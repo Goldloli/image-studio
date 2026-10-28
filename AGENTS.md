@@ -1,5 +1,17 @@
 # Agent Instructions
 
+## OpenSpec 流程（强制）
+
+本项目使用 **OpenSpec**（openspec/）做规格驱动开发。**新增或修改任何功能**，必须走 OpenSpec change 流程，禁止直接写代码：
+
+1. **先写文档，不写代码**：用 `openspec` 创建 change 文档（`/opsx:propose "想法"` 或 `openspec change new`），写清 proposal、specs（delta）、design 与 tasks。
+2. **等用户确认**：change 文档写好后，向用户展示文档内容并明确等待确认。**未获用户确认前，一律不得开工写实现代码。**
+3. **确认后开工**：用户确认后，才可按 tasks 开始实现；实现完成后按 OpenSpec 流程归档（archive）change 并更新 specs。
+
+例外：不涉及行为的琐碎改动（文档错字、代码格式化等）可不走 change；bug 修复是否走 change 视影响面而定，凡涉及行为、接口、结构的改动一律走 change。任务跟踪仍用 `bd`（见下），change 获确认后可在 bd 中建对应 issue 跟踪实现进度。
+
+---
+
 This project uses **bd** (beads) for issue tracking. Run `bd prime` for full workflow context.
 
 > **Architecture in one line:** Issues live in a local Dolt database
