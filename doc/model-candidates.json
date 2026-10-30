@@ -1,0 +1,1109 @@
+{
+  "schema_version": 1,
+  "title": "Image Studio 图片模型候选地图",
+  "research_date": "2026-10-28",
+  "not_a_runtime_registry": true,
+  "notes": [
+    "用于研究与后续分批决策，不可直接用作下载或执行配置。",
+    "每行可能代表家族或类型，不代表一个具体 checkpoint。",
+    "suggested_wave 是建议批次，不是承诺交付日期。",
+    "没有任何候选模型在本次研究中完成实机图片推理验证。",
+    "模型与源码许可、组件、权重 revision 和后端覆盖范围需在接入时重新核对。"
+  ],
+  "candidates": [
+    {
+      "id": "sd15",
+      "name": "Stable Diffusion 1.x",
+      "category": "经典生成",
+      "task_candidates": [
+        "text_to_image",
+        "image_to_image",
+        "inpaint"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 1,
+      "source_ids": [
+        "S008"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "sdxl",
+      "name": "SDXL Base / Refiner",
+      "category": "经典生成",
+      "task_candidates": [
+        "text_to_image",
+        "image_to_image",
+        "inpaint"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "diffusers",
+        "coreml",
+        "comfyui"
+      ],
+      "suggested_wave": 1,
+      "source_ids": [
+        "S025"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "sd35",
+      "name": "Stable Diffusion 3.5",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 3,
+      "source_ids": [
+        "S026"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "flux1-schnell",
+      "name": "FLUX.1 Schnell",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 2,
+      "source_ids": [
+        "S027"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "flux1-dev",
+      "name": "FLUX.1 Dev / Krea",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 2,
+      "source_ids": [
+        "S027"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "flux1-fill",
+      "name": "FLUX.1 Fill",
+      "category": "编辑",
+      "task_candidates": [
+        "inpaint",
+        "outpaint"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 3,
+      "source_ids": [
+        "S027"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "flux1-kontext",
+      "name": "FLUX.1 Kontext",
+      "category": "编辑",
+      "task_candidates": [
+        "instruction_edit"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 3,
+      "source_ids": [
+        "S027"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "flux1-redux",
+      "name": "FLUX.1 Redux",
+      "category": "参考适配",
+      "task_candidates": [
+        "image_variation"
+      ],
+      "route_candidates": [
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S027"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "flux1-control",
+      "name": "FLUX.1 Canny / Depth",
+      "category": "结构控制",
+      "task_candidates": [
+        "conditional_generation"
+      ],
+      "route_candidates": [
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S027"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "flux2-klein",
+      "name": "FLUX.2 Klein",
+      "category": "统一生成编辑",
+      "task_candidates": [
+        "text_to_image",
+        "multi_reference_edit"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 1,
+      "source_ids": [
+        "S028"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "flux2-dev",
+      "name": "FLUX.2 Dev",
+      "category": "统一生成编辑",
+      "task_candidates": [
+        "text_to_image",
+        "multi_reference_edit"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 3,
+      "source_ids": [
+        "S028"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "flux3-klein",
+      "name": "FLUX 3 Image Klein / Base",
+      "category": "统一生成编辑",
+      "task_candidates": [
+        "text_to_image",
+        "multi_reference_edit",
+        "layout_control"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 2,
+      "source_ids": [
+        "S029"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "qwen-image",
+      "name": "Qwen-Image / 2512",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 2,
+      "source_ids": [
+        "S030"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "qwen-image-edit",
+      "name": "Qwen-Image Edit 家族",
+      "category": "编辑",
+      "task_candidates": [
+        "instruction_edit",
+        "multi_reference_edit"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 3,
+      "source_ids": [
+        "S030"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "qwen-image21",
+      "name": "Qwen-Image 2.1 / Turbo",
+      "category": "统一生成编辑",
+      "task_candidates": [
+        "text_to_image",
+        "multi_reference_edit",
+        "rgba_generation"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 2,
+      "source_ids": [
+        "S031"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "z-image-turbo",
+      "name": "Z-Image Turbo",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 1,
+      "source_ids": [
+        "S032"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "z-image-base",
+      "name": "Z-Image Base",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 2,
+      "source_ids": [
+        "S032"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "z-image-omni",
+      "name": "Z-Image Omni-Base",
+      "category": "统一生成编辑",
+      "task_candidates": [
+        "text_to_image",
+        "instruction_edit"
+      ],
+      "route_candidates": [
+        "pending_release"
+      ],
+      "suggested_wave": 7,
+      "source_ids": [
+        "S032"
+      ],
+      "upstream_release_status": "announced_not_released_in_reviewed_readme",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "z-image-edit",
+      "name": "Z-Image Edit",
+      "category": "编辑",
+      "task_candidates": [
+        "instruction_edit"
+      ],
+      "route_candidates": [
+        "pending_release"
+      ],
+      "suggested_wave": 7,
+      "source_ids": [
+        "S032"
+      ],
+      "upstream_release_status": "announced_not_released_in_reviewed_readme",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "krea2",
+      "name": "Krea 2 RAW / Turbo",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "mflux",
+        "official-python",
+        "comfyui"
+      ],
+      "suggested_wave": 2,
+      "source_ids": [
+        "S033"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "iris3b",
+      "name": "Iris-3B Base / Turbo",
+      "category": "像素空间生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "mflux",
+        "native-cpp",
+        "official-python"
+      ],
+      "suggested_wave": 3,
+      "source_ids": [
+        "S034"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "moss-image",
+      "name": "MOSS-Image Base / SFT",
+      "category": "生成与布局",
+      "task_candidates": [
+        "text_to_image",
+        "layout_control"
+      ],
+      "route_candidates": [
+        "mflux",
+        "official-python",
+        "comfyui"
+      ],
+      "suggested_wave": 3,
+      "source_ids": [
+        "S035"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "anima",
+      "name": "Anima 家族",
+      "category": "动漫插画",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "mflux",
+        "comfyui",
+        "official-python"
+      ],
+      "suggested_wave": 3,
+      "source_ids": [
+        "S036"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "sana",
+      "name": "SANA / SANA 1.5 / Sprint 图片分支",
+      "category": "高效生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "diffusers",
+        "official-python",
+        "comfyui"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S037"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "hunyuan-image",
+      "name": "HunyuanImage 3.0 / Instruct",
+      "category": "大规模多模态生成",
+      "task_candidates": [
+        "text_to_image",
+        "instruction_edit"
+      ],
+      "route_candidates": [
+        "official-python",
+        "remote-worker",
+        "comfyui"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S038"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "hidream",
+      "name": "HiDream-I1 Full / Dev / Fast",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "diffusers",
+        "official-python",
+        "comfyui"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S039"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "pixart",
+      "name": "PixArt-Alpha / Sigma",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "diffusers",
+        "official-python",
+        "comfyui"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S040"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "lumina2",
+      "name": "Lumina-Image 2.0",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "diffusers",
+        "official-python",
+        "comfyui"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S041"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "kolors",
+      "name": "Kolors",
+      "category": "生成",
+      "task_candidates": [
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "diffusers",
+        "official-python",
+        "comfyui"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S042"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "omnigen2",
+      "name": "OmniGen2",
+      "category": "统一生成编辑",
+      "task_candidates": [
+        "text_to_image",
+        "instruction_edit",
+        "multi_reference_edit"
+      ],
+      "route_candidates": [
+        "diffusers",
+        "official-python",
+        "comfyui"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S043"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "bagel",
+      "name": "BAGEL",
+      "category": "理解与生成",
+      "task_candidates": [
+        "image_understanding",
+        "text_to_image",
+        "instruction_edit"
+      ],
+      "route_candidates": [
+        "official-python",
+        "remote-worker",
+        "comfyui"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S044"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "janus",
+      "name": "Janus / Janus-Pro",
+      "category": "自回归多模态",
+      "task_candidates": [
+        "image_understanding",
+        "text_to_image"
+      ],
+      "route_candidates": [
+        "official-python",
+        "remote-worker"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S045"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "glm-image",
+      "name": "GLM-Image",
+      "category": "多模态生成",
+      "task_candidates": [
+        "text_to_image",
+        "instruction_edit"
+      ],
+      "route_candidates": [
+        "official-python",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S046"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "longcat-image",
+      "name": "LongCat-Image / Edit",
+      "category": "生成编辑",
+      "task_candidates": [
+        "text_to_image",
+        "instruction_edit"
+      ],
+      "route_candidates": [
+        "official-python",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S047"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "realesrgan",
+      "name": "Real-ESRGAN",
+      "category": "超分",
+      "task_candidates": [
+        "upscale",
+        "restoration"
+      ],
+      "route_candidates": [
+        "onnx",
+        "native-upscale",
+        "official-python"
+      ],
+      "suggested_wave": 1,
+      "source_ids": [
+        "S048"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "hat",
+      "name": "HAT",
+      "category": "超分",
+      "task_candidates": [
+        "upscale"
+      ],
+      "route_candidates": [
+        "onnx",
+        "official-python"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S049"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "supir",
+      "name": "SUPIR",
+      "category": "生成式修复",
+      "task_candidates": [
+        "restoration",
+        "upscale"
+      ],
+      "route_candidates": [
+        "official-python",
+        "comfyui",
+        "remote-worker"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S050"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "seedvr2",
+      "name": "SeedVR2 静态图路线",
+      "category": "生成式修复",
+      "task_candidates": [
+        "restoration",
+        "upscale"
+      ],
+      "route_candidates": [
+        "mflux",
+        "official-python",
+        "comfyui"
+      ],
+      "suggested_wave": 3,
+      "source_ids": [
+        "S074"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "gfpgan",
+      "name": "GFPGAN",
+      "category": "人脸修复",
+      "task_candidates": [
+        "face_restoration"
+      ],
+      "route_candidates": [
+        "onnx",
+        "official-python"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S052"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "codeformer",
+      "name": "CodeFormer",
+      "category": "人脸修复",
+      "task_candidates": [
+        "face_restoration"
+      ],
+      "route_candidates": [
+        "onnx",
+        "official-python"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S053"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "birefnet",
+      "name": "BiRefNet",
+      "category": "前景分离",
+      "task_candidates": [
+        "background_removal",
+        "matting"
+      ],
+      "route_candidates": [
+        "onnx",
+        "official-python"
+      ],
+      "suggested_wave": 1,
+      "source_ids": [
+        "S054"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "rembg",
+      "name": "rembg 支持模型集合",
+      "category": "抠图工具生态",
+      "task_candidates": [
+        "background_removal"
+      ],
+      "route_candidates": [
+        "onnx",
+        "python-wrapper"
+      ],
+      "suggested_wave": 2,
+      "source_ids": [
+        "S055"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "sam2",
+      "name": "SAM 2",
+      "category": "交互分割",
+      "task_candidates": [
+        "segmentation"
+      ],
+      "route_candidates": [
+        "onnx",
+        "official-python"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S056"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "sam3",
+      "name": "SAM 3",
+      "category": "概念分割",
+      "task_candidates": [
+        "segmentation",
+        "text_conditioned_segmentation"
+      ],
+      "route_candidates": [
+        "official-python",
+        "onnx-candidate"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S057"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "depth-anything2",
+      "name": "Depth Anything V2",
+      "category": "深度",
+      "task_candidates": [
+        "depth_estimation"
+      ],
+      "route_candidates": [
+        "onnx",
+        "official-python"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S058"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "groundingdino",
+      "name": "GroundingDINO",
+      "category": "定位检测",
+      "task_candidates": [
+        "text_grounding",
+        "detection"
+      ],
+      "route_candidates": [
+        "official-python",
+        "onnx-candidate"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S059"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "controlnet",
+      "name": "ControlNet 家族",
+      "category": "条件适配",
+      "task_candidates": [
+        "conditional_generation"
+      ],
+      "route_candidates": [
+        "native-cpp",
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S062"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "ipadapter",
+      "name": "IP-Adapter 家族",
+      "category": "图像参考适配",
+      "task_candidates": [
+        "image_conditioning"
+      ],
+      "route_candidates": [
+        "diffusers",
+        "comfyui"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S060"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "photomaker",
+      "name": "PhotoMaker",
+      "category": "身份参考",
+      "task_candidates": [
+        "identity_conditioning"
+      ],
+      "route_candidates": [
+        "diffusers",
+        "official-python",
+        "comfyui"
+      ],
+      "suggested_wave": 4,
+      "source_ids": [
+        "S061"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "lora",
+      "name": "LoRA / LyCORIS 等适配器类型",
+      "category": "参数适配",
+      "task_candidates": [
+        "personalization"
+      ],
+      "route_candidates": [
+        "family_specific_adapter"
+      ],
+      "suggested_wave": 3,
+      "source_ids": [
+        "S024"
+      ],
+      "upstream_release_status": "type_not_single_model",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    },
+    {
+      "id": "paddleocr",
+      "name": "PaddleOCR 图片文字路线",
+      "category": "理解辅助",
+      "task_candidates": [
+        "ocr"
+      ],
+      "route_candidates": [
+        "official-runtime",
+        "onnx-candidate"
+      ],
+      "suggested_wave": 5,
+      "source_ids": [
+        "S063"
+      ],
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run",
+      "route_evidence": "设计候选；列表中的每条路线均需逐版本核实支持范围，不能视为全部已被上游或本产品验证。"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "repository": "https://github.com/CherryHQ/cherry-studio",
+  "release": "v2.1.8",
+  "commit": "9e7bb8a17d002c31bfb83ea4acd6c3b501bf40f1",
+  "reviewed_at": "2026-10-29",
+  "license_source": "https://github.com/CherryHQ/cherry-studio/blob/9e7bb8a17d002c31bfb83ea4acd6c3b501bf40f1/LICENSE",
+  "usage": "Official upstream screenshots retained for research comparison only; not product assets.",
+  "screenshots": [
+    {
+      "file": "drawing-light-en.webp",
+      "url": "https://raw.githubusercontent.com/CherryHQ/cherry-studio/9e7bb8a17d002c31bfb83ea4acd6c3b501bf40f1/.github/images/readme/drawing-light-en.webp",
+      "width_px": 2208,
+      "height_px": 1444,
+      "bytes": 811082,
+      "sha256": "41b0362b071b0b40bfcca17932cb7e9f1e87bd8a3c820545bd54edb8ee2381d9",
+      "visually_reviewed": true
+    },
+    {
+      "file": "chat-light-en.webp",
+      "url": "https://raw.githubusercontent.com/CherryHQ/cherry-studio/9e7bb8a17d002c31bfb83ea4acd6c3b501bf40f1/.github/images/readme/chat-light-en.webp",
+      "width_px": 2208,
+      "height_px": 1444,
+      "bytes": 393706,
+      "sha256": "d4e3dd3aa420d57af9224404e01ac73fdd2b74ff818d6e8aecf142c5265794ce",
+      "visually_reviewed": true
+    },
+    {
+      "file": "provider-light-en.webp",
+      "url": "https://raw.githubusercontent.com/CherryHQ/cherry-studio/9e7bb8a17d002c31bfb83ea4acd6c3b501bf40f1/.github/images/readme/provider-light-en.webp",
+      "width_px": 2208,
+      "height_px": 1444,
+      "bytes": 274418,
+      "sha256": "09f1ea67c4b51c9046206c1878b080f1a451477f83145ccd3c7fc812d060e778",
+      "visually_reviewed": true
+    }
+  ]
+}

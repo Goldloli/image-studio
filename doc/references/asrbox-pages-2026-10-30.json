@@ -1,0 +1,229 @@
+{
+  "kind": "local-source-page-research-inputs",
+  "researched_at_utc": "2026-10-30T09:21:03.731255+00:00",
+  "reference_root": "/Users/gejiawei/Desktop/ai_code/ASRbox",
+  "reference_package_version": "0.4.0",
+  "reference_head": "acc7ab700580cd763f4601318b2c791b6d381ebb",
+  "reference_worktree_status": [],
+  "remote_freshness_verified": false,
+  "method": [
+    "read local repository instructions",
+    "CodeGraph first for indexed code",
+    "focused source and accepted specifications",
+    "inspect repository-saved screenshots; no live application execution"
+  ],
+  "sources": [
+    {
+      "path": "package.json",
+      "bytes": 4259,
+      "sha256": "43ec80db6ff3187a89dad5bf48308988013afeb07b4b3d924857284181937f94"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 20415,
+      "sha256": "39a6353242981305c35395af86ae2d5739b0c85dfafe209dab993d84d0c8c23c"
+    },
+    {
+      "path": "app/src/router.tsx",
+      "bytes": 2850,
+      "sha256": "f956d1987aeec673be7c9273b85944e507daae104443240a983edabb63cff044"
+    },
+    {
+      "path": "app/src/routes/ModelsPage.tsx",
+      "bytes": 20591,
+      "sha256": "e9e66d81caad636753f74fd1d9f1d9d63efbd52b8d650e78ce82686eafc2ed64"
+    },
+    {
+      "path": "app/src/components/models/ModelManagement.tsx",
+      "bytes": 14730,
+      "sha256": "bb6c6a884a7536ad7a4855c6515cad127d3afe82e7f1a2431e41a401e23356cb"
+    },
+    {
+      "path": "app/src/routes/SettingsPage.tsx",
+      "bytes": 40631,
+      "sha256": "786974d4c856deddc0bcbc5d60842840954cd53fbede02fe0842fadbdfebccbe"
+    },
+    {
+      "path": "app/src/stores/uiStore.ts",
+      "bytes": 4112,
+      "sha256": "d6bcfe3eca8519b3c4b83d843841ae1f2cde3042a6a1e44c817d92caac92966e"
+    },
+    {
+      "path": "app/src/components/settings/ModelStorageSettings.tsx",
+      "bytes": 13028,
+      "sha256": "a0909361a25176bde57e75705fe9ed00b390726015565804a9b27b0970e177ab"
+    },
+    {
+      "path": "app/src/components/settings/MediaStorageSettings.tsx",
+      "bytes": 8327,
+      "sha256": "91cef53e88f7e7a76527eb9d18b8cf0ae2e1dd750cddc738baf61979b89b6055"
+    },
+    {
+      "path": "app/src/components/settings/SettingsHealth.tsx",
+      "bytes": 6914,
+      "sha256": "a108b21e03729dfc2f0c6502bfe4ce74cef1583eb28daecbe58e5861a0f7f891"
+    },
+    {
+      "path": "app/src/components/settings/AppleGpuAccelerationSettings.tsx",
+      "bytes": 3953,
+      "sha256": "2651bd6778fe882163206bb15701b9455950b22dfb5eda93b55a29f737f6f7b2"
+    },
+    {
+      "path": "app/src/components/settings/AboutSettings.tsx",
+      "bytes": 22101,
+      "sha256": "f02285c69de8c77b1168174e329431ea4373c26c34c2d2bf27c99a46621b4a88"
+    },
+    {
+      "path": "app/src/routes/AIPage.tsx",
+      "bytes": 10050,
+      "sha256": "82ace2c64fedbdf4557d5e417653d68ac95c00b4c43af4a05ed1998b50a6cb86"
+    },
+    {
+      "path": "app/src/routes/TasksPage.tsx",
+      "bytes": 43564,
+      "sha256": "4d8086335b7eb57673b7f1ebe72ef1128215fb497f1942fabebbd80b823e78d4"
+    },
+    {
+      "path": "app/src/routes/TranscribePage.tsx",
+      "bytes": 30001,
+      "sha256": "7392a49a448b83108859f70bd54c4cbe223b588a59198ebff58507b15ba70c4f"
+    },
+    {
+      "path": "app/src/components/transcript/ProofreadingPanel.tsx",
+      "bytes": 27455,
+      "sha256": "3ed331a2fd19bfb5b5f8e0e5d41b3d58d687f7a4361612df8c624d28017cd9f2"
+    },
+    {
+      "path": "app/src/components/transcript/TranslationPanel.tsx",
+      "bytes": 21919,
+      "sha256": "87ef8f9dcc5d97d9f463020cef186cbd8397aac25986f3538d40affd4605a9cc"
+    },
+    {
+      "path": "app/src/components/transcript/ChatPanel.tsx",
+      "bytes": 17471,
+      "sha256": "a01b46d5e106bb57dc5d8e21cb6c9a4d550cf35fd0bf2cd56b6001daa007f2fa"
+    },
+    {
+      "path": "backend/models.py",
+      "bytes": 31257,
+      "sha256": "d4c2d686668078f4502b7628620a42332420bec4986675c71c56cb918d154f50"
+    },
+    {
+      "path": "backend/routes/models.py",
+      "bytes": 8430,
+      "sha256": "9748e1796203f1f3ed82fc38f35dffb350486ac3235c6afb1a5d23921b64f63d"
+    },
+    {
+      "path": "backend/services/models.py",
+      "bytes": 44553,
+      "sha256": "ba782f680c759cd90f6759eaa23e14d15bffb62321d6892ab53818797cad8263"
+    },
+    {
+      "path": "openspec/specs/model-management/spec.md",
+      "bytes": 30700,
+      "sha256": "7b74b35456ca0990d7202395152f4610af159a9989555b252f3e37c2ca61ec26"
+    },
+    {
+      "path": "openspec/specs/model-storage-location/spec.md",
+      "bytes": 7984,
+      "sha256": "209fe87f7432c362afb3078326c7b5d489ebaf34dafd555b5301b1e4987377f7"
+    },
+    {
+      "path": "openspec/specs/frontend-quality/spec.md",
+      "bytes": 27906,
+      "sha256": "e2fa44f62ad94087361090f6fa7a526a9453e8bf8ad4acf58dd06cd3624228cd"
+    },
+    {
+      "path": "openspec/specs/about-update-management/spec.md",
+      "bytes": 10440,
+      "sha256": "766ce14baa3cf4861a555977e334dbc2a58b6f62d670f957e6f01fcf2107742f"
+    },
+    {
+      "path": "openspec/specs/storage-privacy-recovery/spec.md",
+      "bytes": 9583,
+      "sha256": "42a0d8caf130300f11bc4aac823df79492dc7e263c9f2990fc5de35c39c43aa9"
+    },
+    {
+      "path": "openspec/specs/transcript-proofreading/spec.md",
+      "bytes": 14273,
+      "sha256": "68ea1a595bfdb619dfec27d5418b6fb9e9b8a6a77f1e92bbeada946347ef86d6"
+    },
+    {
+      "path": "openspec/specs/transcript-translation/spec.md",
+      "bytes": 22190,
+      "sha256": "46d189c1bc1da80c96a7540c0af589e40985134ac2ff32e71d19a9507bac1772"
+    },
+    {
+      "path": "openspec/specs/export-formats/spec.md",
+      "bytes": 4986,
+      "sha256": "eddb778784f59337d18bc8cecc800c5fa71c9d28419d6eca896f29ee7ae35b0e"
+    }
+  ],
+  "saved_visual_artifacts": [
+    {
+      "path": "assets/asrbox-home.png",
+      "bytes": 426186,
+      "sha256": "fa3787dc8370eb6c279dece2a4ab70b0378d87495bd641daba3591e9f33b78c5"
+    },
+    {
+      "path": "assets/asrbox-models.png",
+      "bytes": 490683,
+      "sha256": "5be667a92129001245feb9f107a78e3a387bcc6b3d923cdd8c53c0b4a9b43231"
+    },
+    {
+      "path": "assets/asrbox-settings.png",
+      "bytes": 267981,
+      "sha256": "7076e32b62743d95322d3f7941005e48493e4df949617278cf79427f80d6dcb3"
+    },
+    {
+      "path": "assets/asrbox-task-center.png",
+      "bytes": 584184,
+      "sha256": "71d7559c86388d96459e0bee39d02719dd4de97c4f00620971c262884141efe6"
+    },
+    {
+      "path": "assets/asrbox-edit-subtitles.png",
+      "bytes": 619541,
+      "sha256": "4183f5b23764dc66f77ac864f281c90b62e105010791f10af74e24973bcce888"
+    },
+    {
+      "path": "assets/asrbox-ai-proofreading.png",
+      "bytes": 539774,
+      "sha256": "991d517983429a71091dd214618c50beb2993975a9adc2e5c330ef7ddc125eef"
+    },
+    {
+      "path": "assets/asrbox-ai-translation.png",
+      "bytes": 658662,
+      "sha256": "f6d4f9752215f97169d62b917d225e2ec44c5212f6b67f9cfaba0b12d830cb42"
+    },
+    {
+      "path": "assets/asrbox-ai-chat.png",
+      "bytes": 612584,
+      "sha256": "d61f2ff4aa0d97863fbf93c91415600ff52dcd3310cc5ba777961475039729f7"
+    },
+    {
+      "path": "frontend-audit-screenshots/95-gate/desktop-default-light-comfortable-icons-models.png",
+      "bytes": 99982,
+      "sha256": "0f507cf3d0f38be1c308e83c12b75b0a88fbceaf48e9c0e58442bcc282a6a027"
+    },
+    {
+      "path": "frontend-audit-screenshots/95-gate/desktop-default-dark-comfortable-icons-settings.png",
+      "bytes": 73951,
+      "sha256": "af84d542757cd1f49d3dbe97b454f7aa20c790152580f76eac42b290b6709f49"
+    },
+    {
+      "path": "frontend-audit-screenshots/95-gate/report.json",
+      "bytes": 41015,
+      "sha256": "133fec190ad3b245ee5fbdcbbac1cd3044f1539c78d0e10914e3dfed590fda97"
+    }
+  ],
+  "historical_audit": {
+    "entries": 36,
+    "recorded_passes": 36,
+    "rerun_by_this_task": false,
+    "current_inference_or_UI_acceptance": false
+  },
+  "no_reference_files_modified": true,
+  "no_user_data_env_or_weights_read": true,
+  "implementation_changed": false,
+  "research_is_not_feature_approval": true
+}

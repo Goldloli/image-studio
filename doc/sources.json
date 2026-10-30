@@ -1,0 +1,828 @@
+{
+  "title": "Image Studio 研究来源索引",
+  "research_date": "2026-10-28",
+  "timezone": "Asia/Shanghai",
+  "note": "一手资料核对不等于模型在目标产品或硬件上已运行；路线和参数示例均为设计建议。",
+  "sources": [
+    {
+      "id": "S001",
+      "title": "Photocraft 架构",
+      "url": "https://github.com/storytold/photocraft/blob/main/docs/architecture.md",
+      "note": "Rust 界面与图像引擎分层参考。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S002",
+      "title": "Photocraft 界面设计系统",
+      "url": "https://github.com/storytold/photocraft/blob/main/docs/ui-design.md",
+      "note": "主题 token、共用控件和截图验证参考。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S003",
+      "title": "egui",
+      "url": "https://github.com/emilk/egui",
+      "note": "Rust 即时模式 GUI 与 eframe 集成。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S004",
+      "title": "Iced",
+      "url": "https://github.com/iced-rs/iced",
+      "note": "Rust 跨平台声明式 GUI 候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S005",
+      "title": "Slint",
+      "url": "https://github.com/slint-ui/slint",
+      "note": "声明式 GUI 候选；具体分发许可需按选定版本复核。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S006",
+      "title": "GPUI",
+      "url": "https://gpui.rs/",
+      "note": "GPU 加速的 Rust UI 候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S007",
+      "title": "Candle",
+      "url": "https://github.com/huggingface/candle/blob/main/README.md",
+      "note": "Rust ML 框架与模型示例；不等于自动支持所有图片模型。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S008",
+      "title": "stable-diffusion.cpp",
+      "url": "https://github.com/leejet/stable-diffusion.cpp/blob/master/README.md",
+      "note": "多图片模型、量化和多硬件后端的 C/C++ 推理实现。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S009",
+      "title": "stable-diffusion.cpp 构建说明",
+      "url": "https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/build.md",
+      "note": "Metal、CUDA、Vulkan 构建及性能注意事项。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S010",
+      "title": "MLX",
+      "url": "https://github.com/ml-explore/mlx/blob/main/README.md",
+      "note": "MLX API、统一内存与运行时范围。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S011",
+      "title": "MFLUX",
+      "url": "https://github.com/mflux-community/mflux/blob/main/README.md",
+      "note": "MLX 图片模型实现与功能入口。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S012",
+      "title": "Diffusers",
+      "url": "https://github.com/huggingface/diffusers",
+      "note": "广泛的图片模型 pipeline 生态。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S013",
+      "title": "Diffusers MPS",
+      "url": "https://huggingface.co/docs/diffusers/main/en/optimization/mps",
+      "note": "Apple MPS 路径；文档不构成每个模型的实机验证。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S014",
+      "title": "Modular Diffusers",
+      "url": "https://github.com/huggingface/diffusers/blob/main/docs/source/en/modular_diffusers/modular_pipeline.md",
+      "note": "可组合 pipeline 思路。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S015",
+      "title": "ComfyUI",
+      "url": "https://github.com/Comfy-Org/ComfyUI/blob/master/README.md",
+      "note": "模型、节点及多设备生态。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S016",
+      "title": "ComfyUI Server Routes",
+      "url": "https://docs.comfy.org/development/comfyui-server/comms_routes",
+      "note": "队列、工作流和 WebSocket 接口。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S017",
+      "title": "Apple Core ML Stable Diffusion",
+      "url": "https://github.com/apple-aiml-research/ml-stable-diffusion",
+      "note": "Core ML 图片模型部署参考。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S018",
+      "title": "ort",
+      "url": "https://github.com/pykeio/ort",
+      "note": "ONNX Runtime 的 Rust 接口项目。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S019",
+      "title": "ONNX Runtime CoreML EP",
+      "url": "https://onnxruntime.ai/docs/execution-providers/CoreML-ExecutionProvider.html",
+      "note": "Core ML Execution Provider 与算子约束。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S020",
+      "title": "ONNX Runtime DirectML EP",
+      "url": "https://onnxruntime.ai/docs/execution-providers/DirectML-ExecutionProvider.html",
+      "note": "DirectML 持续维护状态，以及 Windows 新功能转向 WinML 的说明。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S021",
+      "title": "HF Hub 文件下载",
+      "url": "https://huggingface.co/docs/huggingface_hub/guides/download",
+      "note": "模型快照、revision 与选择下载。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S022",
+      "title": "HF Hub 缓存",
+      "url": "https://huggingface.co/docs/huggingface_hub/guides/manage-cache",
+      "note": "共享对象、快照与缓存管理参考。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S023",
+      "title": "Safetensors",
+      "url": "https://huggingface.co/docs/safetensors/index",
+      "note": "权重容器及安全加载边界。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S024",
+      "title": "Diffusers 加载 Adapter",
+      "url": "https://huggingface.co/docs/diffusers/main/en/using-diffusers/loading_adapters",
+      "note": "LoRA、IP-Adapter 等接入；兼容性需逐配方确定。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S025",
+      "title": "SDXL 模型卡",
+      "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0",
+      "note": "SDXL 基础模型与模型卡。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S026",
+      "title": "SD 3.5 Large 模型卡",
+      "url": "https://huggingface.co/stabilityai/stable-diffusion-3.5-large",
+      "note": "SD 3.5 家族入口与模型许可元数据。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S027",
+      "title": "FLUX.1",
+      "url": "https://github.com/black-forest-labs/flux/blob/main/README.md",
+      "note": "FLUX.1 及 Fill、Kontext、Redux 等变体。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S028",
+      "title": "FLUX.2",
+      "url": "https://github.com/black-forest-labs/flux2/blob/main/README.md",
+      "note": "FLUX.2 Klein 与基础/蒸馏分支。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S029",
+      "title": "FLUX 3 Image Klein",
+      "url": "https://github.com/black-forest-labs/flux-3-image-klein/blob/main/README.md",
+      "note": "生成、编辑、多参考与布局控制入口。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S030",
+      "title": "Qwen-Image",
+      "url": "https://github.com/QwenLM/Qwen-Image/blob/main/README.md",
+      "note": "Qwen-Image 原始与编辑家族。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S031",
+      "title": "Qwen-Image 2.1",
+      "url": "https://github.com/QwenLM/Qwen-Image-2.1/blob/main/README.md",
+      "note": "统一生成与编辑、透明输出等新能力。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S032",
+      "title": "Z-Image",
+      "url": "https://github.com/Tongyi-MAI/Z-Image/blob/main/README.md",
+      "note": "Turbo/Base 可下载；本次 README 将 Omni-Base/Edit 仍标为 To be released。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S033",
+      "title": "Krea 2",
+      "url": "https://github.com/krea-ai/krea-2/blob/main/README.md",
+      "note": "RAW 与 Turbo 分支。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S034",
+      "title": "Iris-3B",
+      "url": "https://github.com/speridlabs/iris-3b/blob/main/README.md",
+      "note": "像素空间生成，不应强制要求 VAE。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S035",
+      "title": "MOSS-Image",
+      "url": "https://github.com/OpenMOSS/MOSS-Image/blob/main/README.md",
+      "note": "布局、文字和生成模型家族入口。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S036",
+      "title": "Anima",
+      "url": "https://huggingface.co/circlestone-labs/Anima",
+      "note": "插画与动漫模型家族、模型卡。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S037",
+      "title": "SANA",
+      "url": "https://github.com/NVlabs/Sana/blob/main/README.md",
+      "note": "高效生成家族；图片与视频分支需分别分类。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S038",
+      "title": "HunyuanImage 3.0",
+      "url": "https://github.com/Tencent-Hunyuan/HunyuanImage-3.0/blob/main/README.md",
+      "note": "生成与 Instruct 家族；Mac 路径未实测。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S039",
+      "title": "HiDream-I1",
+      "url": "https://github.com/HiDream-ai/HiDream-I1/blob/main/README.md",
+      "note": "Full/Dev/Fast 家族及外部文本编码器依赖。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S040",
+      "title": "PixArt-Sigma",
+      "url": "https://github.com/PixArt-alpha/PixArt-sigma/blob/master/README.md",
+      "note": "历史与扩展生成家族。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S041",
+      "title": "Lumina-Image 2.0",
+      "url": "https://github.com/Alpha-VLLM/Lumina-Image-2.0/blob/main/README.md",
+      "note": "独立生成架构。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S042",
+      "title": "Kolors",
+      "url": "https://github.com/Kwai-Kolors/Kolors/blob/master/README.md",
+      "note": "中文生成生态入口。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S043",
+      "title": "OmniGen2",
+      "url": "https://github.com/VectorSpaceLab/OmniGen2/blob/main/README.md",
+      "note": "统一生成与编辑模型入口。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S044",
+      "title": "BAGEL",
+      "url": "https://github.com/ByteDance-Seed/Bagel/blob/main/README.md",
+      "note": "理解和生成统一模型入口。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S045",
+      "title": "Janus",
+      "url": "https://github.com/deepseek-ai/Janus/blob/main/README.md",
+      "note": "自回归多模态模型入口。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S046",
+      "title": "GLM-Image",
+      "url": "https://github.com/zai-org/GLM-Image/blob/main/README.md",
+      "note": "多模态图片生成架构入口。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S047",
+      "title": "LongCat-Image",
+      "url": "https://github.com/meituan-longcat/LongCat-Image/blob/main/README.md",
+      "note": "生成与编辑模型入口。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S048",
+      "title": "Real-ESRGAN",
+      "url": "https://github.com/xinntao/Real-ESRGAN/blob/master/README.md",
+      "note": "实用超分与修复家族。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S049",
+      "title": "HAT",
+      "url": "https://github.com/XPixelGroup/HAT/blob/main/README.md",
+      "note": "超分家族。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S050",
+      "title": "SUPIR",
+      "url": "https://github.com/Fanghua-Yu/SUPIR/blob/master/README.md",
+      "note": "生成式修复候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S051",
+      "title": "SeedVR / SeedVR2",
+      "url": "https://github.com/ByteDance-Seed/SeedVR",
+      "note": "修复模型；本次以仓库网页核对，不能外推全部平台能力。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S052",
+      "title": "GFPGAN",
+      "url": "https://github.com/TencentARC/GFPGAN/blob/master/README.md",
+      "note": "人脸修复候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S053",
+      "title": "CodeFormer",
+      "url": "https://github.com/sczhou/CodeFormer/blob/master/README.md",
+      "note": "人脸修复候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S054",
+      "title": "BiRefNet",
+      "url": "https://github.com/ZhengPeng7/BiRefNet/blob/main/README.md",
+      "note": "前景分离候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S055",
+      "title": "rembg",
+      "url": "https://github.com/danielgatis/rembg/blob/main/README.md",
+      "note": "抠图工作流与多模型封装参考。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S056",
+      "title": "SAM 2",
+      "url": "https://github.com/facebookresearch/sam2/blob/main/README.md",
+      "note": "交互式分割候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S057",
+      "title": "SAM 3",
+      "url": "https://github.com/facebookresearch/sam3/blob/main/README.md",
+      "note": "概念分割候选；与 SAM 2 不能视为同一模型包。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S058",
+      "title": "Depth Anything V2",
+      "url": "https://github.com/DepthAnything/Depth-Anything-V2",
+      "note": "深度估计候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S059",
+      "title": "GroundingDINO",
+      "url": "https://github.com/IDEA-Research/GroundingDINO",
+      "note": "文本定位和检测候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S060",
+      "title": "IP-Adapter",
+      "url": "https://github.com/tencent-ailab/IP-Adapter/blob/main/README.md",
+      "note": "图像参考条件适配。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S061",
+      "title": "PhotoMaker",
+      "url": "https://github.com/TencentARC/PhotoMaker/blob/main/README.md",
+      "note": "人物身份参考候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S062",
+      "title": "ControlNet",
+      "url": "https://github.com/lllyasviel/ControlNet",
+      "note": "结构控制方法与模型生态。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S063",
+      "title": "PaddleOCR",
+      "url": "https://github.com/PaddlePaddle/PaddleOCR",
+      "note": "图片中文字检测和识别辅助。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S064",
+      "title": "InvokeAI",
+      "url": "https://github.com/invoke-ai/InvokeAI",
+      "note": "创作工作区与画布工作流参考。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S065",
+      "title": "Draw Things 社区仓库",
+      "url": "https://github.com/drawthingsai/draw-things-community",
+      "note": "Mac 产品体验与社区接口参考，不代表整个应用源码开放。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S066",
+      "title": "Fooocus",
+      "url": "https://github.com/lllyasviel/Fooocus",
+      "note": "降低参数负担的交互参考。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S067",
+      "title": "SwarmUI",
+      "url": "https://github.com/mcmonkeyprojects/SwarmUI",
+      "note": "面向用户的多后端编排参考。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S068",
+      "title": "MFLUX Qwen 2.1 编辑说明",
+      "url": "https://github.com/mflux-community/mflux/blob/main/src/mflux/models/qwen21/reference/README.md",
+      "note": "多参考、RGBA、下载与内存口径示例。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S069",
+      "title": "MFLUX Iris 说明",
+      "url": "https://github.com/mflux-community/mflux/blob/main/src/mflux/models/iris/README.md",
+      "note": "像素空间架构、量化和冷加载注意事项。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S070",
+      "title": "stable-diffusion.cpp Qwen 2.1",
+      "url": "https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/qwen_image_2.1.md",
+      "note": "专用 VAE 与文本/视觉编码器兼容关系。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S071",
+      "title": "stable-diffusion.cpp FLUX 3",
+      "url": "https://github.com/leejet/stable-diffusion.cpp/blob/master/docs/flux3.md",
+      "note": "多组件和参考图输入方式。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S072",
+      "title": "Apple macOS 公证文档",
+      "url": "https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution",
+      "note": "仅核对官方文档入口；工具未取得完整正文，不据此提供已验证的签名参数。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "official_entry_only",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S073",
+      "title": "MFLUX 共用参数说明",
+      "url": "https://github.com/mflux-community/mflux/blob/main/src/mflux/models/common/README.md",
+      "note": "量化、计算精度和 Apple M1 家族专用参数。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S074",
+      "title": "MFLUX SeedVR2",
+      "url": "https://github.com/mflux-community/mflux/blob/main/src/mflux/models/seedvr2/README.md",
+      "note": "静态图片放大路径与内存模式。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S075",
+      "title": "Tokio",
+      "url": "https://docs.rs/tokio/latest/tokio/",
+      "note": "异步任务、通道、IO 与进程管理的 Rust 候选基础。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S076",
+      "title": "Serde",
+      "url": "https://docs.rs/serde/latest/serde/",
+      "note": "Rust 类型与序列化基础。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S077",
+      "title": "rusqlite",
+      "url": "https://docs.rs/rusqlite/latest/rusqlite/",
+      "note": "SQLite Rust 接入候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S078",
+      "title": "image",
+      "url": "https://docs.rs/image/latest/image/",
+      "note": "图片编解码与基础处理候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S079",
+      "title": "tracing",
+      "url": "https://docs.rs/tracing/latest/tracing/",
+      "note": "结构化诊断与事件记录。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S080",
+      "title": "reqwest",
+      "url": "https://docs.rs/reqwest/latest/reqwest/",
+      "note": "HTTP 与下载基础候选。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S081",
+      "title": "rfd",
+      "url": "https://docs.rs/rfd/latest/rfd/",
+      "note": "跨平台原生文件对话框。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    },
+    {
+      "id": "S082",
+      "title": "keyring",
+      "url": "https://docs.rs/keyring/latest/keyring/",
+      "note": "系统凭据候选；版本与 feature 的实际行为需集成验证。",
+      "accessed_at": "2026-10-28",
+      "source_type": "primary",
+      "verification": "upstream_documentation_reviewed",
+      "product_smoke_tested": false
+    }
+  ]
+}

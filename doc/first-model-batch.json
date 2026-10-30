@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "title": "Image Studio 第一批模型选型建议",
+  "reviewed_date": "2026-10-29",
+  "timezone": "Asia/Shanghai",
+  "approval_status": "first_target_approved_delivered_remaining_targets_proposed",
+  "not_a_runtime_registry": true,
+  "not_a_download_manifest": true,
+  "baseline_device_from_prior_workspace_verification": {
+    "soc": "Apple M3 Max",
+    "unified_memory_gib": 128,
+    "platform": "macOS arm64"
+  },
+  "first_implementation_target": "z-image-turbo",
+  "models": [
+    {
+      "id": "z-image-turbo",
+      "order": 1,
+      "display_name": "Z-Image Turbo",
+      "upstream_model_id": "Tongyi-MAI/Z-Image-Turbo",
+      "upstream_revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+      "intended_tasks": [
+        "text_to_image"
+      ],
+      "declared_model_license": "apache-2.0",
+      "model_card_url": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo/tree/f332072aa78be7aecdf3ee76d5c247082da564a6",
+      "proposed_route": "mflux-mlx-python-worker",
+      "proposed_validation_profile": {
+        "quantization_bits": 4,
+        "width": 1024,
+        "height": 1024,
+        "mflux_steps": 9
+      },
+      "scope_exclusions": [
+        "z-image-base",
+        "z-image-edit",
+        "z-image-omni",
+        "lora"
+      ],
+      "selection_status": "approved_first_target",
+      "upstream_release_status": "released",
+      "product_status": "implemented",
+      "local_hardware_verification": "passed_m3_max_128g_macos_fixed_profile",
+      "implementation_change": "deliver-first-local-generation",
+      "verification_report": "../verification/first-generation-results.md",
+      "verified_profiles": {
+        "quantization_bits": 4,
+        "mflux_steps": 9,
+        "sizes": [
+          [
+            1024,
+            1024
+          ],
+          [
+            1024,
+            768
+          ],
+          [
+            768,
+            1024
+          ]
+        ],
+        "images_per_attempt": 1
+      }
+    },
+    {
+      "id": "flux2-klein-4b-distilled",
+      "order": 2,
+      "display_name": "FLUX.2 Klein 4B distilled",
+      "upstream_model_id": "black-forest-labs/FLUX.2-klein-4B",
+      "upstream_revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "intended_tasks": [
+        "text_to_image",
+        "single_reference_instruction_edit"
+      ],
+      "upstream_additional_capabilities_not_yet_in_product_scope": [
+        "multi_reference_edit"
+      ],
+      "declared_model_license": "apache-2.0",
+      "model_card_url": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tree/e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "proposed_route": "mflux-mlx-python-worker",
+      "proposed_validation_profile": {
+        "quantization_bits": 4,
+        "mflux_steps": 4
+      },
+      "scope_exclusions": [
+        "klein-base",
+        "klein-9b",
+        "klein-9b-kv",
+        "small-text-encoder-replacement"
+      ],
+      "selection_status": "recommended_batch_target",
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run"
+    },
+    {
+      "id": "birefnet-general-epoch-244",
+      "order": 3,
+      "display_name": "BiRefNet general epoch_244",
+      "upstream_repository": "ZhengPeng7/BiRefNet",
+      "upstream_code_revision": "f7079632d681ecf12161fcea8905682934e59e51",
+      "intended_tasks": [
+        "foreground_segmentation",
+        "background_removal"
+      ],
+      "declared_repository_and_hf_card_license": "mit",
+      "exact_release_artifact_license_review": "pending_package_review",
+      "proposed_route": "onnxruntime-cpu-native-worker",
+      "upstream_artifact": {
+        "release": "v1",
+        "asset_id": 186740004,
+        "filename": "BiRefNet-general-epoch_244.onnx",
+        "reported_bytes": 972666916,
+        "url": "https://github.com/ZhengPeng7/BiRefNet/releases/download/v1/BiRefNet-general-epoch_244.onnx",
+        "downloaded": false,
+        "sha256": null
+      },
+      "model_card_reference": {
+        "id": "ZhengPeng7/BiRefNet",
+        "revision": "e2bf8e4460fc8fa32bba5ea4d94b3233d367b0e4"
+      },
+      "proposed_validation_profile": {
+        "provider": "CPUExecutionProvider",
+        "preprocessing_reference_resolution": [
+          1024,
+          1024
+        ],
+        "actual_graph_io_verified": false
+      },
+      "scope_exclusions": [
+        "coreml-certification",
+        "mps-certification",
+        "portrait-hr-lite-other-checkpoints"
+      ],
+      "selection_status": "recommended_batch_target",
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run"
+    },
+    {
+      "id": "realesrgan-x4plus",
+      "order": 4,
+      "display_name": "Real-ESRGAN x4plus",
+      "upstream_repository": "xinntao/Real-ESRGAN",
+      "upstream_code_revision": "a4abfb2979a7bbff3f69f58f58ae324608821e27",
+      "intended_tasks": [
+        "upscale_4x"
+      ],
+      "declared_source_code_license": "bsd-3-clause",
+      "declared_ncnn_program_license": "mit",
+      "exact_weight_and_conversion_package_license_review": "pending_package_review",
+      "upstream_artifact": {
+        "release": "v0.1.0",
+        "asset_id": 40831506,
+        "filename": "RealESRGAN_x4plus.pth",
+        "reported_bytes": 67040989,
+        "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth",
+        "downloaded": false,
+        "sha256": null
+      },
+      "proposed_route": "ncnn-vulkan-moltenvk-native-worker",
+      "ncnn": {
+        "repository": "xinntao/Real-ESRGAN-ncnn-vulkan",
+        "source_revision": "37026f49824c5cf84062e7c6a5dd71445dcf610f",
+        "model_name_required": "realesrgan-x4plus",
+        "required_format_files": [
+          "realesrgan-x4plus.param",
+          "realesrgan-x4plus.bin"
+        ],
+        "runtime_and_model_bytes_verified": false
+      },
+      "scope_exclusions": [
+        "anime-models",
+        "face-enhancement",
+        "arbitrary-outscale-resampling"
+      ],
+      "selection_status": "recommended_batch_target",
+      "upstream_release_status": "released",
+      "product_status": "not_implemented",
+      "local_hardware_verification": "not_run"
+    }
+  ],
+  "proposed_shared_generation_runtime": {
+    "name": "mflux",
+    "version": "0.24.0",
+    "tag": "v.0.24.0",
+    "code_revision": "8a7fd0a486635f670ef90e02efe1c051ed3f133c",
+    "declared_code_license": "mit",
+    "requires_python": ">=3.11",
+    "declared_macos_mlx_range": ">=0.32.0,<0.33.0",
+    "has_torch_dependency": true,
+    "installed": true,
+    "full_environment_lock_created": true,
+    "installation_scope": "isolated_validation_data_root_for_z_image_turbo",
+    "lock": "../resources/local-generation/requirements.lock"
+  },
+  "deferred": [
+    {
+      "name": "SDXL Base 1.0",
+      "reason": "defer_classic_ecosystem_and_second_generation_executor",
+      "hf_revision": "462165984030d82259a11f4367a4eed129e94a7b",
+      "declared_model_license": "openrail++"
+    },
+    {
+      "name": "Qwen-Image-2.1-Turbo",
+      "reason": "license_limits_to_noncommercial_research_or_evaluation_without_separate_commercial_license",
+      "hf_revision": "fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+      "license_name": "qwen-research",
+      "license_url": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo/blob/fc13ba1986fcb905854dc8de2f52eee395f49b5b/LICENSE"
+    },
+    {
+      "name": "Qwen-Image-Edit-2511",
+      "reason": "evaluate_advanced_editing_after_klein_baseline"
+    },
+    {
+      "name": "FLUX 3 Image Klein",
+      "reason": "evaluate_new_components_and_layout_semantics_after_first_cohort"
+    }
+  ],
+  "notes": [
+    "This file remains a planning record, not a runtime registry or executable download manifest.",
+    "The separately approved first Z-Image Turbo change is implemented and verified on M3 Max / 128 GiB / macOS; the other three models remain proposed and unimplemented.",
+    "Original selection sources are retained at their fixed revisions. Z-Image executable component hashes and runtime locks are now provided in resources/local-generation.",
+    "Four-bit loading does not imply reduced source download size or proportional peak-memory savings.",
+    "Additional models, higher precision comparisons and other hardware require their own approved scope and acceptance."
+  ],
+  "implementation_updated_date": "2026-10-30"
+}
