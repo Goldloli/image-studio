@@ -8,3 +8,23 @@
 
 # CodeGraph local index
 .codegraph/
+
+target/
+
+.DS_Store
+
+# React / Tauri generated artifacts
+node_modules/
+apps/frontend/dist/
+apps/desktop/gen/
+
+# Local UI automation artifacts
+.playwright-cli/
+.vite/
+output/
+
+# Python generated artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
