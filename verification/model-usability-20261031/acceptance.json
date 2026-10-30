@@ -2562,5 +2562,9 @@
     "image-studio-bp9",
     "image-studio-1yi",
     "image-studio-d67"
-  ]
+  ],
+  "archive": {
+    "change": "2026-10-31-certify-current-model-usability",
+    "main_spec": "openspec/specs/model-validation/spec.md"
+  }
 }

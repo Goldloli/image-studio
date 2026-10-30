@@ -75,4 +75,4 @@
 - G01/G02 的主体、光线和语义完整，但呈现更接近写实摄影而非提示词要求的水彩插画；作为能力边界保留，不判损坏或空白。
 - G05 的白色花瓶、向日葵与书本关系清楚，但书为打开状态而非提示词中的合上状态；G03/G04/G06 与固定要求一致。
 
-机器可读明细见 `acceptance.json`；最终 profile 报告位于 `rerun-contracts-final/`、`rerun-daily-final/` 与 `rerun-i01-final/`，冷安装日志和质量审阅文件保存在本目录。
+机器可读明细见 `acceptance.json`；最终 profile 报告位于 `rerun-contracts-final/`、`rerun-daily-final/` 与 `rerun-i01-final/`，冷安装日志和质量审阅文件保存在本目录。本次 change 已归档，正式门禁见 [model-validation 主规格](../../openspec/specs/model-validation/spec.md)。
