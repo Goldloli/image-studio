@@ -28,14 +28,16 @@
       ]
     },
     "D03": {
-      "status": "blocked",
+      "status": "passed",
       "evidence_kind": "native_ui",
-      "reason": "宿主启用的 SCIM.ITABC 是简体拼音源，但当前 CUA 键盘注入没有触发候选组合，Ctrl+Space 也未切换；ASCII meishu 保持为字面文本。需要真实人工键盘确认候选后才能完成本项。中文文本编辑和 Shift+Enter 多行粘贴已通过，但不替代 IME 证据。",
-      "observations": "新会话“日常验收”创建并重命名成功；中文与三行文本通过原生粘贴准确进入 textarea；输入法候选确认仍缺少可由当前自动化能力产生的真实 IME 事件。",
-      "operation_method": "CUA native app; macOS input-source inventory",
+      "reason": "系统级键盘事件唤出了 SCIM.ITABC 的拼音候选窗，选中 `meishu` 后确认成“美术”；候选期间按 Enter 只结束组合，没有创建持久 Job。",
+      "observations": "在原生 Image Studio 创作输入框中通过 SCIM.ITABC 输入 `meishu`，全屏截图同时记录候选窗与 Image Studio 窗口；空格确认后文本框为“美术”。候选组合期间按 Enter 后 Job/Attempt/Asset 计数仍为 6/6/5，没有误发消息。原中文粘贴与 Shift+Enter 三行输入证据仍有效。",
+      "operation_method": "macOS SCIM.ITABC; HID-state CGEvent keyboard events; native Image Studio; full-screen capture; read-only SQLite counts",
       "logical_window": "1280x800",
       "theme": "light",
       "evidence_paths": [
+        "verification/model-usability-20261031/native-ime-candidates.png",
+        "verification/model-usability-20261031/native-ime-confirmed.png",
         "verification/model-usability-20261031/native-chinese-multiline-paste.png"
       ]
     },
@@ -65,15 +67,17 @@
       ]
     },
     "D06": {
-      "status": "failed",
+      "status": "passed",
       "evidence_kind": "native_ui",
-      "reason": "三张正式资产已提交且数据库可读，但从完成生成的创作页首次进入作品页显示 0 件；点击页面刷新后才显示 3 件。单次无刷新日常流程未通过，已登记 image-studio-1yi。",
-      "observations": "任务中心列出 3 个已完成和 1 个已取消 Job，详情显示会话、模型、尺寸、实际种子、Job、Attempt 与阶段；作品页刷新后显示 3 个正式 AssetRef，制作信息与来源会话“日常验收”一致并可返回来源。首次进入作品页曾短暂显示 0 件，手动刷新后恢复为 3 件。",
+      "reason": "首次进入作品页直接显示 5 个正式 AssetRef，无需手动刷新；列表/网格往返后数量和布局保持，来源会话与制作记录可追溯。",
+      "observations": "修复 image-studio-1yi 后在原生默认库回归：生成完成后的首次作品页激活直接读取 5 个正式资产；切换列表布局再返回仍保持 5 个，观看器返回后没有重开旧预览。任务详情继续显示会话、模型、尺寸、实际种子、Job、Attempt 和阶段，来源会话可返回。",
       "operation_method": "CUA native app; SQLite read-only cross-check",
       "logical_window": "1280x800",
       "theme": "light",
       "evidence_paths": [
-        "verification/model-usability-20261031/native-works-detail.png"
+        "verification/model-usability-20261031/native-works-detail.png",
+        "verification/daily-generation-interaction-fix-20261031/native-works-first-entry-fixed.png",
+        "verification/daily-generation-interaction-fix-20261031/native-works-activation-list-preserved.png"
       ]
     },
     "D07": {

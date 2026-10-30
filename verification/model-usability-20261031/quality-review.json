@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-10-30T18:25:16Z",
+  "reviewer": "Codex visual reviewer under the user's acceptance-run authorization",
+  "contact_sheet": "verification/model-usability-20261031/real-generation-contact-sheet.jpg",
+  "meets_quality_bar": true,
+  "summary": "All six P0 samples are complete, decodable, visually coherent images with the required primary subjects. There are no black, blank, corrupted, or unsafe outputs. Minor prompt-fidelity deviations are recorded below but do not invalidate the model capability baseline.",
+  "cases": {
+    "G01": {
+      "status": "passed",
+      "notes": "An orange cat sits beside a bright window with autumn foliage and warm light. The image is complete and coherent; its treatment is more photorealistic than delicate watercolor, so that style deviation is retained as a product-quality observation."
+    },
+    "G02": {
+      "status": "passed",
+      "notes": "The English prompt produced an independent but closely related orange-cat/window/autumn composition. The image is complete; like G01, it reads more photographic than watercolor."
+    },
+    "G03": {
+      "status": "passed",
+      "notes": "The wide landscape clearly contains a calm lake, snowy mountains, morning mist, and a foreground wooden boat. Composition and requested aspect are coherent."
+    },
+    "G04": {
+      "status": "passed",
+      "notes": "The English wide landscape preserves lake, snowy peaks, boat, and mist while remaining an independent result. No corruption or subject omission."
+    },
+    "G05": {
+      "status": "passed",
+      "notes": "The portrait still life shows sunflowers in a white ceramic vase with a book on a wooden table and soft side lighting. The book is open rather than closed; the required vase/book relationship is still clear, and the deviation is recorded."
+    },
+    "G06": {
+      "status": "passed",
+      "notes": "The English portrait result shows sunflowers, a white handled ceramic vase, and a closed book on a wooden table under soft light. Image quality and composition are coherent."
+    }
+  }
+}
