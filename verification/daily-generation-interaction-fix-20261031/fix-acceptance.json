@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "change": "fix-daily-generation-interactions",
+  "validated_at": "2026-10-31T01:56:30+08:00",
+  "verdict": "passed",
+  "environment": {
+    "os": "macOS 27.0.1",
+    "device": "Apple M3 Max",
+    "memory_bytes": 137438953472,
+    "arch": "arm64"
+  },
+  "application": {
+    "path": "target/dev/Image Studio.app",
+    "binary_sha256": "f888af2bb8c45f83fb7fd5982fa78654f975e85b28d5c4a6ec3d5288ed87df2b"
+  },
+  "quality_gates": {
+    "frontend_typecheck": "passed",
+    "frontend_tests": {
+      "files": 5,
+      "passed": 29,
+      "failed": 0
+    },
+    "frontend_build": "passed",
+    "rust_format": "passed",
+    "rust_clippy_deny_warnings": "passed",
+    "rust_workspace_tests": {
+      "passed": 162,
+      "failed": 0,
+      "ignored": 2
+    },
+    "rust_workspace_build": "passed",
+    "python_worker_tests": {
+      "passed": 8,
+      "failed": 0
+    },
+    "acceptance_tool_tests": {
+      "passed": 12,
+      "failed": 0
+    },
+    "openspec_strict": "passed"
+  },
+  "regressions": {
+    "L03": {
+      "status": "passed",
+      "before": {
+        "jobs": 5,
+        "attempts": 5,
+        "assets": 4
+      },
+      "after": {
+        "jobs": 6,
+        "attempts": 6,
+        "assets": 5
+      },
+      "job_id": "job-9f308c8c9ed94e00b0811dc3b14ee72d",
+      "attempt_id": "attempt-fcfde62ce6ee4e919669abb88d9efb13",
+      "attempt_state": "succeeded",
+      "cancelled_job_created_by_double_click": false,
+      "base_cancelled_attempt_count_after": 1,
+      "note": "The one cancelled Attempt is the pre-existing D05 case. The rapid double-click submission added exactly one Job and did not create a cancellation.",
+      "evidence": [
+        "verification/daily-generation-interaction-fix-20261031/native-rapid-double-click-fixed.png"
+      ]
+    },
+    "D06": {
+      "status": "passed",
+      "first_activation_without_manual_refresh": true,
+      "visible_formal_assets": 5,
+      "latest_asset_id": "asset-a05490d273ad49db8e5638d40ff19a28",
+      "latest_asset_path": "/Users/gejiawei/Library/Application Support/ImageStudio/assets/asset-830b7e498fc74a1e979a24a2e9d1043a.png",
+      "latest_asset_bytes": 1259801,
+      "latest_asset_sha256": "6a12c769cc6d381c6a6de042bc8bf354d883ee8cdfe1b00f4808a440f5cbb823",
+      "dimensions": [1024, 768],
+      "list_layout_preserved_across_activation": true,
+      "evidence": [
+        "verification/daily-generation-interaction-fix-20261031/native-works-first-entry-fixed.png",
+        "verification/daily-generation-interaction-fix-20261031/native-works-activation-list-preserved.png"
+      ]
+    },
+    "d67": {
+      "status": "passed",
+      "viewer_closed_before_tab_switch": true,
+      "viewer_reopened_after_works_tasks_create_sequence": false,
+      "source_conversation_preserved": true,
+      "explicit_image_click_still_opens_viewer": true,
+      "evidence": [
+        "verification/daily-generation-interaction-fix-20261031/native-viewer-not-reopened.png",
+        "verification/daily-generation-interaction-fix-20261031/native-explicit-viewer-after-consumed-intent.png"
+      ]
+    }
+  },
+  "evidence_files": [
+    {
+      "path": "verification/daily-generation-interaction-fix-20261031/native-rapid-double-click-fixed.png",
+      "bytes": 200730,
+      "sha256": "1af939e09ee332accd7eba3fb8105388f7e1b9ac355ca6961cb5e67f7d2be09f"
+    },
+    {
+      "path": "verification/daily-generation-interaction-fix-20261031/native-works-first-entry-fixed.png",
+      "bytes": 448439,
+      "sha256": "61550b5fa042b7e2b490cb83a9934f74bd9b8d17c98d34f07cd5adaf8593bb95"
+    },
+    {
+      "path": "verification/daily-generation-interaction-fix-20261031/native-works-activation-list-preserved.png",
+      "bytes": 600243,
+      "sha256": "d9f51a26441886f9826a5d6b6217f4c5cbdcb5c147b52c86ff23a9261eb77ccd"
+    },
+    {
+      "path": "verification/daily-generation-interaction-fix-20261031/native-viewer-not-reopened.png",
+      "bytes": 475597,
+      "sha256": "5f74e1120c9ca83714888e5402e9c6a3933ef77a9a62dde45a97e4f3324bc38d"
+    },
+    {
+      "path": "verification/daily-generation-interaction-fix-20261031/native-explicit-viewer-after-consumed-intent.png",
+      "bytes": 549155,
+      "sha256": "a43cdcbba9144db566c627045a9bb8954255be6456f769edcaeafc361ccb2a79"
+    }
+  ],
+  "scope_limits": [
+    "Native evidence was collected at 1280x800 logical size on the existing M3 Max test device.",
+    "I01 cold network installation and D03 hardware IME interaction remain blocked in the broader model certification and are not changed by this fix.",
+    "No database migration, model download, IPC payload change, or production storage cleanup was performed."
+  ]
+}
