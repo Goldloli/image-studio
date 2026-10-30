@@ -1,0 +1,55 @@
+{
+  "scope": "Direct runtime and development foundations; complete resolution including other target/transitive versions remains in Cargo.lock.",
+  "rust_toolchain": "1.99.1-aarch64-apple-darwin",
+  "cargo_lock_sha256": "2de4e6c13f51e7ba9fdc5243e78fa28bd0a9821be8c7a40289b3a5f9ad7d2675",
+  "dependencies": [
+    {
+      "name": "eframe",
+      "version": "0.37.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "https://crates.io/crates/eframe/0.37.0"
+    },
+    {
+      "name": "egui",
+      "version": "0.37.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "https://crates.io/crates/egui/0.37.0"
+    },
+    {
+      "name": "libc",
+      "version": "0.2.191",
+      "license": "MIT OR Apache-2.0",
+      "source": "https://crates.io/crates/libc/0.2.191"
+    },
+    {
+      "name": "serde",
+      "version": "1.0.229",
+      "license": "MIT OR Apache-2.0",
+      "source": "https://crates.io/crates/serde/1.0.229"
+    },
+    {
+      "name": "serde_json",
+      "version": "1.0.154",
+      "license": "MIT OR Apache-2.0",
+      "source": "https://crates.io/crates/serde_json/1.0.154"
+    },
+    {
+      "name": "tempfile",
+      "version": "3.27.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "https://crates.io/crates/tempfile/3.27.0"
+    },
+    {
+      "name": "thiserror",
+      "version": "2.0.21",
+      "license": "MIT OR Apache-2.0",
+      "source": "https://crates.io/crates/thiserror/2.0.21"
+    },
+    {
+      "name": "tokio",
+      "version": "1.54.1",
+      "license": "MIT",
+      "source": "https://crates.io/crates/tokio/1.54.1"
+    }
+  ]
+}

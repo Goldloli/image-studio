@@ -1,0 +1,19 @@
+{
+  "real_model_cancelled_job": "job-18fe8ec83e544f93ad7494b167658cb5",
+  "attempts": 2,
+  "states": [
+    "cancelled",
+    "cancelled"
+  ],
+  "unique_attempts": true,
+  "unique_tokens": true,
+  "no_output_for_cancelled": true,
+  "assets_total": 3,
+  "loading_cancel_control": [
+    {
+      "action": "cancel",
+      "elapsed_seconds": 1.013776583,
+      "stage": "loading"
+    }
+  ]
+}

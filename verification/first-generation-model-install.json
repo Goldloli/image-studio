@@ -1,0 +1,35 @@
+{
+  "kind": "fixed-model-and-runtime-installation-acceptance",
+  "full_model_download_verified": true,
+  "model_bytes": 32848304893,
+  "uses_prepared_verified_download_cache": true,
+  "snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+  "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+  "runtime_inventory_entries": 27043,
+  "probe": {
+    "device": "gpu",
+    "device_name": "Apple M3 Max",
+    "identity": {
+      "build_id": "studio-mflux-worker-0.1.0",
+      "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1"
+    },
+    "packages": {
+      "mflux": "0.24.0",
+      "mlx": "0.32.4",
+      "torch": "2.15.0",
+      "transformers": "5.22.0"
+    },
+    "python": "3.13.12"
+  },
+  "is_full_model_inference": false,
+  "activation_record_fields": [
+    "runtime_lock_id",
+    "model_snapshot_id",
+    "runtime_manifest_sha256",
+    "model_manifest_sha256",
+    "runtime_files",
+    "probe"
+  ],
+  "source": "production Installation::start, isolated validation data root; inference evidence is separate"
+}

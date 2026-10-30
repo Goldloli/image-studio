@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "change": "introduce-app-icon-branding",
+  "beads_issue": "image-studio-d07",
+  "source_sha256": "f67ff9721c85c360d4ba4f287403cc3d865e1da74b92c632d32ebd3e54d79aac",
+  "mac_icns_sha256": "32c6f5e3b74590edd699ff2652a57f4eee71ca4534f54c358842078d83e24395",
+  "macos_system_entry_acceptance": {
+    "finder": "CUA screenshot and native Finder Info preview",
+    "dock_and_app_switcher": {
+      "method": "user manual observation in current conversation",
+      "question": "请查看当前 Image Studio：两处是否都显示你选定的黑色橙色图标？",
+      "user_reply": "两处都是新黑色图标",
+      "tool_screenshot_available": false,
+      "prior_tool_limitation": "Dock AX and application-switcher capture timed out; user confirmation supplied the missing observation."
+    },
+    "passed": true
+  },
+  "windows_gui_verified": false,
+  "frontend_tests_passed": 18,
+  "rust_tests_passed": 143,
+  "rust_tests_ignored": 2,
+  "report": "verification/app-icon-branding-results.md"
+}

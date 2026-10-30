@@ -1,0 +1,26 @@
+{
+  "runtime": "Rust core + Tauri 2 + React",
+  "rust_toolchain": "[toolchain]\nchannel = \"1.99.1\"\nprofile = \"minimal\"\ncomponents = [\"rustfmt\", \"clippy\"]\ntargets = [\"x86_64-pc-windows-msvc\"]",
+  "node": "24.12.0",
+  "npm": "11.6.2",
+  "tauri": "2.12.5",
+  "tauri_build": "2.7.4",
+  "frontend": {
+    "dependencies": {
+      "@tauri-apps/api": "2.12.4",
+      "lucide-react": "1.64.0",
+      "react": "19.3.1",
+      "react-dom": "19.3.1"
+    },
+    "devDependencies": {
+      "@types/react": "19.3.0",
+      "@types/react-dom": "19.3.0",
+      "@vitejs/plugin-react": "6.1.2",
+      "typescript": "7.0.2",
+      "vite": "8.3.5",
+      "vitest": "5.0.5"
+    }
+  },
+  "cargo_lock_sha256": "cd6c2aeb0e6eac4314667a39115823afa67f06b9b9143fe5468c465c999100bf",
+  "npm_lock_sha256": "c1a40e0970009ee3d94bac20e454dbabcb953ca4853fed9e7cbed1ad129642ee"
+}

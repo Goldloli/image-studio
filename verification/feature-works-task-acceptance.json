@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "change": "improve-feature-works-and-tasks",
+  "beadsIssue": "image-studio-0rc",
+  "sourceDataRoot": "target/conversation-validation",
+  "validationDataRoot": "target/feature-work-task-validation",
+  "migration": {
+    "fromUserVersion": 2,
+    "toUserVersion": 3,
+    "completedAtColumn": true,
+    "queryIndexes": ["jobs_project_created", "assets_created"]
+  },
+  "countsBeforeRealGeneration": {
+    "jobs": 9,
+    "assets": 6
+  },
+  "countsAfterRealGeneration": {
+    "jobs": 10,
+    "assets": 7,
+    "succeededJobs": 7,
+    "cancelledJobs": 3
+  },
+  "realGeneration": {
+    "model": "Z-Image Turbo",
+    "jobId": "job-06b32a3d1a354bbeb7117086bd7e6d1c",
+    "attemptId": "attempt-60f468c99c1a4c1ea918788d021fdc68",
+    "assetId": "asset-62c9489563c2495fa942c25723c0b1c6",
+    "prompt": "夜色中的现代玻璃温室，暖金色灯光映在平静水面，远处薄雾与森林，细腻电影摄影，无文字",
+    "width": 1024,
+    "height": 1024,
+    "seed": 4242,
+    "createdAt": 1793370572662,
+    "completedAt": 1793370656509,
+    "sha256": "37817f53d36ab0f247cd7c414e9249fcf7e2839d6b87478d427367364d61a1cd",
+    "explicitConversationAttribution": false
+  },
+  "export": {
+    "file": "verification/feature-works-task-ui/real-generated-greenhouse-4242.png",
+    "width": 1024,
+    "height": 1024,
+    "sha256": "37817f53d36ab0f247cd7c414e9249fcf7e2839d6b87478d427367364d61a1cd",
+    "hashMatchesManifest": true,
+    "nativeSaveDialog": true
+  },
+  "uiChecks": {
+    "featureCatalogEntries": 4,
+    "implementedFeatures": 1,
+    "plannedFeaturesWithoutAction": 3,
+    "assetFilters": ["date", "model", "size", "conversation"],
+    "assetLayouts": ["grid", "list"],
+    "taskStatuses": ["all", "active", "succeeded", "failed", "cancelled", "interrupted"],
+    "taskSearch": "宿主侧提示词/会话/型号检索",
+    "stableCursorPagination": true,
+    "historicalJobsAreNotBoundToCurrentConversation": true,
+    "sourceConversationReturnVerified": true,
+    "sourcePageAndFilterStatePreserved": true
+  },
+  "viewports": ["1280x800", "960x640"],
+  "themes": ["light", "dark"],
+  "screenshots": [
+    "verification/feature-works-task-ui/native-feature-1280-light.jpg",
+    "verification/feature-works-task-ui/native-feature-1280-dark.jpg",
+    "verification/feature-works-task-ui/native-feature-planned-1280-light.jpg",
+    "verification/feature-works-task-ui/native-works-1280-light.jpg",
+    "verification/feature-works-task-ui/native-works-preview-1280-light.jpg",
+    "verification/feature-works-task-ui/native-works-real-generated-1280-dark.jpg",
+    "verification/feature-works-task-ui/native-tasks-1280-light.jpg",
+    "verification/feature-works-task-ui/native-tasks-real-generated-1280-dark.jpg",
+    "verification/feature-works-task-ui/native-feature-960-light.jpg",
+    "verification/feature-works-task-ui/native-feature-960-dark.jpg",
+    "verification/feature-works-task-ui/native-works-960-light.jpg",
+    "verification/feature-works-task-ui/native-works-960-dark.jpg",
+    "verification/feature-works-task-ui/native-tasks-960-light.jpg",
+    "verification/feature-works-task-ui/native-tasks-960-dark.jpg"
+  ],
+  "qualityGates": {
+    "frontendCheck": "passed",
+    "frontendTests": {
+      "files": 5,
+      "passed": 23,
+      "failed": 0
+    },
+    "frontendBuild": "passed",
+    "rustFormat": "passed",
+    "rustClippy": "passed",
+    "rustWorkspaceTests": {
+      "passed": 162,
+      "failed": 0,
+      "ignored": 2
+    },
+    "openSpecStrict": {
+      "items": 17,
+      "passed": 17,
+      "failed": 0
+    },
+    "offlineStartup": {
+      "passed": true,
+      "report": "verification/cherry-offline-startup.json"
+    }
+  },
+  "limitations": [
+    "旧 v2 记录没有可靠完成时间，页面显示“时间未记录”",
+    "直接 generation-check 验收 Job 没有 Conversation/Turn，因此页面明确显示历史生成",
+    "图片编辑、去背景和放大仍为计划能力",
+    "没有 commit、push 或远程 Beads 同步"
+  ]
+}

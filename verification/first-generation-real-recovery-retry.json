@@ -1,0 +1,24 @@
+{
+  "job_id": "job-4712462836f04006a87816438ca17a3a",
+  "old_attempt": "attempt-1eb1a7e54ee445f1b0ab890b1e4eb65b",
+  "new_attempt": "attempt-798c47a82b124d60b029e50077e99dcb",
+  "states": [
+    "interrupted",
+    "succeeded"
+  ],
+  "same_frozen_plan": true,
+  "new_attempt_and_token": true,
+  "successful_output": {
+    "asset_id": "asset-51b19a7129924a20ab7557609e506c6f",
+    "content_hash": "b8ca593192f231596bb93f4ef32801e352ffe85d8310e35204478d8af7813052",
+    "data_type": "image_rgb",
+    "location": {
+      "kind": "managed",
+      "storage_id": "library",
+      "relative_path": "assets/asset-59348b34354749c29c0dbaa8225b2efe.png"
+    }
+  },
+  "jobs_total": 5,
+  "attempts_total": 7,
+  "assets_total": 4
+}

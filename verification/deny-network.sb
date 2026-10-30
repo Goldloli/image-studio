@@ -1,0 +1,5 @@
+;; Local validation profile: deny networking only for the launched process tree.
+;; Does not change Wi-Fi, firewall settings, or other applications.
+(version 1)
+(allow default)
+(deny network*)

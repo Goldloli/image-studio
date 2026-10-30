@@ -1,0 +1,11 @@
+{
+  "method": "native NSSavePanel, new filename with Chinese and spaces, atomic external PNG export",
+  "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/first-generation-export-验证/湖泊 1024x768.png",
+  "bytes": 950791,
+  "sha256": "0ee10f6de05ccfbd9eb1357232b03066b43cfcb0daf18a88a18c193c2c51f1c2",
+  "matches_internal_asset": {
+    "asset_id": "asset-28f44cb755f34cfdb5a5f9ed4dbed80f",
+    "width": 1024,
+    "height": 768
+  }
+}

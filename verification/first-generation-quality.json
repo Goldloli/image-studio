@@ -1,0 +1,244 @@
+{
+  "kind": "first-local-generation-final-quality-gates",
+  "validated_at_utc": "2026-10-30T08:13:30.467119+00:00",
+  "checks": [
+    {
+      "name": "rust-fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "log": "verification/first-generation-fmt.log",
+      "log_completed_at_utc": "2026-10-30T03:38:02.577721+00:00"
+    },
+    {
+      "name": "frontend-build",
+      "command": [
+        "npm",
+        "--prefix",
+        "apps/frontend",
+        "run",
+        "build"
+      ],
+      "started_utc": "2026-10-30T03:38:02.286881+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.643,
+      "log": "verification/first-generation-frontend-build.log"
+    },
+    {
+      "name": "frontend-tests",
+      "command": [
+        "npm",
+        "--prefix",
+        "apps/frontend",
+        "test"
+      ],
+      "started_utc": "2026-10-30T03:38:02.930203+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.361,
+      "log": "verification/first-generation-frontend-tests.log"
+    },
+    {
+      "name": "frontend-audit",
+      "command": [
+        "npm",
+        "--prefix",
+        "apps/frontend",
+        "audit",
+        "--omit=dev",
+        "--audit-level=moderate"
+      ],
+      "started_utc": "2026-10-30T03:38:02.930271+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 1.359,
+      "log": "verification/first-generation-frontend-audit.log"
+    },
+    {
+      "name": "rust-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--locked",
+        "--offline",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "log": "verification/first-generation-clippy.log",
+      "log_completed_at_utc": "2026-10-30T03:38:05.757402+00:00"
+    },
+    {
+      "name": "rust-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--offline"
+      ],
+      "exit_code": 0,
+      "log": "verification/first-generation-rust-tests.log",
+      "log_completed_at_utc": "2026-10-30T07:58:59.117679+00:00"
+    },
+    {
+      "name": "rust-build",
+      "command": [
+        "cargo",
+        "build",
+        "--workspace",
+        "--examples",
+        "--bins",
+        "--locked",
+        "--offline"
+      ],
+      "exit_code": 0,
+      "log": "verification/first-generation-build.log",
+      "log_completed_at_utc": "2026-10-30T03:38:21.479984+00:00"
+    },
+    {
+      "name": "windows-core-protocol",
+      "command": [
+        "cargo",
+        "check",
+        "-p",
+        "studio-core",
+        "-p",
+        "worker-protocol",
+        "--target",
+        "x86_64-pc-windows-msvc",
+        "--locked",
+        "--offline"
+      ],
+      "started_utc": "2026-10-30T03:38:21.480052+00:00",
+      "exit_code": 0,
+      "elapsed_seconds": 0.122,
+      "log": "verification/first-generation-windows-core.log"
+    },
+    {
+      "name": "rust-library-reopen-focused-recheck",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "image-studio-desktop",
+        "adapters::library::tests::drafts_use_cas_and_restore_content_selection_and_unsupported_values",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--exact"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.19,
+      "log": "verification/first-generation-library-reopen-recheck.log",
+      "note": "Earlier focused recheck preserved for history; current passing default parallel full-workspace run is the rust-tests entry."
+    }
+  ],
+  "all_recorded_commands_passed": true,
+  "rust_tests": {
+    "passed": 134,
+    "failed": 0,
+    "ignored": 2,
+    "summary_lines": 15,
+    "ignored_test_lines": [
+      "test adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host ... ignored, explicit acceptance: build inference-supervisor and set STUDIO_TEST_NATIVE_SUPERVISOR",
+      "test adapters::installation::tests::actual_private_runtime_installs_offline_without_activating_missing_model ... ignored, explicit acceptance: requires all fixed runtime artifacts in validation cache"
+    ],
+    "default_suite_completed": true
+  },
+  "frontend_tests": {
+    "passed": 11
+  },
+  "clean_source": {
+    "exit_code": 0,
+    "source_file_count": 83,
+    "workspace_sources_changed_since_copy": [],
+    "report": "verification/first-generation-clean-source-build.json",
+    "build_cache": "Existing target/clean-validation and global npm/Cargo caches are reused; not a cold build.",
+    "offline_mode": "npm --offline/npm_config_offline and Cargo --offline/CARGO_NET_OFFLINE; no OS network-denial claim."
+  },
+  "offline_startup": {
+    "network_control_exit": 6,
+    "native_window_renderer_initialized": true,
+    "tauri_frontend_page_finished": true,
+    "report": "verification/first-generation-offline-startup.json"
+  },
+  "limits": [
+    "Windows gate compiles only studio-core and worker-protocol; no Windows desktop or inference claim.",
+    "Two default-ignored tests require explicit runtime/native-supervisor acceptance; separate execution evidence is linked.",
+    "Clean-source builds reuse caches; disk peak uses sampled directory allocation, not unique physical blocks.",
+    "This quality summary does not perform or authorize Git commit, push or remote sync."
+  ],
+  "separately_executed_acceptance": [
+    {
+      "test": "actual_private_runtime_installs_offline_without_activating_missing_model",
+      "evidence": "verification/first-generation-runtime-install.json",
+      "previously_executed": true,
+      "network_denied": true,
+      "is_full_model_inference": false
+    },
+    {
+      "test": "actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host",
+      "evidence": "verification/generation-supervisor-crash-tests.log",
+      "previously_executed": true,
+      "fixture_not_full_model": true
+    }
+  ],
+  "previous_failures": [
+    {
+      "name": "rust-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked",
+        "--offline"
+      ],
+      "started_utc": "2026-10-30T03:38:05.757451+00:00",
+      "exit_code": 101,
+      "elapsed_seconds": 15.186,
+      "log": "verification/first-generation-rust-tests-attempt1.log",
+      "diagnosis": "Inherited host.lock descriptor delayed release after host drop; fixed with explicit RAII unlock after SQLite closes."
+    },
+    {
+      "name": "host-lock-regression-fixture-attempt2",
+      "exit_code": 101,
+      "log": "verification/first-generation-rust-tests-attempt2.log",
+      "diagnosis": "Regression child lost stdout reader and exited on SIGPIPE; fixture now retains its reader until child exit."
+    }
+  ],
+  "all_current_checks_passed": true,
+  "explicit_acceptance_evidence": [
+    {
+      "test": "actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host",
+      "report": "verification/generation-supervisor-crash-results.md",
+      "log": "verification/generation-supervisor-crash-results.log"
+    },
+    {
+      "test": "actual_private_runtime_installs_offline_without_activating_missing_model",
+      "report": "verification/first-generation-runtime-install.json"
+    }
+  ],
+  "host_lock_regression": {
+    "report": "verification/first-generation-host-lock-results.md",
+    "passed_in_default_parallel_workspace_run": true
+  },
+  "installation_disk_sampling": {
+    "report": "verification/first-generation-install-space.json",
+    "peak_observed_bytes": 67717607424,
+    "ready": true
+  },
+  "openspec": {
+    "report": "verification/first-generation-completion.json",
+    "archived": true,
+    "strict_main_specs_passed": 9,
+    "tasks_complete": 30
+  }
+}

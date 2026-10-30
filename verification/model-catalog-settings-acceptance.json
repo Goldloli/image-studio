@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "change": "introduce-model-catalog-and-settings",
+  "environment": {
+    "platform": "macOS",
+    "architecture": "arm64",
+    "device": "Apple M3 Max",
+    "tauri": "2",
+    "modelState": "ready"
+  },
+  "catalog": {
+    "total": 4,
+    "implemented": 1,
+    "installed": 1,
+    "executable": 1,
+    "planned": 3,
+    "plannedActionsAvailable": false
+  },
+  "nativeChecks": {
+    "realZImageReadyState": true,
+    "searchFamilyTypeRuntime": true,
+    "combinedNoResultAndClear": true,
+    "keyboardExpand": true,
+    "singleConversationModelAction": true,
+    "lightTheme": true,
+    "darkTheme": true,
+    "logicalSize1280x800": true,
+    "logicalSize960x640": true,
+    "fiveSettingsGroups": true,
+    "unsavedDefaultsPrompt": true,
+    "themePersistenceAcrossRestart": true,
+    "defaultAspectPersistenceAcrossRestart": true,
+    "oldConversationUnaffected": true,
+    "diagnosticsStartOnlyOnExplicitAction": true
+  },
+  "persistedValues": {
+    "theme": "dark",
+    "defaultAspect": "4:3",
+    "existingConversationAspect": "1:1"
+  },
+  "qualityGates": {
+    "frontendCheck": "passed",
+    "frontendTests": 20,
+    "frontendBuild": "passed",
+    "rustFormat": "passed",
+    "rustClippyDenyWarnings": "passed",
+    "workspaceTests": "passed",
+    "workspaceBuild": "passed",
+    "offlineStartup": "passed"
+  },
+  "screenshots": [
+    "verification/model-catalog-1280-light.png",
+    "verification/model-catalog-960-dark.png",
+    "verification/model-detail-960-dark.png",
+    "verification/model-planned-detail-1280-dark.png",
+    "verification/settings-appearance-1280-light.png",
+    "verification/settings-appearance-1280-dark.png",
+    "verification/settings-appearance-960-dark.png",
+    "verification/settings-storage-1280-dark.png"
+  ],
+  "scopeLimits": [
+    "Planned models were not installed or executed.",
+    "No storage migration, weight deletion, auto-update, or online provider is offered.",
+    "No Windows GUI or non-arm64 macOS certification is claimed."
+  ]
+}

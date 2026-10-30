@@ -1,0 +1,12 @@
+
+> image-studio-ui@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.5 /Users/gejiawei/Desktop/ai_code/image-studio/apps/frontend
+
+
+ Test Files  2 passed (2)
+      Tests  11 passed (11)
+   Start at  11:38:03
+   Duration  86ms (import 39%, transform 27%, tests 18%, worker 15%, environment 1%)

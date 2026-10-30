@@ -1,0 +1,44 @@
+{
+  "checked_at_utc": "2026-10-30T08:16:14.333215+00:00",
+  "change": "deliver-first-local-generation",
+  "archived_path": "openspec/changes/archive/2026-10-30-deliver-first-local-generation",
+  "completed_tasks": 30,
+  "total_tasks": 30,
+  "strict_validation": {
+    "command": [
+      "openspec",
+      "validate",
+      "--all",
+      "--strict",
+      "--no-interactive"
+    ],
+    "exit_code": 0,
+    "passed": 9,
+    "failed": 0,
+    "specs": [
+      "core-contracts",
+      "desktop-workspace",
+      "generation-worker-protocol",
+      "local-generation",
+      "model-installation",
+      "platform-foundation",
+      "project-storage",
+      "worker-protocol",
+      "workspace-canvas"
+    ]
+  },
+  "archive_note": "Only remaining task at archive invocation was final archive/documentation step 7.6; it was checked after successful archive and spec update.",
+  "native_final_observation": {
+    "jobs": 5,
+    "in_progress": 0,
+    "succeeded": 4,
+    "cancelled_jobs": 1,
+    "saved_draft": "草稿 4",
+    "generated_output_restored": true,
+    "screenshots": [
+      "verification/first-generation-ui/native-final-tasks.jpg",
+      "verification/first-generation-ui/native-final-recovered-output.jpg"
+    ]
+  },
+  "no_git_commit_push_or_remote_sync": true
+}

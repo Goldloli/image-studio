@@ -1,0 +1,13 @@
+{
+  "network_control_exit": 6,
+  "network_control_stderr": "% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0curl: (6) Could not resolve host: example.com",
+  "native_window_renderer_initialized": true,
+  "tauri_frontend_page_finished": true,
+  "runtime": "Tauri 2 + embedded React production build",
+  "initialization_log": [
+    "DIAGNOSTIC_DESKTOP_READY tauri=2 requested_scale=Some(2) native_dpr=webview window=Some([960, 640]); image inference unavailable"
+  ],
+  "model_installed": false,
+  "worker_started": false,
+  "observation": "Tauri main WebView PageLoadEvent::Finished log and live process; native UI and embedded images are separately verified with CUA."
+}

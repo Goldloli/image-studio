@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-30",
+  "change": "introduce-generation-conversation",
+  "data_root": "target/conversation-validation",
+  "schema_version_before": 1,
+  "schema_version_after": 2,
+  "migration": {
+    "legacy_drafts": 5,
+    "legacy_jobs": 6,
+    "migrated_conversations": 6,
+    "historical_turns": 6,
+    "repeated_startup_created_duplicates": false
+  },
+  "real_generation": {
+    "job_id": "job-3b054673534040189f540f5c13283055",
+    "successful_attempt_id": "attempt-ebacaa78a24a4e39bd6ca089b9eb7c67",
+    "asset_id": "asset-4c32f2112902415aa25610a7c48e4081",
+    "width": 1024,
+    "height": 1024,
+    "seed": 3489739187,
+    "byte_count": 1040543,
+    "sha256": "7bf62fbec1e745ec8d8d6f2a74a021f297ad66f2b30716bee09d4f05e91d10cc",
+    "exported_path": "target/first-generation-export-验证/conversation-validation-output.png",
+    "export_sha256_matches": true
+  },
+  "conversation_checks": {
+    "enter_send": true,
+    "mouse_send": true,
+    "immediate_pending_card": true,
+    "real_progress_9_of_9_remained_below_100": true,
+    "cancel_then_explicit_retry": true,
+    "second_turn_same_conversation": true,
+    "new_conversation_during_generation": true,
+    "other_conversation_input_preserved": true,
+    "restart_restored_active_conversation_and_input": true,
+    "task_asset_opened_source_conversation": true,
+    "manifest_loaded_on_demand": true
+  },
+  "quality_gates": {
+    "frontend_tests": "18 passed",
+    "rust_workspace_tests": "143 passed, 2 ignored",
+    "fmt": "passed",
+    "strict_clippy": "passed",
+    "workspace_build": "passed",
+    "windows_core_protocol_check": "passed",
+    "offline_startup": "passed",
+    "clean_source_build": "passed"
+  }
+}

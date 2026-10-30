@@ -1,0 +1,93 @@
+{
+  "review_date": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "beads_review": "image-studio-788",
+  "application_code_changed": false,
+  "catalog": {
+    "total": 4,
+    "implemented": [
+      "z-image-turbo-mflux-v1"
+    ],
+    "planned": [
+      "flux2-klein-4b-distilled",
+      "birefnet-general-epoch-244",
+      "realesrgan-x4plus"
+    ]
+  },
+  "default_user_data": {
+    "path": "/Users/gejiawei/Library/Application Support/ImageStudio",
+    "model_installed_at_review": false,
+    "runtime_installed_at_review": false,
+    "modified_by_review": false
+  },
+  "automated_checks": {
+    "frontend_tests": {
+      "passed": 23,
+      "failed": 0
+    },
+    "typescript": "passed",
+    "rust_workspace": {
+      "passed": 162,
+      "failed": 0,
+      "ignored": 2
+    },
+    "python_worker": {
+      "passed": 8,
+      "failed": 0
+    },
+    "generation_lock": "passed",
+    "existing_asset_sizes_and_hashes": {
+      "checked": 5,
+      "passed": 5
+    }
+  },
+  "real_execution": {
+    "network_denied": true,
+    "uses_preverified_cache": true,
+    "production_installer_rebuilt_runtime": true,
+    "process_exit_code": 0,
+    "wall_seconds_including_install_and_verification": 146.465,
+    "job_seconds_from_acceptance_to_commit": 69.676,
+    "job_id": "job-b37ca33383c540f5a8ad587dc62c36c9",
+    "attempt_id": "attempt-79cdcf687ed84e26ba99a6ec815f560e",
+    "attempt_state": "succeeded",
+    "manifest_evidence_kind": "execution_record",
+    "output": {
+      "asset_id": "asset-c32707f851004f2dbfe9931236ba98b2",
+      "png_path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-availability-review-20261030/smoke/data/assets/asset-d7f44573bb264f5fbac305057b586497.png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "byte_count": 1471252,
+      "sha256": "1fc7b4a2e4f22b5c4cd294e3e31730b615e99103b116fc7796be6f4f55bced62"
+    },
+    "effective_parameters": {
+      "guidance": 0.0,
+      "quantization": 4,
+      "scheduler": "linear",
+      "seed": 20261030,
+      "steps": 9
+    },
+    "device": {
+      "device_id": "Apple M3 Max",
+      "precision": "native;compute_precision=None;float32=False"
+    }
+  },
+  "pinned_mflux_modules_present": [
+    "qwen21",
+    "moss_image",
+    "flux2"
+  ],
+  "follow_up_beads": [
+    "image-studio-2px",
+    "image-studio-u3q",
+    "image-studio-g37"
+  ],
+  "limitations": [
+    "No fresh network download or clean uncached install in this review",
+    "Native UI, cancellation, recovery, other sizes and repeated generation were not rerun in this review",
+    "One exact M3 Max / 128 GiB configuration; no other hardware claims",
+    "Qwen, MOSS and planned catalog entries were not executed"
+  ]
+}

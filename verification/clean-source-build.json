@@ -1,0 +1,60 @@
+{
+  "method": "isolated source copy, not a Git checkout or commit",
+  "declared_source_roots": [
+    "Cargo.toml",
+    "Cargo.lock",
+    "rust-toolchain.toml",
+    "apps",
+    "crates",
+    "tools",
+    "resources"
+  ],
+  "command": [
+    "cargo",
+    "build",
+    "--workspace",
+    "--locked",
+    "--offline"
+  ],
+  "exit_code": 0,
+  "source_files_sha256": {
+    "Cargo.toml": "687f027202d48f8e15bbc26daf9d5dc7d501ae353341f96121c3329dc72ca8f7",
+    "Cargo.lock": "2de4e6c13f51e7ba9fdc5243e78fa28bd0a9821be8c7a40289b3a5f9ad7d2675",
+    "rust-toolchain.toml": "4387889e7ef217b7a0cea12ee152fb5570ec33880f985bff2ebcd49b963b3b24",
+    "apps/desktop/Cargo.toml": "6bab1305b0fd856399b2caa358b0f7eff1dedb5c0965c7d9c1dcbe686f2b9fa1",
+    "apps/desktop/src/lib.rs": "be5301d89291fbf0f61b4e81ee24314adf7a18623a0b7f0723e09d827ff9b6c6",
+    "apps/desktop/src/main.rs": "c6a7eb90540e4e4578ff762684d5be8d66f7450b8e82090c66abe19665ef41d9",
+    "apps/desktop/src/ui/theme.rs": "78896eb20a0329369f96ff3a0e582747b6bdef49c44257fbaa630cef0c39e378",
+    "apps/desktop/src/ui/options.rs": "9dd400cd54e9dbbd0024d5798e9ea5784c3dbe27cb92fe954865e2ef84684633",
+    "apps/desktop/src/ui/mod.rs": "e41bf337d685e371c3f9319ab386ad35771f307d03ea9467a3c4cee89ed322e5",
+    "apps/desktop/src/adapters/diagnostics.rs": "2a99ecfe1fb59f4cfd882a0c83f4355f500010091bef59f6f026cc3249637776",
+    "apps/desktop/src/adapters/paths.rs": "5178fe2bfe2c040525b2a3a9cf395f3672b0f5688460302aa98a30053f2f1388",
+    "apps/desktop/src/adapters/mod.rs": "143db2cdbf62e413a58751c218939c8b678b630858cea6a3e011d7b3aa316db6",
+    "resources/fonts/NotoSansCJKsc-Regular.otf": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+    "resources/fonts/README.md": "e6d221aa051d66c8df870c479f421edb2c0d163b073a4668d1d6e8e014fafcb7",
+    "resources/fonts/OFL.txt": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2",
+    "crates/worker-protocol/Cargo.toml": "6c274229eec665347cbcf9015333bcb382fa563fab19ad9066547d07bc2846da",
+    "crates/studio-core/Cargo.toml": "4b6941e46bfc3db3c11ee1d30b09c3b8d7868e45dbcb29fa7d556669f2fc6512",
+    "crates/studio-core/README.md": "a5e0630ff61d1430e98416c7ab13da29423a8aea30dbbc9d20b1498fe47bf0b3",
+    "crates/studio-core/tests/contracts.rs": "260f541aace4fb7fb8840b6acbefd406ce762ae4ffd553553f43a1885dfcf2f9",
+    "crates/studio-core/src/ports.rs": "e5f2fcbe0af6aeace95c70277a10e3281d5b68539d138f2c18680d718ca3fc69",
+    "crates/studio-core/src/lib.rs": "b552b8ec5c3b475f4e6ff8437a69e2d124770a72aab5881765ac1cb9be15a0c1",
+    "crates/studio-core/src/domain.rs": "cfbdbdae6c117f1807878c26c4e4193bce0532c4d86adc6f93feb5b6c7a2feb5",
+    "crates/studio-core/src/contracts.rs": "cb3b48a87f30819ee4de494fa4e28b9b24078e1c2ef59ebac6f0ee7a2121d75f",
+    "crates/studio-core/src/application.rs": "c716c6eb234e07645c8fa5e86b603c99e9dba46318ec349c5e1c8b8af92de433",
+    "crates/worker-protocol/src/lib.rs": "81f6755e74f5f6c837bea065b6a0be1d1247ec9498b8376596f1005f5af9401b",
+    "crates/worker-protocol/src/tests.rs": "62b6fa4eb795bf1bec76d80f6ea9a37fc3f82f56d06e24ab85535896309f325b",
+    "tools/diagnostic-worker/Cargo.toml": "b1b77a7af35ee5a2f1916a68870fff1b045782d2ee6268fc8c2f7bc68f050d75",
+    "tools/diagnostic-worker/tests/exchange.rs": "f94a8d5a103d33184c8b5d6555bb0c33f65abc4f8fa51ff25a55a9991e812fa6",
+    "tools/diagnostic-worker/tests/supervision.rs": "0617ef7b931545953355a4af1d76780f9838c38a98d4a3346c8c85f2ee6ddf79",
+    "tools/diagnostic-worker/src/main.rs": "ad0f15c8605c4f7b0103dcffda26abde462ec84deebbc4a133b42b3648417d70"
+  },
+  "excluded": [
+    "user data",
+    "models",
+    "Python inference environments",
+    ".beads",
+    ".codegraph"
+  ],
+  "isolated_build_artifacts": "target/clean-validation"
+}

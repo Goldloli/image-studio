@@ -1,0 +1,60 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running unittests src/lib.rs (target/debug/deps/inference_supervisor-2cf4dd2e004618a2)
+
+running 2 tests
+test tests::incomplete_and_oversize_frames_are_rejected ... ok
+test tests::logs_and_control_queues_have_hard_limits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running unittests src/main.rs (target/debug/deps/inference_supervisor-1b5b11a2d6de1ee2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/supervision.rs (target/debug/deps/supervision-924f73713cff3f7d)
+
+running 8 tests
+inference supervisor: execution lease is busy
+test candidate_is_delivered_after_normal_exit_and_control_sequence_is_valid ... ok
+inference supervisor: execution lease is busy
+test host_eof_reclaims_worker_and_descendant_without_host_cooperation ... ok
+test lifecycle_record_is_published_before_execute_and_bound_to_the_live_child_handle ... ok
+test existing_execution_and_inherited_lease_prevent_new_compute ... ok
+test flood_is_bounded_and_terminal_cannot_be_starved_by_progress ... ok
+test cooperative_and_noncooperative_cancel_reap_before_cancelled ... ok
+test candidates_wait_for_descendants_and_abnormal_workers_do_not_succeed ... ok
+test native_loading_and_generation_timeouts_are_distinct_and_cleanup ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.53s
+
+   Doc-tests inference_supervisor
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling image-studio-desktop v0.1.0 (/Users/gejiawei/Desktop/ai_code/image-studio/apps/desktop)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.87s
+     Running unittests src/lib.rs (target/debug/deps/image_studio_desktop-3b5505a7ac97501f)
+
+running 8 tests
+test adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host ... ignored, explicit acceptance: build inference-supervisor and set STUDIO_TEST_NATIVE_SUPERVISOR
+test adapters::generation::tests::existing_lease_blocks_launch_and_does_not_claim_resource_release ... ok
+test adapters::generation::tests::accepted_cancel_before_preparation_remains_cancelled ... ok
+test adapters::generation::tests::missing_supervisor_finishes_persisted_attempt_without_leaving_busy ... ok
+test adapters::generation::tests::framing_failure_closes_control_before_reaping_and_records_failure ... ok
+test adapters::generation::tests::current_supervisor_sigkill_reclaims_a_gil_holding_compute_group_and_honors_cancel ... ok
+test adapters::generation::tests::cleanup_incomplete_is_nonterminal_and_later_cancel_can_finish ... ok
+test adapters::generation::tests::candidate_waits_for_process_exit_before_durable_success ... ok
+
+test result: ok. 7 passed; 0 failed; 1 ignored; 0 measured; 49 filtered out; finished in 0.93s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.15s
+     Running unittests src/lib.rs (target/debug/deps/image_studio_desktop-3b5505a7ac97501f)
+
+running 1 test
+test adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 56 filtered out; finished in 0.84s

@@ -1,0 +1,11 @@
+{
+  "network_control_exit": 6,
+  "network_control_stderr": "% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0curl: (6) Could not resolve host: example.com",
+  "native_window_renderer_initialized": true,
+  "initialization_log": [
+    "DIAGNOSTIC_DESKTOP_READY scale=2 window=Some([960, 640]); image inference unavailable"
+  ],
+  "model_installed": false,
+  "worker_started": false,
+  "observation": "Application initialization log and live process; UI interactions are separately verified with CUA."
+}

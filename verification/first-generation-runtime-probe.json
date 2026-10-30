@@ -1,0 +1,21 @@
+{
+  "kind": "isolated-dependency-and-mlx-probe",
+  "is_full_model_inference": false,
+  "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+  "probe": {
+    "identity": {
+      "build_id": "studio-mflux-worker-0.1.0",
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+      "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6"
+    },
+    "python": "3.13.12",
+    "device": "gpu",
+    "device_name": "Apple M3 Max",
+    "packages": {
+      "mflux": "0.24.0",
+      "mlx": "0.32.4",
+      "torch": "2.15.0",
+      "transformers": "5.22.0"
+    }
+  }
+}

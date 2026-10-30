@@ -1,0 +1,5 @@
+    Checking studio-core v0.1.0 (/Users/gejiawei/Desktop/ai_code/image-studio/crates/studio-core)
+    Checking diagnostic-worker v0.1.0 (/Users/gejiawei/Desktop/ai_code/image-studio/tools/diagnostic-worker)
+    Checking worker-protocol v0.1.0 (/Users/gejiawei/Desktop/ai_code/image-studio/crates/worker-protocol)
+    Checking image-studio-desktop v0.1.0 (/Users/gejiawei/Desktop/ai_code/image-studio/apps/desktop)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.74s

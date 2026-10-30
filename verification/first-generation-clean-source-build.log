@@ -1,0 +1,24 @@
+
+[frontend-install] cwd=apps/frontend command=['npm', 'ci', '--offline', '--no-audit', '--no-fund']
+
+added 47 packages in 977ms
+
+[frontend-build] cwd=apps/frontend command=['npm', 'run', 'build']
+
+> image-studio-ui@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 2038 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.41 kB │ gzip:  0.28 kB
+dist/assets/index-yRVemN9F.css   28.10 kB │ gzip:  6.13 kB
+dist/assets/index-CJpgSmk1.js   275.13 kB │ gzip: 86.62 kB
+
+✓ built in 428ms
+
+[native-build] cwd=. command=['cargo', 'build', '--workspace', '--locked', '--offline']
+   Compiling image-studio-desktop v0.1.0 (/private/var/folders/6f/bw_544pn0ln_q8m0w8jtmz980000gn/T/image-studio-cherry-clean-tyayjmgg/apps/desktop)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.80s

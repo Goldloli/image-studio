@@ -1,0 +1,60 @@
+{
+  "kind": "final-installation-and-worker-audit",
+  "checked_utc": "2026-10-30T02:52:17.580880+00:00",
+  "is_full_model_inference": false,
+  "test_data_root_opened": false,
+  "model_components": 17,
+  "model_component_bytes": 32848304893,
+  "runtime_wheels": 59,
+  "runtime_artifact_inventory": {
+    "files": 60,
+    "all_cached_sizes_and_sha256_match": true,
+    "all_license_metadata_present": true
+  },
+  "worker_wheel": {
+    "sha256": "3b635d9181d61b83adbfee73b8ba3018f1fddf481dceda2d00848a3263f86310",
+    "bytes": 6050,
+    "sources_match_zip": true,
+    "reproduced_in_isolated_python_3_13_12": true
+  },
+  "model_manifest_sha256": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+  "runtime_manifest_sha256": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+  "requirements_lock_sha256": "31824f7403bc61d2050eb8f12c5a2037fc8dcc6dd3b2098d16f64f413550562c",
+  "activation_record_identity": "Binds runtime/model manifest SHA-256 in addition to version labels; old/mismatched records are unavailable.",
+  "plan_runtime_identity": "RuntimeSnapshot source uses the full runtime manifest SHA-256, including interpreter/wheel identities; MFLUX source commit remains in the manifest.",
+  "pre_install_space_budget": "Conservative full download cache + model target + private runtime expansion + reserve is shown before start; actual start refines per-volume checks.",
+  "official_hf_redirect_domain": "us.aws.cdn.hf.co; exact hostname match, HTTPS only",
+  "gates": [
+    {
+      "command": "python3 scripts/verify-generation-lock.py",
+      "result": "passed; 17 components, 59 wheels, source/wheel/requirements consistency"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 /private/tmp/image-studio-runtime-prep/build-venv/bin/python3 -m unittest discover -s tools/mflux-worker/tests -v",
+      "result": "8 passed"
+    },
+    {
+      "command": "/private/tmp/image-studio-runtime-prep/build-venv/bin/python3 -I -m pip check",
+      "result": "No broken requirements found"
+    },
+    {
+      "command": "cargo test -p image-studio-desktop adapters::installation::tests --lib --locked --offline",
+      "result": "13 passed; 1 explicit production-runtime acceptance ignored in default run"
+    },
+    {
+      "command": "cargo clippy -p image-studio-desktop --all-targets --locked --offline -- -D warnings",
+      "result": "passed"
+    },
+    {
+      "command": "rustfmt --edition 2024 --check apps/desktop/src/adapters/installation.rs",
+      "result": "passed"
+    }
+  ],
+  "separate_actual_runtime_evidence": [
+    "verification/first-generation-runtime-probe.json",
+    "verification/first-generation-runtime-install.json",
+    "verification/first-generation-tokenizer-probe.json"
+  ],
+  "full_model_download_evidence": "target/first-generation-validation/model-download-receipt.json (complete and fully hashed; not activation/inference)",
+  "next_acceptance_owner": "root: actual fixed installation and full-model inference/cancellation/restart/export under b88.5"
+}

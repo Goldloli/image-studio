@@ -1,0 +1,11 @@
+{
+  "kind": "actual-fixed-tokenizer-offline-preflight",
+  "is_full_model_inference": false,
+  "network_denied": true,
+  "short_prompt_template_tokens": 18,
+  "long_prompt_rejection": "提示词含模板共 5008 token，超过 512 token 上限；请缩短提示词。",
+  "max_length": 512,
+  "chat_template_kwargs": {
+    "enable_thinking": true
+  }
+}
