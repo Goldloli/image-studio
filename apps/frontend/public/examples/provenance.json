@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "created_date": "2026-10-29",
+  "timezone": "Asia/Shanghai",
+  "purpose": "Original bundled demonstration artwork for Image Studio. These are static development-time assets, not evidence of local image inference.",
+  "generation_method": "Built-in image_gen__imagegen tool; three independent generation calls; no reference image inputs.",
+  "distribution_basis": "Created for the user-authorized Image Studio implementation and bundled as original demonstration assets. No third-party stock images, Cherry Studio brand assets, logos or screenshot crops are used.",
+  "runtime_generation": false,
+  "asset_storage_records_created": false,
+  "files": [
+    {
+      "id": "landscape",
+      "file": "landscape.png",
+      "url": "/examples/landscape.png",
+      "title": "山湖晨雾",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2339723,
+      "sha256": "24d50e20a2ca1c8810360c8e3ad3b67b69e4a8c249a2468b970e87608efaf3d9",
+      "source_original_path": "/Users/gejiawei/.codex/generated_images/01a1866e-a032-7421-854b-71bedd2ba3df/exec-53076846-a6e1-46f1-8b5c-726c7dc991b8.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: original sample artwork for a desktop image-creation app. Create a refined landscape photograph of a quiet alpine lake at dawn, layered mountains fading into pale mist, small dark conifer silhouettes along the shore, a delicate warm light line meeting cool turquoise water, soft reflections and realistic atmospheric depth. Horizontal 3:2 composition, immersive image filling the entire canvas. Natural fine detail, restrained color grading, calm editorial photography, no exaggerated HDR. No people, no buildings, no typography, no border, no logo, no watermark.",
+      "transparent_background": false,
+      "visually_reviewed": true,
+      "review_notes": "Reviewed full composition, subject, texture and absence of logos/text/watermarks; copied original PNG without image edits."
+    },
+    {
+      "id": "still-life",
+      "file": "still-life.png",
+      "url": "/examples/still-life.png",
+      "title": "静物光影",
+      "width": 1122,
+      "height": 1402,
+      "bytes": 2199600,
+      "sha256": "76d398a0a6c7db4ab5cfd8fbb6ae419123b10e64c5827eba4e4c725819110dcf",
+      "source_original_path": "/Users/gejiawei/.codex/generated_images/01a1866e-a032-7421-854b-71bedd2ba3df/exec-9b0017cb-2866-4af0-b94a-52233215f857.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: original sample artwork for a desktop image-creation app. A beautifully composed still life of a handmade cream ceramic vase with one slender leafy branch and two green pears on a light stone tabletop, beside an off-frame window casting long soft morning shadows on a warm pale plaster wall. Tangible ceramic glaze, subtle natural imperfections, quiet Mediterranean studio atmosphere, authentic photography with restrained colors and elegant negative space. Portrait 4:5 composition, full-bleed image. No text, no border, no logos, no watermark.",
+      "transparent_background": false,
+      "visually_reviewed": true,
+      "review_notes": "Reviewed full composition, subject, texture and absence of logos/text/watermarks; copied original PNG without image edits."
+    },
+    {
+      "id": "illustration",
+      "file": "illustration.png",
+      "url": "/examples/illustration.png",
+      "title": "窗边日光",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 2610266,
+      "sha256": "587c0f70a82eeb5a00cd1be7743d52e75c92c6138ada9c555f7f686d8c02c62f",
+      "source_original_path": "/Users/gejiawei/.codex/generated_images/01a1866e-a032-7421-854b-71bedd2ba3df/exec-0e67a1f3-f06c-4398-adc4-292144f500e5.png",
+      "prompt": "Use case: illustration-story. Asset type: original sample artwork for a desktop image-creation app. A sophisticated editorial illustration of a sunlit architectural interior: a tall arched window, simple warm cream geometric walls and terracotta steps, a sculptural leafy potted plant, crisp planes of golden sunlight and soft teal shadow. Refined gouache and screen-print texture, clean geometric composition, tasteful coral, ochre, ivory and muted deep green palette, poetic quiet mood. Square composition, image fills the entire canvas. No people, no lettering, no border, no logos, no watermark.",
+      "transparent_background": false,
+      "visually_reviewed": true,
+      "review_notes": "Reviewed full composition, subject, texture and absence of logos/text/watermarks; copied original PNG without image edits."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-conversation-apply-model"
+description = "Enables the conversation_apply_model command without any pre-configured scope."
+commands.allow = ["conversation_apply_model"]
+
+[[permission]]
+identifier = "deny-conversation-apply-model"
+description = "Denies the conversation_apply_model command without any pre-configured scope."
+commands.deny = ["conversation_apply_model"]

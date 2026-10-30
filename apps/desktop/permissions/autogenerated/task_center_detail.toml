@@ -1,0 +1,9 @@
+[[permission]]
+identifier = "allow-task-center-detail"
+description = "Enables the task_center_detail command without any pre-configured scope."
+commands.allow = ["task_center_detail"]
+
+[[permission]]
+identifier = "deny-task-center-detail"
+description = "Denies the task_center_detail command without any pre-configured scope."
+commands.deny = ["task_center_detail"]

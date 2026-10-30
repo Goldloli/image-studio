@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Image Studio", "version": "0.1.0", "identifier": "local.image-studio.foundation.dev",
+  "build": { "frontendDist": "../frontend/dist" },
+  "app": {
+    "windows": [{
+      "label": "main", "title": "Image Studio", "width": 1280, "height": 800,
+      "minWidth": 960, "minHeight": 640, "resizable": true,
+      "titleBarStyle": "Overlay", "hiddenTitle": true,
+      "trafficLightPosition": { "x": 16, "y": 22 }, "backgroundColor": "#f5f5f5"
+    }],
+    "security": {
+      "capabilities": ["main-window"],
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: studio-asset: http://studio-asset.localhost; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; object-src 'none'; base-uri 'self'; frame-src 'none'"
+    }
+  },
+  "bundle": { "active": false, "icon": ["icons/icon.icns", "icons/icon.png", "icons/icon.ico"] }
+}

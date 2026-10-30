@@ -1,0 +1,9 @@
+[[permission]]
+identifier = "allow-task-center-query"
+description = "Enables the task_center_query command without any pre-configured scope."
+commands.allow = ["task_center_query"]
+
+[[permission]]
+identifier = "deny-task-center-query"
+description = "Denies the task_center_query command without any pre-configured scope."
+commands.deny = ["task_center_query"]

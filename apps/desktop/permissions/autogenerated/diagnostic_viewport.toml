@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-diagnostic-viewport"
+description = "Enables the diagnostic_viewport command without any pre-configured scope."
+commands.allow = ["diagnostic_viewport"]
+
+[[permission]]
+identifier = "deny-diagnostic-viewport"
+description = "Denies the diagnostic_viewport command without any pre-configured scope."
+commands.deny = ["diagnostic_viewport"]

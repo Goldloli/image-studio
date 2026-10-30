@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-conversation-history"
+description = "Enables the conversation_history command without any pre-configured scope."
+commands.allow = ["conversation_history"]
+
+[[permission]]
+identifier = "deny-conversation-history"
+description = "Denies the conversation_history command without any pre-configured scope."
+commands.deny = ["conversation_history"]

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-conversation-turn-detail"
+description = "Enables the conversation_turn_detail command without any pre-configured scope."
+commands.allow = ["conversation_turn_detail"]
+
+[[permission]]
+identifier = "deny-conversation-turn-detail"
+description = "Denies the conversation_turn_detail command without any pre-configured scope."
+commands.deny = ["conversation_turn_detail"]

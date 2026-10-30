@@ -1,0 +1,35 @@
+[workspace]
+resolver = "3"
+members = ["apps/desktop", "crates/studio-core", "crates/worker-protocol", "tools/diagnostic-worker", "tools/inference-supervisor"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+publish = false
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0"
+tokio = { version = "1.48", features = ["rt-multi-thread", "macros", "process", "io-util", "sync", "time"] }
+libc = "0.2"
+tempfile = "3"
+sha2 = { version = "=0.10.9", features = ["asm"] }
+uuid = { version = "=1.29.0", features = ["v4"] }
+fs2 = "0.4"
+rusqlite = { version = "=0.41.1", default-features = false, features = ["bundled"] }
+png = "=0.18.1"
+reqwest = { version = "=0.13.5", default-features = false, features = ["blocking", "rustls"] }
+flate2 = "1"
+tar = "0.4"
+studio-core = { path = "crates/studio-core" }
+worker-protocol = { path = "crates/worker-protocol" }
+
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+
+# Model integrity checks read tens of GB. Keep the crypto backend optimized in
+# development builds as well; UI/core code retains normal debug behavior.
+[profile.dev.package.sha2]
+opt-level = 3

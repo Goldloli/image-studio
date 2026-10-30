@@ -1,0 +1,17 @@
+[package]
+name = "diagnostic-worker"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+worker-protocol.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+image-studio-desktop = { path = "../../apps/desktop" }
+tempfile.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-generation-submit"
+description = "Enables the generation_submit command without any pre-configured scope."
+commands.allow = ["generation_submit"]
+
+[[permission]]
+identifier = "deny-generation-submit"
+description = "Denies the generation_submit command without any pre-configured scope."
+commands.deny = ["generation_submit"]

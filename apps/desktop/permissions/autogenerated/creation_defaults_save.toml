@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-creation-defaults-save"
+description = "Enables the creation_defaults_save command without any pre-configured scope."
+commands.allow = ["creation_defaults_save"]
+
+[[permission]]
+identifier = "deny-creation-defaults-save"
+description = "Denies the creation_defaults_save command without any pre-configured scope."
+commands.deny = ["creation_defaults_save"]

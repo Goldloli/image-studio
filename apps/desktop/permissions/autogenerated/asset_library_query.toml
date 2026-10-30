@@ -1,0 +1,9 @@
+[[permission]]
+identifier = "allow-asset-library-query"
+description = "Enables the asset_library_query command without any pre-configured scope."
+commands.allow = ["asset_library_query"]
+
+[[permission]]
+identifier = "deny-asset-library-query"
+description = "Denies the asset_library_query command without any pre-configured scope."
+commands.deny = ["asset_library_query"]

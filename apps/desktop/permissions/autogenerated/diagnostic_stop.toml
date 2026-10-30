@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-diagnostic-stop"
+description = "Enables the diagnostic_stop command without any pre-configured scope."
+commands.allow = ["diagnostic_stop"]
+
+[[permission]]
+identifier = "deny-diagnostic-stop"
+description = "Denies the diagnostic_stop command without any pre-configured scope."
+commands.deny = ["diagnostic_stop"]

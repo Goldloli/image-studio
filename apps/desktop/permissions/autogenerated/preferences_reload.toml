@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-preferences-reload"
+description = "Enables the preferences_reload command without any pre-configured scope."
+commands.allow = ["preferences_reload"]
+
+[[permission]]
+identifier = "deny-preferences-reload"
+description = "Denies the preferences_reload command without any pre-configured scope."
+commands.deny = ["preferences_reload"]

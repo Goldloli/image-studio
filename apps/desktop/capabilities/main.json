@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-window",
+  "description": "Only the local main window can query status or use explicitly enabled diagnostics.",
+  "windows": ["main"],
+  "permissions": [
+    "core:window:allow-start-dragging", "allow-workspace-status", "allow-diagnostic-enable",
+    "allow-diagnostic-start", "allow-diagnostic-stop", "allow-diagnostic-snapshot", "allow-diagnostic-viewport",
+    "core:event:allow-listen", "core:event:allow-unlisten",
+    "allow-studio-snapshot", "allow-model-catalog", "allow-feature-catalog", "allow-preferences-snapshot", "allow-preferences-reload", "allow-preferences-save", "allow-creation-defaults-save", "allow-settings-snapshot", "allow-storage-open",
+    "allow-model-install", "allow-model-cancel", "allow-draft-save", "allow-draft-create",
+    "allow-conversation-list", "allow-conversation-create", "allow-conversation-apply-model", "allow-conversation-select", "allow-conversation-rename",
+    "allow-conversation-history", "allow-conversation-turn-detail", "allow-conversation-send", "allow-conversation-cancel-turn", "allow-workspace-select",
+    "allow-generation-submit", "allow-generation-cancel", "allow-generation-retry", "allow-task-list", "allow-asset-library-query", "allow-asset-library-item", "allow-task-center-query", "allow-task-center-detail", "allow-asset-export", "allow-app-close"
+  ]
+}
