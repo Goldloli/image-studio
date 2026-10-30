@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "case_id": "S02",
+  "status": "passed",
+  "evidence_kind": "native_ui",
+  "data_root": "target/model-usability-no-model-20261031",
+  "network_denied": true,
+  "model_installed": false,
+  "runtime_installed": false,
+  "worker_started": false,
+  "ui_state": "Z-Image Turbo · 未就绪；发送并生成 disabled；示例仍显示为非本机生成",
+  "observations": "使用禁网离线外壳与新隔离根启动；embedded React 页面正常完成，模型页/会话显示未就绪，未启动 inference-supervisor 或 Python worker。",
+  "evidence_paths": [
+    "verification/model-usability-20261031/native-offline-no-model.png",
+    "verification/model-usability-offline-startup.json",
+    "target/model-usability-offline-access-v6/offline-app-receipt.json"
+  ]
+}

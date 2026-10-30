@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "case_id": "I01",
+  "status": "blocked",
+  "evidence_kind": "real_execution",
+  "attempted_at": "2026-10-31T00:12:00+08:00",
+  "from_empty_cache": true,
+  "from_uninstalled_default_target": true,
+  "official_source": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+  "ui_result": "网络中断：text_encoder/config.json：error sending request",
+  "retry_result": "再次准备安装后在 text_encoder/config.json 处停止；缓存约 13 MB，模型未激活。",
+  "control_probe": {
+    "command": "curl -L --max-time 20 https://huggingface.co/Tongyi-MAI/Z-Image-Turbo/resolve/f332072aa78be7aecdf3ee76d5c247082da564a6/text_encoder/config.json",
+    "exit_code": 28,
+    "http_code": 0,
+    "bytes": 0,
+    "error": "Connection timed out after 20002 milliseconds"
+  },
+  "limitation": "没有真实联网冷下载证据。后续默认安装改为复用完整校验缓存，不能计入 I01。",
+  "evidence_paths": [
+    "verification/model-usability-20261031/native-model-not-installed.png"
+  ]
+}

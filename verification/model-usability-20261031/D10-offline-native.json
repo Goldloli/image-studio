@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "case_id": "D10",
+  "status": "passed",
+  "evidence_kind": "native_ui",
+  "data_root": "/Users/gejiawei/Library/Application Support/ImageStudio",
+  "app": {
+    "source": "target/dev/Image Studio.app",
+    "offline_wrapper": "target/model-usability-offline-access-v6/Image Studio Offline.app",
+    "bundle_identifier": "local.image-studio.foundation.dev",
+    "injection_library": "target/model-usability-offline-access-v6/Image Studio Offline.app/Contents/MacOS/offline-sandbox.dylib",
+    "injection_library_sha256": "d8964c1e911b251e5191367a4f49f8421577963180481291e947e093bea1981f",
+    "network_profile": "(version 1) (allow default) (deny network*)"
+  },
+  "process_tree": [
+    {
+      "pid": 86254,
+      "role": "native_app",
+      "parent_pid": 1
+    },
+    {
+      "pid": 86325,
+      "role": "inference_supervisor",
+      "parent_pid": 86254
+    },
+    {
+      "pid": 86326,
+      "role": "python_worker",
+      "parent_pid": 86325
+    }
+  ],
+  "generation": {
+    "job_id": "job-f8c6b9e10571417d9541078637206f82",
+    "attempt_id": "attempt-e33249d8dfda4a1bb312fc0f62e8c148",
+    "asset_id": "asset-3213c8e9251a45aabb4a2756428d4dff",
+    "width": 1024,
+    "height": 768,
+    "seed": 20261031,
+    "byte_count": 1411282,
+    "sha256": "f7d83b3c9302921e1951b3e04000b4916ef1d560bda87dbcadd8c2cf456ba90c"
+  },
+  "observations": "sandbox_init 在 app 构造函数中先于应用启动执行，随后宿主、原生监督和 Python worker 构成继承受限的进程树。UI 显示真实采样并完成图片，正式 Job/Attempt 和 AssetRef 均成功。",
+  "evidence_paths": [
+    "verification/model-usability-20261031/native-offline-sampling.png",
+    "verification/model-usability-20261031/native-offline-complete.png",
+    "target/model-usability-offline-access-v6/offline-app-receipt.json"
+  ]
+}

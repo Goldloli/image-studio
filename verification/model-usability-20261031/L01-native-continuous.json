@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "case_id": "L01",
+  "status": "passed",
+  "evidence_kind": "native_ui",
+  "conversation": "日常验收",
+  "jobs": [
+    {
+      "job_id": "job-a286101077784ec6b3b9f799f846740a",
+      "attempt_id": "attempt-2d8ef8b9c0834463816c08954525f450",
+      "asset_id": "asset-a7a33ed6ebcf47bda9e91772f7053a41",
+      "width": 1024,
+      "height": 1024,
+      "seed": 1788438538,
+      "sha256": "bd6bc000168be6bf0995439925fb9f6ff4aac9de926ae670137c688fac914973"
+    },
+    {
+      "job_id": "job-9f5e1919a3874333baff3b6e52a04f6c",
+      "attempt_id": "attempt-16ac22935738432db988599ff92447ff",
+      "asset_id": "asset-5cc4d5658b2b41da8ea81b6d0dfcf85b",
+      "width": 1024,
+      "height": 768,
+      "seed": 2097478994,
+      "sha256": "cd4ebd8c18b3c2aaa0f6455a022b3ea3a7e6ece53c47241eb6b487a806402d84"
+    },
+    {
+      "job_id": "job-c9c0dfaf3f584cb88196cd70602e85a5",
+      "attempt_id": "attempt-eb73f387e8bf407f90b07cc2725b26f3",
+      "asset_id": "asset-a014ed65ecea43208546a06cb48627c4",
+      "width": 768,
+      "height": 1024,
+      "seed": 374621641,
+      "sha256": "502892b13f988cfcc41e1b5f5321278287a2254c600a8253a7b99544cbf13643"
+    }
+  ],
+  "observations": "三个请求在同一原生“日常验收”会话内逐个等待前一轮完成后发送；数据库与 UI 均为三个独立 Job、三个独立成功 Attempt 和三个正式 AssetRef，没有覆盖旧图或隐式并行队列。",
+  "evidence_paths": [
+    "verification/model-usability-20261031/native-daily-three-rounds.png"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "case_id": "L03",
+  "status": "failed",
+  "evidence_kind": "native_ui",
+  "jobs_before": 5,
+  "jobs_after": 5,
+  "attempts_before": 5,
+  "attempts_after": 5,
+  "ui_result": "本地轮次进入“已取消”，没有创建持久 Job 或 Attempt",
+  "observations": "输入有效提示词后快速双击“发送并生成”。首击后按钮立即变为“停止”，第二击命中了停止逻辑，提交在持久化前被取消。没有重复 Job，但一个明确的用户发送意图也没有形成 Job，因此原生 L03 不通过。",
+  "contract_checks": {
+    "duplicate_submission_busy_gate_and_retry_preserve_immutable_history": "passed",
+    "frontend_tests": "23 passed"
+  },
+  "bug": "image-studio-bp9",
+  "evidence_paths": [
+    "verification/model-usability-20261031/native-rapid-double-click-cancelled.png",
+    "target/model-usability-model-20261030/logs/L03-idempotency-contract.log",
+    "target/model-usability-model-20261030/logs/L03-frontend-contract.log"
+  ]
+}
