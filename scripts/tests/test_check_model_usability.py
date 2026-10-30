@@ -50,6 +50,19 @@ class SummaryTests(unittest.TestCase):
         summary = module.summarize([self.result("passed"), self.result("passed", "C02")])
         self.assertEqual(summary["overall"], "passed")
 
+    def test_generation_pass_requires_quality_review(self) -> None:
+        summary = module.summarize([self.result("passed", "G01")])
+        gated = module.apply_quality_gate(summary, ["G01"], None)
+        self.assertEqual(gated["overall"], "incomplete")
+
+    def test_passed_quality_review_preserves_generation_pass(self) -> None:
+        summary = module.summarize([self.result("passed", "G01")])
+        review = {
+            "status": "passed",
+            "meets_quality_bar": True,
+        }
+        self.assertEqual(module.apply_quality_gate(summary, ["G01"], review)["overall"], "passed")
+
 
 class DailyEvidenceTests(unittest.TestCase):
     def test_missing_native_manifest_is_not_a_pass(self) -> None:
@@ -87,6 +100,22 @@ class DailyEvidenceTests(unittest.TestCase):
         result = module.daily_case("D01", manifest, None)
         self.assertEqual(result.status, "failed")
         self.assertIn("evidence_kind", result.reason)
+
+    def test_quality_review_requires_all_generation_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "quality.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "status": "passed",
+                        "meets_quality_bar": True,
+                        "cases": {"G01": {"status": "passed"}},
+                    }
+                )
+            )
+            with self.assertRaisesRegex(ValueError, "G02"):
+                module.read_quality_review(path)
 
 
 class CatalogContractTests(unittest.TestCase):

@@ -2,6 +2,7 @@
   "schema_version": 1,
   "reviewed_at": "2026-10-30T18:25:16Z",
   "reviewer": "Codex visual reviewer under the user's acceptance-run authorization",
+  "status": "passed",
   "contact_sheet": "verification/model-usability-20261031/real-generation-contact-sheet.jpg",
   "meets_quality_bar": true,
   "summary": "All six P0 samples are complete, decodable, visually coherent images with the required primary subjects. There are no black, blank, corrupted, or unsafe outputs. Minor prompt-fidelity deviations are recorded below but do not invalidate the model capability baseline.",

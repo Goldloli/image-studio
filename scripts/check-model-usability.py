@@ -278,6 +278,7 @@ PROFILE_CASES = {
     ],
     "daily": [f"D{index:02}" for index in range(1, 11)] + ["S01"],
 }
+QUALITY_CASES = {f"G{index:02}" for index in range(1, 7)}
 
 
 @dataclass
@@ -2116,11 +2117,17 @@ def run_model_case(
     install_mode: str,
 ) -> CaseResult:
     recorded = {
-        "I01": ROOT / "verification/model-usability-20261031/I01-network-install-blocked.json",
         "L01": ROOT / "verification/model-usability-20261031/L01-native-continuous.json",
         "L03": ROOT / "verification/model-usability-20261031/L03-native-rapid-click-failed.json",
         "S02": ROOT / "verification/model-usability-20261031/S02-offline-no-model.json",
     }
+    if case_id == "I01":
+        passed = ROOT / "verification/model-usability-20261031/I01-network-install-passed.json"
+        blocked = ROOT / "verification/model-usability-20261031/I01-network-install-blocked.json"
+        if passed.is_file() or not blocked.is_file():
+            recorded["I01"] = passed
+        else:
+            recorded["I01"] = blocked
     if case_id in recorded and recorded[case_id].is_file():
         source = recorded[case_id]
         try:
@@ -2186,6 +2193,51 @@ def read_daily_manifest(path: Path) -> dict[str, Any]:
     if not isinstance(value.get("cases"), dict):
         raise ValueError("daily evidence manifest requires a cases object")
     return value
+
+
+def read_quality_review(path: Path) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text())
+    except OSError as error:
+        raise ValueError(f"quality review cannot be read: {error}") from error
+    except ValueError as error:
+        raise ValueError(f"quality review is not valid JSON: {error}") from error
+    if value.get("schema_version") != 1:
+        raise ValueError("quality review schema_version must be 1")
+    if value.get("status") not in {"passed", "failed", "incomplete"}:
+        raise ValueError("quality review status must be passed, failed, or incomplete")
+    if not isinstance(value.get("meets_quality_bar"), bool):
+        raise ValueError("quality review requires a boolean meets_quality_bar")
+    cases = value.get("cases")
+    if not isinstance(cases, dict):
+        raise ValueError("quality review requires a cases object")
+    missing = sorted(QUALITY_CASES - set(cases))
+    if missing:
+        raise ValueError("quality review is missing cases: " + ", ".join(missing))
+    for case_id in sorted(QUALITY_CASES):
+        review = cases.get(case_id)
+        if not isinstance(review, dict) or review.get("status") not in VALID_STATES:
+            raise ValueError(f"quality review case {case_id} has an invalid status")
+    if value["status"] == "passed" and not value["meets_quality_bar"]:
+        raise ValueError("a passed quality review must meet the quality bar")
+    return value
+
+
+def apply_quality_gate(
+    summary: dict[str, Any],
+    selected: Iterable[str],
+    review: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if not QUALITY_CASES.intersection(selected):
+        return summary
+    gated = {**summary}
+    if review is None:
+        gated["overall"] = "incomplete"
+    elif review["status"] == "failed" or not review["meets_quality_bar"]:
+        gated["overall"] = "failed"
+    elif review["status"] != "passed":
+        gated["overall"] = "incomplete"
+    return gated
 
 
 def daily_case(
@@ -2343,6 +2395,10 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         "--daily-evidence",
         help="schema-v1 JSON manifest containing native daily case evidence",
     )
+    parser.add_argument(
+        "--quality-review",
+        help="schema-v1 JSON visual review for G01-G06",
+    )
     return parser.parse_args(argv)
 
 
@@ -2365,6 +2421,9 @@ def run(argv: Iterable[str] | None = None) -> int:
         return 3
     if args.install_mode != "none" and args.profile != "model":
         print("error: --install-mode is only valid with the model profile", file=sys.stderr)
+        return 3
+    if args.quality_review and args.profile != "model":
+        print("error: --quality-review is only valid with the model profile", file=sys.stderr)
         return 3
     if args.profile == "model" and args.install_mode == "none" and data_root and not data_root.exists():
         print("error: model profile with no install mode requires an existing isolated root", file=sys.stderr)
@@ -2438,6 +2497,31 @@ def run(argv: Iterable[str] | None = None) -> int:
 
     ending_root = root_snapshot(data_root if data_root else DEFAULT_DATA_ROOT)
     summary = summarize(results)
+    quality_review = None
+    if args.quality_review:
+        quality_path = Path(args.quality_review).expanduser().resolve()
+        try:
+            quality_review = read_quality_review(quality_path)
+        except ValueError as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 3
+    summary = apply_quality_gate(summary, selected, quality_review)
+    human_review = {
+        "status": "not_run",
+        "reviewer": None,
+        "meets_quality_bar": None,
+        "notes": "Behavioral reports do not replace visual quality review.",
+    }
+    if quality_review is not None:
+        human_review = {
+            "status": quality_review["status"],
+            "reviewer": quality_review.get("reviewer"),
+            "reviewed_at": quality_review.get("reviewed_at"),
+            "meets_quality_bar": quality_review["meets_quality_bar"],
+            "notes": quality_review.get("summary"),
+            "evidence": quality_review.get("contact_sheet"),
+            "cases": quality_review["cases"],
+        }
     report = {
         "schema_version": REPORT_SCHEMA_VERSION,
         "run_id": run_id,
@@ -2465,12 +2549,7 @@ def run(argv: Iterable[str] | None = None) -> int:
         },
         "cases": [result.as_dict(CASES[result.case_id]) for result in results],
         "summary": summary,
-        "human_review": {
-            "status": "not_run",
-            "reviewer": None,
-            "meets_quality_bar": None,
-            "notes": "Behavioral reports do not replace visual quality review.",
-        },
+        "human_review": human_review,
     }
     json_path = report_dir / f"{args.profile}-model-usability-{run_id}.json"
     markdown_path = report_dir / f"{args.profile}-model-usability-{run_id}.md"
