@@ -1,0 +1,143 @@
+{
+  "source": "icon-reference.png",
+  "sourceSha256": "f67ff9721c85c360d4ba4f287403cc3d865e1da74b92c632d32ebd3e54d79aac",
+  "macMaster": "app-icon-1024.png",
+  "uiVariant": "app-icon-ui-512.png",
+  "sourceFormat": {
+    "width": 1254,
+    "height": 1254,
+    "bitDepth": 8,
+    "colorType": "RGBA"
+  },
+  "uiCrop": {
+    "source": "icon-reference.png",
+    "width": 1040,
+    "height": 1040,
+    "alignment": "center",
+    "outputSize": 512
+  },
+  "generator": {
+    "node": "v24.12.0",
+    "macOS": "27.0.1",
+    "tools": [
+      "sips",
+      "iconutil"
+    ]
+  },
+  "macSizes": [
+    {
+      "size": 16,
+      "name": "icon_16x16.png",
+      "sha256": "50383a048577032a30313e810f446f412ef282931050737375a3ea8be7c9f99f",
+      "icnsExtractedSha256": "4ccdb195f3a6249e67f661c463b1352bc92f41d20727acaf6e0a147534aca6c2"
+    },
+    {
+      "size": 32,
+      "name": "icon_16x16@2x.png",
+      "sha256": "5270b5b8f1887dbbd47295831e6f26fe9b737e0cb12e5e00bb513c3184dd0b06",
+      "icnsExtractedSha256": "49ad4b1568def66efbd7fff1065226398087512bd3826bf2db9eb1b36ada7adc"
+    },
+    {
+      "size": 32,
+      "name": "icon_32x32.png",
+      "sha256": "5270b5b8f1887dbbd47295831e6f26fe9b737e0cb12e5e00bb513c3184dd0b06",
+      "icnsExtractedSha256": "320405c50e0e5129cd9a7c9b94b576893bc903a06cd025457ed86f32e06c1205"
+    },
+    {
+      "size": 64,
+      "name": "icon_32x32@2x.png",
+      "sha256": "b1b65ce78d92838e506be5d513f9576118ae112e51d16bd0e6d9821734865298",
+      "icnsExtractedSha256": "885dc0c238f2b7df85b7efb22ee41e007f24d50bc917d0905159681c95206fa4"
+    },
+    {
+      "size": 128,
+      "name": "icon_128x128.png",
+      "sha256": "15b376f1e79df847a81744ce24ecfe041e281c4f523f869c7a9442942d6e6ca8",
+      "icnsExtractedSha256": "eb17636fcd90c599a8e950f768c21614f9cdcaa0185246694415f11053183f0d"
+    },
+    {
+      "size": 256,
+      "name": "icon_128x128@2x.png",
+      "sha256": "97c84c27503b9de70e26db00da2d03a7fa70549397f4ba22c31b04bbfc226e8f",
+      "icnsExtractedSha256": "d2a1897ce9ebbde319971dbd344759ac6491f334b21df00f4105b90b535b2dee"
+    },
+    {
+      "size": 256,
+      "name": "icon_256x256.png",
+      "sha256": "97c84c27503b9de70e26db00da2d03a7fa70549397f4ba22c31b04bbfc226e8f",
+      "icnsExtractedSha256": "d2a1897ce9ebbde319971dbd344759ac6491f334b21df00f4105b90b535b2dee"
+    },
+    {
+      "size": 512,
+      "name": "icon_256x256@2x.png",
+      "sha256": "12c0e7ccd93ae72c7be7dbc8374055289fa9191a22b445dac39b366936f5e5c5",
+      "icnsExtractedSha256": "4c283f2a5aedd5d50d4c433ddcafcacbdef86e2fa56dbc7cf51c84639cb7eaff"
+    },
+    {
+      "size": 512,
+      "name": "icon_512x512.png",
+      "sha256": "12c0e7ccd93ae72c7be7dbc8374055289fa9191a22b445dac39b366936f5e5c5",
+      "icnsExtractedSha256": "4c283f2a5aedd5d50d4c433ddcafcacbdef86e2fa56dbc7cf51c84639cb7eaff"
+    },
+    {
+      "size": 1024,
+      "name": "icon_512x512@2x.png",
+      "sha256": "38efae0d5daf73654704a124f45b455745d24244bd860b0d7695852dbf6258ec",
+      "icnsExtractedSha256": "8664a1e31a9af135b336fb7108ef3a709e0fa78f3acf7b07917d26e226b10277"
+    }
+  ],
+  "windowsIcoSizes": [
+    16,
+    24,
+    32,
+    48,
+    64,
+    128,
+    256
+  ],
+  "windowsFrames": [
+    {
+      "size": 16,
+      "sha256": "50383a048577032a30313e810f446f412ef282931050737375a3ea8be7c9f99f"
+    },
+    {
+      "size": 24,
+      "sha256": "cc422aecc39cb2729c1379758a3685587801fbee6c6d2e92845de18d67025894"
+    },
+    {
+      "size": 32,
+      "sha256": "5270b5b8f1887dbbd47295831e6f26fe9b737e0cb12e5e00bb513c3184dd0b06"
+    },
+    {
+      "size": 48,
+      "sha256": "f5ffd3b968a4695b69c84ad3d67d7261a429ad7bec40ab07daa79262b06b7a5b"
+    },
+    {
+      "size": 64,
+      "sha256": "b1b65ce78d92838e506be5d513f9576118ae112e51d16bd0e6d9821734865298"
+    },
+    {
+      "size": 128,
+      "sha256": "15b376f1e79df847a81744ce24ecfe041e281c4f523f869c7a9442942d6e6ca8"
+    },
+    {
+      "size": 256,
+      "sha256": "97c84c27503b9de70e26db00da2d03a7fa70549397f4ba22c31b04bbfc226e8f"
+    }
+  ],
+  "verifiedOn": {
+    "macOS": true,
+    "windows": false
+  },
+  "outputs": {
+    "resources/brand/icon-reference.png": "f67ff9721c85c360d4ba4f287403cc3d865e1da74b92c632d32ebd3e54d79aac",
+    "resources/brand/app-icon-1024.png": "38efae0d5daf73654704a124f45b455745d24244bd860b0d7695852dbf6258ec",
+    "resources/brand/app-icon-ui-512.png": "cbef5a3c1336632e314536744e188303170cd2f673104132dbbed75328cd7ba5",
+    "resources/brand/app-icon-32.png": "5270b5b8f1887dbbd47295831e6f26fe9b737e0cb12e5e00bb513c3184dd0b06",
+    "apps/desktop/icons/icon.png": "38efae0d5daf73654704a124f45b455745d24244bd860b0d7695852dbf6258ec",
+    "apps/desktop/icons/icon.icns": "32c6f5e3b74590edd699ff2652a57f4eee71ca4534f54c358842078d83e24395",
+    "apps/desktop/icons/icon.ico": "2a776dd40c826922e23846d906ba33a79528a142596ed8c1e77c488f177ed4a7",
+    "apps/frontend/public/brand/app-icon-ui.png": "cbef5a3c1336632e314536744e188303170cd2f673104132dbbed75328cd7ba5",
+    "apps/frontend/public/brand/app-icon-32.png": "5270b5b8f1887dbbd47295831e6f26fe9b737e0cb12e5e00bb513c3184dd0b06"
+  }
+}

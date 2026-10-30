@@ -1,0 +1,21 @@
+方案三 · 模型层叠
+Generated: 2026-10-30 (Asia/Shanghai)
+Tool: built-in image_gen
+Image: image-studio-icon-03-model-stack.png
+Size: 1254 x 1254 pixels
+Format: 8-bit RGBA PNG with actual transparent pixels
+Scope: standalone project icon concept
+Original: /Users/gejiawei/.codex/generated_images/01a18c99-651f-7b32-975e-387c4302a7c5/exec-65f1fdb1-e378-47f9-bd27-b5670ce2ffd2.png
+User direction: 应用主要是一个 image 模型使用工具
+
+Final generation prompt:
+
+Use case: logo-brand.
+Asset type: one final desktop application icon for "Image Studio", a practical application for selecting, running, and using image generation models locally. The product is an IMAGE MODEL TOOL.
+Deliver exactly ONE icon on a square canvas, no board, no multiple options, no text labels.
+Design quality: a distinctive native macOS creative software icon, beautifully proportioned, very simple and readable at 32 pixels. Face-on orthographic view. Use large coherent shapes, precise rounded geometry, thoughtful negative space and refined tactile materials. A single rounded-square tile centered in the canvas, approximately 86 percent of canvas width, generous evenly transparent padding. Actual transparent RGBA outside tile, no checkerboard pattern or backdrop, no external shadow. Subtle upper-left light. Crisp edges. No words, letters, numbers, watermark, sparkle stars, magic wands, robot heads, brains, rainbow gradients, excessive ornament, or perspective mockup. Source palette refers to the application's emerald accent #00B96B. Square high resolution, ideally 1024x1024.
+
+Concept: IMAGE MODEL STACK.
+Tile: deep graphite charcoal #202927 with a very subtle satin finish, softly rounded-square silhouette.
+Central emblem: THREE compact overlapping rounded-square model plates, all parallel and facing the viewer, stepped diagonally from upper-left/back to lower-right/front. Overlap tightly enough to read as ONE cohesive layered model stack. The back plate is dark jade, middle plate vivid emerald #00B96B, front plate pale luminous mint ceramic. No perspective.
+The front plate carries a broad emerald mountain-ridge image glyph with a small emerald sun, carefully inset and readable at small size. Make the two rear plates visibly peek out along their top and left edges so selecting among image models is suggested by the stacked modules. Each plate has beautifully softened corners and a slight tactile thickness, restrained edge highlights. Strong minimal silhouette, front model plate optically centered inside the overall stack. Stack occupies approximately 60 percent of tile width. Visually communicate a library of image-generation models and an active model, with a premium practical desktop-tool mood.

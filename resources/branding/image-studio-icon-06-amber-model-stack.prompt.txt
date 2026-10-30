@@ -1,0 +1,18 @@
+暖橙 · 模型层叠
+Generated: 2026-10-30 (Asia/Shanghai)
+Tool: built-in image_gen
+Image: image-studio-icon-06-amber-model-stack.png
+Original generated output: /Users/gejiawei/.codex/generated_images/01a18c99-651f-7b32-975e-387c4302a7c5/exec-f6d1fefe-bdf3-453f-9d61-957122ae76e9.png
+Edit target: /Users/gejiawei/Desktop/ai_code/image-studio/resources/branding/image-studio-icon-03-model-stack.png
+Background: transparent RGBA
+User direction: 应用主要是 image 模型使用工具；用户不喜欢绿色。
+Scope: independent icon color concept, no application integration
+
+Final generation prompt:
+
+Use case: style-transfer.
+Asset type: color revision of an existing desktop app icon for Image Studio, an application for selecting and using image models.
+Input image 1 is the EDIT TARGET. Preserve the exact three overlapping rounded-square model plates, image glyph with sun and mountain on the front plate, overall placement and scale, front-on viewpoint, sophisticated softened depth, and gently rounded dark base tile.
+Change the palette: replace all green and teal with a WARM ORANGE family. Back model plate in burnt orange #9F391C, middle model plate in vibrant orange #EF7637, front plate in warm pale cream #FFF0DB with a vivid orange mountain and sun. Use light apricot highlights and copper-orange shading. The base tile becomes truly neutral dark graphite #242426 with absolutely no green tint. Preserve the three-layer hierarchy.
+Make the result feel like a premium creative model-management tool, coherent and highly readable at small size, warm and confident.
+Carefully clean the silhouette and any tiny specks outside the tile. Genuine transparent RGBA outside the rounded-square icon, preserving even padding. No green, jade, mint, emerald, or teal anywhere, including reflections. No words, letters, watermark, extra decoration, or board. Deliver exactly one finished square icon, ideally 1024x1024 PNG.

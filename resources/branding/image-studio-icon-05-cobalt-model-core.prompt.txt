@@ -1,0 +1,19 @@
+钴蓝 · 图像模型芯片
+Generated: 2026-10-30 (Asia/Shanghai)
+Tool: built-in image_gen
+Image: image-studio-icon-05-cobalt-model-core.png
+Original generated output: /Users/gejiawei/.codex/generated_images/01a18c99-651f-7b32-975e-387c4302a7c5/exec-ebc6cd03-d89e-4a66-87ff-06a1db7b4646.png
+Edit target: /Users/gejiawei/Desktop/ai_code/image-studio/resources/branding/image-studio-icon-02-model-core.png
+Background: transparent RGBA
+User direction: 应用主要是 image 模型使用工具；用户不喜欢绿色。
+Scope: independent icon color concept, no application integration
+
+Final generation prompt:
+
+Use case: style-transfer.
+Asset type: color revision of an existing desktop app icon for Image Studio, an application for running and using image models.
+Input image 1 is the EDIT TARGET. Preserve the existing chip silhouette, short connector tabs, inset image symbol with sun and mountain, warm-white rounded-square tile, front-on composition, relative sizes, layout, smooth sculpted material, lighting direction, and recognizable identity.
+Change the palette: replace ALL green, jade, teal, emerald, and mint colors with rich COBALT BLUE #325BEB, ultramarine #243BB3 shadows, and soft pale blue highlights. The image glyph stays warm white. The external tile stays ivory-white ceramic. This should look like a beautiful thoughtful native desktop model utility: a cobalt-blue image-model chip inside a warm-white tile.
+Maintain the simple large readable shapes, balanced spacing and controlled subtle depth. Carefully clean the tile silhouette and remove any stray flecks around its edge.
+There must be no green tint anywhere, including reflections and the background.
+Keep genuine transparent RGBA padding outside the rounded-square tile, with no outside shadow. No text, watermark, extra objects, or design-board layout. Deliver exactly one finished square icon, ideally 1024x1024 PNG.

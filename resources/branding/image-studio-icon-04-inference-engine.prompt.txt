@@ -1,0 +1,21 @@
+方案四 · 推理引擎
+Generated: 2026-10-30 (Asia/Shanghai)
+Tool: built-in image_gen
+Image: image-studio-icon-04-inference-engine.png
+Size: 1254 x 1254 pixels
+Format: 8-bit RGBA PNG with actual transparent pixels
+Scope: standalone project icon concept
+Original: /Users/gejiawei/.codex/generated_images/01a18c99-651f-7b32-975e-387c4302a7c5/exec-918f2d15-9f0f-43e1-a917-a9888c79148b.png
+User direction: 应用主要是一个 image 模型使用工具
+
+Final generation prompt:
+
+Use case: logo-brand.
+Asset type: one final desktop application icon for "Image Studio", a practical application for selecting, running, and using image generation models locally. The product is an IMAGE MODEL TOOL.
+Deliver exactly ONE icon on a square canvas, no board, no multiple options, no text labels.
+Design quality: a distinctive native macOS creative software icon, beautifully proportioned, very simple and readable at 32 pixels. Face-on orthographic view. Use large coherent shapes, precise rounded geometry, thoughtful negative space and refined tactile materials. A single rounded-square tile centered in the canvas, approximately 86 percent of canvas width, generous evenly transparent padding. Actual transparent RGBA outside tile, no checkerboard pattern or backdrop, no external shadow. Subtle upper-left light. Crisp edges. No words, letters, numbers, watermark, sparkle stars, magic wands, robot heads, brains, rainbow gradients, excessive ornament, or perspective mockup. Source palette refers to the application's emerald accent #00B96B. Square high resolution, ideally 1024x1024.
+
+Concept: IMAGE INFERENCE ENGINE.
+Tile: vibrant emerald green #00B96B, subtly darkening toward jade at the lower edge, minimal satin-enamel material.
+Central emblem: ONE large warm-ivory circular engine ring, bold and geometrically precise, enclosing a rounded-square image window in dark jade. The ring is broken in ONE place near the upper-right by a short crisp forward-pointing rounded triangular segment integrated into the ring, suggesting running a model / inference in motion. Do not use circular-arrow icons pasted on; make it a custom unified sculpted monogram-like machine symbol.
+Inside the jade image window, show just a tiny ivory sun and a bold ivory triangular mountain silhouette. This single central image-window module should feel like the output core driven by the surrounding inference engine. The combined ring and window form ONE readable cohesive mark. Ring is approximately 61 percent of tile width, with generous breathing room. Thick, minimal geometry, ivory ceramic surface with an almost imperceptible bevel, precise controlled depth, elegantly functional. No gears, little teeth, speed streaks, extra floating parts, or fine details.

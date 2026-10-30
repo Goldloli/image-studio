@@ -1,0 +1,18 @@
+石墨银 · 推理引擎
+Generated: 2026-10-30 (Asia/Shanghai)
+Tool: built-in image_gen
+Image: image-studio-icon-07-graphite-inference-engine.png
+Original generated output: /Users/gejiawei/.codex/generated_images/01a18c99-651f-7b32-975e-387c4302a7c5/exec-41e975e8-b2b6-4b06-b5db-40a5fbf67ef2.png
+Edit target: /Users/gejiawei/Desktop/ai_code/image-studio/resources/branding/image-studio-icon-04-inference-engine.png
+Background: transparent RGBA
+User direction: 应用主要是 image 模型使用工具；用户不喜欢绿色。
+Scope: independent icon color concept, no application integration
+
+Final generation prompt:
+
+Use case: style-transfer.
+Asset type: color and finish revision of an existing desktop app icon for Image Studio, an application for running image-generation models.
+Input image 1 is the EDIT TARGET. Preserve the exact cohesive circular inference ring and integrated triangular forward segment, the rounded-square inner image window with sun and mountain, the layout, relative proportions, softly rounded outer tile, orthographic composition, and silhouette.
+Change the palette to elegant GRAPHITE AND SILVER, almost monochrome. Replace the green outer tile with softly lit neutral graphite #25262B. Replace the dark green inner image window with deep ink charcoal #101116. The circular ring, forward segment, sun and mountain become beautifully softly lit satin SILVER #DBDEE5, with pearl-white highlights and medium neutral grey sides. Restrained brushed-aluminium character, smooth refined surface, avoiding mirror reflections. A slight cool blue-grey reflection is acceptable; no colored accents.
+All former greens must be gone: absolutely no green, teal, jade, mint or emerald hue, even in shadows. This should feel like a precise professional local model runner, beautifully simple and recognizable.
+Preserve gently sculpted depth and small-size legibility. Clean crisp outer edges with no stray fragments. Genuine transparent RGBA padding outside the rounded-square tile, no external shadow. No text, letters, watermark, extra objects, or presentation board. Deliver exactly one finished square icon, ideally 1024x1024 PNG.

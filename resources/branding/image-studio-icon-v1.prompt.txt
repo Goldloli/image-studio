@@ -1,0 +1,21 @@
+Image Studio icon v1
+Generated: 2026-10-30 (Asia/Shanghai)
+Tool: built-in image_gen
+Background: transparent
+Scope: standalone visual asset; no application integration
+Original: /Users/gejiawei/.codex/generated_images/01a18c99-651f-7b32-975e-387c4302a7c5/exec-185183a3-0390-4d8c-b9c1-ad9a09064359.png
+
+Final generation prompt:
+
+Use case: logo-brand.
+Asset type: a finished macOS desktop application icon for Image Studio, a local AI image creation workspace. Generate ONE single icon, no presentation board.
+
+Primary request: evolve the project's existing emerald-green image-frame symbol into a polished, memorable native creative-tool icon. Project accent is #00B96B; existing mark is a white rectangular photo frame with a small sun and angular mountain inside a green rounded-square tile.
+
+Design: one generously rounded square tile in rich emerald green, centered square-on, with a large warm-white picture-frame emblem inside. Give the tile subtle softly bevelled edges and restrained tactile satin-enamel depth, precise premium industrial design. The emblem is a strong, simple white picture frame, a small round sun in its upper-left interior, and a bold folded mountain ridge rising across the lower half. The mountain can have a single translucent mint facet to suggest image creation and light, while maintaining a clear, cohesive silhouette. A small purposeful break at the frame's upper-right edge may introduce a tiny single raised mint square, as if a pixel is becoming an image; keep this detail integrated and understated. All shapes thick enough to remain immediately readable at 32 pixels.
+
+Composition: exactly one large icon, face-on orthographic view, no tilt, no perspective, tile occupying about 88 percent of the square canvas with equal transparent padding. Mark centered optically with generous breathing room, approximately 62 percent of tile width. Consistent corner radii, beautifully balanced spacing.
+Lighting: very soft upper-left studio illumination, subtle material highlights only. High contrast and crisp clean edges.
+Palette: emerald #00B96B, slightly darker jade sides, warm white emblem, tiny pale mint accent. Green must remain vivid and fresh, never neon.
+Background: genuinely transparent RGBA outside the rounded-square tile. The tile itself is solid, no white scene or background. No cast shadow outside the icon.
+Constraints: no words, no letters, no numbers, no watermark, no logo of another brand, no sparkle/star symbol, no magic wand, no brush, no camera lens, no rainbow gradient, no metallic chrome, no floating decorations, no UI screenshot. Deliver a production-quality square PNG app icon at high resolution, ideally 1024 by 1024 pixels.
