@@ -2,6 +2,17 @@
 
 This file provides instructions and context for AI coding agents working on this project.
 
+## Git 提交策略（强制）
+
+用户已明确授权本项目进行本地提交，并要求“尽量多 commit”。当用户已授权实施某项工作、且没有明确禁止提交时，代理应默认持续做小步本地提交，不需要为每次 commit 单独询问；该授权不包含 push、pull 或远程同步。
+
+- **小步提交**：把工作拆成可独立解释和验证的最小逻辑单元。每完成一个单元就立即 commit，不要攒到会话结束或整个功能完成后一次性提交。
+- **一提交一主题**：一个 commit 只解决一件事。实现、测试/验收证据、规格文档、纯格式化、资源更新和 Agent 规则在可以安全独立时分别提交。
+- **保持可审查**：按依赖顺序提交检查点；提交前运行与该单元相关的最小测试、lint 或构建，任务结束前再跑完整质量门。禁止把已知失败或无关改动伪装成已完成提交。
+- **不混入无关工作**：使用精确路径暂存，提交前检查 `git diff --cached`；其他代理、用户或未确认 OpenSpec change 的改动不得顺手带入。
+- **提交信息**：使用 Conventional Commits，例如 `feat:`、`fix:`、`test:`、`docs:`、`refactor:`、`chore:`；标题写结果，正文在需要时说明原因和验证。
+- **不做远程操作**：本地 commit 可直接执行；push、pull、Dolt 远程同步仍须用户明确授权。当前仓库无 remote。
+
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:1105d646 -->
 ## Beads Issue Tracker
 
