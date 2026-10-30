@@ -1,0 +1,36 @@
+{
+  "kind": "approved-product-icon-reference",
+  "approved_by_user_on": "2026-10-30",
+  "source": "user-provided clipboard image from another Codex session",
+  "path": "approved-black-icon-reference.png",
+  "bytes": 1508889,
+  "width": 1254,
+  "height": 1254,
+  "color_mode": "RGBA",
+  "outer_background": "alpha-transparent",
+  "sha256": "f67ff9721c85c360d4ba4f287403cc3d865e1da74b92c632d32ebd3e54d79aac",
+  "visual_intent": [
+    "dark graphite rounded-square base",
+    "burnt orange, vivid orange, and cream rounded image cards stacked with depth",
+    "orange sun and two orange mountain forms",
+    "no text inside the symbol"
+  ],
+  "usage_scope": [
+    "macOS application icon",
+    "workspace left-rail brand mark",
+    "about-page brand mark"
+  ],
+  "not_the_scope": [
+    "functional navigation icons",
+    "generated images",
+    "model capability badges"
+  ],
+  "implementation_status": "completed",
+  "implementation_approval": "User confirmed implementation with 下一步吧 and 继续.",
+  "platform_acceptance": {
+    "macOS": "passed_tools_and_user_observation",
+    "windows": "not_gui_verified",
+    "evidence": "verification/app-icon-branding-acceptance.json"
+  },
+  "research_is_not_approval": true
+}

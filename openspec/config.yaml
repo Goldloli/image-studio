@@ -1,5 +1,29 @@
 schema: spec-driven
 
+context: |
+  项目名 Image Studio，面向本地图片 AI 创作工作台；使用中文沟通和编写说明。
+  已确认方向：Rust 产品主体、macOS 首发、随后 Windows，模型分批添加并长期扩大覆盖。
+  doc/ 是研究资料，包含候选路线和远期设想；不是已批准规格，也不构成模型实机验证。
+  正式行为以 openspec/specs/ 和用户已明确批准的 change 为准。
+  每次新增或修改功能先完成 proposal、spec delta、design、tasks，并展示后等待用户确认。
+  文档齐全、CLI 显示可 apply 或校验通过均不等于用户批准，不得据此自动开始实现。
+  Beads 管理实际任务与持久交接；OpenSpec tasks 仅映射该 change 的实现及验收范围。
+  遵守 AGENTS.md 的 Git 权限：未获明确授权不提交或推送；当前无 remote，不做远程同步。
+
+rules:
+  proposal:
+    - 区分用户已确认前提与本提案待批准选择，并明确本阶段可独立验收的范围。
+    - 研究中的未来模型、平台和场景不得自动成为当前交付承诺。
+  specs:
+    - 只约束本 change 可验证的行为或对调用方可见的数据契约。
+    - 每项要求提供可检查场景；框架、目录和内部实现选择写入 design。
+    - 区分诊断或 fixture 通过与真实模型、设备、安装和恢复验证。
+  design:
+    - 模块先行，以实际构建或运行边界决定 crate；说明依赖方向、备选方案和取舍。
+    - 版本、硬件、性能和兼容性只记录已知证据，不虚构实测结论。
+  tasks:
+    - 按依赖顺序列出实现步骤，每项附完成验证；未获用户批准前不得执行。
+
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.

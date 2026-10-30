@@ -1,0 +1,113 @@
+{
+  "repository": "Tongyi-MAI/Z-Image-Turbo",
+  "revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+  "metadata_url": "https://huggingface.co/api/models/Tongyi-MAI/Z-Image-Turbo/revision/f332072aa78be7aecdf3ee76d5c247082da564a6?blobs=true",
+  "required_path_selection_basis": "MFLUX 0.24.0 ZImageWeightDefinition; planning evidence only, not executable download manifest",
+  "files": [
+    {
+      "path": "text_encoder/config.json",
+      "bytes": 726,
+      "blob_id": "e49eccdc32f36da9c09cfa0e737084f9e0105e5e",
+      "lfs_sha256": null
+    },
+    {
+      "path": "text_encoder/generation_config.json",
+      "bytes": 239,
+      "blob_id": "20a8a9156fc8c3f25295ca067f61fdf120d517c5",
+      "lfs_sha256": null
+    },
+    {
+      "path": "text_encoder/model-00001-of-00003.safetensors",
+      "bytes": 3957900840,
+      "blob_id": "546625baab99f4de2b975842100c119fec83919f",
+      "lfs_sha256": "328a91d3122359d5547f9d79521205bc0a46e1f79a792dfe650e99fc2d651223"
+    },
+    {
+      "path": "text_encoder/model-00002-of-00003.safetensors",
+      "bytes": 3987450520,
+      "blob_id": "3e4d29aad0be87c083e078b50765cd056e793c51",
+      "lfs_sha256": "6cd087b316306a68c562436b5492edbcf6e16c6dba3a1308279caa5a58e21ca5"
+    },
+    {
+      "path": "text_encoder/model-00003-of-00003.safetensors",
+      "bytes": 99630640,
+      "blob_id": "8a83739c1b3794759b2565002478cf8397b4a09d",
+      "lfs_sha256": "7ca841ee75b9c61267c0c6148fd8d096d3d21b6d3e161256a9b878154f91fc52"
+    },
+    {
+      "path": "text_encoder/model.safetensors.index.json",
+      "bytes": 32819,
+      "blob_id": "95c0a0059df040d75dc6c396b174382cf61d2f91",
+      "lfs_sha256": null
+    },
+    {
+      "path": "tokenizer/merges.txt",
+      "bytes": 1671853,
+      "blob_id": "31349551d90c7606f325fe0f11bbb8bd5fa0d7c7",
+      "lfs_sha256": null
+    },
+    {
+      "path": "tokenizer/tokenizer.json",
+      "bytes": 11422654,
+      "blob_id": "cd71f61a15a522601badb3dc960d800d9cb3766c",
+      "lfs_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+    },
+    {
+      "path": "tokenizer/tokenizer_config.json",
+      "bytes": 9732,
+      "blob_id": "417d038a63fa3de29cfde265caedae14d1a58d92",
+      "lfs_sha256": null
+    },
+    {
+      "path": "tokenizer/vocab.json",
+      "bytes": 2776833,
+      "blob_id": "4783fe10ac3adce15ac8f358ef5462739852c569",
+      "lfs_sha256": null
+    },
+    {
+      "path": "transformer/config.json",
+      "bytes": 473,
+      "blob_id": "c579190a5e03d602a2fd9647221c9d0d9441f150",
+      "lfs_sha256": null
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00001-of-00003.safetensors",
+      "bytes": 9973693184,
+      "blob_id": "e8bfa5eb70da3bc562b36e82cf1c66d6a967621b",
+      "lfs_sha256": "95facd593e2549e8252acb571c653d57f7ddb7f1060d4e81712f152555a88804"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00002-of-00003.safetensors",
+      "bytes": 9973714824,
+      "blob_id": "4da2251fcbdcf3c20409a920e9a11dc035452459",
+      "lfs_sha256": "a4bbe43ee184a1fb5af4b412d27555f532893bdc3165b1149e304ed82b5d7015"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model-00003-of-00003.safetensors",
+      "bytes": 4672282880,
+      "blob_id": "2660af9e9cae7e6b8d7b5d26c9bded9fc1bdd8cb",
+      "lfs_sha256": "aba4e37a590e63210878160a718d916d80398f4e1f78ab6c9b2b2a00d92769fa"
+    },
+    {
+      "path": "transformer/diffusion_pytorch_model.safetensors.index.json",
+      "bytes": 48969,
+      "blob_id": "a3cadc1ed28e334ef58d4e6bbda107e25168ef47",
+      "lfs_sha256": null
+    },
+    {
+      "path": "vae/config.json",
+      "bytes": 805,
+      "blob_id": "894fa30ac1950cef422189d2d4cef11043c62875",
+      "lfs_sha256": null
+    },
+    {
+      "path": "vae/diffusion_pytorch_model.safetensors",
+      "bytes": 167666902,
+      "blob_id": "3557b83a132d75a1f71bde9963021e667b1a0d2d",
+      "lfs_sha256": "f5b59a26851551b67ae1fe58d32e76486e1e812def4696a4bea97f16604d40a3"
+    }
+  ],
+  "reported_selected_bytes": 32848304893,
+  "weight_bytes_downloaded": false,
+  "license_and_small_file_sha256_inventory": "requires implementation preparation"
+}
