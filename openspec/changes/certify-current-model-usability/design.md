@@ -22,7 +22,7 @@
 | model | 明确隔离根上的安装/真实生成/真实取消恢复 | 显式安装模式才下载；否则只用现有完整安装 |
 | daily | 检查并汇总原生人工/受控 UI 操作的证据记录 | 不自动操纵或重置默认用户库 |
 
-拟定命令形态为 `python3 scripts/check-model-usability.py --profile model --data-root ABSOLUTE_PATH --report-dir ABSOLUTE_PATH`；只有显式 `--install-mode network` 或 `cache` 才调用安装。调用者不得传模型下载 URL、任意 Python 或 shell 命令。此处为待实现接口，当前不能照抄执行。
+验收入口为 `python3 scripts/check-model-usability.py --profile model --data-root ABSOLUTE_PATH --report-dir ABSOLUTE_PATH`；只有显式 `--install-mode network` 或 `cache` 才调用安装。调用者不得传模型下载 URL、任意 Python 或 shell 命令。若宿主系统走显式代理，调用外壳只设置代理环境变量，固定来源、组件身份和安装路径仍由应用清单控制。
 
 `daily` 读取按用例填写的操作记录、截图、Job 与导出核验信息，对缺失项保持 not_run；不能用填写一个布尔值代替实际证据。采用现有原生 UI 操作能力或人工执行均可，记录操作方式。拒绝把浏览器端 Playwright 预览算成原生完成。
 

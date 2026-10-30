@@ -137,7 +137,7 @@ python3 scripts/check-offline-startup.py
 
 会话、发送、进度、迁移和恢复结果见 [会话式生成验收](verification/conversation-generation-results.md)，机器可读记录见 [会话验收数据](verification/conversation-validation.json)。模型目录、设置持久化和窄窗结果见 [模型设置验收](verification/model-catalog-settings-results.md) 与 [机器可读记录](verification/model-catalog-settings-acceptance.json)。功能目录、作品库、任务中心与真实生成联动见 [功能作品任务验收](verification/feature-works-task-results.md) 和 [机器可读记录](verification/feature-works-task-acceptance.json)。原始工作区结果见 [Cherry 工作区验收](verification/cherry-workspace-results.md)，基础框架记录见 [基础框架验收记录](verification/foundation-results.md)、[依赖与版本](verification/dependencies.json) 和 [字体来源及许可](resources/fonts/README.md)。
 
-2026-10-31 的当前模型复认证覆盖 37 个 P0 用例：35 通过、2 环境阻塞，整体仍为未完成。冷网络安装因 Hugging Face 连接超时阻塞，真实 IME 候选需要人工键盘补验。快速双击误取消、作品页首次旧计数和图片查看器重开问题已完成修复并通过原生回归。完整结果见 [模型复认证报告](verification/model-usability-20261031/results.md) 与 [机器可读明细](verification/model-usability-20261031/acceptance.json)，交互修复证据见 [日常生成交互修复验收](verification/daily-generation-interaction-fix-20261031/results.md)。
+2026-10-31 的当前模型复认证覆盖 37 个 P0 用例，结果为 37 通过、0 失败、0 阻塞。空缓存安装经固定 Hugging Face revision 完成组件校验、运行时激活和 M3 Max GPU 探针；原生 SCIM 拼音候选确认与未确认组合门禁通过。快速双击误取消、作品页首次旧计数和图片查看器重开问题也已完成原生回归。完整结果见 [模型复认证报告](verification/model-usability-20261031/results.md)、[机器可读明细](verification/model-usability-20261031/acceptance.json) 与 [质量审阅](verification/model-usability-20261031/quality-review.json)。
 
 ## 规格与研究
 

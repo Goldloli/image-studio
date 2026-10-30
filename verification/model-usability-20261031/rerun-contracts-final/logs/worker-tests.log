@@ -1,0 +1,19 @@
+command=["/opt/homebrew/opt/python@3.15/bin/python3.15", "-m", "unittest", "discover", "-s", "tools/mflux-worker/tests", "-p", "test*.py", "-v"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=0.112
+
+test_cancel_checkpoint_propagates (test_worker.WorkerTests.test_cancel_checkpoint_propagates) ... ok
+test_fixed_api_calls_and_real_callback_stages (test_worker.WorkerTests.test_fixed_api_calls_and_real_callback_stages) ... ok
+test_frame_limit_and_incomplete_frame (test_worker.WorkerTests.test_frame_limit_and_incomplete_frame) ... ok
+test_native_and_python_stdout_do_not_pollute_protocol (test_worker.WorkerTests.test_native_and_python_stdout_do_not_pollute_protocol) ... ok
+test_protocol_success_exits_cleanly_with_control_reader_waiting (test_worker.WorkerTests.test_protocol_success_exits_cleanly_with_control_reader_waiting) ... ok
+test_request_recipe_seed_and_local_paths_fail_closed (test_worker.WorkerTests.test_request_recipe_seed_and_local_paths_fail_closed) ... ok
+test_template_budget_includes_special_tokens_without_truncation (test_worker.WorkerTests.test_template_budget_includes_special_tokens_without_truncation) ... ok
+test_wrong_identity_rejected_before_inference (test_worker.WorkerTests.test_wrong_identity_rejected_before_inference) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.049s
+
+OK

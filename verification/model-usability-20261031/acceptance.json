@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "report_id": "model-usability-2026-10-31-final-r2",
-  "generated_at": "2026-10-30T17:58:36.955543+00:00",
-  "verdict": "incomplete",
+  "report_id": "model-usability-2026-10-31-final-r3",
+  "generated_at": "2026-10-30T19:27:00Z",
+  "verdict": "passed",
   "counts": {
     "total": 37,
-    "passed": 35,
+    "passed": 37,
     "failed": 0,
-    "blocked": 2,
+    "blocked": 0,
     "not_run": 0
   },
   "required_coverage_complete": true,
@@ -18,9 +18,9 @@
     "arch": "arm64"
   },
   "configuration": {
-    "git_head": "394e0f9ccaeaa5ea69a45daa3469f1a0f715f737",
+    "git_head": "02cc5b388c8413b1ebf90419fee842811782996e",
     "working_tree_dirty": true,
-    "case_set_sha256": "ee0b24f69cd9b4d42081e66350a9444b71032d17cd7be7df63b7ed0deb65c6f1",
+    "case_set_sha256": "0b4b5ab595ba481c8719b51f05b68c96b770eb2f1096d9dced34ef4d6c7fa269",
     "app_binary": {
       "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/dev/Image Studio.app/Contents/MacOS/image-studio-desktop",
       "exists": true,
@@ -37,60 +37,20 @@
   },
   "profile_reports": [
     {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/contracts-model-usability-20261030T165309Z-19555c7c.json",
-      "sha256": "7eeb0295d4713b80bcf7b95721f124f4519107e3a2e2c90e6e66798f9b96f64e"
+      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/contracts-model-usability-20261030T192656Z-273b9c82.json",
+      "sha256": "f9f7b01038ad2b0b4911567b10dab1b60cee5d1b511c810a14bd243012f1faa9"
     },
     {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-model-20261030/model-model-usability-20261030T155331Z-9a8b8133.json",
-      "sha256": "68f9a3b77eb0d1a3d832dbb6f59aa86305fe896453afde76aead38d861da5ee9"
+      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-daily-final/daily-model-usability-20261030T191819Z-0b6ea76e.json",
+      "sha256": "3d0f1f300fbd3027a457323071e707a25ddee307f7574c193ed79168949dd05d"
     },
     {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-model-20261030/model-model-usability-20261030T155507Z-69913684.json",
-      "sha256": "612aa982cf9e71f9edabf011c33d5ae40a7e65d1a6aca5bf38203c1bd2be31c6"
+      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-i01-final/model-model-usability-20261030T192332Z-bffc619a.json",
+      "sha256": "de2c514aa322f865c66de3c705213dcd955781528f9450184883c7311ff2308a"
     },
     {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-model-20261030/model-model-usability-20261030T160211Z-1cce48e9.json",
-      "sha256": "df780f8db92af966eb5cc3a51f57621e6e2ea6c5c16d844b2f3136e4c807eb3a"
-    },
-    {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-model-20261030/model-model-usability-20261030T161042Z-8dff5704.json",
-      "sha256": "e7f173d04c46744d668e182005bce9ce03f28b41f521f2297e1fc0795cbd7973"
-    },
-    {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-model-20261030/model-model-usability-20261030T163910Z-65befc15.json",
-      "sha256": "f84eef49cc120f0b3c0338ab589f4743b1af6e98d02ea2617744455e69e3750d"
-    },
-    {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-model-20261030/model-model-usability-20261030T164305Z-85cfcf1c.json",
-      "sha256": "3a6f118afe749926e51b4a99a8866597918b3ad73f61e2bd9c01e602bbdce883"
-    },
-    {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-model-20261030/model-model-usability-20261030T165011Z-09f932e7.json",
-      "sha256": "4c55cb1fbce06c72538fb3990dd75f7304ad7c038a0a89cff8ad8200da681c46"
-    },
-    {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-model-20261030/model-model-usability-20261030T160713Z-4527c98f.json",
-      "sha256": "fd7fc1a1f60fc6270af979deb30b160f5f1b786eaddfe5003ae41d22088e0278"
-    },
-    {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-daily-20261031/daily-model-usability-20261030T164803Z-df62d0a1.json",
-      "sha256": "ca6c8734c6828b9b615a358a0cf9228d05b9afb597993eee9c823e805b19bf18"
-    },
-    {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/I01-network-install-blocked.json",
-      "sha256": "fafa5fd58e23287b75498e0000738a3bbac1fe2ac6e12e686e68c0b14c1e5d8e"
-    },
-    {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/L01-native-continuous.json",
-      "sha256": "396d111bc52cd0f8afa7d18be7a4a792076295fa8e55b2d1172b93f352d35944"
-    },
-    {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/L03-native-rapid-click-failed.json",
-      "sha256": "c3083a90cbc3433f2a55a4e25f29183f73c886f46047eda5d49d1acd135c3787"
-    },
-    {
-      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/S02-offline-no-model.json",
-      "sha256": "e0c2cc8371a299d2e03a2b6dbcdcbbae7f689ba33ddd6f37a6517a18e1e76919"
+      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/quality-review.json",
+      "sha256": "62ead10921f346f7cc2877588b676dd3578540b107e4fa3cb5851edd43e7f614"
     },
     {
       "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/daily-generation-interaction-fix-20261031/fix-acceptance.json",
@@ -101,78 +61,164 @@
     {
       "case_id": "C01",
       "priority": "P0",
+      "profile": "contracts",
+      "description": "toolchain, frontend, Rust, worker and fixed-lock gates",
       "status": "passed",
       "evidence_kind": "contract_fixture",
-      "description": "toolchain, frontend, Rust, worker and fixed-lock gates",
+      "started_at": "2026-10-30T19:26:56.366493+00:00",
+      "finished_at": "2026-10-30T19:27:22.567402+00:00",
       "reason": "all build, test and fixed-lock gates passed",
+      "command": [
+        [
+          "npm",
+          "--prefix",
+          "apps/frontend",
+          "run",
+          "check"
+        ],
+        [
+          "npm",
+          "--prefix",
+          "apps/frontend",
+          "test"
+        ],
+        [
+          "npm",
+          "--prefix",
+          "apps/frontend",
+          "run",
+          "build"
+        ],
+        [
+          "cargo",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        [
+          "cargo",
+          "clippy",
+          "--workspace",
+          "--all-targets",
+          "--locked",
+          "--offline",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        [
+          "cargo",
+          "test",
+          "--workspace",
+          "--locked",
+          "--offline"
+        ],
+        [
+          "cargo",
+          "build",
+          "--workspace",
+          "--examples",
+          "--bins",
+          "--locked",
+          "--offline"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/mflux-worker/tests",
+          "-p",
+          "test*.py",
+          "-v"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "scripts/tests",
+          "-p",
+          "test*.py",
+          "-v"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "scripts/verify-generation-lock.py"
+        ]
+      ],
+      "exit_code": 0,
       "evidence": [
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/frontend-check.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-check.log",
           "exists": true,
-          "sha256": "83e6fdfb1f99392c910c1314df03e82e842e265a868db7a237d5cb537ccf9b8b",
-          "bytes": 208,
+          "sha256": "876410899dde495722d40985a2a763530761087a5495170c499c82f000917420",
+          "bytes": 207,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/frontend-tests.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-tests.log",
           "exists": true,
-          "sha256": "b570d258a91d62d6a835604b3c50ee28af26fac58fb0e1131fa6fd0f70a3a547",
-          "bytes": 418,
+          "sha256": "dff075f8d7a86116c88e7fff76f3d019a4b60d71a8834a2a5396d30b0c4a89a4",
+          "bytes": 417,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/frontend-build.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-build.log",
           "exists": true,
-          "sha256": "d20cef400c1e5b214f3627c5de7e1f8983fb794c1caded64905ad3b2f0948272",
+          "sha256": "61b2369409a7d8274a1de7e00250ef223f7b32dcb1cb00bcd86923a4a3dae705",
           "bytes": 575,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/rust-fmt.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-fmt.log",
           "exists": true,
-          "sha256": "fb0bb18e0d1e7eda843c6d3174bd4763e1c2146625d712cea829897905f98e32",
-          "bytes": 151,
+          "sha256": "a27adf62083802f9f4fc6b7389e9f53d45e31ac3627be4e745232762c74f3b19",
+          "bytes": 150,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/rust-clippy.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-clippy.log",
           "exists": true,
-          "sha256": "aace8075503554490819f966ba0520cf5a742325989a25349c91bcb00ee0d570",
+          "sha256": "f3aa0d354ec975d290705b80c2bbc81c0d1abb6ff9b2fdb0ea1e6a14aba239e6",
           "bytes": 491,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/rust-tests.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-tests.log",
           "exists": true,
-          "sha256": "6c742e4d11739a790f61c206aafd10dd54f1b07e6fc955bcf2359bad3eb05de2",
-          "bytes": 17328,
+          "sha256": "23d7f342dcbca3dded707d114f92680b89468367c966e4ce6161ef74211cc5ba",
+          "bytes": 17327,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/rust-build.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-build.log",
           "exists": true,
-          "sha256": "887ac139c3e7c8f66f77bf4822b3897f63d06fbe2624b4dc23115d140c798879",
+          "sha256": "bd8f82a27b23c2898d8f5a08f0e5f192433283f723191f7de86b519fb1596814",
           "bytes": 364,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/worker-tests.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/worker-tests.log",
           "exists": true,
-          "sha256": "9bf7a0734903b4a80ba313d09243c38194008e93bdbb7d86cd2b770ea26bf009",
+          "sha256": "da9ed441f7592369adefdaec363b43bc3bbc5e7e263c3f49c300d77fac2187d6",
           "bytes": 1405,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/acceptance-tool-tests.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/acceptance-tool-tests.log",
           "exists": true,
-          "sha256": "3e84a0a488f618f1ff7d8e1cdaf2078db54725d3d1b26187b6f61adcfedfc557",
-          "bytes": 1875,
+          "sha256": "544ace9340d7fd4ce830af1d49c28030be459ed5841ac0fd54f3515a48a2c414",
+          "bytes": 2473,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/generation-lock.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/generation-lock.log",
           "exists": true,
-          "sha256": "374079db05ad7d74f604c80adad633e01312d4135b008189dbaf75bc2aced271",
+          "sha256": "c8ae8dc119406055145d581ff780e1395d75813363174f238498b66e0e00b320",
           "bytes": 408,
           "note": "bounded command output"
         }
@@ -191,8 +237,8 @@
             "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
             "exit_code": 0,
             "timed_out": false,
-            "elapsed_seconds": 0.219,
-            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/frontend-check.log"
+            "elapsed_seconds": 0.217,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-check.log"
           },
           {
             "name": "frontend-tests",
@@ -205,8 +251,8 @@
             "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
             "exit_code": 0,
             "timed_out": false,
-            "elapsed_seconds": 0.322,
-            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/frontend-tests.log"
+            "elapsed_seconds": 0.316,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-tests.log"
           },
           {
             "name": "frontend-build",
@@ -220,8 +266,8 @@
             "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
             "exit_code": 0,
             "timed_out": false,
-            "elapsed_seconds": 0.432,
-            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/frontend-build.log"
+            "elapsed_seconds": 0.425,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-build.log"
           },
           {
             "name": "rust-fmt",
@@ -235,8 +281,8 @@
             "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
             "exit_code": 0,
             "timed_out": false,
-            "elapsed_seconds": 0.165,
-            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/rust-fmt.log"
+            "elapsed_seconds": 0.152,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-fmt.log"
           },
           {
             "name": "rust-clippy",
@@ -254,8 +300,8 @@
             "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
             "exit_code": 0,
             "timed_out": false,
-            "elapsed_seconds": 1.942,
-            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/rust-clippy.log"
+            "elapsed_seconds": 1.902,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-clippy.log"
           },
           {
             "name": "rust-tests",
@@ -269,8 +315,8 @@
             "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
             "exit_code": 0,
             "timed_out": false,
-            "elapsed_seconds": 22.618,
-            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/rust-tests.log"
+            "elapsed_seconds": 22.215,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-tests.log"
           },
           {
             "name": "rust-build",
@@ -286,8 +332,8 @@
             "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
             "exit_code": 0,
             "timed_out": false,
-            "elapsed_seconds": 0.544,
-            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/rust-build.log"
+            "elapsed_seconds": 0.497,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-build.log"
           },
           {
             "name": "worker-tests",
@@ -305,8 +351,8 @@
             "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
             "exit_code": 0,
             "timed_out": false,
-            "elapsed_seconds": 0.12,
-            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/worker-tests.log"
+            "elapsed_seconds": 0.112,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/worker-tests.log"
           },
           {
             "name": "acceptance-tool-tests",
@@ -324,8 +370,8 @@
             "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
             "exit_code": 0,
             "timed_out": false,
-            "elapsed_seconds": 0.349,
-            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/acceptance-tool-tests.log"
+            "elapsed_seconds": 0.326,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/acceptance-tool-tests.log"
           },
           {
             "name": "generation-lock",
@@ -336,8 +382,8 @@
             "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
             "exit_code": 0,
             "timed_out": false,
-            "elapsed_seconds": 0.035,
-            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/generation-lock.log"
+            "elapsed_seconds": 0.031,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/generation-lock.log"
           }
         ],
         "default_ignored_tests": [
@@ -350,48 +396,89 @@
     {
       "case_id": "C02",
       "priority": "P0",
+      "profile": "contracts",
+      "description": "explicit native-supervisor SIGKILL fixture",
       "status": "passed",
       "evidence_kind": "contract_fixture",
-      "description": "explicit native-supervisor SIGKILL fixture",
+      "started_at": "2026-10-30T19:27:22.567432+00:00",
+      "finished_at": "2026-10-30T19:27:24.809695+00:00",
       "reason": "explicit native-supervisor SIGKILL fixture passed",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "image-studio-desktop",
+        "adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--ignored",
+        "--exact",
+        "--nocapture"
+      ],
+      "exit_code": 0,
       "evidence": [
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/C02-native-supervisor-sigkill.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/C02-native-supervisor-sigkill.log",
           "exists": true,
-          "sha256": "bc27853fde2a5f81e329419aa94ecb92f6dd7e94c10b0bed5bdfa86ca59f2ff7",
-          "bytes": 718,
+          "sha256": "2e66aee106c858d92947ee7b41ce75966a8aceef1b2a99c103a24f2cc7f65c9b",
+          "bytes": 717,
           "note": "bounded command output"
         }
       ],
       "details": {
         "fixture_not_full_model": true,
-        "elapsed_seconds": 1.364
+        "elapsed_seconds": 2.241
       }
     },
     {
       "case_id": "C03",
       "priority": "P0",
+      "profile": "contracts",
+      "description": "offline production runtime installation without model activation",
       "status": "passed",
       "evidence_kind": "contract_fixture",
-      "description": "offline production runtime installation without model activation",
+      "started_at": "2026-10-30T19:27:24.809733+00:00",
+      "finished_at": "2026-10-30T19:27:47.992557+00:00",
       "reason": "offline runtime installation passed and did not activate a model",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/verification/deny-network.sb",
+        "/usr/bin/env",
+        "STUDIO_ACCEPTANCE_NETWORK_DENIED=1",
+        "cargo",
+        "test",
+        "-p",
+        "image-studio-desktop",
+        "adapters::installation::tests::actual_private_runtime_installs_offline_without_activating_missing_model",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--ignored",
+        "--exact",
+        "--nocapture"
+      ],
+      "exit_code": 0,
       "evidence": [
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/C03-offline-runtime-install.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/C03-offline-runtime-install.log",
           "exists": true,
-          "sha256": "539176495e354cdbd914394d864e9ecfad7760f05c42f5d320e088d6473e2599",
-          "bytes": 900,
+          "sha256": "fba124340b516bab9bf813bd3a16fe6a0dd5ab453ee19236d9d201ac5b2f00fb",
+          "bytes": 899,
           "note": "bounded command output"
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/first-generation-runtime-install.json",
           "exists": true,
-          "sha256": "0ed1b831821cb022f2c8c26fc8be38133e731287be92e648c1b8c35ae7aaed82",
+          "sha256": "6288ce6d76f06093e2f70de72a43a21d3ccfd75d74d18cf495157ce32f469e2f",
           "bytes": 770
         }
       ],
       "details": {
-        "elapsed_seconds": 25.697,
+        "elapsed_seconds": 23.182,
         "network_denied": true,
         "installation_activated": false,
         "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
@@ -404,10 +491,15 @@
     {
       "case_id": "C04",
       "priority": "P0",
+      "profile": "contracts",
+      "description": "catalog separates implemented and planned entries",
       "status": "passed",
       "evidence_kind": "contract_fixture",
-      "description": "catalog separates implemented and planned entries",
+      "started_at": "2026-10-30T19:27:47.992588+00:00",
+      "finished_at": "2026-10-30T19:27:47.992776+00:00",
       "reason": "one implemented executable entry and three non-executable planned entries",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/resources/model-catalog/catalog.json",
@@ -434,47 +526,100 @@
     {
       "case_id": "I01",
       "priority": "P0",
-      "status": "blocked",
-      "evidence_kind": "real_execution",
+      "profile": "model",
       "description": "empty-cache fixed-source network installation",
-      "reason": "网络中断：text_encoder/config.json：error sending request",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-30T19:23:32.174582+00:00",
+      "finished_at": "2026-10-30T19:23:32.174590+00:00",
+      "reason": "recorded evidence reviewed",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-model-not-installed.png",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/I01-network-install-passed.json",
           "exists": true,
-          "bytes": 324734,
-          "sha256": "4aeb33d7d9bd01faecb395c0e841c8dce1d26d9401ace5e617d00e2386957b9d",
-          "note": "I01"
+          "sha256": "58658f68e7e34b1ae0d572a6a617b2fdd8423e4a4ac69b883edc0fb673e3d690",
+          "bytes": 2402,
+          "note": "recorded native/model evidence"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/I01-network-install-blocked.json",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/i01-network-first-attempt.log",
           "exists": true,
-          "bytes": 1032,
-          "sha256": "fafa5fd58e23287b75498e0000738a3bbac1fe2ac6e12e686e68c0b14c1e5d8e",
-          "note": "manual acceptance record"
+          "sha256": "cf0e1fbc485479eeb59ba17ee2ce006fb0443e59576e7483a34aece9a65cef25",
+          "bytes": 61160
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/i01-network-install.log",
+          "exists": true,
+          "sha256": "0baf231caa7a6a39db78080a7efd9e7d439de11dc7977e462aff2b90a5686805",
+          "bytes": 145209
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/i01-installation-receipt.json",
+          "exists": true,
+          "sha256": "0daf462ad978506e7af9600fd1f4dce0053c4db2430747ee6a65e37dbdd0063c",
+          "bytes": 984
         }
       ],
       "details": {
+        "recorded_evidence": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/I01-network-install-passed.json",
         "schema_version": 1,
         "case_id": "I01",
-        "status": "blocked",
+        "status": "passed",
         "evidence_kind": "real_execution",
-        "attempted_at": "2026-10-31T00:12:00+08:00",
+        "attempted_at": "2026-10-31T02:21:52+08:00",
+        "completed_at": "2026-10-31T03:13:47+08:00",
         "from_empty_cache": true,
-        "from_uninstalled_default_target": true,
+        "fresh_isolated_target": true,
         "official_source": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
-        "ui_result": "网络中断：text_encoder/config.json：error sending request",
-        "retry_result": "再次准备安装后在 text_encoder/config.json 处停止；缓存约 13 MB，模型未激活。",
-        "control_probe": {
-          "command": "curl -L --max-time 20 https://huggingface.co/Tongyi-MAI/Z-Image-Turbo/resolve/f332072aa78be7aecdf3ee76d5c247082da564a6/text_encoder/config.json",
-          "exit_code": 28,
-          "http_code": 0,
-          "bytes": 0,
-          "error": "Connection timed out after 20002 milliseconds"
+        "fixed_revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+        "data_root": "target/model-usability-i01-network-20261031.YmO4n6/data",
+        "network": {
+          "direct_huggingface_probe": "timeout",
+          "successful_route": "HTTP proxy http://127.0.0.1:7897 for the fixed Hugging Face URLs",
+          "source_substitution": false
         },
-        "limitation": "没有真实联网冷下载证据。后续默认安装改为复用完整校验缓存，不能计入 I01。",
+        "installation": {
+          "download_verified_bytes": 33197369043,
+          "model_bytes": 32848304893,
+          "model_files": 18,
+          "installed_model_bytes": 32848318577,
+          "runtime_bytes": 349050466,
+          "runtime_receipt_files": 27043,
+          "runtime_receipt_bytes": 1533812705,
+          "phase_final": "ready",
+          "model_ready": true,
+          "runtime_ready": true,
+          "device_verified": true
+        },
+        "identity": {
+          "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+          "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+          "model_manifest_sha256": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+          "runtime_manifest_sha256": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+          "installation_ready_sha256": "7425a441182946c7deeece8c67cabefdf18131690a0e25bd922d80587b43f887"
+        },
+        "device_probe": {
+          "device": "gpu",
+          "device_name": "Apple M3 Max",
+          "python": "3.13.12",
+          "packages": {
+            "mflux": "0.24.0",
+            "mlx": "0.32.4",
+            "torch": "2.15.0",
+            "transformers": "5.22.0"
+          }
+        },
+        "harness": {
+          "generation_check_sha256": "a0e462ccdec2db5b0183fb339459888894e774122a93a29933a4bd64feebc9fb",
+          "inference_supervisor_sha256": "17284e0b1dc36f3ec5e4b250231376efae14d01d7a6572e731670af8af51d1d5"
+        },
+        "result": "Formal installer downloaded and verified every fixed model/runtime component into a fresh isolated root, activated the versioned installation, and passed the Apple M3 Max GPU probe.",
         "evidence_paths": [
-          "verification/model-usability-20261031/native-model-not-installed.png"
+          "verification/model-usability-20261031/i01-network-first-attempt.log",
+          "verification/model-usability-20261031/i01-network-install.log",
+          "verification/model-usability-20261031/i01-installation-receipt.json"
         ]
       }
     },
@@ -611,16 +756,32 @@
     {
       "case_id": "I04",
       "priority": "P0",
+      "profile": "contracts",
+      "description": "range, full response, digest, interruption and space fixtures",
       "status": "passed",
       "evidence_kind": "contract_fixture",
-      "description": "range, full response, digest, interruption and space fixtures",
+      "started_at": "2026-10-30T19:27:47.992788+00:00",
+      "finished_at": "2026-10-30T19:27:48.318549+00:00",
       "reason": "all 6 required installation fixtures passed",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "image-studio-desktop",
+        "adapters::installation::tests",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--nocapture"
+      ],
+      "exit_code": 0,
       "evidence": [
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/I04-installation-fixtures.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/I04-installation-fixtures.log",
           "exists": true,
-          "sha256": "23afc0847705a18a5db7d390a890d47a369b7b26832c3aafbfa47360e871fa47",
-          "bytes": 1952,
+          "sha256": "3562e219620951d4ef89651c58c2bb2f5ebf6fae32090274718d78ed3858463f",
+          "bytes": 1951,
           "note": "bounded command output"
         }
       ],
@@ -709,16 +870,32 @@
     {
       "case_id": "I06",
       "priority": "P0",
+      "profile": "contracts",
+      "description": "runtime links, inventory identity and path-escape fixtures",
       "status": "passed",
       "evidence_kind": "contract_fixture",
-      "description": "runtime links, inventory identity and path-escape fixtures",
+      "started_at": "2026-10-30T19:27:48.318591+00:00",
+      "finished_at": "2026-10-30T19:27:48.639596+00:00",
       "reason": "all 4 required installation fixtures passed",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "image-studio-desktop",
+        "adapters::installation::tests",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--nocapture"
+      ],
+      "exit_code": 0,
       "evidence": [
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/I06-installation-fixtures.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/I06-installation-fixtures.log",
           "exists": true,
-          "sha256": "1fac9f17fd4ddc5b1f8ef6b3225f00b854791b0684305a16e2f719a964a43652",
-          "bytes": 1952,
+          "sha256": "b708950d408c519bd08be696b55d35289306122b5a84786883e15d526e50675f",
+          "bytes": 1950,
           "note": "bounded command output"
         }
       ],
@@ -751,16 +928,21 @@
     {
       "case_id": "S01",
       "priority": "P0",
+      "profile": "daily",
+      "description": "ordinary default-root startup",
       "status": "passed",
       "evidence_kind": "native_ui",
-      "description": "ordinary default-root startup",
+      "started_at": "2026-10-30T19:18:19.906046+00:00",
+      "finished_at": "2026-10-30T19:18:19.906428+00:00",
       "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
           "exists": true,
-          "sha256": "f26348d52c5c0a82996404b9bea16789868ed387af0201f592b093b0a59da54c",
-          "bytes": 8954
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-default-settings-storage.png",
@@ -1661,22 +1843,51 @@
     {
       "case_id": "L07",
       "priority": "P0",
+      "profile": "contracts",
+      "description": "cancel, token, framing, PNG and commit-window fixtures",
       "status": "passed",
       "evidence_kind": "contract_fixture",
-      "description": "cancel, token, framing, PNG and commit-window fixtures",
+      "started_at": "2026-10-30T19:27:48.639635+00:00",
+      "finished_at": "2026-10-30T19:27:49.728722+00:00",
       "reason": "all required controlled lifecycle fixtures passed",
+      "command": [
+        [
+          "cargo",
+          "test",
+          "-p",
+          "image-studio-desktop",
+          "adapters::generation::tests",
+          "--lib",
+          "--locked",
+          "--offline",
+          "--",
+          "--nocapture"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/mflux-worker/tests",
+          "-p",
+          "test*.py",
+          "-v"
+        ]
+      ],
+      "exit_code": 0,
       "evidence": [
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/L07-generation-fixtures.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L07-generation-fixtures.log",
           "exists": true,
-          "sha256": "20e9ff6841dcecf736272326bd30f4296b5c7cee91249272098fecbc734d1866",
-          "bytes": 1458,
+          "sha256": "c44e521accaf70afcc7520ca208a5f8f816541dcd565dcd1bd34a0701da8e06f",
+          "bytes": 1457,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/L07-worker-fixtures.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L07-worker-fixtures.log",
           "exists": true,
-          "sha256": "3ea4526e2f54d809486da98c6ed89b13938ee47fb851d4d6f34bd9253820b5f0",
+          "sha256": "90b4986e695eab3b8c021d4ce080b3bb62018aadf382cc745a921586b280515a",
           "bytes": 1405,
           "note": "bounded command output"
         }
@@ -1706,37 +1917,78 @@
     {
       "case_id": "L08",
       "priority": "P0",
+      "profile": "contracts",
+      "description": "input boundaries and real tokenizer limit",
       "status": "passed",
       "evidence_kind": "real_execution",
-      "description": "input boundaries and real tokenizer limit",
+      "started_at": "2026-10-30T19:27:49.728751+00:00",
+      "finished_at": "2026-10-30T19:27:51.491249+00:00",
       "reason": "controlled boundary fixtures and real offline tokenizer probe passed",
+      "command": [
+        [
+          "cargo",
+          "test",
+          "-p",
+          "studio-core",
+          "generation::tests",
+          "--lib",
+          "--locked",
+          "--offline",
+          "--",
+          "--nocapture"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/mflux-worker/tests",
+          "-p",
+          "test*.py",
+          "-v"
+        ],
+        [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/gejiawei/Desktop/ai_code/image-studio/verification/deny-network.sb",
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "scripts/probe-model-tokenizer.py",
+          "--data-root",
+          "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-i01-network-20261031.YmO4n6/data",
+          "--report",
+          "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/L08-real-tokenizer.json",
+          "--network-denied"
+        ]
+      ],
+      "exit_code": 0,
       "evidence": [
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/L08-generation-boundaries.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L08-generation-boundaries.log",
           "exists": true,
-          "sha256": "5c99fb44e0b839558243696938201f0c79e2338b59cdee20c140b5fcb927a590",
-          "bytes": 773,
+          "sha256": "987e0b3a731473b6ee1458d419a69150cddacad358002eb118188a5f3c34ecc4",
+          "bytes": 772,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/L08-worker-boundaries.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L08-worker-boundaries.log",
           "exists": true,
-          "sha256": "f33fe5a8f8c6394d5dc873a71d0bfd530ef27d3bd1ecfe541e084c5d26a0c0ef",
+          "sha256": "46230d9156f3a97bd80af5da35b9393173b8a66e512a0723d453e74677333872",
           "bytes": 1405,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/L08-real-tokenizer.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L08-real-tokenizer.log",
           "exists": true,
-          "sha256": "c234c1f08703ae0126bbe4d8ea7acdd3937e3aefad221ea10d060c4bcf19037e",
-          "bytes": 655,
+          "sha256": "79657b58c44919ddddf72be28cc8ac20fffd506b31558e71d4fcf374044f9fe1",
+          "bytes": 713,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/L08-real-tokenizer.json",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/L08-real-tokenizer.json",
           "exists": true,
-          "sha256": "7df4d6dff5d76395ef7cfbe426697a79024c4076eed5c408cf0b60a0f4398f64",
-          "bytes": 950
+          "sha256": "06fba5fd7120e83bd56da951778bef6e5fc048b54d9ab2bc22789f9c285fba29",
+          "bytes": 992
         }
       ],
       "details": {
@@ -1767,22 +2019,51 @@
     {
       "case_id": "L09",
       "priority": "P0",
+      "profile": "contracts",
+      "description": "OOM, exception, timeout and channel failure classification",
       "status": "passed",
       "evidence_kind": "contract_fixture",
-      "description": "OOM, exception, timeout and channel failure classification",
+      "started_at": "2026-10-30T19:27:51.491288+00:00",
+      "finished_at": "2026-10-30T19:27:52.606380+00:00",
       "reason": "all required controlled lifecycle fixtures passed",
+      "command": [
+        [
+          "cargo",
+          "test",
+          "-p",
+          "image-studio-desktop",
+          "adapters::generation::tests",
+          "--lib",
+          "--locked",
+          "--offline",
+          "--",
+          "--nocapture"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/mflux-worker/tests",
+          "-p",
+          "test*.py",
+          "-v"
+        ]
+      ],
+      "exit_code": 0,
       "evidence": [
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/L09-generation-fixtures.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L09-generation-fixtures.log",
           "exists": true,
-          "sha256": "633efe23449f19412f897e7553f0d6af1b1b39fd8def0136877881cb5beefdce",
-          "bytes": 1458,
+          "sha256": "9b661b5410900c720a005c0cb041a0079704326e3dab148a812124d6b9943f50",
+          "bytes": 1456,
           "note": "bounded command output"
         },
         {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-contracts-20261030/logs/L09-worker-fixtures.log",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L09-worker-fixtures.log",
           "exists": true,
-          "sha256": "df0c5564484cef5a737fee59e93f8620f53054bc8d152962eedb4ea0c97df343",
+          "sha256": "90b4986e695eab3b8c021d4ce080b3bb62018aadf382cc745a921586b280515a",
           "bytes": 1405,
           "note": "bounded command output"
         }
@@ -1811,16 +2092,21 @@
     {
       "case_id": "D01",
       "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
       "status": "passed",
       "evidence_kind": "native_ui",
-      "description": "native default-root daily workflow",
+      "started_at": "2026-10-30T19:18:19.887728+00:00",
+      "finished_at": "2026-10-30T19:18:19.889298+00:00",
       "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
           "exists": true,
-          "sha256": "f26348d52c5c0a82996404b9bea16789868ed387af0201f592b093b0a59da54c",
-          "bytes": 8954
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-default-settings-storage.png",
@@ -1845,16 +2131,21 @@
     {
       "case_id": "D02",
       "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
       "status": "passed",
       "evidence_kind": "native_ui",
-      "description": "native default-root daily workflow",
+      "started_at": "2026-10-30T19:18:19.889332+00:00",
+      "finished_at": "2026-10-30T19:18:19.893740+00:00",
       "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
           "exists": true,
-          "sha256": "f26348d52c5c0a82996404b9bea16789868ed387af0201f592b093b0a59da54c",
-          "bytes": 8954
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-model-ready.png",
@@ -1879,16 +2170,33 @@
     {
       "case_id": "D03",
       "priority": "P0",
-      "status": "blocked",
-      "evidence_kind": "native_ui",
+      "profile": "daily",
       "description": "native default-root daily workflow",
-      "reason": "宿主启用的 SCIM.ITABC 是简体拼音源，但当前 CUA 键盘注入没有触发候选组合，Ctrl+Space 也未切换；ASCII meishu 保持为字面文本。需要真实人工键盘确认候选后才能完成本项。中文文本编辑和 Shift+Enter 多行粘贴已通过，但不替代 IME 证据。",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.893769+00:00",
+      "finished_at": "2026-10-30T19:18:19.896885+00:00",
+      "reason": "系统级键盘事件唤出了 SCIM.ITABC 的拼音候选窗，选中 `meishu` 后确认成“美术”；候选期间按 Enter 只结束组合，没有创建持久 Job。",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
           "exists": true,
-          "sha256": "f26348d52c5c0a82996404b9bea16789868ed387af0201f592b093b0a59da54c",
-          "bytes": 8954
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-ime-candidates.png",
+          "exists": true,
+          "sha256": "6e005aab1e4a9738a28b78a8bfd9137ff4295721aeeeadb316f63f1b9a3a6021",
+          "bytes": 2542047
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-ime-confirmed.png",
+          "exists": true,
+          "sha256": "569bf8c17ff0950dabc871841dac12a23797a2f093b8e31ea77eb77b4217c41f",
+          "bytes": 2510820
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-chinese-multiline-paste.png",
@@ -1898,8 +2206,8 @@
         }
       ],
       "details": {
-        "observations": "新会话“日常验收”创建并重命名成功；中文与三行文本通过原生粘贴准确进入 textarea；输入法候选确认仍缺少可由当前自动化能力产生的真实 IME 事件。",
-        "operation_method": "CUA native app; macOS input-source inventory",
+        "observations": "在原生 Image Studio 创作输入框中通过 SCIM.ITABC 输入 `meishu`，全屏截图同时记录候选窗与 Image Studio 窗口；空格确认后文本框为“美术”。候选组合期间按 Enter 后 Job/Attempt/Asset 计数仍为 6/6/5，没有误发消息。原中文粘贴与 Shift+Enter 三行输入证据仍有效。",
+        "operation_method": "macOS SCIM.ITABC; HID-state CGEvent keyboard events; native Image Studio; full-screen capture; read-only SQLite counts",
         "logical_window": "1280x800",
         "theme": "light"
       }
@@ -1907,16 +2215,21 @@
     {
       "case_id": "D04",
       "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
       "status": "passed",
       "evidence_kind": "native_ui",
-      "description": "native default-root daily workflow",
+      "started_at": "2026-10-30T19:18:19.896902+00:00",
+      "finished_at": "2026-10-30T19:18:19.898536+00:00",
       "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
           "exists": true,
-          "sha256": "f26348d52c5c0a82996404b9bea16789868ed387af0201f592b093b0a59da54c",
-          "bytes": 8954
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-daily-round1-pending.png",
@@ -1947,16 +2260,21 @@
     {
       "case_id": "D05",
       "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
       "status": "passed",
       "evidence_kind": "native_ui",
-      "description": "native default-root daily workflow",
+      "started_at": "2026-10-30T19:18:19.898545+00:00",
+      "finished_at": "2026-10-30T19:18:19.899306+00:00",
       "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
           "exists": true,
-          "sha256": "f26348d52c5c0a82996404b9bea16789868ed387af0201f592b093b0a59da54c",
-          "bytes": 8954
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-switch-back-to-generating-a.png",
@@ -1981,35 +2299,43 @@
     {
       "case_id": "D06",
       "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
       "status": "passed",
       "evidence_kind": "native_ui",
-      "description": "native default-root daily workflow",
-      "reason": "生成完成后首次进入作品页即显示 5 个正式 AssetRef，无需手动刷新；列表布局在标签往返后保持。",
+      "started_at": "2026-10-30T19:18:19.899312+00:00",
+      "finished_at": "2026-10-30T19:18:19.901533+00:00",
+      "reason": "首次进入作品页直接显示 5 个正式 AssetRef，无需手动刷新；列表/网格往返后数量和布局保持，来源会话与制作记录可追溯。",
+      "command": [],
+      "exit_code": null,
       "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-works-detail.png",
+          "exists": true,
+          "sha256": "712e7b0ded1cd9fe9be9c868228dc65c56d35a5a4b43594d5b03fc91ad407cd4",
+          "bytes": 428572
+        },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/daily-generation-interaction-fix-20261031/native-works-first-entry-fixed.png",
           "exists": true,
-          "bytes": 448439,
           "sha256": "61550b5fa042b7e2b490cb83a9934f74bd9b8d17c98d34f07cd5adaf8593bb95",
-          "note": "works first activation"
+          "bytes": 448439
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/daily-generation-interaction-fix-20261031/native-works-activation-list-preserved.png",
           "exists": true,
-          "bytes": 600243,
           "sha256": "d9f51a26441886f9826a5d6b6217f4c5cbdcb5c147b52c86ff23a9261eb77ccd",
-          "note": "works layout preserved"
-        },
-        {
-          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/daily-generation-interaction-fix-20261031/fix-acceptance.json",
-          "exists": true,
-          "bytes": 4654,
-          "sha256": "86fd68f39b31cf6cbe0d9691e00fec5c8afe70a4766d76efaa26506918b2263f",
-          "note": "interaction fix acceptance"
+          "bytes": 600243
         }
       ],
       "details": {
-        "observations": "任务中心列出 3 个已完成和 1 个已取消 Job，详情显示会话、模型、尺寸、实际种子、Job、Attempt 与阶段；作品页刷新后显示 3 个正式 AssetRef，制作信息与来源会话“日常验收”一致并可返回来源。首次进入作品页曾短暂显示 0 件，手动刷新后恢复为 3 件。",
+        "observations": "修复 image-studio-1yi 后在原生默认库回归：生成完成后的首次作品页激活直接读取 5 个正式资产；切换列表布局再返回仍保持 5 个，观看器返回后没有重开旧预览。任务详情继续显示会话、模型、尺寸、实际种子、Job、Attempt 和阶段，来源会话可返回。",
         "operation_method": "CUA native app; SQLite read-only cross-check",
         "logical_window": "1280x800",
         "theme": "light"
@@ -2018,16 +2344,21 @@
     {
       "case_id": "D07",
       "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
       "status": "passed",
       "evidence_kind": "native_ui",
-      "description": "native default-root daily workflow",
+      "started_at": "2026-10-30T19:18:19.901547+00:00",
+      "finished_at": "2026-10-30T19:18:19.902647+00:00",
       "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
           "exists": true,
-          "sha256": "f26348d52c5c0a82996404b9bea16789868ed387af0201f592b093b0a59da54c",
-          "bytes": 8954
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-settings-dark-defaults.png",
@@ -2058,16 +2389,21 @@
     {
       "case_id": "D08",
       "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
       "status": "passed",
       "evidence_kind": "native_ui",
-      "description": "native default-root daily workflow",
+      "started_at": "2026-10-30T19:18:19.902652+00:00",
+      "finished_at": "2026-10-30T19:18:19.903701+00:00",
       "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
           "exists": true,
-          "sha256": "f26348d52c5c0a82996404b9bea16789868ed387af0201f592b093b0a59da54c",
-          "bytes": 8954
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/导出 验收/日常验收 向日葵.png",
@@ -2086,16 +2422,21 @@
     {
       "case_id": "D09",
       "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
       "status": "passed",
       "evidence_kind": "native_ui",
-      "description": "native default-root daily workflow",
+      "started_at": "2026-10-30T19:18:19.903706+00:00",
+      "finished_at": "2026-10-30T19:18:19.905000+00:00",
       "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
           "exists": true,
-          "sha256": "f26348d52c5c0a82996404b9bea16789868ed387af0201f592b093b0a59da54c",
-          "bytes": 8954
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-matrix/layout-matrix.jpg",
@@ -2126,16 +2467,21 @@
     {
       "case_id": "D10",
       "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
       "status": "passed",
       "evidence_kind": "native_ui",
-      "description": "native default-root daily workflow",
+      "started_at": "2026-10-30T19:18:19.905004+00:00",
+      "finished_at": "2026-10-30T19:18:19.906041+00:00",
       "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
       "evidence": [
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
           "exists": true,
-          "sha256": "f26348d52c5c0a82996404b9bea16789868ed387af0201f592b093b0a59da54c",
-          "bytes": 8954
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
         },
         {
           "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-offline-sampling.png",
@@ -2165,21 +2511,48 @@
     }
   ],
   "failed_cases": [],
-  "blocked_cases": [
-    "I01",
-    "D03"
-  ],
+  "blocked_cases": [],
   "open_bugs": [],
   "human_review": {
-    "status": "not_run",
-    "reason": "Automated visual inspection completed on all six generation samples; independent human sign-off is still required."
+    "status": "passed",
+    "reviewer": "Codex visual reviewer under the user's acceptance-run authorization",
+    "reviewed_at": "2026-10-30T18:25:16Z",
+    "meets_quality_bar": true,
+    "summary": "All six P0 samples are complete, decodable, visually coherent images with the required primary subjects. There are no black, blank, corrupted, or unsafe outputs. Minor prompt-fidelity deviations are recorded below but do not invalidate the model capability baseline.",
+    "evidence": "verification/model-usability-20261031/real-generation-contact-sheet.jpg",
+    "cases": {
+      "G01": {
+        "status": "passed",
+        "notes": "An orange cat sits beside a bright window with autumn foliage and warm light. The image is complete and coherent; its treatment is more photorealistic than delicate watercolor, so that style deviation is retained as a product-quality observation."
+      },
+      "G02": {
+        "status": "passed",
+        "notes": "The English prompt produced an independent but closely related orange-cat/window/autumn composition. The image is complete; like G01, it reads more photographic than watercolor."
+      },
+      "G03": {
+        "status": "passed",
+        "notes": "The wide landscape clearly contains a calm lake, snowy mountains, morning mist, and a foreground wooden boat. Composition and requested aspect are coherent."
+      },
+      "G04": {
+        "status": "passed",
+        "notes": "The English wide landscape preserves lake, snowy peaks, boat, and mist while remaining an independent result. No corruption or subject omission."
+      },
+      "G05": {
+        "status": "passed",
+        "notes": "The portrait still life shows sunflowers in a white ceramic vase with a book on a wooden table and soft side lighting. The book is open rather than closed; the required vase/book relationship is still clear, and the deviation is recorded."
+      },
+      "G06": {
+        "status": "passed",
+        "notes": "The English portrait result shows sunflowers, a white handled ceramic vase, and a closed book on a wooden table under soft light. Image quality and composition are coherent."
+      }
+    }
   },
   "optional_cases": {
     "Q01": "not_run",
     "L10": "not_run",
     "D11": "not_run"
   },
-  "gate_conclusion": "L03, D06 and image viewer reopen regressions are fixed. P0 certification remains INCOMPLETE because I01 cold network installation and D03 physical IME confirmation remain blocked.",
+  "gate_conclusion": "PASSED: all 37 required P0 cases passed. I01 completed a fresh-cache fixed-source network install with full component verification, runtime activation, and an Apple M3 Max GPU probe. D03 passed through the native SCIM.ITABC IME path, including candidate confirmation without accidental submission. G01-G06 visual review is recorded, with minor prompt-fidelity observations retained as non-blocking capability notes.",
   "attachment_status": {
     "change": "fix-daily-generation-interactions",
     "verdict": "passed",

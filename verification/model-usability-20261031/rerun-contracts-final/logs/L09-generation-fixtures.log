@@ -1,0 +1,20 @@
+command=["cargo", "test", "-p", "image-studio-desktop", "adapters::generation::tests", "--lib", "--locked", "--offline", "--", "--nocapture"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=0.98
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running unittests src/lib.rs (target/debug/deps/image_studio_desktop-3b5505a7ac97501f)
+
+running 8 tests
+test adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host ... ignored, explicit acceptance: build inference-supervisor and set STUDIO_TEST_NATIVE_SUPERVISOR
+test adapters::generation::tests::existing_lease_blocks_launch_and_does_not_claim_resource_release ... ok
+test adapters::generation::tests::accepted_cancel_before_preparation_remains_cancelled ... ok
+test adapters::generation::tests::missing_supervisor_finishes_persisted_attempt_without_leaving_busy ... ok
+test adapters::generation::tests::framing_failure_closes_control_before_reaping_and_records_failure ... ok
+test adapters::generation::tests::cleanup_incomplete_is_nonterminal_and_later_cancel_can_finish ... ok
+test adapters::generation::tests::current_supervisor_sigkill_reclaims_a_gil_holding_compute_group_and_honors_cancel ... ok
+test adapters::generation::tests::candidate_waits_for_process_exit_before_durable_success ... ok
+
+test result: ok. 7 passed; 0 failed; 1 ignored; 0 measured; 79 filtered out; finished in 0.80s

@@ -1,0 +1,20 @@
+command=["npm", "--prefix", "apps/frontend", "run", "build"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=0.425
+
+
+> image-studio-ui@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 2048 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.47 kB │ gzip:   0.31 kB
+dist/assets/index-DUs5n6q8.css   66.62 kB │ gzip:  12.49 kB
+dist/assets/index-DewBHGZt.js   344.87 kB │ gzip: 105.06 kB
+
+✓ built in 122ms

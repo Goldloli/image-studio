@@ -1,0 +1,13 @@
+command=["cargo", "test", "-p", "image-studio-desktop", "adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host", "--lib", "--locked", "--offline", "--", "--ignored", "--exact", "--nocapture"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=2.241
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running unittests src/lib.rs (target/debug/deps/image_studio_desktop-3b5505a7ac97501f)
+
+running 1 test
+test adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 86 filtered out; finished in 2.07s

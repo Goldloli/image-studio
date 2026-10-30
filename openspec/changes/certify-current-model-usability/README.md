@@ -1,6 +1,6 @@
 # 现有模型测试与日常验收方案
 
-状态：**已批准实施，验收未完成（35/37 P0）**。编写日期：2026-10-30。文档任务：`image-studio-ego`；执行任务：`image-studio-2px`。本轮结果见 [验收报告](../../../verification/model-usability-20261031/results.md) 与 [机器可读记录](../../../verification/model-usability-20261031/acceptance.json)。
+状态：**已完成验收（37/37 P0）**。编写日期：2026-10-30。文档任务：`image-studio-ego`；执行任务：`image-studio-2px`。本轮结果见 [验收报告](../../../verification/model-usability-20261031/results.md) 与 [机器可读记录](../../../verification/model-usability-20261031/acceptance.json)。
 
 建议阅读顺序：[提案](proposal.md) → [验收用例](test-plan.md) → [规格](specs/model-validation/spec.md) → [技术设计](design.md) → [实施任务](tasks.md)。
 

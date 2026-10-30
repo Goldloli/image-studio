@@ -373,6 +373,11 @@ def bounded_log_text(value: bytes) -> str:
     )
 
 
+def normalized_log_text(value: bytes) -> str:
+    text = bounded_log_text(value).replace("\r\n", "\n").replace("\r", "\n")
+    return text.rstrip() + "\n"
+
+
 def run_command(
     name: str,
     command: list[str],
@@ -419,7 +424,7 @@ def run_command(
         f"timed_out={timed_out}\n"
         f"elapsed_seconds={elapsed}\n\n"
     ).encode()
-    atomic_write(log_path, bounded_log_text(header + output))
+    atomic_write(log_path, normalized_log_text(header + output))
     return CommandResult(
         command=command,
         cwd=str(cwd),

@@ -1,0 +1,9 @@
+command=["cargo", "clippy", "--workspace", "--all-targets", "--locked", "--offline", "--", "-D", "warnings"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=1.902
+
+    Checking image-studio-desktop v0.1.0 (/Users/gejiawei/Desktop/ai_code/image-studio/apps/desktop)
+    Checking diagnostic-worker v0.1.0 (/Users/gejiawei/Desktop/ai_code/image-studio/tools/diagnostic-worker)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.82s

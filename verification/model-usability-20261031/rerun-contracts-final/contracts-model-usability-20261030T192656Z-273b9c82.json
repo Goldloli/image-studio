@@ -1,0 +1,963 @@
+{
+  "schema_version": 1,
+  "run_id": "20261030T192656Z-273b9c82",
+  "started_at": "2026-10-30T19:26:56.351954+00:00",
+  "completed_at": "2026-10-30T19:27:52.620521+00:00",
+  "timezone": [
+    "CST",
+    "CST"
+  ],
+  "profile": "contracts",
+  "case_set": {
+    "version": "certify-current-model-usability-2026-10-30",
+    "path": "openspec/changes/certify-current-model-usability/test-plan.md",
+    "sha256": "0b4b5ab595ba481c8719b51f05b68c96b770eb2f1096d9dced34ef4d6c7fa269",
+    "selected_cases": [
+      "C01",
+      "C02",
+      "C03",
+      "C04",
+      "I04",
+      "I06",
+      "L07",
+      "L08",
+      "L09"
+    ]
+  },
+  "source_identity": {
+    "git_head": "02cc5b388c8413b1ebf90419fee842811782996e",
+    "working_tree_status_sha256": "02ed3e22cb6ecb56ed2a52da3eed0b28f3ad317053dd893c947665d03d101670",
+    "working_tree_dirty": true,
+    "versions": {
+      "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+      "node": "v24.12.0",
+      "npm": "11.6.2",
+      "python": "Python 3.15.0"
+    },
+    "file_sha256": {
+      "Cargo.lock": "b195b13438c0f8adbe7fb81a68c2f6b514874c50d4399ccba5559def5eeb79b8",
+      "resources/local-generation/model-manifest.json": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+      "resources/local-generation/runtime-manifest.json": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+      "resources/model-catalog/catalog.json": "7bfc42117f476471f16e67ce0b07c0a9a2922f21bcfaa0c826ea1848e6e2f765",
+      "apps/frontend/package-lock.json": "c1a40e0970009ee3d94bac20e454dbabcb953ca4853fed9e7cbed1ad129642ee"
+    },
+    "test_plan_sha256": "0b4b5ab595ba481c8719b51f05b68c96b770eb2f1096d9dced34ef4d6c7fa269",
+    "case_set_version": "certify-current-model-usability-2026-10-30"
+  },
+  "environment": {
+    "platform": "Darwin",
+    "platform_release": "27.0.0",
+    "machine": "arm64",
+    "python": "3.15.0 (main, Oct  9 2026, 11:16:41) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "timezone": [
+      "CST",
+      "CST"
+    ],
+    "sw_vers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434",
+    "memory_bytes": 137438953472,
+    "cpu": "Apple M3 Max"
+  },
+  "data_root": {
+    "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-i01-network-20261031.YmO4n6/data",
+    "category": "isolated",
+    "exists": true,
+    "top_level": [
+      "cache",
+      "data",
+      "logs",
+      "work"
+    ],
+    "installation": {
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+      "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+      "runtime_manifest_sha256": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+      "model_manifest_sha256": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+      "device": "gpu",
+      "device_name": "Apple M3 Max",
+      "runtime_file_count": 27043
+    },
+    "before": {
+      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-i01-network-20261031.YmO4n6/data",
+      "category": "isolated",
+      "exists": true,
+      "top_level": [
+        "cache",
+        "data",
+        "logs",
+        "work"
+      ],
+      "installation": {
+        "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+        "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+        "runtime_manifest_sha256": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+        "model_manifest_sha256": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+        "device": "gpu",
+        "device_name": "Apple M3 Max",
+        "runtime_file_count": 27043
+      }
+    },
+    "changed_normal_operations_only": false
+  },
+  "installation_mode": "none",
+  "network_conditions": {
+    "declared_install_mode": "none",
+    "per_case_network_limits_are_recorded_in_details": true
+  },
+  "cases": [
+    {
+      "case_id": "C01",
+      "priority": "P0",
+      "profile": "contracts",
+      "description": "toolchain, frontend, Rust, worker and fixed-lock gates",
+      "status": "passed",
+      "evidence_kind": "contract_fixture",
+      "started_at": "2026-10-30T19:26:56.366493+00:00",
+      "finished_at": "2026-10-30T19:27:22.567402+00:00",
+      "reason": "all build, test and fixed-lock gates passed",
+      "command": [
+        [
+          "npm",
+          "--prefix",
+          "apps/frontend",
+          "run",
+          "check"
+        ],
+        [
+          "npm",
+          "--prefix",
+          "apps/frontend",
+          "test"
+        ],
+        [
+          "npm",
+          "--prefix",
+          "apps/frontend",
+          "run",
+          "build"
+        ],
+        [
+          "cargo",
+          "fmt",
+          "--all",
+          "--",
+          "--check"
+        ],
+        [
+          "cargo",
+          "clippy",
+          "--workspace",
+          "--all-targets",
+          "--locked",
+          "--offline",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        [
+          "cargo",
+          "test",
+          "--workspace",
+          "--locked",
+          "--offline"
+        ],
+        [
+          "cargo",
+          "build",
+          "--workspace",
+          "--examples",
+          "--bins",
+          "--locked",
+          "--offline"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/mflux-worker/tests",
+          "-p",
+          "test*.py",
+          "-v"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "scripts/tests",
+          "-p",
+          "test*.py",
+          "-v"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "scripts/verify-generation-lock.py"
+        ]
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-check.log",
+          "exists": true,
+          "sha256": "876410899dde495722d40985a2a763530761087a5495170c499c82f000917420",
+          "bytes": 207,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-tests.log",
+          "exists": true,
+          "sha256": "dff075f8d7a86116c88e7fff76f3d019a4b60d71a8834a2a5396d30b0c4a89a4",
+          "bytes": 417,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-build.log",
+          "exists": true,
+          "sha256": "61b2369409a7d8274a1de7e00250ef223f7b32dcb1cb00bcd86923a4a3dae705",
+          "bytes": 575,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-fmt.log",
+          "exists": true,
+          "sha256": "a27adf62083802f9f4fc6b7389e9f53d45e31ac3627be4e745232762c74f3b19",
+          "bytes": 150,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-clippy.log",
+          "exists": true,
+          "sha256": "f3aa0d354ec975d290705b80c2bbc81c0d1abb6ff9b2fdb0ea1e6a14aba239e6",
+          "bytes": 491,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-tests.log",
+          "exists": true,
+          "sha256": "23d7f342dcbca3dded707d114f92680b89468367c966e4ce6161ef74211cc5ba",
+          "bytes": 17327,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-build.log",
+          "exists": true,
+          "sha256": "bd8f82a27b23c2898d8f5a08f0e5f192433283f723191f7de86b519fb1596814",
+          "bytes": 364,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/worker-tests.log",
+          "exists": true,
+          "sha256": "da9ed441f7592369adefdaec363b43bc3bbc5e7e263c3f49c300d77fac2187d6",
+          "bytes": 1405,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/acceptance-tool-tests.log",
+          "exists": true,
+          "sha256": "544ace9340d7fd4ce830af1d49c28030be459ed5841ac0fd54f3515a48a2c414",
+          "bytes": 2473,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/generation-lock.log",
+          "exists": true,
+          "sha256": "c8ae8dc119406055145d581ff780e1395d75813363174f238498b66e0e00b320",
+          "bytes": 408,
+          "note": "bounded command output"
+        }
+      ],
+      "details": {
+        "steps": [
+          {
+            "name": "frontend-check",
+            "command": [
+              "npm",
+              "--prefix",
+              "apps/frontend",
+              "run",
+              "check"
+            ],
+            "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
+            "exit_code": 0,
+            "timed_out": false,
+            "elapsed_seconds": 0.217,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-check.log"
+          },
+          {
+            "name": "frontend-tests",
+            "command": [
+              "npm",
+              "--prefix",
+              "apps/frontend",
+              "test"
+            ],
+            "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
+            "exit_code": 0,
+            "timed_out": false,
+            "elapsed_seconds": 0.316,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-tests.log"
+          },
+          {
+            "name": "frontend-build",
+            "command": [
+              "npm",
+              "--prefix",
+              "apps/frontend",
+              "run",
+              "build"
+            ],
+            "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
+            "exit_code": 0,
+            "timed_out": false,
+            "elapsed_seconds": 0.425,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/frontend-build.log"
+          },
+          {
+            "name": "rust-fmt",
+            "command": [
+              "cargo",
+              "fmt",
+              "--all",
+              "--",
+              "--check"
+            ],
+            "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
+            "exit_code": 0,
+            "timed_out": false,
+            "elapsed_seconds": 0.152,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-fmt.log"
+          },
+          {
+            "name": "rust-clippy",
+            "command": [
+              "cargo",
+              "clippy",
+              "--workspace",
+              "--all-targets",
+              "--locked",
+              "--offline",
+              "--",
+              "-D",
+              "warnings"
+            ],
+            "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
+            "exit_code": 0,
+            "timed_out": false,
+            "elapsed_seconds": 1.902,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-clippy.log"
+          },
+          {
+            "name": "rust-tests",
+            "command": [
+              "cargo",
+              "test",
+              "--workspace",
+              "--locked",
+              "--offline"
+            ],
+            "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
+            "exit_code": 0,
+            "timed_out": false,
+            "elapsed_seconds": 22.215,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-tests.log"
+          },
+          {
+            "name": "rust-build",
+            "command": [
+              "cargo",
+              "build",
+              "--workspace",
+              "--examples",
+              "--bins",
+              "--locked",
+              "--offline"
+            ],
+            "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
+            "exit_code": 0,
+            "timed_out": false,
+            "elapsed_seconds": 0.497,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/rust-build.log"
+          },
+          {
+            "name": "worker-tests",
+            "command": [
+              "/opt/homebrew/opt/python@3.15/bin/python3.15",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tools/mflux-worker/tests",
+              "-p",
+              "test*.py",
+              "-v"
+            ],
+            "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
+            "exit_code": 0,
+            "timed_out": false,
+            "elapsed_seconds": 0.112,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/worker-tests.log"
+          },
+          {
+            "name": "acceptance-tool-tests",
+            "command": [
+              "/opt/homebrew/opt/python@3.15/bin/python3.15",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "scripts/tests",
+              "-p",
+              "test*.py",
+              "-v"
+            ],
+            "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
+            "exit_code": 0,
+            "timed_out": false,
+            "elapsed_seconds": 0.326,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/acceptance-tool-tests.log"
+          },
+          {
+            "name": "generation-lock",
+            "command": [
+              "/opt/homebrew/opt/python@3.15/bin/python3.15",
+              "scripts/verify-generation-lock.py"
+            ],
+            "cwd": "/Users/gejiawei/Desktop/ai_code/image-studio",
+            "exit_code": 0,
+            "timed_out": false,
+            "elapsed_seconds": 0.031,
+            "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/generation-lock.log"
+          }
+        ],
+        "default_ignored_tests": [
+          "test adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host ... ignored, explicit acceptance: build inference-supervisor and set STUDIO_TEST_NATIVE_SUPERVISOR",
+          "test adapters::installation::tests::actual_private_runtime_installs_offline_without_activating_missing_model ... ignored, explicit acceptance: requires all fixed runtime artifacts in validation cache"
+        ],
+        "ignored_tests_are_not_success": true
+      }
+    },
+    {
+      "case_id": "C02",
+      "priority": "P0",
+      "profile": "contracts",
+      "description": "explicit native-supervisor SIGKILL fixture",
+      "status": "passed",
+      "evidence_kind": "contract_fixture",
+      "started_at": "2026-10-30T19:27:22.567432+00:00",
+      "finished_at": "2026-10-30T19:27:24.809695+00:00",
+      "reason": "explicit native-supervisor SIGKILL fixture passed",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "image-studio-desktop",
+        "adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--ignored",
+        "--exact",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/C02-native-supervisor-sigkill.log",
+          "exists": true,
+          "sha256": "2e66aee106c858d92947ee7b41ce75966a8aceef1b2a99c103a24f2cc7f65c9b",
+          "bytes": 717,
+          "note": "bounded command output"
+        }
+      ],
+      "details": {
+        "fixture_not_full_model": true,
+        "elapsed_seconds": 2.241
+      }
+    },
+    {
+      "case_id": "C03",
+      "priority": "P0",
+      "profile": "contracts",
+      "description": "offline production runtime installation without model activation",
+      "status": "passed",
+      "evidence_kind": "contract_fixture",
+      "started_at": "2026-10-30T19:27:24.809733+00:00",
+      "finished_at": "2026-10-30T19:27:47.992557+00:00",
+      "reason": "offline runtime installation passed and did not activate a model",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/verification/deny-network.sb",
+        "/usr/bin/env",
+        "STUDIO_ACCEPTANCE_NETWORK_DENIED=1",
+        "cargo",
+        "test",
+        "-p",
+        "image-studio-desktop",
+        "adapters::installation::tests::actual_private_runtime_installs_offline_without_activating_missing_model",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--ignored",
+        "--exact",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/C03-offline-runtime-install.log",
+          "exists": true,
+          "sha256": "fba124340b516bab9bf813bd3a16fe6a0dd5ab453ee19236d9d201ac5b2f00fb",
+          "bytes": 899,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/first-generation-runtime-install.json",
+          "exists": true,
+          "sha256": "6288ce6d76f06093e2f70de72a43a21d3ccfd75d74d18cf495157ce32f469e2f",
+          "bytes": 770
+        }
+      ],
+      "details": {
+        "elapsed_seconds": 23.182,
+        "network_denied": true,
+        "installation_activated": false,
+        "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+        "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+        "inventory_entries": 27043,
+        "probe_device": "gpu",
+        "is_full_model_inference": false
+      }
+    },
+    {
+      "case_id": "C04",
+      "priority": "P0",
+      "profile": "contracts",
+      "description": "catalog separates implemented and planned entries",
+      "status": "passed",
+      "evidence_kind": "contract_fixture",
+      "started_at": "2026-10-30T19:27:47.992588+00:00",
+      "finished_at": "2026-10-30T19:27:47.992776+00:00",
+      "reason": "one implemented executable entry and three non-executable planned entries",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/resources/model-catalog/catalog.json",
+          "exists": true,
+          "sha256": "7bfc42117f476471f16e67ce0b07c0a9a2922f21bcfaa0c826ea1848e6e2f765",
+          "bytes": 5513
+        }
+      ],
+      "details": {
+        "total": 4,
+        "implemented": [
+          "z-image-turbo-mflux-v1"
+        ],
+        "planned": [
+          "birefnet-general-epoch-244",
+          "flux2-klein-4b-distilled",
+          "realesrgan-x4plus"
+        ],
+        "executable": [
+          "z-image-turbo-mflux-v1"
+        ]
+      }
+    },
+    {
+      "case_id": "I04",
+      "priority": "P0",
+      "profile": "contracts",
+      "description": "range, full response, digest, interruption and space fixtures",
+      "status": "passed",
+      "evidence_kind": "contract_fixture",
+      "started_at": "2026-10-30T19:27:47.992788+00:00",
+      "finished_at": "2026-10-30T19:27:48.318549+00:00",
+      "reason": "all 6 required installation fixtures passed",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "image-studio-desktop",
+        "adapters::installation::tests",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/I04-installation-fixtures.log",
+          "exists": true,
+          "sha256": "3562e219620951d4ef89651c58c2bb2f5ebf6fae32090274718d78ed3858463f",
+          "bytes": 1951,
+          "note": "bounded command output"
+        }
+      ],
+      "details": {
+        "required_tests": [
+          "adapters::installation::tests::full_response_replaces_a_partial_without_appending",
+          "adapters::installation::tests::interrupted_transfer_keeps_a_resumable_part_but_never_a_final_file",
+          "adapters::installation::tests::range_requires_exact_start_end_and_total",
+          "adapters::installation::tests::range_resume_requires_identity_and_preserves_exact_bytes",
+          "adapters::installation::tests::stalled_transfer_cancellation_does_not_wait_for_a_file_or_read_deadline",
+          "adapters::installation::tests::wrong_digest_never_becomes_a_completed_cache_file"
+        ],
+        "observed_tests": [
+          "adapters::installation::tests::activation_records_bind_bytes_even_when_version_labels_are_reused",
+          "adapters::installation::tests::actual_private_runtime_installs_offline_without_activating_missing_model",
+          "adapters::installation::tests::cached_part_and_managed_parent_links_cannot_write_outside",
+          "adapters::installation::tests::fixed_manifests_are_complete",
+          "adapters::installation::tests::full_response_replaces_a_partial_without_appending",
+          "adapters::installation::tests::interrupted_transfer_keeps_a_resumable_part_but_never_a_final_file",
+          "adapters::installation::tests::paths_urls_and_hashes_fail_closed",
+          "adapters::installation::tests::plan_metadata_keeps_all_seventeen_pinned_components",
+          "adapters::installation::tests::range_requires_exact_start_end_and_total",
+          "adapters::installation::tests::range_resume_requires_identity_and_preserves_exact_bytes",
+          "adapters::installation::tests::runtime_inventory_detects_changed_link_targets",
+          "adapters::installation::tests::stalled_transfer_cancellation_does_not_wait_for_a_file_or_read_deadline",
+          "adapters::installation::tests::tar_links_cannot_escape_the_private_runtime",
+          "adapters::installation::tests::wrong_digest_never_becomes_a_completed_cache_file"
+        ],
+        "missing_tests": []
+      }
+    },
+    {
+      "case_id": "I06",
+      "priority": "P0",
+      "profile": "contracts",
+      "description": "runtime links, inventory identity and path-escape fixtures",
+      "status": "passed",
+      "evidence_kind": "contract_fixture",
+      "started_at": "2026-10-30T19:27:48.318591+00:00",
+      "finished_at": "2026-10-30T19:27:48.639596+00:00",
+      "reason": "all 4 required installation fixtures passed",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "image-studio-desktop",
+        "adapters::installation::tests",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/I06-installation-fixtures.log",
+          "exists": true,
+          "sha256": "b708950d408c519bd08be696b55d35289306122b5a84786883e15d526e50675f",
+          "bytes": 1950,
+          "note": "bounded command output"
+        }
+      ],
+      "details": {
+        "required_tests": [
+          "adapters::installation::tests::cached_part_and_managed_parent_links_cannot_write_outside",
+          "adapters::installation::tests::paths_urls_and_hashes_fail_closed",
+          "adapters::installation::tests::runtime_inventory_detects_changed_link_targets",
+          "adapters::installation::tests::tar_links_cannot_escape_the_private_runtime"
+        ],
+        "observed_tests": [
+          "adapters::installation::tests::activation_records_bind_bytes_even_when_version_labels_are_reused",
+          "adapters::installation::tests::actual_private_runtime_installs_offline_without_activating_missing_model",
+          "adapters::installation::tests::cached_part_and_managed_parent_links_cannot_write_outside",
+          "adapters::installation::tests::fixed_manifests_are_complete",
+          "adapters::installation::tests::full_response_replaces_a_partial_without_appending",
+          "adapters::installation::tests::interrupted_transfer_keeps_a_resumable_part_but_never_a_final_file",
+          "adapters::installation::tests::paths_urls_and_hashes_fail_closed",
+          "adapters::installation::tests::plan_metadata_keeps_all_seventeen_pinned_components",
+          "adapters::installation::tests::range_requires_exact_start_end_and_total",
+          "adapters::installation::tests::range_resume_requires_identity_and_preserves_exact_bytes",
+          "adapters::installation::tests::runtime_inventory_detects_changed_link_targets",
+          "adapters::installation::tests::stalled_transfer_cancellation_does_not_wait_for_a_file_or_read_deadline",
+          "adapters::installation::tests::tar_links_cannot_escape_the_private_runtime",
+          "adapters::installation::tests::wrong_digest_never_becomes_a_completed_cache_file"
+        ],
+        "missing_tests": []
+      }
+    },
+    {
+      "case_id": "L07",
+      "priority": "P0",
+      "profile": "contracts",
+      "description": "cancel, token, framing, PNG and commit-window fixtures",
+      "status": "passed",
+      "evidence_kind": "contract_fixture",
+      "started_at": "2026-10-30T19:27:48.639635+00:00",
+      "finished_at": "2026-10-30T19:27:49.728722+00:00",
+      "reason": "all required controlled lifecycle fixtures passed",
+      "command": [
+        [
+          "cargo",
+          "test",
+          "-p",
+          "image-studio-desktop",
+          "adapters::generation::tests",
+          "--lib",
+          "--locked",
+          "--offline",
+          "--",
+          "--nocapture"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/mflux-worker/tests",
+          "-p",
+          "test*.py",
+          "-v"
+        ]
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L07-generation-fixtures.log",
+          "exists": true,
+          "sha256": "c44e521accaf70afcc7520ca208a5f8f816541dcd565dcd1bd34a0701da8e06f",
+          "bytes": 1457,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L07-worker-fixtures.log",
+          "exists": true,
+          "sha256": "90b4986e695eab3b8c021d4ce080b3bb62018aadf382cc745a921586b280515a",
+          "bytes": 1405,
+          "note": "bounded command output"
+        }
+      ],
+      "details": {
+        "required_generation_tests": [
+          "adapters::generation::tests::accepted_cancel_before_preparation_remains_cancelled",
+          "adapters::generation::tests::candidate_waits_for_process_exit_before_durable_success",
+          "adapters::generation::tests::cleanup_incomplete_is_nonterminal_and_later_cancel_can_finish",
+          "adapters::generation::tests::framing_failure_closes_control_before_reaping_and_records_failure",
+          "adapters::generation::tests::missing_supervisor_finishes_persisted_attempt_without_leaving_busy"
+        ],
+        "observed_generation_tests": [
+          "adapters::generation::tests::accepted_cancel_before_preparation_remains_cancelled",
+          "adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host",
+          "adapters::generation::tests::candidate_waits_for_process_exit_before_durable_success",
+          "adapters::generation::tests::cleanup_incomplete_is_nonterminal_and_later_cancel_can_finish",
+          "adapters::generation::tests::current_supervisor_sigkill_reclaims_a_gil_holding_compute_group_and_honors_cancel",
+          "adapters::generation::tests::existing_lease_blocks_launch_and_does_not_claim_resource_release",
+          "adapters::generation::tests::framing_failure_closes_control_before_reaping_and_records_failure",
+          "adapters::generation::tests::missing_supervisor_finishes_persisted_attempt_without_leaving_busy"
+        ],
+        "missing_generation_tests": [],
+        "worker_exit_code": 0
+      }
+    },
+    {
+      "case_id": "L08",
+      "priority": "P0",
+      "profile": "contracts",
+      "description": "input boundaries and real tokenizer limit",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-30T19:27:49.728751+00:00",
+      "finished_at": "2026-10-30T19:27:51.491249+00:00",
+      "reason": "controlled boundary fixtures and real offline tokenizer probe passed",
+      "command": [
+        [
+          "cargo",
+          "test",
+          "-p",
+          "studio-core",
+          "generation::tests",
+          "--lib",
+          "--locked",
+          "--offline",
+          "--",
+          "--nocapture"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/mflux-worker/tests",
+          "-p",
+          "test*.py",
+          "-v"
+        ],
+        [
+          "/usr/bin/sandbox-exec",
+          "-f",
+          "/Users/gejiawei/Desktop/ai_code/image-studio/verification/deny-network.sb",
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "scripts/probe-model-tokenizer.py",
+          "--data-root",
+          "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-i01-network-20261031.YmO4n6/data",
+          "--report",
+          "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/L08-real-tokenizer.json",
+          "--network-denied"
+        ]
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L08-generation-boundaries.log",
+          "exists": true,
+          "sha256": "987e0b3a731473b6ee1458d419a69150cddacad358002eb118188a5f3c34ecc4",
+          "bytes": 772,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L08-worker-boundaries.log",
+          "exists": true,
+          "sha256": "46230d9156f3a97bd80af5da35b9393173b8a66e512a0723d453e74677333872",
+          "bytes": 1405,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L08-real-tokenizer.log",
+          "exists": true,
+          "sha256": "79657b58c44919ddddf72be28cc8ac20fffd506b31558e71d4fcf374044f9fe1",
+          "bytes": 713,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/L08-real-tokenizer.json",
+          "exists": true,
+          "sha256": "06fba5fd7120e83bd56da951778bef6e5fc048b54d9ab2bc22789f9c285fba29",
+          "bytes": 992
+        }
+      ],
+      "details": {
+        "required_generation_tests": [
+          "studio_core::generation::tests::explicit_seed_is_preserved",
+          "studio_core::generation::tests::random_seed_is_frozen_without_rewriting_request",
+          "studio_core::generation::tests::unsupported_inputs_are_not_downgraded"
+        ],
+        "observed_generation_tests": [
+          "generation::tests::explicit_seed_is_preserved",
+          "generation::tests::phases_cannot_undo_cancellation_or_terminal",
+          "generation::tests::random_seed_is_frozen_without_rewriting_request",
+          "generation::tests::unsupported_inputs_are_not_downgraded"
+        ],
+        "missing_generation_tests": [],
+        "tokenizer": {
+          "network_denied": true,
+          "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+          "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+          "short_prompt_template_tokens": 34,
+          "long_prompt_rejection": "提示词含模板共 1708 token，超过 512 token 上限；请缩短提示词。",
+          "truncation_disabled": true,
+          "model_weights_loaded": false,
+          "is_full_model_inference": false
+        }
+      }
+    },
+    {
+      "case_id": "L09",
+      "priority": "P0",
+      "profile": "contracts",
+      "description": "OOM, exception, timeout and channel failure classification",
+      "status": "passed",
+      "evidence_kind": "contract_fixture",
+      "started_at": "2026-10-30T19:27:51.491288+00:00",
+      "finished_at": "2026-10-30T19:27:52.606380+00:00",
+      "reason": "all required controlled lifecycle fixtures passed",
+      "command": [
+        [
+          "cargo",
+          "test",
+          "-p",
+          "image-studio-desktop",
+          "adapters::generation::tests",
+          "--lib",
+          "--locked",
+          "--offline",
+          "--",
+          "--nocapture"
+        ],
+        [
+          "/opt/homebrew/opt/python@3.15/bin/python3.15",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tools/mflux-worker/tests",
+          "-p",
+          "test*.py",
+          "-v"
+        ]
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L09-generation-fixtures.log",
+          "exists": true,
+          "sha256": "9b661b5410900c720a005c0cb041a0079704326e3dab148a812124d6b9943f50",
+          "bytes": 1456,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/rerun-contracts-final/logs/L09-worker-fixtures.log",
+          "exists": true,
+          "sha256": "90b4986e695eab3b8c021d4ce080b3bb62018aadf382cc745a921586b280515a",
+          "bytes": 1405,
+          "note": "bounded command output"
+        }
+      ],
+      "details": {
+        "required_generation_tests": [
+          "adapters::generation::tests::cleanup_incomplete_is_nonterminal_and_later_cancel_can_finish",
+          "adapters::generation::tests::existing_lease_blocks_launch_and_does_not_claim_resource_release",
+          "adapters::generation::tests::framing_failure_closes_control_before_reaping_and_records_failure",
+          "adapters::generation::tests::missing_supervisor_finishes_persisted_attempt_without_leaving_busy"
+        ],
+        "observed_generation_tests": [
+          "adapters::generation::tests::accepted_cancel_before_preparation_remains_cancelled",
+          "adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host",
+          "adapters::generation::tests::candidate_waits_for_process_exit_before_durable_success",
+          "adapters::generation::tests::cleanup_incomplete_is_nonterminal_and_later_cancel_can_finish",
+          "adapters::generation::tests::current_supervisor_sigkill_reclaims_a_gil_holding_compute_group_and_honors_cancel",
+          "adapters::generation::tests::existing_lease_blocks_launch_and_does_not_claim_resource_release",
+          "adapters::generation::tests::framing_failure_closes_control_before_reaping_and_records_failure",
+          "adapters::generation::tests::missing_supervisor_finishes_persisted_attempt_without_leaving_busy"
+        ],
+        "missing_generation_tests": [],
+        "worker_exit_code": 0
+      }
+    }
+  ],
+  "summary": {
+    "case_count": 9,
+    "counts": {
+      "passed": 9,
+      "not_run": 0,
+      "blocked": 0,
+      "failed": 0
+    },
+    "required_counts": {
+      "passed": 9,
+      "not_run": 0,
+      "blocked": 0,
+      "failed": 0
+    },
+    "overall": "passed"
+  },
+  "human_review": {
+    "status": "not_run",
+    "reviewer": null,
+    "meets_quality_bar": null,
+    "notes": "Behavioral reports do not replace visual quality review."
+  }
+}

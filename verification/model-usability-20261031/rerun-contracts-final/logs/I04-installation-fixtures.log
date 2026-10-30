@@ -1,0 +1,26 @@
+command=["cargo", "test", "-p", "image-studio-desktop", "adapters::installation::tests", "--lib", "--locked", "--offline", "--", "--nocapture"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=0.324
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running unittests src/lib.rs (target/debug/deps/image_studio_desktop-3b5505a7ac97501f)
+
+running 14 tests
+test adapters::installation::tests::actual_private_runtime_installs_offline_without_activating_missing_model ... ignored, explicit acceptance: requires all fixed runtime artifacts in validation cache
+test adapters::installation::tests::range_requires_exact_start_end_and_total ... ok
+test adapters::installation::tests::paths_urls_and_hashes_fail_closed ... ok
+test adapters::installation::tests::tar_links_cannot_escape_the_private_runtime ... ok
+test adapters::installation::tests::runtime_inventory_detects_changed_link_targets ... ok
+test adapters::installation::tests::fixed_manifests_are_complete ... ok
+test adapters::installation::tests::cached_part_and_managed_parent_links_cannot_write_outside ... ok
+test adapters::installation::tests::plan_metadata_keeps_all_seventeen_pinned_components ... ok
+test adapters::installation::tests::stalled_transfer_cancellation_does_not_wait_for_a_file_or_read_deadline ... ok
+test adapters::installation::tests::interrupted_transfer_keeps_a_resumable_part_but_never_a_final_file ... ok
+test adapters::installation::tests::wrong_digest_never_becomes_a_completed_cache_file ... ok
+test adapters::installation::tests::activation_records_bind_bytes_even_when_version_labels_are_reused ... ok
+test adapters::installation::tests::full_response_replaces_a_partial_without_appending ... ok
+test adapters::installation::tests::range_resume_requires_identity_and_preserves_exact_bytes ... ok
+
+test result: ok. 13 passed; 0 failed; 1 ignored; 0 measured; 73 filtered out; finished in 0.15s

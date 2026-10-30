@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "captured_from": "target/model-usability-i01-network-20261031.YmO4n6/data/data/installation-ready.json",
+  "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+  "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+  "runtime_manifest_sha256": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+  "model_manifest_sha256": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+  "runtime_file_count": 27043,
+  "runtime_file_bytes": 1533812705,
+  "probe": {
+    "device": "gpu",
+    "device_name": "Apple M3 Max",
+    "identity": {
+      "build_id": "studio-mflux-worker-0.1.0",
+      "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1"
+    },
+    "packages": {
+      "mflux": "0.24.0",
+      "mlx": "0.32.4",
+      "torch": "2.15.0",
+      "transformers": "5.22.0"
+    },
+    "python": "3.13.12"
+  }
+}

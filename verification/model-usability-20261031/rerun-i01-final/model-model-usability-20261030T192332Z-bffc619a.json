@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "run_id": "20261030T192332Z-bffc619a",
+  "started_at": "2026-10-30T19:23:32.159991+00:00",
+  "completed_at": "2026-10-30T19:23:32.188079+00:00",
+  "timezone": [
+    "CST",
+    "CST"
+  ],
+  "profile": "model",
+  "case_set": {
+    "version": "certify-current-model-usability-2026-10-30",
+    "path": "openspec/changes/certify-current-model-usability/test-plan.md",
+    "sha256": "0b4b5ab595ba481c8719b51f05b68c96b770eb2f1096d9dced34ef4d6c7fa269",
+    "selected_cases": [
+      "I01"
+    ]
+  },
+  "source_identity": {
+    "git_head": "02cc5b388c8413b1ebf90419fee842811782996e",
+    "working_tree_status_sha256": "2f2f6ed5db65f2f0b7275dcec53c0a84ff8d48ee0e41701adb6d507c007f0cb9",
+    "working_tree_dirty": true,
+    "versions": {
+      "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+      "node": "v24.12.0",
+      "npm": "11.6.2",
+      "python": "Python 3.15.0"
+    },
+    "file_sha256": {
+      "Cargo.lock": "b195b13438c0f8adbe7fb81a68c2f6b514874c50d4399ccba5559def5eeb79b8",
+      "resources/local-generation/model-manifest.json": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+      "resources/local-generation/runtime-manifest.json": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+      "resources/model-catalog/catalog.json": "7bfc42117f476471f16e67ce0b07c0a9a2922f21bcfaa0c826ea1848e6e2f765",
+      "apps/frontend/package-lock.json": "c1a40e0970009ee3d94bac20e454dbabcb953ca4853fed9e7cbed1ad129642ee"
+    },
+    "test_plan_sha256": "0b4b5ab595ba481c8719b51f05b68c96b770eb2f1096d9dced34ef4d6c7fa269",
+    "case_set_version": "certify-current-model-usability-2026-10-30"
+  },
+  "environment": {
+    "platform": "Darwin",
+    "platform_release": "27.0.0",
+    "machine": "arm64",
+    "python": "3.15.0 (main, Oct  9 2026, 11:16:41) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "timezone": [
+      "CST",
+      "CST"
+    ],
+    "sw_vers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434",
+    "memory_bytes": 137438953472,
+    "cpu": "Apple M3 Max"
+  },
+  "data_root": {
+    "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-i01-network-20261031.YmO4n6/data",
+    "category": "isolated",
+    "exists": true,
+    "top_level": [
+      "cache",
+      "data",
+      "logs",
+      "work"
+    ],
+    "installation": {
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+      "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+      "runtime_manifest_sha256": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+      "model_manifest_sha256": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+      "device": "gpu",
+      "device_name": "Apple M3 Max",
+      "runtime_file_count": 27043
+    },
+    "before": {
+      "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-i01-network-20261031.YmO4n6/data",
+      "category": "isolated",
+      "exists": true,
+      "top_level": [
+        "cache",
+        "data",
+        "logs",
+        "work"
+      ],
+      "installation": {
+        "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+        "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+        "runtime_manifest_sha256": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+        "model_manifest_sha256": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+        "device": "gpu",
+        "device_name": "Apple M3 Max",
+        "runtime_file_count": 27043
+      }
+    },
+    "changed_normal_operations_only": false
+  },
+  "installation_mode": "none",
+  "network_conditions": {
+    "declared_install_mode": "none",
+    "per_case_network_limits_are_recorded_in_details": true
+  },
+  "cases": [
+    {
+      "case_id": "I01",
+      "priority": "P0",
+      "profile": "model",
+      "description": "empty-cache fixed-source network installation",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-30T19:23:32.174582+00:00",
+      "finished_at": "2026-10-30T19:23:32.174590+00:00",
+      "reason": "recorded evidence reviewed",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/I01-network-install-passed.json",
+          "exists": true,
+          "sha256": "58658f68e7e34b1ae0d572a6a617b2fdd8423e4a4ac69b883edc0fb673e3d690",
+          "bytes": 2402,
+          "note": "recorded native/model evidence"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/i01-network-first-attempt.log",
+          "exists": true,
+          "sha256": "cf0e1fbc485479eeb59ba17ee2ce006fb0443e59576e7483a34aece9a65cef25",
+          "bytes": 61160
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/i01-network-install.log",
+          "exists": true,
+          "sha256": "0baf231caa7a6a39db78080a7efd9e7d439de11dc7977e462aff2b90a5686805",
+          "bytes": 145209
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/i01-installation-receipt.json",
+          "exists": true,
+          "sha256": "0daf462ad978506e7af9600fd1f4dce0053c4db2430747ee6a65e37dbdd0063c",
+          "bytes": 984
+        }
+      ],
+      "details": {
+        "recorded_evidence": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/I01-network-install-passed.json",
+        "schema_version": 1,
+        "case_id": "I01",
+        "status": "passed",
+        "evidence_kind": "real_execution",
+        "attempted_at": "2026-10-31T02:21:52+08:00",
+        "completed_at": "2026-10-31T03:13:47+08:00",
+        "from_empty_cache": true,
+        "fresh_isolated_target": true,
+        "official_source": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+        "fixed_revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+        "data_root": "target/model-usability-i01-network-20261031.YmO4n6/data",
+        "network": {
+          "direct_huggingface_probe": "timeout",
+          "successful_route": "HTTP proxy http://127.0.0.1:7897 for the fixed Hugging Face URLs",
+          "source_substitution": false
+        },
+        "installation": {
+          "download_verified_bytes": 33197369043,
+          "model_bytes": 32848304893,
+          "model_files": 18,
+          "installed_model_bytes": 32848318577,
+          "runtime_bytes": 349050466,
+          "runtime_receipt_files": 27043,
+          "runtime_receipt_bytes": 1533812705,
+          "phase_final": "ready",
+          "model_ready": true,
+          "runtime_ready": true,
+          "device_verified": true
+        },
+        "identity": {
+          "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+          "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+          "model_manifest_sha256": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+          "runtime_manifest_sha256": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+          "installation_ready_sha256": "7425a441182946c7deeece8c67cabefdf18131690a0e25bd922d80587b43f887"
+        },
+        "device_probe": {
+          "device": "gpu",
+          "device_name": "Apple M3 Max",
+          "python": "3.13.12",
+          "packages": {
+            "mflux": "0.24.0",
+            "mlx": "0.32.4",
+            "torch": "2.15.0",
+            "transformers": "5.22.0"
+          }
+        },
+        "harness": {
+          "generation_check_sha256": "a0e462ccdec2db5b0183fb339459888894e774122a93a29933a4bd64feebc9fb",
+          "inference_supervisor_sha256": "17284e0b1dc36f3ec5e4b250231376efae14d01d7a6572e731670af8af51d1d5"
+        },
+        "result": "Formal installer downloaded and verified every fixed model/runtime component into a fresh isolated root, activated the versioned installation, and passed the Apple M3 Max GPU probe.",
+        "evidence_paths": [
+          "verification/model-usability-20261031/i01-network-first-attempt.log",
+          "verification/model-usability-20261031/i01-network-install.log",
+          "verification/model-usability-20261031/i01-installation-receipt.json"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "case_count": 1,
+    "counts": {
+      "passed": 1,
+      "not_run": 0,
+      "failed": 0,
+      "blocked": 0
+    },
+    "required_counts": {
+      "passed": 1,
+      "not_run": 0,
+      "failed": 0,
+      "blocked": 0
+    },
+    "overall": "passed"
+  },
+  "human_review": {
+    "status": "passed",
+    "reviewer": "Codex visual reviewer under the user's acceptance-run authorization",
+    "reviewed_at": "2026-10-30T18:25:16Z",
+    "meets_quality_bar": true,
+    "notes": "All six P0 samples are complete, decodable, visually coherent images with the required primary subjects. There are no black, blank, corrupted, or unsafe outputs. Minor prompt-fidelity deviations are recorded below but do not invalidate the model capability baseline.",
+    "evidence": "verification/model-usability-20261031/real-generation-contact-sheet.jpg",
+    "cases": {
+      "G01": {
+        "status": "passed",
+        "notes": "An orange cat sits beside a bright window with autumn foliage and warm light. The image is complete and coherent; its treatment is more photorealistic than delicate watercolor, so that style deviation is retained as a product-quality observation."
+      },
+      "G02": {
+        "status": "passed",
+        "notes": "The English prompt produced an independent but closely related orange-cat/window/autumn composition. The image is complete; like G01, it reads more photographic than watercolor."
+      },
+      "G03": {
+        "status": "passed",
+        "notes": "The wide landscape clearly contains a calm lake, snowy mountains, morning mist, and a foreground wooden boat. Composition and requested aspect are coherent."
+      },
+      "G04": {
+        "status": "passed",
+        "notes": "The English wide landscape preserves lake, snowy peaks, boat, and mist while remaining an independent result. No corruption or subject omission."
+      },
+      "G05": {
+        "status": "passed",
+        "notes": "The portrait still life shows sunflowers in a white ceramic vase with a book on a wooden table and soft side lighting. The book is open rather than closed; the required vase/book relationship is still clear, and the deviation is recorded."
+      },
+      "G06": {
+        "status": "passed",
+        "notes": "The English portrait result shows sunflowers, a white handled ceramic vase, and a closed book on a wooden table under soft light. Image quality and composition are coherent."
+      }
+    }
+  }
+}

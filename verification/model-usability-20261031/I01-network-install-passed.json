@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "case_id": "I01",
+  "status": "passed",
+  "evidence_kind": "real_execution",
+  "attempted_at": "2026-10-31T02:21:52+08:00",
+  "completed_at": "2026-10-31T03:13:47+08:00",
+  "from_empty_cache": true,
+  "fresh_isolated_target": true,
+  "official_source": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+  "fixed_revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+  "data_root": "target/model-usability-i01-network-20261031.YmO4n6/data",
+  "network": {
+    "direct_huggingface_probe": "timeout",
+    "successful_route": "HTTP proxy http://127.0.0.1:7897 for the fixed Hugging Face URLs",
+    "source_substitution": false
+  },
+  "installation": {
+    "download_verified_bytes": 33197369043,
+    "model_bytes": 32848304893,
+    "model_files": 18,
+    "installed_model_bytes": 32848318577,
+    "runtime_bytes": 349050466,
+    "runtime_receipt_files": 27043,
+    "runtime_receipt_bytes": 1533812705,
+    "phase_final": "ready",
+    "model_ready": true,
+    "runtime_ready": true,
+    "device_verified": true
+  },
+  "identity": {
+    "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+    "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+    "model_manifest_sha256": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+    "runtime_manifest_sha256": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+    "installation_ready_sha256": "7425a441182946c7deeece8c67cabefdf18131690a0e25bd922d80587b43f887"
+  },
+  "device_probe": {
+    "device": "gpu",
+    "device_name": "Apple M3 Max",
+    "python": "3.13.12",
+    "packages": {
+      "mflux": "0.24.0",
+      "mlx": "0.32.4",
+      "torch": "2.15.0",
+      "transformers": "5.22.0"
+    }
+  },
+  "harness": {
+    "generation_check_sha256": "a0e462ccdec2db5b0183fb339459888894e774122a93a29933a4bd64feebc9fb",
+    "inference_supervisor_sha256": "17284e0b1dc36f3ec5e4b250231376efae14d01d7a6572e731670af8af51d1d5"
+  },
+  "result": "Formal installer downloaded and verified every fixed model/runtime component into a fresh isolated root, activated the versioned installation, and passed the Apple M3 Max GPU probe.",
+  "evidence_paths": [
+    "verification/model-usability-20261031/i01-network-first-attempt.log",
+    "verification/model-usability-20261031/i01-network-install.log",
+    "verification/model-usability-20261031/i01-installation-receipt.json"
+  ]
+}

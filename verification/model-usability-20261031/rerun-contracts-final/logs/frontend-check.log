@@ -1,0 +1,9 @@
+command=["npm", "--prefix", "apps/frontend", "run", "check"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=0.217
+
+
+> image-studio-ui@0.1.0 check
+> tsc --noEmit

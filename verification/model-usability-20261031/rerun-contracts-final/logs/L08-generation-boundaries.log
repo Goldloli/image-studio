@@ -1,0 +1,16 @@
+command=["cargo", "test", "-p", "studio-core", "generation::tests", "--lib", "--locked", "--offline", "--", "--nocapture"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=0.075
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running unittests src/lib.rs (target/debug/deps/studio_core-4159381348c070be)
+
+running 4 tests
+test generation::tests::phases_cannot_undo_cancellation_or_terminal ... ok
+test generation::tests::explicit_seed_is_preserved ... ok
+test generation::tests::random_seed_is_frozen_without_rewriting_request ... ok
+test generation::tests::unsupported_inputs_are_not_downgraded ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s

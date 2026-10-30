@@ -1,0 +1,27 @@
+command=["/opt/homebrew/opt/python@3.15/bin/python3.15", "-m", "unittest", "discover", "-s", "scripts/tests", "-p", "test*.py", "-v"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=0.326
+
+test_current_catalog_scope_passes (test_check_model_usability.CatalogContractTests.test_current_catalog_scope_passes) ... ok
+test_c04_writes_schema_report (test_check_model_usability.CliTests.test_c04_writes_schema_report) ... ok
+test_default_daily_root_cannot_be_used_for_contracts (test_check_model_usability.CliTests.test_default_daily_root_cannot_be_used_for_contracts) ... ok
+test_historical_reference_cannot_claim_native_ui_pass (test_check_model_usability.DailyEvidenceTests.test_historical_reference_cannot_claim_native_ui_pass) ... ok
+test_missing_native_manifest_is_not_a_pass (test_check_model_usability.DailyEvidenceTests.test_missing_native_manifest_is_not_a_pass) ... ok
+test_passed_native_case_requires_existing_evidence (test_check_model_usability.DailyEvidenceTests.test_passed_native_case_requires_existing_evidence) ... ok
+test_quality_review_requires_all_generation_cases (test_check_model_usability.DailyEvidenceTests.test_quality_review_requires_all_generation_cases) ... ok
+test_default_root_is_rejected (test_check_model_usability.IsolationTests.test_default_root_is_rejected) ... ok
+test_home_directory_is_rejected (test_check_model_usability.IsolationTests.test_home_directory_is_rejected) ... ok
+test_relative_root_is_rejected (test_check_model_usability.IsolationTests.test_relative_root_is_rejected) ... ok
+test_all_selected_cases_passed (test_check_model_usability.SummaryTests.test_all_selected_cases_passed) ... ok
+test_failure_takes_precedence (test_check_model_usability.SummaryTests.test_failure_takes_precedence) ... ok
+test_generation_pass_requires_quality_review (test_check_model_usability.SummaryTests.test_generation_pass_requires_quality_review) ... ok
+test_incomplete_when_required_case_is_not_run (test_check_model_usability.SummaryTests.test_incomplete_when_required_case_is_not_run) ... ok
+test_log_text_normalizes_crlf_and_trailing_blanks (test_check_model_usability.SummaryTests.test_log_text_normalizes_crlf_and_trailing_blanks) ... ok
+test_passed_quality_review_preserves_generation_pass (test_check_model_usability.SummaryTests.test_passed_quality_review_preserves_generation_pass) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.272s
+
+OK

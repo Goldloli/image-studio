@@ -1,0 +1,596 @@
+{
+  "schema_version": 1,
+  "run_id": "20261030T191819Z-0b6ea76e",
+  "started_at": "2026-10-30T19:18:19.887202+00:00",
+  "completed_at": "2026-10-30T19:18:19.906566+00:00",
+  "timezone": [
+    "CST",
+    "CST"
+  ],
+  "profile": "daily",
+  "case_set": {
+    "version": "certify-current-model-usability-2026-10-30",
+    "path": "openspec/changes/certify-current-model-usability/test-plan.md",
+    "sha256": "0b4b5ab595ba481c8719b51f05b68c96b770eb2f1096d9dced34ef4d6c7fa269",
+    "selected_cases": [
+      "D01",
+      "D02",
+      "D03",
+      "D04",
+      "D05",
+      "D06",
+      "D07",
+      "D08",
+      "D09",
+      "D10",
+      "S01"
+    ]
+  },
+  "source_identity": {
+    "git_head": "02cc5b388c8413b1ebf90419fee842811782996e",
+    "working_tree_status_sha256": "9bc3ae6486834afe83f47db772dacf9a3e16761b3fc009cdedb1204873f36ee6",
+    "working_tree_dirty": true,
+    "versions": {
+      "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+      "node": "v24.12.0",
+      "npm": "11.6.2",
+      "python": "Python 3.15.0"
+    },
+    "file_sha256": {
+      "Cargo.lock": "b195b13438c0f8adbe7fb81a68c2f6b514874c50d4399ccba5559def5eeb79b8",
+      "resources/local-generation/model-manifest.json": "f551e517d4b570737a7930b699f120ed976d0179f38d33e18e3868b8effff5d5",
+      "resources/local-generation/runtime-manifest.json": "6594c0e7cdcd36dc1feb15cf475bb43f0d1118edb5e8fe4768d970937ed8d617",
+      "resources/model-catalog/catalog.json": "7bfc42117f476471f16e67ce0b07c0a9a2922f21bcfaa0c826ea1848e6e2f765",
+      "apps/frontend/package-lock.json": "c1a40e0970009ee3d94bac20e454dbabcb953ca4853fed9e7cbed1ad129642ee"
+    },
+    "test_plan_sha256": "0b4b5ab595ba481c8719b51f05b68c96b770eb2f1096d9dced34ef4d6c7fa269",
+    "case_set_version": "certify-current-model-usability-2026-10-30"
+  },
+  "environment": {
+    "platform": "Darwin",
+    "platform_release": "27.0.0",
+    "machine": "arm64",
+    "python": "3.15.0 (main, Oct  9 2026, 11:16:41) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "timezone": [
+      "CST",
+      "CST"
+    ],
+    "sw_vers": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434",
+    "memory_bytes": 137438953472,
+    "cpu": "Apple M3 Max"
+  },
+  "data_root": {
+    "path": "/Users/gejiawei/Library/Application Support/ImageStudio",
+    "category": "default",
+    "exists": true,
+    "top_level": [
+      "application-preferences.json",
+      "assets",
+      "commits",
+      "diagnostics",
+      "execution.lock",
+      "host.lock",
+      "installation-ready.json",
+      "installation.lock",
+      "library.sqlite3",
+      "library.sqlite3-shm",
+      "library.sqlite3-wal",
+      "models",
+      "quarantine",
+      "runs",
+      "runtimes"
+    ],
+    "before": {
+      "path": "/Users/gejiawei/Library/Application Support/ImageStudio",
+      "category": "default",
+      "exists": true,
+      "top_level": [
+        "application-preferences.json",
+        "assets",
+        "commits",
+        "diagnostics",
+        "execution.lock",
+        "host.lock",
+        "installation-ready.json",
+        "installation.lock",
+        "library.sqlite3",
+        "library.sqlite3-shm",
+        "library.sqlite3-wal",
+        "models",
+        "quarantine",
+        "runs",
+        "runtimes"
+      ]
+    },
+    "changed_normal_operations_only": false
+  },
+  "installation_mode": "none",
+  "network_conditions": {
+    "declared_install_mode": "none",
+    "per_case_network_limits_are_recorded_in_details": true
+  },
+  "cases": [
+    {
+      "case_id": "D01",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.887728+00:00",
+      "finished_at": "2026-10-30T19:18:19.889298+00:00",
+      "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-default-settings-storage.png",
+          "exists": true,
+          "sha256": "b9b43ba9a50fd3348ad3fe0de0ac681d696e45407bd2fdfb824256fa400b6be9",
+          "bytes": 267913
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-model-not-installed.png",
+          "exists": true,
+          "sha256": "4aeb33d7d9bd01faecb395c0e841c8dce1d26d9401ace5e617d00e2386957b9d",
+          "bytes": 324734
+        }
+      ],
+      "details": {
+        "observations": "原生应用使用实际默认根启动；设置存储页显示 /Users/gejiawei/Library/Application Support/ImageStudio、缓存和日志路径。模型页显示 Z-Image 未安装，发送不可用，启动未触发下载或推理。",
+        "operation_method": "CUA native app; read-only filesystem and SQLite checks",
+        "logical_window": "1280x800",
+        "theme": "light"
+      }
+    },
+    {
+      "case_id": "D02",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.889332+00:00",
+      "finished_at": "2026-10-30T19:18:19.893740+00:00",
+      "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-model-ready.png",
+          "exists": true,
+          "sha256": "1e3be0b4a88727cf150d63b957c4c1bb5cfcab31f5092e8ac42e2c7b9760238f",
+          "bytes": 334359
+        },
+        {
+          "path": "/Users/gejiawei/Library/Application Support/ImageStudio/installation-ready.json",
+          "exists": true,
+          "sha256": "cb5dabbfb6a013f853af1057957b410d627c9bc1664582867d9dcefc29e9e044",
+          "bytes": 5313603
+        }
+      ],
+      "details": {
+        "observations": "从模型页点击正式安装。首次冷网络安装在 HF 连接超时时失败；重试也失败后停止。随后将已校验下载缓存置于默认缓存，继续由原生模型页和正式安装器重建 runtime，最终模型、环境、设备探针均为就绪。该结果明确为缓存复用安装，不是 I01 冷下载。",
+        "operation_method": "CUA native model page; production installer; no runtime copying",
+        "logical_window": "1280x800",
+        "theme": "light"
+      }
+    },
+    {
+      "case_id": "D03",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.893769+00:00",
+      "finished_at": "2026-10-30T19:18:19.896885+00:00",
+      "reason": "系统级键盘事件唤出了 SCIM.ITABC 的拼音候选窗，选中 `meishu` 后确认成“美术”；候选期间按 Enter 只结束组合，没有创建持久 Job。",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-ime-candidates.png",
+          "exists": true,
+          "sha256": "6e005aab1e4a9738a28b78a8bfd9137ff4295721aeeeadb316f63f1b9a3a6021",
+          "bytes": 2542047
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-ime-confirmed.png",
+          "exists": true,
+          "sha256": "569bf8c17ff0950dabc871841dac12a23797a2f093b8e31ea77eb77b4217c41f",
+          "bytes": 2510820
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-chinese-multiline-paste.png",
+          "exists": true,
+          "sha256": "0b27696a808438a5169444d07c46046aae3e382ab276d44b677b4cd68c843d1a",
+          "bytes": 320544
+        }
+      ],
+      "details": {
+        "observations": "在原生 Image Studio 创作输入框中通过 SCIM.ITABC 输入 `meishu`，全屏截图同时记录候选窗与 Image Studio 窗口；空格确认后文本框为“美术”。候选组合期间按 Enter 后 Job/Attempt/Asset 计数仍为 6/6/5，没有误发消息。原中文粘贴与 Shift+Enter 三行输入证据仍有效。",
+        "operation_method": "macOS SCIM.ITABC; HID-state CGEvent keyboard events; native Image Studio; full-screen capture; read-only SQLite counts",
+        "logical_window": "1280x800",
+        "theme": "light"
+      }
+    },
+    {
+      "case_id": "D04",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.896902+00:00",
+      "finished_at": "2026-10-30T19:18:19.898536+00:00",
+      "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-daily-round1-pending.png",
+          "exists": true,
+          "sha256": "5bef22b9e37ab59042a3244df64b7a6109b212ae5c67dd2c7a66adb7dd44cf0d",
+          "bytes": 190380
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-daily-round1-complete.png",
+          "exists": true,
+          "sha256": "686a687defba730f600dbb14545246c50e1b96c1d8e2cd43f365ff12b53c5b7b",
+          "bytes": 325431
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-daily-three-rounds.png",
+          "exists": true,
+          "sha256": "cbbc9de9ad05ba53c3c861dd503467ae7a43f6b1cce5f2c5dce5086347bbc21a",
+          "bytes": 304858
+        }
+      ],
+      "details": {
+        "observations": "从模型页将 Z-Image 用于明确的“日常验收”会话。原生 Enter 发送后即时出现占位；连续完成中文方图、横图和竖图三轮，分别生成三个独立 Job、三个成功 Attempt 和三个正式资产，图片均在原卡片显示。",
+        "operation_method": "CUA native app; SQLite/AssetRef read-only verification",
+        "logical_window": "1280x800",
+        "theme": "light"
+      }
+    },
+    {
+      "case_id": "D05",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.898545+00:00",
+      "finished_at": "2026-10-30T19:18:19.899306+00:00",
+      "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-switch-back-to-generating-a.png",
+          "exists": true,
+          "sha256": "32455cebf2dce881a3e052ebd8a3c42b3d060550a571a45e36671f356c1f18f2",
+          "bytes": 193765
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-switch-a-sampling.png",
+          "exists": true,
+          "sha256": "c55fbfabcfc8abd7f73e77444e8e0b4c57c5dd7e396b585cce7e100265b42aa8",
+          "bytes": 193472
+        }
+      ],
+      "details": {
+        "observations": "A 会话的独立 Job 进入真实采样后切到“另一会话”；B 的待发送草稿可继续编辑，发送按钮提示其他会话正在生成并禁用。返回 A 后仍看到同一 Job 的采样进度，停止仅将 A 的 Attempt 置为 cancelled，B 草稿与进度未串线。",
+        "operation_method": "CUA native app; live DB checks",
+        "logical_window": "1280x800",
+        "theme": "light"
+      }
+    },
+    {
+      "case_id": "D06",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.899312+00:00",
+      "finished_at": "2026-10-30T19:18:19.901533+00:00",
+      "reason": "首次进入作品页直接显示 5 个正式 AssetRef，无需手动刷新；列表/网格往返后数量和布局保持，来源会话与制作记录可追溯。",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-works-detail.png",
+          "exists": true,
+          "sha256": "712e7b0ded1cd9fe9be9c868228dc65c56d35a5a4b43594d5b03fc91ad407cd4",
+          "bytes": 428572
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/daily-generation-interaction-fix-20261031/native-works-first-entry-fixed.png",
+          "exists": true,
+          "sha256": "61550b5fa042b7e2b490cb83a9934f74bd9b8d17c98d34f07cd5adaf8593bb95",
+          "bytes": 448439
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/daily-generation-interaction-fix-20261031/native-works-activation-list-preserved.png",
+          "exists": true,
+          "sha256": "d9f51a26441886f9826a5d6b6217f4c5cbdcb5c147b52c86ff23a9261eb77ccd",
+          "bytes": 600243
+        }
+      ],
+      "details": {
+        "observations": "修复 image-studio-1yi 后在原生默认库回归：生成完成后的首次作品页激活直接读取 5 个正式资产；切换列表布局再返回仍保持 5 个，观看器返回后没有重开旧预览。任务详情继续显示会话、模型、尺寸、实际种子、Job、Attempt 和阶段，来源会话可返回。",
+        "operation_method": "CUA native app; SQLite read-only cross-check",
+        "logical_window": "1280x800",
+        "theme": "light"
+      }
+    },
+    {
+      "case_id": "D07",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.901547+00:00",
+      "finished_at": "2026-10-30T19:18:19.902647+00:00",
+      "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-settings-dark-defaults.png",
+          "exists": true,
+          "sha256": "154b792f6cfa2fddf8b99bba4b966aeee5884e88315a1b4426ec268a64c6f9d0",
+          "bytes": 220316
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-restart-defaults-seed.png",
+          "exists": true,
+          "sha256": "da42b4e126c23119dcc25dbce63c4330190e290c937af60b5d045defbd699199",
+          "bytes": 306158
+        },
+        {
+          "path": "/Users/gejiawei/Library/Application Support/ImageStudio/application-preferences.json",
+          "exists": true,
+          "sha256": "195bc5c22458380a07f11a1163494ec9d74c060480453c247f6f437f6fca5252",
+          "bytes": 315
+        }
+      ],
+      "details": {
+        "observations": "保存了 B 会话 37 字符未发送草稿、A 会话 3:4 选择、深色主题和新会话默认 4:3/20261031 种子，随后正常退出并重启。重启后主题、当前会话与参数、旧会话结果和 B 草稿均恢复；新建会话使用 4:3 与固定种子，旧会话参数未被改写。",
+        "operation_method": "CUA native app; normal Quit/Launch; preferences and SQLite checks",
+        "logical_window": "1280x800",
+        "theme": "dark"
+      }
+    },
+    {
+      "case_id": "D08",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.902652+00:00",
+      "finished_at": "2026-10-30T19:18:19.903701+00:00",
+      "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/导出 验收/日常验收 向日葵.png",
+          "exists": true,
+          "sha256": "502892b13f988cfcc41e1b5f5321278287a2254c600a8253a7b99544cbf13643",
+          "bytes": 923699
+        }
+      ],
+      "details": {
+        "observations": "系统保存面板先取消一次，界面提示“已取消导出，原作品未改变”。再次通过原生保存面板导出到含中文和空格的目录/文件名；导出与内部 AssetRef 均为 923699 bytes，SHA-256 均为 502892b13f988cfcc41e1b5f5321278287a2254c600a8253a7b99544cbf13643，导出后资产总数仍为 3。",
+        "operation_method": "CUA native app plus NSSavePanel; SHA-256 comparison",
+        "logical_window": "1280x800",
+        "theme": "light"
+      }
+    },
+    {
+      "case_id": "D09",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.903706+00:00",
+      "finished_at": "2026-10-30T19:18:19.905000+00:00",
+      "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-matrix/layout-matrix.jpg",
+          "exists": true,
+          "sha256": "23c115338b39f28224c56bf8e0c57f1b351cef81d0589d37f10b61ebb7a98b7c",
+          "bytes": 210839
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-matrix/1280-light-create.png",
+          "exists": true,
+          "sha256": "4873ccb5e3bab36b005b402955bd280bbfb0cb3d7cefa0c0f63403ef891f88ff",
+          "bytes": 299830
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-matrix/960-dark-create.png",
+          "exists": true,
+          "sha256": "328b7d3faeff9b69636cd14eaf399d8f4a03199f3e8a94fc4909ed885c569bb9",
+          "bytes": 217897
+        }
+      ],
+      "details": {
+        "observations": "完成 1280x800 与 960x640 两档逻辑窗口、浅色与深色两套主题，覆盖创作、模型、作品、任务和设置五个页面；布局矩阵未见关键内容遮挡，Tab 焦点具有可访问名称。原生命令行尺寸参数生成 2x 像素截图，逻辑尺寸分别为 1280x800 与 960x640。",
+        "operation_method": "CUA native app; diagnostic-size launch; keyboard Tab",
+        "logical_window": "1280x800 and 960x640",
+        "theme": "light and dark"
+      }
+    },
+    {
+      "case_id": "D10",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "native default-root daily workflow",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.905004+00:00",
+      "finished_at": "2026-10-30T19:18:19.906041+00:00",
+      "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-offline-sampling.png",
+          "exists": true,
+          "sha256": "d3e2feb13de4468fc1e654ef1a30248d9085d87ad22052a9383b67aff57a9713",
+          "bytes": 187228
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-offline-complete.png",
+          "exists": true,
+          "sha256": "2fb9b2b186704ed490f8935c6460c1985c6dfdaf9eadf82086fff70158e55847",
+          "bytes": 330403
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-access-v6/offline-app-receipt.json",
+          "exists": true,
+          "sha256": "7a5764a2150732a024d579e50c8dfc78939489e0fe09dd4bd9a94397485cc64f",
+          "bytes": 859
+        }
+      ],
+      "details": {
+        "observations": "通过 Mach-O app 注入器在进程启动前调用 sandbox_init；profile 为 allow default + deny network*，宿主、inference-supervisor 与 Python worker 均继承。原生 UI 在该进程树内完成 1024x768 生成，Job job-f8c6b9e10571417d9541078637206f82 与 Attempt attempt-e33249d8dfda4a1bb312fc0f62e8c148 成功，正式 PNG 为 1411282 bytes，SHA-256 f7d83b3c9302921e1951b3e04000b4916ef1d560bda87dbcadd8c2cf456ba90c。",
+        "operation_method": "dylib sandbox injection + CUA native app + live process tree",
+        "logical_window": "960x640",
+        "theme": "dark"
+      }
+    },
+    {
+      "case_id": "S01",
+      "priority": "P0",
+      "profile": "daily",
+      "description": "ordinary default-root startup",
+      "status": "passed",
+      "evidence_kind": "native_ui",
+      "started_at": "2026-10-30T19:18:19.906046+00:00",
+      "finished_at": "2026-10-30T19:18:19.906428+00:00",
+      "reason": "native evidence reviewed",
+      "command": [],
+      "exit_code": null,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/daily-evidence.json",
+          "exists": true,
+          "sha256": "8e1ef749846b2e81f7ce4922c6c8d3946763433fb0d36a507107672adb40135e",
+          "bytes": 9312
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-default-settings-storage.png",
+          "exists": true,
+          "sha256": "b9b43ba9a50fd3348ad3fe0de0ac681d696e45407bd2fdfb824256fa400b6be9",
+          "bytes": 267913
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/model-usability-20261031/native-model-not-installed.png",
+          "exists": true,
+          "sha256": "4aeb33d7d9bd01faecb395c0e841c8dce1d26d9401ace5e617d00e2386957b9d",
+          "bytes": 324734
+        }
+      ],
+      "details": {
+        "observations": "不带 data-dir 正常启动，设置页确认默认数据、缓存、日志路径；启动前后无模型安装动作。未安装时会话仍可编辑，发送禁用。",
+        "operation_method": "CUA native app; default-root filesystem check",
+        "logical_window": "1280x800",
+        "theme": "light"
+      }
+    }
+  ],
+  "summary": {
+    "case_count": 11,
+    "counts": {
+      "failed": 0,
+      "passed": 11,
+      "blocked": 0,
+      "not_run": 0
+    },
+    "required_counts": {
+      "failed": 0,
+      "passed": 11,
+      "blocked": 0,
+      "not_run": 0
+    },
+    "overall": "passed"
+  },
+  "human_review": {
+    "status": "not_run",
+    "reviewer": null,
+    "meets_quality_bar": null,
+    "notes": "Behavioral reports do not replace visual quality review."
+  }
+}

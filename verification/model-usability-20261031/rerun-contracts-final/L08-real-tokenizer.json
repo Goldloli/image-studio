@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "kind": "actual-fixed-tokenizer-offline-preflight",
+  "network_denied": true,
+  "is_full_model_inference": false,
+  "data_root": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-i01-network-20261031.YmO4n6/data",
+  "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+  "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+  "private_python": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-i01-network-20261031.YmO4n6/data/data/runtimes/mflux-0.24.0-py3.13.12-macos-arm64-v1/venv/bin/python3",
+  "worker_exit_code": 0,
+  "short_prompt_bytes": 105,
+  "short_prompt_template_tokens": 34,
+  "short_prompt_within_limit": true,
+  "long_prompt_bytes": 5100,
+  "long_prompt_rejected": true,
+  "long_prompt_rejection": "提示词含模板共 1708 token，超过 512 token 上限；请缩短提示词。",
+  "truncation_disabled": true,
+  "model_weights_loaded": false,
+  "worker_stderr_tail": ""
+}

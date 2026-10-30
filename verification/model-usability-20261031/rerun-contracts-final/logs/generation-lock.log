@@ -1,0 +1,14 @@
+command=["/opt/homebrew/opt/python@3.15/bin/python3.15", "scripts/verify-generation-lock.py"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=0.031
+
+{
+  "model_components": 17,
+  "component_bytes": 32848304893,
+  "runtime_wheels": 59,
+  "worker_source_matches_wheel": true,
+  "runtime_lock": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+  "network_accessed": false
+}

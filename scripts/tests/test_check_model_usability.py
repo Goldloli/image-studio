@@ -63,6 +63,9 @@ class SummaryTests(unittest.TestCase):
         }
         self.assertEqual(module.apply_quality_gate(summary, ["G01"], review)["overall"], "passed")
 
+    def test_log_text_normalizes_crlf_and_trailing_blanks(self) -> None:
+        self.assertEqual(module.normalized_log_text(b"one\r\ntwo\r\n\r\n"), "one\ntwo\n")
+
 
 class DailyEvidenceTests(unittest.TestCase):
     def test_missing_native_manifest_is_not_a_pass(self) -> None:
