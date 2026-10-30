@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "reviewedDate": "2026-10-30",
+  "entries": [
+    {
+      "featureId": "text-to-image",
+      "title": "文生图",
+      "category": "生成",
+      "summary": "把中英文提示词生成一张本地图片。",
+      "description": "复用当前会话已有的提示词、模型、画幅、种子和统一发送链路。功能页只负责登记和跳转，不建立第二套队列或结果状态。",
+      "inputs": ["提示词", "当前会话模型", "画幅", "可选种子"],
+      "outputs": ["正式 PNG AssetRef"],
+      "productStatus": "implemented",
+      "scope": "当前支持 Z-Image Turbo，单轮 1 张，1:1、4:3、3:4 三种画幅。",
+      "action": "open-composer",
+      "modelId": "z-image-turbo-mflux-v1",
+      "dependencies": [
+        { "kind": "model", "label": "已登记且已完成的本地模型安装" },
+        { "kind": "runtime", "label": "通过设备检查的隔离运行环境" },
+        { "kind": "conversation", "label": "当前会话与已保存草稿" }
+      ]
+    },
+    {
+      "featureId": "image-edit",
+      "title": "图片编辑",
+      "category": "编辑",
+      "summary": "未来通过源图和有限指令生成一张新图片。",
+      "description": "规划为独立的源图输入和输出功能。当前没有可执行 worker，也不会把文生图参数伪装成图片编辑。",
+      "inputs": ["受控 AssetId", "编辑指令"],
+      "outputs": ["新的 PNG AssetRef"],
+      "productStatus": "planned",
+      "scope": "仅登记范围；首轮计划不包含多参考编辑。",
+      "action": null,
+      "modelId": "flux2-klein-4b-distilled",
+      "dependencies": [
+        { "kind": "model", "label": "FLUX.2 Klein 模型尚未接入" },
+        { "kind": "runtime", "label": "源图输入与编辑 worker 尚未实现" }
+      ]
+    },
+    {
+      "featureId": "remove-background",
+      "title": "去背景",
+      "category": "编辑",
+      "summary": "未来提取主体并生成透明 PNG。",
+      "description": "规划使用独立主体分割模型，原图与来源制作记录保持不变，处理结果另存为正式资产。",
+      "inputs": ["受控源图 AssetId"],
+      "outputs": ["透明 PNG AssetRef", "前景蒙版"],
+      "productStatus": "planned",
+      "scope": "仅登记范围；当前没有 ONNX 执行链路。",
+      "action": null,
+      "modelId": "birefnet-general-epoch-244",
+      "dependencies": [
+        { "kind": "model", "label": "BiRefNet 权重尚未完成发布复核" },
+        { "kind": "runtime", "label": "ONNX Runtime 与蒙版输出尚未接入" }
+      ]
+    },
+    {
+      "featureId": "upscale",
+      "title": "放大",
+      "category": "增强",
+      "summary": "未来使用固定 4 倍模型输出更高分辨率图片。",
+      "description": "规划使用明确的 Real-ESRGAN x4plus 固定模型，执行分块处理并另存新资产，不覆盖原图。",
+      "inputs": ["受控源图 AssetId"],
+      "outputs": ["放大后的 PNG AssetRef"],
+      "productStatus": "planned",
+      "scope": "仅登记范围；任意倍率、人脸修复和动漫专用模型不在首轮范围。",
+      "action": null,
+      "modelId": "realesrgan-x4plus",
+      "dependencies": [
+        { "kind": "model", "label": "Real-ESRGAN 转换权重尚未复核" },
+        { "kind": "runtime", "label": "分块执行与资源回收尚未接入" }
+      ]
+    }
+  ]
+}

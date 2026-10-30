@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "reviewedDate": "2026-10-30",
+  "entries": [
+    {
+      "id": "z-image-turbo-mflux-v1",
+      "displayName": "Z-Image Turbo",
+      "variant": "Tongyi-MAI/Z-Image-Turbo · mflux-v1",
+      "family": "Z-Image",
+      "summary": "面向中英文提示词的本地文生图模型，当前已接入并完成指定设备验收。",
+      "description": "从提示词生成单张图片。产品固定为 4-bit 加载、9 步采样，并只开放 1:1、4:3、3:4 三种已验证画幅。",
+      "capabilities": [
+        { "id": "text_to_image", "label": "文生图" }
+      ],
+      "productStatus": "implemented",
+      "runtime": "MFLUX / MLX · Python 3.13",
+      "license": "Apache-2.0",
+      "source": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+      "revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+      "modelBytes": 32848304893,
+      "knownArtifactBytes": 32848304893,
+      "requirements": [
+        "隔离的 macOS arm64 MFLUX / MLX 运行时",
+        "下载、目标模型与临时空间合计预算在安装前复核",
+        "运行前校验固定组件哈希与设备探针"
+      ],
+      "exclusions": [
+        "Z-Image Base / Edit / Omni",
+        "LoRA 与任意派生权重",
+        "其他硬件配置的性能承诺"
+      ],
+      "verifiedDevices": [
+        "Apple M3 Max / 128 GiB / macOS arm64"
+      ],
+      "recipe": "q4 · 9 步 · 每轮 1 张",
+      "installId": "z-image-turbo-mflux-v1",
+      "installerSupported": true
+    },
+    {
+      "id": "flux2-klein-4b-distilled",
+      "displayName": "FLUX.2 Klein 4B distilled",
+      "variant": "black-forest-labs/FLUX.2-klein-4B · distilled",
+      "family": "FLUX.2",
+      "summary": "计划补充文生图与单图指令编辑，当前尚未接入安装或执行链路。",
+      "description": "首批规划中的同一 MFLUX 路线型号。产品首轮计划只验证文生图和单图指令编辑，不包含多参考编辑。",
+      "capabilities": [
+        { "id": "text_to_image", "label": "文生图" },
+        { "id": "image_edit", "label": "图片编辑" }
+      ],
+      "productStatus": "planned",
+      "runtime": "MFLUX / MLX（计划）",
+      "license": "Apache-2.0",
+      "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B",
+      "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "modelBytes": null,
+      "knownArtifactBytes": null,
+      "requirements": [
+        "独立模型组件清单与完整哈希",
+        "单图编辑输入、取消和资源回收验收",
+        "目标设备实机验证"
+      ],
+      "exclusions": [
+        "Klein Base / 9B / 9B KV",
+        "多参考编辑",
+        "替换小型文本编码器"
+      ],
+      "verifiedDevices": [],
+      "recipe": "计划：4-bit · 4 步",
+      "installId": null,
+      "installerSupported": false
+    },
+    {
+      "id": "birefnet-general-epoch-244",
+      "displayName": "BiRefNet general epoch_244",
+      "variant": "BiRefNet-general-epoch_244.onnx",
+      "family": "BiRefNet",
+      "summary": "计划补充主体分离与透明背景输出，当前只保留选型事实。",
+      "description": "固定使用官方 general epoch_244 ONNX 权重，首轮计划验证 CPUExecutionProvider、前景 mask 和透明 PNG 输出。",
+      "capabilities": [
+        { "id": "background_removal", "label": "去背景" }
+      ],
+      "productStatus": "planned",
+      "runtime": "ONNX Runtime · CPU（计划）",
+      "license": "源仓库与通用模型卡为 MIT；具体发布权重待复核",
+      "source": "https://github.com/ZhengPeng7/BiRefNet/releases/tag/v1",
+      "revision": "v1 / epoch_244",
+      "modelBytes": null,
+      "knownArtifactBytes": 972666916,
+      "requirements": [
+        "核对实际 ONNX 图输入输出和预处理",
+        "透明 PNG 不覆盖原图",
+        "CPU 路线实机验收"
+      ],
+      "exclusions": [
+        "Core ML / MPS 认证",
+        "Portrait 或其他 checkpoint",
+        "把文件元数据当作已完成哈希"
+      ],
+      "verifiedDevices": [],
+      "recipe": "计划：1024 × 1024 预处理参考",
+      "installId": null,
+      "installerSupported": false
+    },
+    {
+      "id": "realesrgan-x4plus",
+      "displayName": "Real-ESRGAN x4plus",
+      "variant": "RealESRGAN_x4plus · ncnn",
+      "family": "Real-ESRGAN",
+      "summary": "计划补充通用 4 倍放大，当前尚未接入原生 worker。",
+      "description": "首轮只认证通用 realesrgan-x4plus 4 倍放大和分块执行；原始 PyTorch 权重与 ncnn 转换格式必须分别记录来源和哈希。",
+      "capabilities": [
+        { "id": "upscale", "label": "放大" }
+      ],
+      "productStatus": "planned",
+      "runtime": "Real-ESRGAN ncnn Vulkan（计划）",
+      "license": "主仓库 BSD-3-Clause · ncnn 程序 MIT · 转换权重待复核",
+      "source": "https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.1.0",
+      "revision": "v0.1.0 / ncnn 37026f4",
+      "modelBytes": null,
+      "knownArtifactBytes": 67040989,
+      "requirements": [
+        "程序、依赖和所选 .param/.bin 文件分别校验",
+        "显式指定 realesrgan-x4plus",
+        "分块执行与资源回收验收"
+      ],
+      "exclusions": [
+        "动漫专用模型",
+        "人脸修复",
+        "任意倍率重采样"
+      ],
+      "verifiedDevices": [],
+      "recipe": "计划：通用 4× 放大",
+      "installId": null,
+      "installerSupported": false
+    }
+  ]
+}
