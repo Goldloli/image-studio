@@ -19,6 +19,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut prompt = "A quiet cobalt glass cube on a warm concrete table".to_string();
     let mut source = None;
     let mut export = None;
+    let mut seed = "42".to_string();
+    let mut retry_job = None;
+    let mut cancel_after = None;
+    let mut cancel_stage = None;
+    let mut accept_cancelled = false;
     while let Some(flag) = args.next() {
         match flag.as_str() {
             "--data-dir" => root = Some(PathBuf::from(args.next().ok_or("missing data root")?)),
@@ -26,6 +31,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "--prompt" => prompt = args.next().ok_or("missing prompt")?,
             "--source" => source = Some(PathBuf::from(args.next().ok_or("missing source path")?)),
             "--export" => export = Some(PathBuf::from(args.next().ok_or("missing export path")?)),
+            "--seed" => seed = args.next().ok_or("missing seed")?,
+            "--retry-job" => retry_job = Some(args.next().ok_or("missing retry job")?),
+            "--cancel-after-seconds" => {
+                cancel_after = Some(args.next().ok_or("missing cancel delay")?.parse::<u64>()?)
+            }
+            "--cancel-at-stage" => {
+                let stage = args.next().ok_or("missing cancel stage")?;
+                if !["loading", "sampling", "encoding", "decoding"].contains(&stage.as_str()) {
+                    return Err("unsupported cancel stage".into());
+                }
+                cancel_stage = Some(stage);
+            }
+            "--accept-cancelled" => accept_cancelled = true,
             _ => return Err(format!("unknown option: {flag}").into()),
         }
     }
@@ -33,6 +51,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err("--mode must be text or edit".into());
     }
     let root = root.ok_or("--data-dir is required; use an isolated acceptance root")?;
+    let export = export
+        .map(|path| {
+            if path.is_absolute() {
+                Ok(path)
+            } else {
+                std::env::current_dir().map(|cwd| cwd.join(path))
+            }
+        })
+        .transpose()?;
     let executable = std::env::current_exe()?;
     let supervisor = executable
         .parent()
@@ -45,6 +72,79 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ));
     if let Some(error) = &service.startup_error {
         return Err(error.clone().into());
+    }
+    if let Some(job_id) = retry_job {
+        let retried = service.retry(&job_id)?;
+        println!("{}", json!({"retried": retried}));
+        let job_id = retried["id"]
+            .as_str()
+            .ok_or("retried job has no ID")?
+            .to_owned();
+        let started = Instant::now();
+        let mut cancel_requested = false;
+        loop {
+            let current = service.snapshot()?;
+            let job = current["jobs"]
+                .as_array()
+                .and_then(|jobs| jobs.iter().find(|job| job["id"] == job_id.as_str()))
+                .cloned()
+                .ok_or("retried job is not visible")?;
+            println!(
+                "{}",
+                json!({
+                    "job": job,
+                    "execution": current["execution"],
+                    "elapsed_seconds": started.elapsed().as_secs()
+                })
+            );
+            if !cancel_requested {
+                let by_time = cancel_after
+                    .is_some_and(|seconds| started.elapsed() >= Duration::from_secs(seconds));
+                let by_stage = cancel_stage.as_deref() == current["execution"]["stage"].as_str();
+                if by_time || by_stage {
+                    service.cancel(&job_id)?;
+                    cancel_requested = true;
+                    println!(
+                        "{}",
+                        json!({
+                            "cancelRequested": true,
+                            "jobId": job_id,
+                            "trigger": if by_stage { "stage" } else { "time" },
+                            "stage": current["execution"]["stage"]
+                        })
+                    );
+                }
+            }
+            match job["state"].as_str() {
+                Some("Succeeded") => {
+                    let asset_id = job["assetId"]
+                        .as_str()
+                        .ok_or("successful retried job has no asset")?;
+                    if let Some(path) = &export {
+                        service.export(asset_id, path, false)?;
+                        println!("{}", json!({"exported": path, "assetId": asset_id}));
+                    }
+                    return Ok(());
+                }
+                Some("Cancelled") if accept_cancelled => {
+                    println!("{}", json!({"cancelled": true, "jobId": job_id}));
+                    return Ok(());
+                }
+                Some("Failed" | "Cancelled" | "Interrupted") => {
+                    return Err(format!(
+                        "retried Klein job ended as {}: {}",
+                        job["state"],
+                        job["error"].as_str().unwrap_or("no detail")
+                    )
+                    .into());
+                }
+                _ => {}
+            }
+            if started.elapsed() > Duration::from_secs(3600) {
+                return Err("Klein retry exceeded one-hour acceptance deadline".into());
+            }
+            std::thread::sleep(Duration::from_secs(5));
+        }
     }
     let source_id = if mode == "edit" {
         let source = match source {
@@ -110,7 +210,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "sourceAssetId": source_id,
                 "aspect": "1:1",
                 "count": 1,
-                "seed": "42"
+                "seed": seed
             }),
             collapsed: false,
             prompt_source_id: None,
@@ -127,7 +227,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         source_asset_id: source_id,
         aspect: "1:1".into(),
         count: 1,
-        seed: "42".into(),
+        seed,
         submission_key: uuid::Uuid::new_v4().to_string(),
     })?;
     println!("{}", json!({"accepted": accepted}));
@@ -136,6 +236,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .ok_or("accepted turn has no ID")?
         .to_owned();
     let started = Instant::now();
+    let mut cancel_requested = false;
     loop {
         let current = service.snapshot()?;
         let turn = current["turns"]
@@ -151,6 +252,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "elapsed_seconds": started.elapsed().as_secs()
             })
         );
+        if !cancel_requested {
+            let by_time = cancel_after
+                .is_some_and(|seconds| started.elapsed() >= Duration::from_secs(seconds));
+            let by_stage = cancel_stage.as_deref() == current["execution"]["stage"].as_str();
+            if by_time || by_stage {
+                service.conversation_cancel_turn(&turn_id)?;
+                cancel_requested = true;
+                println!(
+                    "{}",
+                    json!({
+                        "cancelRequested": true,
+                        "turnId": turn_id,
+                        "trigger": if by_stage { "stage" } else { "time" },
+                        "stage": current["execution"]["stage"]
+                    })
+                );
+            }
+        }
         match turn["state"].as_str() {
             Some("Succeeded") => {
                 let asset_id = turn["assetId"]
@@ -160,6 +279,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     service.export(asset_id, &path, false)?;
                     println!("{}", json!({"exported": path, "assetId": asset_id}));
                 }
+                return Ok(());
+            }
+            Some("Cancelled") if accept_cancelled => {
+                println!("{}", json!({"cancelled": true, "jobId": turn["jobId"]}));
                 return Ok(());
             }
             Some("Failed" | "Rejected" | "Cancelled" | "Interrupted") => {
