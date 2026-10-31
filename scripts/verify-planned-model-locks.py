@@ -151,13 +151,26 @@ def verify_text_models(shared_directory, model_directories):
             19,
         ),
     }
+    source_metadata = json.loads(
+        (
+            root
+            / "openspec/changes/introduce-qwen21-and-moss-image"
+            / "references/model-source-metadata.json"
+        ).read_text()
+    )
+    source_by_repository = {
+        item["repository"]: item for item in source_metadata["models"]
+    }
     verified = []
     for directory in model_directories:
         model = json.loads((directory / "model-manifest.json").read_text())
         repository, revision, component_bytes, file_count = expected[directory.name]
+        source_model = source_by_repository[repository]
+        source_files = {item["path"]: item for item in source_model["files"]}
         assert model["schema_version"] == 1
         assert model["repository"] == repository
         assert model["revision"] == revision
+        assert source_model["revision"] == revision
         assert model["component_bytes"] == component_bytes
         assert len(model["files"]) == file_count
         assert sum(file["bytes"] for file in model["files"]) == component_bytes
@@ -168,6 +181,13 @@ def verify_text_models(shared_directory, model_directories):
             assert re.fullmatch("[0-9a-f]{64}", file["sha256"])
             assert f"/resolve/{revision}/" in file["url"]
             assert file["license"]
+            source_file = source_files[file["path"]]
+            assert file["bytes"] == source_file["bytes"]
+            if source_file["sha256"] is not None:
+                assert file["sha256"] == source_file["sha256"]
+        selected = set(source_model["candidate_component_files"])
+        selected.add("LICENSE")
+        assert {file["path"] for file in model["files"]} == selected
         verified.append(
             {
                 "repository": repository,
