@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedDate": "2026-10-30",
+  "reviewedDate": "2026-10-31",
   "entries": [
     {
       "id": "z-image-turbo-mflux-v1",
@@ -64,7 +64,9 @@
         "多参考编辑",
         "替换小型文本编码器"
       ],
-      "verifiedDevices": [],
+      "verifiedDevices": [
+        "Apple M3 Max / 128 GiB / macOS arm64"
+      ],
       "recipe": "q4 · 4 步 · 1024 × 1024",
       "installId": "flux2-klein-4b-distilled",
       "installerSupported": true
