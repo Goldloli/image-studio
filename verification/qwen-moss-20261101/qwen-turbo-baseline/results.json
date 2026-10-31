@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "family": "qwen-turbo",
+  "modelId": "qwen-image-2.1-turbo-mflux-v1",
+  "modelSnapshot": "qwen-image-2.1-turbo-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+  "runtime": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+  "quantization": 8,
+  "steps": 8,
+  "guidance": 1.0,
+  "scheduler": "linear",
+  "size": [1024, 1024],
+  "loadSeconds": 0.5383591250283644,
+  "elapsedSeconds": 193.7027387500275,
+  "tasks": [
+    {
+      "id": "T01",
+      "seed": 42,
+      "tokenCount": 26,
+      "tokenBudget": 2048,
+      "lastObservedSamplingStep": 8,
+      "elapsedSeconds": 64.70243800000753,
+      "bytes": 2036110,
+      "sha256": "163d118eaef4c7fa7ccbfb7f41c399cfb2151e8dc7cbbaf6f594c212531b74df"
+    },
+    {
+      "id": "T02",
+      "seed": 43,
+      "tokenCount": 26,
+      "tokenBudget": 2048,
+      "lastObservedSamplingStep": 8,
+      "elapsedSeconds": 64.33227604092099,
+      "bytes": 993692,
+      "sha256": "c7874cf577b7e4c8dcdd87320bcf9e15bb4a3700fe5867472b8fee244df03063"
+    },
+    {
+      "id": "T03",
+      "seed": 44,
+      "tokenCount": 38,
+      "tokenBudget": 2048,
+      "lastObservedSamplingStep": 8,
+      "elapsedSeconds": 64.12871787499171,
+      "bytes": 939861,
+      "sha256": "70e490769c2d7702106c5c88890076969b711d84a7cd9af488428064e63e088b"
+    }
+  ],
+  "qualityReview": {
+    "T01": "水彩小猫、秋叶和窗边暖光正常，8 步 Turbo 输出完整。",
+    "T02": "白瓷茶壶与蓝杯关系准确，产品摄影质感正常。",
+    "T03": "标题“秋日咖啡”和副标题“周末限定”完整清晰，Turbo 中文排版通过。"
+  }
+}
