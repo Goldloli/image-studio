@@ -23,6 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut retry_job = None;
     let mut cancel_after = None;
     let mut cancel_stage = None;
+    let mut poll_milliseconds = 5000;
     let mut accept_cancelled = false;
     while let Some(flag) = args.next() {
         match flag.as_str() {
@@ -42,6 +43,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     return Err("unsupported cancel stage".into());
                 }
                 cancel_stage = Some(stage);
+            }
+            "--poll-milliseconds" => {
+                poll_milliseconds = args.next().ok_or("missing poll interval")?.parse::<u64>()?;
+                if !(100..=60_000).contains(&poll_milliseconds) {
+                    return Err("poll interval must be 100–60000 milliseconds".into());
+                }
             }
             "--accept-cancelled" => accept_cancelled = true,
             _ => return Err(format!("unknown option: {flag}").into()),
@@ -143,7 +150,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             if started.elapsed() > Duration::from_secs(3600) {
                 return Err("Klein retry exceeded one-hour acceptance deadline".into());
             }
-            std::thread::sleep(Duration::from_secs(5));
+            std::thread::sleep(Duration::from_millis(poll_milliseconds));
         }
     }
     let source_id = if mode == "edit" {
@@ -298,6 +305,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if started.elapsed() > Duration::from_secs(3600) {
             return Err("Klein turn exceeded one-hour acceptance deadline".into());
         }
-        std::thread::sleep(Duration::from_secs(5));
+        std::thread::sleep(Duration::from_millis(poll_milliseconds));
     }
 }
