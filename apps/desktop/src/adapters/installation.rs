@@ -1154,48 +1154,24 @@ impl Installation {
             fs::remove_file(&part).map_err(err)?;
         }
 
-        let mut tasks = tokio::task::JoinSet::new();
+        // Keep one long-lived authenticated response in flight at a time.
+        // The fixed ranges still provide restartability without splitting a
+        // redirected CDN object across concurrent streams.
         for (index, (start, end)) in ranges.iter().copied().enumerate() {
-            let worker = self.clone();
-            let client = client.clone();
-            let url = a.url.clone();
             let path = segment_paths[index].clone();
             let metadata_path = segment_meta_paths[index].clone();
-            let sha256 = a.sha256.clone();
-            let etag = etag.clone();
-            let total = a.bytes;
-            tasks.spawn(async move {
-                worker
-                    .download_segment(
-                        &client,
-                        &url,
-                        &path,
-                        &metadata_path,
-                        &sha256,
-                        &etag,
-                        start,
-                        end,
-                        total,
-                    )
-                    .await
-            });
-        }
-        let mut first_error = None;
-        while let Some(result) = tasks.join_next().await {
-            match result {
-                Ok(Ok(())) => {}
-                Ok(Err(error)) => {
-                    first_error.get_or_insert(error);
-                    tasks.abort_all();
-                }
-                Err(error) => {
-                    first_error.get_or_insert_with(|| format!("分段下载线程失败：{error}"));
-                    tasks.abort_all();
-                }
-            }
-        }
-        if let Some(error) = first_error {
-            return Err(error);
+            self.download_segment(
+                &client,
+                &a.url,
+                &path,
+                &metadata_path,
+                &a.sha256,
+                &etag,
+                start,
+                end,
+                a.bytes,
+            )
+            .await?;
         }
         for ((start, end), path) in ranges.iter().zip(&segment_paths) {
             let length = end - start;
