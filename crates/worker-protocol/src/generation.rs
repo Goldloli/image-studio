@@ -345,6 +345,7 @@ pub enum ProgressStage {
     Loading,
     Encoding,
     Sampling,
+    Inference,
     Decoding,
     Writing,
 }

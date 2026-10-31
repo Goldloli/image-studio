@@ -76,21 +76,21 @@
       "displayName": "BiRefNet general epoch_244",
       "variant": "BiRefNet-general-epoch_244.onnx",
       "family": "BiRefNet",
-      "summary": "计划补充主体分离与透明背景输出，当前只保留选型事实。",
-      "description": "固定使用官方 general epoch_244 ONNX 权重，首轮计划验证 CPUExecutionProvider、前景 mask 和透明 PNG 输出。",
+      "summary": "从一张受控源图提取主体，输出透明 RGBA PNG 与逐像素蒙版。",
+      "description": "固定使用官方 general epoch_244 ONNX 权重，CPUExecutionProvider、float32、1024² 预处理，并按源图规范化尺寸输出 RGBA 与 8-bit mask。",
       "capabilities": [
         { "id": "background_removal", "label": "去背景" }
       ],
-      "productStatus": "planned",
-      "runtime": "ONNX Runtime · CPU（计划）",
-      "license": "源仓库与通用模型卡为 MIT；具体发布权重待复核",
+      "productStatus": "implemented",
+      "runtime": "ONNX Runtime 1.31.1 · CPU",
+      "license": "MIT",
       "source": "https://github.com/ZhengPeng7/BiRefNet/releases/tag/v1",
-      "revision": "v1 / epoch_244",
-      "modelBytes": null,
+      "revision": "v1 / asset 186740004 / sha256:58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+      "modelBytes": 972666916,
       "knownArtifactBytes": 972666916,
       "requirements": [
-        "核对实际 ONNX 图输入输出和预处理",
-        "透明 PNG 不覆盖原图",
+        "核对后的 ONNX 图与 CPU 运行时",
+        "透明 PNG 与 mask 同 Job 原子提交",
         "CPU 路线实机验收"
       ],
       "exclusions": [
@@ -98,10 +98,12 @@
         "Portrait 或其他 checkpoint",
         "把文件元数据当作已完成哈希"
       ],
-      "verifiedDevices": [],
-      "recipe": "计划：1024 × 1024 预处理参考",
-      "installId": null,
-      "installerSupported": false
+      "verifiedDevices": [
+        "Apple M3 Max / 128 GiB / macOS arm64 · CPU"
+      ],
+      "recipe": "1024² 网络预处理 · 原尺寸输出 · CPU",
+      "installId": "birefnet-general-epoch-244",
+      "installerSupported": true
     },
     {
       "id": "realesrgan-x4plus",

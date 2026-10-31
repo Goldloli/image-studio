@@ -4,7 +4,9 @@ use crate::adapters::{
     catalog::ModelCatalog,
     feature_catalog::FeatureCatalog,
     generation::GenerationController,
-    installation::{INSTALL_ID, InstallationSnapshot, Installations, KLEIN_INSTALL_ID},
+    installation::{
+        BIREFNET_INSTALL_ID, INSTALL_ID, InstallationSnapshot, Installations, KLEIN_INSTALL_ID,
+    },
     library::{
         AcceptTurnInput, AssetLibraryQuery, DEFAULT_MODEL_ID, DraftRecord, JobRecord, Library,
         TaskCenterQuery, TurnRecord, TurnStatus,
@@ -24,7 +26,7 @@ use std::{
 use studio_core::{
     domain::*,
     generation::{GenerationInput, freeze_z_image},
-    recipes::{KleinInput, SourceAsset, SourceFacts, freeze_klein},
+    recipes::{BiRefNetInput, KleinInput, SourceAsset, SourceFacts, freeze_birefnet, freeze_klein},
 };
 use uuid::Uuid;
 
@@ -41,7 +43,7 @@ pub struct StudioService {
     scheduling: Mutex<()>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct DraftInput {
     pub id: u64,
@@ -61,7 +63,7 @@ pub struct SubmitInput {
     pub submission_key: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ConversationSendInput {
     pub conversation_id: String,
@@ -189,7 +191,7 @@ impl StudioService {
         self.model_view_for(INSTALL_ID)
     }
     pub fn model_views(&self) -> Vec<Value> {
-        [INSTALL_ID, KLEIN_INSTALL_ID]
+        [INSTALL_ID, KLEIN_INSTALL_ID, BIREFNET_INSTALL_ID]
             .into_iter()
             .map(|id| self.model_view_for(id))
             .collect()
@@ -197,11 +199,15 @@ impl StudioService {
     fn model_view_for(&self, install_id: &str) -> Value {
         let name = if install_id == KLEIN_INSTALL_ID {
             "FLUX.2 Klein 4B distilled"
+        } else if install_id == BIREFNET_INSTALL_ID {
+            "BiRefNet general epoch_244"
         } else {
             "Z-Image Turbo"
         };
         let fallback_model_bytes = if install_id == KLEIN_INSTALL_ID {
             15_980_131_745_u64
+        } else if install_id == BIREFNET_INSTALL_ID {
+            972_666_916_u64
         } else {
             32_848_304_893_u64
         };
@@ -347,8 +353,8 @@ impl StudioService {
             "environment": {
                 "platform": std::env::consts::OS,
                 "architecture": std::env::consts::ARCH,
-                "runtimeName": "MFLUX / MLX",
-                "runtimeVersion": "0.24.0",
+                "runtimeName": "MFLUX / MLX + ONNX Runtime CPU",
+                "runtimeVersion": "0.24.0 / 1.31.1",
                 "pythonVersion": "3.13.12",
                 "diagnosticsEnabled": diagnostics_enabled,
                 "runtime": runtime
@@ -366,10 +372,10 @@ impl StudioService {
                 "modelSources": [
                     "Z-Image Turbo · Tongyi-MAI/Z-Image-Turbo · Apache-2.0",
                     "FLUX.2 Klein 4B distilled · black-forest-labs/FLUX.2-klein-4B · Apache-2.0",
-                    "BiRefNet general epoch_244 · planned · exact release review pending",
+                    "BiRefNet general epoch_244 · ZhengPeng7/BiRefNet v1 · MIT",
                     "Real-ESRGAN x4plus · planned · program and conversion-weight reviews pending"
                 ],
-                "capabilityScope": "Z-Image Turbo 与 FLUX.2 Klein 4B 已接入本地安装与执行链路；BiRefNet 和 Real-ESRGAN 仍按计划接入。"
+                "capabilityScope": "Z-Image Turbo、FLUX.2 Klein 4B 与 BiRefNet epoch_244 已接入本地安装与执行链路；Real-ESRGAN 仍按计划接入。"
             }
         }))
     }
@@ -429,10 +435,18 @@ impl StudioService {
                 studio_core::recipes::KLEIN_EDIT_CAPABILITY,
                 true,
             ) => params.aspect == "1:1",
+            (
+                studio_core::recipes::BIREFNET_MODEL,
+                studio_core::recipes::BIREFNET_CAPABILITY,
+                _,
+            ) => params.aspect == "1:1",
             _ => false,
         };
         if !supported_combo {
             return Err("模型、能力、源图与画幅组合不受支持".into());
+        }
+        if params.model_id == studio_core::recipes::BIREFNET_MODEL && !params.seed.is_empty() {
+            return Err("BiRefNet 去背景不接受种子".into());
         }
         if let Some(source) = &params.source_asset_id {
             let source = AssetId::new(source).map_err(|error| error.to_string())?;
@@ -537,6 +551,13 @@ impl StudioService {
                         "height": asset.height,
                         "seed": job.as_ref().and_then(|job| job.plan.effective_parameters.get("seed")).cloned().unwrap_or(Value::Null),
                         "bytes": asset.byte_count,
+                        "outputRole": asset.output_role,
+                        "dataType": match asset.asset.data_type {
+                            AssetKind::ImageRgb => "image_rgb",
+                            AssetKind::ImageRgba => "image_rgba",
+                            AssetKind::Mask => "mask",
+                            AssetKind::Depth | AssetKind::StructuredData => "other",
+                        },
                         "available": asset.available,
                         "error": asset.availability_error
                     })
@@ -799,6 +820,8 @@ impl StudioService {
                 studio_core::recipes::KLEIN_EDIT_CAPABILITY.into()
             } else if input.model_id == KLEIN_INSTALL_ID {
                 studio_core::recipes::KLEIN_TEXT_CAPABILITY.into()
+            } else if input.model_id == BIREFNET_INSTALL_ID {
+                studio_core::recipes::BIREFNET_CAPABILITY.into()
             } else {
                 studio_core::generation::Z_IMAGE_CAPABILITY.into()
             }
@@ -897,7 +920,32 @@ impl StudioService {
         let idempotency_key =
             IdempotencyKey::new(turn.submission_key.clone()).map_err(|error| error.to_string())?;
         let project_id = ProjectId::new("default").map_err(|error| error.to_string())?;
-        let (request, plan) = if turn.model_id == KLEIN_INSTALL_ID {
+        let (request, plan) = if turn.model_id == BIREFNET_INSTALL_ID {
+            let source_id = turn
+                .source_asset_id
+                .as_ref()
+                .ok_or("BiRefNet 去背景需要一张源图")?;
+            let resolved = self.with_library(|library| library.resolve_source(source_id))?;
+            let frozen = freeze_birefnet(
+                BiRefNetInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    source: SourceAsset {
+                        asset: resolved.asset,
+                        facts: SourceFacts {
+                            width: resolved.width,
+                            height: resolved.height,
+                            has_transparent_pixels: resolved.has_transparent_pixels,
+                        },
+                    },
+                },
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
+        } else if turn.model_id == KLEIN_INSTALL_ID {
             let source = turn
                 .source_asset_id
                 .as_ref()
@@ -1119,11 +1167,16 @@ impl StudioService {
         let ready = installation.ready_paths(previous.request.model_variant_id.as_str())?;
         let environment =
             installation.plan_environment(previous.request.model_variant_id.as_str())?;
+        let scheduler_matches = studio_core::recipes::Recipe::from_request(&previous.request)
+            .is_ok_and(|recipe| {
+                recipe == studio_core::recipes::Recipe::BiRefNet
+                    || previous.plan.effective_parameters.get("scheduler")
+                        == Some(&json!(environment.scheduler))
+            });
         if previous.plan.components != environment.components
             || previous.plan.runtime != environment.runtime
             || previous.plan.device != environment.device
-            || previous.plan.effective_parameters.get("scheduler")
-                != Some(&json!(environment.scheduler))
+            || !scheduler_matches
         {
             return Err("原任务的运行环境已变化，不能改写冻结计划；请从草稿创建新任务".into());
         }
@@ -1216,15 +1269,35 @@ fn turn_view(library: &Library, turn: &TurnRecord) -> crate::adapters::library::
         .and_then(|job| job.plan.effective_parameters.get("seed"))
         .cloned()
         .unwrap_or(Value::Null);
-    let asset_id = turn
+    let output_ids = turn
         .job
         .as_ref()
         .and_then(|job| job.manifest.as_ref())
-        .and_then(|manifest| manifest.outputs.first())
-        .map(|asset| asset.asset_id.clone());
-    let asset_record = asset_id
+        .map(|manifest| {
+            manifest
+                .outputs
+                .iter()
+                .map(|asset| asset.asset_id.clone())
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    let asset_for_role = |role: &str| {
+        output_ids.iter().find_map(|asset_id| {
+            library
+                .asset(asset_id)
+                .ok()
+                .filter(|asset| asset.output_role == role)
+        })
+    };
+    let primary_record = asset_for_role("primary");
+    let mask_record = asset_for_role("mask");
+    let asset_id = primary_record
         .as_ref()
-        .and_then(|asset_id| library.asset(asset_id).ok());
+        .map(|asset| asset.asset.asset_id.to_string());
+    let mask_asset_id = mask_record
+        .as_ref()
+        .map(|asset| asset.asset.asset_id.to_string());
+    let asset_record = primary_record;
     let asset_available = asset_record.as_ref().is_some_and(|asset| asset.available);
     Ok(json!({
         "id": turn.id,
@@ -1248,6 +1321,9 @@ fn turn_view(library: &Library, turn: &TurnRecord) -> crate::adapters::library::
         "assetId": asset_id,
         "assetAvailable": asset_available,
         "assetError": asset_record.and_then(|asset| asset.availability_error),
+        "maskAssetId": mask_asset_id,
+        "maskAssetAvailable": mask_record.as_ref().is_some_and(|asset| asset.available),
+        "maskAssetError": mask_record.and_then(|asset| asset.availability_error),
         "error": turn.error.as_ref().or_else(|| turn.job.as_ref().and_then(|job| job.error.as_ref())),
         "progressStage": turn.progress_stage,
         "progressStep": turn.progress_step,

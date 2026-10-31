@@ -84,6 +84,15 @@ pub struct KleinInput {
 }
 
 #[derive(Clone, Debug)]
+pub struct BiRefNetInput {
+    pub request_id: RequestId,
+    pub project_id: ProjectId,
+    pub idempotency_key: IdempotencyKey,
+    pub plan_id: PlanId,
+    pub source: SourceAsset,
+}
+
+#[derive(Clone, Debug)]
 pub struct FrozenRecipe {
     pub request: UserRequest,
     pub plan: ExecutionPlan,
@@ -350,6 +359,7 @@ impl Recipe {
                 ("provider".into(), json!("CPUExecutionProvider")),
                 ("precision".into(), json!("float32")),
                 ("preprocessing".into(), json!("birefnet-1024-rgb-v1")),
+                ("postprocessing".into(), json!("birefnet-logits-sigmoid-v1")),
                 ("intra_op_threads".into(), json!(4)),
                 ("inter_op_threads".into(), json!(1)),
                 ("execution_mode".into(), json!("sequential")),
@@ -470,6 +480,70 @@ pub fn freeze_klein(
         adjustments: vec![],
     };
     recipe.validate_plan(&request, &plan, source)?;
+    Ok(FrozenRecipe { request, plan })
+}
+
+pub fn freeze_birefnet(
+    input: BiRefNetInput,
+    env: crate::generation::PlanEnvironment,
+) -> Result<FrozenRecipe, ContractError> {
+    let source = input.source;
+    let request = UserRequest {
+        schema_version: crate::contracts::REQUEST_SCHEMA_VERSION,
+        request_id: input.request_id,
+        project_id: input.project_id,
+        capability: crate::contracts::CapabilityDescriptor {
+            capability_id: BIREFNET_CAPABILITY.into(),
+            instruction_required: false,
+            input_roles: vec![crate::contracts::RoleRule {
+                role: SOURCE_ROLE.into(),
+                minimum: 1,
+                maximum: 1,
+            }],
+        },
+        instruction: String::new(),
+        inputs: vec![InputBinding {
+            asset: source.asset,
+            role: SOURCE_ROLE.into(),
+            order: 0,
+        }],
+        model_variant_id: ModelVariantId::new(BIREFNET_MODEL)?,
+        requested_output: crate::contracts::ImageOutput {
+            width: source.facts.width,
+            height: source.facts.height,
+            count: 1,
+        },
+        policy: crate::contracts::AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: true,
+        },
+        parameters: BTreeMap::new(),
+        idempotency_key: input.idempotency_key,
+    };
+    let plan = ExecutionPlan {
+        schema_version: crate::contracts::PLAN_SCHEMA_VERSION,
+        plan_id: input.plan_id,
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: env.components,
+        runtime: env.runtime,
+        device: env.device,
+        effective_output: request.requested_output.clone(),
+        effective_parameters: BTreeMap::from([
+            ("recipe".into(), json!(Recipe::BiRefNet.id())),
+            ("recipe_version".into(), json!(1)),
+            ("provider".into(), json!("CPUExecutionProvider")),
+            ("precision".into(), json!("float32")),
+            ("preprocessing".into(), json!("birefnet-1024-rgb-v1")),
+            ("postprocessing".into(), json!("birefnet-logits-sigmoid-v1")),
+            ("intra_op_threads".into(), json!(4)),
+            ("inter_op_threads".into(), json!(1)),
+            ("execution_mode".into(), json!("sequential")),
+        ]),
+        adjustments: vec![],
+    };
+    Recipe::BiRefNet.validate_plan(&request, &plan, Some(source.facts))?;
     Ok(FrozenRecipe { request, plan })
 }
 
@@ -745,6 +819,7 @@ mod tests {
                 ("provider".into(), json!("CPUExecutionProvider")),
                 ("precision".into(), json!("float32")),
                 ("preprocessing".into(), json!("birefnet-1024-rgb-v1")),
+                ("postprocessing".into(), json!("birefnet-logits-sigmoid-v1")),
                 ("intra_op_threads".into(), json!(4)),
                 ("inter_op_threads".into(), json!(1)),
                 ("execution_mode".into(), json!("sequential")),
@@ -827,5 +902,62 @@ mod tests {
         let edit = freeze_klein(edit_input, 17, env).unwrap();
         assert_eq!(edit.request.capability.capability_id, KLEIN_EDIT_CAPABILITY);
         assert_eq!(edit.request.inputs.len(), 1);
+    }
+
+    #[test]
+    fn freeze_birefnet_preserves_source_dimensions_and_cpu_recipe() {
+        let environment = PlanEnvironment {
+            components: vec![ComponentSnapshot {
+                role: "weights".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+                content_hash: ContentHash::new("c".repeat(64)).unwrap(),
+            }],
+            runtime: RuntimeSnapshot {
+                package_id: "onnx-cpu".into(),
+                engine: "onnxruntime".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+            },
+            device: DeviceSnapshot {
+                device_id: "cpu".into(),
+                precision: "float32".into(),
+            },
+            scheduler: "birefnet-1024-rgb-v1".into(),
+        };
+        let frozen = freeze_birefnet(
+            BiRefNetInput {
+                request_id: RequestId::new("request:birefnet").unwrap(),
+                project_id: ProjectId::new("default").unwrap(),
+                idempotency_key: IdempotencyKey::new("submit:birefnet").unwrap(),
+                plan_id: PlanId::new("plan:birefnet").unwrap(),
+                source: SourceAsset {
+                    asset: asset(AssetKind::ImageRgba),
+                    facts: SourceFacts {
+                        width: 768,
+                        height: 1024,
+                        has_transparent_pixels: true,
+                    },
+                },
+            },
+            environment,
+        )
+        .unwrap();
+        assert_eq!(frozen.request.instruction, "");
+        assert!(frozen.request.parameters.is_empty());
+        assert_eq!(frozen.request.requested_output.width, 768);
+        assert_eq!(frozen.request.requested_output.height, 1024);
+        assert_eq!(
+            frozen.plan.effective_parameters["provider"],
+            "CPUExecutionProvider"
+        );
+        assert_eq!(
+            frozen.plan.effective_parameters["postprocessing"],
+            "birefnet-logits-sigmoid-v1"
+        );
     }
 }

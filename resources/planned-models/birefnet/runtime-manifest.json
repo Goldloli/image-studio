@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "id": "onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1",
+  "platform": "macos-arm64",
+  "python": "3.13.12",
+  "interpreter": {
+    "path": "cpython-3.13.12+20260325-aarch64-apple-darwin-install_only_stripped.tar.gz",
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20260325/cpython-3.13.12%2B20260325-aarch64-apple-darwin-install_only_stripped.tar.gz",
+    "bytes": 17776195,
+    "sha256": "053b5062a711c7a07f402d2e9a43c65566e9b750478a10dad9093dad1b814fe5",
+    "license": "PSF-2.0 and bundled dependency licenses in python distribution",
+    "evidence": "https://api.github.com/repos/astral-sh/python-build-standalone/releases/assets/381126164"
+  },
+  "wheels": [
+    {
+      "path": "flatbuffers-25.12.19-py2.py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/e8/2d/d2a548598be01649e2d46231d151a6c56d10b964d94043a335ae56ea2d92/flatbuffers-25.12.19-py2.py3-none-any.whl",
+      "bytes": 26661,
+      "sha256": "7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4",
+      "package": "flatbuffers",
+      "version": "25.12.19",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "numpy-2.5.4-cp313-cp313-macosx_14_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/e2/84/6a3d75b3ba3dfe84ac0053450753d1e6d250a8bf80f66474cc46d1fb643f/numpy-2.5.4-cp313-cp313-macosx_14_0_arm64.whl",
+      "bytes": 5445803,
+      "sha256": "6d6a71b9d9a97c03633aa12565ef2825ffa036cc1d99cfd50dacf0f128af4fe2",
+      "package": "numpy",
+      "version": "2.5.4",
+      "license": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0"
+    },
+    {
+      "path": "onnxruntime-1.31.1-cp313-cp313-macosx_14_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/b2/93/d2b855793302ef57d55cc0583b72a00a8dcb01d9bdb3adac380f09b050e8/onnxruntime-1.31.1-cp313-cp313-macosx_14_0_arm64.whl",
+      "bytes": 20881825,
+      "sha256": "e4ad067d36e2220218e085d7223283b2ee1bc73d887e811fd14d21cf901a11ee",
+      "package": "onnxruntime",
+      "version": "1.31.1",
+      "license": "MIT"
+    },
+    {
+      "path": "packaging-26.3-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl",
+      "bytes": 129956,
+      "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c",
+      "package": "packaging",
+      "version": "26.3",
+      "license": "Apache-2.0 OR BSD-2-Clause"
+    },
+    {
+      "path": "pillow-13.0.0-cp313-cp313-macosx_11_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/98/c8/ccede3dcc4f274b80fb49199eed1ef34ba05566c8b71976b9d1f111da2e3/pillow-13.0.0-cp313-cp313-macosx_11_0_arm64.whl",
+      "bytes": 4852187,
+      "sha256": "f11a3c1358bb3c68012a7b1f41b223c3db9f7bfde90b481df028cfe1c3363313",
+      "package": "pillow",
+      "version": "13.0.0",
+      "license": "MIT-CMU"
+    },
+    {
+      "path": "protobuf-7.36.2-cp310-abi3-macosx_10_9_universal2.whl",
+      "url": "https://files.pythonhosted.org/packages/32/72/98342feb672507c8f3a69e34b4fa8961f608edba5c1a48a6f47156d92cb5/protobuf-7.36.2-cp310-abi3-macosx_10_9_universal2.whl",
+      "bytes": 456039,
+      "sha256": "cbc70b17ee27e28894c7fee8bb04be1abead49e936bc70eb60052531eee2079e",
+      "package": "protobuf",
+      "version": "7.36.2",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "path": "studio_onnx_worker-0.1.0-py3-none-any.whl",
+      "url": "bundled:worker-wheel",
+      "bytes": 8316,
+      "sha256": "59d709c7705569602d01eeffebeca6b2cbc4d02fda181ecb157f937ea91c66c3",
+      "package": "studio-onnx-worker",
+      "version": "0.1.0",
+      "license": "Apache-2.0"
+    }
+  ],
+  "packages": {
+    "flatbuffers": "25.12.19",
+    "numpy": "2.5.4",
+    "onnxruntime": "1.31.1",
+    "packaging": "26.3",
+    "pillow": "13.0.0",
+    "protobuf": "7.36.2",
+    "studio-onnx-worker": "0.1.0"
+  }
+}

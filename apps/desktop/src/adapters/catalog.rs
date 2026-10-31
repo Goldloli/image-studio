@@ -297,8 +297,8 @@ mod tests {
         let catalog = ModelCatalog::load().unwrap();
         let query = catalog.query(&[], Some("安装器不可用")).unwrap();
         assert_eq!(query["counts"]["total"], 4);
-        assert_eq!(query["counts"]["supported"], 2);
-        assert_eq!(query["counts"]["planned"], 2);
+        assert_eq!(query["counts"]["supported"], 3);
+        assert_eq!(query["counts"]["planned"], 1);
         let ids = query["entries"]
             .as_array()
             .unwrap()
@@ -306,6 +306,7 @@ mod tests {
             .map(|entry| entry["id"].as_str().unwrap())
             .collect::<Vec<_>>();
         assert!(ids.contains(&"z-image-turbo-mflux-v1"));
+        assert!(ids.contains(&"birefnet-general-epoch-244"));
         assert!(ids.contains(&"realesrgan-x4plus"));
     }
 

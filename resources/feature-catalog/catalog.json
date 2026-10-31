@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedDate": "2026-10-30",
+  "reviewedDate": "2026-10-31",
   "entries": [
     {
       "featureId": "text-to-image",
@@ -41,17 +41,17 @@
       "featureId": "remove-background",
       "title": "去背景",
       "category": "编辑",
-      "summary": "未来提取主体并生成透明 PNG。",
-      "description": "规划使用独立主体分割模型，原图与来源制作记录保持不变，处理结果另存为正式资产。",
+      "summary": "从一张受控源图提取主体并生成透明 PNG。",
+      "description": "使用 BiRefNet general epoch_244 在 CPU 上生成透明主图与蒙版；原图与来源制作记录保持不变。",
       "inputs": ["受控源图 AssetId"],
       "outputs": ["透明 PNG AssetRef", "前景蒙版"],
-      "productStatus": "planned",
-      "scope": "仅登记范围；当前没有 ONNX 执行链路。",
-      "action": null,
+      "productStatus": "implemented",
+      "scope": "单张 PNG/JPEG，输出规范化源图尺寸的 RGBA 主图与 8-bit mask。",
+      "action": "open-composer",
       "modelId": "birefnet-general-epoch-244",
       "dependencies": [
-        { "kind": "model", "label": "BiRefNet 权重尚未完成发布复核" },
-        { "kind": "runtime", "label": "ONNX Runtime 与蒙版输出尚未接入" }
+        { "kind": "model", "label": "已安装并完成 CPU 探针的 BiRefNet epoch_244" },
+        { "kind": "runtime", "label": "固定 ONNX Runtime CPU 运行环境" }
       ]
     },
     {

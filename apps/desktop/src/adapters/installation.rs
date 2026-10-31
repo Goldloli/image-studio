@@ -20,6 +20,9 @@ pub const WORKER_MODULE: &str = "studio_mflux_worker";
 pub const KLEIN_INSTALL_ID: &str = "flux2-klein-4b-distilled";
 pub const KLEIN_WORKER_BUILD_ID: &str = "studio-mflux-worker-0.2.0";
 pub const KLEIN_WORKER_MODULE: &str = "studio_mflux_worker_v2";
+pub const BIREFNET_INSTALL_ID: &str = "birefnet-general-epoch-244";
+pub const BIREFNET_WORKER_BUILD_ID: &str = "studio-onnx-worker-0.1.0";
+pub const BIREFNET_WORKER_MODULE: &str = "studio_onnx_worker";
 const MODEL_MANIFEST: &str =
     include_str!("../../../../resources/local-generation/model-manifest.json");
 const RUNTIME_MANIFEST: &str =
@@ -36,6 +39,15 @@ const KLEIN_LOCK: &str =
     include_str!("../../../../resources/planned-models/klein/requirements.lock");
 const KLEIN_WORKER_WHEEL: &[u8] = include_bytes!(
     "../../../../resources/planned-models/klein/studio_mflux_worker_v2-0.2.0-py3-none-any.whl"
+);
+const BIREFNET_MODEL_MANIFEST: &str =
+    include_str!("../../../../resources/planned-models/birefnet/model-manifest.json");
+const BIREFNET_RUNTIME_MANIFEST: &str =
+    include_str!("../../../../resources/planned-models/birefnet/runtime-manifest.json");
+const BIREFNET_LOCK: &str =
+    include_str!("../../../../resources/planned-models/birefnet/requirements.lock");
+const BIREFNET_WORKER_WHEEL: &[u8] = include_bytes!(
+    "../../../../resources/planned-models/birefnet/studio_onnx_worker-0.1.0-py3-none-any.whl"
 );
 const RESERVE: u64 = 4 * 1024 * 1024 * 1024;
 const SEGMENTED_DOWNLOAD_THRESHOLD: u64 = 2 * 1024 * 1024 * 1024;
@@ -56,6 +68,7 @@ struct InstallProfile {
     precision: &'static str,
     ready_relative: &'static str,
     installing_relative: &'static str,
+    probe_with_model: bool,
 }
 
 struct SegmentDownload<'a> {
@@ -83,6 +96,7 @@ const Z_PROFILE: InstallProfile = InstallProfile {
     precision: "native;compute_precision=None;float32=False",
     ready_relative: "installation-ready.json",
     installing_relative: "installation-installing.json",
+    probe_with_model: false,
 };
 
 const KLEIN_PROFILE: InstallProfile = InstallProfile {
@@ -99,6 +113,24 @@ const KLEIN_PROFILE: InstallProfile = InstallProfile {
     precision: "native;compute_precision=None;float32=False",
     ready_relative: "installations/models/flux2-klein-4b-distilled.json",
     installing_relative: "installations/models/flux2-klein-4b-distilled.installing.json",
+    probe_with_model: false,
+};
+
+const BIREFNET_PROFILE: InstallProfile = InstallProfile {
+    install_id: BIREFNET_INSTALL_ID,
+    model_manifest: BIREFNET_MODEL_MANIFEST,
+    runtime_manifest: BIREFNET_RUNTIME_MANIFEST,
+    requirements_lock: BIREFNET_LOCK,
+    worker_wheel: BIREFNET_WORKER_WHEEL,
+    worker_module: BIREFNET_WORKER_MODULE,
+    worker_build_id: BIREFNET_WORKER_BUILD_ID,
+    engine: "ONNX Runtime 1.31.1 / CPU",
+    scheduler: "birefnet-1024-rgb-v1",
+    probe_device: "cpu",
+    precision: "float32",
+    ready_relative: "installations/models/birefnet-general-epoch-244.json",
+    installing_relative: "installations/models/birefnet-general-epoch-244.installing.json",
+    probe_with_model: true,
 };
 
 #[derive(Clone, Debug, Deserialize)]
@@ -111,7 +143,6 @@ struct Artifact {
 #[derive(Clone, Debug, Deserialize)]
 struct ModelManifest {
     id: String,
-    repository: String,
     revision: String,
     component_bytes: u64,
     files: Vec<Artifact>,
@@ -166,18 +197,24 @@ struct Inner {
 pub struct Installations {
     legacy: Installation,
     klein: Installation,
+    birefnet: Installation,
 }
 
 impl Installations {
     pub fn new(paths: AppPaths) -> Result<Self, String> {
         Ok(Self {
             legacy: Installation::new(paths.clone())?,
-            klein: Installation::new_klein(paths)?,
+            klein: Installation::new_klein(paths.clone())?,
+            birefnet: Installation::new_birefnet(paths)?,
         })
     }
 
     pub fn snapshots(&self) -> Vec<InstallationSnapshot> {
-        vec![self.legacy.snapshot(), self.klein.snapshot()]
+        vec![
+            self.legacy.snapshot(),
+            self.klein.snapshot(),
+            self.birefnet.snapshot(),
+        ]
     }
 
     pub fn snapshot(&self, install_id: &str) -> Option<InstallationSnapshot> {
@@ -226,12 +263,14 @@ impl Installations {
     pub fn shutdown(&self) {
         self.legacy.cancel();
         self.klein.cancel();
+        self.birefnet.cancel();
     }
 
     fn for_id(&self, install_id: &str) -> Option<&Installation> {
         match install_id {
             INSTALL_ID => Some(&self.legacy),
             KLEIN_INSTALL_ID => Some(&self.klein),
+            BIREFNET_INSTALL_ID => Some(&self.birefnet),
             _ => None,
         }
     }
@@ -282,6 +321,10 @@ impl Installation {
 
     pub fn new_klein(paths: AppPaths) -> Result<Self, String> {
         Self::new_for(paths, KLEIN_PROFILE)
+    }
+
+    pub fn new_birefnet(paths: AppPaths) -> Result<Self, String> {
+        Self::new_for(paths, BIREFNET_PROFILE)
     }
 
     fn new_for(mut paths: AppPaths, profile: InstallProfile) -> Result<Self, String> {
@@ -502,10 +545,7 @@ impl Installation {
                 Ok(ComponentSnapshot {
                     role: format!("component-{index:02}-{}", file.path.replace('/', "-")),
                     source: SourceRevision {
-                        source: format!(
-                            "https://huggingface.co/{}/{}",
-                            self.inner.model.repository, file.path
-                        ),
+                        source: file.url.clone(),
                         revision: self.inner.model.revision.clone(),
                     },
                     content_hash: ContentHash::new(file.sha256.clone()).map_err(err)?,
@@ -813,12 +853,12 @@ impl Installation {
         )?;
         self.check_cancel()?;
         self.update(|s| s.phase = "probing".into());
-        let probe_output = self.command(Command::new(&python).args([
-            "-I",
-            "-m",
-            self.inner.profile.worker_module,
-            "--probe",
-        ]))?;
+        let mut probe = Command::new(&python);
+        probe.args(["-I", "-m", self.inner.profile.worker_module, "--probe"]);
+        if self.inner.profile.probe_with_model {
+            probe.arg(self.model_dir());
+        }
+        let probe_output = self.command(&mut probe)?;
         let probe: serde_json::Value =
             serde_json::from_slice(&probe_output).map_err(|e| format!("探针输出无效：{e}"))?;
         if probe["python"] != self.inner.runtime.python
@@ -2170,12 +2210,51 @@ mod tests {
     }
 
     #[test]
+    fn birefnet_has_an_independent_onnx_runtime_and_worker() {
+        let temp = tempfile::tempdir().unwrap();
+        let paths = AppPaths::resolve(Some(temp.path())).unwrap();
+        let installer = Installation::new_birefnet(paths).unwrap();
+        assert_eq!(installer.snapshot().install_id, BIREFNET_INSTALL_ID);
+        assert_eq!(installer.inner.model.files.len(), 1);
+        assert_eq!(installer.inner.model.component_bytes, 972_666_916);
+        assert_eq!(
+            installer.inner.model.files[0].sha256,
+            "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c"
+        );
+        let worker = installer
+            .inner
+            .runtime
+            .wheels
+            .iter()
+            .find(|wheel| wheel.url == "bundled:worker-wheel")
+            .unwrap();
+        assert_eq!(worker.path, "studio_onnx_worker-0.1.0-py3-none-any.whl");
+        assert_eq!(
+            installer
+                .inner
+                .runtime
+                .packages
+                .get("studio-onnx-worker")
+                .map(String::as_str),
+            Some("0.1.0")
+        );
+        assert_eq!(worker.bytes, BIREFNET_WORKER_WHEEL.len() as u64);
+        assert_eq!(
+            worker.sha256,
+            format!("{:x}", Sha256::digest(BIREFNET_WORKER_WHEEL))
+        );
+        assert_eq!(installer.inner.profile.probe_device, "cpu");
+        assert!(installer.inner.profile.probe_with_model);
+        assert!(installer.ready_paths().is_err());
+    }
+
+    #[test]
     fn installation_manager_keeps_model_states_and_actions_independent() {
         let temp = tempfile::tempdir().unwrap();
         let paths = AppPaths::resolve(Some(temp.path())).unwrap();
         let manager = Installations::new(paths).unwrap();
         let snapshots = manager.snapshots();
-        assert_eq!(snapshots.len(), 2);
+        assert_eq!(snapshots.len(), 3);
         assert!(
             snapshots
                 .iter()
@@ -2185,8 +2264,12 @@ mod tests {
             manager.snapshot(KLEIN_INSTALL_ID).unwrap().install_id,
             KLEIN_INSTALL_ID
         );
+        assert_eq!(
+            manager.snapshot(BIREFNET_INSTALL_ID).unwrap().install_id,
+            BIREFNET_INSTALL_ID
+        );
         assert!(manager.start("https://untrusted").is_err());
-        assert!(manager.cancel("birefnet-general-epoch-244").is_err());
+        assert!(manager.cancel("unregistered-model").is_err());
         assert!(
             manager
                 .snapshot(INSTALL_ID)

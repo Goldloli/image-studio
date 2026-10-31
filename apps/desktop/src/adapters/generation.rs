@@ -26,7 +26,10 @@ use std::{
 use studio_core::{
     domain::JobId,
     generation::AttemptState,
-    recipes::{KLEIN_EDIT_CAPABILITY, KLEIN_TEXT_CAPABILITY, Recipe, validate_recipe_plan},
+    recipes::{
+        BIREFNET_CAPABILITY, KLEIN_EDIT_CAPABILITY, KLEIN_TEXT_CAPABILITY, Recipe,
+        validate_recipe_plan,
+    },
 };
 use uuid::Uuid;
 use worker_protocol::generation::{
@@ -277,6 +280,7 @@ impl GenerationController {
     ) -> Result<(SupervisorConfig, PathBuf, Arc<Control>), String> {
         if ready.worker_module != "studio_mflux_worker"
             && ready.worker_module != "studio_mflux_worker_v2"
+            && ready.worker_module != "studio_onnx_worker"
         {
             return Err("计算模块身份不符".into());
         }
@@ -314,10 +318,12 @@ impl GenerationController {
                 model_snapshot_id: ready.model_snapshot_id.clone(),
             },
             protocol_version: if recipe == Recipe::ZImageTurbo { 1 } else { 2 },
-            expected_capabilities: if recipe == Recipe::KleinText || recipe == Recipe::KleinEdit {
-                vec![KLEIN_TEXT_CAPABILITY.into(), KLEIN_EDIT_CAPABILITY.into()]
-            } else {
-                vec![job.request.capability.capability_id.clone()]
+            expected_capabilities: match recipe {
+                Recipe::KleinText | Recipe::KleinEdit => {
+                    vec![KLEIN_TEXT_CAPABILITY.into(), KLEIN_EDIT_CAPABILITY.into()]
+                }
+                Recipe::BiRefNet => vec![BIREFNET_CAPABILITY.into()],
+                _ => vec![job.request.capability.capability_id.clone()],
             },
             timeouts: Timeouts::default(),
         };
@@ -381,6 +387,13 @@ impl GenerationController {
         let mut session = match recipe.and_then(|recipe| {
             if recipe == Recipe::ZImageTurbo {
                 HostSession::new(session_id, config.expected_worker.clone()).map_err(error)
+            } else if recipe == Recipe::BiRefNet {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![BIREFNET_CAPABILITY.into()],
+                )
+                .map_err(error)
             } else if recipe == Recipe::KleinText || recipe == Recipe::KleinEdit {
                 HostSession::new_v2(
                     session_id,
@@ -635,7 +648,7 @@ impl GenerationController {
     ) {
         let next = match stage {
             ProgressStage::Loading | ProgressStage::Encoding => AttemptState::Preparing,
-            ProgressStage::Sampling => AttemptState::Running,
+            ProgressStage::Sampling | ProgressStage::Inference => AttemptState::Running,
             ProgressStage::Decoding | ProgressStage::Writing => AttemptState::Committing,
         };
         if let Ok(mut library) = self.inner.library.lock()
@@ -661,6 +674,7 @@ impl GenerationController {
             ProgressStage::Loading => "正在加载模型",
             ProgressStage::Encoding => "正在编码提示词",
             ProgressStage::Sampling => "正在采样",
+            ProgressStage::Inference => "正在执行本地推理",
             ProgressStage::Decoding => "正在解码图片",
             ProgressStage::Writing => "正在保存候选图片",
         }
@@ -772,13 +786,26 @@ fn execute_request_v2(
         .transpose()?
         .into_iter()
         .collect();
-    let outputs = vec![OutputSpec {
+    let mut outputs = vec![OutputSpec {
         role: "primary".into(),
-        data_type: "image_rgb".into(),
+        data_type: if recipe_id == "birefnet-general-cpu-v1" {
+            "image_rgba".into()
+        } else {
+            "image_rgb".into()
+        },
         width: job.plan.effective_output.width,
         height: job.plan.effective_output.height,
         max_bytes: 32 * 1024 * 1024,
     }];
+    if recipe_id == "birefnet-general-cpu-v1" {
+        outputs.push(OutputSpec {
+            role: "mask".into(),
+            data_type: "mask".into(),
+            width: job.plan.effective_output.width,
+            height: job.plan.effective_output.height,
+            max_bytes: 32 * 1024 * 1024,
+        });
+    }
     Ok(ExecuteRequestV2 {
         model_id: job.request.model_variant_id.to_string(),
         capability_id: job.request.capability.capability_id.clone(),
