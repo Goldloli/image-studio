@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedDate": "2026-10-31",
+  "reviewedDate": "2026-11-01",
   "entries": [
     {
       "featureId": "text-to-image",
@@ -11,7 +11,7 @@
       "inputs": ["提示词", "当前会话模型", "画幅", "可选种子"],
       "outputs": ["正式 PNG AssetRef"],
       "productStatus": "implemented",
-      "scope": "支持 Z-Image Turbo（1:1、4:3、3:4）与 FLUX.2 Klein 4B（1:1），单轮 1 张。",
+      "scope": "支持 Z-Image Turbo（1:1、4:3、3:4）、FLUX.2 Klein、Qwen-Image 2.1 基础版/Turbo 与 MOSS-Image-SFT（均为 1:1），单轮 1 张。",
       "action": "open-composer",
       "modelId": "flux2-klein-4b-distilled",
       "dependencies": [

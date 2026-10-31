@@ -45,6 +45,7 @@ export type RuntimeSummary = {
   deviceVerified: boolean;
   lastError: string | null;
 };
+export type RuntimeEntry = RuntimeSummary & { installId: string };
 export type SettingsSnapshot = {
   preferences: PreferencesSnapshot;
   catalog: CatalogPayload;
@@ -57,6 +58,7 @@ export type SettingsSnapshot = {
     pythonVersion: string;
     diagnosticsEnabled: boolean;
     runtime: RuntimeSummary;
+    runtimes: RuntimeEntry[];
   };
   about: {
     version: string;

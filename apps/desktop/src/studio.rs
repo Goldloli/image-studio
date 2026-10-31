@@ -376,6 +376,19 @@ impl StudioService {
             .map(Installations::snapshots)
             .unwrap_or_default();
         let model = self.model_view();
+        let runtime_list = installations
+            .iter()
+            .map(|snapshot| {
+                json!({
+                    "installId": snapshot.install_id.clone(),
+                    "phase": snapshot.phase.clone(),
+                    "runtimeReady": snapshot.runtime_ready,
+                    "modelReady": snapshot.model_ready,
+                    "deviceVerified": snapshot.device_verified,
+                    "lastError": snapshot.error.clone()
+                })
+            })
+            .collect::<Vec<_>>();
         let runtime = installations.first().map_or_else(
             || {
                 json!({
@@ -409,7 +422,7 @@ impl StudioService {
                 "pythonVersion": "3.13.12",
                 "diagnosticsEnabled": diagnostics_enabled,
                 "runtime": runtime
-                ,"runtimes": installations
+                ,"runtimes": runtime_list
             },
             "about": {
                 "version": env!("CARGO_PKG_VERSION"),
@@ -1831,6 +1844,35 @@ mod tests {
             .unwrap();
         assert_eq!(overridden["draft"]["params"]["aspect"], "3:4");
         assert_eq!(overridden["draft"]["params"]["seed"], "");
+    }
+
+    #[test]
+    fn qwen_and_moss_defaults_require_an_explicit_square_aspect() {
+        let (_root, service) = fixture();
+        for model_id in [
+            studio_core::recipes::QWEN_IMAGE_21_MODEL,
+            studio_core::recipes::QWEN_IMAGE_21_TURBO_MODEL,
+            studio_core::recipes::MOSS_IMAGE_SFT_MODEL,
+        ] {
+            let invalid = CreationDefaults {
+                model_id: model_id.into(),
+                aspect: "4:3".into(),
+                count: 1,
+                seed: "42".into(),
+            };
+            assert!(service.save_creation_defaults(invalid).is_err());
+            let valid = CreationDefaults {
+                model_id: model_id.into(),
+                aspect: "1:1".into(),
+                count: 1,
+                seed: "42".into(),
+            };
+            service.save_creation_defaults(valid).unwrap();
+            let created = service.conversation_create(None).unwrap();
+            assert_eq!(created["draft"]["params"]["modelId"], model_id);
+            assert_eq!(created["draft"]["params"]["aspect"], "1:1");
+            assert_eq!(created["draft"]["params"]["seed"], "42");
+        }
     }
 
     #[test]

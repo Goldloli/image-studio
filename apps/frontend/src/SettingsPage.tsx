@@ -315,6 +315,13 @@ export function SettingsPage({
               <InfoRow label="最后错误" value={snapshot?.environment.runtime.lastError ?? '无已知错误'}/>
               <InfoRow label="通信诊断" value={diagnosticsOpen ? '诊断面板已打开' : '尚未主动运行'}/>
             </div>
+            <div className="runtime-summary">
+              {snapshot?.environment.runtimes.map(entry => <InfoRow
+                key={entry.installId}
+                label={entry.installId}
+                value={`${entry.phase} · 模型${entry.modelReady ? '就绪' : '未就绪'} · 环境${entry.runtimeReady ? '就绪' : '未就绪'} · 设备${entry.deviceVerified ? '已验证' : '未验证'}${entry.lastError ? ` · ${entry.lastError}` : ''}`}
+              />)}
+            </div>
             <div className="runtime-actions">
               <button className="secondary" onClick={onOpenDiagnostics}><Monitor size={13}/>{diagnosticsOpen ? '查看诊断面板' : '打开通信诊断'}</button>
             </div>
