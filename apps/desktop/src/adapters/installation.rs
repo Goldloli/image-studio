@@ -1710,7 +1710,11 @@ impl Installation {
                 )
                 .await?;
             if response.status() != reqwest::StatusCode::PARTIAL_CONTENT {
-                return Err(format!("{}：服务器不支持分段续传。", a.path));
+                return Err(format!(
+                    "{}：服务器不支持分段续传（HTTP {}）。",
+                    a.path,
+                    response.status()
+                ));
             }
             etag = response
                 .headers()
@@ -2082,6 +2086,7 @@ fn allowed_url(url: &reqwest::Url) -> bool {
 }
 fn http_client() -> Result<reqwest::Client, String> {
     reqwest::Client::builder()
+        .user_agent(concat!("ImageStudio/", env!("CARGO_PKG_VERSION")))
         .connect_timeout(Duration::from_secs(30))
         .read_timeout(Duration::from_secs(45))
         .redirect(reqwest::redirect::Policy::custom(|attempt| {
@@ -2879,6 +2884,50 @@ mod tests {
                 assert!(allowed_url(&reqwest::Url::parse(url).unwrap()));
             }
         }
+    }
+
+    #[test]
+    #[ignore = "explicit acceptance: requires ModelScope network access"]
+    fn actual_modelscope_fixed_range_probe_returns_partial_content() {
+        let manifest: serde_json::Value =
+            serde_json::from_str(QWEN_IMAGE_21_MODEL_MANIFEST).unwrap();
+        let file = manifest["files"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|file| {
+                file["path"] == "transformer/diffusion_pytorch_model-00001-of-00002.safetensors"
+            })
+            .unwrap();
+        let url = file["url"].as_str().unwrap();
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        runtime.block_on(async {
+            let response = http_client()
+                .unwrap()
+                .get(url)
+                .header(reqwest::header::RANGE, "bytes=0-0")
+                .send()
+                .await
+                .unwrap();
+            let status = response.status();
+            let headers = response.headers().clone();
+            let body = response.text().await.unwrap();
+            assert_eq!(
+                status,
+                reqwest::StatusCode::PARTIAL_CONTENT,
+                "status={status} headers={headers:?} body={body}"
+            );
+            assert_eq!(
+                headers
+                    .get(reqwest::header::CONTENT_RANGE)
+                    .and_then(|value| value.to_str().ok()),
+                Some("bytes 0-0/9968332504")
+            );
+            assert!(headers.contains_key(reqwest::header::ETAG));
+        });
     }
 
     #[test]
