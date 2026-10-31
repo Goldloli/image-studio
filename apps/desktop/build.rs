@@ -8,6 +8,7 @@ fn main() {
         "diagnostic_viewport",
         "studio_snapshot",
         "model_catalog",
+        "feature_catalog",
         "prompt_library_snapshot",
         "prompt_library_favorite",
         "prompt_library_image",
@@ -37,6 +38,8 @@ fn main() {
         "generation_retry",
         "task_list",
         "asset_export",
+        "source_import",
+        "source_list",
         "app_close",
     ]);
     tauri_build::try_build(tauri_build::Attributes::new().app_manifest(manifest))

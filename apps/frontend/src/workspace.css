@@ -105,6 +105,8 @@
 .source-pill{height:28px;max-width:170px;border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;font-size:9px;color:var(--muted);background:var(--surface)}
 .source-pill img{width:22px;height:22px;border-radius:50%;object-fit:cover;background:var(--hover)}
 .source-pill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.source-pill button{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;color:var(--muted)}
+.source-pill button:hover{background:var(--hover);color:var(--text)}
 .model-select{background:var(--chrome);color:var(--text);padding:0 8px 0 4px}
 .model-select:hover{background:var(--selected)}
 .model-mark{width:21px;height:21px;border-radius:50%;background:var(--surface);display:grid;place-items:center;color:var(--accent);flex:none}
@@ -135,6 +137,8 @@
 .single-model-option strong{font-size:11px;font-weight:550}
 .single-model-option small{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .single-model-option>svg:last-child{color:var(--accent)}
+.source-popover{max-height:320px;overflow:auto}
+.source-option-image{width:34px;height:34px;object-fit:cover;border-radius:7px;background:var(--hover);flex:none}
 .popover-action{width:100%;height:30px;margin-top:8px;border-radius:7px;background:var(--chrome);justify-content:center;font-size:10px}
 .composer-warning{max-width:780px;margin:5px auto 0;padding:0 4px;font-size:9px;color:var(--danger)}
 .composer-save-note{max-width:780px;margin:5px auto 0;text-align:center;font-size:8px;color:var(--muted);min-height:12px}

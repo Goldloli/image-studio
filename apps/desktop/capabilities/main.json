@@ -11,6 +11,6 @@
     "allow-model-install", "allow-model-cancel", "allow-draft-save", "allow-draft-create",
     "allow-conversation-list", "allow-conversation-create", "allow-conversation-apply-model", "allow-conversation-select", "allow-conversation-rename",
     "allow-conversation-history", "allow-conversation-turn-detail", "allow-conversation-send", "allow-conversation-cancel-turn", "allow-workspace-select",
-    "allow-generation-submit", "allow-generation-cancel", "allow-generation-retry", "allow-task-list", "allow-asset-library-query", "allow-asset-library-item", "allow-task-center-query", "allow-task-center-detail", "allow-asset-export", "allow-app-close"
+    "allow-generation-submit", "allow-generation-cancel", "allow-generation-retry", "allow-task-list", "allow-asset-library-query", "allow-asset-library-item", "allow-task-center-query", "allow-task-center-detail", "allow-asset-export", "allow-source-import", "allow-source-list", "allow-app-close"
   ]
 }
