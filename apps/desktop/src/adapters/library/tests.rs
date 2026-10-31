@@ -1541,10 +1541,7 @@ fn klein_edit_turn_copies_the_frozen_source_for_retry() {
         .unwrap()
         .join("input.png");
     assert_eq!(fs::read(retry_snapshot).unwrap(), normalized_source);
-    assert_eq!(
-        retry.request.inputs[0].asset.asset_id,
-        imported.asset_id
-    );
+    assert_eq!(retry.request.inputs[0].asset.asset_id, imported.asset_id);
 }
 
 #[test]
