@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "networkDenied": true,
+  "sandboxProfile": "../../deny-network.sb",
+  "controlProbe": {
+    "command": "/usr/bin/sandbox-exec -f verification/deny-network.sb /usr/bin/curl --max-time 3 -I https://example.com",
+    "exitCode": 6,
+    "observation": "Could not resolve host: example.com"
+  },
+  "models": [
+    {
+      "modelId": "qwen-image-2.1-mflux-v1",
+      "steps": 40,
+      "processElapsedMilliseconds": 901008,
+      "evidence": "qwen-base-product-verified/batch.jsonl",
+      "tasks": [
+        {
+          "id": "T01",
+          "turnId": "turn-540b5f85b06c47709b6ca1f3d5eaa577",
+          "jobId": "job-b4f165fb4e214c0d8e40f001c2fd3d6a",
+          "attemptId": "attempt-5784285441494a15bddbab4da90b304e",
+          "assetId": "asset-99e74be00cf64710b31fc993b45181a5",
+          "assetSha256": "26841917ba82f9dfed34e254df6f82690207b95879698645cc73042fdc513d00",
+          "maxSamplingStep": 40
+        },
+        {
+          "id": "T02",
+          "turnId": "turn-a7ed399a27fc439fa0f6f99c19169c10",
+          "jobId": "job-51437e6c65904fd196706527a5891682",
+          "attemptId": "attempt-e41f98695ab04d9fb5497b1d55b29f50",
+          "assetId": "asset-d381a2d6d5f049d99b6f6e0dfcced8b4",
+          "assetSha256": "21d494f2912c5a20c1b21e3857b6dd08979d1d2a0f24332afe74984a4b31491e",
+          "maxSamplingStep": 40
+        },
+        {
+          "id": "T03",
+          "turnId": "turn-0ef744579665479a82295648e4a67899",
+          "jobId": "job-3cf08ef32ab141fab670c0b4227ef3f4",
+          "attemptId": "attempt-682bb82ed874461ead2f7777c2349903",
+          "assetId": "asset-a78f5d52b5d44f2dbc7bd3c9701ba4cf",
+          "assetSha256": "d9399e55dd3c4f0ded0e94665c4e260f17e466b51ca7ef5dbb3df9484eacb30d",
+          "maxSamplingStep": 40
+        }
+      ]
+    },
+    {
+      "modelId": "qwen-image-2.1-turbo-mflux-v1",
+      "steps": 8,
+      "processElapsedMilliseconds": 232276,
+      "evidence": "qwen-turbo-product-verified/batch.jsonl",
+      "tasks": [
+        {
+          "id": "T01",
+          "turnId": "turn-27de9fcfcf234365a5896ff8781af36f",
+          "jobId": "job-1312a1d94d2d4c8294cad20914593443",
+          "attemptId": "attempt-5c8491a69bdd486e930c3f62d8b64026",
+          "assetId": "asset-da9ad436dae34eb2b8e105886a4ea6fe",
+          "assetSha256": "73a9cfdcdeac9d1c8ce36b46d98f1575854856c7b31b7849fd8a651c208635f1",
+          "maxSamplingStep": 8
+        },
+        {
+          "id": "T02",
+          "turnId": "turn-eaeab1fb1fa640e1a357b84077828261",
+          "jobId": "job-8c642c1d934644ea891dae5ddaf51cef",
+          "attemptId": "attempt-36df901ab5624977a6c9dfc438179093",
+          "assetId": "asset-3debecf015ad460fbdfe80e3ae1ee62c",
+          "assetSha256": "ddf50435e97dd15121dc88c1e57b421a7c016f2e7d5360026c61544c302f2205",
+          "maxSamplingStep": 8
+        },
+        {
+          "id": "T03",
+          "turnId": "turn-37c893fdb5e24e3894d8798088a7477d",
+          "jobId": "job-2362b4a8838a4839aec7496f9496ad8e",
+          "attemptId": "attempt-fe0ff4d9607c44c6818c372b00a531cb",
+          "assetId": "asset-0c55d7d163434bf892eba6ef7d0bbd65",
+          "assetSha256": "d4b694d3b8b81a6871f90c58e9a4e3b16373d8a701cab515d8c1220031c60929",
+          "maxSamplingStep": 8
+        }
+      ]
+    }
+  ],
+  "workerProcessesAfterCompletion": [],
+  "exportHashesMatch": true
+}
