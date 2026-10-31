@@ -239,7 +239,7 @@ export function SettingsPage({
               <label>
                 <span>默认模型</span>
                 <select value={defaults.modelId} onChange={event => setDefaults({ ...defaults, modelId: event.target.value })}>
-                  {(snapshot?.catalog.entries ?? []).map(model => <option key={model.id} value={model.id}>
+                  {(snapshot?.catalog.entries ?? []).filter(model => model.productStatus === 'implemented' && model.capabilities.some(capability => capability.id === 'text_to_image')).map(model => <option key={model.id} value={model.id}>
                     {model.displayName}{model.productStatus === 'planned' ? '（计划中）' : ''}
                   </option>)}
                 </select>
