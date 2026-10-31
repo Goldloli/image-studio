@@ -1,0 +1,7 @@
+command=["/opt/homebrew/opt/python@3.15/bin/python3.15", "scripts/check-generation-crash.py", "--data-root", "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031", "--report", "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/L06-real-host-crash.json", "--log", "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/logs/L06-real-host-crash.log"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=0
+timed_out=False
+elapsed_seconds=119.043
+
+/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/L06-real-host-crash.json

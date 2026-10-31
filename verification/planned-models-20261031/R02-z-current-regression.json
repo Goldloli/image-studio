@@ -1,0 +1,908 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "R02",
+  "configurationKey": "Z-v1",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution",
+  "reason": "当前构建六项中英文/三尺寸真实生成和目视质量通过；重试安装标识和旧官方URL记法修复后，四项真实加载/采样取消、随机种子冻结、宿主强杀恢复全部通过，历史v1冻结计划显式重试成功。默认目录Z原生结果重开后系统导出hash相同。",
+  "generationCases": [
+    {
+      "case_id": "G01",
+      "priority": "P0",
+      "profile": "model",
+      "description": "Chinese square Z-Image generation",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-31T15:10:58.950313+00:00",
+      "finished_at": "2026-10-31T15:13:05.519563+00:00",
+      "reason": "fixed input produced a decodable formal PNG with a successful execution record",
+      "command": [
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/generation-check",
+        "--data-dir",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031",
+        "--prompt",
+        "一只橙色的小猫坐在窗边，窗外是秋天的树叶，温暖自然光，细腻的水彩插画。",
+        "--aspect",
+        "1:1",
+        "--seed",
+        "42"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-regression/logs/G01-real-generation.log",
+          "exists": true,
+          "sha256": "27fc8f31515bb0e7f0fff217d7016beb8e0525adb20d90f3ee97f64c7ab89698",
+          "bytes": 911626,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-1b1aa1e3224e4d359ed88cb606d6cf11.png",
+          "exists": true,
+          "sha256": "2857b89dedeec2ebc0f58e353571d6b6a3ae491cea3e76d28308a5340171ea44",
+          "bytes": 1333720,
+          "note": "formal generated PNG"
+        }
+      ],
+      "details": {
+        "job_id": "job-3b236da509574530b7a4db9327c382b7",
+        "network_denied": false,
+        "job": {
+          "state": "Succeeded",
+          "attempt_id": "attempt-fa865d4f5cb94a6788fbeecebc6764ce",
+          "asset_id": "asset-4fe1e3c485d7499897e88f255a9dde69",
+          "width": 1024,
+          "height": 1024,
+          "seed": 42
+        },
+        "manifest": {
+          "evidence_kind": "execution_record",
+          "effective_parameters": {
+            "guidance": 0.0,
+            "quantization": 4,
+            "scheduler": "linear",
+            "seed": 42,
+            "steps": 9
+          },
+          "effective_output": {
+            "count": 1,
+            "height": 1024,
+            "width": 1024
+          },
+          "runtime_package_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+          "device": {
+            "device_id": "Apple M3 Max",
+            "precision": "native;compute_precision=None;float32=False"
+          }
+        },
+        "asset": {
+          "id": "asset-4fe1e3c485d7499897e88f255a9dde69",
+          "available": true,
+          "bytes": 1333720,
+          "width": 1024,
+          "height": 1024
+        },
+        "output": {
+          "asset_id": "asset-4fe1e3c485d7499897e88f255a9dde69",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-1b1aa1e3224e4d359ed88cb606d6cf11.png",
+          "sha256": "2857b89dedeec2ebc0f58e353571d6b6a3ae491cea3e76d28308a5340171ea44",
+          "manifest_content_hash": "2857b89dedeec2ebc0f58e353571d6b6a3ae491cea3e76d28308a5340171ea44"
+        },
+        "png": {
+          "width": 1024,
+          "height": 1024,
+          "bytes": 1333720,
+          "decompressed_bytes": 3146752,
+          "chunk_structure_valid": true
+        }
+      }
+    },
+    {
+      "case_id": "G02",
+      "priority": "P0",
+      "profile": "model",
+      "description": "English square Z-Image generation",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-31T15:13:05.519709+00:00",
+      "finished_at": "2026-10-31T15:15:31.298837+00:00",
+      "reason": "fixed input produced a decodable formal PNG with a successful execution record",
+      "command": [
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/generation-check",
+        "--data-dir",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031",
+        "--prompt",
+        "An orange cat sits by a window with autumn leaves outside, warm natural light, delicate watercolor illustration.",
+        "--aspect",
+        "1:1",
+        "--seed",
+        "42"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-regression/logs/G02-real-generation.log",
+          "exists": true,
+          "sha256": "3347f7f58f223c5f0bc60a374a2223a676e9cc847fce45105ad245330a92b9ea",
+          "bytes": 2156455,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-12d8d7f99a6e42b2a0ed54845194c755.png",
+          "exists": true,
+          "sha256": "c654b5a73422b30157622c4bd3fa03487236e5528ecff965c5a15223ef5ccf32",
+          "bytes": 1456556,
+          "note": "formal generated PNG"
+        }
+      ],
+      "details": {
+        "job_id": "job-d9ca519b806e4b159ad2fd1c2e7e7c32",
+        "network_denied": false,
+        "job": {
+          "state": "Succeeded",
+          "attempt_id": "attempt-198893f25ea44285af2b6d44f832ee84",
+          "asset_id": "asset-7f40164c2323455595ca4cbbfad0728a",
+          "width": 1024,
+          "height": 1024,
+          "seed": 42
+        },
+        "manifest": {
+          "evidence_kind": "execution_record",
+          "effective_parameters": {
+            "guidance": 0.0,
+            "quantization": 4,
+            "scheduler": "linear",
+            "seed": 42,
+            "steps": 9
+          },
+          "effective_output": {
+            "count": 1,
+            "height": 1024,
+            "width": 1024
+          },
+          "runtime_package_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+          "device": {
+            "device_id": "Apple M3 Max",
+            "precision": "native;compute_precision=None;float32=False"
+          }
+        },
+        "asset": {
+          "id": "asset-7f40164c2323455595ca4cbbfad0728a",
+          "available": true,
+          "bytes": 1456556,
+          "width": 1024,
+          "height": 1024
+        },
+        "output": {
+          "asset_id": "asset-7f40164c2323455595ca4cbbfad0728a",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-12d8d7f99a6e42b2a0ed54845194c755.png",
+          "sha256": "c654b5a73422b30157622c4bd3fa03487236e5528ecff965c5a15223ef5ccf32",
+          "manifest_content_hash": "c654b5a73422b30157622c4bd3fa03487236e5528ecff965c5a15223ef5ccf32"
+        },
+        "png": {
+          "width": 1024,
+          "height": 1024,
+          "bytes": 1456556,
+          "decompressed_bytes": 3146752,
+          "chunk_structure_valid": true
+        }
+      }
+    },
+    {
+      "case_id": "G03",
+      "priority": "P0",
+      "profile": "model",
+      "description": "Chinese landscape Z-Image generation",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-31T15:15:31.298999+00:00",
+      "finished_at": "2026-10-31T15:17:50.348328+00:00",
+      "reason": "fixed input produced a decodable formal PNG with a successful execution record",
+      "command": [
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/generation-check",
+        "--data-dir",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031",
+        "--prompt",
+        "平静山湖的横向风景，远处雪山，近处木船，清晨薄雾，写实摄影。",
+        "--aspect",
+        "4:3",
+        "--seed",
+        "43"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-regression/logs/G03-real-generation.log",
+          "exists": true,
+          "sha256": "bf4d804fd884d0bbd0145d4ac3947811c3712e95b1ca95666b58ad9c9ff036c6",
+          "bytes": 3124089,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-447cd35ec5ac4daaba1bdc59110056df.png",
+          "exists": true,
+          "sha256": "38d3cfc332a415f67d1c6650f4ecaeb50d45b1fe5b6ce070f7b52266db904572",
+          "bytes": 918937,
+          "note": "formal generated PNG"
+        }
+      ],
+      "details": {
+        "job_id": "job-b672147b1c2e4557b4d196cc3a1551b4",
+        "network_denied": false,
+        "job": {
+          "state": "Succeeded",
+          "attempt_id": "attempt-b4f70aa0513b493184170a30a27cacd4",
+          "asset_id": "asset-e13a74b9a75945c3871e75c8b71e4dd7",
+          "width": 1024,
+          "height": 768,
+          "seed": 43
+        },
+        "manifest": {
+          "evidence_kind": "execution_record",
+          "effective_parameters": {
+            "guidance": 0.0,
+            "quantization": 4,
+            "scheduler": "linear",
+            "seed": 43,
+            "steps": 9
+          },
+          "effective_output": {
+            "count": 1,
+            "height": 768,
+            "width": 1024
+          },
+          "runtime_package_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+          "device": {
+            "device_id": "Apple M3 Max",
+            "precision": "native;compute_precision=None;float32=False"
+          }
+        },
+        "asset": {
+          "id": "asset-e13a74b9a75945c3871e75c8b71e4dd7",
+          "available": true,
+          "bytes": 918937,
+          "width": 1024,
+          "height": 768
+        },
+        "output": {
+          "asset_id": "asset-e13a74b9a75945c3871e75c8b71e4dd7",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-447cd35ec5ac4daaba1bdc59110056df.png",
+          "sha256": "38d3cfc332a415f67d1c6650f4ecaeb50d45b1fe5b6ce070f7b52266db904572",
+          "manifest_content_hash": "38d3cfc332a415f67d1c6650f4ecaeb50d45b1fe5b6ce070f7b52266db904572"
+        },
+        "png": {
+          "width": 1024,
+          "height": 768,
+          "bytes": 918937,
+          "decompressed_bytes": 2360064,
+          "chunk_structure_valid": true
+        }
+      }
+    },
+    {
+      "case_id": "G04",
+      "priority": "P0",
+      "profile": "model",
+      "description": "English landscape Z-Image generation",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-31T15:17:50.348497+00:00",
+      "finished_at": "2026-10-31T15:19:47.471301+00:00",
+      "reason": "fixed input produced a decodable formal PNG with a successful execution record",
+      "command": [
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/generation-check",
+        "--data-dir",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031",
+        "--prompt",
+        "A wide landscape of a calm mountain lake, snowy peaks in the distance, a wooden boat in the foreground, morning mist, realistic photography.",
+        "--aspect",
+        "4:3",
+        "--seed",
+        "43"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-regression/logs/G04-real-generation.log",
+          "exists": true,
+          "sha256": "cc1388d5f434eaa963a606dd8810357eaede2a4eaaebaa528957d955cbd82f1c",
+          "bytes": 3374427,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-c127788203b84966ac47f718acdc7805.png",
+          "exists": true,
+          "sha256": "7c2dca5f4efae3a53fa30f5c3dd420de7fc7fe10c19796cba09147b7fdbd797c",
+          "bytes": 982975,
+          "note": "formal generated PNG"
+        }
+      ],
+      "details": {
+        "job_id": "job-a043c8d448574aebbdb9e96bad68b21c",
+        "network_denied": false,
+        "job": {
+          "state": "Succeeded",
+          "attempt_id": "attempt-89ffd92f285c46709657ed1c886597be",
+          "asset_id": "asset-0a0f2ce3d24641edaed65542048f0d17",
+          "width": 1024,
+          "height": 768,
+          "seed": 43
+        },
+        "manifest": {
+          "evidence_kind": "execution_record",
+          "effective_parameters": {
+            "guidance": 0.0,
+            "quantization": 4,
+            "scheduler": "linear",
+            "seed": 43,
+            "steps": 9
+          },
+          "effective_output": {
+            "count": 1,
+            "height": 768,
+            "width": 1024
+          },
+          "runtime_package_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+          "device": {
+            "device_id": "Apple M3 Max",
+            "precision": "native;compute_precision=None;float32=False"
+          }
+        },
+        "asset": {
+          "id": "asset-0a0f2ce3d24641edaed65542048f0d17",
+          "available": true,
+          "bytes": 982975,
+          "width": 1024,
+          "height": 768
+        },
+        "output": {
+          "asset_id": "asset-0a0f2ce3d24641edaed65542048f0d17",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-c127788203b84966ac47f718acdc7805.png",
+          "sha256": "7c2dca5f4efae3a53fa30f5c3dd420de7fc7fe10c19796cba09147b7fdbd797c",
+          "manifest_content_hash": "7c2dca5f4efae3a53fa30f5c3dd420de7fc7fe10c19796cba09147b7fdbd797c"
+        },
+        "png": {
+          "width": 1024,
+          "height": 768,
+          "bytes": 982975,
+          "decompressed_bytes": 2360064,
+          "chunk_structure_valid": true
+        }
+      }
+    },
+    {
+      "case_id": "G05",
+      "priority": "P0",
+      "profile": "model",
+      "description": "Chinese portrait Z-Image generation",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-31T15:19:47.471443+00:00",
+      "finished_at": "2026-10-31T15:21:29.336608+00:00",
+      "reason": "fixed input produced a decodable formal PNG with a successful execution record",
+      "command": [
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/generation-check",
+        "--data-dir",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031",
+        "--prompt",
+        "一束向日葵插在白色陶瓷花瓶里，木桌上有一本合上的书，柔和侧光，竖幅静物摄影。",
+        "--aspect",
+        "3:4",
+        "--seed",
+        "44"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-regression/logs/G05-real-generation.log",
+          "exists": true,
+          "sha256": "5363c56d6bc8011dc4b7b132c46f50a64cce838826513d021ba2f26a5bda8a40",
+          "bytes": 3540052,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-b70dd08429ef474fa931f59c9070c9f7.png",
+          "exists": true,
+          "sha256": "1780994ee3bca7e796dd6d2968b93530715184190f9f2554f4e59fc44790a30c",
+          "bytes": 937094,
+          "note": "formal generated PNG"
+        }
+      ],
+      "details": {
+        "job_id": "job-080461f4c8d747acbdc73a853f485ed5",
+        "network_denied": false,
+        "job": {
+          "state": "Succeeded",
+          "attempt_id": "attempt-6b9077fb86cd416180f2d54fc43c5df8",
+          "asset_id": "asset-d2cb5ec2f5414b959252dbccaa42de3e",
+          "width": 768,
+          "height": 1024,
+          "seed": 44
+        },
+        "manifest": {
+          "evidence_kind": "execution_record",
+          "effective_parameters": {
+            "guidance": 0.0,
+            "quantization": 4,
+            "scheduler": "linear",
+            "seed": 44,
+            "steps": 9
+          },
+          "effective_output": {
+            "count": 1,
+            "height": 1024,
+            "width": 768
+          },
+          "runtime_package_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+          "device": {
+            "device_id": "Apple M3 Max",
+            "precision": "native;compute_precision=None;float32=False"
+          }
+        },
+        "asset": {
+          "id": "asset-d2cb5ec2f5414b959252dbccaa42de3e",
+          "available": true,
+          "bytes": 937094,
+          "width": 768,
+          "height": 1024
+        },
+        "output": {
+          "asset_id": "asset-d2cb5ec2f5414b959252dbccaa42de3e",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-b70dd08429ef474fa931f59c9070c9f7.png",
+          "sha256": "1780994ee3bca7e796dd6d2968b93530715184190f9f2554f4e59fc44790a30c",
+          "manifest_content_hash": "1780994ee3bca7e796dd6d2968b93530715184190f9f2554f4e59fc44790a30c"
+        },
+        "png": {
+          "width": 768,
+          "height": 1024,
+          "bytes": 937094,
+          "decompressed_bytes": 2360320,
+          "chunk_structure_valid": true
+        }
+      }
+    },
+    {
+      "case_id": "G06",
+      "priority": "P0",
+      "profile": "model",
+      "description": "English portrait Z-Image generation",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-31T15:21:29.336724+00:00",
+      "finished_at": "2026-10-31T15:23:50.161836+00:00",
+      "reason": "fixed input produced a decodable formal PNG with a successful execution record",
+      "command": [
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/generation-check",
+        "--data-dir",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031",
+        "--prompt",
+        "A bouquet of sunflowers in a white ceramic vase, a closed book on a wooden table, soft side lighting, vertical still life photography.",
+        "--aspect",
+        "3:4",
+        "--seed",
+        "44"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-regression/logs/G06-real-generation.log",
+          "exists": true,
+          "sha256": "b2adef4fa95ebf9991d3496cb1ef7064d6e06eb475bd9b6f4b8c78385c15d231",
+          "bytes": 6286089,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-0d9d612a78c94de89ca678cdbdeaa510.png",
+          "exists": true,
+          "sha256": "d6b2cea7427f5a46b46e27e8f47477e8d390c14cbc77d6c4e09cf0ad4f339668",
+          "bytes": 944057,
+          "note": "formal generated PNG"
+        }
+      ],
+      "details": {
+        "job_id": "job-39e71f673414427488e7b659acaa375a",
+        "network_denied": false,
+        "job": {
+          "state": "Succeeded",
+          "attempt_id": "attempt-239a3676e99f4032b2e9f67552cee130",
+          "asset_id": "asset-0effae566b8e482d810da2bc244e88db",
+          "width": 768,
+          "height": 1024,
+          "seed": 44
+        },
+        "manifest": {
+          "evidence_kind": "execution_record",
+          "effective_parameters": {
+            "guidance": 0.0,
+            "quantization": 4,
+            "scheduler": "linear",
+            "seed": 44,
+            "steps": 9
+          },
+          "effective_output": {
+            "count": 1,
+            "height": 1024,
+            "width": 768
+          },
+          "runtime_package_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+          "device": {
+            "device_id": "Apple M3 Max",
+            "precision": "native;compute_precision=None;float32=False"
+          }
+        },
+        "asset": {
+          "id": "asset-0effae566b8e482d810da2bc244e88db",
+          "available": true,
+          "bytes": 944057,
+          "width": 768,
+          "height": 1024
+        },
+        "output": {
+          "asset_id": "asset-0effae566b8e482d810da2bc244e88db",
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-0d9d612a78c94de89ca678cdbdeaa510.png",
+          "sha256": "d6b2cea7427f5a46b46e27e8f47477e8d390c14cbc77d6c4e09cf0ad4f339668",
+          "manifest_content_hash": "d6b2cea7427f5a46b46e27e8f47477e8d390c14cbc77d6c4e09cf0ad4f339668"
+        },
+        "png": {
+          "width": 768,
+          "height": 1024,
+          "bytes": 944057,
+          "decompressed_bytes": 2360320,
+          "chunk_structure_valid": true
+        }
+      }
+    }
+  ],
+  "generationRawReport": "z-regression/model-model-usability-20261031T151058Z-ed3c2d57.json",
+  "qualityReview": "z-regression/quality-review.json",
+  "recoveryReport": "z-recovery-current/model-model-usability-20261031T152940Z-ce1327e4.json",
+  "recoveryCases": [
+    {
+      "case_id": "L02",
+      "priority": "P0",
+      "profile": "model",
+      "description": "random seed freeze, cancellation and explicit retry",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-31T15:29:40.224784+00:00",
+      "finished_at": "2026-10-31T15:31:52.059444+00:00",
+      "reason": "random seed was frozen, cancellation was cleaned up and explicit retry succeeded",
+      "command": [
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/generation-check",
+        "--data-dir",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031",
+        "--prompt",
+        "一只橙色小猫在安静窗台上，秋日暖光，简洁水彩插画。",
+        "--aspect",
+        "1:1",
+        "--seed",
+        "",
+        "--cancel-at-stage",
+        "loading"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/logs/L02-cancel-loading.log",
+          "exists": true,
+          "sha256": "d43e0ba4239c692a7c294a745413a7cbf3e27601cc748fcc2c076d17c9592275",
+          "bytes": 479478,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/logs/L02-explicit-retry.log",
+          "exists": true,
+          "sha256": "10125a3d60fcbf9e58259e9fb1d7afe0ca8b59637078df60330cf2701f94e750",
+          "bytes": 8382343,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-068f4e99c7774167990f278c558f43c9.png",
+          "exists": true,
+          "sha256": "202d2ab7ee4d36a386fb46b02df7b7b07b2550b59825e0045b42be9032b3f394",
+          "bytes": 1303914,
+          "note": "retry formal PNG"
+        }
+      ],
+      "details": {
+        "job_id": "job-3dbd590ab6894a3da82dbbb2b30cf8bf",
+        "requested_stage": "loading",
+        "requested_seed": "random",
+        "frozen_seed": 397772442,
+        "control_events": [
+          {
+            "action": "cancel",
+            "elapsed_seconds": 2.040452875,
+            "stage": "loading"
+          }
+        ],
+        "attempts": [
+          {
+            "id": "attempt-0a89ea812f5843c397ad22b523e57563",
+            "token": "token-f6e8b646dece445597ba62e53f81c4b1",
+            "state": "cancelled",
+            "error": null
+          },
+          {
+            "id": "attempt-4b5674baca224655a54ce63eeffc2bb4",
+            "token": "token-7d6ea8f46b6e465ea9ccfd226983dc2e",
+            "state": "succeeded",
+            "error": null
+          }
+        ],
+        "asset_count_before": 7,
+        "asset_count_after_cancel": 7,
+        "asset_count_after_retry": 8,
+        "first_job": {
+          "state": "Cancelled",
+          "asset_id": null
+        },
+        "retry_job": {
+          "state": "Succeeded",
+          "attempt_id": "attempt-4b5674baca224655a54ce63eeffc2bb4",
+          "asset_id": "asset-455405b5f96a4afb8305aa69ac03e40d"
+        }
+      }
+    },
+    {
+      "case_id": "L04",
+      "priority": "P0",
+      "profile": "model",
+      "description": "real loading-stage cancellation",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-31T15:31:52.059726+00:00",
+      "finished_at": "2026-10-31T15:32:14.292215+00:00",
+      "reason": "real loading cancellation was cleaned up without a formal asset",
+      "command": [
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/generation-check",
+        "--data-dir",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031",
+        "--prompt",
+        "一只橙色小猫在安静窗台上，秋日暖光，简洁水彩插画。",
+        "--aspect",
+        "1:1",
+        "--seed",
+        "46",
+        "--cancel-at-stage",
+        "loading"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/logs/L04-cancel-loading.log",
+          "exists": true,
+          "sha256": "15b348d4d0952ed4a4d0830020c1eb7cdd9729bfb31e9c5f604c648f6dcd40f6",
+          "bytes": 521895,
+          "note": "bounded command output"
+        }
+      ],
+      "details": {
+        "job_id": "job-84ea6713ad6c477fbca8a40b94c665c6",
+        "requested_stage": "loading",
+        "requested_seed": "46",
+        "frozen_seed": 46,
+        "control_events": [
+          {
+            "action": "cancel",
+            "elapsed_seconds": 1.026177875,
+            "stage": "loading"
+          }
+        ],
+        "attempts": [
+          {
+            "id": "attempt-f8794e0fc161420789ea42def73d9309",
+            "token": "token-6f693e0cc9e64c83946cabfd595bc38d",
+            "state": "cancelled",
+            "error": null
+          }
+        ],
+        "asset_count_before": 8,
+        "asset_count_after_cancel": 8,
+        "asset_count_after_retry": 8,
+        "first_job": {
+          "state": "Cancelled",
+          "asset_id": null
+        }
+      }
+    },
+    {
+      "case_id": "L05",
+      "priority": "P0",
+      "profile": "model",
+      "description": "real sampling-stage cancellation and explicit retry",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-31T15:32:14.292332+00:00",
+      "finished_at": "2026-10-31T15:34:40.253660+00:00",
+      "reason": "real sampling cancellation was cleaned up and an explicit retry succeeded",
+      "command": [
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/generation-check",
+        "--data-dir",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031",
+        "--prompt",
+        "平静山湖、远处雪山和近处木船，清晨自然光，写实摄影。",
+        "--aspect",
+        "1:1",
+        "--seed",
+        "47",
+        "--cancel-at-stage",
+        "sampling"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/logs/L05-cancel-sampling.log",
+          "exists": true,
+          "sha256": "c7a09510dce13361917564d0d8f6d1d9889f0b6f0b93335b80595f95be3fb85d",
+          "bytes": 995051,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/logs/L05-explicit-retry.log",
+          "exists": true,
+          "sha256": "5a556527f64271c5cad0a47fa5c585387275c18b631f4cc83d32ed6cf628d93f",
+          "bytes": 11072553,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-353a7cb06c4d4159902251a50c675dc0.png",
+          "exists": true,
+          "sha256": "8d9bc1087a29d8f8e3149332db60457152c5c62ea74075dbbb1c57e9aaf91091",
+          "bytes": 1344521,
+          "note": "retry formal PNG"
+        }
+      ],
+      "details": {
+        "job_id": "job-86058abfbc8d438084034a9b14278d65",
+        "requested_stage": "sampling",
+        "requested_seed": "47",
+        "frozen_seed": 47,
+        "control_events": [
+          {
+            "action": "cancel",
+            "elapsed_seconds": 3.062017792,
+            "stage": "sampling"
+          }
+        ],
+        "attempts": [
+          {
+            "id": "attempt-6ee016f5b25d44f588a9f878d69d29d5",
+            "token": "token-031da8aea4af45d0a3fe3353c7121e75",
+            "state": "cancelled",
+            "error": null
+          },
+          {
+            "id": "attempt-8f1a68bb0e4e4bff906b759076750173",
+            "token": "token-c484836eef924fd7a8c93bf04d25866a",
+            "state": "succeeded",
+            "error": null
+          }
+        ],
+        "asset_count_before": 8,
+        "asset_count_after_cancel": 8,
+        "asset_count_after_retry": 9,
+        "first_job": {
+          "state": "Cancelled",
+          "asset_id": null
+        },
+        "retry_job": {
+          "state": "Succeeded",
+          "attempt_id": "attempt-8f1a68bb0e4e4bff906b759076750173",
+          "asset_id": "asset-3fdfbdf9afbd4a09ac53ed8db4cbf869"
+        }
+      }
+    },
+    {
+      "case_id": "L06",
+      "priority": "P0",
+      "profile": "model",
+      "description": "host SIGKILL after real GPU sampling and recovery",
+      "status": "passed",
+      "evidence_kind": "real_execution",
+      "started_at": "2026-10-31T15:34:40.253969+00:00",
+      "finished_at": "2026-10-31T15:36:39.304807+00:00",
+      "reason": "real GPU execution was killed, the old lease was busy, and explicit retry succeeded",
+      "command": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "scripts/check-generation-crash.py",
+        "--data-root",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031",
+        "--report",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/L06-real-host-crash.json",
+        "--log",
+        "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/logs/L06-real-host-crash.log"
+      ],
+      "exit_code": 0,
+      "evidence": [
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/logs/L06-real-host-crash-wrapper.log",
+          "exists": true,
+          "sha256": "20ec9e1c81ee4ff1c34ed586e63bab4e9503325c095a23f43c7ce15dd88d50f5",
+          "bytes": 714,
+          "note": "bounded command output"
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/L06-real-host-crash.json",
+          "exists": true,
+          "sha256": "33e47304bd65f856e3d4a0356c0a722a2d69eb6ce6a3c1ba9f5956b4aa888b32",
+          "bytes": 13309
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/logs/L06-real-host-crash.log",
+          "exists": true,
+          "sha256": "883a0441168faaf9d4ad2314db9a8f680aa0ab223229d134dd80576be30299ff",
+          "bytes": 1399186
+        },
+        {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-885418f473ef4016b1938f72dc41f469.png",
+          "exists": true,
+          "sha256": "6eb6b262c9b26591f0c9382d3bcf0da1ced648d36178a50561c26340c162d692",
+          "bytes": 1277718,
+          "note": "post-crash retry PNG"
+        }
+      ],
+      "details": {
+        "raw_report": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-recovery-current/L06-real-host-crash.json",
+        "observed_execution": {
+          "attemptId": "attempt-0b762709a4444c7b879c191b72610ebc",
+          "busy": true,
+          "cleanupError": null,
+          "jobId": "job-398d4e56e8cb496eabc84f7de4ef6427",
+          "logs": "\r  0%|          | 0/9 [00:00<?, ?it/s]\r 11%|█         | 1/9 [00:09<01:12,  9.12s/it]",
+          "stage": "sampling",
+          "step": 2,
+          "summary": "正在采样",
+          "total": 9
+        },
+        "recovered_job_state": "Interrupted",
+        "lease_was_busy": true,
+        "lease_released": true,
+        "retry_job": {
+          "state": "Succeeded",
+          "attempt_id": "attempt-637e156c281b4d6a90b0fed73600613a",
+          "asset_id": "asset-49d2bb16d5a74704ab38acdf267c7c09"
+        },
+        "attempts": [
+          {
+            "id": "attempt-0b762709a4444c7b879c191b72610ebc",
+            "token": "token-1f92964c87ca4df8bbaadf521365916c",
+            "state": "interrupted",
+            "error": "宿主中断；请确认旧执行已清理后显式重试"
+          },
+          {
+            "id": "attempt-637e156c281b4d6a90b0fed73600613a",
+            "token": "token-fa9426630f5e4e68ae338dee7969e76b",
+            "state": "succeeded",
+            "error": null
+          }
+        ],
+        "asset": {
+          "path": "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031/data/assets/asset-885418f473ef4016b1938f72dc41f469.png",
+          "exists": true,
+          "sha256": "6eb6b262c9b26591f0c9382d3bcf0da1ced648d36178a50561c26340c162d692",
+          "bytes": 1277718,
+          "note": "post-crash retry PNG"
+        }
+      }
+    }
+  ],
+  "historicalRetry": "R02-historical-v1-retry.json",
+  "nativeExport": [
+    {
+      "path": "native-exports/中文 空格/原生 重开ZImage.png",
+      "sha256": "7e7a29f5aab63fadb070588a8636d2039aef0f431be6dc817ce745d1902c2fb3",
+      "bytes": 871598,
+      "assetId": "asset-410e4c88ffbd4e06a3bea7676c83a2d5",
+      "jobId": "job-3306be744e044b729aea6432c0890970",
+      "attemptId": "attempt-c4acf21fddc44b33bd5ac7db8bef7cb3",
+      "role": "primary",
+      "width": 768,
+      "height": 1024
+    }
+  ],
+  "resolvedFailures": "原始调试报告的L02/L05/L06失败保留供审计，不被改写为通过；本项使用修复后的独立真实重跑证据。",
+  "problems": []
+}

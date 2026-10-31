@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "meets_quality_bar": true,
+  "reviewer": "Codex visual review",
+  "reviewed_at": "2026-11-01",
+  "contact_sheet": "quality-contact-sheet.jpg",
+  "summary": "六张当前回归产物逐一审阅：三种尺寸和中英文主要对象、颜色及布局均满足原模型质量门槛，未见整幅损坏。保留水彩风格偏弱、单张书本开合偏差及伪文字局限。此结论只覆盖所附实际产物。",
+  "cases": {
+    "G01": {
+      "status": "passed",
+      "output": "outputs/G01.png",
+      "sha256": "2857b89dedeec2ebc0f58e353571d6b6a3ae491cea3e76d28308a5340171ea44",
+      "observation": "橙色小猫、窗框与窗外秋叶清楚，暖光方向一致，主体和四肢没有明显结构破损；风格较提示的水彩更接近写实。"
+    },
+    "G02": {
+      "status": "passed",
+      "output": "outputs/G02.png",
+      "sha256": "c654b5a73422b30157622c4bd3fa03487236e5528ecff965c5a15223ef5ccf32",
+      "observation": "橙猫位于窗边，秋叶与暖自然光对应输入，毛发及窗台连续；同样偏写实，水彩风格响应有限。"
+    },
+    "G03": {
+      "status": "passed",
+      "output": "outputs/G03.png",
+      "sha256": "38d3cfc332a415f67d1c6650f4ecaeb50d45b1fe5b6ce070f7b52266db904572",
+      "observation": "横幅雪山、平静湖面、近处木船和薄雾均可辨认，反射与船体方向一致，无整图损坏。"
+    },
+    "G04": {
+      "status": "passed",
+      "output": "outputs/G04.png",
+      "sha256": "7c2dca5f4efae3a53fa30f5c3dd420de7fc7fe10c19796cba09147b7fdbd797c",
+      "observation": "英文横幅提示得到雪山、湖、木船与薄雾，前景主体与远景比例正常，颜色和方向稳定。"
+    },
+    "G05": {
+      "status": "passed",
+      "output": "outputs/G05.png",
+      "sha256": "1780994ee3bca7e796dd6d2968b93530715184190f9f2554f4e59fc44790a30c",
+      "observation": "竖幅向日葵、白陶瓷花瓶与木桌清楚，侧光柔和；书本被生成成打开状态，闭合细节未完全遵循。"
+    },
+    "G06": {
+      "status": "passed",
+      "output": "outputs/G06.png",
+      "sha256": "d6b2cea7427f5a46b46e27e8f47477e8d390c14cbc77d6c4e09cf0ad4f339668",
+      "observation": "英文竖幅静物的向日葵、白花瓶、木桌和闭合书本齐全；书脊文字为不可读伪文字，主体无明显损坏。"
+    }
+  }
+}

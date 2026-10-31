@@ -1,0 +1,15 @@
+command=["/opt/homebrew/opt/python@3.15/bin/python3.15", "scripts/check-generation-crash.py", "--data-root", "/Users/gejiawei/Desktop/ai_code/image-studio/target/model-usability-offline-cache-20261031", "--report", "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-regression/L06-real-host-crash.json", "--log", "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/z-regression/logs/L06-real-host-crash.log"]
+cwd=/Users/gejiawei/Desktop/ai_code/image-studio
+exit_code=1
+timed_out=False
+elapsed_seconds=40.117
+
+Traceback (most recent call last):
+  File "/Users/gejiawei/Desktop/ai_code/image-studio/scripts/check-generation-crash.py", line 246, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/gejiawei/Desktop/ai_code/image-studio/scripts/check-generation-crash.py", line 194, in main
+    raise RuntimeError(
+    ...<2 lines>...
+    )
+RuntimeError: explicit retry failed: Error: "未登记的安装标识。"
