@@ -202,7 +202,7 @@ impl PromptLibraryStore {
     }
 
     pub fn set_favorite(&self, case_id: &str, favorite: bool) -> Result<Value, String> {
-        if !self.cases.contains_key(case_id) {
+        if favorite && !self.cases.contains_key(case_id) {
             return Err("未登记的灵感案例".into());
         }
         let mut guard = self
@@ -722,6 +722,14 @@ mod tests {
         let favorites = snapshot["favorites"].as_array().unwrap();
         assert!(favorites.iter().any(|value| value == id));
         assert!(favorites.iter().any(|value| value == orphan));
+        reloaded.set_favorite(orphan, false).unwrap();
+        assert!(
+            !reloaded.snapshot()["favorites"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|value| value == orphan)
+        );
     }
 
     #[test]
