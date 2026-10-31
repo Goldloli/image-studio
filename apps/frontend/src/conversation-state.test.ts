@@ -68,6 +68,11 @@ describe('composer keyboard and parameters', () => {
     expect(supportedDraftParams({ modelId: 'realesrgan-x4plus', capabilityId: 'image.upscale.realesrgan-x4plus.v1', sourceAssetId: 'source-1', aspect: '1:1', count: 1, seed: '' })).toBe(true);
     expect(supportedDraftParams({ modelId: 'realesrgan-x4plus', capabilityId: 'image.upscale.realesrgan-x4plus.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(false);
     expect(supportedDraftParams({ modelId: 'realesrgan-x4plus', capabilityId: 'image.upscale.realesrgan-x4plus.v1', sourceAssetId: 'source-1', aspect: '4:3', count: 1, seed: '' })).toBe(false);
+    expect(supportedDraftParams({ modelId: 'qwen-image-2.1-mflux-v1', capabilityId: 'image.text-to-image.qwen-image-2.1.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '42' })).toBe(true);
+    expect(supportedDraftParams({ modelId: 'qwen-image-2.1-mflux-v1', capabilityId: 'image.text-to-image.qwen-image-2.1.v1', sourceAssetId: null, aspect: '4:3', count: 1, seed: '' })).toBe(false);
+    expect(supportedDraftParams({ modelId: 'qwen-image-2.1-turbo-mflux-v1', capabilityId: 'image.text-to-image.qwen-image-2.1-turbo.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(true);
+    expect(supportedDraftParams({ modelId: 'moss-image-sft-mflux-v1', capabilityId: 'image.text-to-image.moss-image-sft.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(true);
+    expect(supportedDraftParams({ modelId: 'moss-image-sft-mflux-v1', capabilityId: 'image.text-to-image.moss-image-sft.v1', sourceAssetId: 'source-1', aspect: '1:1', count: 1, seed: '' })).toBe(false);
   });
 });
 

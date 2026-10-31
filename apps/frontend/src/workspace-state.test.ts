@@ -122,6 +122,14 @@ describe('workspace draft isolation',()=>{
     }
     expect(reduce(state,{type:'select',id:99})).toBe(state);
   });
+  it('preserves an incompatible aspect when selecting Qwen until the user changes it',()=>{
+    let state=reduce(initialWorkspace(),{type:'params',patch:{aspect:'4:3'}});
+    state=reduce(state,{type:'params',patch:{modelId:'qwen-image-2.1-mflux-v1',capabilityId:'image.text-to-image.qwen-image-2.1.v1'}});
+    expect(state.drafts[0].params.aspect).toBe('4:3');
+    expect(state.drafts[0].prompt).toBe('');
+    state=reduce(state,{type:'params',patch:{aspect:'1:1'}});
+    expect(state.drafts[0].params.aspect).toBe('1:1');
+  });
 });
 
 describe('canvas and input boundaries',()=>{

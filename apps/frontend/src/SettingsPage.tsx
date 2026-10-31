@@ -23,6 +23,7 @@ import {
   type PreferencesEnvelope,
   type SettingsSnapshot,
 } from './settings-types';
+import { textRecipeForModel } from './model-recipes';
 import './model-settings.css';
 
 type Group = 'appearance' | 'defaults' | 'storage' | 'runtime' | 'about';
@@ -98,12 +99,16 @@ export function SettingsPage({
   useEffect(() => { setGroup(initialGroup); }, [initialGroup]);
 
   const dirty = !defaultsEqual(defaults, savedDefaults);
+  const selectedTextRecipe = textRecipeForModel(defaults.modelId);
   const validationError = useMemo(() => {
     if (!validSeed(defaults.seed)) return '种子须为 0–4294967295 的整数，或留空随机。';
     if (defaults.count !== 1) return '当前产品每轮只接受 1 张图片。';
     if (!['1:1', '4:3', '3:4'].includes(defaults.aspect)) return '当前产品不支持该画幅。';
+    if (selectedTextRecipe && !selectedTextRecipe.aspects.includes(defaults.aspect)) {
+      return `所选模型仅支持 ${selectedTextRecipe.aspects.join('、')}；请明确选择有效画幅。`;
+    }
     return '';
-  }, [defaults]);
+  }, [defaults, selectedTextRecipe]);
 
   const chooseGroup = (next: Group) => {
     if (next === group) return;
@@ -128,7 +133,8 @@ export function SettingsPage({
       onError('设置只能在桌面应用中保存。');
       return false;
     }
-    if (!validSeed(value.seed) || value.count !== 1 || !['1:1', '4:3', '3:4'].includes(value.aspect)) {
+    const recipe = textRecipeForModel(value.modelId);
+    if (!validSeed(value.seed) || value.count !== 1 || !['1:1', '4:3', '3:4'].includes(value.aspect) || (recipe && !recipe.aspects.includes(value.aspect))) {
       setDefaultsError('创作默认值整组无效，请修正标出的字段。');
       setDefaultsSaveStatus('error');
       return false;
@@ -248,7 +254,7 @@ export function SettingsPage({
               <fieldset>
                 <legend>默认画幅</legend>
                 <div className="settings-segments">
-                  {['1:1', '4:3', '3:4'].map(aspect => <button key={aspect} className={defaults.aspect === aspect ? 'is-selected' : ''} aria-pressed={defaults.aspect === aspect} onClick={() => setDefaults({ ...defaults, aspect })}>{aspect}</button>)}
+                  {(selectedTextRecipe?.aspects ?? ['1:1', '4:3', '3:4']).map(aspect => <button key={aspect} className={defaults.aspect === aspect ? 'is-selected' : ''} aria-pressed={defaults.aspect === aspect} onClick={() => setDefaults({ ...defaults, aspect })}>{aspect}</button>)}
                 </div>
               </fieldset>
               <label>

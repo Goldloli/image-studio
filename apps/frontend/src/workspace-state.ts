@@ -1,3 +1,5 @@
+import { Z_IMAGE_MODEL_ID } from './model-recipes';
+
 export type CapabilityDraft = {
   prompt: string;
   aspect: string;
@@ -20,7 +22,7 @@ export type Draft = {
   past: string[]; future: string[];
 };
 export type WorkspaceState = { drafts: Draft[]; activeId: number; sample: number | null; nextId: number };
-export const DEFAULT_MODEL_ID = 'z-image-turbo-mflux-v1';
+export const DEFAULT_MODEL_ID = Z_IMAGE_MODEL_ID;
 export const createDraft = (id: number, name = '新会话'): Draft => ({id, name, prompt: '', collapsed: false, promptSourceId:null, params: {modelId:DEFAULT_MODEL_ID, aspect:'1:1', count:1, seed:'', capabilityId:'image.text-to-image.z-image-turbo.v1', sourceAssetId:null}, past:[], future:[]});
 export const initialWorkspace = (): WorkspaceState => ({drafts:[createDraft(1)], activeId:1, sample:null, nextId:2});
 export const validSeed = (seed: string): boolean => seed === '' || (/^\d+$/.test(seed) && Number(seed) <= 4294967295);
@@ -73,7 +75,8 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
         const slots={...d.params.capabilityDrafts,[current]:{prompt:d.prompt,aspect:d.params.aspect,seed:d.params.seed,sourceAssetId:d.params.sourceAssetId??null,promptSourceId:d.promptSourceId??null}};
         const saved=slots[next];
         const tool=next.includes('.remove-background.')||next.includes('.upscale.');
-        params={...d.params,aspect:'1:1',seed:tool?'':d.params.seed,sourceAssetId:null,...(saved?{aspect:saved.aspect,seed:saved.seed,sourceAssetId:saved.sourceAssetId}:{}),...action.patch,capabilityDrafts:slots};
+        params={...d.params,seed:tool?'':d.params.seed,sourceAssetId:null,...(saved?{aspect:saved.aspect,seed:saved.seed,sourceAssetId:saved.sourceAssetId}:{}),...action.patch,capabilityDrafts:slots};
+        if(tool) params.aspect='1:1';
         return {...d,params,prompt:saved?.prompt??(tool?'':d.prompt),promptSourceId:saved?.promptSourceId??null,past:[],future:[]};
       }
       return {...d,params};

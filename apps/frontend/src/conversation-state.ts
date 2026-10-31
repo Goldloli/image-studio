@@ -1,5 +1,6 @@
 import type { DraftParams } from './workspace-state';
 import type { ExecutionView, TurnView } from './studio-api';
+import { textRecipeForModel } from './model-recipes';
 
 export type TurnProgress = { percent: number | null; label: string };
 export type ComposerAction =
@@ -113,15 +114,14 @@ export function shouldSendOnEnter(input: {
 export function supportedDraftParams(params: DraftParams): boolean {
   const seedValid = /^(?:|[0-9]+)$/.test(params.seed)
     && (params.seed === '' || Number(params.seed) <= 4294967295);
-  if (params.modelId === 'z-image-turbo-mflux-v1') {
-    return (params.capabilityId ?? 'image.text-to-image.z-image-turbo.v1') === 'image.text-to-image.z-image-turbo.v1'
-      && ['1:1', '4:3', '3:4'].includes(params.aspect)
-      && params.count === 1 && !params.sourceAssetId && seedValid;
-  }
-  if (params.modelId === 'flux2-klein-4b-distilled') {
-    const text = params.capabilityId === 'image.text-to-image.flux2-klein-4b.v1' && !params.sourceAssetId;
+  const textRecipe = textRecipeForModel(params.modelId);
+  if (textRecipe) {
+    const text = (params.capabilityId ?? textRecipe.capabilityId) === textRecipe.capabilityId && !params.sourceAssetId;
     const edit = params.capabilityId === 'image.edit.flux2-klein-4b.v1' && Boolean(params.sourceAssetId);
-    return params.aspect === '1:1' && params.count === 1 && (text || edit) && seedValid;
+    return textRecipe.aspects.includes(params.aspect)
+      && params.count === 1
+      && (text || (params.modelId === 'flux2-klein-4b-distilled' && edit))
+      && seedValid;
   }
   if (params.modelId === 'birefnet-general-epoch-244') {
     return params.capabilityId === 'image.remove-background.birefnet-general-epoch-244.v1'
