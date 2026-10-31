@@ -1,6 +1,6 @@
 # 新模型分阶段验收计划
 
-状态：已条件确认，等待前置整批认证。新模型当前没有本产品执行证据。本计划复用已归档的[验收契约](../archive/2026-10-31-certify-current-model-usability/specs/model-validation/spec.md)和[历史日常用例](../archive/2026-10-31-certify-current-model-usability/test-plan.md)，并依赖[三个计划型号整批认证](../integrate-planned-models/test-plan.md)全部通过及归档，以下新增用例补充型号差异，不把 Z-Image 的通过结果复制给新模型。
+状态：已条件确认，前置整批118/118通过并归档；按用户2026-11-01要求暂停，尚未实施。新模型当前没有本产品执行证据。本计划复用已归档的[验收契约](../archive/2026-10-31-certify-current-model-usability/specs/model-validation/spec.md)和[历史日常用例](../archive/2026-10-31-certify-current-model-usability/test-plan.md)，并依赖[三个计划型号整批认证](../archive/2026-11-01-integrate-planned-models/test-plan.md)全部通过及归档，以下新增用例补充型号差异，不把 Z-Image 的通过结果复制给新模型。
 
 ## 1. 精确认证矩阵
 

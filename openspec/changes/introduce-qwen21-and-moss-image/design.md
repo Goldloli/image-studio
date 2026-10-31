@@ -1,6 +1,6 @@
 ## Context
 
-当前产品仍只有Z-Image接入。2026-10-31顺序修订后，本设计以`integrate-planned-models`完成并归档作为实施基线：该前置将交付Klein/ONNX/ncnn、按型号安装、generation v2、源图/多输出、SQLite v5与四型号认证。本change复用已交付边界并增补Qwen/MOSS固定分支，不能一边跳过前置一边重复建设另一套公共边界。
+前置已完成并归档，当前产品已接入Z-Image、Klein、BiRefNet和Real-ESRGAN。Qwen/MOSS按用户2026-11-01要求暂停，尚未实施。2026-10-31顺序修订后，本设计以`integrate-planned-models`完成并归档作为实施基线：该前置将交付Klein/ONNX/ncnn、按型号安装、generation v2、源图/多输出、SQLite v5与四型号认证。本change复用已交付边界并增补Qwen/MOSS固定分支，不能一边跳过前置一边重复建设另一套公共边界。
 
 前置change负责三个计划型号全部适用P0与旧Z-Image当前回归；历史Z-Image认证已归档。本设计已获用户条件确认，复用它的报告语义，模型资料以 [sources.md](sources.md) 的固定 revision 为准；前置门槛完成前没有新模型实测结论。
 
