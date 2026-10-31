@@ -6,7 +6,7 @@
 
 ### Requirement: 型号和配方具有独立稳定身份
 
-应用 SHALL 为 Z-Image Turbo、Qwen-Image 2.1 基础版、官方 Turbo 和 MOSS-Image-SFT 分别登记稳定型号与版本化配方，明确绑定能力、模型快照、完整组件、运行时锁和协议路线。相近名称、相同文件扩展名或共享后端不得产生隐式替代；旧 Z-Image 型号与内部变体映射 SHALL 保持可读且原义不变。
+应用 SHALL 为 Z-Image Turbo、Qwen-Image 2.1 基础版、官方 Turbo 和 MOSS-Image-SFT 分别登记稳定型号与版本化配方，明确绑定能力、模型快照、完整组件、运行时锁和协议路线。相近名称、相同文件扩展名或共享后端不得产生隐式替代；前置Z-Image、Klein两个能力、BiRefNet与ncnn型号/能力映射SHALL保持可读且原义不变。
 
 #### Scenario: 选择基础版和 Turbo
 - **WHEN** 用户在不同会话选择 Qwen-Image 2.1 和 Qwen-Image 2.1-Turbo
@@ -18,7 +18,7 @@
 
 ### Requirement: 每个配方显式限定输入输出和有效参数
 
-首轮新配方 SHALL 只接受纯文本、1024×1024、单张 RGB PNG、u32 或空种子；Qwen 基础版 SHALL 使用 40 步/q8/guidance 1.0，Qwen Turbo SHALL 使用 8 步/q8/guidance 1.0 和该快照的官方 Turbo 采样曲线，MOSS-SFT SHALL 使用 50 步/q8/guidance 3.0、空负提示词及负分支跳层 [22] 的固定配方。有效参数 SHALL 显式记录实际组件量化/精度与采样身份，不以 q8 标签暗示所有组件同精度。用户不得传任意后端参数或自动启用 LoRA、缓存跳步和低内存替代。
+本change新增的三个纯文本配方 SHALL 只接受纯文本、1024×1024、单张 RGB PNG、u32 或空种子；Qwen 基础版 SHALL 使用 40 步/q8/guidance 1.0，Qwen Turbo SHALL 使用 8 步/q8/guidance 1.0 和该快照的官方 Turbo 采样曲线，MOSS-SFT SHALL 使用 50 步/q8/guidance 3.0、空负提示词及负分支跳层 [22] 的固定配方。有效参数 SHALL 显式记录实际组件量化/精度与采样身份，不以 q8 标签暗示所有组件同精度。用户不得传任意后端参数或自动启用 LoRA、缓存跳步和低内存替代。
 
 #### Scenario: 旧会话的非方形参数切到新型号
 - **WHEN** 用户将原先 4:3 的会话选择为本轮只支持 1:1 的新模型
@@ -30,7 +30,7 @@
 
 ### Requirement: 文本预检跟随对应模板和预算
 
-所有文本请求 SHALL 保持 16 KiB UTF-8 产品上限并保留原始输入。固定配方的有效 token 预算 SHALL 分别为 Z-Image 512、所选 Qwen txt2img 2048、MOSS 4096，计入其自身模板与特殊 token。执行 SHALL 在采样前以本地真实 tokenizer 检查且禁用截断；超限原因和恢复编辑入口 SHALL 可见。MOSS 的标签或 JSON 布局可作为原始文本输入保留，不视为可执行代码或由产品保证几何约束。
+所有文本请求 SHALL 保持 16 KiB UTF-8 产品上限并保留原始输入。固定配方的有效 token 预算 SHALL 分别为 Z-Image及Klein各自模板512、所选 Qwen txt2img 2048、MOSS 4096，计入其自身模板与特殊 token。执行 SHALL 在采样前以本地真实 tokenizer 检查且禁用截断；超限原因和恢复编辑入口 SHALL 可见。MOSS 的标签或 JSON 布局可作为原始文本输入保留，不视为可执行代码或由产品保证几何约束。
 
 #### Scenario: 新模型输入超过旧预算
 - **WHEN** Qwen 输入含模板超过 512 token 但未超过 2048 且在字节上限内
@@ -61,7 +61,7 @@
 - **THEN** 旧 Job 仍走原版组合，若原环境缺失则要求按原身份恢复，不用新版 worker 重解释旧请求
 
 #### Scenario: 跨模型作品检索
-- **WHEN** 四个配方产生结果后，用户按 Qwen Turbo 筛选作品和任务
+- **WHEN** 七型号/八能力配置产生结果后，用户按 Qwen Turbo 筛选作品和任务
 - **THEN** 仅返回该精确变体的真实结果，其余型号和历史来源保持各自身份，不将所有 MFLUX 结果标成 Z-Image
 
 ### Requirement: 各配方独立取得执行认证
@@ -75,3 +75,16 @@
 #### Scenario: 新模型引入回归
 - **WHEN** Qwen 与 MOSS 出图成功但旧 Z-Image 重试、尺寸或原生导出失败
 - **THEN** 本批交付被阻止，先修复并重跑对应原基线，不以新模型成功抵消旧模型失败
+
+
+### Requirement: 后续实施不得越过三型号整批认证
+
+本change实施 SHALL 以前置Klein生成/编辑、BiRefNet去背景、Real-ESRGAN放大全部适用必需项及Z-Image当前回归通过并归档为门槛，另须用户明确批准本方案。前置公共安装/v2/输入/输出合同 SHALL 复用且保持，不能创建另一套互相覆盖的状态或运行时；后续Qwen两配方通过后才推进MOSS。
+
+#### Scenario: 只有历史Z-Image认证通过
+- **WHEN** Z-Image历史37/37已通过但三个计划型号尚未接通或测试未全通过
+- **THEN** Qwen/MOSS保持方案阶段，不因历史认证通过提前实施
+
+#### Scenario: 已完成前置后增加Qwen
+- **WHEN** 前置整批已认证/归档且本方案已获批
+- **THEN** 在已交付公共边界内新增三配方，保留Klein/ONNX/ncnn原包身份、历史重试及处理能力，不覆盖已有运行时

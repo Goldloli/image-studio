@@ -13,5 +13,5 @@
 - **THEN** 新会话保留 MOSS 与未就绪原因，不回退为 Z-Image，也不改写其他已有会话
 
 #### Scenario: 同时存在两代运行时
-- **WHEN** 机器保留历史 Z-Image 环境和新模型共享环境
+- **WHEN** 机器保留历史Z-Image、前置Klein/ONNX/ncnn以及新增Qwen/MOSS环境
 - **THEN** 设置页可核对各自实际锁标识/worker 与所服务型号，并区分探针和整模型证据，关于页展示当前真实接入范围和精确来源

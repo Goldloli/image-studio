@@ -42,7 +42,7 @@ ncnn包装器是实际部署进程，允许新增一个workspace binary成员；
 
 ### 3. 分型号安装与运行时锁
 
-保留原`resources/local-generation/`、旧wheel及其源码。新增Klein model manifest、MFLUX v2 runtime lock及独立`tools/mflux-worker-v2/`；仍固定MFLUX0.24.0及已有依赖，换worker包必须产生新build/runtime身份，不能复用旧摘要。共享下载缓存只按相同内容散列复用，不复制路径绑定的venv。
+保留原`resources/local-generation/`、旧wheel及其源码。新增Klein model manifest、`studio-mflux-worker` 0.2.0、`mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2` runtime锁及独立`tools/mflux-worker-v2/`；仍固定MFLUX0.24.0及已有依赖，换worker包必须产生新build/runtime身份，不能复用旧摘要。共享下载缓存只按相同内容散列复用，不复制路径绑定的venv。后续Qwen/MOSS另用0.3.0包及recipes-v3锁，generation通信协议仍是v2。
 
 BiRefNet独立manifest和Python3.13/ONNX Runtime1.31.1 CPU私有runtime，解释器复用已锁PBS来源；依赖以预构建wheel固定版本/平台/字节/SHA-256。ncnn使用官方v0.2.0程序包与主仓库v0.2.5.0包内指定模型对，分别核验归档和提取文件；不把原.pth当目标.bin，也不在用户机器现场编译或用brew修补环境。原生runtime另记录包装器、程序、依赖、架构、GPU/MoltenVK和许可证清单。
 

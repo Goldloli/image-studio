@@ -2,7 +2,7 @@
 
 ### Requirement: 安装范围与来源明确
 
-应用 SHALL 只为本阶段正式登记的 Z-Image Turbo、Qwen-Image 2.1、Qwen-Image 2.1-Turbo 和 MOSS-Image-SFT 的固定 revision、版本化配方及锁定运行时提供安装入口；安装清单 SHALL 固定各文件来源、版本、字节数、SHA-256、平台、组件角色及必要许可记录。前端 SHALL 仅提交登记的安装标识，不得传入任意下载 URL、脚本或执行路径。安装前 SHALL 展示该型号和运行时各自的原始下载量、可验证缓存命中和预计临时空间，并以用户主动安装动作开始，普通启动不得自动下载。候选来源元数据未完成组件闭包和内容摘要前 SHALL 不成为正式安装清单。
+应用 SHALL 只为本阶段正式登记的 Z-Image Turbo、Klein distilled 4B、BiRefNet general epoch_244、Real-ESRGAN x4plus、Qwen-Image 2.1、Qwen-Image 2.1-Turbo 和 MOSS-Image-SFT 的固定 revision、版本化配方及锁定运行时提供安装入口；安装清单 SHALL 固定各文件来源、版本、字节数、SHA-256、平台、组件角色及必要许可记录。前端 SHALL 仅提交登记的安装标识，不得传入任意下载 URL、脚本或执行路径。安装前 SHALL 展示该型号和运行时各自的原始下载量、可验证缓存命中和预计临时空间，并以用户主动安装动作开始，普通启动不得自动下载。候选来源元数据未完成组件闭包和内容摘要前 SHALL 不成为正式安装清单。
 
 #### Scenario: 查看首次安装计划
 - **WHEN** 用户打开尚未安装的 Z-Image Turbo
@@ -16,28 +16,20 @@
 - **WHEN** 用户打开 Qwen 基础版、Turbo 或 MOSS-SFT 的安装计划
 - **THEN** 显示所选精确变体及其完整清单所需下载/缓存/临时空间，不能将 q8 当作原始文件缩小，也不能按参数量推算已测运行峰值
 
+#### Scenario: 三个计划型号的正式安装
+- **WHEN** 用户查看前置已接入的Klein、BiRefNet或Real-ESRGAN安装计划
+- **THEN** 继续展示它们各自的完整程序/模型/runtime与空间预算，只接受固定来源主动安装，不因增加Qwen/MOSS删除前置安装能力
+
 ## ADDED Requirements
 
-### Requirement: 多型号安装状态和运行时引用独立
+### Requirement: Qwen与MOSS使用新的独立包身份
 
-安装状态、进度、激活记录和恢复动作 SHALL 归属于明确型号/快照与运行时组合；不同型号不得借用彼此的模型组件就绪事实。经过清单身份与完整性验证的相同运行时可以被多个新型号引用，共享不等于模型已经安装或有实机证据。新版 worker SHALL 使用新的运行时身份，不覆盖既有 Z-Image 环境；修复一个型号不得删除其他型号快照或用户资产。
+Qwen基础版、Turbo及MOSS SHALL 复用前置按install_id安装/互斥/恢复合同，但增加自己的固定manifest和新worker/runtime锁。原Z-Image、Klein、ONNX和ncnn的源/wheel/二进制及激活身份 SHALL 保持，不原地覆盖或重新解释旧计划。共享新runtime只证明该环境存在，不使未装权重的其他新型号就绪。
 
-#### Scenario: 只安装 Turbo
-- **WHEN** Qwen Turbo 和共享新版运行时完成安装，但基础版和 MOSS 权重尚未安装
-- **THEN** 仅 Turbo 显示本机组件齐备且可执行，其他两项可以显示运行时可复用但模型未就绪
+#### Scenario: 只安装Turbo
+- **WHEN** Turbo和Qwen/MOSS新runtime已安装而基础版与MOSS权重缺失
+- **THEN** 仅Turbo具备本机可执行条件，原四型号状态独立，其他两新型号仍显示缺权重
 
-#### Scenario: 新环境失败
-- **WHEN** 新 worker 运行时或 MOSS 设备探针失败
-- **THEN** 对应新组合不激活，已有 Z-Image 原环境仍可使用；失败原因和对应修复范围可见
-
-### Requirement: 安装与执行在受管理资源上互斥
-
-本阶段 SHALL 同时只运行一个正式安装流程，并以活跃型号标识绑定停止/继续动作；取消另一型号不得停止当前安装。会修改或验证共享运行时的安装/修复 SHALL 与生成及回收互斥，不能在执行中重建所用环境；等待冲突 SHALL 明确显示为忙碌，不创建隐式安装或推理队列。
-
-#### Scenario: 另一行发出停止
-- **WHEN** Turbo 正在安装而调用者提交针对 MOSS 的停止请求
-- **THEN** 请求被拒绝或返回该项无活动安装，不取消 Turbo
-
-#### Scenario: 生成期间修复环境
-- **WHEN** Qwen 正在使用共享运行时或仍在回收，用户请求重建该运行时
-- **THEN** 安装动作被明确阻止并保留当前任务，不覆盖正在使用的文件，用户在空闲后明确重试
+#### Scenario: 新包安装失败
+- **WHEN** Qwen/MOSS新worker或MOSS探针失败
+- **THEN** 对应新组合不激活，前置四型号及用户源图/蒙版/作品不变，不回退其他模型或覆盖Klein环境

@@ -1,12 +1,12 @@
 ## Context
 
-当前 `studio-core` 和存储提交入口调用 Z-Image 专用校验，安装器只有一个固定模型/运行时组合，Python worker 的身份、载荷和实际后端也固定为 Z-Image。宿主会话选择、设置页环境信息、资产和任务投影还存在该首个模型的专用路径。因此本 change 需要扩展实际边界，不能只改目录 JSON。
+当前产品仍只有Z-Image接入。2026-10-31顺序修订后，本设计以`integrate-planned-models`完成并归档作为实施基线：该前置将交付Klein/ONNX/ncnn、按型号安装、generation v2、源图/多输出、SQLite v5与四型号认证。本change复用已交付边界并增补Qwen/MOSS固定分支，不能一边跳过前置一边重复建设另一套公共边界。
 
-前置 change 负责取得当前版本的测试和日常认证。本设计复用它的报告语义，模型资料以 [sources.md](sources.md) 的固定 revision 为准；以下均为待批准设计，没有新模型实测结论。
+前置change负责三个计划型号全部适用P0与旧Z-Image当前回归；历史Z-Image认证已归档。本设计复用它的报告语义，模型资料以 [sources.md](sources.md) 的固定 revision 为准；以下均为待批准设计，没有新模型实测结论。
 
 ## Goals / Non-Goals
 
-目标是让三个新变体各自从受控安装走到真实原生文生图，并能与原有 Z-Image 交替使用。以两类新家族的具体需要扩展固定配方、安装状态、协议和显示，保留旧环境与请求的执行原义。
+目标是让本方案三个新变体各自从受控安装走到真实原生文生图，并与前置Z-Image/Klein/BiRefNet/Real-ESRGAN交替使用。以两类新家族的具体需要扩展固定配方、安装状态、协议和显示，保留旧环境与请求的执行原义。
 
 不建设任意模型插件系统，不接受任意远程 manifest、Python 类路径或用户脚本，不新增 crate 层级。首轮不增加参数面板：新模型仍由型号、画幅、数量与种子表达用户选择，采样参数属于版本化配方。所有新型号初始仅开放 1:1，保持现有 Z-Image 三个尺寸。
 
@@ -20,12 +20,12 @@
 | desktop `catalog` / `installation` | 登记型号到快照/运行时的解析、逐项状态和受控安装 | 固定来源、文件完整性、原子激活和锁 |
 | desktop `studio` / `generation` / `library` | 发送快照、按冻结配方分发、重试、事务提交 | 单活动、幂等、取消/成功裁决与不可变资产 |
 | `worker-protocol` / supervisor | v1/v2 严格载荷、身份、超时和回收 | 有界通道、候选输出、单 Attempt 单图 |
-| `tools/mflux-worker` / 新版 worker 源目录 | 原版源与包保持，另行实现少量新后端分支和各自文本/采样验证 | 私有运行时、离线本地路径、不执行远程代码 |
+| `tools/mflux-worker` / 新版 worker 源目录 | 原版源与包保持，保留前置源目录，另行实现Qwen/MOSS有限后端分支和各自文本/采样验证 | 私有运行时、离线本地路径、不执行远程代码 |
 | frontend | 目录驱动型号、配方可接受范围、真实状态与制作记录 | 会话隔离、输入保存、真实进度和明确拒绝 |
 
-使用有界枚举/登记表覆盖 LegacyZImage、Qwen21Base、Qwen21Turbo、MossImageSft；登记表可以由受源码审阅的静态资源加载，但不能成为运行时可执行插件入口。Rust 校验与 Python 内置分支共享版本化配方标识并做一致性测试，不靠展示名称匹配模型。
+使用有界枚举/登记表覆盖 前置LegacyZImage/KleinText/KleinEdit/BiRefNetCpu/RealEsrganX4及新增Qwen21Base、Qwen21Turbo、MossImageSft；登记表可以由受源码审阅的静态资源加载，但不能成为运行时可执行插件入口。Rust 校验与 Python 内置分支共享版本化配方标识并做一致性测试，不靠展示名称匹配模型。
 
-产品目录 ID、内部模型变体 ID、模型快照 ID、runtime lock 和 recipe ID 分开保存。旧 Z-Image 目录 ID `z-image-turbo-mflux-v1` 与内部变体 `z-image-turbo-q4` 的映射不改；新型号也须有显式映射。新型号名称中的 `mflux-v1` 表示该产品配方的第一版，不代表生成通信协议 v1。
+产品目录 ID、内部模型变体 ID、模型快照 ID、runtime lock 和 recipe ID 分开保存。旧 Z-Image 目录 ID `z-image-turbo-mflux-v1` 与内部变体 `z-image-turbo-q4` 的映射不改；新型号也须有显式映射。Qwen/MOSS型号名称中的`mflux-v1`表示该产品配方的第一版，不代表生成通信协议 v1。
 
 ### 2. 首轮配方与输入范围
 
@@ -50,23 +50,23 @@ Qwen 选 `qwen21/variants/txt2img`，不选 reference/edit。后者虽然也能�
 
 宿主对外部参数做第一层校验，worker 对收到的配方做第二层校验；两者都拒绝未知字段。原始请求参数仍只由公开用户字段组成，固定 steps/CFG/精度等进入有效计划，不能伪装成用户显式输入。
 
-### 4. 分型号 manifest 和两代运行时
+### 4. 分型号manifest和版本隔离的运行时
 
-保留 `resources/local-generation/` 和原 Z-Image runtime lock，不修改旧 worker wheel 内容或摘要。新资源按明确型号保存完整 model manifest，并增加一个共享的新 runtime lock，拟标识为 `mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2`，内含新版 `studio-mflux-worker` 0.2.0。应用本身版本不因 worker 包版本自动改变。
+保留 `resources/local-generation/` 和原 Z-Image runtime lock，不修改旧 worker wheel 内容或摘要。新资源按明确型号保存完整 model manifest，并增加一个共享的新 runtime lock，拟标识为`mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3`，内含`studio-mflux-worker` 0.3.0；该runtime v3编号不改变generation协议仍为v2。应用本身版本不因 worker 包版本自动改变。
 
-旧锁审计还要求原 worker 源码与内嵌旧 wheel 逐文件一致，因此不能仅保留旧 wheel、同时就地覆盖其源码。新版 worker 放在独立的 `tools/mflux-worker-v2/`，保留同名 Python 模块和新版包版本，由独立虚拟环境隔离；旧源目录、构建输入和 wheel 保持可审计。源码/wheel 审计按 runtime lock 映射到对应源目录，禁止通过删除旧一致性检查让新版本通过。
+旧锁审计还要求原 worker 源码与内嵌旧 wheel 逐文件一致，因此不能仅保留旧 wheel、同时就地覆盖其源码。新版 worker 放在独立的 `tools/mflux-worker-v3/`，保留同名 Python 模块和新版包版本，由独立虚拟环境隔离；旧源目录、构建输入和 wheel 保持可审计。源码/wheel 审计按 runtime lock 映射到对应源目录，禁止通过删除旧一致性检查让新版本通过。
 
-新版运行时优先复用已锁定 PBS、MFLUX/MLX 及依赖版本，只替换新版 worker wheel；如果新路线确实需要其他依赖，在新锁内固定 wheel、版本、来源、平台和摘要后验证，不修改系统 Python，不在用户机器解析浮动依赖。需要整体更换 MFLUX 版本或改变模型路线时更新本方案，不静默扩大升级范围。
+前置Klein的worker v2源目录、wheel和runtime也保留审计，不原地覆盖。Qwen/MOSS新版运行时优先复用已锁定PBS、MFLUX/MLX 及依赖版本，只替换新版 worker wheel；如果新路线确实需要其他依赖，在新锁内固定 wheel、版本、来源、平台和摘要后验证，不修改系统 Python，不在用户机器解析浮动依赖。需要整体更换 MFLUX 版本或改变模型路线时更新本方案，不静默扩大升级范围。
 
 每个 model manifest 覆盖完整 transformer、文本编码器、VAE、tokenizer/processor、配置、索引及采样需要的文件；不盲目下载整个仓库，也不能漏掉小文件。普通文件须取得内容 SHA-256，Git blob ID 不能替代。组件共享只按相同内容证明；首轮不实现用户可见的通用组件管理器或卸载引用计数。
 
-拟新增激活记录布局：`data/installations/models/<install-id>.json` 保存模型 manifest 摘要、快照和所需 runtime lock；`data/installations/runtimes/<runtime-id>.json` 保存运行时 inventory/摘要及探针。记录位于被散列的运行时树之外，避免自包含摘要。旧 `installation-ready.json` 继续只表示原 Z-Image 组合，读取时映射到旧型号，不搬迁、不重新登记为新环境。
+复用前置已交付激活记录布局：`data/installations/models/<install-id>.json` 保存模型 manifest 摘要、快照和所需 runtime lock；`data/installations/runtimes/<runtime-id>.json` 保存运行时 inventory/摘要及探针。记录位于被散列的运行时树之外，避免自包含摘要。旧 `installation-ready.json` 继续只表示原 Z-Image 组合，读取时映射到旧型号，不搬迁、不重新登记为新环境。
 
 就绪核验顺序为登记和锁身份 → 模型完整文件 → runtime inventory/链接 → 包版本和设备探针 → 原子型号激活。共享 runtime Ready 只证明环境可引用，不能证明另一个型号权重齐备；实机证据又与设备探针分开。模型页仍可快速读取激活元数据，生成前在后台执行完整核验，不在搜索/展开时散列几十 GB。
 
 ### 5. 安装协调与空间口径
 
-在现有宿主内用一个小型安装协调器管理按 install_id 索引的状态，保留单安装流程和数据根文件锁，不启动多模型并行下载。新安装/修复与生成/清理互斥，避免重建共享环境时另一个 worker 正在使用。
+复用前置宿主的小型安装协调器管理按 install_id 索引的状态，保留单安装流程和数据根文件锁，不启动多模型并行下载。新安装/修复与生成/清理互斥，避免重建共享环境时另一个 worker 正在使用。
 
 `model_install`、停止/继续调用和事件均绑定 install_id；现有无目标的停止调用在同版本前后端一起调整为明确目标。活跃安装身份必须由宿主核对，不能依据当前展开行猜测。没有等待队列，冲突直接返回可行动的忙碌原因。
 
@@ -74,15 +74,15 @@ Qwen 选 `qwen21/variants/txt2img`，不选 reference/edit。后者虽然也能�
 
 运行时因绝对链接绑定位置，应在目标目录经正式安装器创建，不复制旧 venv 或篡改 inventory。修复新环境不会覆盖旧 Z-Image；某个新模型失败只改变对应状态，其他已就绪组合保持可用。
 
-### 6. 协议 v2 与旧路径兼容
+### 6. 复用generation v2与全部前置路径
 
-宿主支持两条有界路线：LegacyZImageV1 与 MfluxTextToImageV2。旧冻结计划只连接旧 v1 worker/运行时；新计划必须连接 v2 worker。每次握手的可接受版本由计划路线限定，不能协商后再降级猜测。诊断 v1 不参与该选择。
+宿主保留前置的LegacyZImageV1和generation v2（Klein/源图/ONNX/ncnn），在v2内增加Qwen/MOSS三个纯文本分支。历史Z-Image冻结计划只连接原v1 worker/runtime，前置Klein/ONNX/ncnn仍连接各自v2组合；本次Qwen/MOSS计划连接新增纯文本v2 worker。每次握手的可接受版本由计划路线限定，不能协商后再降级猜测。诊断v1不参与该选择。
 
 新 worker 启动由宿主传入登记型号/已验证快照配置，参数来自内置允许列表和本地激活记录，不接受前端指定模块或命令。worker 从自身包构建、运行时和选定内置分支形成身份，不能仅复制 hello 中的 expected_worker 字符串作为证明；宿主仍负责运行时与模型字节核验。
 
-v2 execute 采用严格结构：`model_id`、`recipe_id`、`recipe_version`、`model_snapshot_id`、`prompt`、`width`、`height`、`seed`、配方专用的有界 `parameters`、规范化 `model_path` 和 `output_dir`；单图语义由配方固定为 1。parameters 以受限枚举解码，各分支只接受规定字段，不做任意 JSON 透传。采样表等大型固定配置放在已核验快照，不通过 IPC 传任意数组。
+Qwen/MOSS的v2 execute按无源图分支采用严格结构：`model_id`、`recipe_id`、`recipe_version`、`model_snapshot_id`、`prompt`、`width`、`height`、`seed`、配方专用的有界 `parameters`、规范化 `model_path` 和 `output_dir`；单图语义由配方固定为1；输入列表为空，候选仅primary。前置BiRefNet的primary+mask合同及ncnn受监督子进程语义保持，不删除已有v2角色/输入字段。parameters 以受限枚举解码，各分支只接受规定字段，不做任意 JSON 透传。采样表等大型固定配置放在已核验快照，不通过 IPC 传任意数组。
 
-继续沿用 family、session/request/Job/Attempt/token、递增 sequence、64 KiB 帧、日志上限、候选 PNG 和原子提交门禁。新增 v2 与 v1 分开解码，未知字段/非有限数值/版本载荷串用均拒绝。增加错快照、错配方、旧 worker 及取消迟到反例；不因增加型号删除原 v1 回归。
+继续沿用 family、session/request/Job/Attempt/token、递增 sequence、64 KiB 帧、日志上限、候选 PNG 和原子提交门禁。沿用v2与v1分开解码，未知字段/非有限数值/版本载荷串用均拒绝。增加错快照、错配方、旧 worker 及取消迟到反例；不因增加型号删除原v1及源图/双输出/原生ncnn回归。
 
 ### 7. 生命周期、阶段和超时
 
@@ -96,7 +96,7 @@ v2 execute 采用严格结构：`model_id`、`recipe_id`、`recipe_version`、`m
 
 现有 UserRequest/ExecutionPlan/RunManifest 已能表达型号、组件、运行时和有效参数映射，先复用当前 schema。新计划加入配方身份和专用有效参数，旧计划保持原字段与旧严格校验；不要给旧 map 补新字段导致原长度/键校验失效。存储的单模型合法性校验改为按稳定配方分发，幂等、Attempt 事务和候选验证规则不改。
 
-仅增加模型数量不要求 SQLite 升版。若实施发现确需新增持久字段，先明确迁移和兼容测试并补充对应 spec，而不是修改既有 request_json/plan_json。重试始终使用原快照/runtime/recipe；原组合缺失时说明恢复条件。新请求可以选择新版配方，旧 Job 不被升级。
+前置已迁移至SQLite v5。仅新增Qwen/MOSS不再次升版，保留imported_sources、Turn源图与多输出角色结构。若实施发现确需新增持久字段，先明确迁移和兼容测试并补充对应 spec，而不是修改既有 request_json/plan_json。重试始终使用原快照/runtime/recipe；原组合缺失时说明恢复条件。新请求可以选择新版配方，旧 Job 不被升级。
 
 前端从宿主目录读取可接受画幅和配方摘要。选择新型号时保留当前提示词与旧画幅；不适用的画幅显示明确原因、阻止发送，由用户主动改为 1:1。新会话默认表单也做整组校验，不隐式继承当前会话或部分保存。
 
@@ -104,26 +104,26 @@ v2 execute 采用严格结构：`model_id`、`recipe_id`、`recipe_version`、`m
 
 ### 9. 实施阶段与通过门槛
 
-现有 `generation-check` 只提交 Z-Image；为新配方扩展登记 `--model-id` 选择与机器可判读结果，或由前置编排器调用同一正式应用服务的型号化发送入口。两者都须经过相同的宿主就绪校验、冻结请求、存储事务、监督与 worker，不能绕过宿主直接调用 Python 后端后登记为产品成功。原生用例仍必须从实际会话 composer 提交，验收 CLI 只覆盖其所属层。
+前置验收入口已须支持能力/源图及型号选择；为本批增补登记`--model-id`及纯文本配方选择与机器可判读结果，或由前置编排器调用同一正式应用服务的型号化发送入口。两者都须经过相同的宿主就绪校验、冻结请求、存储事务、监督与 worker，不能绕过宿主直接调用 Python 后端后登记为产品成功。原生用例仍必须从实际会话 composer 提交，验收 CLI 只覆盖其所属层。
 
 | 阶段 | 工作 | 出口条件 |
 |---|---|---|
-| G0 | 前置与授权 | 现有模型 P0/日常认证通过，且用户明确批准本方案 |
-| G1 | 公共边界与源清单 | 三个完整 manifest、新 worker/runtime 锁、配方/v2/旧路径 fixture 通过；没有来源/字节身份缺口 |
+| G0 | 前置与授权 | 三个计划型号全部适用P0/原生/质量及Z-Image回归通过并归档，且用户明确批准本方案 |
+| G1 | 公共边界与源清单 | 三个新增manifest、新worker/runtime锁、前置公共边界复用与新增配方fixture通过；无来源缺口，不重建安装/v2框架 |
 | G2 | Qwen 本机基线 | 基础版和 Turbo 以选定固定 MFLUX 同配方本地运行，模板/采样与离线依赖审计通过 |
 | G3 | Qwen 产品链路 | 两配方各自安装、真实生成/取消/恢复、原生日常和质量对照通过 |
 | G4 | MOSS | SFT 独立基线、产品链路、文字/布局观察、取消/恢复与日常通过 |
-| G5 | 整批回归 | 四配方交替使用、历史 Z-Image 重试、作品/默认值、原生 UI 和当前配置报告通过 |
+| G5 | 整批回归 | 七型号/八能力配置交替使用，含前置Klein编辑/BiRefNet双输出/ncnn放大与旧Z-Image重试；原生及当前报告通过 |
 
-本方案获批后按技术依赖推进，不增加每阶段重复审批；范围或路线发生实质变化时才回到提案确认。G2/G3 的 Qwen 基础版和 Turbo 不能互相代验；MOSS 必须有独立证据。开发分支中的接入登记不等于已获实机认证，verifiedDevices 只写真实组合。最终未完成项保留 planned 或经用户确认拆分 change，不能以部分成功直接归档整批。
+本方案获批后按技术依赖推进，不增加每阶段重复审批；范围或路线发生实质变化时才回到提案确认。G2/G3 的 Qwen 基础版和 Turbo 不能互相代验；MOSS 必须有独立证据。开发分支中的接入登记不等于已获实机认证，verifiedDevices 只写真实组合。本方案新增型号未完成项保留planned或经用户确认拆分change；前置已认证三型号不改回planned，不能以部分成功直接归档整批。
 
 ## Alternatives Considered
 
 继续堆硬编码会让型号、安装和 UI 状态频繁串用，因此以固定配方分发收拢边界；完整通用插件系统则超出两类新家族需要。直接调用上游 CLI 虽便于基线，但缺少本产品的事务、取消和历史约束，因此只作为参考，不取代 worker 产品路线。
 
-选择新增协议 v2 和 runtime lock，是为了保留旧载荷的严格解码与原配方重试。直接扩宽原 v1 字段或就地替换旧 worker 会让历史计划的“相同版本”含义变化。新旧环境暂时并存带来额外磁盘占用，本轮接受该成本，不借机添加垃圾回收或卸载系统。
+选择复用generation v2但新增runtime lock，是为了保留旧载荷严格解码以及Klein等前置配方重试。直接扩宽原 v1 字段或就地替换旧 worker 会让历史计划的“相同版本”含义变化。新旧环境暂时并存带来额外磁盘占用，本轮接受该成本，不借机添加垃圾回收或卸载系统。
 
-独立保留两代 worker 源会有少量生命周期辅助代码重复；在尚未完成旧配方迁移前接受这项有限成本。提前抽公共模块需要重新构建旧 wheel 并改变原 runtime 身份，不作为本批接入的隐含任务。
+独立保留Z-Image、Klein、Qwen/MOSS多版worker源会有少量生命周期辅助代码重复；在尚未完成旧配方迁移前接受这项有限成本。提前抽公共模块需要重新构建旧 wheel 并改变原 runtime 身份，不作为本批接入的隐含任务。
 
 ## Risks / Trade-offs
 
@@ -136,8 +136,8 @@ v2 execute 采用严格结构：`model_id`、`recipe_id`、`recipe_version`、`m
 
 ## Migration Plan
 
-保留旧 Z-Image 安装和数据。新运行时/模型存入新版本目录，逐项校验后原子激活；安装失败不覆盖旧环境和其他快照。数据读取按新旧配方分发，回归旧库、旧 PNG 与旧重试，必要迁移必须有独立设计和 fixture。
+保留前置四型号及其全部安装、源图、mask与历史数据。新运行时/模型存入新版本目录，逐项校验后原子激活；安装失败不覆盖旧环境和其他快照。数据读取按新旧配方分发，回归旧库、旧 PNG 与旧重试，必要迁移必须有独立设计和 fixture。
 
 代码回退前先确保无活动执行；旧应用无法解析的新型号/协议任务只能保留为不可执行，不能篡改 JSON 使其冒充 Z-Image。新资产仍通过既有通用 AssetRef/PNG 机制保存；回退不得删除新旧资产或运行记录。旧二进制对新增型号的兼容不作无证据承诺，正式发布前记录实际回退限制。
 
-交付时汇总三个新配方和 Z-Image 回归证据，关闭对应 Beads。全部任务通过后归档本 change，更新新增与修改规格；前置认证 change 单独归档，不能一次归档把未实施的新模型规格写成已交付。
+交付时汇总三个新增配方和前置四型号的当前回归证据，关闭对应 Beads。全部任务通过后归档本 change，更新新增与修改规格；前置认证 change 单独归档，不能一次归档把未实施的新模型规格写成已交付。
