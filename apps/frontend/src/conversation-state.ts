@@ -1,7 +1,7 @@
 import type { DraftParams } from './workspace-state';
 import type { ExecutionView, TurnView } from './studio-api';
 
-export type TurnProgress = { percent: number; label: string };
+export type TurnProgress = { percent: number | null; label: string };
 export type ComposerAction =
   | { kind: 'send'; disabled: boolean }
   | { kind: 'stop'; disabled: boolean }
@@ -64,7 +64,7 @@ export function progressForTurn(
   }
   if (stage === 'loading') return { percent: 10, label: '正在加载模型' };
   if (stage === 'encoding') return { percent: 15, label: '正在编码提示词' };
-  if (stage === 'inference') return { percent: 45, label: '正在执行本地推理' };
+  if (stage === 'inference') return { percent: null, label: '正在执行本地推理' };
   if (stage === 'sampling') {
     const resolvedTotal = total && total > 0 ? total : 9;
     const resolvedStep = Math.max(0, Math.min(step ?? 0, resolvedTotal));
@@ -125,6 +125,13 @@ export function supportedDraftParams(params: DraftParams): boolean {
   }
   if (params.modelId === 'birefnet-general-epoch-244') {
     return params.capabilityId === 'image.remove-background.birefnet-general-epoch-244.v1'
+      && Boolean(params.sourceAssetId)
+      && params.aspect === '1:1'
+      && params.count === 1
+      && params.seed === '';
+  }
+  if (params.modelId === 'realesrgan-x4plus') {
+    return params.capabilityId === 'image.upscale.realesrgan-x4plus.v1'
       && Boolean(params.sourceAssetId)
       && params.aspect === '1:1'
       && params.count === 1

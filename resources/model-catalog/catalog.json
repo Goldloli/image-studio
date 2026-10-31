@@ -110,22 +110,22 @@
       "displayName": "Real-ESRGAN x4plus",
       "variant": "RealESRGAN_x4plus · ncnn",
       "family": "Real-ESRGAN",
-      "summary": "计划补充通用 4 倍放大，当前尚未接入原生 worker。",
-      "description": "首轮只认证通用 realesrgan-x4plus 4 倍放大和分块执行；原始 PyTorch 权重与 ncnn 转换格式必须分别记录来源和哈希。",
+      "summary": "使用固定的 ncnn 模型与 Vulkan GPU 路径，将一张 RGB 图片精确放大 4 倍。",
+      "description": "固定 realesrgan-x4plus 的 ncnn 权重、官方 macOS 程序、单 GPU、tile 128 和 1:1:1 线程；首轮输出 PNG，不启用 TTA。",
       "capabilities": [
         { "id": "upscale", "label": "放大" }
       ],
-      "productStatus": "planned",
-      "runtime": "Real-ESRGAN ncnn Vulkan（计划）",
-      "license": "主仓库 BSD-3-Clause · ncnn 程序 MIT · 转换权重待复核",
-      "source": "https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.1.0",
-      "revision": "v0.1.0 / ncnn 37026f4",
-      "modelBytes": null,
-      "knownArtifactBytes": 67040989,
+      "productStatus": "implemented",
+      "runtime": "Real-ESRGAN ncnn Vulkan v0.2.0 · Metal GPU",
+      "license": "Real-ESRGAN BSD-3-Clause · ncnn app MIT",
+      "source": "https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.2.5.0",
+      "revision": "v0.2.5.0 ncnn package / x4plus bin sha256:713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+      "modelBytes": 33540549,
+      "knownArtifactBytes": 51817124,
       "requirements": [
-        "程序、依赖和所选 .param/.bin 文件分别校验",
-        "显式指定 realesrgan-x4plus",
-        "分块执行与资源回收验收"
+        "官方 ncnn 程序与 x4plus 模型对分别校验",
+        "显式指定 x4plus、4×、tile 128 与单 GPU",
+        "分块接缝、取消和强杀回收实机验收"
       ],
       "exclusions": [
         "动漫专用模型",
@@ -133,9 +133,9 @@
         "任意倍率重采样"
       ],
       "verifiedDevices": [],
-      "recipe": "计划：通用 4× 放大",
-      "installId": null,
-      "installerSupported": false
+      "recipe": "ncnn Vulkan · x4plus · tile 128 · 固定 4×",
+      "installId": "realesrgan-x4plus",
+      "installerSupported": true
     }
   ]
 }

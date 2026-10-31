@@ -428,12 +428,22 @@ impl Library {
                 Value::String(studio_core::recipes::KLEIN_TEXT_CAPABILITY.into()),
             );
             params.insert("sourceAssetId".into(), Value::Null);
-        } else if model_id == studio_core::recipes::BIREFNET_MODEL {
+        } else if matches!(
+            model_id,
+            studio_core::recipes::BIREFNET_MODEL | studio_core::recipes::REALESRGAN_MODEL
+        ) {
             params.insert("aspect".into(), Value::String("1:1".into()));
             params.insert("seed".into(), Value::String(String::new()));
             params.insert(
                 "capabilityId".into(),
-                Value::String(studio_core::recipes::BIREFNET_CAPABILITY.into()),
+                Value::String(
+                    if model_id == studio_core::recipes::BIREFNET_MODEL {
+                        studio_core::recipes::BIREFNET_CAPABILITY
+                    } else {
+                        studio_core::recipes::REALESRGAN_CAPABILITY
+                    }
+                    .into(),
+                ),
             );
             params.insert("sourceAssetId".into(), Value::Null);
         } else {
@@ -724,6 +734,10 @@ impl Library {
                 && input.model_id == studio_core::recipes::BIREFNET_MODEL
             {
                 "去背景"
+            } else if input.prompt.trim().is_empty()
+                && input.model_id == studio_core::recipes::REALESRGAN_MODEL
+            {
+                "放大 4 倍"
             } else {
                 &input.prompt
             },
@@ -801,8 +815,11 @@ impl Library {
         } else {
             turn.model_id.as_str()
         };
-        let tool_output_matches = turn.model_id == studio_core::recipes::BIREFNET_MODEL
-            || request.requested_output.width == width && request.requested_output.height == height;
+        let tool_output_matches = matches!(
+            turn.model_id.as_str(),
+            studio_core::recipes::BIREFNET_MODEL | studio_core::recipes::REALESRGAN_MODEL
+        ) || request.requested_output.width == width
+            && request.requested_output.height == height;
         if request.model_variant_id.as_str() != expected_model
             || request.capability.capability_id != turn.capability_id
             || request.instruction != turn.prompt && request.capability.instruction_required
@@ -1112,9 +1129,16 @@ fn ensure_no_other_pending_turn(db: &Connection, turn_id: &TurnId) -> Result<()>
 }
 
 fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
-    let tool_without_prompt = input.model_id == studio_core::recipes::BIREFNET_MODEL
-        && input.capability_id == studio_core::recipes::BIREFNET_CAPABILITY
-        && input.prompt.is_empty()
+    let tool_without_prompt = matches!(
+        (input.model_id.as_str(), input.capability_id.as_str()),
+        (
+            studio_core::recipes::BIREFNET_MODEL,
+            studio_core::recipes::BIREFNET_CAPABILITY
+        ) | (
+            studio_core::recipes::REALESRGAN_MODEL,
+            studio_core::recipes::REALESRGAN_CAPABILITY
+        )
+    ) && input.prompt.is_empty()
         && input.seed.is_empty();
     if (!tool_without_prompt && input.prompt.trim().is_empty())
         || input.prompt.len() > studio_core::generation::MAX_PROMPT_BYTES
@@ -1139,6 +1163,11 @@ fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
         (studio_core::recipes::BIREFNET_MODEL, studio_core::recipes::BIREFNET_CAPABILITY, true) => {
             input.aspect == "1:1" && input.prompt.is_empty() && input.seed.is_empty()
         }
+        (
+            studio_core::recipes::REALESRGAN_MODEL,
+            studio_core::recipes::REALESRGAN_CAPABILITY,
+            true,
+        ) => input.aspect == "1:1" && input.prompt.is_empty() && input.seed.is_empty(),
         _ => false,
     };
     if !valid_recipe {

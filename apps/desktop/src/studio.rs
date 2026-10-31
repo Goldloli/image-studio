@@ -6,6 +6,7 @@ use crate::adapters::{
     generation::GenerationController,
     installation::{
         BIREFNET_INSTALL_ID, INSTALL_ID, InstallationSnapshot, Installations, KLEIN_INSTALL_ID,
+        REALESRGAN_INSTALL_ID,
     },
     library::{
         AcceptTurnInput, AssetLibraryQuery, DEFAULT_MODEL_ID, DraftRecord, JobRecord, Library,
@@ -26,7 +27,10 @@ use std::{
 use studio_core::{
     domain::*,
     generation::{GenerationInput, freeze_z_image},
-    recipes::{BiRefNetInput, KleinInput, SourceAsset, SourceFacts, freeze_birefnet, freeze_klein},
+    recipes::{
+        BiRefNetInput, KleinInput, RealEsrganInput, SourceAsset, SourceFacts, freeze_birefnet,
+        freeze_klein, freeze_realesrgan,
+    },
 };
 use uuid::Uuid;
 
@@ -191,16 +195,23 @@ impl StudioService {
         self.model_view_for(INSTALL_ID)
     }
     pub fn model_views(&self) -> Vec<Value> {
-        [INSTALL_ID, KLEIN_INSTALL_ID, BIREFNET_INSTALL_ID]
-            .into_iter()
-            .map(|id| self.model_view_for(id))
-            .collect()
+        [
+            INSTALL_ID,
+            KLEIN_INSTALL_ID,
+            BIREFNET_INSTALL_ID,
+            REALESRGAN_INSTALL_ID,
+        ]
+        .into_iter()
+        .map(|id| self.model_view_for(id))
+        .collect()
     }
     fn model_view_for(&self, install_id: &str) -> Value {
         let name = if install_id == KLEIN_INSTALL_ID {
             "FLUX.2 Klein 4B distilled"
         } else if install_id == BIREFNET_INSTALL_ID {
             "BiRefNet general epoch_244"
+        } else if install_id == REALESRGAN_INSTALL_ID {
+            "Real-ESRGAN x4plus"
         } else {
             "Z-Image Turbo"
         };
@@ -208,6 +219,8 @@ impl StudioService {
             15_980_131_745_u64
         } else if install_id == BIREFNET_INSTALL_ID {
             972_666_916_u64
+        } else if install_id == REALESRGAN_INSTALL_ID {
+            33_540_549_u64
         } else {
             32_848_304_893_u64
         };
@@ -353,8 +366,8 @@ impl StudioService {
             "environment": {
                 "platform": std::env::consts::OS,
                 "architecture": std::env::consts::ARCH,
-                "runtimeName": "MFLUX / MLX + ONNX Runtime CPU",
-                "runtimeVersion": "0.24.0 / 1.31.1",
+                "runtimeName": "MFLUX / MLX + ONNX Runtime CPU + ncnn Vulkan",
+                "runtimeVersion": "0.24.0 / 1.31.1 / 0.2.0",
                 "pythonVersion": "3.13.12",
                 "diagnosticsEnabled": diagnostics_enabled,
                 "runtime": runtime
@@ -373,9 +386,9 @@ impl StudioService {
                     "Z-Image Turbo · Tongyi-MAI/Z-Image-Turbo · Apache-2.0",
                     "FLUX.2 Klein 4B distilled · black-forest-labs/FLUX.2-klein-4B · Apache-2.0",
                     "BiRefNet general epoch_244 · ZhengPeng7/BiRefNet v1 · MIT",
-                    "Real-ESRGAN x4plus · planned · program and conversion-weight reviews pending"
+                    "Real-ESRGAN x4plus · official ncnn package v0.2.5.0 · BSD-3-Clause"
                 ],
-                "capabilityScope": "Z-Image Turbo、FLUX.2 Klein 4B 与 BiRefNet epoch_244 已接入本地安装与执行链路；Real-ESRGAN 仍按计划接入。"
+                "capabilityScope": "Z-Image Turbo、FLUX.2 Klein 4B、BiRefNet epoch_244 与 Real-ESRGAN x4plus 已接入本地安装与执行链路。"
             }
         }))
     }
@@ -439,14 +452,23 @@ impl StudioService {
                 studio_core::recipes::BIREFNET_MODEL,
                 studio_core::recipes::BIREFNET_CAPABILITY,
                 _,
+            )
+            | (
+                studio_core::recipes::REALESRGAN_MODEL,
+                studio_core::recipes::REALESRGAN_CAPABILITY,
+                _,
             ) => params.aspect == "1:1",
             _ => false,
         };
         if !supported_combo {
             return Err("模型、能力、源图与画幅组合不受支持".into());
         }
-        if params.model_id == studio_core::recipes::BIREFNET_MODEL && !params.seed.is_empty() {
-            return Err("BiRefNet 去背景不接受种子".into());
+        if matches!(
+            params.model_id.as_str(),
+            studio_core::recipes::BIREFNET_MODEL | studio_core::recipes::REALESRGAN_MODEL
+        ) && !params.seed.is_empty()
+        {
+            return Err("当前工具能力不接受种子".into());
         }
         if let Some(source) = &params.source_asset_id {
             let source = AssetId::new(source).map_err(|error| error.to_string())?;
@@ -822,6 +844,8 @@ impl StudioService {
                 studio_core::recipes::KLEIN_TEXT_CAPABILITY.into()
             } else if input.model_id == BIREFNET_INSTALL_ID {
                 studio_core::recipes::BIREFNET_CAPABILITY.into()
+            } else if input.model_id == REALESRGAN_INSTALL_ID {
+                studio_core::recipes::REALESRGAN_CAPABILITY.into()
             } else {
                 studio_core::generation::Z_IMAGE_CAPABILITY.into()
             }
@@ -928,6 +952,31 @@ impl StudioService {
             let resolved = self.with_library(|library| library.resolve_source(source_id))?;
             let frozen = freeze_birefnet(
                 BiRefNetInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    source: SourceAsset {
+                        asset: resolved.asset,
+                        facts: SourceFacts {
+                            width: resolved.width,
+                            height: resolved.height,
+                            has_transparent_pixels: resolved.has_transparent_pixels,
+                        },
+                    },
+                },
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
+        } else if turn.model_id == REALESRGAN_INSTALL_ID {
+            let source_id = turn
+                .source_asset_id
+                .as_ref()
+                .ok_or("Real-ESRGAN 放大需要一张源图")?;
+            let resolved = self.with_library(|library| library.resolve_source(source_id))?;
+            let frozen = freeze_realesrgan(
+                RealEsrganInput {
                     request_id,
                     project_id,
                     idempotency_key,
@@ -1169,9 +1218,12 @@ impl StudioService {
             installation.plan_environment(previous.request.model_variant_id.as_str())?;
         let scheduler_matches = studio_core::recipes::Recipe::from_request(&previous.request)
             .is_ok_and(|recipe| {
-                recipe == studio_core::recipes::Recipe::BiRefNet
-                    || previous.plan.effective_parameters.get("scheduler")
-                        == Some(&json!(environment.scheduler))
+                matches!(
+                    recipe,
+                    studio_core::recipes::Recipe::BiRefNet
+                        | studio_core::recipes::Recipe::RealEsrgan
+                ) || previous.plan.effective_parameters.get("scheduler")
+                    == Some(&json!(environment.scheduler))
             });
         if previous.plan.components != environment.components
             || previous.plan.runtime != environment.runtime

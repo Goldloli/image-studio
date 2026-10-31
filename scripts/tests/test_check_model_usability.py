@@ -131,10 +131,11 @@ class CatalogContractTests(unittest.TestCase):
             [
                 "birefnet-general-epoch-244",
                 "flux2-klein-4b-distilled",
+                "realesrgan-x4plus",
                 "z-image-turbo-mflux-v1",
             ],
         )
-        self.assertEqual(result.details["planned"], ["realesrgan-x4plus"])
+        self.assertEqual(result.details["planned"], [])
 
 
 class CliTests(unittest.TestCase):

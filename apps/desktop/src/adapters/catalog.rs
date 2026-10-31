@@ -297,8 +297,8 @@ mod tests {
         let catalog = ModelCatalog::load().unwrap();
         let query = catalog.query(&[], Some("安装器不可用")).unwrap();
         assert_eq!(query["counts"]["total"], 4);
-        assert_eq!(query["counts"]["supported"], 3);
-        assert_eq!(query["counts"]["planned"], 1);
+        assert_eq!(query["counts"]["supported"], 4);
+        assert_eq!(query["counts"]["planned"], 0);
         let ids = query["entries"]
             .as_array()
             .unwrap()

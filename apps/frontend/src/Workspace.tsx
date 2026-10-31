@@ -114,16 +114,29 @@ const activeStates = ['Pending', 'Submitted', 'Preparing', 'Running', 'Committin
 const retryStates = ['Failed', 'Cancelled', 'Interrupted'];
 const BIREFNET_MODEL = 'birefnet-general-epoch-244';
 const BIREFNET_CAPABILITY = 'image.remove-background.birefnet-general-epoch-244.v1';
+const REALESRGAN_MODEL = 'realesrgan-x4plus';
+const REALESRGAN_CAPABILITY = 'image.upscale.realesrgan-x4plus.v1';
 const capabilityForModel = (modelId: string) => modelId === 'flux2-klein-4b-distilled'
   ? 'image.text-to-image.flux2-klein-4b.v1'
   : modelId === BIREFNET_MODEL
     ? BIREFNET_CAPABILITY
+    : modelId === REALESRGAN_MODEL
+      ? REALESRGAN_CAPABILITY
     : 'image.text-to-image.z-image-turbo.v1';
 const modelDisplayName = (modelId: string) => modelId === 'flux2-klein-4b-distilled'
   ? 'FLUX.2 Klein 4B'
   : modelId === BIREFNET_MODEL
     ? 'BiRefNet epoch_244 · 去背景'
+    : modelId === REALESRGAN_MODEL
+      ? 'Real-ESRGAN x4plus · 4× 放大'
     : 'Z-Image Turbo';
+const modelShortName = (modelId: string) => modelId === 'flux2-klein-4b-distilled'
+  ? 'FLUX.2 Klein 4B'
+  : modelId === BIREFNET_MODEL
+    ? 'BiRefNet epoch_244'
+    : modelId === REALESRGAN_MODEL
+      ? 'Real-ESRGAN x4plus'
+      : 'Z-Image Turbo';
 
 function IconButton({ label, children, onClick, disabled = false, className = '' }: { label: string; children: ReactNode; onClick: () => void; disabled?: boolean; className?: string }) {
   return <button type="button" className={`ws-icon-button ${className}`} aria-label={label} title={label} disabled={disabled} onClick={onClick}>{children}</button>;
@@ -217,31 +230,31 @@ function TurnCard({
   return <article className={`conversation-turn state-${turn.state}`} data-turn-id={turn.id} aria-label={`第 ${turn.sequence} 轮生成`}>
     <div className="user-message">
       <div className="user-message-body">
-        <p>{turn.prompt || (turn.capabilityId.includes('.remove-background.') ? '去除背景，保留主体' : '未命名操作')}</p>
-        <button type="button" aria-label="复制提示词" title="复制提示词" onClick={onCopy}><Copy size={13}/></button>
+        <p>{turn.prompt || (turn.capabilityId.includes('.remove-background.') ? '去除背景，保留主体' : turn.capabilityId.includes('.upscale.') ? '使用固定 4× 模型放大图片' : '未命名操作')}</p>
+        {turn.prompt && <button type="button" aria-label="复制提示词" title="复制提示词" onClick={onCopy}><Copy size={13}/></button>}
       </div>
       <span className="message-author">你</span>
     </div>
     <div className="assistant-response">
-      <div className="response-source"><span className="assistant-mark"><Palette size={15}/></span><div><strong>Image Studio</strong><span>{turn.modelId === 'flux2-klein-4b-distilled' ? 'FLUX.2 Klein 4B' : turn.modelId === 'birefnet-general-epoch-244' ? 'BiRefNet epoch_244' : 'Z-Image Turbo'} · {turn.capabilityId.includes('.edit.') ? '单图编辑' : turn.capabilityId.includes('.remove-background.') ? (showMask ? '前景蒙版' : '透明背景') : `${turn.aspect} · 种子 ${turn.seed ?? '随机'}`}</span></div></div>
+      <div className="response-source"><span className="assistant-mark"><Palette size={15}/></span><div><strong>Image Studio</strong><span>{modelShortName(turn.modelId)} · {turn.capabilityId.includes('.edit.') ? '单图编辑' : turn.capabilityId.includes('.remove-background.') ? (showMask ? '前景蒙版' : '透明背景') : turn.capabilityId.includes('.upscale.') ? `精确 4× · ${turn.width}×${turn.height}` : `${turn.aspect} · 种子 ${turn.seed ?? '随机'}`}</span></div></div>
       <div className="image-card" style={cardStyle}>
         {complete && <button className="image-card-open" type="button" onClick={() => onOpen(showMask)} aria-label={showMask ? '放大查看前景蒙版' : '放大查看生成图片'}><img src={assetUrl(displayedAssetId!)} alt={showMask ? '前景蒙版' : turn.prompt} draggable={false} onLoad={() => setImageReady(true)} onError={() => setImageFailed(true)}/>{imageReady && <span className="image-open-hint"><Expand size={14}/>查看大图</span>}</button>}
         {(!complete || !imageReady) && <div className="image-card-placeholder">
           {turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) ? <><ImageIcon size={25}/><strong>任务已完成，图片无法显示</strong><span>{displayedError || 'PNG 可能已被移动、改写或无法解码。'}</span></> : active || turn.state === 'Succeeded' ? <><LoaderCircle size={25} className="spin"/><strong>{progress.label}</strong><span>{turn.state === 'Succeeded' ? '正在解码并校验 PNG' : '生成结果会在此处原位出现'}</span></> : <>{turn.state === 'Rejected' ? <X size={24}/> : <ImageIcon size={25}/>}<strong>{stateLabel(turn.state)}</strong><span>{turn.error || (turn.state === 'Cancelled' ? '本次生成已取消' : '本次执行没有可显示结果')}</span></>}
         </div>}
         {(active || turn.state === 'CancelRequested' || turn.state === 'Succeeded') && <div className="image-card-progress">
-          <div className="progress-copy" role="status"><span>{progress.label}</span><strong>{progress.percent}%</strong></div>
-          <div className={`progress-track ${turn.state === 'Succeeded' && !imageReady ? 'is-indeterminate' : ''}`}><span style={{ width: `${progress.percent}%` }}/></div>
+          <div className="progress-copy" role="status"><span>{progress.label}</span>{progress.percent !== null && <strong>{progress.percent}%</strong>}</div>
+          <div className={`progress-track ${progress.percent === null || turn.state === 'Succeeded' && !imageReady ? 'is-indeterminate' : ''}`}><span style={{ width: `${progress.percent ?? 40}%` }}/></div>
         </div>}
         {turn.error && !active && <p className="turn-error" role="alert">{turn.error}</p>}
         <div className="image-card-actions">
           {active && <button className="danger-quiet" disabled={turn.state === 'CancelRequested' || turn.id.startsWith('local-') && turn.state === 'CancelRequested'} onClick={onCancel}><Square size={12}/>{turn.state === 'CancelRequested' ? '正在取消' : '停止'}</button>}
           {turn.jobId && retryStates.includes(turn.state) && <button onClick={onRetry}><RefreshCw size={12}/>重试</button>}
-          {!active && !turn.capabilityId.includes('.remove-background.') && <button onClick={onEdit}><Pencil size={12}/>编辑后重发</button>}
+          {!active && !turn.capabilityId.includes('.remove-background.') && !turn.capabilityId.includes('.upscale.') && <button onClick={onEdit}><Pencil size={12}/>编辑后重发</button>}
           {turn.maskAssetId && <button aria-pressed={showMask} onClick={toggleMask}><ImageIcon size={12}/>{showMask ? '查看透明图' : '查看蒙版'}</button>}
           {displayedAssetId && <><button onClick={() => onOpen(showMask)}><Expand size={12}/>查看</button><button disabled={!displayedAvailable} onClick={() => onExport(showMask)}><Download size={12}/>{showMask ? '导出蒙版' : '导出 PNG'}</button></>}
           {turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) && <button onClick={() => { setImageFailed(false); setImageReady(false); onReload(); }}><RefreshCw size={12}/>重新加载</button>}
-          <button onClick={onCopy}><Copy size={12}/>复制提示词</button>
+          {turn.prompt && <button onClick={onCopy}><Copy size={12}/>复制提示词</button>}
           <button aria-expanded={detailsOpen} onClick={async () => {
             const next = !detailsOpen;
             setDetailsOpen(next);
@@ -381,20 +394,24 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   const overByteBudget = new TextEncoder().encode(active.prompt).length > 16384;
   const validParams = supportedDraftParams(active.params);
   const isRemoveBackground = active.params.capabilityId === BIREFNET_CAPABILITY;
-  const validText = isRemoveBackground ? active.prompt === '' : Boolean(active.prompt.trim()) && !overByteBudget;
+  const isUpscale = active.params.capabilityId === REALESRGAN_CAPABILITY;
+  const isToolComposer = isRemoveBackground || isUpscale;
+  const validText = isToolComposer ? active.prompt === '' : Boolean(active.prompt.trim()) && !overByteBudget;
   const availableModels = studio?.models ?? (studio?.model ? [studio.model] : []);
   const selectedModel = availableModels.find(model => model.id === active.params.modelId);
   const modelReady = selectedModel?.ready ?? false;
   const selectedModelExecutable = modelReady;
   const selectedModelLabel = isRemoveBackground
     ? modelReady ? 'BiRefNet · 去背景' : 'BiRefNet · 去背景 · 未就绪'
+    : isUpscale
+      ? modelReady ? 'Real-ESRGAN · 4× 放大' : 'Real-ESRGAN · 4× 放大 · 未就绪'
     : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1'
     ? modelReady ? 'Klein · 单图编辑' : 'Klein · 单图编辑 · 未就绪'
     : active.params.modelId === 'flux2-klein-4b-distilled'
       ? modelReady ? 'Klein 4B' : 'Klein 4B · 未就绪'
       : modelReady ? 'Z-Image Turbo' : 'Z-Image Turbo · 未就绪';
   const busyInAnotherConversation = Boolean(systemBusy && !currentActiveTurn && runningConversation && runningConversation.id !== currentConversation.id);
-  const canSend = native && loaded && selectedModelExecutable && validText && validParams && (isRemoveBackground || validSeed(active.params.seed)) && !switching && submittingDraftId === null && !systemBusy;
+  const canSend = native && loaded && selectedModelExecutable && validText && validParams && (isToolComposer || validSeed(active.params.seed)) && !switching && submittingDraftId === null && !systemBusy;
 
   const dispatch = (action: WorkspaceAction) => {
     const next = workspaceReducer(activeRef.current.state, action);
@@ -749,12 +766,12 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       const imported = await api<SourceImportAck>('source_import');
       if ('cancelled' in imported) return;
       setDraftParams({
-        modelId: isRemoveBackground ? BIREFNET_MODEL : 'flux2-klein-4b-distilled',
-        capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : 'image.edit.flux2-klein-4b.v1',
+        modelId: isRemoveBackground ? BIREFNET_MODEL : isUpscale ? REALESRGAN_MODEL : 'flux2-klein-4b-distilled',
+        capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : isUpscale ? REALESRGAN_CAPABILITY : 'image.edit.flux2-klein-4b.v1',
         sourceAssetId: imported.assetId,
         aspect: '1:1',
         count: 1,
-        seed: isRemoveBackground ? '' : active.params.seed,
+        seed: isToolComposer ? '' : active.params.seed,
       });
     } catch (error) {
       setActionError(String(error));
@@ -793,8 +810,8 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       setActionError(composerStatus);
       return;
     }
-    if ((!isRemoveBackground && !source.prompt.trim()) || !supportedDraftParams(source.params) || (!isRemoveBackground && !validSeed(source.params.seed))) {
-      setActionError(isRemoveBackground ? '请先导入一张有效源图。' : '请先填写有效提示词和参数。');
+    if ((!isToolComposer && !source.prompt.trim()) || !supportedDraftParams(source.params) || (!isToolComposer && !validSeed(source.params.seed))) {
+      setActionError(isToolComposer ? '请先导入一张有效源图。' : '请先填写有效提示词和参数。');
       return;
     }
     if (systemBusy) {
@@ -808,11 +825,11 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       if (intent.current?.content !== content) intent.current = { content, key: crypto.randomUUID() };
       submissionKey = intent.current.key;
       const pendingTurn = localTurn(currentConversation.id, source, submissionKey);
-      if (isRemoveBackground && source.params.sourceAssetId) {
+      if (isToolComposer && source.params.sourceAssetId) {
         const sourceAsset = studio?.assets.find(asset => asset.id === source.params.sourceAssetId);
         if (sourceAsset) {
-          pendingTurn.width = sourceAsset.width;
-          pendingTurn.height = sourceAsset.height;
+          pendingTurn.width = sourceAsset.width * (isUpscale ? 4 : 1);
+          pendingTurn.height = sourceAsset.height * (isUpscale ? 4 : 1);
         }
       }
       forceScroll.current = true;
@@ -921,6 +938,22 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       available: mask ? Boolean(turn.maskAssetAvailable) : turn.assetAvailable,
       error: mask ? turn.maskAssetError ?? null : turn.assetError,
     };
+  };
+  const sourcePixelLimit = isUpscale ? 1024 * 1024 : 4 * 1024 * 1024;
+  const sourceAssets = (studio?.assets ?? []).filter(asset => {
+    if (!asset.available || (asset.outputRole ?? 'primary') !== 'primary' || asset.width * asset.height > sourcePixelLimit) return false;
+    return !isUpscale || (asset.dataType ?? 'image_rgb') === 'image_rgb' && asset.width <= 1024 && asset.height <= 1024;
+  });
+  const chooseToolSource = (asset: AssetView) => {
+    setDraftParams({
+      modelId: isRemoveBackground ? BIREFNET_MODEL : isUpscale ? REALESRGAN_MODEL : 'flux2-klein-4b-distilled',
+      capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : isUpscale ? REALESRGAN_CAPABILITY : 'image.edit.flux2-klein-4b.v1',
+      sourceAssetId: asset.id,
+      aspect: '1:1',
+      count: 1,
+      seed: isToolComposer ? '' : active.params.seed,
+    });
+    setPopup(null);
   };
   const loadOlder = async () => {
     const page = turnPages[currentConversation.id];
@@ -1032,6 +1065,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     setPopup(null);
     const source = requestedComposer.capabilityId === 'image.edit.flux2-klein-4b.v1'
       || requestedComposer.capabilityId === BIREFNET_CAPABILITY
+      || requestedComposer.capabilityId === REALESRGAN_CAPABILITY
       ? active.params.sourceAssetId ?? null
       : null;
     dispatch({
@@ -1045,7 +1079,8 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
         count: 1,
       },
     });
-    if (requestedComposer.capabilityId !== BIREFNET_CAPABILITY) {
+    if (requestedComposer.capabilityId !== BIREFNET_CAPABILITY
+      && requestedComposer.capabilityId !== REALESRGAN_CAPABILITY) {
       requestAnimationFrame(() => textarea.current?.focus());
     }
   }, [requestedComposer?.nonce, loaded]);
@@ -1179,10 +1214,10 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       <section className={`conversation-composer-area ${active.collapsed ? 'is-collapsed' : ''}`}>
         {replacePromptTurn && <div className="replace-prompt-bar" role="dialog" aria-label="替换当前提示词"><span>当前输入框已有文字。用这条历史提示词替换吗？</span><button onClick={() => applyPrompt(replacePromptTurn.prompt)}>替换</button><button onClick={() => setReplacePromptTurn(null)}>取消</button></div>}
         {replaceLibraryPrompt && <div className="replace-prompt-bar" role="dialog" aria-label="替换为灵感提示词"><span>当前输入已有文字。用「{replaceLibraryPrompt.title}」的完整提示词替换吗？</span><button onClick={confirmLibraryPrompt}>替换</button><button onClick={() => setReplaceLibraryPrompt(null)}>取消</button></div>}
-        <button className="collapsed-composer" onClick={() => dispatch({ type: 'collapse' })}><ChevronUp size={15}/><span>{isRemoveBackground ? 'BiRefNet 去背景' : active.prompt || '展开提示词，继续创作'}</span></button>
+        <button className="collapsed-composer" onClick={() => dispatch({ type: 'collapse' })}><ChevronUp size={15}/><span>{isRemoveBackground ? 'BiRefNet 去背景' : isUpscale ? 'Real-ESRGAN 4× 放大' : active.prompt || '展开提示词，继续创作'}</span></button>
         <div className="conversation-composer">
-          <div className="composer-caption"><span>{currentConversation.title}</span><span>{isRemoveBackground ? '透明 PNG + 蒙版' : `${Array.from(active.prompt).length} 字符`}<IconButton label="收起输入区" onClick={() => { textarea.current?.blur(); dispatch({ type: 'collapse' }); }}><ChevronDown size={14}/></IconButton></span></div>
-          {isRemoveBackground ? <div className="tool-composer-summary" role="note"><ListChecks size={17}/><span><strong>提取主体并去除背景</strong><small>使用 BiRefNet epoch_244 · CPU · 输出原图尺寸的透明 PNG 与 8-bit 蒙版</small></span></div> : <textarea ref={textarea} value={active.prompt} readOnly={submittingDraftId === active.id} aria-label="图片提示词" placeholder="描述你想创作的画面……" spellCheck={false}
+          <div className="composer-caption"><span>{currentConversation.title}</span><span>{isRemoveBackground ? '透明 PNG + 蒙版' : isUpscale ? '固定 4× PNG' : `${Array.from(active.prompt).length} 字符`}<IconButton label="收起输入区" onClick={() => { textarea.current?.blur(); dispatch({ type: 'collapse' }); }}><ChevronDown size={14}/></IconButton></span></div>
+          {isRemoveBackground ? <div className="tool-composer-summary" role="note"><ListChecks size={17}/><span><strong>提取主体并去除背景</strong><small>使用 BiRefNet epoch_244 · CPU · 输出原图尺寸的透明 PNG 与 8-bit 蒙版</small></span></div> : isUpscale ? <div className="tool-composer-summary" role="note"><ListChecks size={17}/><span><strong>将图片精确放大 4 倍</strong><small>使用 Real-ESRGAN x4plus · Metal GPU · tile 128 · 输出各边精确 4 倍的 PNG</small></span></div> : <textarea ref={textarea} value={active.prompt} readOnly={submittingDraftId === active.id} aria-label="图片提示词" placeholder="描述你想创作的画面……" spellCheck={false}
             onChange={event => dispatch({ type: 'edit', value: event.target.value, record: !compositions.current.has(active.id) })}
             onKeyDown={handleEditorKeyDown}
             onCompositionStart={() => { compositionDraftId.current = active.id; compositions.current.set(active.id, active.prompt); }}
@@ -1197,23 +1232,23 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
           />}
           <div className="composer-toolbar">
             <div className="composer-left">
-              {!isRemoveBackground && <div className="composer-popup-anchor" data-composer-popup>
+              {!isToolComposer && <div className="composer-popup-anchor" data-composer-popup>
                 <button className={`composer-chip ${popup === 'params' ? 'is-open' : ''}`} aria-expanded={popup === 'params'} onClick={() => { if (popup === 'params') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('params'); }}><SlidersHorizontal size={15}/><span>{active.params.aspect} · {active.params.count} 张</span></button>
                 {popup === 'params' && <div className="composer-popover params-popover" role="dialog" aria-label="创作参数"><div className="popover-heading"><strong>创作参数</strong><span>当前型号 {active.params.modelId === 'flux2-klein-4b-distilled' ? '4 步' : '9 步'} · q4 · 单张</span></div><span className="popover-label">画幅</span><div className="aspect-options">{(active.params.modelId === 'flux2-klein-4b-distilled' ? ['1:1'] : ['1:1', '4:3', '3:4']).map(aspect => <button key={aspect} className={active.params.aspect === aspect ? 'is-selected' : ''} aria-pressed={active.params.aspect === aspect} onClick={() => setDraftParams({ aspect })}><i style={{ aspectRatio: aspect.replace(':', '/') }}/><span>{aspect}</span></button>)}</div><label className="seed-field"><span>数量</span><input type="number" min={1} max={1} step={1} value={active.params.count} onChange={event => setDraftParams({ count: Number(event.target.value) })}/></label><label className="seed-field"><span>种子</span><input inputMode="numeric" value={active.params.seed} aria-invalid={!validSeed(active.params.seed)} placeholder="留空随机" onChange={event => setDraftParams({ seed: event.target.value })}/></label>{!validSeed(active.params.seed) && <p className="field-error">请输入 0–4294967295 的整数，或留空。</p>}<p className="popover-note">只修改当前会话的下一条请求，不会改变已发送记录。</p></div>}
               </div>}
-              <button className="composer-chip" disabled={sourceImporting || submittingDraftId !== null} onClick={() => void importSource()} title={isRemoveBackground ? '导入一张 PNG 或 JPEG 用于去背景' : '导入一张 PNG 或 JPEG 作为编辑源图'}>{sourceImporting ? <LoaderCircle size={14} className="spin"/> : <ImageIcon size={14}/>}<span>{active.params.sourceAssetId ? '更换源图' : '导入源图'}</span></button>
+              <button className="composer-chip" disabled={sourceImporting || submittingDraftId !== null} onClick={() => void importSource()} title={isRemoveBackground ? '导入一张 PNG 或 JPEG 用于去背景' : isUpscale ? '导入一张最大 1 MP 的 RGB PNG 或 JPEG 用于放大' : '导入一张 PNG 或 JPEG 作为编辑源图'}>{sourceImporting ? <LoaderCircle size={14} className="spin"/> : <ImageIcon size={14}/>}<span>{active.params.sourceAssetId ? '更换源图' : '导入源图'}</span></button>
               <div className="composer-popup-anchor" data-composer-popup>
                 <button className="composer-chip" disabled={submittingDraftId !== null} onClick={() => { if (popup === 'sources') setPopup(null); else setPopup('sources'); }}>作品</button>
-                {popup === 'sources' && <div className="composer-popover model-popover source-popover" role="dialog" aria-label="选择已有作品作为源图"><div className="popover-heading"><strong>选择已有作品</strong><span>{studio?.assets.filter(asset => asset.available && (asset.outputRole ?? 'primary') === 'primary' && (asset.width * asset.height) <= 4194304).length ?? 0} 张可用</span></div>{(studio?.assets ?? []).filter(asset => asset.available && (asset.outputRole ?? 'primary') === 'primary' && (asset.width * asset.height) <= 4194304).map(asset => <button key={asset.id} className={`single-model-option ${active.params.sourceAssetId === asset.id ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: isRemoveBackground ? BIREFNET_MODEL : 'flux2-klein-4b-distilled', capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : 'image.edit.flux2-klein-4b.v1', sourceAssetId: asset.id, aspect: '1:1', count: 1, seed: isRemoveBackground ? '' : active.params.seed }); setPopup(null); }}><img className="source-option-image" src={assetUrl(asset.id)} alt="" draggable={false}/><span><strong>{asset.width} × {asset.height}</strong><small>{asset.prompt}</small></span>{active.params.sourceAssetId === asset.id && <Check size={14}/>}</button>)}{!studio?.assets.some(asset => asset.available && (asset.outputRole ?? 'primary') === 'primary' && asset.width * asset.height <= 4194304) && <p className="popover-note">本机还没有可用作源图的正式作品。</p>}</div>}
+                {popup === 'sources' && <div className="composer-popover model-popover source-popover" role="dialog" aria-label="选择已有作品作为源图"><div className="popover-heading"><strong>选择已有作品</strong><span>{sourceAssets.length} 张可用</span></div>{sourceAssets.map(asset => <button key={asset.id} className={`single-model-option ${active.params.sourceAssetId === asset.id ? 'is-selected' : ''}`} onClick={() => chooseToolSource(asset)}><img className="source-option-image" src={assetUrl(asset.id)} alt="" draggable={false}/><span><strong>{asset.width} × {asset.height}</strong><small>{asset.prompt}</small></span>{active.params.sourceAssetId === asset.id && <Check size={14}/>}</button>)}{sourceAssets.length === 0 && <p className="popover-note">{isUpscale ? '本机还没有不超过 1 MP 的无透明 RGB 正式作品。' : '本机还没有可用作源图的正式作品。'}</p>}</div>}
               </div>
-              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前受控源图"/><span>{isRemoveBackground ? '去背景 · 原尺寸输出' : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? '单图编辑 · 保比例缩放至 1 MP' : '源图'}</span><button aria-label="移除源图" title="移除源图" onClick={() => setDraftParams({ sourceAssetId: null, capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : active.params.modelId === 'flux2-klein-4b-distilled' ? 'image.text-to-image.flux2-klein-4b.v1' : 'image.text-to-image.z-image-turbo.v1' })}><X size={11}/></button></span>}
-              {!isRemoveBackground && <IconButton label={copyState === 'composer' ? '已复制提示词' : '复制提示词'} disabled={!active.prompt} onClick={() => void copyText(active.prompt, 'composer')}>{copyState === 'composer' ? <Check size={14}/> : <Copy size={14}/>}</IconButton>}
+              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前受控源图"/><span>{isRemoveBackground ? '去背景 · 原尺寸输出' : isUpscale ? '4× 放大 · tile 128' : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? '单图编辑 · 保比例缩放至 1 MP' : '源图'}</span><button aria-label="移除源图" title="移除源图" onClick={() => setDraftParams({ sourceAssetId: null, capabilityId: isToolComposer ? active.params.capabilityId : active.params.modelId === 'flux2-klein-4b-distilled' ? 'image.text-to-image.flux2-klein-4b.v1' : 'image.text-to-image.z-image-turbo.v1' })}><X size={11}/></button></span>}
+              {!isToolComposer && <IconButton label={copyState === 'composer' ? '已复制提示词' : '复制提示词'} disabled={!active.prompt} onClick={() => void copyText(active.prompt, 'composer')}>{copyState === 'composer' ? <Check size={14}/> : <Copy size={14}/>}</IconButton>}
             </div>
             <div className="composer-right">
               <span className="composer-status">{currentActiveTurn ? studio?.execution.summary : composerStatus}</span>
               <div className="composer-popup-anchor" data-composer-popup>
                 <button className="model-select" aria-expanded={popup === 'models'} title={selectedModelExecutable ? '当前模型可执行' : '当前模型不可执行，请在模型菜单中选择已就绪型号'} onClick={() => { if (popup === 'models') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('models'); }}><span className="model-mark"><Palette size={13}/></span><span>{selectedModelLabel}</span><ChevronDown size={12}/></button>
-                {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型"><div className="popover-heading"><strong>本地图片模型</strong><span>{availableModels.filter(model => model.ready).length} 个可执行模型</span></div>{availableModels.map(model => { const capability = capabilityForModel(model.id); const selected = active.params.modelId === model.id && active.params.capabilityId === capability; return <button key={model.id} className={`single-model-option ${selected ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: model.id, capabilityId: capability, sourceAssetId: null, aspect: '1:1', seed: model.id === BIREFNET_MODEL ? '' : active.params.seed }); setPopup(null); if (model.id !== BIREFNET_MODEL) requestAnimationFrame(() => textarea.current?.focus()); }}><span className="model-mark"><Palette size={14}/></span><span><strong>{modelDisplayName(model.id)}</strong><small>{model.summary}</small></span>{selected && <Check size={14}/>}</button>; })}{active.params.sourceAssetId && !isRemoveBackground && <button className={`single-model-option ${active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', aspect: '1:1' }); setPopup(null); }}><span className="model-mark"><ImageIcon size={14}/></span><span><strong>Klein 单图编辑</strong><small>使用当前源图和编辑指令</small></span>{active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' && <Check size={14}/>}</button>}<button className="popover-action" onClick={() => { setPopup(null); onModels(); }}>前往模型中心 <ArrowUp size={12}/></button></div>}
+                {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型"><div className="popover-heading"><strong>本地图片模型</strong><span>{availableModels.filter(model => model.ready).length} 个可执行模型</span></div>{availableModels.map(model => { const capability = capabilityForModel(model.id); const selected = active.params.modelId === model.id && active.params.capabilityId === capability; const tool = capability === BIREFNET_CAPABILITY || capability === REALESRGAN_CAPABILITY; return <button key={model.id} className={`single-model-option ${selected ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: model.id, capabilityId: capability, sourceAssetId: null, aspect: '1:1', seed: tool ? '' : active.params.seed }); setPopup(null); if (!tool) requestAnimationFrame(() => textarea.current?.focus()); }}><span className="model-mark"><Palette size={14}/></span><span><strong>{modelDisplayName(model.id)}</strong><small>{model.summary}</small></span>{selected && <Check size={14}/>}</button>; })}{active.params.sourceAssetId && !isToolComposer && <button className={`single-model-option ${active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', aspect: '1:1' }); setPopup(null); }}><span className="model-mark"><ImageIcon size={14}/></span><span><strong>Klein 单图编辑</strong><small>使用当前源图和编辑指令</small></span>{active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' && <Check size={14}/>}</button>}<button className="popover-action" onClick={() => { setPopup(null); onModels(); }}>前往模型中心 <ArrowUp size={12}/></button></div>}
               </div>
               {sendButton}
             </div>

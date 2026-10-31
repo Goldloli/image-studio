@@ -58,17 +58,17 @@
       "featureId": "upscale",
       "title": "放大",
       "category": "增强",
-      "summary": "未来使用固定 4 倍模型输出更高分辨率图片。",
-      "description": "规划使用明确的 Real-ESRGAN x4plus 固定模型，执行分块处理并另存新资产，不覆盖原图。",
+      "summary": "使用固定 Real-ESRGAN x4plus 原生模型将一张 RGB 图片精确放大 4 倍。",
+      "description": "通过受监督的 ncnn Vulkan worker 执行 tile 128 放大，另存新 PNG，不覆盖原图。",
       "inputs": ["受控源图 AssetId"],
       "outputs": ["放大后的 PNG AssetRef"],
-      "productStatus": "planned",
-      "scope": "仅登记范围；任意倍率、人脸修复和动漫专用模型不在首轮范围。",
-      "action": null,
+      "productStatus": "implemented",
+      "scope": "单张无透明 RGB，最长边不超过 1024 且不超过 1 MP；输出各边精确 4 倍。",
+      "action": "open-composer",
       "modelId": "realesrgan-x4plus",
       "dependencies": [
-        { "kind": "model", "label": "Real-ESRGAN 转换权重尚未复核" },
-        { "kind": "runtime", "label": "分块执行与资源回收尚未接入" }
+        { "kind": "model", "label": "已安装并校验的 realesrgan-x4plus 模型对" },
+        { "kind": "runtime", "label": "固定 ncnn Vulkan 原生运行时" }
       ]
     }
   ]

@@ -32,6 +32,7 @@ describe('conversation progress', () => {
     expect(progressForTurn({ ...turn, state: 'Succeeded', progressStage: 'writing' }, null, false)).toEqual({ percent: 99, label: '正在显示图片' });
     expect(progressForTurn({ ...turn, state: 'Succeeded', progressStage: 'writing' }, null, true).percent).toBe(100);
     expect(progressForTurn({ ...turn, state: 'Failed' }, null).percent).toBe(48);
+    expect(progressForTurn(turn, { ...execution, stage: 'inference', step: null, total: null })).toEqual({ percent: null, label: '正在执行本地推理' });
   });
 });
 
@@ -64,6 +65,9 @@ describe('composer keyboard and parameters', () => {
     expect(supportedDraftParams({ modelId: 'birefnet-general-epoch-244', capabilityId: 'image.remove-background.birefnet-general-epoch-244.v1', sourceAssetId: 'source-1', aspect: '1:1', count: 1, seed: '' })).toBe(true);
     expect(supportedDraftParams({ modelId: 'birefnet-general-epoch-244', capabilityId: 'image.remove-background.birefnet-general-epoch-244.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(false);
     expect(supportedDraftParams({ modelId: 'birefnet-general-epoch-244', capabilityId: 'image.remove-background.birefnet-general-epoch-244.v1', sourceAssetId: 'source-1', aspect: '1:1', count: 1, seed: '7' })).toBe(false);
+    expect(supportedDraftParams({ modelId: 'realesrgan-x4plus', capabilityId: 'image.upscale.realesrgan-x4plus.v1', sourceAssetId: 'source-1', aspect: '1:1', count: 1, seed: '' })).toBe(true);
+    expect(supportedDraftParams({ modelId: 'realesrgan-x4plus', capabilityId: 'image.upscale.realesrgan-x4plus.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(false);
+    expect(supportedDraftParams({ modelId: 'realesrgan-x4plus', capabilityId: 'image.upscale.realesrgan-x4plus.v1', sourceAssetId: 'source-1', aspect: '4:3', count: 1, seed: '' })).toBe(false);
   });
 });
 
