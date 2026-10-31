@@ -40,6 +40,7 @@ import {
   type StoredDraft,
   type StudioSnapshot,
   type SourceImportAck,
+  type ImportedSource,
   type TurnDetail,
   type TurnPage,
   type TurnView,
@@ -352,6 +353,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   const [replaceLibraryPrompt, setReplaceLibraryPrompt] = useState<PendingLibraryPrompt | null>(null);
   const [promptActionBusy, setPromptActionBusy] = useState(false);
   const [sourceImporting, setSourceImporting] = useState(false);
+  const [importedSources, setImportedSources] = useState<ImportedSource[]>([]);
   const [exporting, setExporting] = useState(false);
   const initialized = useRef(false);
   const saveQueue = useRef<DraftSaveQueue | null>(null);
@@ -378,6 +380,14 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   );
 
   const active = state.drafts.find(draft => draft.id === state.activeId) ?? state.drafts[0] ?? initialWorkspace().drafts[0];
+  const selectedSource = importedSources.find(source => source.assetId === active.params.sourceAssetId)
+    ?? studio?.assets.find(asset => asset.id === active.params.sourceAssetId);
+  useEffect(() => {
+    if (!native || !loaded) return;
+    let current = true;
+    void api<ImportedSource[]>('source_list').then(sources => { if (current) setImportedSources(sources); }).catch(error => { if (current) setActionError(String(error)); });
+    return () => { current = false; };
+  }, [loaded]);
   const previewConversation: ConversationView = { id: `local-conversation-${active.id}`, draftId: active.id, title: active.name, titleSource: 'auto', createdAt: 0, activitySeq: 0, running: false };
   const visibleConversations = conversations.length ? conversations : state.drafts.map((draft, index) => ({ ...previewConversation, id: `local-conversation-${draft.id}`, draftId: draft.id, title: draft.name, activitySeq: state.drafts.length - index }));
   const currentConversation = visibleConversations.find(conversation => conversation.id === activeConversationId)
@@ -765,6 +775,11 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     try {
       const imported = await api<SourceImportAck>('source_import');
       if ('cancelled' in imported) return;
+      setImportedSources(previous => [...previous.filter(source => source.assetId !== imported.assetId), imported]);
+      if (isUpscale && (imported.width > 1024 || imported.height > 1024 || imported.width * imported.height > 1024 * 1024 || imported.hasTransparentPixels)) {
+        setActionError('放大需要无透明像素、最长边不超过 1024 且不超过 1 MP 的源图；已保留原选择。');
+        return;
+      }
       setDraftParams({
         modelId: isRemoveBackground ? BIREFNET_MODEL : isUpscale ? REALESRGAN_MODEL : 'flux2-klein-4b-distilled',
         capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : isUpscale ? REALESRGAN_CAPABILITY : 'image.edit.flux2-klein-4b.v1',
@@ -826,7 +841,8 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       submissionKey = intent.current.key;
       const pendingTurn = localTurn(currentConversation.id, source, submissionKey);
       if (isToolComposer && source.params.sourceAssetId) {
-        const sourceAsset = studio?.assets.find(asset => asset.id === source.params.sourceAssetId);
+        const sourceAsset = importedSources.find(asset => asset.assetId === source.params.sourceAssetId)
+          ?? studio?.assets.find(asset => asset.id === source.params.sourceAssetId);
         if (sourceAsset) {
           pendingTurn.width = sourceAsset.width * (isUpscale ? 4 : 1);
           pendingTurn.height = sourceAsset.height * (isUpscale ? 4 : 1);
@@ -1227,12 +1243,12 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
                 <button className={`composer-chip ${popup === 'params' ? 'is-open' : ''}`} aria-expanded={popup === 'params'} onClick={() => { if (popup === 'params') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('params'); }}><SlidersHorizontal size={15}/><span>{active.params.aspect} · {active.params.count} 张</span></button>
                 {popup === 'params' && <div className="composer-popover params-popover" role="dialog" aria-label="创作参数"><div className="popover-heading"><strong>创作参数</strong><span>当前型号 {active.params.modelId === 'flux2-klein-4b-distilled' ? '4 步' : '9 步'} · q4 · 单张</span></div><span className="popover-label">画幅</span><div className="aspect-options">{(active.params.modelId === 'flux2-klein-4b-distilled' ? ['1:1'] : ['1:1', '4:3', '3:4']).map(aspect => <button key={aspect} className={active.params.aspect === aspect ? 'is-selected' : ''} aria-pressed={active.params.aspect === aspect} onClick={() => setDraftParams({ aspect })}><i style={{ aspectRatio: aspect.replace(':', '/') }}/><span>{aspect}</span></button>)}</div><label className="seed-field"><span>数量</span><input type="number" min={1} max={1} step={1} value={active.params.count} onChange={event => setDraftParams({ count: Number(event.target.value) })}/></label><label className="seed-field"><span>种子</span><input inputMode="numeric" value={active.params.seed} aria-invalid={!validSeed(active.params.seed)} placeholder="留空随机" onChange={event => setDraftParams({ seed: event.target.value })}/></label>{!validSeed(active.params.seed) && <p className="field-error">请输入 0–4294967295 的整数，或留空。</p>}<p className="popover-note">只修改当前会话的下一条请求，不会改变已发送记录。</p></div>}
               </div>}
-              <button className="composer-chip" disabled={sourceImporting || submittingDraftId !== null} onClick={() => void importSource()} title={isRemoveBackground ? '导入一张 PNG 或 JPEG 用于去背景' : isUpscale ? '导入一张最大 1 MP 的 RGB PNG 或 JPEG 用于放大' : '导入一张 PNG 或 JPEG 作为编辑源图'}>{sourceImporting ? <LoaderCircle size={14} className="spin"/> : <ImageIcon size={14}/>}<span>{active.params.sourceAssetId ? '更换源图' : '导入源图'}</span></button>
+              <button className="composer-chip" disabled={sourceImporting || submittingDraftId !== null} onClick={() => void importSource()} title={isRemoveBackground ? '导入一张 PNG 或 JPEG 用于去背景' : isUpscale ? '导入最长边不超过 1024、最大 1 MP、无透明像素的 PNG 或 JPEG' : '导入一张 PNG 或 JPEG 作为编辑源图'}>{sourceImporting ? <LoaderCircle size={14} className="spin"/> : <ImageIcon size={14}/>}<span>{active.params.sourceAssetId ? '更换源图' : '导入源图'}</span></button>
               <div className="composer-popup-anchor" data-composer-popup>
                 <button className="composer-chip" disabled={submittingDraftId !== null} onClick={() => { if (popup === 'sources') setPopup(null); else setPopup('sources'); }}>作品</button>
                 {popup === 'sources' && <div className="composer-popover model-popover source-popover" role="dialog" aria-label="选择已有作品作为源图"><div className="popover-heading"><strong>选择已有作品</strong><span>{sourceAssets.length} 张可用</span></div>{sourceAssets.map(asset => <button key={asset.id} className={`single-model-option ${active.params.sourceAssetId === asset.id ? 'is-selected' : ''}`} onClick={() => chooseToolSource(asset)}><img className="source-option-image" src={assetUrl(asset.id)} alt="" draggable={false}/><span><strong>{asset.width} × {asset.height}</strong><small>{asset.prompt}</small></span>{active.params.sourceAssetId === asset.id && <Check size={14}/>}</button>)}{sourceAssets.length === 0 && <p className="popover-note">{isUpscale ? '本机还没有不超过 1 MP 的无透明 RGB 正式作品。' : '本机还没有可用作源图的正式作品。'}</p>}</div>}
               </div>
-              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前受控源图"/><span>{isRemoveBackground ? '去背景 · 原尺寸输出' : isUpscale ? '4× 放大 · tile 128' : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? '单图编辑 · 保比例缩放至 1 MP' : '源图'}</span><button aria-label="移除源图" title="移除源图" onClick={() => setDraftParams({ sourceAssetId: null, capabilityId: isToolComposer ? active.params.capabilityId : active.params.modelId === 'flux2-klein-4b-distilled' ? 'image.text-to-image.flux2-klein-4b.v1' : 'image.text-to-image.z-image-turbo.v1' })}><X size={11}/></button></span>}
+              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前受控源图"/><span>{isRemoveBackground ? '去背景 · 原尺寸输出' : isUpscale ? selectedSource ? `${selectedSource.width}×${selectedSource.height} → ${selectedSource.width*4}×${selectedSource.height*4}` : '4× 放大 · 最长边 ≤1024'  : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? '单图编辑 · 保比例缩放至 1 MP' : '源图'}</span><button aria-label="移除源图" title="移除源图" onClick={() => setDraftParams({ sourceAssetId: null, capabilityId: isToolComposer ? active.params.capabilityId : active.params.modelId === 'flux2-klein-4b-distilled' ? 'image.text-to-image.flux2-klein-4b.v1' : 'image.text-to-image.z-image-turbo.v1' })}><X size={11}/></button></span>}
               {!isToolComposer && <IconButton label={copyState === 'composer' ? '已复制提示词' : '复制提示词'} disabled={!active.prompt} onClick={() => void copyText(active.prompt, 'composer')}>{copyState === 'composer' ? <Check size={14}/> : <Copy size={14}/>}</IconButton>}
             </div>
             <div className="composer-right">
