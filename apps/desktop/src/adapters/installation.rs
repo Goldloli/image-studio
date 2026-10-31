@@ -1140,7 +1140,13 @@ impl Installation {
         } else {
             let existing: u64 = segment_paths
                 .iter()
-                .filter_map(|path| fs::metadata(path).ok().map(|metadata| metadata.len()))
+                .zip(&segment_meta_paths)
+                .filter_map(|(path, metadata_path)| {
+                    let bytes = fs::metadata(path).ok()?.len();
+                    let metadata = fs::read(metadata_path).ok()?;
+                    let metadata = serde_json::from_slice::<serde_json::Value>(&metadata).ok()?;
+                    (metadata["offset"] == bytes).then_some(bytes)
+                })
                 .sum();
             self.update(|state| state.received_bytes += existing);
         }
@@ -1237,7 +1243,21 @@ impl Installation {
             open_regular(path, true, true)?;
             0
         };
-        if raw_offset == expected {
+        let previous = fs::read(metadata_path)
+            .ok()
+            .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok());
+        let identity_matches = previous.as_ref().is_some_and(|value| {
+            value["sha256"] == sha256
+                && value["etag"] == etag
+                && value["start"] == start
+                && value["end"] == end
+        });
+        if raw_offset == expected
+            && identity_matches
+            && previous
+                .as_ref()
+                .is_some_and(|value| value["offset"] == raw_offset)
+        {
             atomic_json(
                 metadata_path,
                 &serde_json::json!({
@@ -1251,16 +1271,7 @@ impl Installation {
             )?;
             return Ok(());
         }
-        let previous = fs::read(metadata_path)
-            .ok()
-            .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok());
-        let resumable = raw_offset > 0
-            && previous.as_ref().is_some_and(|value| {
-                value["sha256"] == sha256
-                    && value["etag"] == etag
-                    && value["start"] == start
-                    && value["end"] == end
-            });
+        let resumable = raw_offset > 0 && raw_offset < expected && identity_matches;
         let offset = if resumable { raw_offset } else { 0 };
         atomic_json(
             metadata_path,
@@ -1332,6 +1343,17 @@ impl Installation {
         if received != expected {
             return Err("分段下载未达到清单长度。".into());
         }
+        atomic_json(
+            metadata_path,
+            &serde_json::json!({
+                "sha256": sha256,
+                "etag": etag,
+                "start": start,
+                "end": end,
+                "total": total,
+                "offset": received,
+            }),
+        )?;
         Ok(())
     }
 }
