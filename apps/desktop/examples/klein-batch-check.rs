@@ -129,6 +129,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "maxSamplingStep": observation["maxSamplingStep"],
             "stageSequence": observation["stageSequence"],
             "hostResidentBytesAfterCompletion": resident_bytes()?,
+            "backendPeakBytes": Value::Null,
+            "measurement": "host RSS sampled immediately after execution cleanup; worker/GPU peak unavailable; elapsed uses a monotonic clock from acceptance to cleanup",
             "workerProcessesAfterCompletion": worker_processes(),
             "executionAfterCompletion": observation["execution"]
         }));
@@ -279,6 +281,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "maxSamplingStep": observation["maxSamplingStep"],
         "stageSequence": observation["stageSequence"],
         "hostResidentBytesAfterCompletion": resident_bytes()?,
+        "backendPeakBytes": Value::Null,
+        "measurement": "host RSS sampled immediately after execution cleanup; worker/GPU peak unavailable; elapsed uses a monotonic clock from acceptance to cleanup",
         "workerProcessesAfterCompletion": worker_processes(),
         "executionAfterCompletion": observation["execution"]
     });
