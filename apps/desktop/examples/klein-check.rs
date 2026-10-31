@@ -17,6 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut root = None;
     let mut mode = "text".to_string();
     let mut prompt = "A quiet cobalt glass cube on a warm concrete table".to_string();
+    let mut prompt_file = None;
     let mut source = None;
     let mut export = None;
     let mut seed = "42".to_string();
@@ -32,6 +33,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "--data-dir" => root = Some(PathBuf::from(args.next().ok_or("missing data root")?)),
             "--mode" => mode = args.next().ok_or("missing mode")?,
             "--prompt" => prompt = args.next().ok_or("missing prompt")?,
+            "--prompt-file" => {
+                prompt_file = Some(PathBuf::from(args.next().ok_or("missing prompt file")?))
+            }
             "--source" => source = Some(PathBuf::from(args.next().ok_or("missing source path")?)),
             "--export" => export = Some(PathBuf::from(args.next().ok_or("missing export path")?)),
             "--seed" => seed = args.next().ok_or("missing seed")?,
@@ -62,6 +66,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     if !matches!(mode.as_str(), "text" | "edit") {
         return Err("--mode must be text or edit".into());
+    }
+    if let Some(path) = prompt_file {
+        prompt = std::fs::read_to_string(path)?;
     }
     let root = root.ok_or("--data-dir is required; use an isolated acceptance root")?;
     let export = export
