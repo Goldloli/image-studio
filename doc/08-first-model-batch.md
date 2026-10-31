@@ -2,7 +2,9 @@
 
 核对日期：2026-10-29，Asia/Shanghai。本文是首批接入目标的选型建议，不是模型运行注册表，也不代表已安装、已适配或已通过实机验证。
 
-**2026-10-30 交付更新：** Z-Image Turbo 已按用户批准的 `deliver-first-local-generation` 完成本地安装和实机闭环，支持 q4 / 9 步、三个尺寸、取消、恢复重试与 PNG 导出。验证设备为 M3 Max / 128 GiB，证据见[完整验收报告](../verification/first-generation-results.md)。其余三个型号仍为后续接入建议，未下载或认证。下文保留选型时的来源与取舍，不把历史计划当作当前执行清单。
+**2026-10-30 交付更新：** Z-Image Turbo 已按用户批准的 `deliver-first-local-generation` 完成本地安装和实机闭环，支持 q4 / 9 步、三个尺寸、取消、恢复重试与 PNG 导出。验证设备为 M3 Max / 128 GiB，证据见[完整验收报告](../verification/first-generation-results.md)。
+
+**2026-10-31 阶段更新：** FLUX.2 Klein 4B distilled 已通过 50/50 必需项；BiRefNet general epoch_244 已通过 31/31 必需项，支持 CPU 去背景、RGBA 与 mask 双输出。Real-ESRGAN 仍未下载或认证，三型号整批门禁保持关闭。下文保留选型时的来源与取舍，不把历史计划当作当前执行清单，当前状态见[计划模型阶段验收](../verification/planned-models-20261031/results.md)。
 
 现有产品为 Rust core + Tauri 2 + React。首个验证设备沿用当前工作区已记录的 Apple M3 Max / 128 GiB / macOS；不把这台机器的目标外推为所有 Mac 的兼容承诺。
 
@@ -45,7 +47,9 @@
 
 ## 4. BiRefNet-general：选定一个固定通用权重
 
-选 [官方 v1 release 的 BiRefNet-general-epoch_244.onnx](https://github.com/ZhengPeng7/BiRefNet/releases/tag/v1)，不把整个 BiRefNet 家族视为同一模型。release API 记录该 ONNX 文件为 972,666,916 字节；这只是上游文件元数据，未下载校验内容哈希。
+选 [官方 v1 release 的 BiRefNet-general-epoch_244.onnx](https://github.com/ZhengPeng7/BiRefNet/releases/tag/v1)，不把整个 BiRefNet 家族视为同一模型。选型时 release API 仅记录该 ONNX 文件为 972,666,916 字节，尚未下载校验内容哈希。
+
+正式接入已核对文件内容 SHA-256 为 `58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c`。实际图为 opset 17、固定 1024×1024 float32 输入和输出、无外置权重；图末 Conv 产生 logits，因此只做一次 sigmoid。当前实现输出规范化源图尺寸的 straight-alpha RGBA 和 8-bit mask，并在 Apple M3 Max CPU 上完成真实安装、推理、质量、取消/恢复和原生验收。
 
 第一轮任务是输入一张图，生成前景 mask 并导出透明 PNG；原图不覆盖。先使用官方 ONNX 的 CPU 路线验证正确性、边缘和耗时，再决定是否增加加速 provider。没有本轮证据能承诺 Core ML、MPS 或 Apple GPU 已经可用。
 
@@ -90,7 +94,7 @@
 
 ## 8. 从“入选”到“产品支持”的门槛
 
-选型时四个目标均未实现。2026-10-30，Z-Image Turbo 的指定组合已完成实现和本机验证，模型中心反映真实就绪状态；其余三个目标仍为 product_status=not_implemented、local_hardware_verification=not_run。时间、最大 RSS 和采样磁盘占用的口径与限制见验收报告；更高精度画质对照和其他硬件留后续变更。
+选型时四个目标均未实现。当前 Z-Image Turbo、FLUX.2 Klein 4B distilled 与 BiRefNet general epoch_244 已完成实现和本机验证，模型中心反映真实就绪状态；Real-ESRGAN 仍为 product_status=planned、local_hardware_verification=not_run。时间、磁盘占用和质量局限见各阶段验收报告；更高精度画质对照、其他硬件和整批回归留后续步骤。
 
 进入正式目录前，每个精确配置需提供完整组件与文件哈希、运行时锁、设备与参数、真实输出、取消/失败/资源回收、结果保存/重启查看/导出证据。4-bit 配置不等于下载字节或峰值内存按比例缩小；普通内存规格 Mac 需另行认证。
 

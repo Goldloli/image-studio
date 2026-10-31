@@ -2,6 +2,8 @@
 
 研究日期：2026-10-28。本文中的路线、优先级和批次为建议；上游项目存在不代表已经在 Image Studio 中运行。机器可读候选见 [model-candidates.json](model-candidates.json)，来源见 [05](05-sources.md)。返回[总览](README.md)。
 
+**实施状态补充（2026-10-31）：** Z-Image Turbo、FLUX.2 Klein 4B distilled 与 BiRefNet general epoch_244 的固定组合已完成真实本地验收；Real-ESRGAN 仍待接入，三型号整批回归尚未完成。下文是生态路线研究，当前支持范围以[计划模型阶段验收](../verification/planned-models-20261031/results.md)和模型目录为准。
+
 ## 1. 如何理解“最终覆盖几乎所有模型”
 
 这应当成为一种持续吸纳新架构与长尾模型的系统能力。它不适合表达为一个静态数字，因为模型会不断发布，微调和合并权重数量远大于基础架构数量，且同一名称可能有多个量化、格式和用途。

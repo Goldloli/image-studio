@@ -6,7 +6,9 @@
 
 ## 1. 当前产品事实
 
-`resources/model-catalog/catalog.json` 登记四项：Z-Image 已接入，`flux2-klein-4b-distilled`、`birefnet-general-epoch-244`、`realesrgan-x4plus` 均为 planned/installerSupported=false。功能目录的编辑、去背景和放大也都是 planned。
+2026-10-31 阶段更新：`resources/model-catalog/catalog.json` 仍登记四项；Z-Image、`flux2-klein-4b-distilled` 与 `birefnet-general-epoch-244` 已接入并支持受控安装，`realesrgan-x4plus` 仍为 planned。功能目录的文生图和单图编辑已可执行，去背景也已启用；放大仍为 planned。Klein 与 BiRefNet 的正式结果分别为 50/50 和 31/31 P0，Real-ESRGAN 及三型号整批回归尚未执行。
+
+以下“当前限制”表保留实施前代码审阅快照，用于解释为什么需要公共多型号安装、能力和存储扩展；其中已完成项以上述阶段更新与验收报告为准。
 
 代码审阅通过 CodeGraph 优先定位，得到以下必要改动：
 
@@ -37,6 +39,8 @@
 ## 3. BiRefNet：独立 CPU ONNX 路线
 
 目标为[官方 v1 release](https://github.com/ZhengPeng7/BiRefNet/releases/tag/v1)的 `BiRefNet-general-epoch_244.onnx`，asset ID 186740004、972,666,916 bytes。发布 API 没有提供内容digest，因此本轮不知道真实SHA-256；tag/文件名和大小不能替代下载后的完整哈希与图检查。源仓库及官方通用模型卡标注MIT，具体下载文件的来源/许可附件仍须进入正式清单，不混入RMBG等权重。
+
+**实施后修订：** 最终下载内容 SHA-256 为 `58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c`。实际图为 opset 17，固定输入 `input_image` float32 `1×3×1024×1024`，固定输出 `output_image` float32 `1×1×1024×1024`，无外置 initializer；输出节点是最终 Conv，因此配方只对 logits 做一次 sigmoid。正式安装、真实 CPU 推理、双输出、质量、恢复与原生验收均已通过，见[BirefNet 阶段结果](../../../verification/planned-models-20261031/birefnet-acceptance.json)。
 
 [固定官方 notebook](https://github.com/ZhengPeng7/BiRefNet/blob/f7079632d681ecf12161fcea8905682934e59e51/tutorials/BiRefNet_pth2onnx.ipynb)展示CPUExecutionProvider、RGB→1024²、float32 NCHW、[0,1]及ImageNet均值/标准差归一化，示例对最后输出做sigmoid。该 notebook 当前示例使用另一个dynamic checkpoint，不能证明epoch_244图的opset、输入名或是否自带sigmoid；实施先检查选定图，避免重复sigmoid。若实际图不兼容，保留阻塞并补充设计，不能暗换权重。
 

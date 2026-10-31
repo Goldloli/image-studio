@@ -17,3 +17,8 @@ logits 应用一次 sigmoid。产品随后使用 `align_corners=True` 双线性�
 网络连接或镜像都只能传输这些清单已固定的内容。`LICENSE-BiRefNet.txt` 保存发布
 仓库的 MIT 许可。wheel 的版本与哈希见 runtime manifest，各 wheel 包内 license
 文件随安装内容保留。
+
+2026-10-31 已在 Apple M3 Max / 128 GiB 完成空缓存安装、隔离根禁网安装、
+真实下载中断恢复、真实 CPU 推理、RGBA/mask、质量、取消/强杀和原生日常验收。
+固定配置为 `31 passed / 0 failed / 0 not_run / 0 blocked`，证据见
+`verification/planned-models-20261031/birefnet-acceptance.json`。
