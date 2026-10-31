@@ -421,19 +421,27 @@ fn wait_for_turn(service: &StudioService, turn_id: &str) -> Result<Value, String
             .and_then(|turns| turns.iter().find(|turn| turn["id"] == turn_id))
             .cloned()
             .ok_or("accepted turn is not visible")?;
-        let stage = snapshot["execution"]["stage"]
-            .as_str()
-            .unwrap_or("")
-            .to_owned();
-        if stage_sequence.last() != Some(&stage) {
-            stage_sequence.push(stage.clone());
-        }
-        if stage == "sampling" {
-            max_sampling_step =
-                max_sampling_step.max(snapshot["execution"]["step"].as_u64().unwrap_or_default());
+        let belongs_to_turn = turn["jobId"].as_str().is_some()
+            && turn["jobId"].as_str() == snapshot["execution"]["jobId"].as_str();
+        if belongs_to_turn {
+            let stage = snapshot["execution"]["stage"]
+                .as_str()
+                .unwrap_or("")
+                .to_owned();
+            if stage_sequence.last() != Some(&stage) {
+                stage_sequence.push(stage.clone());
+            }
+            if stage == "sampling" {
+                max_sampling_step = max_sampling_step
+                    .max(snapshot["execution"]["step"].as_u64().unwrap_or_default());
+            }
         }
         match turn["state"].as_str() {
             Some("Succeeded") => {
+                if snapshot["execution"]["busy"] == true {
+                    std::thread::sleep(Duration::from_secs(1));
+                    continue;
+                }
                 if max_sampling_step < 1 {
                     return Err("successful Klein task never reported a sampling step".into());
                 }
