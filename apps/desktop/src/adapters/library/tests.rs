@@ -3,6 +3,9 @@ use super::*;
 use sha2::{Digest, Sha256};
 use std::process::Command;
 use studio_core::generation::{GenerationInput, PlanEnvironment, freeze_z_image};
+use studio_core::recipes::{
+    KLEIN_EDIT_CAPABILITY, KleinInput, SourceAsset, SourceFacts, freeze_klein,
+};
 use tempfile::TempDir;
 
 fn open(root: &Path) -> Library {
@@ -1430,6 +1433,118 @@ fn pending_turn_cancel_recovery_and_job_binding_are_explicit() {
     let turn = library.turn(&accepted.turn.id).unwrap();
     assert_eq!(turn.progress_stage.as_deref(), Some("sampling"));
     assert_eq!(turn.progress_step, Some(4));
+}
+
+#[test]
+fn klein_edit_turn_copies_the_frozen_source_for_retry() {
+    let root = TempDir::new().unwrap();
+    let outside = tempfile::tempdir().unwrap();
+    let source_path = outside.path().join("edit-source.png");
+    let source_bytes = png_bytes_for(512, 512);
+    fs::write(&source_path, &source_bytes).unwrap();
+    let mut library = open(root.path());
+    let imported = library.import_source(&source_path).unwrap();
+    let normalized_source = library.read_source_png(&imported.asset_id).unwrap();
+    let resolved = library.resolve_source(&imported.asset_id).unwrap();
+    let conversation = library
+        .conversation(&library.active_conversation_id().unwrap())
+        .unwrap();
+    let mut draft = library.draft(conversation.draft_id).unwrap();
+    draft.prompt = "change the cube to cobalt".into();
+    draft.params = serde_json::json!({
+        "modelId": studio_core::recipes::KLEIN_MODEL,
+        "capabilityId": KLEIN_EDIT_CAPABILITY,
+        "sourceAssetId": imported.asset_id,
+        "aspect": "1:1",
+        "count": 1,
+        "seed": "42"
+    });
+    let draft = library.save_draft(draft.clone(), draft.version).unwrap();
+    let accepted = library
+        .accept_turn(AcceptTurnInput {
+            conversation_id: conversation.id,
+            draft_id: draft.id,
+            expected_version: draft.version,
+            submission_key: IdempotencyKey::new("klein-edit:source-retry").unwrap(),
+            prompt: draft.prompt.clone(),
+            model_id: studio_core::recipes::KLEIN_MODEL.into(),
+            capability_id: KLEIN_EDIT_CAPABILITY.into(),
+            source_asset_id: Some(imported.asset_id.clone()),
+            aspect: "1:1".into(),
+            count: 1,
+            seed: "42".into(),
+        })
+        .unwrap();
+    let frozen = freeze_klein(
+        KleinInput {
+            request_id: RequestId::new("request:klein-edit").unwrap(),
+            project_id: ProjectId::new("default").unwrap(),
+            idempotency_key: IdempotencyKey::new("klein-edit:source-retry").unwrap(),
+            plan_id: PlanId::new("plan:klein-edit").unwrap(),
+            prompt: draft.prompt.clone(),
+            seed: Some(42),
+            source: Some(SourceAsset {
+                asset: resolved.asset,
+                facts: SourceFacts {
+                    width: resolved.width,
+                    height: resolved.height,
+                    has_transparent_pixels: resolved.has_transparent_pixels,
+                },
+            }),
+        },
+        42,
+        PlanEnvironment {
+            components: vec![ComponentSnapshot {
+                role: "transformer".into(),
+                source: SourceRevision {
+                    source: "test".into(),
+                    revision: "immutable".into(),
+                },
+                content_hash: ContentHash::new("e".repeat(64)).unwrap(),
+            }],
+            runtime: RuntimeSnapshot {
+                package_id: "recipes-v2".into(),
+                engine: "mlx".into(),
+                source: SourceRevision {
+                    source: "test".into(),
+                    revision: "immutable".into(),
+                },
+            },
+            device: DeviceSnapshot {
+                device_id: "fixture".into(),
+                precision: "bfloat16".into(),
+            },
+            scheduler: "flow_match_euler_discrete".into(),
+        },
+    )
+    .unwrap();
+    let binding = library
+        .bind_turn_job(&accepted.turn.id, frozen.request, frozen.plan)
+        .unwrap();
+    let first_snapshot = library
+        .attempt_run_dir(&binding.job.attempt)
+        .unwrap()
+        .join("input.png");
+    assert_eq!(fs::read(&first_snapshot).unwrap(), normalized_source);
+    library
+        .finish_after_reap(
+            &binding.job.attempt,
+            Completion::Failed {
+                code: "fixture".into(),
+                detail: "retry source".into(),
+            },
+        )
+        .unwrap();
+    let retry = library.retry(&binding.job.job_id).unwrap();
+    let retry_snapshot = library
+        .attempt_run_dir(&retry.attempt)
+        .unwrap()
+        .join("input.png");
+    assert_eq!(fs::read(retry_snapshot).unwrap(), normalized_source);
+    assert_eq!(
+        retry.request.inputs[0].asset.asset_id,
+        imported.asset_id
+    );
 }
 
 #[test]
