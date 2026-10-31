@@ -1202,32 +1202,55 @@ fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
     {
         return Err(LibraryError::Invalid("发送内容或参数无效".into()));
     }
-    let valid_recipe = match (
-        input.model_id.as_str(),
-        input.capability_id.as_str(),
+    if !supported_turn_recipe(
+        &input.model_id,
+        &input.capability_id,
         input.source_asset_id.is_some(),
-    ) {
+        &input.aspect,
+    ) || matches!(
+        input.capability_id.as_str(),
+        studio_core::recipes::BIREFNET_CAPABILITY | studio_core::recipes::REALESRGAN_CAPABILITY
+    ) && (!input.prompt.is_empty() || !input.seed.is_empty())
+    {
+        return Err(LibraryError::Invalid("模型、能力与源图组合不受支持".into()));
+    }
+    Ok(())
+}
+
+fn supported_turn_recipe(model: &str, capability: &str, has_source: bool, aspect: &str) -> bool {
+    match (model, capability, has_source) {
         (DEFAULT_MODEL_ID, studio_core::generation::Z_IMAGE_CAPABILITY, false) => true,
         (studio_core::recipes::KLEIN_MODEL, studio_core::recipes::KLEIN_TEXT_CAPABILITY, false) => {
-            input.aspect == "1:1"
+            aspect == "1:1"
         }
         (studio_core::recipes::KLEIN_MODEL, studio_core::recipes::KLEIN_EDIT_CAPABILITY, true) => {
-            input.aspect == "1:1"
+            aspect == "1:1"
         }
         (studio_core::recipes::BIREFNET_MODEL, studio_core::recipes::BIREFNET_CAPABILITY, true) => {
-            input.aspect == "1:1" && input.prompt.is_empty() && input.seed.is_empty()
+            aspect == "1:1"
         }
         (
             studio_core::recipes::REALESRGAN_MODEL,
             studio_core::recipes::REALESRGAN_CAPABILITY,
             true,
-        ) => input.aspect == "1:1" && input.prompt.is_empty() && input.seed.is_empty(),
+        ) => aspect == "1:1",
+        (
+            studio_core::recipes::QWEN_IMAGE_21_MODEL,
+            studio_core::recipes::QWEN_IMAGE_21_CAPABILITY,
+            false,
+        )
+        | (
+            studio_core::recipes::QWEN_IMAGE_21_TURBO_MODEL,
+            studio_core::recipes::QWEN_IMAGE_21_TURBO_CAPABILITY,
+            false,
+        )
+        | (
+            studio_core::recipes::MOSS_IMAGE_SFT_MODEL,
+            studio_core::recipes::MOSS_IMAGE_SFT_CAPABILITY,
+            false,
+        ) => aspect == "1:1",
         _ => false,
-    };
-    if !valid_recipe {
-        return Err(LibraryError::Invalid("模型、能力与源图组合不受支持".into()));
     }
-    Ok(())
 }
 
 fn valid_seed_text(seed: &str) -> bool {
@@ -1271,4 +1294,31 @@ fn optional_u32(value: Option<i64>, field: &str) -> Result<Option<u32>> {
                 .map_err(|_| LibraryError::Schema(format!("{field} 超出范围")))
         })
         .transpose()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn qwen_and_moss_accept_exact_text_only_square_turns() {
+        for (model, capability) in [
+            (
+                studio_core::recipes::QWEN_IMAGE_21_MODEL,
+                studio_core::recipes::QWEN_IMAGE_21_CAPABILITY,
+            ),
+            (
+                studio_core::recipes::QWEN_IMAGE_21_TURBO_MODEL,
+                studio_core::recipes::QWEN_IMAGE_21_TURBO_CAPABILITY,
+            ),
+            (
+                studio_core::recipes::MOSS_IMAGE_SFT_MODEL,
+                studio_core::recipes::MOSS_IMAGE_SFT_CAPABILITY,
+            ),
+        ] {
+            assert!(supported_turn_recipe(model, capability, false, "1:1"));
+            assert!(!supported_turn_recipe(model, capability, true, "1:1"));
+            assert!(!supported_turn_recipe(model, capability, false, "4:3"));
+        }
+    }
 }
