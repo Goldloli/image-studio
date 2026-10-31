@@ -21,6 +21,14 @@ pub const BIREFNET_MODEL: &str = "birefnet-general-epoch-244";
 pub const BIREFNET_CAPABILITY: &str = "image.remove-background.birefnet-general-epoch-244.v1";
 pub const REALESRGAN_MODEL: &str = "realesrgan-x4plus";
 pub const REALESRGAN_CAPABILITY: &str = "image.upscale.realesrgan-x4plus.v1";
+pub const QWEN_IMAGE_21_MODEL: &str = "qwen-image-2.1-mflux-v1";
+pub const QWEN_IMAGE_21_CAPABILITY: &str = "image.text-to-image.qwen-image-2.1.v1";
+pub const QWEN_IMAGE_21_TURBO_MODEL: &str = "qwen-image-2.1-turbo-mflux-v1";
+pub const QWEN_IMAGE_21_TURBO_CAPABILITY: &str =
+    "image.text-to-image.qwen-image-2.1-turbo.v1";
+pub const MOSS_IMAGE_SFT_MODEL: &str = "moss-image-sft-mflux-v1";
+pub const MOSS_IMAGE_SFT_CAPABILITY: &str =
+    "image.text-to-image.moss-image-sft.v1";
 
 pub const SOURCE_ROLE: &str = "source";
 pub const PRIMARY_ROLE: &str = "primary";
@@ -41,6 +49,9 @@ pub enum Recipe {
     KleinEdit,
     BiRefNet,
     RealEsrgan,
+    QwenImage21,
+    QwenImage21Turbo,
+    MossImageSft,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -102,6 +113,16 @@ pub struct RealEsrganInput {
 }
 
 #[derive(Clone, Debug)]
+pub struct TextModelInput {
+    pub request_id: RequestId,
+    pub project_id: ProjectId,
+    pub idempotency_key: IdempotencyKey,
+    pub plan_id: PlanId,
+    pub prompt: String,
+    pub seed: Option<u32>,
+}
+
+#[derive(Clone, Debug)]
 pub struct FrozenRecipe {
     pub request: UserRequest,
     pub plan: ExecutionPlan,
@@ -131,6 +152,11 @@ impl Recipe {
             (KLEIN_MODEL, KLEIN_EDIT_CAPABILITY) => Self::KleinEdit,
             (BIREFNET_MODEL, BIREFNET_CAPABILITY) => Self::BiRefNet,
             (REALESRGAN_MODEL, REALESRGAN_CAPABILITY) => Self::RealEsrgan,
+            (QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_CAPABILITY) => Self::QwenImage21,
+            (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY) => {
+                Self::QwenImage21Turbo
+            }
+            (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY) => Self::MossImageSft,
             _ => {
                 return Err(ContractError::InvalidValue(
                     "unsupported model and capability combination".into(),
@@ -147,6 +173,9 @@ impl Recipe {
             Self::KleinEdit => "klein4b-edit-v1",
             Self::BiRefNet => "birefnet-general-cpu-v1",
             Self::RealEsrgan => "realesrgan-x4plus-t128-v1",
+            Self::QwenImage21 => "qwen21-txt2img-q8-40-v1",
+            Self::QwenImage21Turbo => "qwen21-turbo-txt2img-q8-8-v1",
+            Self::MossImageSft => "moss-image-sft-txt2img-q8-50-v1",
         }
     }
 
@@ -164,9 +193,15 @@ impl Recipe {
             (Self::ZImageTurbo, OutputRole::Primary) => {
                 matches!(kind, AssetKind::ImageRgb | AssetKind::ImageRgba)
             }
-            (Self::KleinText | Self::KleinEdit | Self::RealEsrgan, OutputRole::Primary) => {
-                matches!(kind, AssetKind::ImageRgb)
-            }
+            (
+                Self::KleinText
+                | Self::KleinEdit
+                | Self::RealEsrgan
+                | Self::QwenImage21
+                | Self::QwenImage21Turbo
+                | Self::MossImageSft,
+                OutputRole::Primary,
+            ) => matches!(kind, AssetKind::ImageRgb),
             (Self::BiRefNet, OutputRole::Primary) => matches!(kind, AssetKind::ImageRgba),
             (Self::BiRefNet, OutputRole::Mask) => matches!(kind, AssetKind::Mask),
             _ => false,
@@ -176,7 +211,15 @@ impl Recipe {
     pub fn max_output_bytes(self, role: OutputRole) -> Option<u64> {
         match (self, role) {
             (Self::RealEsrgan, OutputRole::Primary) => Some(MAX_UPSCALE_OUTPUT_BYTES),
-            (Self::ZImageTurbo | Self::KleinText | Self::KleinEdit, OutputRole::Primary)
+            (
+                Self::ZImageTurbo
+                | Self::KleinText
+                | Self::KleinEdit
+                | Self::QwenImage21
+                | Self::QwenImage21Turbo
+                | Self::MossImageSft,
+                OutputRole::Primary,
+            )
             | (Self::BiRefNet, OutputRole::Primary | OutputRole::Mask) => {
                 Some(MAX_TOOL_OUTPUT_BYTES)
             }
@@ -199,6 +242,9 @@ impl Recipe {
             Self::KleinEdit => KLEIN_EDIT_CAPABILITY,
             Self::BiRefNet => BIREFNET_CAPABILITY,
             Self::RealEsrgan => REALESRGAN_CAPABILITY,
+            Self::QwenImage21 => QWEN_IMAGE_21_CAPABILITY,
+            Self::QwenImage21Turbo => QWEN_IMAGE_21_TURBO_CAPABILITY,
+            Self::MossImageSft => MOSS_IMAGE_SFT_CAPABILITY,
             Self::ZImageTurbo => unreachable!(),
         };
         require(
@@ -297,6 +343,9 @@ impl Recipe {
                     "Real-ESRGAN output must be exactly four times the source dimensions",
                 )?;
             }
+            Self::QwenImage21 | Self::QwenImage21Turbo | Self::MossImageSft => {
+                validate_text_model_request(request, source)?;
+            }
             Self::ZImageTurbo => unreachable!(),
         }
         Ok(())
@@ -382,6 +431,10 @@ impl Recipe {
                 ("threads".into(), json!("1:1:1")),
                 ("tta".into(), json!(false)),
             ]),
+            Self::QwenImage21 | Self::QwenImage21Turbo | Self::MossImageSft => {
+                let effective_seed = text_model_effective_seed(request, plan)?;
+                text_model_parameters(self, effective_seed)
+            }
             Self::ZImageTurbo => unreachable!(),
         };
         require(
@@ -624,6 +677,226 @@ pub fn freeze_realesrgan(
     };
     Recipe::RealEsrgan.validate_plan(&request, &plan, Some(source.facts))?;
     Ok(FrozenRecipe { request, plan })
+}
+
+pub fn freeze_text_model(
+    recipe: Recipe,
+    input: TextModelInput,
+    resolved_seed: u32,
+    env: crate::generation::PlanEnvironment,
+) -> Result<FrozenRecipe, ContractError> {
+    let (model, capability) = match recipe {
+        Recipe::QwenImage21 => (QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_CAPABILITY),
+        Recipe::QwenImage21Turbo => {
+            (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY)
+        }
+        Recipe::MossImageSft => (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY),
+        _ => {
+            return Err(ContractError::InvalidValue(
+                "text model freezer received a non-text recipe".into(),
+            ));
+        }
+    };
+    let request = UserRequest {
+        schema_version: crate::contracts::REQUEST_SCHEMA_VERSION,
+        request_id: input.request_id,
+        project_id: input.project_id,
+        capability: crate::contracts::CapabilityDescriptor {
+            capability_id: capability.into(),
+            instruction_required: true,
+            input_roles: vec![],
+        },
+        instruction: input.prompt,
+        inputs: vec![],
+        model_variant_id: ModelVariantId::new(model)?,
+        requested_output: crate::contracts::ImageOutput {
+            width: 1024,
+            height: 1024,
+            count: 1,
+        },
+        policy: crate::contracts::AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: false,
+        },
+        parameters: BTreeMap::from([(
+            "seed".into(),
+            input
+                .seed
+                .map_or(serde_json::Value::Null, |seed| json!(seed)),
+        )]),
+        idempotency_key: input.idempotency_key,
+    };
+    let effective_seed = input.seed.unwrap_or(resolved_seed);
+    let plan = ExecutionPlan {
+        schema_version: crate::contracts::PLAN_SCHEMA_VERSION,
+        plan_id: input.plan_id,
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: env.components,
+        runtime: env.runtime,
+        device: env.device,
+        effective_output: request.requested_output.clone(),
+        effective_parameters: text_model_parameters(recipe, effective_seed),
+        adjustments: vec![],
+    };
+    recipe.validate_plan(&request, &plan, None)?;
+    Ok(FrozenRecipe { request, plan })
+}
+
+fn validate_text_model_request(
+    request: &UserRequest,
+    source: Option<SourceFacts>,
+) -> Result<(), ContractError> {
+    require(
+        request.capability.instruction_required
+            && request.capability.input_roles.is_empty()
+            && request.inputs.is_empty()
+            && source.is_none(),
+        "Qwen/MOSS text-to-image requires text and no source image",
+    )?;
+    require(
+        !request.instruction.trim().is_empty()
+            && request.instruction.len() <= MAX_PROMPT_BYTES,
+        "Qwen/MOSS prompt must contain text and be at most 16 KiB UTF-8",
+    )?;
+    require(
+        request.requested_output.width == 1024
+            && request.requested_output.height == 1024
+            && request.requested_output.count == 1,
+        "Qwen/MOSS requires one 1024x1024 image",
+    )?;
+    require(
+        request.parameters.keys().all(|key| key == "seed"),
+        "unsupported Qwen/MOSS request parameter",
+    )?;
+    if let Some(seed) = request.parameters.get("seed") {
+        require(
+            seed.is_null()
+                || seed
+                    .as_u64()
+                    .is_some_and(|value| u32::try_from(value).is_ok()),
+            "Qwen/MOSS seed must be null or u32",
+        )?;
+    }
+    Ok(())
+}
+
+fn text_model_effective_seed(
+    request: &UserRequest,
+    plan: &ExecutionPlan,
+) -> Result<u32, ContractError> {
+    let expected = request
+        .parameters
+        .get("seed")
+        .and_then(serde_json::Value::as_u64)
+        .and_then(|value| u32::try_from(value).ok());
+    let actual = plan
+        .effective_parameters
+        .get("seed")
+        .and_then(serde_json::Value::as_u64)
+        .and_then(|value| u32::try_from(value).ok())
+        .ok_or_else(|| {
+            ContractError::InvalidValue("Qwen/MOSS effective seed must be u32".into())
+        })?;
+    if let Some(expected) = expected {
+        require(
+            actual == expected,
+            "effective seed must preserve the explicit Qwen/MOSS seed",
+        )?;
+    }
+    Ok(actual)
+}
+
+fn text_model_parameters(recipe: Recipe, seed: u32) -> BTreeMap<String, serde_json::Value> {
+    let mut parameters = BTreeMap::from([
+        ("seed".into(), json!(seed)),
+        ("steps".into(), json!(recipe_steps(recipe))),
+        ("quantization".into(), json!(8)),
+        ("guidance".into(), json!(recipe_guidance(recipe))),
+        ("scheduler".into(), json!(recipe_scheduler(recipe))),
+        ("recipe".into(), json!(recipe.id())),
+        ("recipe_version".into(), json!(1)),
+        ("token_budget".into(), json!(recipe_token_budget(recipe))),
+        ("truncation".into(), json!(false)),
+        (
+            "quantized_components".into(),
+            json!(recipe_quantized_components(recipe)),
+        ),
+        (
+            "text_encoder_precision".into(),
+            json!(recipe_text_encoder_precision(recipe)),
+        ),
+        (
+            "vae_precision".into(),
+            json!(if recipe == Recipe::MossImageSft {
+                "bfloat16"
+            } else {
+                "float32"
+            }),
+        ),
+    ]);
+    if recipe == Recipe::QwenImage21Turbo {
+        parameters.insert(
+            "sampling_schedule".into(),
+            json!("qwen-turbo-model-index-v1"),
+        );
+    }
+    if recipe == Recipe::MossImageSft {
+        parameters.insert("thinking".into(), json!(true));
+        parameters.insert("negative_prompt".into(), json!(""));
+        parameters.insert("uncond_skip_layers".into(), json!([22]));
+    }
+    parameters
+}
+
+fn recipe_steps(recipe: Recipe) -> u32 {
+    match recipe {
+        Recipe::QwenImage21 => 40,
+        Recipe::QwenImage21Turbo => 8,
+        Recipe::MossImageSft => 50,
+        _ => 0,
+    }
+}
+
+fn recipe_guidance(recipe: Recipe) -> f64 {
+    if recipe == Recipe::MossImageSft {
+        3.0
+    } else {
+        1.0
+    }
+}
+
+fn recipe_scheduler(recipe: Recipe) -> &'static str {
+    if recipe == Recipe::MossImageSft {
+        "moss_image"
+    } else {
+        "linear"
+    }
+}
+
+fn recipe_token_budget(recipe: Recipe) -> u32 {
+    if recipe == Recipe::MossImageSft {
+        4096
+    } else {
+        2048
+    }
+}
+
+fn recipe_quantized_components(recipe: Recipe) -> &'static [&'static str] {
+    if recipe == Recipe::MossImageSft {
+        &["transformer", "text_encoder"]
+    } else {
+        &["transformer"]
+    }
+}
+
+fn recipe_text_encoder_precision(recipe: Recipe) -> &'static str {
+    if recipe == Recipe::MossImageSft {
+        "q8"
+    } else {
+        "bfloat16"
+    }
 }
 
 fn validate_klein_instruction(request: &UserRequest) -> Result<(), ContractError> {
@@ -1094,5 +1367,107 @@ mod tests {
         assert_eq!(frozen.plan.effective_parameters["tile"], 128);
         assert_eq!(frozen.plan.effective_parameters["threads"], "1:1:1");
         assert_eq!(frozen.plan.effective_parameters["tta"], false);
+    }
+
+    #[test]
+    fn qwen_and_moss_text_recipes_are_distinct_and_strict() {
+        for (model, capability, recipe) in [
+            (
+                QWEN_IMAGE_21_MODEL,
+                QWEN_IMAGE_21_CAPABILITY,
+                Recipe::QwenImage21,
+            ),
+            (
+                QWEN_IMAGE_21_TURBO_MODEL,
+                QWEN_IMAGE_21_TURBO_CAPABILITY,
+                Recipe::QwenImage21Turbo,
+            ),
+            (
+                MOSS_IMAGE_SFT_MODEL,
+                MOSS_IMAGE_SFT_CAPABILITY,
+                Recipe::MossImageSft,
+            ),
+        ] {
+            let request = request(model, capability, true, false);
+            assert_eq!(
+                validate_recipe_request(&request, None).unwrap(),
+                recipe
+            );
+            let mut altered = request;
+            altered.requested_output.width = 768;
+            assert!(validate_recipe_request(&altered, None).is_err());
+        }
+
+        let wrong = request(
+            QWEN_IMAGE_21_MODEL,
+            QWEN_IMAGE_21_TURBO_CAPABILITY,
+            true,
+            false,
+        );
+        assert!(validate_recipe_request(&wrong, None).is_err());
+    }
+
+    #[test]
+    fn freeze_text_models_record_seed_sampling_budget_and_precision() {
+        let env = PlanEnvironment {
+            components: vec![ComponentSnapshot {
+                role: "transformer".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+                content_hash: ContentHash::new("e".repeat(64)).unwrap(),
+            }],
+            runtime: RuntimeSnapshot {
+                package_id: "recipes-v3".into(),
+                engine: "mlx".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+            },
+            device: DeviceSnapshot {
+                device_id: "gpu".into(),
+                precision: "bfloat16".into(),
+            },
+            scheduler: "linear".into(),
+        };
+        let input = || TextModelInput {
+            request_id: RequestId::new("request:text-v3").unwrap(),
+            project_id: ProjectId::new("default").unwrap(),
+            idempotency_key: IdempotencyKey::new("submit:text-v3").unwrap(),
+            plan_id: PlanId::new("plan:text-v3").unwrap(),
+            prompt: "a cobalt cube".into(),
+            seed: None,
+        };
+
+        let base = freeze_text_model(Recipe::QwenImage21, input(), 17, env.clone()).unwrap();
+        assert_eq!(base.plan.effective_parameters["seed"], 17);
+        assert_eq!(base.plan.effective_parameters["steps"], 40);
+        assert_eq!(base.plan.effective_parameters["token_budget"], 2048);
+        assert_eq!(
+            base.plan.effective_parameters["quantized_components"],
+            json!(["transformer"])
+        );
+
+        let turbo =
+            freeze_text_model(Recipe::QwenImage21Turbo, input(), 18, env.clone()).unwrap();
+        assert_eq!(turbo.plan.effective_parameters["steps"], 8);
+        assert_eq!(
+            turbo.plan.effective_parameters["sampling_schedule"],
+            "qwen-turbo-model-index-v1"
+        );
+
+        let moss = freeze_text_model(Recipe::MossImageSft, input(), 19, env).unwrap();
+        assert_eq!(moss.plan.effective_parameters["steps"], 50);
+        assert_eq!(moss.plan.effective_parameters["token_budget"], 4096);
+        assert_eq!(
+            moss.plan.effective_parameters["uncond_skip_layers"],
+            json!([22])
+        );
+        assert_eq!(
+            moss.plan.effective_parameters["quantized_components"],
+            json!(["transformer", "text_encoder"])
+        );
     }
 }
