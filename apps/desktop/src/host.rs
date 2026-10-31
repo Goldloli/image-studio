@@ -5,6 +5,7 @@ use crate::{
         diagnostics::{DiagnosticConfig, DiagnosticController, DiagnosticSnapshot},
         library::{AssetLibraryQuery, TaskCenterQuery},
         preferences::{AppearancePreferences, CreationDefaults},
+        prompt_library::PromptLibraryStore,
     },
     options::LaunchOptions,
     studio::{
@@ -27,6 +28,7 @@ pub struct HostState {
     worker: PathBuf,
     session: Mutex<DiagnosticSession>,
     studio: Arc<StudioService>,
+    prompt_library: Result<Arc<PromptLibraryStore>, String>,
 }
 
 struct DiagnosticSession {
@@ -45,6 +47,7 @@ impl HostState {
                 "inference-supervisor"
             });
         let studio = Arc::new(StudioService::new(paths.clone(), supervisor));
+        let prompt_library = PromptLibraryStore::load(&paths).map(Arc::new);
         Self {
             paths,
             worker,
@@ -54,6 +57,7 @@ impl HostState {
                 controller: None,
             }),
             studio,
+            prompt_library,
         }
     }
     fn session(&self) -> MutexGuard<'_, DiagnosticSession> {
@@ -103,6 +107,9 @@ impl HostState {
         if let Some(controller) = &self.session().controller {
             controller.stop();
         }
+    }
+    fn prompt_library(&self) -> Result<Arc<PromptLibraryStore>, String> {
+        self.prompt_library.clone()
     }
 }
 
@@ -163,6 +170,35 @@ async fn model_catalog(state: State<'_, HostState>) -> Result<serde_json::Value,
 async fn feature_catalog(state: State<'_, HostState>) -> Result<serde_json::Value, String> {
     let studio = state.studio.clone();
     blocking(move || studio.feature_catalog()).await
+}
+#[tauri::command]
+async fn prompt_library_snapshot(state: State<'_, HostState>) -> Result<serde_json::Value, String> {
+    let library = state.prompt_library()?;
+    blocking(move || Ok(library.snapshot())).await
+}
+#[tauri::command]
+async fn prompt_library_favorite(
+    state: State<'_, HostState>,
+    case_id: String,
+    favorite: bool,
+) -> Result<serde_json::Value, String> {
+    let library = state.prompt_library()?;
+    blocking(move || library.set_favorite(&case_id, favorite)).await
+}
+#[tauri::command]
+async fn prompt_library_image(
+    state: State<'_, HostState>,
+    case_id: String,
+) -> Result<serde_json::Value, String> {
+    let library = state.prompt_library()?;
+    blocking(move || library.ensure_image(&case_id)).await
+}
+#[tauri::command]
+async fn prompt_library_clear_cache(
+    state: State<'_, HostState>,
+) -> Result<serde_json::Value, String> {
+    let library = state.prompt_library()?;
+    blocking(move || library.clear_cache()).await
 }
 #[tauri::command]
 async fn preferences_snapshot(state: State<'_, HostState>) -> Result<serde_json::Value, String> {
@@ -557,6 +593,37 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let ready = Arc::new(AtomicBool::new(false));
     let app = tauri::Builder::default()
         .manage(host)
+        .register_asynchronous_uri_scheme_protocol("studio-prompt",|context,request,responder|{
+            let library=context.app_handle().state::<HostState>().prompt_library();
+            let source_id=request.uri().path().trim_start_matches('/').parse::<u64>();
+            let allowed=request.method()==tauri::http::Method::GET
+                && request.uri().host()==Some("localhost")
+                && source_id.is_ok();
+            tauri::async_runtime::spawn_blocking(move||{
+                let response=if allowed {
+                    let case_id=format!("awesome-gpt-image-2:case:{}",source_id.unwrap());
+                    match library.and_then(|store|store.read_cached_image(&case_id)) {
+                        Ok((bytes,mime))=>tauri::http::Response::builder()
+                            .status(200)
+                            .header("Content-Type",mime)
+                            .header("Cache-Control","private, max-age=3600")
+                            .header("Access-Control-Allow-Origin","*")
+                            .body(bytes),
+                        Err(_)=>tauri::http::Response::builder()
+                            .status(404)
+                            .header("Content-Type","text/plain")
+                            .body(b"Prompt image unavailable".to_vec()),
+                    }
+                } else {
+                    tauri::http::Response::builder()
+                        .status(400)
+                        .body(b"Invalid prompt image request".to_vec())
+                };
+                if let Ok(response)=response {
+                    responder.respond(response);
+                }
+            });
+        })
         .register_asynchronous_uri_scheme_protocol("studio-asset",|context,request,responder|{
             let studio=context.app_handle().state::<HostState>().studio.clone();
             let id=request.uri().path().trim_start_matches('/').to_owned();
@@ -586,7 +653,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 eprintln!("DIAGNOSTIC_DESKTOP_READY tauri=2 requested_scale={requested_scale:?} native_dpr=webview window={initial_size:?}; image inference unavailable");
             }
         })
-        .invoke_handler(tauri::generate_handler![workspace_status, diagnostic_enable, diagnostic_start, diagnostic_stop, diagnostic_snapshot, diagnostic_viewport, studio_snapshot, model_catalog, feature_catalog, preferences_snapshot, preferences_reload, preferences_save, creation_defaults_save, settings_snapshot, storage_open, model_install, model_cancel, draft_save, draft_create, conversation_list, conversation_create, conversation_apply_model, conversation_select, conversation_rename, conversation_history, conversation_turn_detail, conversation_send, conversation_cancel_turn, workspace_select, generation_submit, generation_cancel, generation_retry, task_list, asset_library_query, asset_library_item, task_center_query, task_center_detail, asset_export, app_close])
+        .invoke_handler(tauri::generate_handler![workspace_status, diagnostic_enable, diagnostic_start, diagnostic_stop, diagnostic_snapshot, diagnostic_viewport, studio_snapshot, model_catalog, feature_catalog, prompt_library_snapshot, prompt_library_favorite, prompt_library_image, prompt_library_clear_cache, preferences_snapshot, preferences_reload, preferences_save, creation_defaults_save, settings_snapshot, storage_open, model_install, model_cancel, draft_save, draft_create, conversation_list, conversation_create, conversation_apply_model, conversation_select, conversation_rename, conversation_history, conversation_turn_detail, conversation_send, conversation_cancel_turn, workspace_select, generation_submit, generation_cancel, generation_retry, task_list, asset_library_query, asset_library_item, task_center_query, task_center_detail, asset_export, app_close])
         .build(tauri::generate_context!())?;
     app.run(|app, event| {
         if let tauri::RunEvent::ExitRequested { api, .. } = &event

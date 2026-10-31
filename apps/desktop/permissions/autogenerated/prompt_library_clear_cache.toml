@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-prompt-library-clear-cache"
+description = "Enables the prompt_library_clear_cache command without any pre-configured scope."
+commands.allow = ["prompt_library_clear_cache"]
+
+[[permission]]
+identifier = "deny-prompt-library-clear-cache"
+description = "Denies the prompt_library_clear_cache command without any pre-configured scope."
+commands.deny = ["prompt_library_clear_cache"]
