@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedDate": "2026-10-31",
+  "reviewedDate": "2026-11-01",
   "entries": [
     {
       "id": "z-image-turbo-mflux-v1",
@@ -135,6 +135,102 @@
       "verifiedDevices": ["Apple M3 Max / 128 GiB / macOS arm64 · ncnn Vulkan GPU 0"],
       "recipe": "ncnn Vulkan · x4plus · tile 128 · 固定 4×",
       "installId": "realesrgan-x4plus",
+      "installerSupported": true
+    },
+    {
+      "id": "qwen-image-2.1-mflux-v1",
+      "displayName": "Qwen-Image 2.1",
+      "variant": "Qwen/Qwen-Image-2.1 · txt2img",
+      "family": "Qwen-Image",
+      "summary": "使用独立 Qwen 2.1 文生图配方，面向中英文文字与复杂场景。",
+      "description": "固定官方模型快照，使用 q8 transformer、bf16 文本编码器、40 步 linear 采样与 guidance 1.0；首轮仅支持 1024² 单张 RGB PNG。",
+      "capabilities": [
+        { "id": "text_to_image", "label": "文生图" }
+      ],
+      "productStatus": "implemented",
+      "runtime": "MFLUX / MLX · recipes-v3",
+      "license": "qwen-research",
+      "source": "https://huggingface.co/Qwen/Qwen-Image-2.1",
+      "revision": "d26bb61231c349cf6b7896fa83353113880e1ba3",
+      "modelBytes": 33131609424,
+      "knownArtifactBytes": 33131609424,
+      "requirements": [
+        "精确 revision 与逐文件内容 SHA-256",
+        "独立 recipes-v3 worker 与共享隔离 MLX 运行时",
+        "真实 tokenizer 2048 token 预算和离线执行"
+      ],
+      "exclusions": [
+        "Qwen-Image 2.1 编辑与控制分支",
+        "LoRA、低内存配方与小文本编码器",
+        "非 1024² 画幅"
+      ],
+      "verifiedDevices": [],
+      "recipe": "q8 · 40 步 · 1024 × 1024",
+      "installId": "qwen-image-2.1-mflux-v1",
+      "installerSupported": true
+    },
+    {
+      "id": "qwen-image-2.1-turbo-mflux-v1",
+      "displayName": "Qwen-Image 2.1 Turbo",
+      "variant": "Qwen/Qwen-Image-2.1-Turbo · txt2img",
+      "family": "Qwen-Image",
+      "summary": "Qwen-Image 2.1 的官方 8 步 Turbo 快照，使用独立模型配置和采样曲线。",
+      "description": "固定官方 Turbo revision，显式加载 Turbo model_config，使用 q8 transformer、bf16 文本编码器、8 步官方 sample_sigmas 与 guidance 1.0；首轮仅支持 1024² 单张 RGB PNG。",
+      "capabilities": [
+        { "id": "text_to_image", "label": "文生图" }
+      ],
+      "productStatus": "implemented",
+      "runtime": "MFLUX / MLX · recipes-v3",
+      "license": "qwen-research",
+      "source": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo",
+      "revision": "fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+      "modelBytes": 32451607098,
+      "knownArtifactBytes": 32451607098,
+      "requirements": [
+        "Turbo 权重与 model_config 独立核验",
+        "model_index 中的官方 sample_sigmas 完整落盘",
+        "独立取消、恢复和原生日常验收"
+      ],
+      "exclusions": [
+        "仅把基础版步数改为 8 的伪 Turbo 路线",
+        "LoRA、控制分支与非方图",
+        "继承基础版实机认证"
+      ],
+      "verifiedDevices": [],
+      "recipe": "q8 · 8 步官方曲线 · 1024 × 1024",
+      "installId": "qwen-image-2.1-turbo-mflux-v1",
+      "installerSupported": true
+    },
+    {
+      "id": "moss-image-sft-mflux-v1",
+      "displayName": "MOSS-Image-SFT",
+      "variant": "OpenMOSS-Team/MOSS-Image-SFT · txt2img",
+      "family": "MOSS-Image",
+      "summary": "支持自然语言、标签与 JSON 布局提示词的本地中英文文生图模型。",
+      "description": "固定 MOSS-Image-SFT 快照，使用 q8 transformer/text encoder、50 步 moss_image 调度、guidance 3.0、空负提示词和负分支跳层 [22]；首轮仅支持 1024² 单张 RGB PNG。",
+      "capabilities": [
+        { "id": "text_to_image", "label": "文生图" }
+      ],
+      "productStatus": "implemented",
+      "runtime": "MFLUX / MLX · recipes-v3",
+      "license": "Apache-2.0",
+      "source": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT",
+      "revision": "f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+      "modelBytes": 27219783878,
+      "knownArtifactBytes": 27219783878,
+      "requirements": [
+        "MOSS 专属 tokenizer、chat template 与 4096 token 预算",
+        "50 步 CFG 与 skip layers [22] 独立配方",
+        "中文文字、JSON 布局、取消恢复和原生验收"
+      ],
+      "exclusions": [
+        "MOSS-Image-Base",
+        "社区 4/8 步蒸馏 LoRA",
+        "可视化布局编辑器与像素级排版保证"
+      ],
+      "verifiedDevices": [],
+      "recipe": "q8 · 50 步 · CFG 3.0 · 1024 × 1024",
+      "installId": "moss-image-sft-mflux-v1",
       "installerSupported": true
     }
   ]

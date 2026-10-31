@@ -293,11 +293,11 @@ mod tests {
     }
 
     #[test]
-    fn catalog_contains_exactly_the_first_four_targets() {
+    fn catalog_contains_the_exact_supported_targets() {
         let catalog = ModelCatalog::load().unwrap();
         let query = catalog.query(&[], Some("安装器不可用")).unwrap();
-        assert_eq!(query["counts"]["total"], 4);
-        assert_eq!(query["counts"]["supported"], 4);
+        assert_eq!(query["counts"]["total"], 7);
+        assert_eq!(query["counts"]["supported"], 7);
         assert_eq!(query["counts"]["planned"], 0);
         let ids = query["entries"]
             .as_array()
@@ -308,6 +308,9 @@ mod tests {
         assert!(ids.contains(&"z-image-turbo-mflux-v1"));
         assert!(ids.contains(&"birefnet-general-epoch-244"));
         assert!(ids.contains(&"realesrgan-x4plus"));
+        assert!(ids.contains(&"qwen-image-2.1-mflux-v1"));
+        assert!(ids.contains(&"qwen-image-2.1-turbo-mflux-v1"));
+        assert!(ids.contains(&"moss-image-sft-mflux-v1"));
     }
 
     #[test]

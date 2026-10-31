@@ -26,6 +26,11 @@ pub const BIREFNET_WORKER_MODULE: &str = "studio_onnx_worker";
 pub const REALESRGAN_INSTALL_ID: &str = "realesrgan-x4plus";
 pub const REALESRGAN_WORKER_BUILD_ID: &str = "studio-realesrgan-worker-0.1.0";
 pub const REALESRGAN_WORKER_MODULE: &str = "realesrgan-native-worker";
+pub const QWEN_IMAGE_21_INSTALL_ID: &str = "qwen-image-2.1-mflux-v1";
+pub const QWEN_IMAGE_21_TURBO_INSTALL_ID: &str = "qwen-image-2.1-turbo-mflux-v1";
+pub const MOSS_IMAGE_SFT_INSTALL_ID: &str = "moss-image-sft-mflux-v1";
+pub const RECIPES_V3_WORKER_BUILD_ID: &str = "studio-mflux-worker-0.3.0";
+pub const RECIPES_V3_WORKER_MODULE: &str = "studio_mflux_worker_v3";
 const MODEL_MANIFEST: &str =
     include_str!("../../../../resources/local-generation/model-manifest.json");
 const RUNTIME_MANIFEST: &str =
@@ -56,6 +61,19 @@ const REALESRGAN_MODEL_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/realesrgan/model-manifest.json");
 const REALESRGAN_RUNTIME_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/realesrgan/runtime-manifest.json");
+const QWEN_IMAGE_21_MODEL_MANIFEST: &str =
+    include_str!("../../../../resources/planned-models/qwen21/model-manifest.json");
+const QWEN_IMAGE_21_TURBO_MODEL_MANIFEST: &str =
+    include_str!("../../../../resources/planned-models/qwen21-turbo/model-manifest.json");
+const MOSS_IMAGE_SFT_MODEL_MANIFEST: &str =
+    include_str!("../../../../resources/planned-models/moss-image-sft/model-manifest.json");
+const RECIPES_V3_RUNTIME_MANIFEST: &str =
+    include_str!("../../../../resources/planned-models/qwen21/runtime-manifest.json");
+const RECIPES_V3_LOCK: &str =
+    include_str!("../../../../resources/planned-models/qwen21/requirements.lock");
+const RECIPES_V3_WORKER_WHEEL: &[u8] = include_bytes!(
+    "../../../../resources/planned-models/qwen21/studio_mflux_worker_v3-0.3.0-py3-none-any.whl"
+);
 const RESERVE: u64 = 4 * 1024 * 1024 * 1024;
 const SEGMENTED_DOWNLOAD_THRESHOLD: u64 = 2 * 1024 * 1024 * 1024;
 const DOWNLOAD_SEGMENTS: usize = 8;
@@ -76,6 +94,7 @@ struct InstallProfile {
     ready_relative: &'static str,
     installing_relative: &'static str,
     probe_with_model: bool,
+    worker_model_argument: bool,
 }
 
 struct SegmentDownload<'a> {
@@ -104,6 +123,7 @@ const Z_PROFILE: InstallProfile = InstallProfile {
     ready_relative: "installation-ready.json",
     installing_relative: "installation-installing.json",
     probe_with_model: false,
+    worker_model_argument: false,
 };
 
 const KLEIN_PROFILE: InstallProfile = InstallProfile {
@@ -121,6 +141,7 @@ const KLEIN_PROFILE: InstallProfile = InstallProfile {
     ready_relative: "installations/models/flux2-klein-4b-distilled.json",
     installing_relative: "installations/models/flux2-klein-4b-distilled.installing.json",
     probe_with_model: false,
+    worker_model_argument: false,
 };
 
 const BIREFNET_PROFILE: InstallProfile = InstallProfile {
@@ -138,6 +159,7 @@ const BIREFNET_PROFILE: InstallProfile = InstallProfile {
     ready_relative: "installations/models/birefnet-general-epoch-244.json",
     installing_relative: "installations/models/birefnet-general-epoch-244.installing.json",
     probe_with_model: true,
+    worker_model_argument: false,
 };
 
 const REALESRGAN_PROFILE: InstallProfile = InstallProfile {
@@ -155,6 +177,61 @@ const REALESRGAN_PROFILE: InstallProfile = InstallProfile {
     ready_relative: "installations/models/realesrgan-x4plus.json",
     installing_relative: "installations/models/realesrgan-x4plus.installing.json",
     probe_with_model: true,
+    worker_model_argument: false,
+};
+
+const QWEN_IMAGE_21_PROFILE: InstallProfile = InstallProfile {
+    install_id: QWEN_IMAGE_21_INSTALL_ID,
+    model_manifest: QWEN_IMAGE_21_MODEL_MANIFEST,
+    runtime_manifest: RECIPES_V3_RUNTIME_MANIFEST,
+    requirements_lock: RECIPES_V3_LOCK,
+    worker_wheel: RECIPES_V3_WORKER_WHEEL,
+    worker_module: RECIPES_V3_WORKER_MODULE,
+    worker_build_id: RECIPES_V3_WORKER_BUILD_ID,
+    engine: "MFLUX 0.24.0 / MLX",
+    scheduler: "linear",
+    probe_device: "gpu",
+    precision: "q8 transformer;bfloat16 text encoder;float32 vae",
+    ready_relative: "installations/models/qwen-image-2.1-mflux-v1.json",
+    installing_relative: "installations/models/qwen-image-2.1-mflux-v1.installing.json",
+    probe_with_model: false,
+    worker_model_argument: true,
+};
+
+const QWEN_IMAGE_21_TURBO_PROFILE: InstallProfile = InstallProfile {
+    install_id: QWEN_IMAGE_21_TURBO_INSTALL_ID,
+    model_manifest: QWEN_IMAGE_21_TURBO_MODEL_MANIFEST,
+    runtime_manifest: RECIPES_V3_RUNTIME_MANIFEST,
+    requirements_lock: RECIPES_V3_LOCK,
+    worker_wheel: RECIPES_V3_WORKER_WHEEL,
+    worker_module: RECIPES_V3_WORKER_MODULE,
+    worker_build_id: RECIPES_V3_WORKER_BUILD_ID,
+    engine: "MFLUX 0.24.0 / MLX",
+    scheduler: "linear",
+    probe_device: "gpu",
+    precision: "q8 transformer;bfloat16 text encoder;float32 vae",
+    ready_relative: "installations/models/qwen-image-2.1-turbo-mflux-v1.json",
+    installing_relative: "installations/models/qwen-image-2.1-turbo-mflux-v1.installing.json",
+    probe_with_model: false,
+    worker_model_argument: true,
+};
+
+const MOSS_IMAGE_SFT_PROFILE: InstallProfile = InstallProfile {
+    install_id: MOSS_IMAGE_SFT_INSTALL_ID,
+    model_manifest: MOSS_IMAGE_SFT_MODEL_MANIFEST,
+    runtime_manifest: RECIPES_V3_RUNTIME_MANIFEST,
+    requirements_lock: RECIPES_V3_LOCK,
+    worker_wheel: RECIPES_V3_WORKER_WHEEL,
+    worker_module: RECIPES_V3_WORKER_MODULE,
+    worker_build_id: RECIPES_V3_WORKER_BUILD_ID,
+    engine: "MFLUX 0.24.0 / MLX",
+    scheduler: "moss_image",
+    probe_device: "gpu",
+    precision: "q8 transformer/text encoder;bfloat16 vae",
+    ready_relative: "installations/models/moss-image-sft-mflux-v1.json",
+    installing_relative: "installations/models/moss-image-sft-mflux-v1.installing.json",
+    probe_with_model: false,
+    worker_model_argument: true,
 };
 
 #[derive(Clone, Debug, Deserialize)]
@@ -263,6 +340,9 @@ pub struct Installations {
     klein: Installation,
     birefnet: Installation,
     realesrgan: Installation,
+    qwen_image_21: Installation,
+    qwen_image_21_turbo: Installation,
+    moss_image_sft: Installation,
 }
 
 impl Installations {
@@ -271,7 +351,13 @@ impl Installations {
             legacy: Installation::new(paths.clone())?,
             klein: Installation::new_klein(paths.clone())?,
             birefnet: Installation::new_birefnet(paths.clone())?,
-            realesrgan: Installation::new_realesrgan(paths)?,
+            realesrgan: Installation::new_realesrgan(paths.clone())?,
+            qwen_image_21: Installation::new_for(paths.clone(), QWEN_IMAGE_21_PROFILE)?,
+            qwen_image_21_turbo: Installation::new_for(
+                paths.clone(),
+                QWEN_IMAGE_21_TURBO_PROFILE,
+            )?,
+            moss_image_sft: Installation::new_for(paths, MOSS_IMAGE_SFT_PROFILE)?,
         })
     }
 
@@ -281,6 +367,9 @@ impl Installations {
             self.klein.snapshot(),
             self.birefnet.snapshot(),
             self.realesrgan.snapshot(),
+            self.qwen_image_21.snapshot(),
+            self.qwen_image_21_turbo.snapshot(),
+            self.moss_image_sft.snapshot(),
         ]
     }
 
@@ -335,6 +424,9 @@ impl Installations {
         self.klein.cancel();
         self.birefnet.cancel();
         self.realesrgan.cancel();
+        self.qwen_image_21.cancel();
+        self.qwen_image_21_turbo.cancel();
+        self.moss_image_sft.cancel();
     }
 
     fn for_id(&self, install_id: &str) -> Option<&Installation> {
@@ -343,6 +435,9 @@ impl Installations {
             KLEIN_INSTALL_ID => Some(&self.klein),
             BIREFNET_INSTALL_ID => Some(&self.birefnet),
             REALESRGAN_INSTALL_ID => Some(&self.realesrgan),
+            QWEN_IMAGE_21_INSTALL_ID => Some(&self.qwen_image_21),
+            QWEN_IMAGE_21_TURBO_INSTALL_ID => Some(&self.qwen_image_21_turbo),
+            MOSS_IMAGE_SFT_INSTALL_ID => Some(&self.moss_image_sft),
             _ => None,
         }
     }
@@ -878,14 +973,16 @@ impl Installation {
                 ],
             )
         } else {
-            (
-                self.runtime_dir().join("venv/bin/python3"),
-                vec![
-                    "-I".into(),
-                    "-m".into(),
-                    self.inner.profile.worker_module.into(),
-                ],
-            )
+            let mut arguments = vec![
+                "-I".into(),
+                "-m".into(),
+                self.inner.profile.worker_module.into(),
+            ];
+            if self.inner.profile.worker_model_argument {
+                arguments.push("--model-snapshot-id".into());
+                arguments.push(self.inner.model.id.clone());
+            }
+            (self.runtime_dir().join("venv/bin/python3"), arguments)
         };
         Ok(ReadyPaths {
             worker_program,
@@ -1111,7 +1208,13 @@ impl Installation {
         self.check_cancel()?;
         self.update(|s| s.phase = "probing".into());
         let mut probe = Command::new(&python);
-        probe.args(["-I", "-m", self.inner.profile.worker_module, "--probe"]);
+        probe.args(["-I", "-m", self.inner.profile.worker_module]);
+        if self.inner.profile.worker_model_argument {
+            probe
+                .arg("--model-snapshot-id")
+                .arg(&self.inner.model.id);
+        }
+        probe.arg("--probe");
         if self.inner.profile.probe_with_model {
             probe.arg(self.model_dir());
         }
@@ -2707,6 +2810,56 @@ mod tests {
     }
 
     #[test]
+    fn qwen_and_moss_share_v3_runtime_but_keep_model_identity_and_worker_arguments() {
+        for (profile, expected_model_bytes, expected_ready) in [
+            (
+                QWEN_IMAGE_21_PROFILE,
+                33_131_609_424,
+                "installations/models/qwen-image-2.1-mflux-v1.json",
+            ),
+            (
+                QWEN_IMAGE_21_TURBO_PROFILE,
+                32_451_607_098,
+                "installations/models/qwen-image-2.1-turbo-mflux-v1.json",
+            ),
+            (
+                MOSS_IMAGE_SFT_PROFILE,
+                27_219_783_878,
+                "installations/models/moss-image-sft-mflux-v1.json",
+            ),
+        ] {
+            let temp = tempfile::tempdir().unwrap();
+            let paths = AppPaths::resolve(Some(temp.path())).unwrap();
+            let installer = Installation::new_for(paths, profile).unwrap();
+            assert_eq!(installer.snapshot().install_id, profile.install_id);
+            assert_eq!(installer.inner.model.component_bytes, expected_model_bytes);
+            assert_eq!(profile.ready_relative, expected_ready);
+            assert_eq!(
+                installer.inner.runtime.id,
+                "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3"
+            );
+            assert_eq!(installer.inner.profile.worker_module, RECIPES_V3_WORKER_MODULE);
+            assert!(installer.inner.profile.worker_model_argument);
+            assert!(installer.inner.model.files.iter().all(|file| {
+                file.sha256.len() == 64
+                    && file.sha256.bytes().all(|byte| byte.is_ascii_hexdigit())
+            }));
+            let worker = installer
+                .inner
+                .runtime
+                .wheels
+                .iter()
+                .find(|wheel| wheel.url == "bundled:worker-wheel")
+                .unwrap();
+            assert_eq!(
+                worker.sha256,
+                format!("{:x}", Sha256::digest(RECIPES_V3_WORKER_WHEEL))
+            );
+            assert!(installer.ready_paths().is_err());
+        }
+    }
+
+    #[test]
     fn birefnet_has_an_independent_onnx_runtime_and_worker() {
         let temp = tempfile::tempdir().unwrap();
         let paths = AppPaths::resolve(Some(temp.path())).unwrap();
@@ -2893,7 +3046,7 @@ mod tests {
         let paths = AppPaths::resolve(Some(temp.path())).unwrap();
         let manager = Installations::new(paths).unwrap();
         let snapshots = manager.snapshots();
-        assert_eq!(snapshots.len(), 4);
+        assert_eq!(snapshots.len(), 7);
         assert!(
             snapshots
                 .iter()
@@ -2911,6 +3064,13 @@ mod tests {
             manager.snapshot(REALESRGAN_INSTALL_ID).unwrap().install_id,
             REALESRGAN_INSTALL_ID
         );
+        for install_id in [
+            QWEN_IMAGE_21_INSTALL_ID,
+            QWEN_IMAGE_21_TURBO_INSTALL_ID,
+            MOSS_IMAGE_SFT_INSTALL_ID,
+        ] {
+            assert_eq!(manager.snapshot(install_id).unwrap().install_id, install_id);
+        }
         assert!(manager.start("https://untrusted").is_err());
         assert!(manager.cancel("unregistered-model").is_err());
         assert!(
