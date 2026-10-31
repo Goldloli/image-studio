@@ -10,6 +10,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { api, native, type FeatureCatalog, type FeatureCatalogEntry, type StudioSnapshot } from './studio-api';
+import { textRecipeForModel } from './model-recipes';
 
 type Props = {
   studio: StudioSnapshot | null;
@@ -154,7 +155,5 @@ function capabilityFor(feature: FeatureCatalogEntry): string {
   if (feature.featureId === 'image-edit') return 'image.edit.flux2-klein-4b.v1';
   if (feature.featureId === 'remove-background') return 'image.remove-background.birefnet-general-epoch-244.v1';
   if (feature.featureId === 'upscale') return 'image.upscale.realesrgan-x4plus.v1';
-  return feature.modelId === 'flux2-klein-4b-distilled'
-    ? 'image.text-to-image.flux2-klein-4b.v1'
-    : 'image.text-to-image.z-image-turbo.v1';
+  return textRecipeForModel(feature.modelId ?? '')?.capabilityId ?? 'image.text-to-image.z-image-turbo.v1';
 }

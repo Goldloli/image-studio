@@ -877,7 +877,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
           expectedVersion,
           prompt: source.prompt,
           modelId: source.params.modelId,
-          capabilityId: source.params.capabilityId ?? 'image.text-to-image.z-image-turbo.v1',
+          capabilityId: source.params.capabilityId ?? capabilityForModel(source.params.modelId),
           sourceAssetId: source.params.sourceAssetId ?? null,
           aspect: source.params.aspect,
           count: source.params.count,
