@@ -1,0 +1,6 @@
+{"elapsedSeconds":0,"stage":"preparing","turnId":"turn-cf058c1584a74cfd8899076748cca9de"}
+{"elapsedSeconds":1,"stage":"loading","turnId":"turn-cf058c1584a74cfd8899076748cca9de"}
+{"cancelRequested":true,"turnId":"turn-cf058c1584a74cfd8899076748cca9de"}
+{"elapsedSeconds":1,"stage":"cancel_requested","turnId":"turn-cf058c1584a74cfd8899076748cca9de"}
+{"elapsedSeconds":3,"stage":"cancelled","turnId":"turn-cf058c1584a74cfd8899076748cca9de"}
+{"elapsedMilliseconds":3198,"execution":{"attemptId":"attempt-ce3c70b81e3d4901b747d606dc6594c3","busy":false,"cleanupError":null,"jobId":"job-cbaf0399e5f74849aabb5a0d09eeaf25","logs":"","stage":"cancelled","step":null,"summary":"生成已取消，资源已回收","total":null},"stageSequence":["preparing","loading","cancel_requested","cancelled"],"status":"cancelled","turnId":"turn-cf058c1584a74cfd8899076748cca9de"}

@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseIds": [
+    "I07",
+    "I08",
+    "I09"
+  ],
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "device_probe_and_fixture",
+  "reason": "A real BiRefNet download was interrupted and reopened. The model prefix remained resumable, while a changed ONNX Runtime wheel range was rejected and cleared without activation; an explicit retry completed all downloads, verified the official hashes, installed the isolated runtime, passed the CPU graph probe and activated the same identity as the cold install. Corrupt state, disk-space, unsafe-link, cancellation, per-model state and lease boundaries pass the installation fixtures.",
+  "interruptedDownload": {
+    "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-resume-20261031/data",
+    "cacheRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-resume-20261031/cache",
+    "lastObservedReceivedBytes": 25543613,
+    "modelPartBytesAtStop": 4815255,
+    "runtimeWheelPartBytesAtStop": 2553344,
+    "completedArtifactsAtStop": [
+      {
+        "path": "python-build-standalone interpreter",
+        "bytes": 17776195
+      },
+      {
+        "path": "protobuf-7.36.2-cp310-abi3-macosx_10_9_universal2.whl",
+        "bytes": 456039
+      },
+      {
+        "path": "studio_onnx_worker-0.1.0-py3-none-any.whl",
+        "bytes": 8316
+      }
+    ],
+    "log": "logs/birefnet-resume-part1.log"
+  },
+  "identityMismatchHandling": {
+    "attemptObservedTotalBytes": 18240550,
+    "artifact": "onnxruntime-1.31.1-cp313-cp313-macosx_14_0_arm64.whl",
+    "result": "partial range was cleared and the installation stayed failed without activation",
+    "reason": "the server returned a partial response whose range or ETag identity did not match the saved resume state",
+    "log": "logs/birefnet-resume-part2.log"
+  },
+  "completedRetry": {
+    "receivedBytes": 1022243898,
+    "requiredBytes": 6569099452,
+    "phase": "ready",
+    "activationPath": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-resume-20261031/data/installations/models/birefnet-general-epoch-244.json",
+    "activationSha256": "b29e1f74e5d9b9665cf2111effd65647099b1d3d0c42bb5d013c20bc9ff379c9",
+    "runtimeLockId": "onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1",
+    "modelSnapshotId": "birefnet-general-epoch-244-onnx",
+    "runtimeManifestSha256": "1df154313587d21a509aee209c6f0717090f30b854c270754e96479363d85d56",
+    "modelManifestSha256": "a2890b0c3e935b392aac93056c2c2e4c41ec12ad4cdf9fec071403877d8d4d3d",
+    "runtimeFiles": 3889,
+    "probeDevice": "cpu",
+    "probeProvider": "CPUExecutionProvider",
+    "coldIdentityMatches": true,
+    "log": "logs/birefnet-resume-part3.log"
+  },
+  "i08FixtureEvidence": {
+    "log": "logs/birefnet-installation-recovery-tests.log",
+    "tests": [
+      "adapters::installation::tests::interrupted_transfer_keeps_a_resumable_part_but_never_a_final_file",
+      "adapters::installation::tests::range_resume_requires_identity_and_preserves_exact_bytes",
+      "adapters::installation::tests::segmented_range_resume_preserves_the_existing_prefix",
+      "adapters::installation::tests::full_response_replaces_a_partial_without_appending",
+      "adapters::installation::tests::wrong_digest_never_becomes_a_completed_cache_file",
+      "adapters::installation::tests::corrupt_segment_state_is_cleared_for_an_explicit_redownload",
+      "adapters::installation::tests::installation_space_accounts_for_separate_and_shared_volumes",
+      "adapters::installation::tests::tar_links_cannot_escape_the_private_runtime",
+      "adapters::installation::tests::cached_part_and_managed_parent_links_cannot_write_outside",
+      "adapters::installation::tests::runtime_inventory_detects_changed_link_targets"
+    ]
+  },
+  "i09FixtureEvidence": {
+    "log": "logs/birefnet-installation-recovery-tests.log",
+    "tests": [
+      "adapters::installation::tests::installation_manager_keeps_model_states_and_actions_independent",
+      "adapters::installation::tests::stalled_transfer_cancellation_does_not_wait_for_a_file_or_read_deadline",
+      "adapters::generation::tests::existing_lease_blocks_launch_and_does_not_claim_resource_release",
+      "adapters::library::tests::installation_records_are_separate_from_generation_evidence"
+    ],
+    "result": "BiRefNet installation state and actions remained independent from Z-Image and Klein; cancellation and an existing execution lease did not claim resource release or success."
+  },
+  "problems": []
+}

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "P07",
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution",
+  "reason": "Host SIGKILL during real BiRefNet session.run left the supervisor to reclaim the tree, persisted Interrupted without outputs, and an explicit new-token retry atomically registered primary and mask.",
+  "command": [
+    "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/birefnet-check",
+    "--data-dir",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-20261031/install",
+    "--source",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/fixtures/birefnet-smoke.png",
+    "--export-dir",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031"
+  ],
+  "hostReturncode": -9,
+  "observedExecution": {
+    "elapsedSeconds": 3,
+    "stage": "inference",
+    "turnId": "turn-f0f0193ea1a848ab99423357c6a36dcc"
+  },
+  "turnId": "turn-f0f0193ea1a848ab99423357c6a36dcc",
+  "jobId": "job-a719bbdadc9e4d02b3d5829d9c569784",
+  "executionLeaseWasBusyDuringRecovery": true,
+  "executionLeaseReleaseSeconds": 3.0857057500397786,
+  "lingeringOwnedProcesses": [],
+  "recoveredTurn": {
+    "aspect": "1:1",
+    "assetAvailable": false,
+    "assetError": null,
+    "assetId": null,
+    "attemptId": "attempt-c46a124e7ec74ff2928046d41ab460df",
+    "capabilityId": "image.remove-background.birefnet-general-epoch-244.v1",
+    "conversationId": "conv-default",
+    "count": 1,
+    "error": "宿主中断；请确认旧执行已清理后显式重试",
+    "height": 240,
+    "id": "turn-f0f0193ea1a848ab99423357c6a36dcc",
+    "jobId": "job-a719bbdadc9e4d02b3d5829d9c569784",
+    "maskAssetAvailable": false,
+    "maskAssetError": null,
+    "maskAssetId": null,
+    "modelId": "birefnet-general-epoch-244",
+    "progressStage": "inference",
+    "progressStep": null,
+    "progressTotal": null,
+    "prompt": "",
+    "receivedAt": 1793440858778,
+    "requestedSeed": "",
+    "seed": null,
+    "sequence": 14,
+    "sourceAssetId": "source-832593d93d2049beb9e52c58e593c1dc",
+    "state": "Interrupted",
+    "status": "Job",
+    "submissionKey": "birefnet-4e415e12-0f6e-4662-948d-4bc33caaa7ba",
+    "width": 320
+  },
+  "attempts": [
+    {
+      "id": "attempt-c46a124e7ec74ff2928046d41ab460df",
+      "token": "token-2a56db9bbce441409115fd415067b282",
+      "state": "interrupted",
+      "assetCount": 0,
+      "error": "宿主中断；请确认旧执行已清理后显式重试"
+    },
+    {
+      "id": "attempt-315706785e044150be43dea5f67f2b7c",
+      "token": "token-37bee59f87e040a9855d425802022ce2",
+      "state": "succeeded",
+      "assetCount": 2,
+      "error": null
+    }
+  ],
+  "retryExport": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/P07-birefnet-host-crash.png",
+  "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/logs/birefnet-host-crash.log",
+  "elapsedSeconds": 23.604275375022553
+}

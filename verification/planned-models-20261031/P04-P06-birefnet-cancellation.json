@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "cases": [
+    {
+      "caseId": "P04",
+      "stage": "loading",
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "turnId": "turn-cf058c1584a74cfd8899076748cca9de",
+      "jobId": "job-cbaf0399e5f74849aabb5a0d09eeaf25",
+      "attempts": [
+        {
+          "id": "attempt-ce3c70b81e3d4901b747d606dc6594c3",
+          "token": "token-dbfd7bb9dd614f248fdde38ebedd7cbe",
+          "state": "cancelled",
+          "error": null,
+          "asset_count": 0,
+          "outputAssetIds": [],
+          "finalResult": {
+            "status": "cancelled"
+          }
+        },
+        {
+          "id": "attempt-8aea1900c17347f185e0582b7c3f56b3",
+          "token": "token-1f872f7976804368963800fc4aac6176",
+          "state": "succeeded",
+          "error": null,
+          "asset_count": 2,
+          "outputAssetIds": [
+            "asset-de5e2566be3c45bd82ff0b2107931c8f",
+            "asset-c0edabe3707f48f29cd304cc2b65cc7c"
+          ],
+          "finalResult": {
+            "status": "succeeded"
+          }
+        }
+      ],
+      "distinctTokens": true,
+      "retryExport": {
+        "path": "target/planned-models-birefnet-20261031/cancel-loading/retry-primary.png",
+        "sha256": "6881a354fdf6888974ee6d2e6ccdd4d2474a0600dd3a3459e53d288a68bb4010",
+        "bytes": 2430
+      },
+      "cancelLog": "logs/birefnet-cancel-loading.log",
+      "retryLog": "logs/birefnet-retry-after-loading-cancel.log",
+      "reason": "The old Attempt has no asset, cancellation followed process-tree cleanup, and explicit retry used a new token and atomically committed primary plus mask."
+    },
+    {
+      "caseId": "P06",
+      "stage": "inference",
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "turnId": "turn-8bdbbda03aea4acaa80878c5003dea80",
+      "jobId": "job-379c2d3e1bee4b44aac6e8077a82cb54",
+      "attempts": [
+        {
+          "id": "attempt-134c1ece6b15438086dd6e9dad672c17",
+          "token": "token-837beed4da334073bd3eae44adf81cda",
+          "state": "cancelled",
+          "error": null,
+          "asset_count": 0,
+          "outputAssetIds": [],
+          "finalResult": {
+            "status": "cancelled"
+          }
+        },
+        {
+          "id": "attempt-405ad9d3b844441fa8ecea935e5d90c0",
+          "token": "token-b4615ed215d64b83bad0d793ba329900",
+          "state": "succeeded",
+          "error": null,
+          "asset_count": 2,
+          "outputAssetIds": [
+            "asset-5c3f494d2adc4c5f9dcb17b2771eb023",
+            "asset-f2c99b6968844ad898291803dd142a0c"
+          ],
+          "finalResult": {
+            "status": "succeeded"
+          }
+        }
+      ],
+      "distinctTokens": true,
+      "retryExport": {
+        "path": "target/planned-models-birefnet-20261031/cancel/retry-primary.png",
+        "sha256": "6881a354fdf6888974ee6d2e6ccdd4d2474a0600dd3a3459e53d288a68bb4010",
+        "bytes": 2430
+      },
+      "cancelLog": "logs/birefnet-cancel-inference.log",
+      "retryLog": "logs/birefnet-retry-after-inference-cancel.log",
+      "reason": "The old Attempt has no asset, cancellation followed process-tree cleanup, and explicit retry used a new token and atomically committed primary plus mask."
+    }
+  ],
+  "problems": []
+}

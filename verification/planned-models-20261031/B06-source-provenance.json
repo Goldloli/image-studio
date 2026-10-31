@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "createdDate": "2026-10-31",
+  "purpose": "BiRefNet quality-acceptance source provenance",
+  "sources": [
+    {
+      "id": "portrait-hair",
+      "path": "fixtures/original/portrait-hair.png",
+      "bytes": 2598783,
+      "sha256": "63d07fbf4beabb99cfa48fca25b69d5e41c00f9f7d5fe5e02a6c0dec4d9de8d6",
+      "width": 1122,
+      "height": 1402,
+      "mode": "RGB",
+      "rights": "Generated for this user-authorized Image Studio acceptance run; no third-party reference image or stock image input.",
+      "generation": {
+        "tool": "built-in image_gen tool",
+        "originalPath": "/Users/gejiawei/.codex/generated_images/01a19058-b239-7a62-ba4e-5eca9d55cc0b/call_00_5VqVNHyXxEkEcThCVOXX9581.png",
+        "prompt": "Use case: photorealistic-natural. Asset type: BiRefNet quality-acceptance source image, portrait hair edge case. Primary request: Create an original editorial portrait of an adult East Asian woman with very fine, windblown shoulder-length hair, looking slightly over one shoulder toward the camera. Scene/backdrop: A softly blurred public garden with pale birch trunks and tiny pale-yellow wildflowers behind her, clearly separated from the foreground except where several loose hair strands cross high-detail foliage. Subject: One adult woman, natural skin texture, calm expression, a simple charcoal linen jacket, realistic loose hair flyaways around the crown and profile. Style/medium: authentic editorial photography with restrained colors, natural fine detail, no beauty-filter smoothness. Composition/framing: portrait 4:5, half-body, centered, enough background margin around the hair silhouette, no cropping at the shoulders or crown. Lighting/mood: soft overcast daylight with subtle rim light on the hair edges. Constraints: subject and hair fully visible; no text, logos, watermark, border, UI, or decorative overlay. Avoid: stylized illustration, oversaturated flowers, heavy bokeh that hides the hair, extra people, animals."
+      }
+    },
+    {
+      "id": "person-long-haired-cat",
+      "path": "fixtures/original/person-long-haired-cat.png",
+      "bytes": 2791205,
+      "sha256": "a0ee596264b9eecb128249619b310dcd290cc359d17042bb3eca942d02f2f7fa",
+      "width": 1122,
+      "height": 1402,
+      "mode": "RGB",
+      "rights": "Generated for this user-authorized Image Studio acceptance run; no third-party reference image or stock image input.",
+      "generation": {
+        "tool": "built-in image_gen tool",
+        "originalPath": "/Users/gejiawei/.codex/generated_images/01a19058-b239-7a62-ba4e-5eca9d55cc0b/call_00_XbpvWQh8BRgzagDYBlPw0695.png",
+        "prompt": "Use case: photorealistic-natural. Asset type: BiRefNet quality-acceptance source image, animal fur and human hair edge case. Primary request: Create an original candid photograph of an adult person gently holding a long-haired ginger-and-cream cat outside. Scene/backdrop: A sunlit but softly shaded wooden garden bench in front of dark green ivy, with enough separation at the silhouettes and a few leaves crossing the loose hair and cat fur. Subject: One adult person in a natural pose and one calm long-haired cat; both faces and full body silhouettes visible, with detailed hair, whiskers and fur. Style/medium: authentic lifestyle photography, natural textures, subtle film grain, no polished commercial gloss. Composition/framing: portrait 4:5, medium shot, the person and cat centered, complete ears, paws and hair within frame with background margin. Lighting/mood: diffused afternoon light with gentle highlights on fur and hair. Constraints: exactly one person and one cat; no text, logos, watermark, border, or UI. Avoid: stylized illustration, motion blur, foreground blur covering the animals."
+      }
+    },
+    {
+      "id": "perfume-hard-edge",
+      "path": "fixtures/original/perfume-hard-edge.png",
+      "bytes": 2129775,
+      "sha256": "f04c1515fd33fb209950a686e51bc71e29af9aa5a968266a9908732b0df733c7",
+      "width": 1086,
+      "height": 1448,
+      "mode": "RGB",
+      "rights": "Generated for this user-authorized Image Studio acceptance run; no third-party reference image or stock image input.",
+      "generation": {
+        "tool": "built-in image_gen tool",
+        "originalPath": "/Users/gejiawei/.codex/generated_images/01a19058-b239-7a62-ba4e-5eca9d55cc0b/call_00_LssrWz2u7WwqGi7h9vaT4107.png",
+        "prompt": "Use case: product-mockup. Asset type: BiRefNet quality-acceptance source image, hard-edged product silhouette. Primary request: Create an original perfume bottle product photograph with clean glass edges and a softly transparent glass body. Scene/backdrop: A quiet stone plinth against a pale warm-gray studio wall, with a restrained arrangement of mint leaves and pale rose petals behind the bottle, partly overlapping but visually separate. Subject: One unbranded rectangular perfume bottle with a frosted aqua-tinted glass body, a simple round brushed-brass cap, and a clear fine glass neck; no lettering or logo. Style/medium: high-end commercial product photography with believable reflections and clean material separation. Composition/framing: portrait 3:4 or 4:5, bottle centered, full cap and bottle base visible with generous margin; leaves and petals do not crop the product. Lighting/mood: soft large-source studio light with crisp specular edges and gentle shadows. Constraints: one bottle only; clean transparent highlights; no text, brand marks, logos, watermark, border, UI or packaging copy. Avoid: opaque colored liquid, cluttered props, hard cutout appearance, illustration."
+      }
+    },
+    {
+      "id": "translucent-glass-fish",
+      "path": "fixtures/original/glass-fish.png",
+      "bytes": 2372553,
+      "sha256": "1a171ac69d17942cd340e6fa007b9b2dd6f3967019b1d0a19973d914b82478da",
+      "width": 1122,
+      "height": 1402,
+      "mode": "RGB",
+      "rights": "Generated for this user-authorized Image Studio acceptance run; no third-party reference image or stock image input.",
+      "generation": {
+        "tool": "built-in image_gen tool",
+        "originalPath": "/Users/gejiawei/.codex/generated_images/01a19058-b239-7a62-ba4e-5eca9d55cc0b/call_00_O8b3hVrDR3RtlT6Kyggq6959.png",
+        "prompt": "Use case: photorealistic-natural. Asset type: BiRefNet quality-acceptance source image, translucent object and internal alpha edge case. Primary request: Create an original close-up photograph of a hand-blown clear glass sculpture shaped like a slender fish with fine translucent fins and small suspended bubbles inside. Scene/backdrop: A deep charcoal felt display surface with soft dark teal shadows; no other objects, so internal transparency and thin glass edges are visually measurable. Subject: One clear cyan-and-neutral glass fish sculpture, complete silhouette, delicate dorsal fin, fork-shaped tail and visible internal bubbles; a little faint water-like reflection beneath it. Style/medium: authentic studio macro photography with physically believable refraction, not CGI. Composition/framing: portrait 4:5, sculpture centered diagonally, entire fins and tail inside frame with generous dark margin. Lighting/mood: controlled side lighting with narrow white highlights, subtle teal caustics, dark background. Constraints: exactly one glass object; no text, logos, watermark, border or UI; preserve nuanced semi-transparent interior rather than forcing an opaque solid. Avoid: frosted opaque object, decorative gradients, graphic cutout, added plants."
+      }
+    },
+    {
+      "id": "complex-same-tone-background",
+      "path": "../../verification/feature-works-task-ui/real-generated-greenhouse-4242.png",
+      "bytes": 1316381,
+      "sha256": "37817f53d36ab0f247cd7c414e9249fcf7e2839d6b87478d427367364d61a1cd",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "rights": "Existing original Image Studio product output created during this user-authorized implementation and retained as local acceptance material.",
+      "provenance": "verification/feature-works-task-acceptance.json"
+    },
+    {
+      "id": "fine-contours-and-shadow",
+      "path": "../../apps/frontend/public/examples/still-life.png",
+      "bytes": 2199600,
+      "sha256": "76d398a0a6c7db4ab5cfd8fbb6ae419123b10e64c5827eba4e4c725819110dcf",
+      "width": 1122,
+      "height": 1402,
+      "mode": "RGB",
+      "rights": "Original bundled Image Studio demonstration artwork generated for this user-authorized implementation; no third-party reference image input.",
+      "provenance": "apps/frontend/public/examples/provenance.json"
+    }
+  ],
+  "thirdPartyImagesUsed": false,
+  "problems": []
+}

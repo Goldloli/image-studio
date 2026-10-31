@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "S03",
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "fixture",
+  "reason": "The shared v1-v5 migration preserves historical turns, attempts, inputs and assets and adds the output-role model used by BiRefNet. Migration failures roll back without replacing the source database, and unexpected intermediate schemas remain explicit errors.",
+  "tests": [
+    "adapters::library::tests::legacy_v1_migration_preserves_drafts_jobs_and_is_idempotent",
+    "adapters::library::tests::v3_migration_preserves_drafts_and_adds_prompt_source",
+    "adapters::library::tests::v4_to_v5_preserves_legacy_records_and_adds_output_role",
+    "adapters::library::tests::failed_v1_migration_rolls_back_without_replacing_the_database",
+    "adapters::library::schema::tests::migration_is_rejected_for_an_unexpected_intermediate_version",
+    "adapters::library::tests::current_schema_installs_stable_query_indexes"
+  ],
+  "qualityGateLog": "logs/birefnet-final-cargo-test.log",
+  "problems": []
+}

@@ -1,8 +1,37 @@
-# Klein 阶段验收结果
+# 计划模型阶段验收结果
 
-状态：**通过，Klein 阶段门禁关闭**。必需项全部通过；BiRefNet 尚未开始，因此三型号整批门禁仍保持关闭。
+状态：**Klein 与 BiRefNet 阶段通过**。两阶段必需项均无失败、未运行或阻塞；Real-ESRGAN 尚未开始，因此三型号整批门禁仍保持关闭。
 
-## 结论
+## BiRefNet 阶段
+
+- 模型：`birefnet-general-epoch-244-onnx`
+- 运行时：`onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1`
+- worker：`studio-onnx-worker-0.1.0`
+- 设备：Apple M3 Max / 128 GiB / macOS arm64 / `CPUExecutionProvider`
+- 最终应用二进制：`29ef71fa71a903b050db11ecce3581da891241e222c72480e3c8f307dbcbc1dd`
+- 结构化汇总：[birefnet-acceptance.json](birefnet-acceptance.json)
+- schema 校验：[birefnet-report-schema-validation.json](birefnet-report-schema-validation.json)
+- 必需项：**31 passed / 0 failed / 0 not_run / 0 blocked**
+
+已通过：
+
+- 官方 release asset `186740004`，`972,666,916` bytes，SHA-256 `58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c`；opset 17、固定 float32 `1×3×1024×1024` 输入和 `1×1×1024×1024` 输出。图末输出为 Conv logits，产品明确只做一次 sigmoid。
+- 真正空缓存冷安装下载 `1,022,243,898` bytes，随后完成权重哈希、隔离 Python/ONNX Runtime 安装、CPU 图探针和原子激活；另一个隔离根在整树禁网环境完成同身份安装。
+- 真实下载中断后重开：模型部分前缀保留；变化后的 ONNX Runtime wheel Range/ETag 被拒绝并清除，显式重试完成下载、校验、安装和激活，最终身份与冷安装一致。
+- 固定 RGB/归一化/`cv2.INTER_LINEAR` 预处理、`align_corners=True` 恢复、straight alpha 和源 alpha 乘法；产品 alpha 与 8-bit mask 逐像素一致。
+- 六张真实质量样图覆盖发丝、人物与长毛猫、硬边香水瓶、透明玻璃鱼、复杂同色背景和细枝/阴影。样图全部来自本轮原创生成或项目已有原创资产，未使用授权不明的第三方图片。
+- 同进程连续三次任务、重复提交键、忙碌请求、加载和真实 `session.run` 取消、宿主 SIGKILL、整树回收、约 3.09 秒租约释放及显式重试。
+- 单一 Job 原子提交 primary RGBA 与 mask；作品页和 facets 只统计 primary，原生页面 2 个 Job 显示 2 件作品，蒙版仍可单独查看和导出。
+- 系统选图、已有作品选图、透明棋盘格、蒙版查看、中文空格目录双导出、正常重开、1280×800、960×640、缺源图与无效 ICC 恢复。
+- 最终 Tauri 构建及 960×640 禁网启动重新通过；Rust、前端、Python、模型锁与 OpenSpec strict 校验通过。
+
+质量局限：
+
+- 极细、低对比度发丝或枝杈可能被软化或少抠。
+- 半透明玻璃物体保留内部 alpha 变化，但极细肋片和歧义反射可能碎片化。
+- 这些结论只适用于固定 epoch_244 快照和已记录样图，不外推到其他 BiRefNet checkpoint。
+
+### Klein 结论
 
 - 运行标识：`planned-models-20261031`
 - 产品与验收代码检查点：`d08359c`

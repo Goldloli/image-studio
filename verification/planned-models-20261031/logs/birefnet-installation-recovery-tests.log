@@ -1,0 +1,34 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running unittests src/lib.rs (target/debug/deps/image_studio_desktop-1d13f5b93eab50c1)
+
+running 22 tests
+test adapters::installation::tests::actual_private_runtime_installs_offline_without_activating_missing_model ... ignored, explicit acceptance: requires all fixed runtime artifacts in validation cache
+test adapters::installation::tests::klein_private_runtime_installs_offline_without_model_weights ... ignored, explicit acceptance: requires the pinned MFLUX wheel cache
+test adapters::installation::tests::installation_space_accounts_for_separate_and_shared_volumes ... ok
+test adapters::installation::tests::range_requires_exact_start_end_and_total ... ok
+test adapters::installation::tests::paths_urls_and_hashes_fail_closed ... ok
+test adapters::installation::tests::runtime_inventory_detects_changed_link_targets ... ok
+test adapters::installation::tests::tar_links_cannot_escape_the_private_runtime ... ok
+test adapters::installation::tests::birefnet_has_an_independent_onnx_runtime_and_worker ... ok
+test adapters::installation::tests::corrupt_segment_state_is_cleared_for_an_explicit_redownload ... ok
+test adapters::installation::tests::klein_has_an_independent_manifest_runtime_and_worker ... ok
+test adapters::installation::tests::fixed_manifests_are_complete ... ok
+test adapters::installation::tests::installation_manager_keeps_model_states_and_actions_independent ... ok
+test adapters::installation::tests::segmented_ranges_are_complete_disjoint_and_resumeable ... ok
+test adapters::installation::tests::cached_part_and_managed_parent_links_cannot_write_outside ... ok
+test adapters::installation::tests::plan_metadata_keeps_all_seventeen_pinned_components ... ok
+test adapters::installation::tests::stalled_transfer_cancellation_does_not_wait_for_a_file_or_read_deadline ... ok
+test adapters::installation::tests::activation_records_bind_bytes_even_when_version_labels_are_reused ... ok
+test adapters::installation::tests::wrong_digest_never_becomes_a_completed_cache_file ... ok
+test adapters::installation::tests::interrupted_transfer_keeps_a_resumable_part_but_never_a_final_file ... ok
+test adapters::installation::tests::range_resume_requires_identity_and_preserves_exact_bytes ... ok
+test adapters::installation::tests::full_response_replaces_a_partial_without_appending ... ok
+test adapters::installation::tests::segmented_range_resume_preserves_the_existing_prefix ... ok
+
+test result: ok. 20 passed; 0 failed; 2 ignored; 0 measured; 97 filtered out; finished in 0.18s
+
+     Running unittests src/main.rs (target/debug/deps/image_studio_desktop-777e5b3e4641304f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

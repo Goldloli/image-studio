@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "B05-graph-contract",
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "real_model_graph",
+  "reason": "The pinned official ONNX graph parsed and passed the ONNX checker. Its fixed float32 NCHW 1x3x1024x1024 input produces one float32 1x1x1024x1024 output directly from a final Conv node; sigmoid is applied every time by the frozen postprocessing step.",
+  "source": {
+    "repository": "https://github.com/ZhengPeng7/BiRefNet",
+    "release": "v1",
+    "release_asset_id": 186740004,
+    "release_commit": "a0cf9925880620000aa2d1948d61bf659ddfdfaa",
+    "url": "https://github.com/ZhengPeng7/BiRefNet/releases/download/v1/BiRefNet-general-epoch_244.onnx",
+    "bytes": 972666916,
+    "sha256": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c"
+  },
+  "inspector": {
+    "onnx": "1.23.2"
+  },
+  "graph": {
+    "ir_version": 8,
+    "producer_name": "pytorch",
+    "producer_version": "2.0.1",
+    "opsets": [
+      {
+        "domain": "ai.onnx",
+        "version": 17
+      }
+    ],
+    "inputs": [
+      {
+        "name": "input_image",
+        "elem_type": 1,
+        "shape": [
+          1,
+          3,
+          1024,
+          1024
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "output_image",
+        "elem_type": 1,
+        "shape": [
+          1,
+          1,
+          1024,
+          1024
+        ]
+      }
+    ],
+    "initializer_count": 593,
+    "external_initializer_count": 0,
+    "node_count": 21968,
+    "operator_counts": {
+      "Add": 497,
+      "BatchNormalization": 20,
+      "Cast": 585,
+      "Clip": 80,
+      "Concat": 965,
+      "Constant": 9672,
+      "ConstantOfShape": 336,
+      "Conv": 102,
+      "Div": 270,
+      "Equal": 304,
+      "Erf": 48,
+      "Expand": 360,
+      "Floor": 20,
+      "Gather": 643,
+      "GatherND": 80,
+      "GlobalAveragePool": 5,
+      "Identity": 99,
+      "LayerNormalization": 112,
+      "MatMul": 294,
+      "Mod": 32,
+      "Mul": 642,
+      "Not": 8,
+      "Pad": 68,
+      "Relu": 38,
+      "Reshape": 1166,
+      "Resize": 22,
+      "ScatterND": 72,
+      "Shape": 652,
+      "Sigmoid": 23,
+      "Slice": 670,
+      "Softmax": 48,
+      "Split": 66,
+      "Sub": 132,
+      "Sum": 20,
+      "Transpose": 490,
+      "Unsqueeze": 3023,
+      "Where": 304
+    },
+    "sigmoid_node_count_internal": 23,
+    "output_producers": {
+      "output_image": {
+        "op_type": "Conv",
+        "name": "/decoder/conv_out1/conv_out1.0/Conv"
+      }
+    },
+    "output_is_direct_sigmoid": false
+  },
+  "contract": {
+    "input_name": "input_image",
+    "output_name": "output_image",
+    "input_dtype": "float32",
+    "output_dtype": "float32",
+    "input_shape": [
+      1,
+      3,
+      1024,
+      1024
+    ],
+    "output_shape": [
+      1,
+      1,
+      1024,
+      1024
+    ],
+    "external_data": false,
+    "output_activation": "sigmoid"
+  },
+  "problems": []
+}

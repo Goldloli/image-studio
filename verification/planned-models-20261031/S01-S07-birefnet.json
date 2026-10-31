@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseIds": [
+    "S01",
+    "S02",
+    "S04",
+    "S05",
+    "S07"
+  ],
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "fixture_and_product_execution",
+  "reason": "BiRefNet uses immutable managed source identities, bounded source gates, one primary plus one mask per Job, atomic rollback, and frozen-source retry. Native jobs count once in works while both output roles remain queryable.",
+  "nativeDatabase": {
+    "jobs": 2,
+    "assetsByRole": {
+      "mask": 2,
+      "primary": 2
+    },
+    "currentAttemptStates": {
+      "succeeded": 2
+    }
+  },
+  "tests": [
+    {
+      "caseIds": [
+        "S01"
+      ],
+      "test": "adapters::library::sources::tests::imports_an_immutable_normalized_source_and_ignores_the_original"
+    },
+    {
+      "caseIds": [
+        "S02"
+      ],
+      "test": "adapters::library::sources::tests::rejects_sixteen_bit_animated_icc_and_oversized_png"
+    },
+    {
+      "caseIds": [
+        "S02"
+      ],
+      "test": "adapters::library::sources::tests::jpeg_component_gate_rejects_gray_and_cmyk_before_decode"
+    },
+    {
+      "caseIds": [
+        "S02"
+      ],
+      "test": "adapters::library::tests::symlink_and_fifo_are_rejected_without_following_or_blocking"
+    },
+    {
+      "caseIds": [
+        "S04",
+        "S05"
+      ],
+      "test": "adapters::library::tests::birefnet_commits_primary_and_mask_as_one_job_result"
+    },
+    {
+      "caseIds": [
+        "S04",
+        "S05"
+      ],
+      "test": "adapters::library::tests::birefnet_requires_both_valid_outputs_and_rolls_back_as_a_unit"
+    },
+    {
+      "caseIds": [
+        "S05"
+      ],
+      "test": "adapters::library::tests::real_process_exit_at_all_commit_boundaries_recovers_exactly_once"
+    },
+    {
+      "caseIds": [
+        "S07"
+      ],
+      "test": "adapters::library::tests::klein_edit_turn_copies_the_frozen_source_for_retry"
+    }
+  ],
+  "realEvidence": [
+    "P01-birefnet.json",
+    "P07-birefnet-host-crash.json",
+    "B07-rgba-alpha.json",
+    "B07-exif-orientation.json",
+    "U-birefnet-native.json"
+  ],
+  "problems": []
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "U04-export",
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "native_daily",
+  "reason": "Both system save panels wrote to a directory containing Chinese and spaces. Exported bytes match their internal assets; primary alpha equals the grayscale mask, with RGBA and 8-bit L modes at source-normalized dimensions.",
+  "items": [
+    {
+      "assetId": "asset-14fb5f3f7aef4ccda057653735b64792",
+      "role": "mask",
+      "internalSha256": "30b64406e6ca0eb19f47189cd7944a4db62c5e93088a99d87c93d6de4b9de5e9",
+      "exportPath": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/导出 验收/BiRefNet 原生蒙版.png",
+      "exportSha256": "30b64406e6ca0eb19f47189cd7944a4db62c5e93088a99d87c93d6de4b9de5e9",
+      "equal": true,
+      "bytes": 46760
+    },
+    {
+      "assetId": "asset-7380b2dedd9d46d9a557947f72c3d5a6",
+      "role": "primary",
+      "internalSha256": "78630c65f741013134440954b7890881f2dcd713caef26da4a35f924d021d304",
+      "exportPath": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/导出 验收/BiRefNet 原生透明图.png",
+      "exportSha256": "78630c65f741013134440954b7890881f2dcd713caef26da4a35f924d021d304",
+      "equal": true,
+      "bytes": 2371389
+    }
+  ],
+  "primary": {
+    "mode": "RGBA",
+    "width": 1122,
+    "height": 1402
+  },
+  "mask": {
+    "mode": "L",
+    "width": 1122,
+    "height": 1402
+  },
+  "alphaEqualsMask": true,
+  "problems": []
+}

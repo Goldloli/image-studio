@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "P01",
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution",
+  "reason": "The frozen formal request, plan, Attempt and both output roles correspond to one Job. No seed, prompt, or alternate model is fabricated.",
+  "jobId": "job-8790d8acf3d543e0aaeee580d4c4b757",
+  "attemptId": "attempt-defc2c2fa8bb42588b3edb0d1592c3b6",
+  "attemptState": "succeeded",
+  "request": {
+    "schema_version": 1,
+    "request_id": "request-birefnet-a863e0c4-ca60-406b-b2a2-a42d472b89c2",
+    "project_id": "default",
+    "capability": {
+      "capability_id": "image.remove-background.birefnet-general-epoch-244.v1",
+      "instruction_required": false,
+      "input_roles": [
+        {
+          "role": "source",
+          "minimum": 1,
+          "maximum": 1
+        }
+      ]
+    },
+    "instruction": "",
+    "inputs": [
+      {
+        "asset": {
+          "asset_id": "source-3e035d241c5b4be28d3c70941d6e06ab",
+          "content_hash": "c8351d167e7927e52e4f0efd952610833778b2e1006065283a547a82146dad2d",
+          "data_type": "image_rgb",
+          "location": {
+            "kind": "managed",
+            "storage_id": "library",
+            "relative_path": "inputs/source-3e035d241c5b4be28d3c70941d6e06ab.png"
+          }
+        },
+        "role": "source",
+        "order": 0
+      }
+    ],
+    "model_variant_id": "birefnet-general-epoch-244",
+    "requested_output": {
+      "width": 320,
+      "height": 240,
+      "count": 1
+    },
+    "policy": {
+      "allow_model_substitution": false,
+      "allow_resolution_change": false,
+      "allow_cpu_fallback": true
+    },
+    "parameters": {},
+    "idempotency_key": "birefnet-a863e0c4-ca60-406b-b2a2-a42d472b89c2"
+  },
+  "plan": {
+    "schema_version": 1,
+    "plan_id": "plan-birefnet-a863e0c4-ca60-406b-b2a2-a42d472b89c2",
+    "request_id": "request-birefnet-a863e0c4-ca60-406b-b2a2-a42d472b89c2",
+    "model_variant_id": "birefnet-general-epoch-244",
+    "components": [
+      {
+        "role": "component-00-BiRefNet-general-epoch_244.onnx",
+        "source": {
+          "source": "https://github.com/ZhengPeng7/BiRefNet/releases/download/v1/BiRefNet-general-epoch_244.onnx",
+          "revision": "v1 / release asset 186740004 / sha256:58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c"
+        },
+        "content_hash": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c"
+      }
+    ],
+    "runtime": {
+      "package_id": "onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1",
+      "engine": "ONNX Runtime 1.31.1 / CPU",
+      "source": {
+        "source": "image-studio:runtime-manifest:onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1",
+        "revision": "1df154313587d21a509aee209c6f0717090f30b854c270754e96479363d85d56"
+      }
+    },
+    "device": {
+      "device_id": "arm64",
+      "precision": "float32"
+    },
+    "effective_output": {
+      "width": 320,
+      "height": 240,
+      "count": 1
+    },
+    "effective_parameters": {
+      "execution_mode": "sequential",
+      "inter_op_threads": 1,
+      "intra_op_threads": 4,
+      "postprocessing": "birefnet-logits-sigmoid-v1",
+      "precision": "float32",
+      "preprocessing": "birefnet-1024-rgb-v1",
+      "provider": "CPUExecutionProvider",
+      "recipe": "birefnet-general-cpu-v1",
+      "recipe_version": 1
+    },
+    "adjustments": []
+  },
+  "outputs": [
+    {
+      "id": "asset-e41e8e38086a40be99085a3aa13c1409",
+      "output_role": "mask",
+      "relative_path": "assets/asset-43c9dc2dabff4b65954b2c72f322f078.png",
+      "byte_count": 1194,
+      "sha256": "ee320d1030cff0b565fba939d34b7d9538ec7b1235d5b8b268534215fd3b5047",
+      "dataType": "mask"
+    },
+    {
+      "id": "asset-b7191e0a3a46430aa6d727849b94ab65",
+      "output_role": "primary",
+      "relative_path": "assets/asset-d6404def09694f2d8abdc59e76323691.png",
+      "byte_count": 2430,
+      "sha256": "6881a354fdf6888974ee6d2e6ccdd4d2474a0600dd3a3459e53d288a68bb4010",
+      "dataType": "image_rgba"
+    }
+  ],
+  "manifestFinalResult": {
+    "status": "succeeded"
+  },
+  "oneLogicalResult": true,
+  "problems": []
+}

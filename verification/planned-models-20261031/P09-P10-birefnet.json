@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseIds": [
+    "P09",
+    "P10"
+  ],
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "fixture_and_native_error",
+  "reason": "BiRefNet rejects missing source, prompt/seed, wrong capability, duplicate/missing roles, wrong dimensions/types, path traversal, wrong identities, stale frames and corrupted inputs before durable success. Errors preserve the previous source and create no empty Turn.",
+  "realEvidence": {
+    "invalidIcc": "native-birefnet-invalid-icc-recovered.png",
+    "noSource": "native-birefnet-960x640-no-source.png",
+    "workerTests": "tools/onnx-worker/tests/test_onnx_worker.py",
+    "protocolTests": "crates/worker-protocol/src/generation/tests.rs"
+  },
+  "tests": [
+    "studio_core::recipes::tests::tool_recipes_do_not_require_fake_instruction_or_seed",
+    "studio_core::recipes::tests::plan_parameters_are_exact_for_each_new_backend",
+    "adapters::library::tests::birefnet_requires_both_valid_outputs_and_rolls_back_as_a_unit",
+    "adapters::library::sources::tests::rejects_sixteen_bit_animated_icc_and_oversized_png",
+    "adapters::library::tests::symlink_and_fifo_are_rejected_without_following_or_blocking",
+    "generation::tests::v2_rejects_fake_tool_fields_path_escape_and_bad_roles",
+    "generation::tests::stale_identity_and_duplicate_rejection_do_not_advance_state",
+    "generation::tests::recipe_and_progress_cannot_silently_downgrade"
+  ],
+  "problems": []
+}

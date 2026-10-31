@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "status": "passed",
+  "configurationKey": "B-R",
+  "evidenceKind": "native_daily",
+  "applicationPath": "/Users/gejiawei/Desktop/ai_code/image-studio/target/dev/Image Studio.app/Contents/MacOS/image-studio-desktop",
+  "applicationSha256": "29ef71fa71a903b050db11ecce3581da891241e222c72480e3c8f307dbcbc1dd",
+  "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-native-20261031",
+  "screenshotScale": {
+    "1280x800": [
+      2560,
+      1600
+    ],
+    "960x640": [
+      1920,
+      1280
+    ],
+    "deviceScale": "2x pixels"
+  },
+  "contactSheet": "native-birefnet-contact-sheet.jpg",
+  "finalOfflineStartup": "native-offline-startup.json",
+  "keyboardFocusSequence": [
+    "参数",
+    "导入源图",
+    "作品",
+    "模型选择",
+    "创作标签",
+    "模型标签"
+  ],
+  "cases": [
+    {
+      "caseId": "U01",
+      "status": "passed",
+      "reason": "The model page shows one installed and executable BiRefNet with CPU runtime, passed device probe, M3 Max CPU verification, and a use action that enters the background-removal composer.",
+      "evidencePaths": [
+        "native-birefnet-model-ready.png",
+        "native-birefnet-model-960x640.png"
+      ]
+    },
+    {
+      "caseId": "U02",
+      "status": "passed",
+      "reason": "The function page starts the correct tool composer. Native Open imported a PNG; existing-work selection offered one primary work and excluded the mask; canceling replacement retained the source; no-source drafts save with send disabled and create no Turn.",
+      "evidencePaths": [
+        "native-birefnet-import-source.png",
+        "native-birefnet-960x640-no-source.png",
+        "native-birefnet-existing-work-picker.png"
+      ]
+    },
+    {
+      "caseId": "U03",
+      "status": "passed",
+      "reason": "A real BiRefNet task retained its frozen source and request while a new conversation was created during inference. The original card stayed active, and returning showed the same job with stop/progress controls.",
+      "evidencePaths": [
+        "native-birefnet-running.png",
+        "native-birefnet-live-switch.png"
+      ]
+    },
+    {
+      "caseId": "U04",
+      "status": "passed",
+      "reason": "Transparent checkerboard, grayscale mask and mask viewer passed. Both system save panels used a Chinese/space directory and exports matched internal bytes and hashes. Works shows one card per Job and excludes both masks.",
+      "evidencePaths": [
+        "native-birefnet-result.png",
+        "native-birefnet-mask.png",
+        "native-birefnet-mask-viewer.png",
+        "导出 验收/BiRefNet 原生透明图.png",
+        "导出 验收/BiRefNet 原生蒙版.png",
+        "U04-birefnet-export.json",
+        "native-birefnet-works-primary-only.png"
+      ]
+    },
+    {
+      "caseId": "U05",
+      "status": "passed",
+      "reason": "Normal quit and relaunch restored both completed rounds, source lineage, selected conversation, and mask/toggle controls. The final model page still reports the verified CPU device.",
+      "evidencePaths": [
+        "native-birefnet-restart-restored.png",
+        "native-birefnet-model-ready.png"
+      ]
+    },
+    {
+      "caseId": "U06",
+      "status": "passed",
+      "reason": "1280x800 and 960x640 layouts keep navigation, tool operation, source controls, model selector, send/stop and results reachable. The focused text path yields a stable Tab order; the BiRefNet tool intentionally has no text or IME field. Unknown ICC input reports a specific error and retains the existing source.",
+      "evidencePaths": [
+        "native-birefnet-model-ready.png",
+        "native-birefnet-model-960x640.png",
+        "native-birefnet-960x640.png",
+        "native-birefnet-invalid-icc-recovered.png"
+      ]
+    }
+  ],
+  "screenshots": [
+    "verification/planned-models-20261031/native-birefnet-model-ready.png",
+    "verification/planned-models-20261031/native-birefnet-import-source.png",
+    "verification/planned-models-20261031/native-birefnet-running.png",
+    "verification/planned-models-20261031/native-birefnet-live-switch.png",
+    "verification/planned-models-20261031/native-birefnet-result.png",
+    "verification/planned-models-20261031/native-birefnet-mask.png",
+    "verification/planned-models-20261031/native-birefnet-mask-viewer.png",
+    "verification/planned-models-20261031/native-birefnet-restart-restored.png",
+    "verification/planned-models-20261031/native-birefnet-model-960x640.png",
+    "verification/planned-models-20261031/native-birefnet-960x640.png",
+    "verification/planned-models-20261031/native-birefnet-960x640-no-source.png",
+    "verification/planned-models-20261031/native-birefnet-invalid-icc-recovered.png",
+    "verification/planned-models-20261031/native-birefnet-existing-work-picker.png",
+    "verification/planned-models-20261031/native-birefnet-works-primary-only.png",
+    "verification/planned-models-20261031/native-birefnet-works-960x640.png"
+  ],
+  "problems": []
+}

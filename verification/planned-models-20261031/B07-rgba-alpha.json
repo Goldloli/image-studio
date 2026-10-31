@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "B07-rgba-alpha",
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution_and_reference_recompute",
+  "reason": "A 64x64 RGBA source with every pixel at alpha 128 preserved normalized dimensions and RGB channels. The final mask equals the model probability multiplied by the original alpha with one fixed rounding step; primary alpha and grayscale mask are pixel-identical and are not premultiplied.",
+  "source": {
+    "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/fixtures/klein-transparent-source.png",
+    "width": 64,
+    "height": 64,
+    "mode": "RGBA",
+    "alphaMin": 128,
+    "alphaMax": 128,
+    "sha256": "d6845c5916a2afdcd198ef685308f2144252ad706d3d0af68004961ee1e8ad51"
+  },
+  "output": {
+    "width": 64,
+    "height": 64,
+    "primaryMode": "RGBA",
+    "maskMode": "L",
+    "primaryAlphaEqualsMask": true,
+    "maskEqualsRecomputed": true,
+    "maskMaxRecomputeError": 0,
+    "rgbPreserved": true,
+    "premultiplied": false
+  },
+  "problems": []
+}

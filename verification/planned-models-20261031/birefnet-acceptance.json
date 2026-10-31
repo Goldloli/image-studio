@@ -1,0 +1,397 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "phase": "BiRefNet",
+  "modelId": "birefnet-general-epoch-244",
+  "configurationKey": "B-R",
+  "productCodeCommit": "c6be421",
+  "acceptanceHarnessCommit": "3436d10",
+  "finalApplicationSha256": "29ef71fa71a903b050db11ecce3581da891241e222c72480e3c8f307dbcbc1dd",
+  "modelSnapshotId": "birefnet-general-epoch-244-onnx",
+  "runtimeLockId": "onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1",
+  "workerBuildId": "studio-onnx-worker-0.1.0",
+  "device": "Apple M3 Max / 128 GiB / macOS arm64 / CPUExecutionProvider",
+  "qualityGates": "birefnet-quality-gates.json",
+  "reportSchemaValidation": "birefnet-report-schema-validation.json",
+  "requiredCaseCount": 31,
+  "summary": {
+    "passed": 31,
+    "failed": 0,
+    "not_run": 0,
+    "blocked": 0
+  },
+  "gateStatus": "passed",
+  "reason": "All required BiRefNet installation, graph, preprocessing, real quality, alpha, lifecycle, safety, storage, offline and native UI cases passed. The final app startup was rechecked under deny-network and the works projection counts one primary per Job.",
+  "nextAllowedAction": "Proceed to Real-ESRGAN after committing this stage checkpoint. Qwen and MOSS remain blocked until all three models and the batch regression pass.",
+  "cases": [
+    {
+      "caseId": "I01",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "The official release asset, byte count, SHA-256, MIT license, ONNX Runtime closure and worker source are fixed in versioned manifests.",
+      "evidencePaths": [
+        "I03-I05-I06-birefnet-install.json"
+      ]
+    },
+    {
+      "caseId": "I03",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "The actual graph is opset 17 with one float32 1x3x1024x1024 input, one float32 1x1x1024x1024 output, no external initializer and a final Conv output that requires one explicit sigmoid.",
+      "evidencePaths": [
+        "I03-I05-I06-birefnet-install.json",
+        "B05-graph-contract.json"
+      ]
+    },
+    {
+      "caseId": "I05",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "A new empty-cache formal install downloaded 1,022,243,898 bytes, verified the model and isolated ONNX runtime, probed the CPU graph and reached Ready.",
+      "evidencePaths": [
+        "I03-I05-I06-birefnet-install.json",
+        "logs/birefnet-cold-install.log"
+      ]
+    },
+    {
+      "caseId": "I06",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "A separate cache install reached the same model, runtime, manifest hashes and CPU probe while the formal installer and descendants ran with networking denied.",
+      "evidencePaths": [
+        "I03-I05-I06-birefnet-install.json",
+        "logs/birefnet-offline-install.log"
+      ]
+    },
+    {
+      "caseId": "I07",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "A live download was stopped and reopened. The model prefix remained resumable; a changed wheel range failed closed and cleared its partial before explicit retry completed and activated the cold-install identity.",
+      "evidencePaths": [
+        "I07-I09-birefnet-recovery.json"
+      ]
+    },
+    {
+      "caseId": "I08",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Wrong hashes, corrupt segment state, inconsistent ranges, insufficient space, unsafe archive links and wrong private runtime identities fail without activation.",
+      "evidencePaths": [
+        "I07-I09-birefnet-recovery.json",
+        "logs/birefnet-installation-recovery-tests.log"
+      ]
+    },
+    {
+      "caseId": "I09",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Per-model actions, installation locks and execution leases remain independent; stalled transfers cancel, and an existing lease cannot report resources released.",
+      "evidencePaths": [
+        "I07-I09-birefnet-recovery.json",
+        "logs/birefnet-installation-recovery-tests.log"
+      ]
+    },
+    {
+      "caseId": "B05",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "upstream_baseline",
+      "reason": "The fixed NumPy preprocessing matches the official cv2 linear reference within one 8-bit step; align-corners resizing, one-sigmoid postprocessing and product mask parity passed.",
+      "evidencePaths": [
+        "B05-graph-contract.json",
+        "B05-preprocessing-and-mask-parity.json"
+      ]
+    },
+    {
+      "caseId": "B06",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Six real runs using original or project-owned sources cover hair, long cat fur, hard product edges, translucent glass, same-tone background and fine contours; every mask has spatial variation and reviewed limitations.",
+      "evidencePaths": [
+        "B06-quality-review.json",
+        "B06-source-provenance.json",
+        "birefnet-quality-contact-sheet.jpg"
+      ]
+    },
+    {
+      "caseId": "B07",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "RGBA alpha, straight-alpha composition, exact 8-bit mask equality, normalized EXIF orientation and source-dimension restoration passed.",
+      "evidencePaths": [
+        "B07-rgba-alpha.json",
+        "B07-exif-orientation.json"
+      ]
+    },
+    {
+      "caseId": "B10",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "The host, supervisor and ONNX worker completed real background removal with networking denied.",
+      "evidencePaths": [
+        "B10-P02-birefnet-offline.json"
+      ]
+    },
+    {
+      "caseId": "P01",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "One frozen formal request and plan produced one Job, one Attempt, one primary ImageRgba and one Mask with matching source and output identities.",
+      "evidencePaths": [
+        "P01-birefnet.json"
+      ]
+    },
+    {
+      "caseId": "P02",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "A complete product run and byte-identical outputs completed inside the deny-network profile.",
+      "evidencePaths": [
+        "B10-P02-birefnet-offline.json"
+      ]
+    },
+    {
+      "caseId": "P03",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Three independent tasks completed in one StudioService process with unique turns, jobs, attempts, primary assets and masks, followed by idle cleanup.",
+      "evidencePaths": [
+        "P03-P08-birefnet.json"
+      ]
+    },
+    {
+      "caseId": "P04",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Cancellation during loading left no assets, and explicit retry with a new token atomically committed both outputs.",
+      "evidencePaths": [
+        "P04-P06-birefnet-cancellation.json"
+      ]
+    },
+    {
+      "caseId": "P06",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Cancellation during real ONNX session.run left no assets and returned only after process-tree cleanup; explicit retry succeeded.",
+      "evidencePaths": [
+        "P04-P06-birefnet-cancellation.json"
+      ]
+    },
+    {
+      "caseId": "P07",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Host SIGKILL during real inference was recovered as Interrupted with zero assets after 3.09-second lease release and descendant cleanup; retry succeeded.",
+      "evidencePaths": [
+        "P07-birefnet-host-crash.json"
+      ]
+    },
+    {
+      "caseId": "P08",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Duplicate submission keys returned the original Turn; a distinct busy submission was rejected without creating another Turn.",
+      "evidencePaths": [
+        "P03-P08-birefnet.json"
+      ]
+    },
+    {
+      "caseId": "P09",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Missing source, prompt or seed misuse, wrong capability, source corruption and invalid imports fail before execution while preserving the prior source.",
+      "evidencePaths": [
+        "P09-P10-birefnet.json",
+        "native-birefnet-960x640-no-source.png",
+        "native-birefnet-invalid-icc-recovered.png"
+      ]
+    },
+    {
+      "caseId": "P10",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Wrong identity, recipe, provider, output roles, dimensions, data types, paths, stale frames and timeouts are rejected without durable success.",
+      "evidencePaths": [
+        "P09-P10-birefnet.json",
+        "tools/onnx-worker/tests/test_onnx_worker.py"
+      ]
+    },
+    {
+      "caseId": "S01",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Imported and existing-work sources use immutable managed identities; changing or removing the external original does not affect the frozen request.",
+      "evidencePaths": [
+        "S01-S07-birefnet.json"
+      ]
+    },
+    {
+      "caseId": "S02",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Bounded PNG/JPEG decoding rejects unsupported color, bit depth, animation, ICC, dimensions, links and special files before allocation or commit.",
+      "evidencePaths": [
+        "S01-S07-birefnet.json",
+        "P09-P10-birefnet.json"
+      ]
+    },
+    {
+      "caseId": "S03",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "v1-v5 migration preserves IDs, request JSON, inputs and assets; output-role migration and rollback failures are explicit.",
+      "evidencePaths": [
+        "S03-birefnet.json",
+        "logs/birefnet-final-cargo-test.log"
+      ]
+    },
+    {
+      "caseId": "S04",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Primary ImageRgba and Mask are validated by exact role, dimensions, bytes and hashes; only a complete pair becomes one successful Job result.",
+      "evidencePaths": [
+        "S01-S07-birefnet.json",
+        "B07-rgba-alpha.json"
+      ]
+    },
+    {
+      "caseId": "S05",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Copy, move and commit crash boundaries recover exactly once; missing or invalid outputs roll back as one unit, and accepted cancellation promotes neither asset.",
+      "evidencePaths": [
+        "S01-S07-birefnet.json",
+        "P07-birefnet-host-crash.json"
+      ]
+    },
+    {
+      "caseId": "S07",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Retry uses the original managed source hash and frozen recipe; current draft source or model changes are not substituted.",
+      "evidencePaths": [
+        "S01-S07-birefnet.json",
+        "P04-P06-birefnet-cancellation.json"
+      ]
+    },
+    {
+      "caseId": "U01",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "The native model page showed installed BiRefNet, CPU runtime, verified device and a use action into the correct background-removal composer.",
+      "evidencePaths": [
+        "U-birefnet-native.json",
+        "native-birefnet-model-ready.png"
+      ]
+    },
+    {
+      "caseId": "U02",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Native file import, primary-work selection, canceled replacement and no-source behavior preserved drafts and created no empty Turn.",
+      "evidencePaths": [
+        "U-birefnet-native.json",
+        "native-birefnet-import-source.png",
+        "native-birefnet-existing-work-picker.png",
+        "native-birefnet-960x640-no-source.png"
+      ]
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "A live BiRefNet task retained its source and frozen request while the next conversation changed, and returning restored the same progress and stop controls.",
+      "evidencePaths": [
+        "U-birefnet-native.json",
+        "native-birefnet-running.png",
+        "native-birefnet-live-switch.png"
+      ]
+    },
+    {
+      "caseId": "U04",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Checkerboard, mask viewer, system exports to a Chinese/space directory, byte equality, independent mask exclusion and one work per Job passed.",
+      "evidencePaths": [
+        "U-birefnet-native.json",
+        "U04-birefnet-export.json",
+        "native-birefnet-works-primary-only.png"
+      ]
+    },
+    {
+      "caseId": "U06",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "1280x800 and 960x640 keep navigation, source, model, send/stop and results reachable; keyboard paths and invalid-ICC recovery pass without a fake text field.",
+      "evidencePaths": [
+        "U-birefnet-native.json",
+        "native-birefnet-model-960x640.png",
+        "native-birefnet-invalid-icc-recovered.png",
+        "native-offline-startup.json"
+      ]
+    }
+  ]
+}

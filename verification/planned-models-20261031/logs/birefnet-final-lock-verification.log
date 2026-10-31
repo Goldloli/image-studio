@@ -1,0 +1,18 @@
+{
+  "locks": [
+    {
+      "model_components": 18,
+      "component_bytes": 15980131745,
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+      "worker_sha256": "9f4c9c8000f695d7cb4d1dab686772bf2bbdbcdf8786cae988b9e7785224765f"
+    },
+    {
+      "model_components": 1,
+      "component_bytes": 972666916,
+      "runtime_lock_id": "onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1",
+      "worker_sha256": "59d709c7705569602d01eeffebeca6b2cbc4d02fda181ecb157f937ea91c66c3"
+    }
+  ],
+  "worker_sources_match_wheels": true,
+  "network_accessed": false
+}

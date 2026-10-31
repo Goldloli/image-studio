@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "B06",
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "real_model_quality_review",
+  "reason": "Six real product runs use original or project-owned sources to cover portrait hair, long animal fur, hard product edges, translucent glass, a complex same-tone scene and fine contours with cast shadow. Each mask has meaningful spatial variation and no whole-image black or white failure.",
+  "contactSheet": "birefnet-quality-contact-sheet.jpg",
+  "sourceProvenance": "B06-source-provenance.json",
+  "samples": [
+    {
+      "id": "portrait-hair",
+      "source": "fixtures/original/portrait-hair.png",
+      "sourceSha256": "63d07fbf4beabb99cfa48fca25b69d5e41c00f9f7d5fe5e02a6c0dec4d9de8d6",
+      "output": "birefnet-quality/original-portrait/birefnet-primary.png",
+      "outputSha256": "b5ca4fd689015915f2bd91ffa32505a43e4ff5bb4cc59b318e102a913c25f32b",
+      "mask": "birefnet-quality/original-portrait/birefnet-mask.png",
+      "maskSha256": "46e5dc0abd4ccfb7f9de2f6407b931dd288c8621c0e57f1942269065a1308ed2",
+      "maskStats": {
+        "mode": "L",
+        "size": [1122, 1402],
+        "min": 0,
+        "max": 255,
+        "nonzeroPercent": 42.0,
+        "partialPercent": 1.93
+      },
+      "runLog": "logs/birefnet-quality-portrait-hair.log",
+      "status": "passed",
+      "observation": "The person remains complete and individual loose strand silhouettes are retained against the garden. A few very fine hairs merge with pale tree detail, but there is no whole-subject loss or hard rectangular cutout."
+    },
+    {
+      "id": "person-and-long-haired-cat",
+      "source": "fixtures/original/person-long-haired-cat.png",
+      "sourceSha256": "a0ee596264b9eecb128249619b310dcd290cc359d17042bb3eca942d02f2f7fa",
+      "output": "birefnet-quality/original-cat/birefnet-primary.png",
+      "outputSha256": "73c7670f1587583c49350d84fddfd541dfd92e03f8efa697357bc785ab589d29",
+      "mask": "birefnet-quality/original-cat/birefnet-mask.png",
+      "maskSha256": "cd61199ddc08548a1115cc70d8a2646b24a1cd2492468e32dcec497f3a753442",
+      "maskStats": {
+        "mode": "L",
+        "size": [1122, 1402],
+        "min": 0,
+        "max": 255,
+        "nonzeroPercent": 44.81,
+        "partialPercent": 1.97
+      },
+      "runLog": "logs/birefnet-quality-person-long-haired-cat.log",
+      "status": "passed",
+      "observation": "The person and long-haired cat are both retained as one foreground subject. Hair, ear tufts, tail and the hand-to-fur contact remain legible; low-contrast ivy creates a narrow soft boundary without dropping either subject."
+    },
+    {
+      "id": "perfume-hard-edge",
+      "source": "fixtures/original/perfume-hard-edge.png",
+      "sourceSha256": "f04c1515fd33fb209950a686e51bc71e29af9aa5a968266a9908732b0df733c7",
+      "output": "birefnet-quality/original-perfume/birefnet-primary.png",
+      "outputSha256": "0d210cd36bbf431795af466e8b5805b9b17e4a0adb3764422e4151b9931fca98",
+      "mask": "birefnet-quality/original-perfume/birefnet-mask.png",
+      "maskSha256": "efd8244fbff9705e300f9bff963a8e1b96ce11bf61a7f8c40fdb6cc815ae8639",
+      "maskStats": {
+        "mode": "L",
+        "size": [1086, 1448],
+        "min": 0,
+        "max": 255,
+        "nonzeroPercent": 21.81,
+        "partialPercent": 0.75
+      },
+      "runLog": "logs/birefnet-quality-perfume-hard-edge.log",
+      "status": "passed",
+      "observation": "The engraved bottle body and brass cap retain a clean rectangular silhouette. Mint, rose, petals and stone are excluded as background; the translucent body is kept as foreground rather than punched out by color."
+    },
+    {
+      "id": "translucent-glass-fish",
+      "source": "fixtures/original/glass-fish.png",
+      "sourceSha256": "1a171ac69d17942cd340e6fa007b9b2dd6f3967019b1d0a19973d914b82478da",
+      "output": "birefnet-quality/original-glass/birefnet-primary.png",
+      "outputSha256": "15fa4283799d063d51f64586eefe946fb91cadf7989a651f2781e94027d5e0a0",
+      "mask": "birefnet-quality/original-glass/birefnet-mask.png",
+      "maskSha256": "6c5f54c03c85e46783642e44f38d8ef94b23d2df0bca6b4625495ea663c1d4f9",
+      "maskStats": {
+        "mode": "L",
+        "size": [1122, 1402],
+        "min": 0,
+        "max": 255,
+        "nonzeroPercent": 20.21,
+        "partialPercent": 1.24
+      },
+      "runLog": "logs/birefnet-quality-glass-fish.log",
+      "status": "passed",
+      "observation": "The glass fish, bubbles and body are retained with internal alpha variation and no global mask failure. Very thin fin ribs and some edge reflections are incomplete, which is recorded as a real translucency limitation rather than hidden by thresholding."
+    },
+    {
+      "id": "complex-same-tone-background",
+      "source": "../../verification/feature-works-task-ui/real-generated-greenhouse-4242.png",
+      "sourceSha256": "37817f53d36ab0f247cd7c414e9249fcf7e2839d6b87478d427367364d61a1cd",
+      "output": "birefnet-quality/complex/birefnet-primary.png",
+      "outputSha256": "a1fe923c2a8df3e9206e4e221a0f20f39ad98f793892693d6644c1606ab4cb7b",
+      "mask": "birefnet-quality/complex/birefnet-mask.png",
+      "maskSha256": "ff613a38d17dfe59562ca2482308f659d9737321bd17dc11308ae89387e8b12c",
+      "maskStats": {
+        "mode": "L",
+        "size": [1024, 1024],
+        "min": 0,
+        "max": 255,
+        "nonzeroPercent": 25.76,
+        "partialPercent": 1.87
+      },
+      "runLog": "logs/birefnet-quality-complex.log",
+      "status": "passed",
+      "observation": "With the lit greenhouse treated as subject, the building is retained and the similarly dark sky, hills and reflective water are removed. A thin roof mast and some low-contrast foliage remain incomplete."
+    },
+    {
+      "id": "product-contours-and-shadow",
+      "source": "../../apps/frontend/public/examples/still-life.png",
+      "sourceSha256": "76d398a0a6c7db4ab5cfd8fbb6ae419123b10e64c5827eba4e4c725819110dcf",
+      "output": "birefnet-quality/product/birefnet-primary.png",
+      "outputSha256": "8493c4188d128f32aea65ce2fd8faa4d6f57544dca1c7f603f5d6a859231fa5a",
+      "mask": "birefnet-quality/product/birefnet-mask.png",
+      "maskSha256": "51e9cffcbd8d1749ecd150d17130107fb3b445e580b9028e382978a1829ca105",
+      "maskStats": {
+        "mode": "L",
+        "size": [1122, 1402],
+        "min": 0,
+        "max": 255,
+        "nonzeroPercent": 18.23,
+        "partialPercent": 3.89
+      },
+      "runLog": "logs/birefnet-quality-product.log",
+      "status": "passed",
+      "observation": "The vase, pears and main branch are retained against the wall and table. Several thin twigs and the wall shadow are only partially included, which is a documented edge limitation and not evidence of a broken mask."
+    }
+  ],
+  "knownLimitations": [
+    "Very thin low-contrast details, hair against similar background detail and cast shadows may be incomplete.",
+    "Translucent objects retain internal alpha variation but fine ribs and ambiguous reflections can fragment.",
+    "These observations apply only to the pinned epoch_244 snapshot and tested inputs."
+  ],
+  "problems": []
+}

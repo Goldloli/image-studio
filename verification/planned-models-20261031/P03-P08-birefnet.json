@@ -1,0 +1,109 @@
+{
+  "configurationKey": "B-R",
+  "executionAfterCompletion": {
+    "attemptId": "attempt-1f2525e7b1bf45c8b7a6dff3e4d204ad",
+    "busy": false,
+    "cleanupError": null,
+    "jobId": "job-5f593af2bcb2416f9e46d1703b5c50f5",
+    "logs": "",
+    "stage": "succeeded",
+    "step": null,
+    "summary": "图片已生成并保存到本机",
+    "total": null
+  },
+  "sameProcess": true,
+  "status": "passed",
+  "tasks": [
+    {
+      "attemptId": "attempt-590497c0c19344cc95538a4653d60fb2",
+      "busyRequestRejected": true,
+      "duplicateCreated": false,
+      "elapsedMilliseconds": 12209,
+      "execution": {
+        "attemptId": "attempt-590497c0c19344cc95538a4653d60fb2",
+        "busy": true,
+        "cleanupError": null,
+        "jobId": "job-62d57cca7b674314998120bf7468dc41",
+        "logs": "",
+        "stage": "writing",
+        "step": null,
+        "summary": "正在保存候选图片",
+        "total": null
+      },
+      "index": 1,
+      "jobId": "job-62d57cca7b674314998120bf7468dc41",
+      "maskAssetId": "asset-8242d789ad9a44dba75b149454961b1e",
+      "maskExport": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-20261031/batch-v2/continuous-1-mask.png",
+      "maskSha256": "ee320d1030cff0b565fba939d34b7d9538ec7b1235d5b8b268534215fd3b5047",
+      "primaryAssetId": "asset-389893ea584a48bc826ccb168dcc3c79",
+      "primaryExport": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-20261031/batch-v2/continuous-1.png",
+      "primarySha256": "6881a354fdf6888974ee6d2e6ccdd4d2474a0600dd3a3459e53d288a68bb4010",
+      "sourceAssetId": "source-154ca3e6cf6f4f95b3cae48fe2796ac9",
+      "turnId": "turn-e2769c7033fe4119b52de5934a910e3c"
+    },
+    {
+      "attemptId": "attempt-9d967ca2750e4ba9b519a6f5de07b6d3",
+      "busyRequestRejected": false,
+      "duplicateCreated": false,
+      "elapsedMilliseconds": 13032,
+      "execution": {
+        "attemptId": "attempt-9d967ca2750e4ba9b519a6f5de07b6d3",
+        "busy": false,
+        "cleanupError": null,
+        "jobId": "job-625660c87a784d4ea06f555c751c1da9",
+        "logs": "",
+        "stage": "succeeded",
+        "step": null,
+        "summary": "图片已生成并保存到本机",
+        "total": null
+      },
+      "index": 2,
+      "jobId": "job-625660c87a784d4ea06f555c751c1da9",
+      "maskAssetId": "asset-fdd6e904f0384d1ab4e0f3eeea44629d",
+      "maskExport": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-20261031/batch-v2/continuous-2-mask.png",
+      "maskSha256": "30b64406e6ca0eb19f47189cd7944a4db62c5e93088a99d87c93d6de4b9de5e9",
+      "primaryAssetId": "asset-4fc994ff10e54bb685a55775290dc4d8",
+      "primaryExport": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-20261031/batch-v2/continuous-2.png",
+      "primarySha256": "78630c65f741013134440954b7890881f2dcd713caef26da4a35f924d021d304",
+      "sourceAssetId": "source-c7316ba910964ab69b3725036daddfee",
+      "turnId": "turn-74053e163d714edf911cc13162792e69"
+    },
+    {
+      "attemptId": "attempt-1f2525e7b1bf45c8b7a6dff3e4d204ad",
+      "busyRequestRejected": false,
+      "duplicateCreated": false,
+      "elapsedMilliseconds": 13087,
+      "execution": {
+        "attemptId": "attempt-1f2525e7b1bf45c8b7a6dff3e4d204ad",
+        "busy": false,
+        "cleanupError": null,
+        "jobId": "job-5f593af2bcb2416f9e46d1703b5c50f5",
+        "logs": "",
+        "stage": "succeeded",
+        "step": null,
+        "summary": "图片已生成并保存到本机",
+        "total": null
+      },
+      "index": 3,
+      "jobId": "job-5f593af2bcb2416f9e46d1703b5c50f5",
+      "maskAssetId": "asset-50ece988505f4a4b93241688cef23a12",
+      "maskExport": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-20261031/batch-v2/continuous-3-mask.png",
+      "maskSha256": "1aaa489bb34ec91865c39b289f477313aed9b826ed2d0d6be1811659b7a9c490",
+      "primaryAssetId": "asset-a71748a2389d4c5c90203472a87a987d",
+      "primaryExport": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-birefnet-20261031/batch-v2/continuous-3.png",
+      "primarySha256": "dfb368d3be1979bb74c2b192659a95a24aec98f593180d444dba44ca79419650",
+      "sourceAssetId": "source-ebe7ed64007940c0941ceac61509b33f",
+      "turnId": "turn-2b5ce95936e14aaf833d39c5d31c8551"
+    }
+  ],
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseIds": [
+    "P03",
+    "P08"
+  ],
+  "required": true,
+  "evidenceKind": "product_execution",
+  "reason": "Three independent BiRefNet jobs completed in one StudioService process with unique attempts/assets and final idle cleanup. Duplicate keys reused the original Turn; a distinct busy submission was rejected without an additional Turn.",
+  "problems": []
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "B07-exif-orientation",
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution",
+  "reason": "The host applied EXIF orientation 6 during import, and BiRefNet preserved the normalized 96x160 dimensions in both outputs.",
+  "source": {
+    "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/fixtures/birefnet-exif-orientation.jpg",
+    "encodedWidth": 160,
+    "encodedHeight": 96,
+    "orientation": 6,
+    "sha256": "e411f23ab69400f7555b65c92a9b42f1d28cdbde9d2106a049010ac9177cb0b7"
+  },
+  "output": {
+    "primaryWidth": 96,
+    "primaryHeight": 160,
+    "primaryMode": "RGBA",
+    "maskWidth": 96,
+    "maskHeight": 160,
+    "maskMode": "L",
+    "expectedNormalizedWidth": 96,
+    "expectedNormalizedHeight": 160
+  },
+  "problems": []
+}

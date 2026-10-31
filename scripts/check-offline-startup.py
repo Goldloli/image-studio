@@ -13,7 +13,13 @@ root = Path(__file__).resolve().parent.parent
 parser=argparse.ArgumentParser()
 parser.add_argument(
     '--report-prefix',
-    choices=['cherry', 'first-generation', 'model-settings', 'model-usability'],
+    choices=[
+        'cherry',
+        'first-generation',
+        'model-settings',
+        'model-usability',
+        'planned-models',
+    ],
     default='cherry',
 )
 prefix=parser.parse_args().report_prefix

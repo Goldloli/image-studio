@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "caseCount": 31,
+  "counts": {
+    "passed": 31,
+    "failed": 0,
+    "not_run": 0,
+    "blocked": 0
+  },
+  "gateStatus": "passed",
+  "problems": []
+}

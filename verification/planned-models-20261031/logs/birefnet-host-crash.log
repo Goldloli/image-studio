@@ -1,0 +1,4 @@
+{"elapsedSeconds":0,"stage":"preparing","turnId":"turn-f0f0193ea1a848ab99423357c6a36dcc"}
+{"elapsedSeconds":1,"stage":"loading","turnId":"turn-f0f0193ea1a848ab99423357c6a36dcc"}
+{"elapsedSeconds":3,"stage":"inference","turnId":"turn-f0f0193ea1a848ab99423357c6a36dcc"}
+{"acceptanceControl": {"action": "SIGKILL", "pid": 71630, "stage": "inference", "turnId": "turn-f0f0193ea1a848ab99423357c6a36dcc"}}

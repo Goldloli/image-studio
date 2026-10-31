@@ -1,17 +1,21 @@
 {
   "schemaVersion": 1,
   "runId": "planned-models-20261031",
-  "caseId": "U06-offline-startup-spine",
-  "configurationKey": "K-T/K-E",
-  "required": false,
+  "caseId": "U06-offline-startup",
+  "configurationKey": "B-R",
+  "required": true,
   "status": "passed",
   "evidenceKind": "device_probe",
-  "reason": "Current final Tauri binary and embedded frontend initialized under deny-network; offline startup is supporting evidence for the completed U matrix.",
-  "applicationSha256": "200995dcb04c578caa5bdacec41e2249cbaa48ba1f09311c4ac3632b3bc84565",
+  "reason": "The final Tauri binary and embedded React production build initialized under deny-network, proving ordinary startup did not require the model or worker.",
+  "applicationSha256": "29ef71fa71a903b050db11ecce3581da891241e222c72480e3c8f307dbcbc1dd",
   "networkControlExit": 6,
-  "networkControlStderr": "% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0curl: (6) Could not resolve host: example.com",
+  "networkControlStderr": "% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total    Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0curl: (6) Could not resolve host: example.com",
   "nativeWindowRendererInitialized": true,
+  "tauriFrontendPageFinished": true,
   "log": [
     "DIAGNOSTIC_DESKTOP_READY tauri=2 requested_scale=Some(2) native_dpr=webview window=Some([960, 640]); image inference unavailable"
-  ]
+  ],
+  "modelInstalled": false,
+  "workerStarted": false,
+  "problems": []
 }

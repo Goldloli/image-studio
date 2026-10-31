@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "B05-preprocessing-and-mask-parity",
+  "configurationKey": "B-R",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "real_model_reference_parity",
+  "reason": "The frozen NumPy preprocessing matches the official cv2.INTER_LINEAR reference with a sub-8-bit tolerance, and the real model logits follow one sigmoid plus torch-compatible bilinear align_corners=True resize. The product alpha and grayscale mask are pixel-identical.",
+  "source": {
+    "path": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/fixtures/birefnet-smoke.png",
+    "width": 320,
+    "height": 240,
+    "sha256": "b0edd2da823fcfbc812ad0dbf0663a8f6b1c6b4270d131f727118f682f588ed4"
+  },
+  "graphContract": "B05-graph-contract.json",
+  "rawLogits": {
+    "shape": [
+      1,
+      1,
+      1024,
+      1024
+    ],
+    "min": -27.870685577392578,
+    "max": 237.25424194335938,
+    "contains_values_outside_probability_range": true
+  },
+  "preprocessing": {
+    "official": "RGB cv2.INTER_LINEAR to 1024x1024; float32 [0,1]; ImageNet mean/std",
+    "product": "birefnet-1024-rgb-v1",
+      "max_absolute_tensor_error": 0.01750713586807251,
+      "mean_absolute_tensor_error": 2.323112857993692e-05,
+      "max_uint8_channel_error": 1,
+      "different_channels": 4195,
+      "total_channels": 3145728,
+      "tolerance": "At most one uint8 channel step, matching the fixed cv2 reference tolerance; the final committed mask is pixel-identical."
+  },
+  "postprocessing": {
+    "official": "sigmoid; bilinear align_corners=True to source size",
+    "product": "birefnet-logits-sigmoid-v1",
+    "max_probability_error": 2.0563602447509766e-05,
+    "mean_probability_error": 1.814767003338602e-08,
+    "max_8bit_error": 0
+  },
+  "outputs": {
+    "primaryAlphaEqualsMask": true,
+    "oursMaskEqualsCommittedMask": true,
+    "officialMaskMaxError": 0,
+    "officialMaskDifferentPixels": 0
+  },
+  "problems": [],
+  "decision": "The preprocessing difference is limited to a one-value fixed-point rounding difference on 0.13% of resized channels and produces a pixel-identical B05 mask. The required <=1 eight-bit mask tolerance and exact primary-alpha/mask identity both pass."
+}
