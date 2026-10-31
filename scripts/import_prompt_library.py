@@ -17,6 +17,7 @@ UPSTREAM_COMMIT = "63e6176fa01be51c000108dacd72716d3e46784b"
 CATALOG_SCHEMA_VERSION = 1
 CATALOG_VERSION = "2026-10-31"
 MAX_IMAGE_BYTES = 16 * 1024 * 1024
+MAX_IMAGE_PIXELS = 64_000_000
 EXPECTED_CASE_COUNT = 541
 EXPECTED_MISSING_IDS = [12, 169, 170]
 
@@ -216,7 +217,60 @@ def validate_corrections(document: Any) -> dict[int, dict[str, Any]]:
     return result
 
 
-def image_metadata(path: Path) -> tuple[int, str, str]:
+def image_dimensions(value: bytes, mime_type: str) -> tuple[int, int]:
+    if mime_type == "image/png":
+        width = int.from_bytes(value[16:20], "big")
+        height = int.from_bytes(value[20:24], "big")
+    else:
+        width = height = 0
+        offset = 2
+        sof_markers = {
+            0xC0,
+            0xC1,
+            0xC2,
+            0xC3,
+            0xC5,
+            0xC6,
+            0xC7,
+            0xC9,
+            0xCA,
+            0xCB,
+            0xCD,
+            0xCE,
+            0xCF,
+        }
+        while offset + 4 <= len(value):
+            if value[offset] != 0xFF:
+                offset += 1
+                continue
+            while offset < len(value) and value[offset] == 0xFF:
+                offset += 1
+            if offset >= len(value):
+                break
+            marker = value[offset]
+            offset += 1
+            if marker in {0x01, *range(0xD0, 0xDA)}:
+                continue
+            if offset + 2 > len(value):
+                break
+            segment_length = int.from_bytes(value[offset : offset + 2], "big")
+            if segment_length < 2 or offset + segment_length > len(value):
+                break
+            if marker in sof_markers:
+                if segment_length < 7:
+                    break
+                height = int.from_bytes(value[offset + 3 : offset + 5], "big")
+                width = int.from_bytes(value[offset + 5 : offset + 7], "big")
+                break
+            offset += segment_length
+    if width <= 0 or height <= 0:
+        raise ValueError("无法读取图片尺寸")
+    if width * height > MAX_IMAGE_PIXELS:
+        raise ValueError(f"图片像素数 {width}x{height} 超过 {MAX_IMAGE_PIXELS}")
+    return width, height
+
+
+def image_metadata(path: Path) -> tuple[int, str, str, int, int]:
     value = path.read_bytes()
     if len(value) > MAX_IMAGE_BYTES:
         raise ValueError(f"{path.name} 超过 16 MiB")
@@ -228,7 +282,8 @@ def image_metadata(path: Path) -> tuple[int, str, str]:
         mime_type = "image/png"
     else:
         raise ValueError(f"{path.name} 不是完整 JPEG 或 PNG")
-    return len(value), sha256_bytes(value), mime_type
+    width, height = image_dimensions(value, mime_type)
+    return len(value), sha256_bytes(value), mime_type, width, height
 
 
 def normalize_case(
@@ -241,7 +296,7 @@ def normalize_case(
     image_path = images / filename
     if not image_path.is_file():
         raise ValueError(f"案例 {case_id} 缺少图片 {filename}")
-    byte_count, image_hash, mime_type = image_metadata(image_path)
+    byte_count, image_hash, mime_type, width, height = image_metadata(image_path)
     category_id, category_label = CATEGORY_CONFIG[case["category"]]
     input_kind, variables, notes, review_status = classify_usage(case["prompt"])
     correction = corrections.get(case_id, {})
@@ -286,6 +341,8 @@ def normalize_case(
             "sha256": image_hash,
             "bytes": byte_count,
             "mimeType": mime_type,
+            "width": width,
+            "height": height,
         },
         "source": {
             "label": case.get("sourceLabel") or "未署名",
@@ -394,6 +451,7 @@ def build_catalog(
             "bundled": False,
             "maxFileBytes": MAX_IMAGE_BYTES,
             "maxCacheBytes": 268435456,
+            "maxPixels": MAX_IMAGE_PIXELS,
             "allowedMimeTypes": ["image/jpeg", "image/png"],
         },
         "cases": normalized,
@@ -425,6 +483,10 @@ def build_catalog(
         "missingIdsMatch": sorted(missing_ids) == EXPECTED_MISSING_IDS,
         "imageBytesTotal": sum(case["image"]["bytes"] for case in normalized),
         "imageBytesMaximum": max(case["image"]["bytes"] for case in normalized),
+        "imagePixelsMaximum": max(
+            case["image"]["width"] * case["image"]["height"]
+            for case in normalized
+        ),
         "usageCounts": dict(
             Counter(case["usage"]["inputKind"] for case in normalized)
         ),
@@ -459,7 +521,12 @@ def validate_checked_in_catalog(path: Path) -> None:
     if categories != set(CATEGORY_CONFIG):
         raise ValueError("已提交目录未覆盖全部 13 个分类")
     for case in cases:
-        if case["image"]["bytes"] <= 0 or len(case["image"]["sha256"]) != 64:
+        if (
+            case["image"]["bytes"] <= 0
+            or len(case["image"]["sha256"]) != 64
+            or case["image"]["width"] <= 0
+            or case["image"]["height"] <= 0
+        ):
             raise ValueError(f"案例 {case['sourceCaseId']} 图片元数据无效")
         if not case["prompt"] or case["prompt"] == case.get("promptPreview"):
             raise ValueError(f"案例 {case['sourceCaseId']} 提示词不是完整原文")

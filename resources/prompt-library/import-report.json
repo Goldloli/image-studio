@@ -63,6 +63,7 @@
   "missingIdsMatch": true,
   "imageBytesTotal": 157178325,
   "imageBytesMaximum": 5434675,
+  "imagePixelsMaximum": 13422592,
   "usageCounts": {
     "text-to-image": 481,
     "reference-image": 57,
