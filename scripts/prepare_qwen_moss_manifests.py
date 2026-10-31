@@ -97,6 +97,7 @@ def build_manifest(model: dict[str, Any], source: dict[str, Any]) -> dict[str, A
 
     revision = source_model["revision"]
     files = []
+    documents: dict[str, bytes] = {}
     for path in selected:
         item = metadata.get(path)
         if item is None:
@@ -113,6 +114,12 @@ def build_manifest(model: dict[str, Any], source: dict[str, Any]) -> dict[str, A
                 )
             data = fetch(url, item["bytes"])
             content_sha256 = sha256(data)
+        if path.endswith(".json") and path != "model_index.json":
+            if content_sha256 != item.get("sha256"):
+                data = fetch(url, item["bytes"])
+                if sha256(data) != content_sha256:
+                    raise RuntimeError(f"{repository}/{path} changed during verification")
+                documents[path] = data
         print(f"verified {repository}/{path}: {item['bytes']} bytes", flush=True)
         files.append(
             {
@@ -123,6 +130,24 @@ def build_manifest(model: dict[str, Any], source: dict[str, Any]) -> dict[str, A
                 "license": model["license"],
             }
         )
+
+    selected_paths = set(selected)
+    for path, data in documents.items():
+        if not path.endswith(".safetensors.index.json"):
+            continue
+        try:
+            index = json.loads(data)
+            shards = set(index["weight_map"].values())
+        except (KeyError, TypeError, ValueError) as error:
+            raise RuntimeError(f"invalid weight index {repository}/{path}: {error}") from error
+        parent = Path(path).parent
+        missing = [
+            str(parent / shard) for shard in sorted(shards) if str(parent / shard) not in selected_paths
+        ]
+        if missing:
+            raise RuntimeError(
+                f"{repository}/{path} references missing manifest shards: {missing}"
+            )
 
     component_bytes = sum(
         item["bytes"] for item in files if item["path"] != "README.md"
