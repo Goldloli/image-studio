@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "id": "realesrgan-x4plus-ncnn",
+  "repository": "xinntao/Real-ESRGAN",
+  "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus",
+  "component_bytes": 33540549,
+  "files": [],
+  "archives": [
+    {
+      "path": "realesrgan-ncnn-vulkan-20220424-macos.zip",
+      "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+      "bytes": 51817124,
+      "sha256": "e0ad05580abfeb25f8d8fb55aaf7bedf552c375b5b4d9bd3c8d59764d2cc333a",
+      "members": [
+        {
+          "archive_path": "models/realesrgan-x4plus.bin",
+          "path": "realesrgan-x4plus.bin",
+          "bytes": 33424520,
+          "sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+          "executable": false
+        },
+        {
+          "archive_path": "models/realesrgan-x4plus.param",
+          "path": "realesrgan-x4plus.param",
+          "bytes": 116029,
+          "sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86",
+          "executable": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "kind": "native",
+  "id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+  "platform": "macos-universal2",
+  "archives": [
+    {
+      "path": "realesrgan-ncnn-vulkan-v0.2.0-macos.zip",
+      "url": "https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan/releases/download/v0.2.0/realesrgan-ncnn-vulkan-v0.2.0-macos.zip",
+      "bytes": 8532236,
+      "sha256": "f1cc31f13398126ddec25a186b9e50c7ab3e4f2bc011d0222331b43ce2037d3b",
+      "members": [
+        {
+          "archive_path": "realesrgan-ncnn-vulkan-v0.2.0-macos/realesrgan-ncnn-vulkan",
+          "path": "bin/realesrgan-ncnn-vulkan",
+          "bytes": 26787080,
+          "sha256": "c1c35d92079085de96b9d547fd7e4464bc8a2e9ccf28d7b8c712d72ade91b7cc",
+          "executable": true
+        },
+        {
+          "archive_path": "realesrgan-ncnn-vulkan-v0.2.0-macos/LICENSE",
+          "path": "LICENSE-ncnn-app.txt",
+          "bytes": 2228,
+          "sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937",
+          "executable": false
+        },
+        {
+          "archive_path": "realesrgan-ncnn-vulkan-v0.2.0-macos/README.md",
+          "path": "README-ncnn-app.md",
+          "bytes": 6052,
+          "sha256": "b7e6d9b329d057aba2dee56bf6fa8bdb7b79e90df959b39b92ed2873255f028b",
+          "executable": false
+        }
+      ]
+    }
+  ],
+  "executable": "bin/realesrgan-ncnn-vulkan"
+}
