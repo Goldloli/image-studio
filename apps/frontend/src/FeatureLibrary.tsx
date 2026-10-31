@@ -100,7 +100,7 @@ export function FeatureLibrary({ studio, onBack, onModels, onStart, onError }: P
       <aside className="feature-categories" aria-label="功能分类">
         <div className="library-search"><Search size={14}/><input value={search} onChange={event => setSearch(event.target.value)} aria-label="搜索功能" placeholder="搜索能力"/></div>
         {categories.map(item => <button key={item} className={item === category ? 'active' : ''} aria-pressed={item === category} onClick={() => setCategory(item)}>{item}<span>{item === '全部' ? catalog?.entries.length ?? 0 : catalog?.entries.filter(entry => entry.category === item).length ?? 0}</span></button>)}
-        <div className="feature-category-note"><Sparkles size={14}/><p>当前首个真实能力是本地文生图。其余能力需要独立 change 和实机验收。</p></div>
+        <div className="feature-category-note"><Sparkles size={14}/><p>文生图、单图编辑、去背景和 4× 放大均在本机执行。请先安装相应模型与运行环境。</p></div>
       </aside>
 
       <div className="feature-browser">

@@ -237,7 +237,7 @@ function TurnCard({
       <span className="message-author">你</span>
     </div>
     <div className="assistant-response">
-      <div className="response-source"><span className="assistant-mark"><Palette size={15}/></span><div><strong>Image Studio</strong><span>{modelShortName(turn.modelId)} · {turn.capabilityId.includes('.edit.') ? '单图编辑' : turn.capabilityId.includes('.remove-background.') ? (showMask ? '前景蒙版' : '透明背景') : turn.capabilityId.includes('.upscale.') ? `精确 4× · ${turn.width}×${turn.height}` : `${turn.aspect} · 种子 ${turn.seed ?? '随机'}`}</span></div></div>
+      <div className="response-source"><span className="assistant-mark"><Palette size={15}/></span><div><strong>Image Studio</strong><span>{modelShortName(turn.modelId)} · {turn.capabilityId.includes('.edit.') ? '单图编辑' : turn.capabilityId.includes('.remove-background.') ? (showMask ? '前景蒙版' : '透明背景') : turn.capabilityId.includes('.upscale.') ? turn.jobId ? `精确 4× · ${turn.width}×${turn.height}` : '固定 4× · 正在校验源图' : `${turn.aspect} · 种子 ${turn.seed ?? '随机'}`}</span></div></div>
       <div className="image-card" style={cardStyle}>
         {complete && <button className="image-card-open" type="button" onClick={() => onOpen(showMask)} aria-label={showMask ? '放大查看前景蒙版' : '放大查看生成图片'}><img src={assetUrl(displayedAssetId!)} alt={showMask ? '前景蒙版' : turn.prompt} draggable={false} onLoad={() => setImageReady(true)} onError={() => setImageFailed(true)}/>{imageReady && <span className="image-open-hint"><Expand size={14}/>查看大图</span>}</button>}
         {(!complete || !imageReady) && <div className="image-card-placeholder">
@@ -1160,13 +1160,13 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
         : busyInAnotherConversation
           ? '其他会话正在生成'
           : !validParams
-            ? isRemoveBackground
+            ? isToolComposer
               ? '请先导入源图'
               : '参数不受当前模型支持'
             : overByteBudget
               ? '提示词超过 16 KiB'
               : !validText
-                ? isRemoveBackground
+                ? isToolComposer
                   ? '导入源图后开始'
                   : '输入提示词后发送'
                 : 'Enter 发送 · Shift+Enter 换行';
