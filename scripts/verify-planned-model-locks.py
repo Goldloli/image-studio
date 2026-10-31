@@ -87,6 +87,99 @@ def verify_native_lock(directory):
     return model, runtime
 
 
+def verify_text_models(shared_directory, model_directories):
+    runtime = json.loads(
+        (shared_directory / "runtime-manifest.json").read_text()
+    )
+    assert runtime["schema_version"] == 1
+    assert runtime["id"] == "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3"
+    assert (
+        runtime["mflux_source"]["revision"]
+        == "8a7fd0a486635f670ef90e02efe1c051ed3f133c"
+    )
+    worker = next(
+        wheel for wheel in runtime["wheels"] if wheel["url"] == "bundled:worker-wheel"
+    )
+    assert worker["path"] == "studio_mflux_worker_v3-0.3.0-py3-none-any.whl"
+    assert runtime["packages"]["studio-mflux-worker-v3"] == "0.3.0"
+    for file in [runtime["interpreter"], *runtime["wheels"]]:
+        path = Path(file["path"])
+        assert not path.is_absolute() and ".." not in path.parts
+        assert file["bytes"] > 0
+        assert re.fullmatch("[0-9a-f]{64}", file["sha256"])
+        assert file["url"].startswith("https://") or file["url"] == "bundled:worker-wheel"
+    lines = [
+        line
+        for line in (shared_directory / "requirements.lock")
+        .read_text()
+        .splitlines()
+        if line and not line.startswith("#")
+    ]
+    assert lines == [
+        f"{wheel['package']}=={wheel['version']} --hash=sha256:{wheel['sha256']}"
+        for wheel in runtime["wheels"]
+    ]
+    wheel_path = shared_directory / worker["path"]
+    assert wheel_path.stat().st_size == worker["bytes"]
+    assert hashlib.sha256(wheel_path.read_bytes()).hexdigest() == worker["sha256"]
+    with zipfile.ZipFile(wheel_path) as archive:
+        for source in (root / "tools/mflux-worker-v3/studio_mflux_worker_v3").glob(
+            "*.py"
+        ):
+            assert (
+                source.read_bytes()
+                == archive.read(f"studio_mflux_worker_v3/{source.name}")
+            )
+
+    expected = {
+        "qwen21": (
+            "Qwen/Qwen-Image-2.1",
+            "d26bb61231c349cf6b7896fa83353113880e1ba3",
+            33_131_609_424,
+            25,
+        ),
+        "qwen21-turbo": (
+            "Qwen/Qwen-Image-2.1-Turbo",
+            "fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+            32_451_607_098,
+            16,
+        ),
+        "moss-image-sft": (
+            "OpenMOSS-Team/MOSS-Image-SFT",
+            "f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+            27_219_783_878,
+            19,
+        ),
+    }
+    verified = []
+    for directory in model_directories:
+        model = json.loads((directory / "model-manifest.json").read_text())
+        repository, revision, component_bytes, file_count = expected[directory.name]
+        assert model["schema_version"] == 1
+        assert model["repository"] == repository
+        assert model["revision"] == revision
+        assert model["component_bytes"] == component_bytes
+        assert len(model["files"]) == file_count
+        assert sum(file["bytes"] for file in model["files"]) == component_bytes
+        for file in model["files"]:
+            path = Path(file["path"])
+            assert not path.is_absolute() and ".." not in path.parts
+            assert file["bytes"] > 0
+            assert re.fullmatch("[0-9a-f]{64}", file["sha256"])
+            assert f"/resolve/{revision}/" in file["url"]
+            assert file["license"]
+        verified.append(
+            {
+                "repository": repository,
+                "model_components": len(model["files"]),
+                "component_bytes": model["component_bytes"],
+                "runtime_lock_id": runtime["id"],
+                "worker_sha256": worker["sha256"],
+            }
+        )
+    return runtime, worker, verified
+
+
 root = Path(__file__).resolve().parent.parent
 klein = root / "resources/planned-models/klein"
 klein_model, klein_runtime, klein_worker = verify_lock(
@@ -104,6 +197,15 @@ assert klein_runtime["id"] == "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2"
 assert (
     klein_runtime["mflux_source"]["revision"]
     == "8a7fd0a486635f670ef90e02efe1c051ed3f133c"
+)
+
+qwen_runtime, qwen_worker, text_locks = verify_text_models(
+    root / "resources/planned-models/qwen21",
+    [
+        root / "resources/planned-models/qwen21",
+        root / "resources/planned-models/qwen21-turbo",
+        root / "resources/planned-models/moss-image-sft",
+    ],
 )
 
 birefnet = root / "resources/planned-models/birefnet"
@@ -163,6 +265,7 @@ print(
                         [*realesrgan_model["archives"], *realesrgan_runtime["archives"]]
                     ),
                 },
+                *text_locks,
             ],
             "worker_sources_match_wheels": True,
             "network_accessed": False,
