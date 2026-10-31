@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "status": "passed",
+  "measurement": "elapsed is monotonic acceptance-to-cleanup; host RSS sampled after cleanup; worker/GPU peak unavailable (null).",
+  "cases": [
+    {
+      "configurationKey": "K-T",
+      "P03": {
+        "caseId": "P03",
+        "required": true,
+        "status": "passed",
+        "evidenceKind": "product_execution",
+        "reason": "Three sequential tasks ran in one StudioService without restart and each owned one successful Attempt/Asset.",
+        "tasks": [
+          {
+            "id": "K-T-P03-1",
+            "turnId": "turn-e81ef172cfdf48198ca286cd07b37551",
+            "jobId": "job-62fe39a5734444c289aedbbfdef3d65d",
+            "assetId": "asset-e044d892cb614f19859830d3c448c630",
+            "elapsedMilliseconds": 25839,
+            "maxSamplingStep": 4,
+            "stageSequence": [
+              "",
+              "preparing",
+              "loading",
+              "sampling",
+              "succeeded"
+            ],
+            "hostResidentBytesAfterCompletion": 34897920,
+            "backendPeakBytes": null,
+            "workerProcessesAfterCompletion": [],
+            "exportPath": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/outputs/text-batch/continuous-01.png",
+            "assetSha256": "a9fccc01532225d3e3e9c9ba48ecaabb19a256dd860ef2274ce77f6830c71ccd",
+            "dbCounts": {
+              "turns": 1,
+              "jobs": 1,
+              "attempts": 1,
+              "assets": 1
+            }
+          },
+          {
+            "id": "K-T-P03-2",
+            "turnId": "turn-fe2c95e5204346fc842f18097bc63844",
+            "jobId": "job-5e5749ec4aac403fa91b168168673eb6",
+            "assetId": "asset-1969059b73a144828fbf328dee7b604d",
+            "elapsedMilliseconds": 26912,
+            "maxSamplingStep": 4,
+            "stageSequence": [
+              "succeeded",
+              "loading",
+              "sampling",
+              "writing",
+              "succeeded"
+            ],
+            "hostResidentBytesAfterCompletion": 36831232,
+            "backendPeakBytes": null,
+            "workerProcessesAfterCompletion": [],
+            "exportPath": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/outputs/text-batch/continuous-02.png",
+            "assetSha256": "d0c3c83f21b1431c7487818cb56f88e8996830cd86c75da9747523ec6e608984",
+            "dbCounts": {
+              "turns": 1,
+              "jobs": 1,
+              "attempts": 1,
+              "assets": 1
+            }
+          },
+          {
+            "id": "K-T-P03-3",
+            "turnId": "turn-706a4dc9c6eb4cb0863614da5047b58a",
+            "jobId": "job-c71bd947919349089d47da7548bd2269",
+            "assetId": "asset-4bde861b72994bce9d0c92cf4b48d569",
+            "elapsedMilliseconds": 26992,
+            "maxSamplingStep": 4,
+            "stageSequence": [
+              "succeeded",
+              "loading",
+              "sampling",
+              "writing"
+            ],
+            "hostResidentBytesAfterCompletion": 37896192,
+            "backendPeakBytes": null,
+            "workerProcessesAfterCompletion": [],
+            "exportPath": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/outputs/text-batch/continuous-03.png",
+            "assetSha256": "09272f73f1a4ba2919daa9e57aadb99346c827b1ec373a7fe8ac77f14601813f",
+            "dbCounts": {
+              "turns": 1,
+              "jobs": 1,
+              "attempts": 1,
+              "assets": 1
+            }
+          }
+        ],
+        "sameStudioService": true
+      },
+      "P08": {
+        "caseId": "P08",
+        "required": true,
+        "status": "passed",
+        "evidenceKind": "product_execution",
+        "reason": "Duplicate submission returned the original Turn; a distinct submission while busy created no Turn and preserved the unsent draft.",
+        "record": {
+          "assetId": "asset-64a0661791d5481b80b4d1418060a406",
+          "assetSha256": "0df6a9b0becc31001a518cc0fd60c5dea8ccc8898689e2c8caf27807c0cec3e5",
+          "attemptId": "attempt-58fe152dccc84d4a8483b0a9b678f88c",
+          "busyDraftPreserved": true,
+          "busyError": "存在活动任务，请等待执行和清理完成",
+          "busyRejectionCreatedNoTurn": true,
+          "duplicateCreated": false,
+          "elapsedMilliseconds": 28012,
+          "executionAfterCompletion": {
+            "attemptId": "attempt-58fe152dccc84d4a8483b0a9b678f88c",
+            "busy": false,
+            "cleanupError": null,
+            "jobId": "job-2b1188f7431d4c5a9940f4a11907964f",
+            "logs": "\r  0%|          | 0/4 [00:00<?, ?it/s]\r 25%|██▌       | 1/4 [00:04<00:13,  4.39s/it]\r 50%|█████     | 2/4 [00:08<00:07,  4.00s/it]\r 75%|███████▌  | 3/4 [00:11<00:03,  3.85s/it]\r100%|██████████| 4/4 [00:15<00:00,  3.79s/it]\r100%|██████████| 4/4 [00:15<00:00,  3.87s/it]\n",
+            "stage": "succeeded",
+            "step": null,
+            "summary": "图片已生成并保存到本机",
+            "total": null
+          },
+          "exportPath": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/outputs/text-batch/p08-duplicate.png",
+          "firstCreated": true,
+          "hostResidentBytesAfterCompletion": 41730048,
+          "jobId": "job-2b1188f7431d4c5a9940f4a11907964f",
+          "maxSamplingStep": 4,
+          "sameTurnReturnedOnDuplicate": true,
+          "stageSequence": [
+            "succeeded",
+            "preparing",
+            "loading",
+            "sampling",
+            "succeeded"
+          ],
+          "turnId": "turn-0aa5198ce3ad4e6c8154cc821d72ac56",
+          "workerProcessesAfterCompletion": []
+        }
+      }
+    },
+    {
+      "configurationKey": "K-E",
+      "P03": {
+        "caseId": "P03",
+        "required": true,
+        "status": "passed",
+        "evidenceKind": "product_execution",
+        "reason": "Three sequential tasks ran in one StudioService without restart and each owned one successful Attempt/Asset.",
+        "tasks": [
+          {
+            "id": "K-E-P03-1",
+            "turnId": "turn-1d24e4cbdcbd431bae7206d0129b14d1",
+            "jobId": "job-42fc42fabcc04d66b3bd09a893125b46",
+            "assetId": "asset-e2e98b238dd44668812b4a0b635b0da6",
+            "elapsedMilliseconds": 45625,
+            "maxSamplingStep": 4,
+            "stageSequence": [
+              "loading",
+              "sampling",
+              "writing",
+              "succeeded"
+            ],
+            "hostResidentBytesAfterCompletion": 34914304,
+            "backendPeakBytes": null,
+            "workerProcessesAfterCompletion": [],
+            "exportPath": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/outputs/edit-batch/continuous-01.png",
+            "assetSha256": "6533d979afb41b75f1ef5e9940dfc8ef1c5df576798b130d19e78a147fcd0065",
+            "dbCounts": {
+              "turns": 1,
+              "jobs": 1,
+              "attempts": 1,
+              "assets": 1
+            }
+          },
+          {
+            "id": "K-E-P03-2",
+            "turnId": "turn-19d5a5f60c33472d9071c0a6f0bba162",
+            "jobId": "job-21f776c3b4c945f99274e688aa36ce7a",
+            "assetId": "asset-b1bf7bb1f4e641258602b5d734afd727",
+            "elapsedMilliseconds": 49920,
+            "maxSamplingStep": 4,
+            "stageSequence": [
+              "loading",
+              "sampling",
+              "writing",
+              "succeeded"
+            ],
+            "hostResidentBytesAfterCompletion": 35569664,
+            "backendPeakBytes": null,
+            "workerProcessesAfterCompletion": [],
+            "exportPath": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/outputs/edit-batch/continuous-02.png",
+            "assetSha256": "ce919705278df6595e12fefb35f3b7bfd311b90adfb4a33e3b1281da6f5d7355",
+            "dbCounts": {
+              "turns": 1,
+              "jobs": 1,
+              "attempts": 1,
+              "assets": 1
+            }
+          },
+          {
+            "id": "K-E-P03-3",
+            "turnId": "turn-787a680939894d5a9dd3dba8fc0ccaa1",
+            "jobId": "job-a15fda9e14e342b4934ae9ba68eb1d45",
+            "assetId": "asset-cbf142ae4f934da0b0256e1f0c569f46",
+            "elapsedMilliseconds": 62402,
+            "maxSamplingStep": 4,
+            "stageSequence": [
+              "loading",
+              "sampling",
+              "succeeded"
+            ],
+            "hostResidentBytesAfterCompletion": 35749888,
+            "backendPeakBytes": null,
+            "workerProcessesAfterCompletion": [],
+            "exportPath": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/outputs/edit-batch/continuous-03.png",
+            "assetSha256": "c60770cdbc92e59d55dd7b0a76340e02b6eb7fc8220e93e9c70eff4ff4a71a49",
+            "dbCounts": {
+              "turns": 1,
+              "jobs": 1,
+              "attempts": 1,
+              "assets": 1
+            }
+          }
+        ],
+        "sameStudioService": true
+      },
+      "P08": {
+        "caseId": "P08",
+        "required": true,
+        "status": "passed",
+        "evidenceKind": "product_execution",
+        "reason": "Duplicate submission returned the original Turn; a distinct submission while busy created no Turn and preserved the unsent draft.",
+        "record": {
+          "assetId": "asset-13d21d71716941f995beed8e755c778d",
+          "assetSha256": "a86ba9517d28a2888cab8110ed4ab0ad1ee9661a65702e59e4de4ba7cde45b6d",
+          "attemptId": "attempt-e01c1d918e4840639317fadfaa4010c7",
+          "busyDraftPreserved": true,
+          "busyError": "存在活动任务，请等待执行和清理完成",
+          "busyRejectionCreatedNoTurn": true,
+          "duplicateCreated": false,
+          "elapsedMilliseconds": 139426,
+          "executionAfterCompletion": {
+            "attemptId": "attempt-e01c1d918e4840639317fadfaa4010c7",
+            "busy": false,
+            "cleanupError": null,
+            "jobId": "job-67bb68941d1643c982dd1f8ff9927e36",
+            "logs": "\r  0%|          | 0/4 [00:00<?, ?it/s]\r 25%|██▌       | 1/4 [00:24<01:14, 24.71s/it]\r 50%|█████     | 2/4 [00:59<01:01, 30.82s/it]\r 75%|███████▌  | 3/4 [01:41<00:35, 35.56s/it]\r100%|██████████| 4/4 [02:05<00:00, 31.01s/it]\r100%|██████████| 4/4 [02:05<00:00, 31.26s/it]\n",
+            "stage": "succeeded",
+            "step": null,
+            "summary": "图片已生成并保存到本机",
+            "total": null
+          },
+          "exportPath": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/outputs/edit-batch/p08-duplicate.png",
+          "firstCreated": true,
+          "hostResidentBytesAfterCompletion": 40271872,
+          "jobId": "job-67bb68941d1643c982dd1f8ff9927e36",
+          "maxSamplingStep": 4,
+          "sameTurnReturnedOnDuplicate": true,
+          "stageSequence": [
+            "preparing",
+            "loading",
+            "sampling",
+            "succeeded"
+          ],
+          "turnId": "turn-edcbbb507f554a8e9071ba95184591ac",
+          "workerProcessesAfterCompletion": []
+        }
+      }
+    }
+  ]
+}

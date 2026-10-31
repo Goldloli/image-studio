@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "I06",
+  "configurationKey": "K-T/K-E",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "device_probe",
+  "reason": "A second isolated root installed from a complete cloned cache while the formal installer and all descendants ran under a network-denial profile; the model, runtime, and probe identities matched the cold installation.",
+  "sourceRoot": "target/planned-models-acceptance-20261031",
+  "offlineRoot": "target/planned-models-offline-20261031",
+  "cacheReused": true,
+  "networkDenied": true,
+  "networkControlExit": 6,
+  "identityMatches": {
+    "runtime_lock_id": true,
+    "model_snapshot_id": true,
+    "runtime_manifest_sha256": true,
+    "model_manifest_sha256": true
+  },
+  "coldIdentity": {
+    "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+    "model_snapshot_id": "flux2-klein-4b-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "runtime_manifest_sha256": "9ed991665cfce624a4e26f436ea8769b83782e8270aafd282e91845538db995b",
+    "model_manifest_sha256": "921eb72bfee51b164103bfda457d36e25757b0219269709d29851fd2134a85c5"
+  },
+  "offlineIdentity": {
+    "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+    "model_snapshot_id": "flux2-klein-4b-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "runtime_manifest_sha256": "9ed991665cfce624a4e26f436ea8769b83782e8270aafd282e91845538db995b",
+    "model_manifest_sha256": "921eb72bfee51b164103bfda457d36e25757b0219269709d29851fd2134a85c5"
+  },
+  "offlineRuntimeFiles": 27043,
+  "offlineProbe": {
+    "device": "gpu",
+    "device_name": "Apple M3 Max",
+    "identity": {
+      "build_id": "studio-mflux-worker-0.2.0",
+      "model_snapshot_id": "flux2-klein-4b-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2"
+    },
+    "packages": {
+      "mflux": "0.24.0",
+      "mlx": "0.32.4",
+      "torch": "2.15.0",
+      "transformers": "5.22.0"
+    },
+    "python": "3.13.12"
+  },
+  "offlineLog": "logs/klein-offline-install.log"
+}

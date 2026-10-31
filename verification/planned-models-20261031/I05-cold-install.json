@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "I05",
+  "configurationKey": "K-T/K-E",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "device_probe",
+  "reason": "The formal installer completed a fresh-cache install from fixed official sources and activated the exact runtime, model snapshot and GPU probe.",
+  "runRoot": "target/planned-models-acceptance-20261031",
+  "modelId": "flux2-klein-4b-distilled",
+  "modelSnapshotId": "flux2-klein-4b-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+  "runtimeLockId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+  "workerBuildId": "studio-mflux-worker-0.2.0",
+  "device": "Apple M3 Max",
+  "componentFiles": 18,
+  "modelComponentBytes": 15980131745,
+  "installBytes": 15980131745,
+  "runtimeFileCount": 27043,
+  "runtimeBytes": 1533818703,
+  "activationPath": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-acceptance-20261031/data/installations/models/flux2-klein-4b-distilled.json",
+  "activationSha256": "ab01b7b5c324c01305f5bbff2672331c8e5dc570a44f05fde9021a56671d728d",
+  "probe": {
+    "device": "gpu",
+    "device_name": "Apple M3 Max",
+    "identity": {
+      "build_id": "studio-mflux-worker-0.2.0",
+      "model_snapshot_id": "flux2-klein-4b-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2"
+    },
+    "packages": {
+      "mflux": "0.24.0",
+      "mlx": "0.32.4",
+      "torch": "2.15.0",
+      "transformers": "5.22.0"
+    },
+    "python": "3.13.12"
+  },
+  "evidence": [
+    "klein-install.json",
+    "installation-identity.json"
+  ]
+}

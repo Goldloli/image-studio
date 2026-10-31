@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "S01/S07",
+  "configurationKey": "K-E",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution",
+  "reason": "The imported source is stored as a managed normalized immutable input; all same-process edit Jobs and both attempts of an explicit retry reference the same frozen hash.",
+  "sourceAssetId": "source-1773183e51ae4e849e287ffded1a95d2",
+  "source": {
+    "path": "target/planned-models-acceptance-20261031/data/inputs/source-1773183e51ae4e849e287ffded1a95d2.png",
+    "fileSha256": "52bb1f21ccfed4c94f24b35c206bd7b4c169a93c9f1d0ca804ea94e17a0ba56a",
+    "assetJson": {
+      "asset_id": "source-1773183e51ae4e849e287ffded1a95d2",
+      "content_hash": "52bb1f21ccfed4c94f24b35c206bd7b4c169a93c9f1d0ca804ea94e17a0ba56a",
+      "data_type": "image_rgb",
+      "location": {
+        "kind": "managed",
+        "storage_id": "library",
+        "relative_path": "inputs/source-1773183e51ae4e849e287ffded1a95d2.png"
+      }
+    },
+    "width": 1024,
+    "height": 1024,
+    "originalSha256": "96759040947be28e31dab60198dd1c4f8e4fb7a9d1c9c46d59f66730270256d7",
+    "hasTransparentPixels": false
+  },
+  "jobSourceHashes": [
+    "52bb1f21ccfed4c94f24b35c206bd7b4c169a93c9f1d0ca804ea94e17a0ba56a",
+    "52bb1f21ccfed4c94f24b35c206bd7b4c169a93c9f1d0ca804ea94e17a0ba56a",
+    "52bb1f21ccfed4c94f24b35c206bd7b4c169a93c9f1d0ca804ea94e17a0ba56a",
+    "52bb1f21ccfed4c94f24b35c206bd7b4c169a93c9f1d0ca804ea94e17a0ba56a"
+  ],
+  "retryJobId": "job-03a6b9aeec05458b9a9baf6b211967f5",
+  "retryPlanIdentical": true,
+  "checks": {
+    "managedSourceFileMatchesAssetJson": true,
+    "allEditJobsUseImportedSourceHash": true,
+    "retryReusesIdenticalFrozenPlan": true,
+    "externalOriginalStillReadable": true,
+    "sourceWithin4MP": true
+  },
+  "supportingFixtureTests": [
+    "imports_an_immutable_normalized_source_and_ignores_the_original",
+    "klein_edit_turn_copies_the_frozen_source_for_retry",
+    "symlink_and_fifo_are_rejected_without_following_or_blocking"
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "status": "passed",
+  "networkControl": {
+    "command": [
+      "/usr/bin/sandbox-exec",
+      "-f",
+      "verification/deny-network.sb",
+      "/usr/bin/curl",
+      "--max-time",
+      "3",
+      "-I",
+      "https://example.com"
+    ],
+    "exitCode": 6,
+    "stderrTail": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0curl: (6) Could not resolve host: example.com\n",
+    "expectedFailure": true
+  },
+  "executionCommandTemplate": [
+    "env",
+    "HF_HUB_OFFLINE=1",
+    "TRANSFORMERS_OFFLINE=1",
+    "HF_HUB_DISABLE_TELEMETRY=1",
+    "DO_NOT_TRACK=1",
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "verification/deny-network.sb",
+    "target/debug/examples/klein-check",
+    "..."
+  ],
+  "networkProfile": "allow default; deny network* applies to the launched process tree",
+  "cases": [
+    {
+      "caseId": "P02",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Host, supervisor, and worker completed under a profile that denies all network operations.",
+      "turnId": "turn-0b9981804eec4bee9285c0188dd92a70",
+      "jobId": "job-83be2b3e270242069ca9ef9b7acd16fa",
+      "attemptId": "attempt-e1320ec83dad4e9b840ac61ca4b72d27",
+      "capabilityId": "image.text-to-image.flux2-klein-4b.v1",
+      "prompt": "A small ivory ceramic bird on a stack of old books beside a rain-streaked window, soft overcast light, still life photograph",
+      "requestedSeed": "94",
+      "sourceAssetId": null,
+      "inputAssets": [],
+      "output": {
+        "asset_id": "asset-351fbfd9c8ea408c916105649fdfe0e8",
+        "content_hash": "62cc09458db6f05d4bcdfb8afa4508ebc1b0efe698fc63b1da0047ecf6564c8f",
+        "data_type": "image_rgb",
+        "location": {
+          "kind": "managed",
+          "storage_id": "library",
+          "relative_path": "assets/asset-f992bda2f7f2478eb05b7ab824524659.png"
+        }
+      },
+      "exportedSha256": "62cc09458db6f05d4bcdfb8afa4508ebc1b0efe698fc63b1da0047ecf6564c8f",
+      "outputPath": "target/planned-models-acceptance-20261031/data/assets/asset-f992bda2f7f2478eb05b7ab824524659.png",
+      "networkDenied": true
+    },
+    {
+      "caseId": "P02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Host, supervisor, and worker completed under a profile that denies all network operations.",
+      "turnId": "turn-c2c76dc3fa604396b3021ed81bb623d6",
+      "jobId": "job-b5bed2bd06cb40f88de80f8afcca7d3c",
+      "attemptId": "attempt-5a4d0c02c979400d8a527a2d9fc3b833",
+      "capabilityId": "image.edit.flux2-klein-4b.v1",
+      "prompt": "Change only the plain background to a deep charcoal-blue studio wall. Preserve the teapot, pears, linen cloth, walnut table, framing and soft lighting.",
+      "requestedSeed": "95",
+      "sourceAssetId": "source-0d94ed85623847929a91e316d19e1dc7",
+      "inputAssets": [
+        {
+          "asset_id": "source-0d94ed85623847929a91e316d19e1dc7",
+          "content_hash": "52bb1f21ccfed4c94f24b35c206bd7b4c169a93c9f1d0ca804ea94e17a0ba56a",
+          "data_type": "image_rgb",
+          "location": {
+            "kind": "managed",
+            "storage_id": "library",
+            "relative_path": "inputs/source-0d94ed85623847929a91e316d19e1dc7.png"
+          }
+        }
+      ],
+      "output": {
+        "asset_id": "asset-8b061e32befa4eda8c9db5f7f2363614",
+        "content_hash": "f2bd94cd2571ed20e70dcca87a930d73e95146aebdfed9ccb045d1ac1b0c4d95",
+        "data_type": "image_rgb",
+        "location": {
+          "kind": "managed",
+          "storage_id": "library",
+          "relative_path": "assets/asset-0a0486242560478fb6fc160ed0bbce5c.png"
+        }
+      },
+      "exportedSha256": "f2bd94cd2571ed20e70dcca87a930d73e95146aebdfed9ccb045d1ac1b0c4d95",
+      "outputPath": "target/planned-models-acceptance-20261031/data/assets/asset-0a0486242560478fb6fc160ed0bbce5c.png",
+      "networkDenied": true
+    }
+  ]
+}

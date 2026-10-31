@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "status": "passed",
+  "cases": [
+    {
+      "caseId": "P04",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Cancellation was accepted after loading; the original attempt committed no output, cleanup completed, and explicit retry used a new token and succeeded.",
+      "jobId": "job-9c2e1b0523dd4dd4ad1dce7d808c35c6",
+      "observedCancellationStage": "loading",
+      "attempts": [
+        {
+          "attemptId": "attempt-1b789190c5104425a00e8df1568a39a9",
+          "token": "token-981f75fb44604daba2f0d21dbd654388",
+          "state": "cancelled",
+          "assetCount": 0,
+          "outputRoles": [],
+          "error": null
+        },
+        {
+          "attemptId": "attempt-1e4175d842034b4ea5a299c7e9bca6df",
+          "token": "token-40b3e76df12d4545b3912ee2954b1da8",
+          "state": "succeeded",
+          "assetCount": 1,
+          "outputRoles": [
+            null
+          ],
+          "error": null
+        }
+      ],
+      "retryExport": "verification/planned-models-20261031/klein-retry-after-loading-cancel.png",
+      "retryExportSha256": "59943a9e4330625efaea9962b36743f990cdc5c4670164ad6e875bf19cb3ed41",
+      "log": "logs/klein-cancel-loading.log"
+    },
+    {
+      "caseId": "P04",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Cancellation was accepted after loading; the original attempt committed no output, cleanup completed, and explicit retry used a new token and succeeded.",
+      "jobId": "job-647e5530b2e04c4fb6d8b84bb83b83d7",
+      "observedCancellationStage": "loading",
+      "attempts": [
+        {
+          "attemptId": "attempt-74ab44b6b6dd4151b63a59d5976ad2f1",
+          "token": "token-65d07265f6164543b1589764598495d1",
+          "state": "cancelled",
+          "assetCount": 0,
+          "outputRoles": [],
+          "error": null
+        },
+        {
+          "attemptId": "attempt-4fab087440db4af3b9a83f5dd6a1dc3f",
+          "token": "token-f1b900427cb448fb98151a0e36052b77",
+          "state": "succeeded",
+          "assetCount": 1,
+          "outputRoles": [
+            null
+          ],
+          "error": null
+        }
+      ],
+      "retryExport": "verification/planned-models-20261031/klein-edit-retry-after-loading-cancel.png",
+      "retryExportSha256": "97b842bef93eecd14de0c07276d1f1bb3e47c3534f3b0cebcbaeb7afaed020fb",
+      "log": "logs/klein-edit-cancel-loading.log"
+    },
+    {
+      "caseId": "P05",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Cancellation was accepted after sampling step 1; the original attempt committed no output, cleanup completed, and explicit retry used a new token and succeeded.",
+      "jobId": "job-f4318bb917fd443c986eb0ef05caec67",
+      "observedCancellationStage": "sampling step 1",
+      "attempts": [
+        {
+          "attemptId": "attempt-9db18a641d5f4ecc8dcc1313a1fd717e",
+          "token": "token-afab4d13f1cb4470b5c84f6b78b5bab5",
+          "state": "cancelled",
+          "assetCount": 0,
+          "outputRoles": [],
+          "error": null
+        },
+        {
+          "attemptId": "attempt-1b6fd1c66d074622be916c369837a661",
+          "token": "token-a9ee39e5d4a840f683fc42720ba70048",
+          "state": "succeeded",
+          "assetCount": 1,
+          "outputRoles": [
+            null
+          ],
+          "error": null
+        }
+      ],
+      "retryExport": "verification/planned-models-20261031/klein-retry-after-text-sampling-cancel.png",
+      "retryExportSha256": "174a25ee539ada7f01b109eab07f85c6469e5d19af2557889cea273b301e9117",
+      "log": "logs/klein-cancel-text-sampling.log"
+    },
+    {
+      "caseId": "P05",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Cancellation was accepted after sampling step 1; the original attempt committed no output, cleanup completed, and explicit retry used a new token and succeeded.",
+      "jobId": "job-03a6b9aeec05458b9a9baf6b211967f5",
+      "observedCancellationStage": "sampling step 1",
+      "attempts": [
+        {
+          "attemptId": "attempt-c03c977409ed4912abc55fcb6b875618",
+          "token": "token-a50d50fea9fa4acf8ac30e3f4f0f03c2",
+          "state": "cancelled",
+          "assetCount": 0,
+          "outputRoles": [],
+          "error": null
+        },
+        {
+          "attemptId": "attempt-ae3aded3589442e6b7d3a09f9e198554",
+          "token": "token-babe5b7a4b294ae6bdb5568c5d92854a",
+          "state": "succeeded",
+          "assetCount": 1,
+          "outputRoles": [
+            null
+          ],
+          "error": null
+        }
+      ],
+      "retryExport": "verification/planned-models-20261031/klein-retry-after-edit-sampling-cancel.png",
+      "retryExportSha256": "3a3693448e353f8263fada6eb2fc69f2f34d7c486f3992a080cfd6ac090c564c",
+      "log": "logs/klein-cancel-edit-sampling.log"
+    }
+  ]
+}

@@ -1,0 +1,579 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "phase": "Klein",
+  "modelId": "flux2-klein-4b-distilled",
+  "gitCommit": "9bf1d938340027a0b6b2f64595f2bf6630e60bf7",
+  "requiredCaseCount": 50,
+  "summary": {
+    "passed": 41,
+    "failed": 0,
+    "not_run": 0,
+    "blocked": 9
+  },
+  "gateStatus": "incomplete",
+  "reason": "Klein backend, installation, real generation/edit, lifecycle, quality and safety gates pass. Required resumable-install completion and native UI evidence remain blocked by the upstream proxy timeout and locked macOS session, respectively.",
+  "nextAllowedAction": "Unlock macOS and restore the configured proxy, then finish I07 and U01/U02/U03/U05/U06. Do not start BiRefNet before those required cases pass.",
+  "cases": [
+    {
+      "caseId": "I01/I02",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "Pinned official Klein components, licenses, runtime closure and hashes are complete.",
+      "evidencePaths": [
+        "I01-I02-sources.json"
+      ]
+    },
+    {
+      "caseId": "I05",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "Fresh-cache official installation, runtime probe and activation passed.",
+      "evidencePaths": [
+        "I05-cold-install.json",
+        "klein-install.json"
+      ]
+    },
+    {
+      "caseId": "I06",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "Offline cache installation passed in a second isolated root with matching identities.",
+      "evidencePaths": [
+        "I06-offline-install.json",
+        "logs/klein-offline-install.log"
+      ]
+    },
+    {
+      "caseId": "I07",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "device_probe",
+      "reason": "Real range resume is byte-correct, but the upstream proxy now times out before completion.",
+      "evidencePaths": [
+        "I07-resume.json"
+      ]
+    },
+    {
+      "caseId": "I08",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Corrupt, wrong-identity, partial and archive escape cases fail closed; actual corrupt segments trigger explicit redownload state reset.",
+      "evidencePaths": [
+        "I08-I09-recovery.json"
+      ]
+    },
+    {
+      "caseId": "I09",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Per-install locking, target binding, independent state and single-execution gates are covered by current tests.",
+      "evidencePaths": [
+        "I08-I09-recovery.json"
+      ]
+    },
+    {
+      "caseId": "P01",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Formal tasks bind recipe, source, seed and one primary output with matching hashes.",
+      "evidencePaths": [
+        "P01-integrity.json"
+      ]
+    },
+    {
+      "caseId": "P02",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Both capabilities completed in the whole host/worker tree under deny-network.",
+      "evidencePaths": [
+        "P02-B10-offline.json"
+      ]
+    },
+    {
+      "caseId": "P03",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Three sequential tasks used one StudioService and yielded independent successful attempts/assets.",
+      "evidencePaths": [
+        "P03-P08-batch.json"
+      ]
+    },
+    {
+      "caseId": "P04",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Loading-stage cancellation left no asset and explicit retry succeeded with a new token.",
+      "evidencePaths": [
+        "P04-P05-cancellation.json"
+      ]
+    },
+    {
+      "caseId": "P05",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Sampling-step cancellation left no asset and explicit retry succeeded with a new token.",
+      "evidencePaths": [
+        "P04-P05-cancellation.json"
+      ]
+    },
+    {
+      "caseId": "P07",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Host SIGKILL after sampling released the lease and process tree; no asset was promoted and retry succeeded.",
+      "evidencePaths": [
+        "P07-klein-host-crash.json"
+      ]
+    },
+    {
+      "caseId": "P08",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Duplicate keys return one Turn; busy distinct submission creates no Turn and preserves the next draft.",
+      "evidencePaths": [
+        "P03-P08-batch.json"
+      ]
+    },
+    {
+      "caseId": "P09",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Invalid capability/source/seed/dimension cases fail before sampling without substitution.",
+      "evidencePaths": [
+        "P09-validation.json",
+        "B03-P09-source-rejections.json"
+      ]
+    },
+    {
+      "caseId": "P10",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Strict v2 identity, recipe, role, frame, stale-token and timeout fixtures pass; v1 remains separate.",
+      "evidencePaths": [
+        "P09-validation.json"
+      ]
+    },
+    {
+      "caseId": "S01",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Imported and selected sources are managed immutable identities; external originals do not control execution.",
+      "evidencePaths": [
+        "S01-S07-source-integrity.json"
+      ]
+    },
+    {
+      "caseId": "S02",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Bounded decode gates reject unsupported color types, formats, sizes, links and special files.",
+      "evidencePaths": [
+        "B03-P09-source-rejections.json",
+        "I08-I09-recovery.json"
+      ]
+    },
+    {
+      "caseId": "S03",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "v1-v4 migration fixtures preserve records and roll back failures; current schema v5 is recoverable.",
+      "evidencePaths": [
+        "installation-identity.json"
+      ]
+    },
+    {
+      "caseId": "S07",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Retry reuses the frozen source hash and plan; unavailable originals do not substitute current draft inputs.",
+      "evidencePaths": [
+        "S01-S07-source-integrity.json"
+      ]
+    },
+    {
+      "caseId": "I01/I02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "Pinned official Klein components, licenses, runtime closure and hashes are complete.",
+      "evidencePaths": [
+        "I01-I02-sources.json"
+      ]
+    },
+    {
+      "caseId": "I05",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "Fresh-cache official installation, runtime probe and activation passed.",
+      "evidencePaths": [
+        "I05-cold-install.json",
+        "klein-install.json"
+      ]
+    },
+    {
+      "caseId": "I06",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "Offline cache installation passed in a second isolated root with matching identities.",
+      "evidencePaths": [
+        "I06-offline-install.json",
+        "logs/klein-offline-install.log"
+      ]
+    },
+    {
+      "caseId": "I07",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "device_probe",
+      "reason": "Real range resume is byte-correct, but the upstream proxy now times out before completion.",
+      "evidencePaths": [
+        "I07-resume.json"
+      ]
+    },
+    {
+      "caseId": "I08",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Corrupt, wrong-identity, partial and archive escape cases fail closed; actual corrupt segments trigger explicit redownload state reset.",
+      "evidencePaths": [
+        "I08-I09-recovery.json"
+      ]
+    },
+    {
+      "caseId": "I09",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Per-install locking, target binding, independent state and single-execution gates are covered by current tests.",
+      "evidencePaths": [
+        "I08-I09-recovery.json"
+      ]
+    },
+    {
+      "caseId": "P01",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Formal tasks bind recipe, source, seed and one primary output with matching hashes.",
+      "evidencePaths": [
+        "P01-integrity.json"
+      ]
+    },
+    {
+      "caseId": "P02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Both capabilities completed in the whole host/worker tree under deny-network.",
+      "evidencePaths": [
+        "P02-B10-offline.json"
+      ]
+    },
+    {
+      "caseId": "P03",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Three sequential tasks used one StudioService and yielded independent successful attempts/assets.",
+      "evidencePaths": [
+        "P03-P08-batch.json"
+      ]
+    },
+    {
+      "caseId": "P04",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Loading-stage cancellation left no asset and explicit retry succeeded with a new token.",
+      "evidencePaths": [
+        "P04-P05-cancellation.json"
+      ]
+    },
+    {
+      "caseId": "P05",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Sampling-step cancellation left no asset and explicit retry succeeded with a new token.",
+      "evidencePaths": [
+        "P04-P05-cancellation.json"
+      ]
+    },
+    {
+      "caseId": "P07",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Host SIGKILL after sampling released the lease and process tree; no asset was promoted and retry succeeded.",
+      "evidencePaths": [
+        "P07-klein-edit-host-crash.json"
+      ]
+    },
+    {
+      "caseId": "P08",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Duplicate keys return one Turn; busy distinct submission creates no Turn and preserves the next draft.",
+      "evidencePaths": [
+        "P03-P08-batch.json"
+      ]
+    },
+    {
+      "caseId": "P09",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Invalid capability/source/seed/dimension cases fail before sampling without substitution.",
+      "evidencePaths": [
+        "P09-validation.json",
+        "B03-P09-source-rejections.json"
+      ]
+    },
+    {
+      "caseId": "P10",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Strict v2 identity, recipe, role, frame, stale-token and timeout fixtures pass; v1 remains separate.",
+      "evidencePaths": [
+        "P09-validation.json"
+      ]
+    },
+    {
+      "caseId": "S01",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Imported and selected sources are managed immutable identities; external originals do not control execution.",
+      "evidencePaths": [
+        "S01-S07-source-integrity.json"
+      ]
+    },
+    {
+      "caseId": "S02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Bounded decode gates reject unsupported color types, formats, sizes, links and special files.",
+      "evidencePaths": [
+        "B03-P09-source-rejections.json",
+        "I08-I09-recovery.json"
+      ]
+    },
+    {
+      "caseId": "S03",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "v1-v4 migration fixtures preserve records and roll back failures; current schema v5 is recoverable.",
+      "evidencePaths": [
+        "installation-identity.json"
+      ]
+    },
+    {
+      "caseId": "S07",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Retry reuses the frozen source hash and plan; unavailable originals do not substitute current draft inputs.",
+      "evidencePaths": [
+        "S01-S07-source-integrity.json"
+      ]
+    },
+    {
+      "caseId": "U01",
+      "configurationKey": "K-T/K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The macOS session is locked; native model-page and capability-entry evidence cannot be captured.",
+      "evidencePaths": [
+        "U-native-blocked.json"
+      ]
+    },
+    {
+      "caseId": "U02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The macOS session is locked; native file dialog, existing-work selection and source controls are unavailable.",
+      "evidencePaths": [
+        "U-native-blocked.json"
+      ]
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The macOS session is locked; native live editing, stop and conversation switching are unavailable.",
+      "evidencePaths": [
+        "U-native-blocked.json"
+      ]
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The macOS session is locked; native live editing, stop and conversation switching are unavailable.",
+      "evidencePaths": [
+        "U-native-blocked.json"
+      ]
+    },
+    {
+      "caseId": "U05",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The macOS session is locked; restart and system save-panel export are unavailable.",
+      "evidencePaths": [
+        "U-native-blocked.json"
+      ]
+    },
+    {
+      "caseId": "U05",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The macOS session is locked; restart, source recovery and system save-panel export are unavailable.",
+      "evidencePaths": [
+        "U-native-blocked.json"
+      ]
+    },
+    {
+      "caseId": "U06",
+      "configurationKey": "K-T/K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The macOS session is locked; 1280×800, 960×640, keyboard and IME checks are unavailable.",
+      "evidencePaths": [
+        "U-native-blocked.json"
+      ]
+    },
+    {
+      "caseId": "B01",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Chinese and English prompts plus seeds 42 and 73 produced complete fixed-recipe baselines.",
+      "evidencePaths": [
+        "klein-quality-review.json"
+      ]
+    },
+    {
+      "caseId": "B04",
+      "configurationKey": "K-T/K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Installed tokenizer measured exactly 512 tokens and rejected 513 with the original prompt retained; boundary generation succeeded.",
+      "evidencePaths": [
+        "B04-result.json"
+      ]
+    },
+    {
+      "caseId": "B10",
+      "configurationKey": "K-T/K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Text and edit tasks completed with network denied to the launched process tree.",
+      "evidencePaths": [
+        "P02-B10-offline.json"
+      ]
+    },
+    {
+      "caseId": "B02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Real edits changed object color, background and atmosphere while preserving the scene and required subjects.",
+      "evidencePaths": [
+        "klein-quality-review.json"
+      ]
+    },
+    {
+      "caseId": "B03",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Large landscape and odd portrait references match upstream resize/crop behavior; directional orientation and source immutability pass.",
+      "evidencePaths": [
+        "B03-reference-landscape.json",
+        "B03-reference-portrait.json",
+        "klein-quality-review.json"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "B03/P09",
+  "configurationKey": "K-E",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution_and_device_probe",
+  "reason": "Installed upstream reference processing was recorded for large landscape and odd portrait sources; product preflight rejected sub-16 edges, effective transparency, and a true 4-component CMYK JPEG before Job creation.",
+  "referenceReports": [
+    "B03-reference-landscape.json",
+    "B03-reference-portrait.json"
+  ],
+  "contactSheet": "reference-preprocessing-contact-sheet.jpg",
+  "negativeTurns": {
+    "small": {
+      "id": "turn-102d0d0a48c14607b63f689c9d21ef77",
+      "status": "rejected",
+      "error": "invalid value: Klein edit source edges must be at least 16 pixels",
+      "job_id": null,
+      "source_asset_id": "source-bb97db6f4e3a477faf0389caf24ba88e"
+    },
+    "transparent": {
+      "id": "turn-d47a152378f44d6799a5b85a2e637a2e",
+      "status": "rejected",
+      "error": "invalid value: Klein edit does not accept effective transparency",
+      "job_id": null,
+      "source_asset_id": "source-31fdf8d6f5a44f5b8bba2cdc5ac5224a"
+    }
+  },
+  "checks": {
+    "smallEdgeRejectedBeforeJob": true,
+    "transparentRejectedBeforeJob": true,
+    "cmykRejectedBeforeTurn": true
+  },
+  "cmykProductEvidence": {
+    "fixture": "fixtures/klein-cmyk-source.jpg",
+    "turnCountBefore": 31,
+    "turnCountAfter": 31,
+    "error": "无效操作：JPEG 源图只接受 3 分量 RGB；不支持灰度或 CMYK",
+    "log": "logs/klein-cmyk-source-rejected-fixed.log"
+  },
+  "excludedDiagnostic": {
+    "turnId": "turn-1fa2f984e8974f96b567200e2b8583f5",
+    "reason": "Pre-fix decoder incorrectly normalized a 4-component CMYK JPEG to RGB; retained only as diagnostic and excluded from acceptance."
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "status": "blocked",
+  "reason": "Native UI matrix is blocked by the locked macOS session; backend and offline startup evidence are complete.",
+  "nativeBinary": "target/dev/Image Studio.app",
+  "defaultDataPath": "/Users/gejiawei/Library/Application Support/ImageStudio",
+  "defaultCachePath": "/Users/gejiawei/Library/Caches/ImageStudio",
+  "kleinDefaultPhase": "ready",
+  "cases": [
+    {
+      "caseId": "U01",
+      "configurationKey": "K-T/K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The current macOS session is locked. Computer Use cannot see or operate Image Studio, and user input is required to unlock the machine before native UI, dialog, IME, and screenshot evidence can be collected.",
+      "scope": "模型页状态与两个 Klein 能力入口",
+      "evidencePaths": []
+    },
+    {
+      "caseId": "U02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The current macOS session is locked. Computer Use cannot see or operate Image Studio, and user input is required to unlock the machine before native UI, dialog, IME, and screenshot evidence can be collected.",
+      "scope": "原生文件选择、已有作品源图、缺输入与换源图",
+      "evidencePaths": []
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The current macOS session is locked. Computer Use cannot see or operate Image Studio, and user input is required to unlock the machine before native UI, dialog, IME, and screenshot evidence can be collected.",
+      "scope": "原生命令输入、发送、执行中编辑下一条与切会话",
+      "evidencePaths": []
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The current macOS session is locked. Computer Use cannot see or operate Image Studio, and user input is required to unlock the machine before native UI, dialog, IME, and screenshot evidence can be collected.",
+      "scope": "原生命令输入、发送、执行中编辑下一条与切会话",
+      "evidencePaths": []
+    },
+    {
+      "caseId": "U05",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The current macOS session is locked. Computer Use cannot see or operate Image Studio, and user input is required to unlock the machine before native UI, dialog, IME, and screenshot evidence can be collected.",
+      "scope": "正常退出重开、记录恢复与系统保存面板导出",
+      "evidencePaths": []
+    },
+    {
+      "caseId": "U05",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The current macOS session is locked. Computer Use cannot see or operate Image Studio, and user input is required to unlock the machine before native UI, dialog, IME, and screenshot evidence can be collected.",
+      "scope": "正常退出重开、源图/任务恢复与系统保存面板导出",
+      "evidencePaths": []
+    },
+    {
+      "caseId": "U06",
+      "configurationKey": "K-T/K-E",
+      "required": true,
+      "status": "blocked",
+      "evidenceKind": "native_daily",
+      "reason": "The current macOS session is locked. Computer Use cannot see or operate Image Studio, and user input is required to unlock the machine before native UI, dialog, IME, and screenshot evidence can be collected.",
+      "scope": "1280×800、960×640、键盘、IME 与错误恢复",
+      "evidencePaths": []
+    },
+    {
+      "caseId": "U06-startup-spine",
+      "configurationKey": "K-T/K-E",
+      "required": false,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "The current Tauri binary initialized its native window and embedded frontend under deny-network.",
+      "evidencePaths": [
+        "native-offline-startup.json"
+      ]
+    }
+  ]
+}

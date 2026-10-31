@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "I08/I09",
+  "configurationKey": "K-T/K-E",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "fixture",
+  "reason": "Corrupt or wrong-identity partials never activate; full-hash failure clears damaged segment state for explicit redownload; insufficient separate/shared-volume space fails; unsafe links fail; install and execution locks keep model states independent.",
+  "actualCorruptReset": {
+    "log": "logs/klein-install-resume-corruption-reset.log",
+    "result": "损坏分段已清除，请重试下载"
+  },
+  "fixtureTests": [
+    "wrong_digest_never_becomes_a_completed_cache_file",
+    "range_resume_requires_identity_and_preserves_exact_bytes",
+    "tar_links_cannot_escape_the_private_runtime",
+    "installation_space_accounts_for_separate_and_shared_volumes",
+    "installation_manager_keeps_model_states_and_actions_independent",
+    "existing_lease_blocks_launch_and_does_not_claim_resource_release"
+  ],
+  "qualityGateLog": "logs/quality-gates.log"
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "I07",
+  "configurationKey": "K-T/K-E",
+  "required": true,
+  "status": "blocked",
+  "evidenceKind": "device_probe",
+  "reason": "A real download was interrupted and explicit retries resumed the same cache. Two complete 620,901,920-byte segments and a 471,499,485-byte partial segment match the trusted object byte-for-byte. The remaining transfer is blocked because the configured upstream proxy now times out before any HTTP bytes.",
+  "installId": "flux2-klein-4b-distilled",
+  "resumeRoot": "target/planned-models-resume-20261031",
+  "firstInterruptedBytes": 235350607,
+  "cacheBytesAfterFirstStop": 301989888,
+  "segments": [
+    {
+      "index": 0,
+      "bytes": 620901920,
+      "matchesTrustedPrefix": true,
+      "sha256Prefix": "ec946366ec8552685882817ad019516192443e8c0d132ac0ccd95fa7566d1666",
+      "metadataPresent": true
+    },
+    {
+      "index": 1,
+      "bytes": 620901920,
+      "matchesTrustedPrefix": true,
+      "sha256Prefix": "db51e9ace79a99352c79f0cbdbd03fac0cb1b7bee5c7a4329896009ef8b902d9",
+      "metadataPresent": true
+    },
+    {
+      "index": 2,
+      "bytes": 471499485,
+      "matchesTrustedPrefix": true,
+      "sha256Prefix": "2d2f9d4ab264c5a6e00fcd34d759621d02fe23ea16e417180bdffce33606dfe0",
+      "metadataPresent": true
+    }
+  ],
+  "rangeIdentityTest": "range_resume_requires_identity_and_preserves_exact_bytes",
+  "sizeMismatchRedownloadTest": "full_response_replaces_a_partial_without_appending",
+  "corruptStateResetTest": "corrupt_segment_state_is_cleared_for_an_explicit_redownload",
+  "lastNetworkControl": {
+    "command": "curl --connect-timeout 5 --max-time 12 -I --proxy http://127.0.0.1:7897 https://huggingface.co",
+    "exitCode": 28
+  },
+  "logs": [
+    "logs/klein-install-resume-first.log",
+    "logs/klein-install-resume-second.log",
+    "logs/klein-install-serial-fresh-part1.log",
+    "logs/klein-install-serial-fresh-part2.log",
+    "logs/klein-install-serial-fresh-part4.log"
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "reviewer": "Codex visual review under the user-authorized acceptance run",
+  "status": "passed",
+  "meetsQualityBar": true,
+  "contactSheet": "klein-real-quality-contact-sheet.jpg",
+  "continuousContactSheet": "continuous-quality-contact-sheet.jpg",
+  "summary": "All required Klein text and edit quality cases are complete, coherent, decodable images with the requested subjects and edits. Directional references retain orientation; no black, blank, corrupted, or whole-subject-loss outputs were found.",
+  "cases": {
+    "B01-zh-seed42": {
+      "path": "verification/planned-models-20261031/klein-text-chinese-seed42.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1499772,
+      "sha256": "0dabb3744f8c1ded46d1c6c4e5aaa3bda73f358289e474047da765b3d853b9f0",
+      "status": "passed",
+      "observations": "中文提示词生成了完整、可辨识的钴蓝玻璃方块、混凝土桌面和清晨侧光；主体、材质、阴影与构图均符合输入，无整幅损坏。"
+    },
+    "B01-en-seed42": {
+      "path": "verification/planned-models-20261031/klein-text-english.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1356718,
+      "sha256": "96759040947be28e31dab60198dd1c4f8e4fb7a9d1c9c46d59f66730270256d7",
+      "status": "passed",
+      "observations": "英文提示词生成了白色茶壶、两个梨、褶皱亚麻布和胡桃木桌面；物体关系、柔和北光和产品摄影方向清晰。"
+    },
+    "B01-seed73": {
+      "path": "verification/planned-models-20261031/klein-text-seed73.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1345033,
+      "sha256": "6176267e4208664e0b3da34b9dfd8ced26aecf1d7686db8f234cfdd75c3f968c",
+      "status": "passed",
+      "observations": "第二个固定种子生成了独立构图；蓝色玻璃方块、粗糙混凝土、晨光和空气尘点符合提示词，图像完整。"
+    },
+    "B02-color": {
+      "path": "verification/planned-models-20261031/klein-edit-cube.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1482194,
+      "sha256": "44fe697a971c62e88f66024f8f4420f0f4bacaf2d21c82b58f8970d68063171f",
+      "status": "passed",
+      "observations": "只改变玻璃方块颜色，方块形状、桌面、背景、构图和侧光保持；橙色材质响应明确。"
+    },
+    "B02-background": {
+      "path": "verification/planned-models-20261031/klein-edit-background.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1305287,
+      "sha256": "f89ea5ae6ab0b7c204304bdc52e8f2d0520209e98a3c0aeeea0526ab749afc11",
+      "status": "passed",
+      "observations": "灰色背景被替换为浅鼠尾草绿灰泥墙；茶壶、两梨、亚麻布、木桌、机位与柔光整体保持。"
+    },
+    "B02-atmosphere": {
+      "path": "verification/planned-models-20261031/klein-edit-atmosphere.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1284802,
+      "sha256": "dfe397780e8e673c13146eee0839e3851a18d9ec7551f94cb66890ade678ea57",
+      "status": "passed",
+      "observations": "湖景被改为暖金色日落，天空、湖面反光和船内暖灯同步变化；山峰轮廓、森林、湖面与船的位置保持。"
+    },
+    "B03-landscape-large": {
+      "path": "verification/planned-models-20261031/klein-edit-reference-landscape-large.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 591547,
+      "sha256": "98cd5b3d02718b6a260f7ee03c9a61e87b7230314cc50e09f13d1ec364fc90fe",
+      "status": "passed",
+      "observations": "1600×1200 参考图由上游助手中位缩放至 1182×887、裁为 1168×880；结果保持横向布局、TOP/BOTTOM 与 L/R 方向，中央方块改成橙色。"
+    },
+    "B03-portrait-odd": {
+      "path": "verification/planned-models-20261031/klein-edit-reference-portrait-odd.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 581424,
+      "sha256": "73692c80c69e8432b5f4a62d947cde555326e51521681a726c0d8a7f67f92542",
+      "status": "passed",
+      "observations": "481×641 参考图上游裁为 480×640；结果保持竖直方向、TOP/BOTTOM 与 L/R 标记，中央方块正确改色。"
+    },
+    "P04-loading-retry": {
+      "path": "verification/planned-models-20261031/klein-retry-after-loading-cancel.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1837868,
+      "sha256": "59943a9e4330625efaea9962b36743f990cdc5c4670164ad6e875bf19cb3ed41",
+      "status": "passed",
+      "observations": "加载阶段取消后重试成功；红纸灯、雪中松林和柔和日光完整。"
+    },
+    "P05-text-sampling-retry": {
+      "path": "verification/planned-models-20261031/klein-retry-after-text-sampling-cancel.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1273256,
+      "sha256": "174a25ee539ada7f01b109eab07f85c6469e5d19af2557889cea273b301e9117",
+      "status": "passed",
+      "observations": "文本任务在真实采样后取消并重试成功；黄铜钟表、深色石桌和侧光符合提示。"
+    },
+    "P05-edit-sampling-retry": {
+      "path": "verification/planned-models-20261031/klein-retry-after-edit-sampling-cancel.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1348494,
+      "sha256": "3a3693448e353f8263fada6eb2fc69f2f34d7c486f3992a080cfd6ac090c564c",
+      "status": "passed",
+      "observations": "编辑任务在真实采样后取消并重试成功；左梨变为橙色柿果，其余主体与场景保持。"
+    },
+    "P07-text-crash-retry": {
+      "path": "verification/planned-models-20261031/P07-klein-host-crash.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1176553,
+      "sha256": "6e94b111df43c38364a6dc1c083e6d8c0df8273b5c3b1b98d31063c5d1dd4108",
+      "status": "passed",
+      "observations": "宿主在实际采样后被杀，重试成功；琥珀玻璃瓶、白枝和柔影完整。"
+    },
+    "P07-edit-crash-retry": {
+      "path": "verification/planned-models-20261031/P07-klein-edit-host-crash.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1237202,
+      "sha256": "337e807a8e29153f9a57d5128c8cbf53e58a9ec07d3d1880da5121ccf800f629",
+      "status": "passed",
+      "observations": "编辑宿主在采样后被杀，重试成功；日落被改为蓝调暮色，山峰、湖面、船与灯的位置和构图保持。"
+    },
+    "offline-text": {
+      "path": "verification/planned-models-20261031/klein-offline-text.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1308227,
+      "sha256": "62cc09458db6f05d4bcdfb8afa4508ebc1b0efe698fc63b1da0047ecf6564c8f",
+      "status": "passed",
+      "observations": "禁网文本任务成功；雨窗、象牙陶瓷鸟、旧书和阴天光线完整。"
+    },
+    "offline-edit": {
+      "path": "verification/planned-models-20261031/klein-offline-edit.png",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "bytes": 1234574,
+      "sha256": "f2bd94cd2571ed20e70dcca87a930d73e95146aebdfed9ccb045d1ac1b0c4d95",
+      "status": "passed",
+      "observations": "禁网编辑成功；纯背景改为炭蓝摄影棚墙面，主体、桌面和光线保持。"
+    },
+    "excluded-diagnostic-edit": {
+      "path": "verification/planned-models-20261031/klein-edit.png",
+      "status": "excluded",
+      "reason": "该运行只把无纹理渐变改为橙色，结构合法但没有真实源图语义，不能作为 B02 质量证据。",
+      "width": 1024,
+      "height": 1024,
+      "mode": "RGB",
+      "sha256": "979ff8b8719f48ccb16b3e30a0f314407d6de7cdc554a753256088ffcfb02f9a"
+    }
+  }
+}

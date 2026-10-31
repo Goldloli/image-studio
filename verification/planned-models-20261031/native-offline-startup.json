@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "U06-offline-startup-spine",
+  "configurationKey": "K-T/K-E",
+  "required": false,
+  "status": "passed",
+  "evidenceKind": "device_probe",
+  "reason": "The current Tauri binary and embedded frontend initialized under deny-network; live native interaction is still required for the U matrix.",
+  "applicationSha256": "babaebde9a771110071cbf1c4679fd8c90d1a27d2c8d526e9547f55bbe8d9558",
+  "networkControlExit": 6,
+  "networkControlStderr": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0curl: (6) Could not resolve host: example.com\n",
+  "nativeWindowRendererInitialized": true,
+  "log": [
+    "DIAGNOSTIC_DESKTOP_READY tauri=2 requested_scale=None native_dpr=webview window=Some([960, 640]); image inference unavailable"
+  ]
+}

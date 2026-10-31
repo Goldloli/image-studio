@@ -1,0 +1,519 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "B04",
+  "configurationKey": "K-T/K-E",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution_and_device_probe",
+  "reason": "The installed Klein tokenizer measured an exact 512-token boundary; 513 tokens was rejected. The formal 512-token task succeeded, while the 513-token task failed before sampling and retained its complete instruction in the frozen request.",
+  "modelSnapshotId": "flux2-klein-4b-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+  "runtimeLockId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+  "tokenizerEvidence": "B04-tokenizer.json",
+  "promptFiles": [
+    "B04-prompt-512.txt",
+    "B04-prompt-513.txt"
+  ],
+  "checks": {
+    "actual_tokenizer_exact_512": true,
+    "actual_tokenizer_rejects_513": true,
+    "thinking_disabled": true,
+    "boundary_product_task_succeeded": true,
+    "overlimit_failed_before_sampling": true,
+    "overlimit_original_preserved": true,
+    "no_truncation": true
+  },
+  "boundaryTask": {
+    "id": "turn-0b1f2da1492a462ea6240a5d347a588b",
+    "prompt": "秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋",
+    "status": "job",
+    "job_id": "job-4e489d501abd4240bb40007808a10f50",
+    "current_attempt_id": "attempt-516af165f2474f27ba66fbfbcf6da0bd",
+    "attempt_state": "succeeded",
+    "error": null,
+    "prompt_sha256": "de761e3d66360d8634d5db8b3fc69f6de2d95f63667705c9773bfc7575577760",
+    "manifest": {
+      "schema_version": 1,
+      "evidence_kind": "execution_record",
+      "job_id": "job-4e489d501abd4240bb40007808a10f50",
+      "attempt": {
+        "attempt_id": "attempt-516af165f2474f27ba66fbfbcf6da0bd",
+        "job_id": "job-4e489d501abd4240bb40007808a10f50",
+        "execution_token": "token-570cdfb4d9e64d50892905c6b2ff48e8"
+      },
+      "request": {
+        "schema_version": 1,
+        "request_id": "request-aabbbe6a-ed11-4d6a-acbf-36f42acc9850",
+        "project_id": "default",
+        "capability": {
+          "capability_id": "image.text-to-image.flux2-klein-4b.v1",
+          "instruction_required": true,
+          "input_roles": []
+        },
+        "instruction": "秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋",
+        "inputs": [],
+        "model_variant_id": "flux2-klein-4b-distilled",
+        "requested_output": {
+          "width": 1024,
+          "height": 1024,
+          "count": 1
+        },
+        "policy": {
+          "allow_model_substitution": false,
+          "allow_resolution_change": false,
+          "allow_cpu_fallback": false
+        },
+        "parameters": {
+          "seed": 42
+        },
+        "idempotency_key": "aabbbe6a-ed11-4d6a-acbf-36f42acc9850"
+      },
+      "plan": {
+        "schema_version": 1,
+        "plan_id": "plan-aabbbe6a-ed11-4d6a-acbf-36f42acc9850",
+        "request_id": "request-aabbbe6a-ed11-4d6a-acbf-36f42acc9850",
+        "model_variant_id": "flux2-klein-4b-distilled",
+        "components": [
+          {
+            "role": "component-00-model_index.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/model_index.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "51a76cb1cf3ed37423a1128c79c22faee8e6fbe7f5aaeb737f0a258930dbaac0"
+          },
+          {
+            "role": "component-01-scheduler-scheduler_config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/scheduler/scheduler_config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "067afb012cef64553a763447d1efd93daeffcc0123ca7e25b09f8de20b90762e"
+          },
+          {
+            "role": "component-02-text_encoder-config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/text_encoder/config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "214b4c29a0d975e9fddf9994a5673f22cb2c4c5750352f9227c2c3251ebeab40"
+          },
+          {
+            "role": "component-03-text_encoder-generation_config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/text_encoder/generation_config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "4347b1aeed2b2b78bc059920a0b7f5fec71482e1344952b76d7665d638d71f13"
+          },
+          {
+            "role": "component-04-text_encoder-model-00001-of-00002.safetensors",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/text_encoder/model-00001-of-00002.safetensors",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "8c0506e7f4936fa7e26183a4fd8da4e2bdbc5990ba64ae441f965d51228f36ea"
+          },
+          {
+            "role": "component-05-text_encoder-model-00002-of-00002.safetensors",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/text_encoder/model-00002-of-00002.safetensors",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "82f2bd839378541b0557bfabaf37c7d3d637071fdcb73302dedd7cf61162ce07"
+          },
+          {
+            "role": "component-06-text_encoder-model.safetensors.index.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/text_encoder/model.safetensors.index.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "06b3d5319b6d76d1a4a2433419180016cfd54ed62d086a5e6567a809f8c82634"
+          },
+          {
+            "role": "component-07-tokenizer-added_tokens.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/added_tokens.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680"
+          },
+          {
+            "role": "component-08-tokenizer-chat_template.jinja",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/chat_template.jinja",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8"
+          },
+          {
+            "role": "component-09-tokenizer-merges.txt",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/merges.txt",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+          },
+          {
+            "role": "component-10-tokenizer-special_tokens_map.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/special_tokens_map.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd"
+          },
+          {
+            "role": "component-11-tokenizer-tokenizer.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/tokenizer.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+          },
+          {
+            "role": "component-12-tokenizer-tokenizer_config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/tokenizer_config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "443bfa629eb16387a12edbf92a76f6a6f10b2af3b53d87ba1550adfcf45f7fa0"
+          },
+          {
+            "role": "component-13-tokenizer-vocab.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/vocab.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+          },
+          {
+            "role": "component-14-transformer-config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/transformer/config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "09733c74a3da6d17dd0a0472a091a8950c7c6935889c32c16cc800ede05029de"
+          },
+          {
+            "role": "component-15-transformer-diffusion_pytorch_model.safetensors",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/transformer/diffusion_pytorch_model.safetensors",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "9f29f9edcfdae452a653ffb51a534ca4decd389952c225724ff3b94042612a6e"
+          },
+          {
+            "role": "component-16-vae-config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/vae/config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "0d6dfb69ae95a5e2ac9836284bbb63d8b38ce67b25ba2dff380752b2a10ab948"
+          },
+          {
+            "role": "component-17-vae-diffusion_pytorch_model.safetensors",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/vae/diffusion_pytorch_model.safetensors",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "ca70d2202afe6415bdbcb8793ba8cd99fd159cfe6192381504d6c4d3036e0f04"
+          }
+        ],
+        "runtime": {
+          "package_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+          "engine": "MFLUX 0.24.0 / MLX",
+          "source": {
+            "source": "image-studio:runtime-manifest:mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+            "revision": "9ed991665cfce624a4e26f436ea8769b83782e8270aafd282e91845538db995b"
+          }
+        },
+        "device": {
+          "device_id": "Apple M3 Max",
+          "precision": "native;compute_precision=None;float32=False"
+        },
+        "effective_output": {
+          "width": 1024,
+          "height": 1024,
+          "count": 1
+        },
+        "effective_parameters": {
+          "guidance": 1.0,
+          "quantization": 4,
+          "recipe": "klein4b-text-v1",
+          "recipe_version": 1,
+          "scheduler": "flow_match_euler_discrete",
+          "seed": 42,
+          "steps": 4,
+          "thinking": false,
+          "token_budget": 512,
+          "truncation": false
+        },
+        "adjustments": []
+      },
+      "input_assets": [],
+      "outputs": [
+        {
+          "asset_id": "asset-7bc3bcc48d984e169b23065577ae1769",
+          "content_hash": "51f4de68445ced1f51038a0484ba40841e249c3af966e88d8da4192c86abf9fb",
+          "data_type": "image_rgb",
+          "location": {
+            "kind": "managed",
+            "storage_id": "library",
+            "relative_path": "assets/asset-6e2a196cc2a342d9a8cf8eb191c63608.png"
+          }
+        }
+      ],
+      "final_result": {
+        "status": "succeeded"
+      }
+    },
+    "assets": [
+      {
+        "asset_id": "asset-7bc3bcc48d984e169b23065577ae1769",
+        "content_hash": "51f4de68445ced1f51038a0484ba40841e249c3af966e88d8da4192c86abf9fb",
+        "data_type": "image_rgb",
+        "location": {
+          "kind": "managed",
+          "storage_id": "library",
+          "relative_path": "assets/asset-6e2a196cc2a342d9a8cf8eb191c63608.png"
+        }
+      }
+    ]
+  },
+  "overlimitTask": {
+    "id": "turn-3c87831888b349f7933ecc2bb823d2c5",
+    "prompt": "秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋",
+    "status": "job",
+    "job_id": "job-0437d37181e94feaac6ced49b3738715",
+    "current_attempt_id": "attempt-a715f4e5cd7948ccb7c39b982a8f2b52",
+    "attempt_state": "failed",
+    "error": "提示词含模板共 513 token，超过 512 token 上限；请缩短提示词。",
+    "prompt_sha256": "c240a29f8b4a4a43aa73d21371828a1e0a7b0bdc5de96f37046520f9c602da71",
+    "manifest": {
+      "schema_version": 1,
+      "evidence_kind": "execution_record",
+      "job_id": "job-0437d37181e94feaac6ced49b3738715",
+      "attempt": {
+        "attempt_id": "attempt-a715f4e5cd7948ccb7c39b982a8f2b52",
+        "job_id": "job-0437d37181e94feaac6ced49b3738715",
+        "execution_token": "token-adfd9ea25ce040d4a2457784c4d87fb6"
+      },
+      "request": {
+        "schema_version": 1,
+        "request_id": "request-c34f260e-7360-4f2c-be9d-a65fc2f39376",
+        "project_id": "default",
+        "capability": {
+          "capability_id": "image.text-to-image.flux2-klein-4b.v1",
+          "instruction_required": true,
+          "input_roles": []
+        },
+        "instruction": "秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋秋",
+        "inputs": [],
+        "model_variant_id": "flux2-klein-4b-distilled",
+        "requested_output": {
+          "width": 1024,
+          "height": 1024,
+          "count": 1
+        },
+        "policy": {
+          "allow_model_substitution": false,
+          "allow_resolution_change": false,
+          "allow_cpu_fallback": false
+        },
+        "parameters": {
+          "seed": 42
+        },
+        "idempotency_key": "c34f260e-7360-4f2c-be9d-a65fc2f39376"
+      },
+      "plan": {
+        "schema_version": 1,
+        "plan_id": "plan-c34f260e-7360-4f2c-be9d-a65fc2f39376",
+        "request_id": "request-c34f260e-7360-4f2c-be9d-a65fc2f39376",
+        "model_variant_id": "flux2-klein-4b-distilled",
+        "components": [
+          {
+            "role": "component-00-model_index.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/model_index.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "51a76cb1cf3ed37423a1128c79c22faee8e6fbe7f5aaeb737f0a258930dbaac0"
+          },
+          {
+            "role": "component-01-scheduler-scheduler_config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/scheduler/scheduler_config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "067afb012cef64553a763447d1efd93daeffcc0123ca7e25b09f8de20b90762e"
+          },
+          {
+            "role": "component-02-text_encoder-config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/text_encoder/config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "214b4c29a0d975e9fddf9994a5673f22cb2c4c5750352f9227c2c3251ebeab40"
+          },
+          {
+            "role": "component-03-text_encoder-generation_config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/text_encoder/generation_config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "4347b1aeed2b2b78bc059920a0b7f5fec71482e1344952b76d7665d638d71f13"
+          },
+          {
+            "role": "component-04-text_encoder-model-00001-of-00002.safetensors",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/text_encoder/model-00001-of-00002.safetensors",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "8c0506e7f4936fa7e26183a4fd8da4e2bdbc5990ba64ae441f965d51228f36ea"
+          },
+          {
+            "role": "component-05-text_encoder-model-00002-of-00002.safetensors",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/text_encoder/model-00002-of-00002.safetensors",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "82f2bd839378541b0557bfabaf37c7d3d637071fdcb73302dedd7cf61162ce07"
+          },
+          {
+            "role": "component-06-text_encoder-model.safetensors.index.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/text_encoder/model.safetensors.index.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "06b3d5319b6d76d1a4a2433419180016cfd54ed62d086a5e6567a809f8c82634"
+          },
+          {
+            "role": "component-07-tokenizer-added_tokens.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/added_tokens.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680"
+          },
+          {
+            "role": "component-08-tokenizer-chat_template.jinja",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/chat_template.jinja",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8"
+          },
+          {
+            "role": "component-09-tokenizer-merges.txt",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/merges.txt",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5"
+          },
+          {
+            "role": "component-10-tokenizer-special_tokens_map.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/special_tokens_map.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd"
+          },
+          {
+            "role": "component-11-tokenizer-tokenizer.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/tokenizer.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+          },
+          {
+            "role": "component-12-tokenizer-tokenizer_config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/tokenizer_config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "443bfa629eb16387a12edbf92a76f6a6f10b2af3b53d87ba1550adfcf45f7fa0"
+          },
+          {
+            "role": "component-13-tokenizer-vocab.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/tokenizer/vocab.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+          },
+          {
+            "role": "component-14-transformer-config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/transformer/config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "09733c74a3da6d17dd0a0472a091a8950c7c6935889c32c16cc800ede05029de"
+          },
+          {
+            "role": "component-15-transformer-diffusion_pytorch_model.safetensors",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/transformer/diffusion_pytorch_model.safetensors",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "9f29f9edcfdae452a653ffb51a534ca4decd389952c225724ff3b94042612a6e"
+          },
+          {
+            "role": "component-16-vae-config.json",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/vae/config.json",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "0d6dfb69ae95a5e2ac9836284bbb63d8b38ce67b25ba2dff380752b2a10ab948"
+          },
+          {
+            "role": "component-17-vae-diffusion_pytorch_model.safetensors",
+            "source": {
+              "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B/vae/diffusion_pytorch_model.safetensors",
+              "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294"
+            },
+            "content_hash": "ca70d2202afe6415bdbcb8793ba8cd99fd159cfe6192381504d6c4d3036e0f04"
+          }
+        ],
+        "runtime": {
+          "package_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+          "engine": "MFLUX 0.24.0 / MLX",
+          "source": {
+            "source": "image-studio:runtime-manifest:mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+            "revision": "9ed991665cfce624a4e26f436ea8769b83782e8270aafd282e91845538db995b"
+          }
+        },
+        "device": {
+          "device_id": "Apple M3 Max",
+          "precision": "native;compute_precision=None;float32=False"
+        },
+        "effective_output": {
+          "width": 1024,
+          "height": 1024,
+          "count": 1
+        },
+        "effective_parameters": {
+          "guidance": 1.0,
+          "quantization": 4,
+          "recipe": "klein4b-text-v1",
+          "recipe_version": 1,
+          "scheduler": "flow_match_euler_discrete",
+          "seed": 42,
+          "steps": 4,
+          "thinking": false,
+          "token_budget": 512,
+          "truncation": false
+        },
+        "adjustments": []
+      },
+      "input_assets": [],
+      "outputs": [],
+      "final_result": {
+        "status": "failed",
+        "code": "validation_error"
+      }
+    },
+    "assets": []
+  }
+}

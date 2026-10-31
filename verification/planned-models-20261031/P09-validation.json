@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "P09",
+  "configurationKey": "K-T/K-E",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "fixture_and_product_execution",
+  "reason": "Invalid seed was rejected before a persisted draft update; transparent, sub-16, and true 4-component CMYK edit sources were rejected before Job creation; core, decoder, and protocol fixtures reject unsupported color/depth, animation, ICC, dimensions, unknown fields, and wrong capability/source combinations.",
+  "productEvidence": [
+    "B03-P09-source-rejections.json",
+    "logs/klein-invalid-seed-rejected.log"
+  ],
+  "fixtureEvidence": [
+    "jpeg_component_gate_rejects_gray_and_cmyk_before_decode",
+    "rejects_sixteen_bit_animated_icc_and_oversized_png",
+    "klein_text_and_edit_have_distinct_source_rules",
+    "unsupported_inputs_are_not_downgraded",
+    "v2_rejects_fake_tool_fields_path_escape_and_bad_roles",
+    "codec_rejects_unknown_fields_truncated_and_oversize_before_decode",
+    "model_substitution_and_count_changes_cannot_be_silent"
+  ],
+  "boundary": "Native preservation of an invalid in-browser seed remains part of the blocked U06 matrix."
+}

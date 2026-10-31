@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseIds": [
+    "I01",
+    "I02"
+  ],
+  "configurationKey": "K-T/K-E",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "source_review",
+  "reason": "The pinned Klein snapshot, all 18 content hashes, Apache-2.0 licenses, Python interpreter and wheel closure, worker wheel, and runtime lock are recorded. No duplicate transformer download is introduced by the recipe.",
+  "modelManifest": {
+    "path": "resources/planned-models/klein/model-manifest.json",
+    "sha256": "921eb72bfee51b164103bfda457d36e25757b0219269709d29851fd2134a85c5",
+    "repository": "black-forest-labs/FLUX.2-klein-4B",
+    "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "componentFiles": 18,
+    "componentBytes": 15980131745
+  },
+  "runtimeManifest": {
+    "path": "resources/planned-models/klein/runtime-manifest.json",
+    "sha256": "9ed991665cfce624a4e26f436ea8769b83782e8270aafd282e91845538db995b",
+    "id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+    "python": "3.13.12",
+    "wheels": 59
+  },
+  "requirementsLock": {
+    "path": "resources/planned-models/klein/requirements.lock",
+    "sha256": "c84acae224fff14b2a5a06a98b97889fa25ecb7317639e45526ff796b79cef0d"
+  },
+  "workerWheel": {
+    "path": "resources/planned-models/klein/studio_mflux_worker_v2-0.2.0-py3-none-any.whl",
+    "sha256": "9f4c9c8000f695d7cb4d1dab686772bf2bbdbcdf8786cae988b9e7785224765f"
+  },
+  "checks": {
+    "uniqueModelHashes": true,
+    "completeDeclaredBytes": true,
+    "officialRevisionPinned": true,
+    "licensesPresent": true,
+    "runtimeFilesHashed": true,
+    "workerWheelShaMatches": true
+  }
+}

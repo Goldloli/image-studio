@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "quality-gates",
+  "configurationKey": "K-T/K-E",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "fixture",
+  "reason": "Formatting, Clippy with warnings denied, workspace tests, examples build, frontend production build/tests, and Python worker/script tests all pass.",
+  "commands": [
+    "cargo fmt --all -- --check",
+    "cargo clippy --workspace --all-targets --locked -- -D warnings",
+    "cargo test --workspace --locked",
+    "cargo build --workspace --examples --locked",
+    "cargo build --workspace --locked --bins",
+    "npm --prefix apps/frontend run build",
+    "npm --prefix apps/frontend test",
+    "python3 -m pytest -q tools/mflux-worker/tests tools/mflux-worker-v2/tests scripts/tests"
+  ],
+  "results": {
+    "rust_workspace": "113 desktop tests passed, 4 explicit acceptance tests ignored; all other workspace suites passed",
+    "frontend": "35/35 passed",
+    "python": "32/32 passed",
+    "frontend_build": "passed with existing large-chunk warning",
+    "examples_build": "passed"
+  },
+  "log": "logs/quality-gates.log",
+  "gitCommit": "9bf1d938340027a0b6b2f64595f2bf6630e60bf7"
+}
