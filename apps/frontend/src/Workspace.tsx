@@ -167,7 +167,7 @@ function localTurn(conversationId: string, draft: Draft, submissionKey: string):
     submissionKey,
     prompt: draft.prompt,
     modelId: draft.params.modelId,
-    capabilityId: draft.params.capabilityId ?? 'image.text-to-image.z-image-turbo.v1',
+    capabilityId: draft.params.capabilityId ?? capabilityForModel(draft.params.modelId),
     sourceAssetId: draft.params.sourceAssetId ?? null,
     aspect: draft.params.aspect,
     count: draft.params.count,
