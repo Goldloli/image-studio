@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "family": "qwen",
+  "modelId": "qwen-image-2.1-mflux-v1",
+  "modelSnapshot": "qwen-image-2.1-d26bb61231c349cf6b7896fa83353113880e1ba3",
+  "runtime": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+  "quantization": 8,
+  "steps": 40,
+  "guidance": 1.0,
+  "scheduler": "linear",
+  "size": [1024, 1024],
+  "loadSeconds": 0.4309041249798611,
+  "elapsedSeconds": 1214.849614082952,
+  "tasks": [
+    {
+      "id": "T01",
+      "seed": 42,
+      "tokenCount": 26,
+      "tokenBudget": 2048,
+      "lastObservedSamplingStep": 40,
+      "elapsedSeconds": 566.6048297920497,
+      "bytes": 2083208,
+      "sha256": "f198694c0d9140d0768ba5b529128fbebf02bb8bce78944c275f6930de91aef3"
+    },
+    {
+      "id": "T02",
+      "seed": 43,
+      "tokenCount": 26,
+      "tokenBudget": 2048,
+      "lastObservedSamplingStep": 40,
+      "elapsedSeconds": 333.272253833944,
+      "bytes": 1043630,
+      "sha256": "d4f9603a9e1b64908a8b04f75570c6cc308dc6dab08b07ba50c108aae087394b"
+    },
+    {
+      "id": "T03",
+      "seed": 44,
+      "tokenCount": 38,
+      "tokenBudget": 2048,
+      "lastObservedSamplingStep": 40,
+      "elapsedSeconds": 314.5392714170739,
+      "bytes": 1022351,
+      "sha256": "42f9a2e975dc04d6db5dda79029cfbf0acf333b6e7f7de204314dcccc8d4124c"
+    }
+  ],
+  "qualityReview": {
+    "T01": "橙色小猫、窗边秋叶和细水彩质感均符合提示词，主体完整。",
+    "T02": "白色陶瓷茶壶、蓝色杯子、木桌和柔和晨光均符合提示词，器物结构正常。",
+    "T03": "标题“秋日咖啡”和副标题“周末限定”均清晰、可读，米色背景与热咖啡构图符合提示词。"
+  }
+}
