@@ -3,17 +3,17 @@
   "runId": "planned-models-20261031",
   "phase": "Klein",
   "modelId": "flux2-klein-4b-distilled",
-  "gitCommit": "9bf1d938340027a0b6b2f64595f2bf6630e60bf7",
+  "gitCommit": "d08359c",
   "requiredCaseCount": 50,
   "summary": {
-    "passed": 41,
+    "passed": 50,
     "failed": 0,
     "not_run": 0,
-    "blocked": 9
+    "blocked": 0
   },
-  "gateStatus": "incomplete",
-  "reason": "Klein backend, installation, real generation/edit, lifecycle, quality and safety gates pass. Required resumable-install completion and native UI evidence remain blocked by the upstream proxy timeout and locked macOS session, respectively.",
-  "nextAllowedAction": "Unlock macOS and restore the configured proxy, then finish I07 and U01/U02/U03/U05/U06. Do not start BiRefNet before those required cases pass.",
+  "gateStatus": "passed",
+  "reason": "All required Klein installation, generation, edit, quality, lifecycle, safety and native UI cases passed. The final resumable-install attempt used the user-authorized hf-mirror transport only after every file matched the official pinned SHA-256, then the formal installer verified, probed and activated the same snapshot with networking denied.",
+  "nextAllowedAction": "Proceed to BiRefNet only after committing and validating this Klein gate checkpoint.",
   "cases": [
     {
       "caseId": "I01/I02",
@@ -54,11 +54,13 @@
       "caseId": "I07",
       "configurationKey": "K-T",
       "required": true,
-      "status": "blocked",
+      "status": "passed",
       "evidenceKind": "device_probe",
-      "reason": "Real range resume is byte-correct, but the upstream proxy now times out before completion.",
+      "reason": "Live range resume, explicit repair/redownload, exact hashes and offline final activation passed.",
       "evidencePaths": [
-        "I07-resume.json"
+        "I07-resume.json",
+        "I07-mirror-cache.json",
+        "klein-resume-install.json"
       ]
     },
     {
@@ -267,11 +269,13 @@
       "caseId": "I07",
       "configurationKey": "K-E",
       "required": true,
-      "status": "blocked",
+      "status": "passed",
       "evidenceKind": "device_probe",
-      "reason": "Real range resume is byte-correct, but the upstream proxy now times out before completion.",
+      "reason": "Live range resume, explicit repair/redownload, exact hashes and offline final activation passed.",
       "evidencePaths": [
-        "I07-resume.json"
+        "I07-resume.json",
+        "I07-mirror-cache.json",
+        "klein-resume-install.json"
       ]
     },
     {
@@ -445,77 +449,77 @@
       "caseId": "U01",
       "configurationKey": "K-T/K-E",
       "required": true,
-      "status": "blocked",
+      "status": "passed",
       "evidenceKind": "native_daily",
-      "reason": "The macOS session is locked; native model-page and capability-entry evidence cannot be captured.",
+      "reason": "Default-root native model page shows both Klein capabilities and ready file/runtime/probe facts.",
       "evidencePaths": [
-        "U-native-blocked.json"
+        "U-native.json"
       ]
     },
     {
       "caseId": "U02",
       "configurationKey": "K-E",
       "required": true,
-      "status": "blocked",
+      "status": "passed",
       "evidenceKind": "native_daily",
-      "reason": "The macOS session is locked; native file dialog, existing-work selection and source controls are unavailable.",
+      "reason": "Native file import, existing-work selection, canceled replacement, and no-source behavior passed.",
       "evidencePaths": [
-        "U-native-blocked.json"
+        "U-native.json"
       ]
     },
     {
       "caseId": "U03",
       "configurationKey": "K-T",
       "required": true,
-      "status": "blocked",
+      "status": "passed",
       "evidenceKind": "native_daily",
-      "reason": "The macOS session is locked; native live editing, stop and conversation switching are unavailable.",
+      "reason": "Live task kept its Klein request while next draft, conversation, and model selector changed.",
       "evidencePaths": [
-        "U-native-blocked.json"
+        "U-native.json"
       ]
     },
     {
       "caseId": "U03",
       "configurationKey": "K-E",
       "required": true,
-      "status": "blocked",
+      "status": "passed",
       "evidenceKind": "native_daily",
-      "reason": "The macOS session is locked; native live editing, stop and conversation switching are unavailable.",
+      "reason": "Live task kept its Klein request while next draft, conversation, and model selector changed.",
       "evidencePaths": [
-        "U-native-blocked.json"
+        "U-native.json"
       ]
     },
     {
       "caseId": "U05",
       "configurationKey": "K-T",
       "required": true,
-      "status": "blocked",
+      "status": "passed",
       "evidenceKind": "native_daily",
-      "reason": "The macOS session is locked; restart and system save-panel export are unavailable.",
+      "reason": "Normal restart restored records/source/draft; system save panels exported byte-identical PNGs to a Chinese/space path.",
       "evidencePaths": [
-        "U-native-blocked.json"
+        "U-native.json"
       ]
     },
     {
       "caseId": "U05",
       "configurationKey": "K-E",
       "required": true,
-      "status": "blocked",
+      "status": "passed",
       "evidenceKind": "native_daily",
-      "reason": "The macOS session is locked; restart, source recovery and system save-panel export are unavailable.",
+      "reason": "Normal restart restored records/source/draft; system save panels exported byte-identical PNGs to a Chinese/space path.",
       "evidencePaths": [
-        "U-native-blocked.json"
+        "U-native.json"
       ]
     },
     {
       "caseId": "U06",
       "configurationKey": "K-T/K-E",
       "required": true,
-      "status": "blocked",
+      "status": "passed",
       "evidenceKind": "native_daily",
-      "reason": "The macOS session is locked; 1280×800, 960×640, keyboard and IME checks are unavailable.",
+      "reason": "1280×800 and 960×640, keyboard focus, SCIM confirmation, and invalid-seed recovery passed.",
       "evidencePaths": [
-        "U-native-blocked.json"
+        "U-native.json"
       ]
     },
     {

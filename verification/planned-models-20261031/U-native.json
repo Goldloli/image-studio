@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "status": "passed",
+  "applicationPath": "target/dev/Image Studio.app",
+  "applicationSha256": "babaebde9a771110071cbf1c4679fd8c90d1a27d2c8d526e9547f55bbe8d9558",
+  "defaultDataRoot": "/Users/gejiawei/Library/Application Support/ImageStudio",
+  "defaultCacheRoot": "/Users/gejiawei/Library/Caches/ImageStudio",
+  "conversation": {
+    "id": "conv-51d6fe3548314884913e320a9f3ab49c",
+    "draft_id": 7
+  },
+  "turns": [
+    {
+      "id": "turn-a0f271ea80f14fd89296dc3292f502e7",
+      "sequence": 1,
+      "prompt": "Change the atmosphere to a cool blue twilight, adding a warm lantern glow in the boat while preserving the mountain silhouette, lake reflections, boat position and composition.",
+      "model_id": "flux2-klein-4b-distilled",
+      "capability_id": "image.edit.flux2-klein-4b.v1",
+      "source_asset_id": "asset-5cc4d5658b2b41da8ea81b6d0dfcf85b",
+      "seed": "20261031",
+      "job_id": "job-1ced8d791a10425895119fc19a6d0193",
+      "attemptId": "attempt-eabc628e68b3459ca39e442c32344bc1",
+      "attemptState": "succeeded",
+      "assetId": "asset-9686d4f31ee04f1a81fecdfe0f68fc60",
+      "assetHash": "bec07b92750c327d8d19ebee1ab5f633431cfe7aa5a6405e4bad12f09fe04936",
+      "manifestHash": "bec07b92750c327d8d19ebee1ab5f633431cfe7aa5a6405e4bad12f09fe04936",
+      "inputAssets": [
+        {
+          "asset_id": "asset-5cc4d5658b2b41da8ea81b6d0dfcf85b",
+          "content_hash": "cd4ebd8c18b3c2aaa0f6455a022b3ea3a7e6ece53c47241eb6b487a806402d84",
+          "data_type": "image_rgb",
+          "location": {
+            "kind": "managed",
+            "storage_id": "library",
+            "relative_path": "assets/asset-5c6c954e47cd4cda982ecd83346de524.png"
+          }
+        }
+      ]
+    },
+    {
+      "id": "turn-a937d94daddd4d72aff48194d3c96d9d",
+      "sequence": 2,
+      "prompt": "下一条未发送草稿：保持湖面构图，改成清晨薄雾。",
+      "model_id": "flux2-klein-4b-distilled",
+      "capability_id": "image.text-to-image.flux2-klein-4b.v1",
+      "source_asset_id": null,
+      "seed": "20261031",
+      "job_id": "job-40d9f573213a4d4dbe90a4b3c80a76f4",
+      "attemptId": "attempt-f9ed3990458a49dbae0c87367015d6d3",
+      "attemptState": "succeeded",
+      "assetId": "asset-03e853b346814ba6a2816767b15c2124",
+      "assetHash": "7d9060dcb22a3d6161faa01c352fd0a83fb437c72fe12f3301a35c7de8330c5b",
+      "manifestHash": "7d9060dcb22a3d6161faa01c352fd0a83fb437c72fe12f3301a35c7de8330c5b",
+      "inputAssets": []
+    }
+  ],
+  "exports": [
+    {
+      "path": "verification/planned-models-20261031/导出 验收/Klein 原生夜景编辑.png",
+      "bytes": 1267677,
+      "sha256": "bec07b92750c327d8d19ebee1ab5f633431cfe7aa5a6405e4bad12f09fe04936"
+    },
+    {
+      "path": "verification/planned-models-20261031/导出 验收/Klein 原生文生图.png",
+      "bytes": 1154520,
+      "sha256": "7d9060dcb22a3d6161faa01c352fd0a83fb437c72fe12f3301a35c7de8330c5b"
+    }
+  ],
+  "restartDraft": {
+    "id": "conv-51d6fe3548314884913e320a9f3ab49c",
+    "prompt": "重启后应恢复的 Klein 原生草稿",
+    "version": 11
+  },
+  "imeConversation": {
+    "id": "conv-fbd44ff32cba417884abec010be8d603",
+    "prompt": "美术",
+    "version": 6,
+    "turns": 0
+  },
+  "keyboardFocusSequence": {
+    "1280x800": [
+      "复制提示词",
+      "查看"
+    ],
+    "960x640": [
+      "创作参数",
+      "导入源图",
+      "作品"
+    ]
+  },
+  "screenshotScale": "2x device pixels: 2560×1600 for logical 1280×800; 1920×1280 for logical 960×640",
+  "cases": [
+    {
+      "caseId": "U01",
+      "configurationKey": "K-T/K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Default-root native model page shows both capabilities, files, runtime and device probe ready; Klein is executable and detail view exposes text-to-image plus single-image edit.",
+      "evidencePaths": [
+        "native-klein-model-ready.png",
+        "native-klein-model-960x640.png"
+      ]
+    },
+    {
+      "caseId": "U02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Native Open panel imported the PNG; existing-work selection was then used, canceling a replacement file panel retained the selected source, and no edit turn is created when no source is selected.",
+      "evidencePaths": [
+        "native-klein-import-source.png"
+      ],
+      "importedSource": {
+        "id": "source-300554ac232244028f1c03167d345d4d",
+        "original_name": "klein-text-english.png",
+        "relative_path": "inputs/source-300554ac232244028f1c03167d345d4d.png",
+        "width": 1024,
+        "height": 1024,
+        "has_transparent_pixels": 0
+      },
+      "selectedSourceAssetId": "asset-5cc4d5658b2b41da8ea81b6d0dfcf85b"
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "K-T/K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "A Klein edit ran while the next draft was edited and the session/model controls remained usable; switching to another conversation disabled its send, returning showed the same live job, and changing the model selector did not alter the active Klein request.",
+      "evidencePaths": [
+        "native-klein-edit-running.png",
+        "native-klein-live-ability-switch.png",
+        "native-klein-edit-complete-next-draft.png"
+      ]
+    },
+    {
+      "caseId": "U05",
+      "configurationKey": "K-T/K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Normal quit/relaunch restored Klein edit and text results, source lineage, and an unsent draft. Native save panels canceled once without changing the library, then exported both outputs to a Chinese/space path with hashes identical to internal assets.",
+      "evidencePaths": [
+        "native-klein-restart-restored.png",
+        "verification/planned-models-20261031/导出 验收/Klein 原生夜景编辑.png",
+        "verification/planned-models-20261031/导出 验收/Klein 原生文生图.png"
+      ]
+    },
+    {
+      "caseId": "U06",
+      "configurationKey": "K-T/K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "1280×800 and 960×640 layouts keep navigation, model, source, parameter, send and stop controls reachable. Tab focus names are available. SCIM Chinese composition rendered marked pinyin, Space confirmed 美术 without creating a Turn; invalid seed showed an inline error and retained 美术, then recovered after setting 42.",
+      "evidencePaths": [
+        "native-klein-edit-complete-next-draft.png",
+        "native-klein-960x640-clean.png",
+        "native-klein-model-960x640.png",
+        "native-klein-ime-pinyin.png",
+        "native-klein-ime-confirmed.png",
+        "native-klein-960x640-invalid-seed.png",
+        "native-klein-960x640-error-recovered.png"
+      ]
+    }
+  ],
+  "contactSheet": "native-klein-contact-sheet.jpg"
+}
