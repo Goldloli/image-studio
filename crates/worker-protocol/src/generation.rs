@@ -300,6 +300,71 @@ impl ExecuteRequestV2 {
                     return Err(Error::Invalid("invalid upscale output size or limit"));
                 }
             }
+            ("qwen-image-2.1-mflux-v1", "image.text-to-image.qwen-image-2.1.v1")
+                if self.recipe_id == "qwen21-txt2img-q8-40-v1" =>
+            {
+                validate_text_model_shape(self, &output_roles, 40, 2048)?;
+                let expected = text_model_parameters(
+                    &self.recipe_id,
+                    self.seed.unwrap(),
+                    40,
+                    1.0,
+                    "linear",
+                    2048,
+                );
+                if self.parameters != expected {
+                    return Err(Error::Invalid("invalid Qwen 2.1 parameters"));
+                }
+            }
+            (
+                "qwen-image-2.1-turbo-mflux-v1",
+                "image.text-to-image.qwen-image-2.1-turbo.v1",
+            ) if self.recipe_id == "qwen21-turbo-txt2img-q8-8-v1" => {
+                validate_text_model_shape(self, &output_roles, 8, 2048)?;
+                let mut expected = text_model_parameters(
+                    &self.recipe_id,
+                    self.seed.unwrap(),
+                    8,
+                    1.0,
+                    "linear",
+                    2048,
+                );
+                expected.insert(
+                    "sampling_schedule".into(),
+                    serde_json::json!("qwen-turbo-model-index-v1"),
+                );
+                if self.parameters != expected {
+                    return Err(Error::Invalid("invalid Qwen Turbo parameters"));
+                }
+            }
+            ("moss-image-sft-mflux-v1", "image.text-to-image.moss-image-sft.v1")
+                if self.recipe_id == "moss-image-sft-txt2img-q8-50-v1" =>
+            {
+                validate_text_model_shape(self, &output_roles, 50, 4096)?;
+                let mut expected = text_model_parameters(
+                    &self.recipe_id,
+                    self.seed.unwrap(),
+                    50,
+                    3.0,
+                    "moss_image",
+                    4096,
+                );
+                expected.insert("thinking".into(), serde_json::json!(true));
+                expected.insert("negative_prompt".into(), serde_json::json!(""));
+                expected.insert("uncond_skip_layers".into(), serde_json::json!([22]));
+                expected.insert(
+                    "quantized_components".into(),
+                    serde_json::json!(["transformer", "text_encoder"]),
+                );
+                expected.insert(
+                    "text_encoder_precision".into(),
+                    serde_json::json!("q8"),
+                );
+                expected.insert("vae_precision".into(), serde_json::json!("bfloat16"));
+                if self.parameters != expected {
+                    return Err(Error::Invalid("invalid MOSS-Image-SFT parameters"));
+                }
+            }
             _ => return Err(Error::Invalid("unsupported v2 model recipe")),
         }
         Ok(())
@@ -1045,6 +1110,61 @@ fn safe_relative_output_path(value: &str) -> Result<(), Error> {
         return Err(Error::Invalid("unsafe relative output path"));
     }
     Ok(())
+}
+
+fn validate_text_model_shape(
+    request: &ExecuteRequestV2,
+    output_roles: &BTreeSet<&str>,
+    steps: u32,
+    token_budget: u32,
+) -> Result<(), Error> {
+    if request.instruction.trim().is_empty()
+        || request.seed.is_none()
+        || request.sampling_steps != Some(steps)
+        || !request.inputs.is_empty()
+        || request.parameters.get("token_budget") != Some(&serde_json::json!(token_budget))
+    {
+        return Err(Error::Invalid("invalid text model recipe shape"));
+    }
+    expect_outputs(request.outputs.as_slice(), output_roles, &["primary"], "image_rgb")?;
+    if request
+        .outputs
+        .iter()
+        .any(|output| (output.width, output.height) != (1024, 1024))
+    {
+        return Err(Error::Invalid("text model output must be 1024 square"));
+    }
+    Ok(())
+}
+
+fn text_model_parameters(
+    recipe_id: &str,
+    seed: u32,
+    steps: u32,
+    guidance: f64,
+    scheduler: &str,
+    token_budget: u32,
+) -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        ("seed".into(), serde_json::json!(seed)),
+        ("steps".into(), serde_json::json!(steps)),
+        ("quantization".into(), serde_json::json!(8)),
+        ("guidance".into(), serde_json::json!(guidance)),
+        ("scheduler".into(), serde_json::json!(scheduler)),
+        ("recipe".into(), serde_json::json!(recipe_id)),
+        ("recipe_version".into(), serde_json::json!(1)),
+        ("token_budget".into(), serde_json::json!(token_budget)),
+        ("truncation".into(), serde_json::json!(false)),
+        (
+            "quantized_components".into(),
+            serde_json::json!(["transformer"]),
+        ),
+        (
+            "text_encoder_precision".into(),
+            serde_json::json!("bfloat16"),
+        ),
+        ("vae_precision".into(), serde_json::json!("float32")),
+    ])
 }
 
 fn expect_outputs(

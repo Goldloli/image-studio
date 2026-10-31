@@ -244,6 +244,80 @@ fn v2_request() -> ExecuteRequestV2 {
     }
 }
 
+fn text_v2_request(
+    model_id: &str,
+    capability_id: &str,
+    recipe_id: &str,
+    snapshot_id: &str,
+    steps: u32,
+    guidance: f64,
+    scheduler: &str,
+    token_budget: u32,
+) -> ExecuteRequestV2 {
+    let mut parameters = BTreeMap::from([
+        ("seed".into(), serde_json::json!(42)),
+        ("steps".into(), serde_json::json!(steps)),
+        ("quantization".into(), serde_json::json!(8)),
+        ("guidance".into(), serde_json::json!(guidance)),
+        ("scheduler".into(), serde_json::json!(scheduler)),
+        ("recipe".into(), serde_json::json!(recipe_id)),
+        ("recipe_version".into(), serde_json::json!(1)),
+        ("token_budget".into(), serde_json::json!(token_budget)),
+        ("truncation".into(), serde_json::json!(false)),
+        (
+            "quantized_components".into(),
+            serde_json::json!(["transformer"]),
+        ),
+        (
+            "text_encoder_precision".into(),
+            serde_json::json!("bfloat16"),
+        ),
+        ("vae_precision".into(), serde_json::json!("float32")),
+    ]);
+    if recipe_id == "qwen21-turbo-txt2img-q8-8-v1" {
+        parameters.insert(
+            "sampling_schedule".into(),
+            serde_json::json!("qwen-turbo-model-index-v1"),
+        );
+    }
+    if recipe_id == "moss-image-sft-txt2img-q8-50-v1" {
+        parameters.insert("thinking".into(), serde_json::json!(true));
+        parameters.insert("negative_prompt".into(), serde_json::json!(""));
+        parameters.insert("uncond_skip_layers".into(), serde_json::json!([22]));
+        parameters.insert(
+            "quantized_components".into(),
+            serde_json::json!(["transformer", "text_encoder"]),
+        );
+        parameters.insert(
+            "text_encoder_precision".into(),
+            serde_json::json!("q8"),
+        );
+        parameters.insert("vae_precision".into(), serde_json::json!("bfloat16"));
+    }
+    ExecuteRequestV2 {
+        model_id: model_id.into(),
+        capability_id: capability_id.into(),
+        recipe_id: recipe_id.into(),
+        recipe_version: 1,
+        runtime_lock_id: "recipes-v3".into(),
+        model_snapshot_id: snapshot_id.into(),
+        instruction: "a cobalt cube".into(),
+        seed: Some(42),
+        sampling_steps: Some(steps),
+        parameters,
+        inputs: vec![],
+        outputs: vec![OutputSpec {
+            role: "primary".into(),
+            data_type: "image_rgb".into(),
+            width: 1024,
+            height: 1024,
+            max_bytes: MAX_OUTPUT_BYTES,
+        }],
+        model_path: format!("/managed/models/{snapshot_id}"),
+        output_dir: "/managed/runs/text-v3".into(),
+    }
+}
+
 fn v2_envelope(sequence: u64, request_id: &str, message: Message) -> Envelope {
     Envelope {
         family: FAMILY.into(),
@@ -354,6 +428,61 @@ fn v2_rejects_fake_tool_fields_path_escape_and_bad_roles() {
     request = v2_request();
     request.outputs.pop();
     assert!(request.validate().is_err());
+}
+
+#[test]
+fn qwen_and_moss_v2_payloads_require_exact_recipe_identity_and_parameters() {
+    let mut requests = vec![
+        text_v2_request(
+            "qwen-image-2.1-mflux-v1",
+            "image.text-to-image.qwen-image-2.1.v1",
+            "qwen21-txt2img-q8-40-v1",
+            "qwen-image-2.1-d26bb61231c349cf6b7896fa83353113880e1ba3",
+            40,
+            1.0,
+            "linear",
+            2048,
+        ),
+        text_v2_request(
+            "qwen-image-2.1-turbo-mflux-v1",
+            "image.text-to-image.qwen-image-2.1-turbo.v1",
+            "qwen21-turbo-txt2img-q8-8-v1",
+            "qwen-image-2.1-turbo-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+            8,
+            1.0,
+            "linear",
+            2048,
+        ),
+        text_v2_request(
+            "moss-image-sft-mflux-v1",
+            "image.text-to-image.moss-image-sft.v1",
+            "moss-image-sft-txt2img-q8-50-v1",
+            "moss-image-sft-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+            50,
+            3.0,
+            "moss_image",
+            4096,
+        ),
+    ];
+    for request in &requests {
+        request.validate().unwrap();
+    }
+
+    let mut wrong = requests.remove(0);
+    wrong.capability_id = "image.text-to-image.qwen-image-2.1-turbo.v1".into();
+    assert!(wrong.validate().is_err());
+    wrong = requests.remove(0);
+    wrong.parameters.insert("steps".into(), serde_json::json!(9));
+    assert!(wrong.validate().is_err());
+    wrong = requests.remove(0);
+    wrong.inputs.push(InputAssetDescriptor {
+        role: "source".into(),
+        path: "/managed/runs/text-v3/input.png".into(),
+        width: 1024,
+        height: 1024,
+        sha256: "a".repeat(64),
+    });
+    assert!(wrong.validate().is_err());
 }
 
 #[test]
