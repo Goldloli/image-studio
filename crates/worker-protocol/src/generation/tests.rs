@@ -244,6 +244,7 @@ fn v2_request() -> ExecuteRequestV2 {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn text_v2_request(
     model_id: &str,
     capability_id: &str,
