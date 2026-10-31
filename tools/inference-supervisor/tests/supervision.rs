@@ -9,8 +9,8 @@ use std::{
     time::{Duration, Instant},
 };
 use worker_protocol::generation::{
-    self as protocol, Envelope, ExecuteRequest, ExecutionContext, HostSession, Message,
-    WorkerEvent, WorkerIdentity,
+    self as protocol, Envelope, ExecuteRequest, ExecuteRequestV2, ExecutionContext, HostSession,
+    Message, OutputSpec, WorkerEvent, WorkerIdentity,
 };
 
 struct Harness {
@@ -64,6 +64,41 @@ impl Harness {
         };
         Self::from_config(config, root)
     }
+    fn v2() -> Self {
+        let root = tempfile::Builder::new()
+            .prefix("生成 v2 监督 ; ")
+            .tempdir()
+            .unwrap();
+        let capabilities = vec![
+            "image.text-to-image.flux2-klein-4b.v1".into(),
+            "image.edit.flux2-klein-4b.v1".into(),
+        ];
+        let config = SupervisorConfig {
+            python_program: python(),
+            worker_args: vec![format!(
+                "{}/tests/fixtures/worker_v2.py",
+                env!("CARGO_MANIFEST_DIR")
+            )],
+            working_dir: root.path().into(),
+            execution_lock: root.path().join("execution.lock"),
+            log_path: root.path().join("worker.log"),
+            expected_worker: WorkerIdentity {
+                build_id: "fixture-worker-v2".into(),
+                runtime_lock_id: "fixture-runtime-v2".into(),
+                model_snapshot_id: "fixture-model-v2".into(),
+            },
+            protocol_version: protocol::PROTOCOL_VERSION_V2,
+            expected_capabilities: capabilities,
+            timeouts: Timeouts {
+                handshake_ms: 1000,
+                loading_ms: 2000,
+                generation_ms: 2000,
+                cancel_grace_ms: 100,
+                cleanup_deadline_ms: 1000,
+            },
+        };
+        Self::from_config(config, root)
+    }
     fn from_config(config: SupervisorConfig, root: tempfile::TempDir) -> Self {
         let config_path = root.path().join("config.json");
         fs::write(&config_path, serde_json::to_vec(&config).unwrap()).unwrap();
@@ -88,8 +123,16 @@ impl Harness {
                 }
             }
         });
-        let session =
-            HostSession::new("session:integration", config.expected_worker.clone()).unwrap();
+        let session = if config.protocol_version == protocol::PROTOCOL_VERSION_V2 {
+            HostSession::new_v2(
+                "session:integration",
+                config.expected_worker.clone(),
+                config.expected_capabilities.clone(),
+            )
+            .unwrap()
+        } else {
+            HostSession::new("session:integration", config.expected_worker.clone()).unwrap()
+        };
         Self {
             child,
             input,
@@ -131,6 +174,63 @@ impl Harness {
                     quantization_bits: 4,
                     model_path: self.root.path().join("model").to_str().unwrap().into(),
                     output_dir: self.root.path().to_str().unwrap().into(),
+                },
+            )
+            .unwrap();
+        self.send(&execute);
+    }
+    fn start_v2(&mut self) {
+        let hello = self.session.hello("request:hello", "fixture-host").unwrap();
+        self.send(&hello);
+        assert_eq!(
+            self.session.accept(&self.next()).unwrap(),
+            WorkerEvent::HandshakeAccepted
+        );
+        fs::create_dir_all(self.root.path().join("model")).unwrap();
+        let execute = self
+            .session
+            .execute_v2(
+                "request:execute",
+                ExecutionContext {
+                    job_id: "job:integration".into(),
+                    attempt_id: "attempt:integration".into(),
+                    execution_token: "token:integration".into(),
+                },
+                ExecuteRequestV2 {
+                    model_id: "flux2-klein-4b-distilled".into(),
+                    capability_id: "image.text-to-image.flux2-klein-4b.v1".into(),
+                    recipe_id: "klein4b-text-v1".into(),
+                    recipe_version: 1,
+                    runtime_lock_id: self.config.expected_worker.runtime_lock_id.clone(),
+                    model_snapshot_id: self.config.expected_worker.model_snapshot_id.clone(),
+                    instruction: "fixture prompt".into(),
+                    seed: Some(7),
+                    sampling_steps: Some(4),
+                    parameters: std::collections::BTreeMap::from([
+                        ("seed".into(), serde_json::json!(7)),
+                        ("steps".into(), serde_json::json!(4)),
+                        ("quantization".into(), serde_json::json!(4)),
+                        ("guidance".into(), serde_json::json!(1.0)),
+                        (
+                            "scheduler".into(),
+                            serde_json::json!("flow_match_euler_discrete"),
+                        ),
+                        ("recipe".into(), serde_json::json!("klein4b-text-v1")),
+                        ("recipe_version".into(), serde_json::json!(1)),
+                        ("token_budget".into(), serde_json::json!(512)),
+                        ("thinking".into(), serde_json::json!(false)),
+                        ("truncation".into(), serde_json::json!(false)),
+                    ]),
+                    inputs: vec![],
+                    outputs: vec![OutputSpec {
+                        role: "primary".into(),
+                        data_type: "image_rgb".into(),
+                        width: 1024,
+                        height: 1024,
+                        max_bytes: 32 * 1024 * 1024,
+                    }],
+                    model_path: self.root.path().join("model").to_string_lossy().into_owned(),
+                    output_dir: self.root.path().to_string_lossy().into_owned(),
                 },
             )
             .unwrap();
@@ -206,6 +306,22 @@ fn candidate_is_delivered_after_normal_exit_and_control_sequence_is_valid() {
     );
     assert!(h.wait().success());
     gone(h.pids()["worker"].as_u64().unwrap() as u32);
+}
+
+#[test]
+fn v2_candidate_is_forwarded_after_normal_process_exit() {
+    let mut h = Harness::v2();
+    h.start_v2();
+    let terminal = h.terminal();
+    match terminal.message {
+        Message::OutputCandidateV2 { candidate } => {
+            assert_eq!(candidate.role, "primary");
+            assert_eq!(candidate.relative_path, "primary.png");
+            assert_eq!((candidate.width, candidate.height), (1024, 1024));
+        }
+        other => panic!("unexpected terminal: {other:?}"),
+    }
+    assert!(h.wait().success());
 }
 
 #[test]

@@ -11,10 +11,10 @@ use std::{
     process::{Child, Command, ExitStatus, Stdio},
     time::{Duration, Instant},
 };
+use worker_protocol::generation;
 use worker_protocol::generation::{
     self as protocol, Envelope, HostSession, Message, ProgressStage, WorkerEvent, WorkerIdentity,
 };
-use worker_protocol::generation;
 
 pub const MEMORY_LOG_BYTES: usize = 128 * 1024;
 pub const DISK_LOG_BYTES: usize = 8 * 1024 * 1024;
