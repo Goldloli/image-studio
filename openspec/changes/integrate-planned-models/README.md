@@ -13,6 +13,6 @@
 | 5 | Qwen 2.1 / 官方 Turbo | 按[既有方案](../introduce-qwen21-and-moss-image/README.md)执行 |
 | 6 | MOSS-Image-SFT | 在 Qwen 阶段通过后执行 |
 
-Klein 已在 Apple M3 Max / 128 GiB 完成安装、文生图、单图编辑、质量、生命周期、禁网、恢复和原生日常验收，结构化结果为 `50 passed / 0 failed / 0 not_run / 0 blocked`。BiRefNet epoch_244 也已完成空缓存安装、CPU 图探针、RGBA/mask、质量、取消/崩溃恢复、双导出和原生日常验收，结构化结果为 `31 passed / 0 failed / 0 not_run / 0 blocked`。两阶段证据见[阶段报告](../../../verification/planned-models-20261031/results.md)；Real-ESRGAN 的实现与真实执行仍为 **not_run**，三型号整批门禁保持关闭。
+Klein 已在 Apple M3 Max / 128 GiB 完成安装、文生图、单图编辑、质量、生命周期、禁网、恢复和原生日常验收，结构化结果为 `50 passed / 0 failed / 0 not_run / 0 blocked`。BiRefNet epoch_244 也已完成空缓存安装、CPU 图探针、RGBA/mask、质量、取消/崩溃恢复、双导出和原生日常验收，结构化结果为 `31 passed / 0 failed / 0 not_run / 0 blocked`。两阶段证据见[阶段报告](../../../verification/planned-models-20261031/results.md)；Real-ESRGAN 也已通过固定 x4plus/tile128、精确4倍、分块接缝、取消/强杀、禁网和原生日常验收，结构化结果为 `29 passed / 0 failed / 0 not_run / 0 blocked`。最终按能力逐项展开的114个适用P0与4项整批回归均通过（118/118）；认证见[整批报告](../../../verification/planned-models-20261031/batch-acceptance.json)。可归档并按条件批准的Qwen方案继续。
 
 用户明确确认后才能开始实现；OpenSpec artifacts complete / apply ready 仅表示文档齐全。本 change 获批后可按既定阶段连续推进，不要求每个步骤重复审批。Qwen/MOSS 实施还须其自身方案获批且本批认证通过。
