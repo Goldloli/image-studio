@@ -119,10 +119,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let turn = loop {
         let snapshot = service.snapshot()?;
         let stage = snapshot["execution"]["stage"].as_str().unwrap_or("");
-        if !cancellation_sent
-            && cancel_stage.as_deref() == Some(stage)
-            && snapshot["execution"]["step"].as_u64().unwrap_or_default() >= 1
-        {
+        let sampling_has_started =
+            stage != "sampling" || snapshot["execution"]["step"].as_u64().unwrap_or_default() >= 1;
+        if !cancellation_sent && cancel_stage.as_deref() == Some(stage) && sampling_has_started {
             service.conversation_cancel_turn(&turn_id)?;
             cancellation_sent = true;
             cancelled_at = Some(json!({
@@ -132,7 +131,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 "elapsedMilliseconds": started.elapsed().as_millis()
             }));
         }
-        if kill_stage.as_deref() == Some(stage) {
+        if kill_stage.as_deref() == Some(stage) && sampling_has_started {
             let kill_observed = json!({
                 "stage": stage,
                 "step": snapshot["execution"]["step"],
