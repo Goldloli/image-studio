@@ -316,7 +316,7 @@ export function SettingsPage({
               <InfoRow label="通信诊断" value={diagnosticsOpen ? '诊断面板已打开' : '尚未主动运行'}/>
             </div>
             <div className="runtime-summary">
-              {snapshot?.environment.runtimes.map(entry => <InfoRow
+              {(snapshot?.environment.runtimes ?? []).map(entry => <InfoRow
                 key={entry.installId}
                 label={entry.installId}
                 value={`${entry.phase} · 模型${entry.modelReady ? '就绪' : '未就绪'} · 环境${entry.runtimeReady ? '就绪' : '未就绪'} · 设备${entry.deviceVerified ? '已验证' : '未验证'}${entry.lastError ? ` · ${entry.lastError}` : ''}`}
