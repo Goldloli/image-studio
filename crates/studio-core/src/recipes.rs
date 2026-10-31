@@ -760,8 +760,8 @@ fn validate_text_model_request(
         "Qwen/MOSS requires one 1024x1024 image",
     )?;
     require(
-        request.parameters.keys().all(|key| key == "seed"),
-        "unsupported Qwen/MOSS request parameter",
+        request.parameters.len() == 1 && request.parameters.contains_key("seed"),
+        "Qwen/MOSS requires exactly the seed request parameter",
     )?;
     if let Some(seed) = request.parameters.get("seed") {
         require(
@@ -1381,11 +1381,15 @@ mod tests {
                 Recipe::MossImageSft,
             ),
         ] {
-            let request = request(model, capability, true, false);
-            assert_eq!(validate_recipe_request(&request, None).unwrap(), recipe);
-            let mut altered = request;
+            let valid = request(model, capability, true, false);
+            assert_eq!(validate_recipe_request(&valid, None).unwrap(), recipe);
+            let mut altered = valid;
             altered.requested_output.width = 768;
             assert!(validate_recipe_request(&altered, None).is_err());
+
+            let mut missing_seed = request(model, capability, true, false);
+            missing_seed.parameters.clear();
+            assert!(validate_recipe_request(&missing_seed, None).is_err());
         }
 
         let wrong = request(
