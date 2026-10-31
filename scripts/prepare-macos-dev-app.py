@@ -23,7 +23,12 @@ executables = bundle / "Contents/MacOS"
 resources = bundle / "Contents/Resources"
 executables.mkdir(parents=True, exist_ok=True)
 resources.mkdir(parents=True, exist_ok=True)
-for name in ["image-studio-desktop", "diagnostic-worker", "inference-supervisor"]:
+for name in [
+    "image-studio-desktop",
+    "diagnostic-worker",
+    "inference-supervisor",
+    "realesrgan-worker",
+]:
     source = root / "target/debug" / name
     if not source.is_file():
         raise SystemExit(f"Missing {source}; run cargo build --workspace --locked first.")

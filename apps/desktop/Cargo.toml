@@ -27,6 +27,7 @@ image.workspace = true
 reqwest.workspace = true
 flate2.workspace = true
 tar.workspace = true
+zip.workspace = true
 rfd = "=0.17.2"
 inference-supervisor = { path = "../../tools/inference-supervisor" }
 

@@ -93,6 +93,15 @@ pub struct BiRefNetInput {
 }
 
 #[derive(Clone, Debug)]
+pub struct RealEsrganInput {
+    pub request_id: RequestId,
+    pub project_id: ProjectId,
+    pub idempotency_key: IdempotencyKey,
+    pub plan_id: PlanId,
+    pub source: SourceAsset,
+}
+
+#[derive(Clone, Debug)]
 pub struct FrozenRecipe {
     pub request: UserRequest,
     pub plan: ExecutionPlan,
@@ -547,6 +556,76 @@ pub fn freeze_birefnet(
     Ok(FrozenRecipe { request, plan })
 }
 
+pub fn freeze_realesrgan(
+    input: RealEsrganInput,
+    env: crate::generation::PlanEnvironment,
+) -> Result<FrozenRecipe, ContractError> {
+    let source = input.source;
+    let width =
+        source.facts.width.checked_mul(4).ok_or_else(|| {
+            ContractError::InvalidValue("Real-ESRGAN output width overflow".into())
+        })?;
+    let height =
+        source.facts.height.checked_mul(4).ok_or_else(|| {
+            ContractError::InvalidValue("Real-ESRGAN output height overflow".into())
+        })?;
+    let request = UserRequest {
+        schema_version: crate::contracts::REQUEST_SCHEMA_VERSION,
+        request_id: input.request_id,
+        project_id: input.project_id,
+        capability: crate::contracts::CapabilityDescriptor {
+            capability_id: REALESRGAN_CAPABILITY.into(),
+            instruction_required: false,
+            input_roles: vec![crate::contracts::RoleRule {
+                role: SOURCE_ROLE.into(),
+                minimum: 1,
+                maximum: 1,
+            }],
+        },
+        instruction: String::new(),
+        inputs: vec![InputBinding {
+            asset: source.asset,
+            role: SOURCE_ROLE.into(),
+            order: 0,
+        }],
+        model_variant_id: ModelVariantId::new(REALESRGAN_MODEL)?,
+        requested_output: crate::contracts::ImageOutput {
+            width,
+            height,
+            count: 1,
+        },
+        policy: crate::contracts::AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: false,
+        },
+        parameters: BTreeMap::new(),
+        idempotency_key: input.idempotency_key,
+    };
+    let plan = ExecutionPlan {
+        schema_version: crate::contracts::PLAN_SCHEMA_VERSION,
+        plan_id: input.plan_id,
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: env.components,
+        runtime: env.runtime,
+        device: env.device,
+        effective_output: request.requested_output.clone(),
+        effective_parameters: BTreeMap::from([
+            ("recipe".into(), json!(Recipe::RealEsrgan.id())),
+            ("recipe_version".into(), json!(1)),
+            ("model".into(), json!("realesrgan-x4plus")),
+            ("scale".into(), json!(4)),
+            ("tile".into(), json!(128)),
+            ("threads".into(), json!("1:1:1")),
+            ("tta".into(), json!(false)),
+        ]),
+        adjustments: vec![],
+    };
+    Recipe::RealEsrgan.validate_plan(&request, &plan, Some(source.facts))?;
+    Ok(FrozenRecipe { request, plan })
+}
+
 fn validate_klein_instruction(request: &UserRequest) -> Result<(), ContractError> {
     require(
         request.capability.instruction_required
@@ -959,5 +1038,61 @@ mod tests {
             frozen.plan.effective_parameters["postprocessing"],
             "birefnet-logits-sigmoid-v1"
         );
+    }
+
+    #[test]
+    fn freeze_realesrgan_exposes_exact_four_times_output_and_tile_recipe() {
+        let environment = PlanEnvironment {
+            components: vec![ComponentSnapshot {
+                role: "weights".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+                content_hash: ContentHash::new("d".repeat(64)).unwrap(),
+            }],
+            runtime: RuntimeSnapshot {
+                package_id: "ncnn-vulkan".into(),
+                engine: "ncnn".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+            },
+            device: DeviceSnapshot {
+                device_id: "Apple M3 Max".into(),
+                precision: "vulkan-fp16".into(),
+            },
+            scheduler: "realesrgan-x4plus-t128-v1".into(),
+        };
+        let frozen = freeze_realesrgan(
+            RealEsrganInput {
+                request_id: RequestId::new("request:realesrgan").unwrap(),
+                project_id: ProjectId::new("default").unwrap(),
+                idempotency_key: IdempotencyKey::new("submit:realesrgan").unwrap(),
+                plan_id: PlanId::new("plan:realesrgan").unwrap(),
+                source: SourceAsset {
+                    asset: asset(AssetKind::ImageRgb),
+                    facts: SourceFacts {
+                        width: 640,
+                        height: 360,
+                        has_transparent_pixels: false,
+                    },
+                },
+            },
+            environment,
+        )
+        .unwrap();
+        assert_eq!(
+            (
+                frozen.request.requested_output.width,
+                frozen.request.requested_output.height
+            ),
+            (2560, 1440)
+        );
+        assert_eq!(frozen.plan.effective_parameters["scale"], 4);
+        assert_eq!(frozen.plan.effective_parameters["tile"], 128);
+        assert_eq!(frozen.plan.effective_parameters["threads"], "1:1:1");
+        assert_eq!(frozen.plan.effective_parameters["tta"], false);
     }
 }

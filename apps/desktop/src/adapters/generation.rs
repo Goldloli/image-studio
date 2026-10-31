@@ -27,8 +27,8 @@ use studio_core::{
     domain::JobId,
     generation::AttemptState,
     recipes::{
-        BIREFNET_CAPABILITY, KLEIN_EDIT_CAPABILITY, KLEIN_TEXT_CAPABILITY, Recipe,
-        validate_recipe_plan,
+        BIREFNET_CAPABILITY, KLEIN_EDIT_CAPABILITY, KLEIN_TEXT_CAPABILITY, REALESRGAN_CAPABILITY,
+        Recipe, validate_recipe_plan,
     },
 };
 use uuid::Uuid;
@@ -281,6 +281,7 @@ impl GenerationController {
         if ready.worker_module != "studio_mflux_worker"
             && ready.worker_module != "studio_mflux_worker_v2"
             && ready.worker_module != "studio_onnx_worker"
+            && ready.worker_module != "realesrgan-native-worker"
         {
             return Err("计算模块身份不符".into());
         }
@@ -306,9 +307,18 @@ impl GenerationController {
             .canonicalize()
             .map_err(error)?;
         let recipe = Recipe::from_request(&job.request).map_err(error)?;
+        let worker_program = if recipe == Recipe::RealEsrgan {
+            self.inner
+                .supervisor
+                .parent()
+                .ok_or("监督器目录缺失")?
+                .join("realesrgan-worker")
+        } else {
+            ready.worker_program.clone()
+        };
         let config = SupervisorConfig {
-            python_program: ready.python.clone(),
-            worker_args: vec!["-I".into(), "-m".into(), ready.worker_module.clone()],
+            python_program: worker_program,
+            worker_args: ready.worker_args.clone(),
             working_dir: run_dir.clone(),
             execution_lock: self.inner.paths.data.join("execution.lock"),
             log_path: run_dir.join("worker.log"),
@@ -323,6 +333,7 @@ impl GenerationController {
                     vec![KLEIN_TEXT_CAPABILITY.into(), KLEIN_EDIT_CAPABILITY.into()]
                 }
                 Recipe::BiRefNet => vec![BIREFNET_CAPABILITY.into()],
+                Recipe::RealEsrgan => vec![REALESRGAN_CAPABILITY.into()],
                 _ => vec![job.request.capability.capability_id.clone()],
             },
             timeouts: Timeouts::default(),
@@ -392,6 +403,13 @@ impl GenerationController {
                     session_id,
                     config.expected_worker.clone(),
                     vec![BIREFNET_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::RealEsrgan {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![REALESRGAN_CAPABILITY.into()],
                 )
                 .map_err(error)
             } else if recipe == Recipe::KleinText || recipe == Recipe::KleinEdit {
@@ -786,6 +804,11 @@ fn execute_request_v2(
         .transpose()?
         .into_iter()
         .collect();
+    let max_bytes = if recipe_id == "realesrgan-x4plus-t128-v1" {
+        wire::MAX_UPSCALE_OUTPUT_BYTES
+    } else {
+        32 * 1024 * 1024
+    };
     let mut outputs = vec![OutputSpec {
         role: "primary".into(),
         data_type: if recipe_id == "birefnet-general-cpu-v1" {
@@ -795,7 +818,7 @@ fn execute_request_v2(
         },
         width: job.plan.effective_output.width,
         height: job.plan.effective_output.height,
-        max_bytes: 32 * 1024 * 1024,
+        max_bytes,
     }];
     if recipe_id == "birefnet-general-cpu-v1" {
         outputs.push(OutputSpec {

@@ -74,7 +74,8 @@ impl Fixture {
         let library = Arc::new(Mutex::new(library));
         let controller = GenerationController::new(paths, library.clone(), supervisor);
         let ready = ReadyPaths {
-            python: PathBuf::from("/fixture/private/python"),
+            worker_program: PathBuf::from("/fixture/private/python"),
+            worker_args: vec!["-I".into(), "-m".into(), "studio_mflux_worker".into()],
             model_path: PathBuf::from("/fixture/verified-model"),
             worker_module: "studio_mflux_worker".into(),
             worker_build_id: "fixture-worker".into(),
@@ -296,7 +297,7 @@ fn actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host() {
             .unwrap();
         fs::write(&worker, format!("#!/usr/bin/env python3\nimport os,sys\nos.execv(sys.executable,[sys.executable,{fixture:?},'hold-gil',{pids:?}])\n")).unwrap();
         fs::set_permissions(&worker, fs::Permissions::from_mode(0o700)).unwrap();
-        f.ready.python = worker;
+        f.ready.worker_program = worker;
         f.controller = GenerationController::new(paths, f.library.clone(), native.clone());
         f.start();
         wait_for(|| pids.exists());

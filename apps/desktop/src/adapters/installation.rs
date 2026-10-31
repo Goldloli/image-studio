@@ -23,6 +23,9 @@ pub const KLEIN_WORKER_MODULE: &str = "studio_mflux_worker_v2";
 pub const BIREFNET_INSTALL_ID: &str = "birefnet-general-epoch-244";
 pub const BIREFNET_WORKER_BUILD_ID: &str = "studio-onnx-worker-0.1.0";
 pub const BIREFNET_WORKER_MODULE: &str = "studio_onnx_worker";
+pub const REALESRGAN_INSTALL_ID: &str = "realesrgan-x4plus";
+pub const REALESRGAN_WORKER_BUILD_ID: &str = "studio-realesrgan-worker-0.1.0";
+pub const REALESRGAN_WORKER_MODULE: &str = "realesrgan-native-worker";
 const MODEL_MANIFEST: &str =
     include_str!("../../../../resources/local-generation/model-manifest.json");
 const RUNTIME_MANIFEST: &str =
@@ -49,6 +52,10 @@ const BIREFNET_LOCK: &str =
 const BIREFNET_WORKER_WHEEL: &[u8] = include_bytes!(
     "../../../../resources/planned-models/birefnet/studio_onnx_worker-0.1.0-py3-none-any.whl"
 );
+const REALESRGAN_MODEL_MANIFEST: &str =
+    include_str!("../../../../resources/planned-models/realesrgan/model-manifest.json");
+const REALESRGAN_RUNTIME_MANIFEST: &str =
+    include_str!("../../../../resources/planned-models/realesrgan/runtime-manifest.json");
 const RESERVE: u64 = 4 * 1024 * 1024 * 1024;
 const SEGMENTED_DOWNLOAD_THRESHOLD: u64 = 2 * 1024 * 1024 * 1024;
 const DOWNLOAD_SEGMENTS: usize = 8;
@@ -133,6 +140,23 @@ const BIREFNET_PROFILE: InstallProfile = InstallProfile {
     probe_with_model: true,
 };
 
+const REALESRGAN_PROFILE: InstallProfile = InstallProfile {
+    install_id: REALESRGAN_INSTALL_ID,
+    model_manifest: REALESRGAN_MODEL_MANIFEST,
+    runtime_manifest: REALESRGAN_RUNTIME_MANIFEST,
+    requirements_lock: "",
+    worker_wheel: &[],
+    worker_module: REALESRGAN_WORKER_MODULE,
+    worker_build_id: REALESRGAN_WORKER_BUILD_ID,
+    engine: "Real-ESRGAN ncnn Vulkan v0.2.0",
+    scheduler: "realesrgan-x4plus-t128-v1",
+    probe_device: "gpu",
+    precision: "vulkan-fp16;tile=128",
+    ready_relative: "installations/models/realesrgan-x4plus.json",
+    installing_relative: "installations/models/realesrgan-x4plus.installing.json",
+    probe_with_model: true,
+};
+
 #[derive(Clone, Debug, Deserialize)]
 struct Artifact {
     path: String,
@@ -145,15 +169,54 @@ struct ModelManifest {
     id: String,
     revision: String,
     component_bytes: u64,
+    #[serde(default)]
     files: Vec<Artifact>,
+    #[serde(default)]
+    archives: Vec<ArchiveArtifact>,
 }
 #[derive(Clone, Debug, Deserialize)]
 struct RuntimeManifest {
+    #[serde(default)]
+    kind: String,
     id: String,
-    python: String,
-    interpreter: Artifact,
+    #[serde(default)]
+    python: Option<String>,
+    #[serde(default)]
+    interpreter: Option<Artifact>,
+    #[serde(default)]
     wheels: Vec<Artifact>,
+    #[serde(default)]
     packages: std::collections::BTreeMap<String, String>,
+    #[serde(default)]
+    platform: String,
+    #[serde(default)]
+    archives: Vec<ArchiveArtifact>,
+    #[serde(default)]
+    executable: Option<String>,
+}
+#[derive(Clone, Debug, Deserialize)]
+struct ArchiveArtifact {
+    path: String,
+    url: String,
+    bytes: u64,
+    sha256: String,
+    members: Vec<ArchiveMember>,
+}
+#[derive(Clone, Debug, Deserialize)]
+struct ArchiveMember {
+    archive_path: String,
+    path: String,
+    bytes: u64,
+    sha256: String,
+    #[serde(default)]
+    executable: bool,
+}
+#[derive(Clone, Debug)]
+struct InstalledArtifact {
+    path: String,
+    bytes: u64,
+    sha256: String,
+    executable: bool,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct InstallationSnapshot {
@@ -171,7 +234,8 @@ pub struct InstallationSnapshot {
 }
 #[derive(Clone, Debug)]
 pub struct ReadyPaths {
-    pub python: PathBuf,
+    pub worker_program: PathBuf,
+    pub worker_args: Vec<String>,
     pub model_path: PathBuf,
     pub worker_module: String,
     pub worker_build_id: String,
@@ -198,6 +262,7 @@ pub struct Installations {
     legacy: Installation,
     klein: Installation,
     birefnet: Installation,
+    realesrgan: Installation,
 }
 
 impl Installations {
@@ -205,7 +270,8 @@ impl Installations {
         Ok(Self {
             legacy: Installation::new(paths.clone())?,
             klein: Installation::new_klein(paths.clone())?,
-            birefnet: Installation::new_birefnet(paths)?,
+            birefnet: Installation::new_birefnet(paths.clone())?,
+            realesrgan: Installation::new_realesrgan(paths)?,
         })
     }
 
@@ -214,6 +280,7 @@ impl Installations {
             self.legacy.snapshot(),
             self.klein.snapshot(),
             self.birefnet.snapshot(),
+            self.realesrgan.snapshot(),
         ]
     }
 
@@ -264,6 +331,7 @@ impl Installations {
         self.legacy.cancel();
         self.klein.cancel();
         self.birefnet.cancel();
+        self.realesrgan.cancel();
     }
 
     fn for_id(&self, install_id: &str) -> Option<&Installation> {
@@ -271,6 +339,7 @@ impl Installations {
             INSTALL_ID => Some(&self.legacy),
             KLEIN_INSTALL_ID => Some(&self.klein),
             BIREFNET_INSTALL_ID => Some(&self.birefnet),
+            REALESRGAN_INSTALL_ID => Some(&self.realesrgan),
             _ => None,
         }
     }
@@ -312,6 +381,118 @@ struct InventoryEntry {
     bytes: u64,
     #[serde(default)]
     link_target: Option<String>,
+    #[serde(default)]
+    mode: u32,
+}
+
+impl ArchiveArtifact {
+    fn download(&self) -> Artifact {
+        Artifact {
+            path: self.path.clone(),
+            url: self.url.clone(),
+            bytes: self.bytes,
+            sha256: self.sha256.clone(),
+        }
+    }
+
+    fn members(&self) -> Vec<InstalledArtifact> {
+        self.members
+            .iter()
+            .map(|member| InstalledArtifact {
+                path: member.path.clone(),
+                bytes: member.bytes,
+                sha256: member.sha256.clone(),
+                executable: member.executable,
+            })
+            .collect()
+    }
+}
+
+impl ModelManifest {
+    fn downloads(&self) -> Vec<Artifact> {
+        self.files
+            .iter()
+            .cloned()
+            .chain(self.archives.iter().map(ArchiveArtifact::download))
+            .collect()
+    }
+
+    fn installed_files(&self) -> Vec<InstalledArtifact> {
+        self.files
+            .iter()
+            .map(|file| InstalledArtifact {
+                path: file.path.clone(),
+                bytes: file.bytes,
+                sha256: file.sha256.clone(),
+                executable: false,
+            })
+            .chain(self.archives.iter().flat_map(ArchiveArtifact::members))
+            .collect()
+    }
+
+    fn component_sources(&self) -> Vec<(String, InstalledArtifact)> {
+        self.files
+            .iter()
+            .filter(|file| file.path != "README.md")
+            .map(|file| {
+                (
+                    file.url.clone(),
+                    InstalledArtifact {
+                        path: file.path.clone(),
+                        bytes: file.bytes,
+                        sha256: file.sha256.clone(),
+                        executable: false,
+                    },
+                )
+            })
+            .chain(self.archives.iter().flat_map(|archive| {
+                archive
+                    .members()
+                    .into_iter()
+                    .map(|member| (archive.url.clone(), member))
+            }))
+            .collect()
+    }
+}
+
+impl RuntimeManifest {
+    fn is_native(&self) -> bool {
+        self.kind == "native"
+    }
+
+    fn downloads(&self) -> Vec<Artifact> {
+        if self.is_native() {
+            return self
+                .archives
+                .iter()
+                .map(ArchiveArtifact::download)
+                .collect();
+        }
+        self.interpreter
+            .iter()
+            .cloned()
+            .chain(self.wheels.iter().cloned())
+            .collect()
+    }
+
+    fn native_installed_files(&self) -> Vec<InstalledArtifact> {
+        self.archives
+            .iter()
+            .flat_map(ArchiveArtifact::members)
+            .collect()
+    }
+
+    fn python_version(&self) -> Result<&str, String> {
+        self.python
+            .as_deref()
+            .ok_or_else(|| "Python 运行时清单缺少解释器版本。".into())
+    }
+
+    fn interpreter(&self) -> Result<&Artifact, String> {
+        self.interpreter
+            .as_ref()
+            .ok_or_else(|| "Python 运行时清单缺少解释器归档。".into())
+    }
 }
 
 impl Installation {
@@ -327,6 +508,10 @@ impl Installation {
         Self::new_for(paths, BIREFNET_PROFILE)
     }
 
+    pub fn new_realesrgan(paths: AppPaths) -> Result<Self, String> {
+        Self::new_for(paths, REALESRGAN_PROFILE)
+    }
+
     fn new_for(mut paths: AppPaths, profile: InstallProfile) -> Result<Self, String> {
         paths.data = paths.data.canonicalize().map_err(err)?;
         paths.cache = paths.cache.canonicalize().map_err(err)?;
@@ -334,17 +519,46 @@ impl Installation {
         let model: ModelManifest = serde_json::from_str(profile.model_manifest).map_err(err)?;
         let runtime: RuntimeManifest =
             serde_json::from_str(profile.runtime_manifest).map_err(err)?;
-        for file in model
-            .files
-            .iter()
-            .chain(runtime.wheels.iter())
-            .chain(std::iter::once(&runtime.interpreter))
-        {
+        for archive in &model.archives {
+            validate_archive(archive)?;
+        }
+        for archive in &runtime.archives {
+            validate_archive(archive)?;
+        }
+        let model_downloads = model.downloads();
+        let runtime_downloads = runtime.downloads();
+        for file in model_downloads.iter().chain(&runtime_downloads) {
             validate_artifact(file)?;
         }
-        let runtime_bytes =
-            runtime.interpreter.bytes + runtime.wheels.iter().map(|x| x.bytes).sum::<u64>();
-        let model_file_bytes = model.files.iter().map(|file| file.bytes).sum::<u64>();
+        let installed_model_bytes = model
+            .installed_files()
+            .iter()
+            .filter(|file| file.path != "README.md")
+            .map(|file| file.bytes)
+            .sum::<u64>();
+        if installed_model_bytes != model.component_bytes {
+            return Err(format!(
+                "{} 模型清单组件字节与解压文件不符。",
+                profile.install_id
+            ));
+        }
+        if runtime.is_native() {
+            if runtime.platform != "macos-universal2"
+                || runtime.executable.is_none()
+                || runtime.interpreter.is_some()
+                || !runtime.wheels.is_empty()
+            {
+                return Err("原生运行时清单结构无效。".into());
+            }
+        } else {
+            runtime.python_version()?;
+            runtime.interpreter()?;
+            if !runtime.archives.is_empty() {
+                return Err("Python 运行时不得包含原生归档。".into());
+            }
+        }
+        let runtime_bytes = runtime_downloads.iter().map(|file| file.bytes).sum::<u64>();
+        let model_file_bytes = model_downloads.iter().map(|file| file.bytes).sum::<u64>();
         // Initial upper bound is available before any network or large hashing:
         // full download cache + target model copy + runtime expansion + reserve.
         // start() refines missing cache bytes and checks both volumes separately.
@@ -370,19 +584,19 @@ impl Installation {
             if ready_record_matches(&record, profile, &runtime.id, &model.id) {
                 let runtime_root = paths.data.join("runtimes").join(&runtime.id);
                 let model_root = paths.data.join("models").join(&model.id);
-                let healthy = record.probe["device"] == profile.probe_device
-                    && record.probe["identity"]["build_id"] == profile.worker_build_id
-                    && record.probe["identity"]["runtime_lock_id"] == runtime.id
-                    && record.probe["identity"]["model_snapshot_id"] == model.id
-                    && record.probe["device_name"]
-                        .as_str()
-                        .is_some_and(|s| !s.is_empty())
-                    && !record.runtime_files.is_empty()
-                    && model.files.iter().all(|f| {
-                        fs::symlink_metadata(model_root.join(&f.path))
-                            .is_ok_and(|m| m.is_file() && m.len() == f.bytes)
+                let runtime_critical_ok = if runtime.is_native() {
+                    runtime.native_installed_files().iter().all(|file| {
+                        record
+                            .runtime_files
+                            .iter()
+                            .find(|entry| entry.path == file.path)
+                            .is_some_and(|entry| {
+                                inventory_metadata_matches(&runtime_root, entry).is_ok()
+                                    && (!file.executable || entry.mode & 0o111 != 0)
+                            })
                     })
-                    && [
+                } else {
+                    [
                         "python/bin/python3.13".to_string(),
                         "python/bin/python3".to_string(),
                         "venv/bin/python3".to_string(),
@@ -404,7 +618,22 @@ impl Installation {
                             .is_some_and(|entry| {
                                 inventory_metadata_matches(&runtime_root, entry).is_ok()
                             })
-                    });
+                    })
+                };
+                let healthy = record.probe["device"] == profile.probe_device
+                    && record.probe["identity"]["build_id"] == profile.worker_build_id
+                    && record.probe["identity"]["runtime_lock_id"] == runtime.id
+                    && record.probe["identity"]["model_snapshot_id"] == model.id
+                    && record.probe["device_name"]
+                        .as_str()
+                        .is_some_and(|s| !s.is_empty())
+                    && !record.runtime_files.is_empty()
+                    && model.installed_files().iter().all(|file| {
+                        fs::symlink_metadata(model_root.join(&file.path)).is_ok_and(|metadata| {
+                            metadata.is_file() && metadata.len() == file.bytes
+                        })
+                    })
+                    && runtime_critical_ok;
                 if healthy {
                     state.phase = "ready".into();
                     state.runtime_ready = true;
@@ -537,15 +766,14 @@ impl Installation {
         let components = self
             .inner
             .model
-            .files
-            .iter()
-            .filter(|file| file.path != "README.md")
+            .component_sources()
+            .into_iter()
             .enumerate()
-            .map(|(index, file)| {
+            .map(|(index, (source, file))| {
                 Ok(ComponentSnapshot {
                     role: format!("component-{index:02}-{}", file.path.replace('/', "-")),
                     source: SourceRevision {
-                        source: file.url.clone(),
+                        source,
                         revision: self.inner.model.revision.clone(),
                     },
                     content_hash: ContentHash::new(file.sha256.clone()).map_err(err)?,
@@ -617,8 +845,8 @@ impl Installation {
         ) {
             return Err("安装身份已变化，请重新安装。".into());
         }
-        for f in &self.inner.model.files {
-            verify(&self.model_dir().join(&f.path), f.bytes, &f.sha256)?;
+        for file in self.inner.model.installed_files() {
+            verify(&self.model_dir().join(&file.path), file.bytes, &file.sha256)?;
         }
         if record.runtime_files.is_empty()
             || record.probe["device"] != self.inner.profile.probe_device
@@ -631,8 +859,34 @@ impl Installation {
                 verify(&self.runtime_dir().join(f.path), f.bytes, &f.sha256)?;
             }
         }
+        let (worker_program, worker_args) = if self.inner.runtime.is_native() {
+            let executable = self
+                .inner
+                .runtime
+                .executable
+                .as_deref()
+                .ok_or("原生运行时缺少 executable")?;
+            let program = self.runtime_dir().join(executable);
+            (
+                program.clone(),
+                vec![
+                    "--ncnn-binary".into(),
+                    program.to_str().ok_or("ncnn 路径不是 UTF-8")?.into(),
+                ],
+            )
+        } else {
+            (
+                self.runtime_dir().join("venv/bin/python3"),
+                vec![
+                    "-I".into(),
+                    "-m".into(),
+                    self.inner.profile.worker_module.into(),
+                ],
+            )
+        };
         Ok(ReadyPaths {
-            python: self.runtime_dir().join("venv/bin/python3"),
+            worker_program,
+            worker_args,
             model_path: self.model_dir(),
             worker_module: self.inner.profile.worker_module.into(),
             worker_build_id: self.inner.profile.worker_build_id.into(),
@@ -658,32 +912,25 @@ impl Installation {
         )?;
         fs2::FileExt::try_lock_exclusive(&lock)
             .map_err(|_| "另一个进程正在安装，请等待后重试。".to_string())?;
-        let all: Vec<_> = self
-            .inner
-            .model
-            .files
-            .iter()
-            .chain(self.inner.runtime.wheels.iter())
-            .chain(std::iter::once(&self.inner.runtime.interpreter))
-            .cloned()
-            .collect();
+        let mut all = self.inner.model.downloads();
+        all.extend(self.inner.runtime.downloads());
         let missing: u64 = all
             .iter()
             .filter(|a| !self.cache().join(&a.sha256).exists())
             .map(|a| a.bytes)
             .sum();
-        let target: u64 = self.inner.model.files.iter().map(|a| a.bytes).sum();
+        let target = self.inner.model.component_bytes;
         // Conservative full target copy and private expansion budget. Cache and data
         // may share a volume, in which case both peaks must fit simultaneously.
-        let runtime_budget = (self.inner.runtime.interpreter.bytes
-            + self
-                .inner
-                .runtime
-                .wheels
-                .iter()
-                .map(|a| a.bytes)
-                .sum::<u64>())
-            * 6;
+        let runtime_download_bytes = self
+            .inner
+            .runtime
+            .downloads()
+            .iter()
+            .map(|artifact| artifact.bytes)
+            .sum::<u64>();
+        let runtime_budget =
+            runtime_download_bytes * if self.inner.runtime.is_native() { 3 } else { 6 };
         let required = missing + target + runtime_budget + RESERVE;
         self.update(|s| s.required_bytes = required);
         // Check both volumes independently; never rely on cross-volume rename.
@@ -755,6 +1002,9 @@ impl Installation {
                 &self.inner.paths.data,
             )?;
         }
+        for archive in &self.inner.model.archives {
+            self.install_archive_members(archive, &self.model_dir())?;
+        }
         self.update(|s| {
             s.model_ready = true;
             s.phase = "installing_runtime".into();
@@ -794,10 +1044,17 @@ impl Installation {
         Ok(())
     }
     fn prepare_runtime(&self) -> Result<ReadyRecord, String> {
+        if self.inner.runtime.is_native() {
+            return self.prepare_native_runtime();
+        }
+        self.prepare_python_runtime()
+    }
+    fn prepare_python_runtime(&self) -> Result<ReadyRecord, String> {
+        let interpreter = self.inner.runtime.interpreter()?;
         verify(
-            &self.cache().join(&self.inner.runtime.interpreter.sha256),
-            self.inner.runtime.interpreter.bytes,
-            &self.inner.runtime.interpreter.sha256,
+            &self.cache().join(&interpreter.sha256),
+            interpreter.bytes,
+            &interpreter.sha256,
         )?;
         let runtime = self.runtime_dir();
         ensure_child_dir(&self.inner.paths.data, &runtime)?;
@@ -805,10 +1062,7 @@ impl Installation {
         // Only this fixed private identity is rebuilt; other activated versions survive.
         fs::remove_dir_all(&runtime).map_err(err)?;
         ensure_child_dir(&self.inner.paths.data, &runtime)?;
-        extract(
-            &self.cache().join(&self.inner.runtime.interpreter.sha256),
-            &runtime,
-        )?;
+        extract(&self.cache().join(&interpreter.sha256), &runtime)?;
         let base_python = runtime.join("python/bin/python3");
         self.check_cancel()?;
         self.command(
@@ -861,7 +1115,7 @@ impl Installation {
         let probe_output = self.command(&mut probe)?;
         let probe: serde_json::Value =
             serde_json::from_slice(&probe_output).map_err(|e| format!("探针输出无效：{e}"))?;
-        if probe["python"] != self.inner.runtime.python
+        if probe["python"].as_str() != Some(self.inner.runtime.python_version()?)
             || probe["identity"]["build_id"] != self.inner.profile.worker_build_id
             || probe["identity"]["runtime_lock_id"] != self.inner.runtime.id
             || probe["identity"]["model_snapshot_id"] != self.inner.model.id
@@ -889,6 +1143,206 @@ impl Installation {
             probe,
         };
         Ok(record)
+    }
+    fn prepare_native_runtime(&self) -> Result<ReadyRecord, String> {
+        for archive in &self.inner.runtime.archives {
+            verify(
+                &self.cache().join(&archive.sha256),
+                archive.bytes,
+                &archive.sha256,
+            )?;
+        }
+        let runtime = self.runtime_dir();
+        ensure_child_dir(&self.inner.paths.data, &runtime)?;
+        fs::remove_dir_all(&runtime).map_err(err)?;
+        ensure_child_dir(&self.inner.paths.data, &runtime)?;
+        for archive in &self.inner.runtime.archives {
+            self.install_archive_members(archive, &runtime)?;
+        }
+        let executable = self
+            .inner
+            .runtime
+            .executable
+            .as_deref()
+            .ok_or("原生运行时缺少 executable")?;
+        let ncnn = runtime.join(executable);
+        let executable_file = self
+            .inner
+            .runtime
+            .native_installed_files()
+            .into_iter()
+            .find(|file| file.path == executable && file.executable)
+            .ok_or("原生运行时 executable 未登记为可执行成员")?;
+        verify(&ncnn, executable_file.bytes, &executable_file.sha256)?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            if ncnn.metadata().map_err(err)?.permissions().mode() & 0o111 == 0 {
+                return Err("ncnn 可执行权限缺失。".into());
+            }
+        }
+        self.check_cancel()?;
+        self.update(|state| state.phase = "probing".into());
+        let probe_dir = self.inner.paths.data.join("work/realesrgan-install-probe");
+        if probe_dir.exists() {
+            fs::remove_dir_all(&probe_dir).map_err(err)?;
+        }
+        ensure_child_dir(&self.inner.paths.data, &probe_dir)?;
+        let input = probe_dir.join("input.png");
+        let output = probe_dir.join("output.png");
+        let mut image = image::RgbImage::new(8, 6);
+        for (x, y, pixel) in image.enumerate_pixels_mut() {
+            *pixel = image::Rgb([
+                (x * 31 % 256) as u8,
+                (y * 47 % 256) as u8,
+                ((x + y) * 19 % 256) as u8,
+            ]);
+        }
+        image.save(&input).map_err(err)?;
+        let model = self.model_dir();
+        self.command(
+            Command::new(&ncnn)
+                .args([
+                    "-i",
+                    input.to_str().ok_or("探针输入路径不是 UTF-8")?,
+                    "-o",
+                    output.to_str().ok_or("探针输出路径不是 UTF-8")?,
+                    "-s",
+                    "4",
+                    "-t",
+                    "128",
+                    "-m",
+                    model.to_str().ok_or("模型路径不是 UTF-8")?,
+                    "-n",
+                    "realesrgan-x4plus",
+                    "-g",
+                    "0",
+                    "-j",
+                    "1:1:1",
+                    "-f",
+                    "png",
+                ])
+                .args(["-v"]),
+        )?;
+        let dimensions = image::image_dimensions(&output).map_err(err)?;
+        if dimensions != (32, 24) {
+            return Err(format!("ncnn 探针输出尺寸不符：{dimensions:?}"));
+        }
+        let probe_log = fs::read_to_string(self.inner.paths.logs.join("installation-process.log"))
+            .unwrap_or_default();
+        let device_name = probe_log
+            .lines()
+            .find_map(|line| {
+                line.strip_prefix("[0 ")
+                    .and_then(|value| value.split_once(']'))
+                    .map(|(name, _)| name.trim().to_string())
+                    .filter(|name| !name.is_empty())
+            })
+            .ok_or("ncnn Vulkan 探针未报告 GPU 0")?;
+        let probe_output_sha256 = format!("{:x}", Sha256::digest(fs::read(&output).map_err(err)?));
+        let mut runtime_files = Vec::new();
+        inventory(&runtime, &runtime, &mut runtime_files)?;
+        fs::remove_dir_all(&probe_dir).map_err(err)?;
+        self.check_cancel()?;
+        Ok(ReadyRecord {
+            runtime_lock_id: self.inner.runtime.id.clone(),
+            model_snapshot_id: self.inner.model.id.clone(),
+            runtime_manifest_sha256: manifest_digest(self.inner.profile.runtime_manifest),
+            model_manifest_sha256: manifest_digest(self.inner.profile.model_manifest),
+            runtime_files,
+            probe: serde_json::json!({
+                "identity": {
+                    "build_id": self.inner.profile.worker_build_id,
+                    "runtime_lock_id": self.inner.runtime.id,
+                    "model_snapshot_id": self.inner.model.id,
+                },
+                "device": "gpu",
+                "device_name": device_name,
+                "gpu_id": 0,
+                "backend": "ncnn Vulkan",
+                "model": "realesrgan-x4plus",
+                "scale": 4,
+                "tile": 128,
+                "threads": "1:1:1",
+                "tta": false,
+                "probe_input_size": [8, 6],
+                "probe_output_size": [32, 24],
+                "probe_output_sha256": probe_output_sha256,
+            }),
+        })
+    }
+    fn install_archive_members(
+        &self,
+        archive: &ArchiveArtifact,
+        destination: &Path,
+    ) -> Result<(), String> {
+        let archive_path = self.cache().join(&archive.sha256);
+        verify(&archive_path, archive.bytes, &archive.sha256)?;
+        let file = open_regular(&archive_path, false, false)?;
+        let mut zip_archive = zip::ZipArchive::new(file).map_err(err)?;
+        if zip_archive.len() > 4096 {
+            return Err("归档成员数量超限。".into());
+        }
+        let mut names = std::collections::BTreeSet::new();
+        for index in 0..zip_archive.len() {
+            let entry = zip_archive.by_index(index).map_err(err)?;
+            let entry_name = entry.name().map_err(err)?;
+            let name = entry_name.trim_end_matches('/');
+            safe_relative(name)?;
+            let file_type = entry.unix_mode().unwrap_or(0) & 0o170000;
+            if name.contains(['\\', ':', '\0'])
+                || entry.enclosed_name().is_none()
+                || entry.is_symlink()
+                || !matches!(file_type, 0 | 0o100000 | 0o040000)
+                || !names.insert(name.to_string())
+            {
+                return Err("归档包含链接、特殊文件、重复或越界路径。".into());
+            }
+        }
+        for member in &archive.members {
+            self.check_cancel()?;
+            safe_relative(&member.path)?;
+            safe_relative(&member.archive_path)?;
+            let mut entry = zip_archive
+                .by_name(&member.archive_path)
+                .map_err(|error| format!("归档缺少 {}：{error}", member.archive_path))?;
+            if !entry.is_file() || entry.size() != member.bytes {
+                return Err(format!("归档成员类型或大小不符：{}", member.archive_path));
+            }
+            let target = destination.join(&member.path);
+            ensure_child_dir(destination, target.parent().ok_or("归档成员目标无父目录")?)?;
+            let temporary = target.with_extension("install-tmp");
+            if temporary.exists() {
+                fs::remove_file(&temporary).map_err(err)?;
+            }
+            let mut output = open_regular(&temporary, true, true)?;
+            let copied = std::io::copy(&mut entry.by_ref().take(member.bytes + 1), &mut output)
+                .map_err(err)?;
+            output.sync_all().map_err(err)?;
+            drop(output);
+            if copied != member.bytes {
+                let _ = fs::remove_file(&temporary);
+                return Err(format!("归档成员字节数不符：{}", member.archive_path));
+            }
+            verify(&temporary, member.bytes, &member.sha256)?;
+            if member.executable {
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::PermissionsExt;
+                    fs::set_permissions(&temporary, fs::Permissions::from_mode(0o755))
+                        .map_err(err)?;
+                }
+            }
+            if target.exists() {
+                if verify(&target, member.bytes, &member.sha256).is_ok() {
+                    fs::remove_file(&temporary).map_err(err)?;
+                    continue;
+                }
+                fs::remove_file(&target).map_err(err)?;
+            }
+            fs::rename(&temporary, &target).map_err(err)?;
+        }
+        Ok(())
     }
     fn command(&self, command: &mut Command) -> Result<Vec<u8>, String> {
         let log = open_regular(
@@ -1479,7 +1933,17 @@ fn inventory_metadata_matches(root: &Path, entry: &InventoryEntry) -> Result<(),
         {
             return Err("运行时链接身份已变化。".into());
         }
-    } else if !metadata.is_file() || metadata.len() != entry.bytes {
+    } else if !metadata.is_file() || metadata.len() != entry.bytes || {
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            entry.mode != 0 && metadata.permissions().mode() != entry.mode
+        }
+        #[cfg(not(unix))]
+        {
+            false
+        }
+    } {
         return Err("运行时文件缺失、类型或大小不符。".into());
     }
     Ok(())
@@ -1614,6 +2078,27 @@ fn installation_space_available(
                     .saturating_add(runtime_budget)
                     .saturating_add(reserve))
 }
+fn validate_archive(archive: &ArchiveArtifact) -> Result<(), String> {
+    safe_relative(&archive.path)?;
+    if !archive.path.ends_with(".zip") || archive.members.is_empty() {
+        return Err("归档清单格式无效。".into());
+    }
+    let artifact = archive.download();
+    validate_artifact(&artifact)?;
+    let mut paths = std::collections::BTreeSet::new();
+    for member in &archive.members {
+        safe_relative(&member.archive_path)?;
+        safe_relative(&member.path)?;
+        if !paths.insert(&member.path)
+            || member.bytes == 0
+            || member.sha256.len() != 64
+            || !member.sha256.bytes().all(|byte| byte.is_ascii_hexdigit())
+        {
+            return Err("归档成员身份无效或目标重复。".into());
+        }
+    }
+    Ok(())
+}
 fn validate_artifact(a: &Artifact) -> Result<(), String> {
     safe_relative(&a.path)?;
     if a.bytes == 0 || a.sha256.len() != 64 || !a.sha256.bytes().all(|b| b.is_ascii_hexdigit()) {
@@ -1743,6 +2228,13 @@ fn inventory(root: &Path, path: &Path, out: &mut Vec<InventoryEntry>) -> Result<
             let mut file = File::open(&p).map_err(err)?;
             let mut h = Sha256::new();
             std::io::copy(&mut file, &mut h).map_err(err)?;
+            #[cfg(unix)]
+            let mode = {
+                use std::os::unix::fs::PermissionsExt;
+                metadata.permissions().mode()
+            };
+            #[cfg(not(unix))]
+            let mode = 0;
             out.push(InventoryEntry {
                 path: p
                     .strip_prefix(root)
@@ -1752,6 +2244,7 @@ fn inventory(root: &Path, path: &Path, out: &mut Vec<InventoryEntry>) -> Result<
                 sha256: format!("{:x}", h.finalize()),
                 bytes: metadata.len(),
                 link_target: None,
+                mode,
             });
         } else if metadata.file_type().is_symlink() {
             if !p.canonicalize().map_err(err)?.starts_with(root) {
@@ -1770,6 +2263,7 @@ fn inventory(root: &Path, path: &Path, out: &mut Vec<InventoryEntry>) -> Result<
                 sha256: format!("{:x}", Sha256::digest(target.as_bytes())),
                 bytes: metadata.len(),
                 link_target: Some(target),
+                mode: 0,
             });
         } else {
             return Err("私有运行时包含特殊文件。".into());
@@ -1795,7 +2289,7 @@ mod tests {
             .runtime
             .wheels
             .iter()
-            .chain(std::iter::once(&i.inner.runtime.interpreter))
+            .chain(std::iter::once(i.inner.runtime.interpreter().unwrap()))
         {
             let from = source.join(&a.sha256);
             verify(&from, a.bytes, &a.sha256).unwrap();
@@ -1829,7 +2323,7 @@ mod tests {
             .wheels
             .iter()
             .filter(|wheel| wheel.url != "bundled:worker-wheel")
-            .chain(std::iter::once(&i.inner.runtime.interpreter))
+            .chain(std::iter::once(i.inner.runtime.interpreter().unwrap()))
         {
             let from = source.join(&artifact.sha256);
             verify(&from, artifact.bytes, &artifact.sha256).unwrap();
@@ -2249,12 +2743,154 @@ mod tests {
     }
 
     #[test]
+    fn realesrgan_has_a_native_archive_runtime_and_fixed_model_pair() {
+        let temp = tempfile::tempdir().unwrap();
+        let paths = AppPaths::resolve(Some(temp.path())).unwrap();
+        let installer = Installation::new_realesrgan(paths).unwrap();
+        assert_eq!(installer.snapshot().install_id, REALESRGAN_INSTALL_ID);
+        assert_eq!(installer.inner.model.component_bytes, 33_540_549);
+        assert!(installer.inner.runtime.is_native());
+        assert_eq!(
+            installer.inner.runtime.id,
+            "realesrgan-x4plus-ncnn-macos-v0.2.0-v1"
+        );
+        assert_eq!(
+            installer
+                .inner
+                .model
+                .installed_files()
+                .iter()
+                .map(|file| file.path.as_str())
+                .collect::<Vec<_>>(),
+            vec!["realesrgan-x4plus.bin", "realesrgan-x4plus.param"]
+        );
+        assert_eq!(
+            installer.inner.runtime.executable.as_deref(),
+            Some("bin/realesrgan-ncnn-vulkan")
+        );
+        assert!(installer.ready_paths().is_err());
+    }
+
+    fn zip_fixture(i: &Installation, name: &str, symlink: bool) -> ArchiveArtifact {
+        let cursor = std::io::Cursor::new(Vec::new());
+        let mut writer = zip::ZipWriter::new(cursor);
+        let options = zip::write::SimpleFileOptions::default();
+        if symlink {
+            writer.add_symlink(name, "../../outside", options).unwrap();
+        } else {
+            writer.start_file(name, options).unwrap();
+            writer.write_all(b"trusted").unwrap();
+        }
+        let bytes = writer.finish().unwrap().into_inner();
+        let sha256 = format!("{:x}", Sha256::digest(&bytes));
+        fs::write(i.cache().join(&sha256), &bytes).unwrap();
+        ArchiveArtifact {
+            path: "fixture.zip".into(),
+            url: "https://github.com/fixture/fixture.zip".into(),
+            bytes: bytes.len() as u64,
+            sha256,
+            members: vec![ArchiveMember {
+                archive_path: name.into(),
+                path: "bin/tool".into(),
+                bytes: 7,
+                sha256: format!("{:x}", Sha256::digest(b"trusted")),
+                executable: true,
+            }],
+        }
+    }
+
+    #[test]
+    fn zip_extraction_rejects_links_and_paths_before_writing_members() {
+        let (temp, installer) = fixture_for(Installation::new_realesrgan);
+        let destination = temp.path().join("out");
+        fs::create_dir(&destination).unwrap();
+        for (name, symlink) in [
+            ("../outside", false),
+            ("/outside", false),
+            ("C:\\outside", false),
+            ("nested/../../outside", false),
+            ("link", true),
+        ] {
+            let archive = zip_fixture(&installer, name, symlink);
+            assert!(
+                installer
+                    .install_archive_members(&archive, &destination)
+                    .is_err(),
+                "{name}"
+            );
+            assert!(!destination.join("bin/tool").exists());
+        }
+        assert!(!temp.path().join("outside").exists());
+    }
+
+    #[test]
+    fn zip_extraction_requires_member_size_hash_and_presence() {
+        let (temp, installer) = fixture_for(Installation::new_realesrgan);
+        let destination = temp.path().join("out");
+        fs::create_dir(&destination).unwrap();
+        let mut archive = zip_fixture(&installer, "tool", false);
+        archive.members[0].bytes = 8;
+        assert!(
+            installer
+                .install_archive_members(&archive, &destination)
+                .is_err()
+        );
+        archive.members[0].bytes = 7;
+        archive.members[0].sha256 = "0".repeat(64);
+        assert!(
+            installer
+                .install_archive_members(&archive, &destination)
+                .is_err()
+        );
+        archive.members[0].archive_path = "missing".into();
+        assert!(
+            installer
+                .install_archive_members(&archive, &destination)
+                .is_err()
+        );
+        assert!(!destination.join("bin/tool").exists());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn zip_extraction_sets_native_mode_and_refuses_linked_parents() {
+        use std::os::unix::fs::{PermissionsExt, symlink};
+        let (temp, installer) = fixture_for(Installation::new_realesrgan);
+        let destination = temp.path().join("out");
+        fs::create_dir(&destination).unwrap();
+        let archive = zip_fixture(&installer, "tool", false);
+        installer
+            .install_archive_members(&archive, &destination)
+            .unwrap();
+        let target = destination.join("bin/tool");
+        assert_eq!(fs::read(&target).unwrap(), b"trusted");
+        assert_eq!(
+            fs::metadata(&target).unwrap().permissions().mode() & 0o777,
+            0o755
+        );
+        let mut entries = vec![];
+        inventory(&destination, &destination, &mut entries).unwrap();
+        fs::set_permissions(&target, fs::Permissions::from_mode(0o644)).unwrap();
+        assert!(inventory_metadata_matches(&destination, &entries[0]).is_err());
+        fs::remove_dir_all(destination.join("bin")).unwrap();
+        let outside = temp.path().join("outside");
+        fs::create_dir(&outside).unwrap();
+        symlink(&outside, destination.join("bin")).unwrap();
+        assert!(
+            installer
+                .install_archive_members(&archive, &destination)
+                .is_err()
+        );
+        assert!(!outside.join("tool").exists());
+    }
+
+    #[test]
     fn installation_manager_keeps_model_states_and_actions_independent() {
         let temp = tempfile::tempdir().unwrap();
         let paths = AppPaths::resolve(Some(temp.path())).unwrap();
         let manager = Installations::new(paths).unwrap();
         let snapshots = manager.snapshots();
-        assert_eq!(snapshots.len(), 3);
+        assert_eq!(snapshots.len(), 4);
         assert!(
             snapshots
                 .iter()
@@ -2267,6 +2903,10 @@ mod tests {
         assert_eq!(
             manager.snapshot(BIREFNET_INSTALL_ID).unwrap().install_id,
             BIREFNET_INSTALL_ID
+        );
+        assert_eq!(
+            manager.snapshot(REALESRGAN_INSTALL_ID).unwrap().install_id,
+            REALESRGAN_INSTALL_ID
         );
         assert!(manager.start("https://untrusted").is_err());
         assert!(manager.cancel("unregistered-model").is_err());
