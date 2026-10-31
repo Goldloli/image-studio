@@ -62,6 +62,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let export_directory = export_directory.ok_or("--export-dir is required")?;
     let capability = capability_for_model(&model_id)?;
     std::fs::create_dir_all(&export_directory)?;
+    let export_directory = export_directory.canonicalize()?;
     let specs: Vec<TaskSpec> = serde_json::from_slice(&std::fs::read(specs_path)?)?;
     let expected_tasks = if model_id == studio_core::recipes::MOSS_IMAGE_SFT_MODEL {
         4
