@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "reviewedDate": "2026-10-31",
+  "timezone": "Asia/Shanghai",
+  "evidenceKind": "upstream_metadata_and_source_review",
+  "weightsDownloaded": false,
+  "modelExecutionPerformed": false,
+  "biRefNet": {
+    "sourceRevision": "f7079632d681ecf12161fcea8905682934e59e51",
+    "releaseId": 155546220,
+    "tag": "v1",
+    "assets": [
+      {
+        "id": 186740004,
+        "name": "BiRefNet-general-epoch_244.onnx",
+        "size": 972666916,
+        "sha256": null,
+        "url": "https://github.com/ZhengPeng7/BiRefNet/releases/download/v1/BiRefNet-general-epoch_244.onnx",
+        "updatedAt": "2024-08-18T18:23:43Z"
+      }
+    ]
+  },
+  "realEsrgan": {
+    "sourceRevision": "37026f49824c5cf84062e7c6a5dd71445dcf610f",
+    "programPackage": [
+      {
+        "id": 63486055,
+        "name": "realesrgan-ncnn-vulkan-v0.2.0-macos.zip",
+        "size": 8532236,
+        "sha256": null,
+        "url": "https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan/releases/download/v0.2.0/realesrgan-ncnn-vulkan-v0.2.0-macos.zip"
+      }
+    ],
+    "modelPackage": [
+      {
+        "id": 63494474,
+        "name": "realesrgan-ncnn-vulkan-20220424-macos.zip",
+        "size": 51817124,
+        "sha256": null,
+        "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip"
+      }
+    ],
+    "archiveInventoryVerified": false
+  },
+  "sourceUrls": [
+    "https://github.com/mflux-community/mflux/blob/8a7fd0a486635f670ef90e02efe1c051ed3f133c/src/mflux/models/flux2/README.md",
+    "https://github.com/mflux-community/mflux/blob/8a7fd0a486635f670ef90e02efe1c051ed3f133c/src/mflux/models/flux2/weights/flux2_weight_definition.py",
+    "https://github.com/mflux-community/mflux/blob/8a7fd0a486635f670ef90e02efe1c051ed3f133c/src/mflux/models/flux2/variants/edit/flux2_klein_edit_helpers.py",
+    "https://github.com/ZhengPeng7/BiRefNet/blob/f7079632d681ecf12161fcea8905682934e59e51/tutorials/BiRefNet_pth2onnx.ipynb",
+    "https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan/blob/37026f49824c5cf84062e7c6a5dd71445dcf610f/.github/workflows/release.yml",
+    "https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan/blob/37026f49824c5cf84062e7c6a5dd71445dcf610f/src/main.cpp"
+  ]
+}
