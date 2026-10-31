@@ -1,6 +1,6 @@
 # 接入并验收三个计划模型
 
-日期：2026-10-31，Asia/Shanghai。状态：**待用户审阅，未批准实施**。调研/文档 Beads：`image-studio-70s`。
+日期：2026-10-31，Asia/Shanghai。状态：**用户已确认实施**。调研/文档 Beads：`image-studio-70s`；实施 Beads：`image-studio-d6w`。
 
 推荐阅读：[提案](proposal.md) → [调研与来源](research.md) → [设计](design.md) → [测试计划](test-plan.md) → [规格](specs/) → [实施任务](tasks.md)。
 

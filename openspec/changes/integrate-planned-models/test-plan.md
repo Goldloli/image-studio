@@ -1,6 +1,6 @@
 # 三个计划模型的测试与验收计划
 
-状态：**待批准；所有新增模型执行项not_run**。本文件定义将来如何测试，没有执行结果。承接现有`model-validation`报告语义；新报告建议置于`verification/planned-models-<run-id>/`，不得覆写Z-Image历史认证。
+状态：**已批准；所有新增模型执行项当前为not_run**。本文件定义正式验收方式；尚未执行的新项目不得记录为通过。承接现有`model-validation`报告语义；新报告置于`verification/planned-models-<run-id>/`，不得覆写Z-Image历史认证。
 
 ## 1. 配置与门槛
 

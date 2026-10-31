@@ -2,7 +2,7 @@
 
 当前产品只有Z-Image真正接入；用户要求先完成Klein、BiRefNet、Real-ESRGAN的接入与全部测试，再推进Qwen/MOSS。本方案以该前置change交付的安装、输入/输出和v2协议边界为基础，新增三个明确文生图配方与中文文字/布局验证，不能越过前置验收。
 
-**批准状态：待确认。** 用户当前授权编写方案；本 change 未开始实现。实施必须同时满足用户明确确认本方案，以及`integrate-planned-models`的三型号全部适用P0、原生日常与当前Z-Image回归通过并归档。原Z-Image历史认证已于2026-10-31归档，不再是唯一前置。来源初查2026-10-30，固定revision于2026-10-31复核，见 [sources.md](sources.md)。
+**批准状态：用户已条件确认。** 用户于2026-10-31确认按顺序实施本方案；开始条件仍是`integrate-planned-models`的三型号全部适用P0、原生日常与当前Z-Image回归通过并归档。本 change 当前未开始实现，前置门槛不因批准而降低。原Z-Image历史认证已于2026-10-31归档，不再是唯一前置。来源初查2026-10-30，固定revision于2026-10-31复核，见 [sources.md](sources.md)。
 
 ## What Changes
 
@@ -17,7 +17,7 @@
 
 批准实施将包含这三个固定来源的模型/私有运行时下载和本机验收。产品不随主程序捆绑这些权重，不运行仓库中的远程自定义代码，不调用在线 API，也不自动修改系统 Python。
 
-本change新增的Qwen/MOSS配方不含编辑、参考图、RGBA、图层蒙版、任意尺寸、用户可调 CFG/steps、LoRA、小文本编码器替换、低内存配方、模型卸载/迁移、Windows 或其他硬件认证。Klein、BiRefNet、Real-ESRGAN由前置change接入认证，本方案不删除或降级其既有能力。新模型首轮只支持方图是本提案待批准的范围选择。
+本change新增的Qwen/MOSS配方不含编辑、参考图、RGBA、图层蒙版、任意尺寸、用户可调 CFG/steps、LoRA、小文本编码器替换、低内存配方、模型卸载/迁移、Windows 或其他硬件认证。Klein、BiRefNet、Real-ESRGAN由前置change接入认证，本方案不删除或降级其既有能力。新模型首轮只支持方图是本提案已确认的范围选择。
 
 ## Capabilities
 

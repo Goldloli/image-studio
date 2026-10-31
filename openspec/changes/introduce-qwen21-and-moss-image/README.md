@@ -1,6 +1,6 @@
 # Qwen-Image 2.1/Turbo 与 MOSS-Image-SFT 接入方案
 
-状态：**待用户审阅，未批准实施**。编写：2026-10-30；顺序修订：2026-10-31。文档任务：`image-studio-ego`；批准后的执行跟踪：Qwen `image-studio-u3q`、MOSS `image-studio-g37`。
+状态：**用户已条件确认，等待前置整批验收**。编写：2026-10-30；顺序与实施确认：2026-10-31。文档任务：`image-studio-ego`；执行跟踪：Qwen `image-studio-u3q`、MOSS `image-studio-g37`。
 
 前置：[三个计划模型接入与验收](../integrate-planned-models/README.md)必须全部完成；历史Z-Image认证已通过，见[归档记录](../archive/2026-10-31-certify-current-model-usability/README.md)。用户确认本方案与三个计划型号整批认证通过是独立条件，不能互相替代。
 

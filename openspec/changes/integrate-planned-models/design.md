@@ -1,6 +1,6 @@
 ## Context
 
-用户已确认希望补齐三个计划型号并先测试，再接Qwen/MOSS；本轮只授权调研/文档，以下设计仍待确认。现有实现是一个Z-Image安装组合、v1 Python worker、无源图Turn和单候选PNG提交。具体来源和证据缺口见[调研](research.md)。本设计按实际执行边界扩展，不引入通用插件框架。
+用户已确认希望补齐三个计划型号并先测试，再接Qwen/MOSS；本设计已获实施确认，按 Klein → BiRefNet → Real-ESRGAN → 三型号整批验收的顺序执行。现有实现是一个Z-Image安装组合、v1 Python worker、无源图Turn和单候选PNG提交。具体来源和证据缺口见[调研](research.md)。本设计按实际执行边界扩展，不引入通用插件框架。
 
 ## Goals / Non-Goals
 

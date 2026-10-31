@@ -54,7 +54,7 @@
 
 ## 5. Qwen/MOSS 后置
 
-既有[详细方案](../introduce-qwen21-and-moss-image/README.md)已选择Qwen 2.1基础版、官方Turbo及MOSS-SFT。本次重新查询三个固定HF revision，仍可解析，Qwen两版元数据为qwen-research，MOSS为Apache-2.0；没有升级版本或更换路线。该方案仍待批准且未实施。
+既有[详细方案](../introduce-qwen21-and-moss-image/README.md)已选择Qwen 2.1基础版、官方Turbo及MOSS-SFT。本次重新查询三个固定HF revision，仍可解析，Qwen两版元数据为qwen-research，MOSS为Apache-2.0；没有升级版本或更换路线。该后续方案已获条件确认，须等待本批三型号整批验收与归档后实施。
 
 公共多型号安装、配方路由和v2协议先由本批建立。后续只补Qwen/MOSS的manifest、模型分支和独立验收，不再另造第二套v2或覆盖Klein worker身份。先完成三个计划型号的全部必需项及旧模型回归，再做Qwen基础版/Turbo，随后MOSS。Z-Image历史认证或三个型号中的单项通过不能提前越过整批门槛。
 

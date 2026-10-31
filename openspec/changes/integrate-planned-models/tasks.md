@@ -1,6 +1,6 @@
 # 实施任务
 
-状态：待用户确认，以下全部未实施。本文件映射OpenSpec实施/验收，不替代Beads；获批后再为实际实施创建和认领Beads。本轮文档任务为`image-studio-70s`。
+状态：用户已确认实施。本文件映射OpenSpec实施/验收，不替代Beads；文档任务为`image-studio-70s`，实施由`image-studio-d6w`及其子任务跟踪。
 
 ## 1. 授权、来源与独立资源
 
