@@ -28,6 +28,7 @@ use studio_core::{
     generation::AttemptState,
     recipes::{
         BIREFNET_CAPABILITY, KLEIN_EDIT_CAPABILITY, KLEIN_TEXT_CAPABILITY, REALESRGAN_CAPABILITY,
+        MOSS_IMAGE_SFT_CAPABILITY, QWEN_IMAGE_21_CAPABILITY, QWEN_IMAGE_21_TURBO_CAPABILITY,
         Recipe, validate_recipe_plan,
     },
 };
@@ -280,6 +281,7 @@ impl GenerationController {
     ) -> Result<(SupervisorConfig, PathBuf, Arc<Control>), String> {
         if ready.worker_module != "studio_mflux_worker"
             && ready.worker_module != "studio_mflux_worker_v2"
+            && ready.worker_module != "studio_mflux_worker_v3"
             && ready.worker_module != "studio_onnx_worker"
             && ready.worker_module != "realesrgan-native-worker"
         {
@@ -307,6 +309,20 @@ impl GenerationController {
             .canonicalize()
             .map_err(error)?;
         let recipe = Recipe::from_request(&job.request).map_err(error)?;
+        let timeouts = if matches!(
+            recipe,
+            Recipe::QwenImage21 | Recipe::QwenImage21Turbo | Recipe::MossImageSft
+        ) {
+            Timeouts {
+                handshake_ms: 30_000,
+                loading_ms: 600_000,
+                generation_ms: 1_920_000,
+                cancel_grace_ms: 5_000,
+                cleanup_deadline_ms: 30_000,
+            }
+        } else {
+            Timeouts::default()
+        };
         let worker_program = if recipe == Recipe::RealEsrgan {
             self.inner
                 .supervisor
@@ -334,9 +350,12 @@ impl GenerationController {
                 }
                 Recipe::BiRefNet => vec![BIREFNET_CAPABILITY.into()],
                 Recipe::RealEsrgan => vec![REALESRGAN_CAPABILITY.into()],
+                Recipe::QwenImage21 => vec![QWEN_IMAGE_21_CAPABILITY.into()],
+                Recipe::QwenImage21Turbo => vec![QWEN_IMAGE_21_TURBO_CAPABILITY.into()],
+                Recipe::MossImageSft => vec![MOSS_IMAGE_SFT_CAPABILITY.into()],
                 _ => vec![job.request.capability.capability_id.clone()],
             },
-            timeouts: Timeouts::default(),
+            timeouts,
         };
         Ok((config, run_dir, control))
     }
@@ -417,6 +436,27 @@ impl GenerationController {
                     session_id,
                     config.expected_worker.clone(),
                     vec![KLEIN_TEXT_CAPABILITY.into(), KLEIN_EDIT_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::QwenImage21 {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![QWEN_IMAGE_21_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::QwenImage21Turbo {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![QWEN_IMAGE_21_TURBO_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::MossImageSft {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![MOSS_IMAGE_SFT_CAPABILITY.into()],
                 )
                 .map_err(error)
             } else {

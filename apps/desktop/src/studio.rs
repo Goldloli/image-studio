@@ -6,7 +6,8 @@ use crate::adapters::{
     generation::GenerationController,
     installation::{
         BIREFNET_INSTALL_ID, INSTALL_ID, InstallationSnapshot, Installations, KLEIN_INSTALL_ID,
-        REALESRGAN_INSTALL_ID,
+        MOSS_IMAGE_SFT_INSTALL_ID, QWEN_IMAGE_21_INSTALL_ID,
+        QWEN_IMAGE_21_TURBO_INSTALL_ID, REALESRGAN_INSTALL_ID,
     },
     library::{
         AcceptTurnInput, AssetLibraryQuery, DEFAULT_MODEL_ID, DraftRecord, JobRecord, Library,
@@ -28,8 +29,10 @@ use studio_core::{
     domain::*,
     generation::{GenerationInput, freeze_z_image},
     recipes::{
-        BiRefNetInput, KleinInput, RealEsrganInput, SourceAsset, SourceFacts, freeze_birefnet,
-        freeze_klein, freeze_realesrgan,
+        BiRefNetInput, KleinInput, MOSS_IMAGE_SFT_CAPABILITY, MOSS_IMAGE_SFT_MODEL,
+        QWEN_IMAGE_21_CAPABILITY, QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY,
+        QWEN_IMAGE_21_TURBO_MODEL, RealEsrganInput, Recipe, SourceAsset, SourceFacts,
+        TextModelInput, freeze_birefnet, freeze_klein, freeze_realesrgan, freeze_text_model,
     },
 };
 use uuid::Uuid;
@@ -213,6 +216,9 @@ impl StudioService {
             KLEIN_INSTALL_ID,
             BIREFNET_INSTALL_ID,
             REALESRGAN_INSTALL_ID,
+            QWEN_IMAGE_21_INSTALL_ID,
+            QWEN_IMAGE_21_TURBO_INSTALL_ID,
+            MOSS_IMAGE_SFT_INSTALL_ID,
         ]
         .into_iter()
         .map(|id| self.model_view_for(id))
@@ -225,6 +231,12 @@ impl StudioService {
             "BiRefNet general epoch_244"
         } else if install_id == REALESRGAN_INSTALL_ID {
             "Real-ESRGAN x4plus"
+        } else if install_id == QWEN_IMAGE_21_INSTALL_ID {
+            "Qwen-Image 2.1"
+        } else if install_id == QWEN_IMAGE_21_TURBO_INSTALL_ID {
+            "Qwen-Image 2.1 Turbo"
+        } else if install_id == MOSS_IMAGE_SFT_INSTALL_ID {
+            "MOSS-Image-SFT"
         } else {
             "Z-Image Turbo"
         };
@@ -234,6 +246,12 @@ impl StudioService {
             972_666_916_u64
         } else if install_id == REALESRGAN_INSTALL_ID {
             33_540_549_u64
+        } else if install_id == QWEN_IMAGE_21_INSTALL_ID {
+            33_131_609_424_u64
+        } else if install_id == QWEN_IMAGE_21_TURBO_INSTALL_ID {
+            32_451_607_098_u64
+        } else if install_id == MOSS_IMAGE_SFT_INSTALL_ID {
+            27_219_783_878_u64
         } else {
             32_848_304_893_u64
         };
@@ -338,6 +356,13 @@ impl StudioService {
         if !catalog.supports(&defaults.model_id, "text_to_image") {
             return Err("默认模型必须支持已接入的文生图能力".into());
         }
+        if matches!(
+            defaults.model_id.as_str(),
+            QWEN_IMAGE_21_MODEL | QWEN_IMAGE_21_TURBO_MODEL | MOSS_IMAGE_SFT_MODEL
+        ) && defaults.aspect != "1:1"
+        {
+            return Err("所选模型仅支持 1:1；请明确修改默认画幅后再保存".into());
+        }
         self.preferences.save_creation_defaults(defaults)?;
         Ok(self.preferences_snapshot())
     }
@@ -399,9 +424,12 @@ impl StudioService {
                     "Z-Image Turbo · Tongyi-MAI/Z-Image-Turbo · Apache-2.0",
                     "FLUX.2 Klein 4B distilled · black-forest-labs/FLUX.2-klein-4B · Apache-2.0",
                     "BiRefNet general epoch_244 · ZhengPeng7/BiRefNet v1 · MIT",
-                    "Real-ESRGAN x4plus · official ncnn package v0.2.5.0 · BSD-3-Clause"
+                    "Real-ESRGAN x4plus · official ncnn package v0.2.5.0 · BSD-3-Clause",
+                    "Qwen-Image 2.1 · Qwen/Qwen-Image-2.1 · qwen-research",
+                    "Qwen-Image 2.1 Turbo · Qwen/Qwen-Image-2.1-Turbo · qwen-research",
+                    "MOSS-Image-SFT · OpenMOSS-Team/MOSS-Image-SFT · Apache-2.0"
                 ],
-                "capabilityScope": "Z-Image Turbo、FLUX.2 Klein 4B、BiRefNet epoch_244 与 Real-ESRGAN x4plus 已接入本地安装与执行链路。"
+                "capabilityScope": "Z-Image Turbo、FLUX.2 Klein 4B、BiRefNet epoch_244、Real-ESRGAN x4plus、Qwen-Image 2.1 基础版/Turbo 与 MOSS-Image-SFT 已接入本地安装与执行链路。"
             }
         }))
     }
@@ -448,7 +476,10 @@ impl StudioService {
                 studio_core::recipes::KLEIN_TEXT_CAPABILITY
                 | studio_core::recipes::KLEIN_EDIT_CAPABILITY
                 | studio_core::recipes::BIREFNET_CAPABILITY
-                | studio_core::recipes::REALESRGAN_CAPABILITY => saved.aspect == "1:1",
+                | studio_core::recipes::REALESRGAN_CAPABILITY
+                | QWEN_IMAGE_21_CAPABILITY
+                | QWEN_IMAGE_21_TURBO_CAPABILITY
+                | MOSS_IMAGE_SFT_CAPABILITY => saved.aspect == "1:1",
                 _ => false,
             };
             let tool = matches!(
@@ -500,6 +531,19 @@ impl StudioService {
                 studio_core::recipes::REALESRGAN_CAPABILITY,
                 _,
             ) => params.aspect == "1:1",
+            (
+                QWEN_IMAGE_21_MODEL,
+                QWEN_IMAGE_21_CAPABILITY,
+                false,
+            )
+            | (
+                QWEN_IMAGE_21_TURBO_MODEL,
+                QWEN_IMAGE_21_TURBO_CAPABILITY,
+                false,
+            )
+            | (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY, false) => {
+                params.aspect == "1:1"
+            }
             _ => false,
         };
         if !supported_combo {
@@ -573,7 +617,22 @@ impl StudioService {
                 params.seed = seed.clone();
             }
         }
-        if params.model_id == KLEIN_INSTALL_ID {
+        if matches!(
+            params.model_id.as_str(),
+            QWEN_IMAGE_21_MODEL | QWEN_IMAGE_21_TURBO_MODEL | MOSS_IMAGE_SFT_MODEL
+        ) {
+            if params.aspect != "1:1" {
+                return Err("所选模型仅支持 1:1；当前输入和默认画幅未被改写".into());
+            }
+            params.capability_id = match params.model_id.as_str() {
+                QWEN_IMAGE_21_MODEL => QWEN_IMAGE_21_CAPABILITY,
+                QWEN_IMAGE_21_TURBO_MODEL => QWEN_IMAGE_21_TURBO_CAPABILITY,
+                MOSS_IMAGE_SFT_MODEL => MOSS_IMAGE_SFT_CAPABILITY,
+                _ => unreachable!(),
+            }
+            .into();
+            params.source_asset_id = None;
+        } else if params.model_id == KLEIN_INSTALL_ID {
             params.aspect = "1:1".into();
             params.capability_id = studio_core::recipes::KLEIN_TEXT_CAPABILITY.into();
             params.source_asset_id = None;
@@ -889,6 +948,12 @@ impl StudioService {
                 studio_core::recipes::BIREFNET_CAPABILITY.into()
             } else if input.model_id == REALESRGAN_INSTALL_ID {
                 studio_core::recipes::REALESRGAN_CAPABILITY.into()
+            } else if input.model_id == QWEN_IMAGE_21_INSTALL_ID {
+                QWEN_IMAGE_21_CAPABILITY.into()
+            } else if input.model_id == QWEN_IMAGE_21_TURBO_INSTALL_ID {
+                QWEN_IMAGE_21_TURBO_CAPABILITY.into()
+            } else if input.model_id == MOSS_IMAGE_SFT_INSTALL_ID {
+                MOSS_IMAGE_SFT_CAPABILITY.into()
             } else {
                 studio_core::generation::Z_IMAGE_CAPABILITY.into()
             }
@@ -1033,6 +1098,33 @@ impl StudioService {
                         },
                     },
                 },
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
+        } else if matches!(
+            turn.model_id.as_str(),
+            QWEN_IMAGE_21_INSTALL_ID
+                | QWEN_IMAGE_21_TURBO_INSTALL_ID
+                | MOSS_IMAGE_SFT_INSTALL_ID
+        ) {
+            let recipe = match turn.model_id.as_str() {
+                QWEN_IMAGE_21_INSTALL_ID => Recipe::QwenImage21,
+                QWEN_IMAGE_21_TURBO_INSTALL_ID => Recipe::QwenImage21Turbo,
+                MOSS_IMAGE_SFT_INSTALL_ID => Recipe::MossImageSft,
+                _ => unreachable!(),
+            };
+            let frozen = freeze_text_model(
+                recipe,
+                TextModelInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    prompt: turn.prompt.clone(),
+                    seed,
+                },
+                random_seed,
                 environment,
             )
             .map_err(|error| error.to_string())?;
@@ -1865,7 +1957,7 @@ mod tests {
     fn catalog_query_exposes_independent_model_install_actions() {
         let (_root, service) = fixture();
         let catalog = service.model_catalog().unwrap();
-        assert_eq!(catalog["counts"]["total"], 4);
+        assert_eq!(catalog["counts"]["total"], 7);
         let planned = catalog["entries"]
             .as_array()
             .unwrap()
