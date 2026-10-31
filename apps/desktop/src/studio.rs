@@ -1275,8 +1275,11 @@ impl StudioService {
                 ) || previous.plan.effective_parameters.get("scheduler")
                     == Some(&json!(environment.scheduler))
             });
-        if previous.plan.components != environment.components
-            || previous.plan.runtime != environment.runtime
+        if !retry_components_match(
+            &previous.plan.components,
+            &environment.components,
+            previous.request.model_variant_id.as_str() == studio_core::generation::Z_IMAGE_MODEL,
+        ) || previous.plan.runtime != environment.runtime
             || previous.plan.device != environment.device
             || !scheduler_matches
         {
@@ -1340,6 +1343,26 @@ impl StudioService {
 
 pub fn job_view(job: &JobRecord) -> Value {
     json!({"id":job.job_id,"turnId":job.turn_id,"conversationId":job.conversation_id,"attemptId":job.attempt.attempt_id,"state":format!("{:?}",job.state),"prompt":job.request.instruction,"width":job.plan.effective_output.width,"height":job.plan.effective_output.height,"seed":job.plan.effective_parameters.get("seed"),"error":job.error,"assetId":job.manifest.as_ref().and_then(|m|m.outputs.first()).map(|a|a.asset_id.clone()),"manifest":job.manifest})
+}
+
+fn retry_components_match(
+    frozen: &[studio_core::contracts::ComponentSnapshot],
+    installed: &[studio_core::contracts::ComponentSnapshot],
+    legacy_z_image: bool,
+) -> bool {
+    const PREFIX: &str = "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo/";
+    frozen.len() == installed.len()
+        && frozen.iter().zip(installed).all(|(old, current)| {
+            old == current
+                || legacy_z_image
+                    && old.role == current.role
+                    && old.content_hash == current.content_hash
+                    && old.source.revision == current.source.revision
+                    && old.source.source.strip_prefix(PREFIX).is_some_and(|path| {
+                        current.source.source
+                            == format!("{PREFIX}resolve/{}/{path}", old.source.revision)
+                    })
+        })
 }
 
 fn turn_view(library: &Library, turn: &TurnRecord) -> crate::adapters::library::Result<Value> {
@@ -1454,6 +1477,46 @@ mod tests {
         );
         (root, service)
     }
+    #[test]
+    fn legacy_source_url_notation_does_not_change_frozen_component_identity() {
+        use studio_core::contracts::{ComponentSnapshot, SourceRevision};
+        let installed = ComponentSnapshot {
+            role: "component-00-transformer".into(),
+            content_hash: ContentHash::new("a".repeat(64)).unwrap(),
+            source: SourceRevision { source: "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo/resolve/fixed/transformer/model.safetensors".into(), revision: "fixed".into() },
+        };
+        let mut old = installed.clone();
+        old.source.source =
+            "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo/transformer/model.safetensors".into();
+        assert!(retry_components_match(
+            std::slice::from_ref(&old),
+            std::slice::from_ref(&installed),
+            true
+        ));
+        assert!(!retry_components_match(
+            std::slice::from_ref(&old),
+            std::slice::from_ref(&installed),
+            false
+        ));
+        for field in ["hash", "revision", "role", "repository"] {
+            let mut wrong = old.clone();
+            match field {
+                "hash" => wrong.content_hash = ContentHash::new("b".repeat(64)).unwrap(),
+                "revision" => wrong.source.revision = "other".into(),
+                "role" => wrong.role = "other".into(),
+                _ => {
+                    wrong.source.source =
+                        "https://huggingface.co/other/repo/transformer/model.safetensors".into()
+                }
+            }
+            assert!(
+                !retry_components_match(&[wrong], std::slice::from_ref(&installed), true),
+                "{field}"
+            );
+        }
+        assert!(!retry_components_match(&[old], &[], true));
+    }
+
     #[test]
     fn legacy_v1_retry_checks_the_registered_z_image_installation() {
         use studio_core::{
