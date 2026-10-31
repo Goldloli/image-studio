@@ -30,13 +30,13 @@ use studio_core::{
     ContractError,
     contracts::*,
     domain::*,
-    generation::{AttemptState, validate_z_image_plan},
-    recipes::PRIMARY_ROLE,
+    generation::AttemptState,
+    recipes::{PRIMARY_ROLE, validate_recipe_plan},
 };
 use thiserror::Error;
 use uuid::Uuid;
 
-pub use assets::CandidateDescriptor;
+pub use assets::{CandidateDescriptor, RoleCandidate};
 
 #[derive(Debug, Error)]
 pub enum LibraryError {
@@ -384,7 +384,8 @@ impl Library {
     }
 
     pub fn submit(&mut self, request: UserRequest, plan: ExecutionPlan) -> Result<Submission> {
-        validate_z_image_plan(&request, &plan)?;
+        let source = self.source_facts_for_request(&request)?;
+        validate_recipe_plan(&request, &plan, source)?;
         if request.project_id != self.default_project_id() {
             return Err(LibraryError::Invalid("本阶段仅支持默认项目".into()));
         }

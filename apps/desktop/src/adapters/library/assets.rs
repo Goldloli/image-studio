@@ -4,9 +4,10 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     io::{BufReader, Read, Seek, SeekFrom, Write},
 };
+use studio_core::recipes::{OutputRole, Recipe};
 
-const MAX_PNG_BYTES: u64 = 32 * 1024 * 1024;
-const DECODE_LIMIT: usize = 64 * 1024 * 1024;
+const MAX_ASSET_BYTES: u64 = 128 * 1024 * 1024;
+const DECODE_LIMIT: usize = 256 * 1024 * 1024;
 const MAX_ASSET_CHECKS: usize = 512;
 
 /// A lightweight poll may reuse a verified result only while the same file's
@@ -58,6 +59,12 @@ pub struct CandidateDescriptor {
     pub sha256: String,
 }
 
+#[derive(Clone, Debug)]
+pub struct RoleCandidate {
+    pub role: String,
+    pub candidate: CandidateDescriptor,
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) enum CommitStage {
     Copied,
@@ -74,6 +81,32 @@ impl Drop for TemporaryFile {
     }
 }
 
+struct PublishedAssets {
+    paths: Vec<PathBuf>,
+    quarantine: PathBuf,
+    committed: bool,
+}
+
+impl Drop for PublishedAssets {
+    fn drop(&mut self) {
+        if !self.committed {
+            for path in &self.paths {
+                let _ = fs::rename(path, self.quarantine.join(new_key("orphan")));
+            }
+        }
+    }
+}
+
+struct PreparedOutput {
+    role: OutputRole,
+    asset: AssetRef,
+    temporary: TemporaryFile,
+    final_path: PathBuf,
+    width: u32,
+    height: u32,
+    bytes: u64,
+}
+
 impl Library {
     /// Trust boundary: only call after the supervisor confirms all compute descendants ended.
     pub fn commit_candidate_after_reap(
@@ -88,93 +121,198 @@ impl Library {
         &mut self,
         attempt: &Attempt,
         candidate: CandidateDescriptor,
+        hook: impl FnMut(CommitStage) -> Result<()>,
+    ) -> Result<JobRecord> {
+        self.commit_outputs_with_hook(
+            attempt,
+            vec![RoleCandidate {
+                role: PRIMARY_ROLE.into(),
+                candidate,
+            }],
+            hook,
+        )
+    }
+
+    /// Commits every frozen recipe output or none. Call only after all compute
+    /// descendants have been reaped and the process has exited successfully.
+    pub fn commit_outputs_after_reap(
+        &mut self,
+        attempt: &Attempt,
+        candidates: Vec<RoleCandidate>,
+    ) -> Result<JobRecord> {
+        self.commit_outputs_with_hook(attempt, candidates, |_| Ok(()))
+    }
+
+    fn commit_outputs_with_hook(
+        &mut self,
+        attempt: &Attempt,
+        candidates: Vec<RoleCandidate>,
         mut hook: impl FnMut(CommitStage) -> Result<()>,
     ) -> Result<JobRecord> {
         let record = current_job(&self.db, attempt)?;
         commit_eligible(&record)?;
-        let output = &record.plan.effective_output;
-        if candidate.relative_path != "result.png"
-            || candidate.width != output.width
-            || candidate.height != output.height
-            || candidate.byte_count == 0
-            || candidate.byte_count > MAX_PNG_BYTES
-        {
+        let recipe = Recipe::from_request(&record.request)?;
+        let expected_roles = recipe
+            .outputs()
+            .iter()
+            .map(|role| role.as_str())
+            .collect::<BTreeSet<_>>();
+        let mut supplied_roles = BTreeSet::new();
+        for candidate in &candidates {
+            parse_output_role(&candidate.role)?;
+            if !supplied_roles.insert(candidate.role.as_str()) {
+                return Err(LibraryError::Invalid("候选输出角色重复".into()));
+            }
+        }
+        if supplied_roles != expected_roles || candidates.len() != expected_roles.len() {
             return Err(LibraryError::Invalid(
-                "候选路径、尺寸或文件大小不符合冻结计划".into(),
+                "候选输出角色集合与冻结配方不符".into(),
             ));
         }
-        let expected_hash = ContentHash::new(&candidate.sha256)?;
         let run = self.attempt_run_dir(attempt)?;
         if !fs::symlink_metadata(&run)?.file_type().is_dir() || run.canonicalize()? != run {
             return Err(LibraryError::Invalid("执行目录越界或包含链接".into()));
         }
-        let mut source = open_regular(&run.join("result.png"), false)?;
-        let before = source.metadata()?;
-        if before.len() != candidate.byte_count || before.len() > MAX_PNG_BYTES {
-            return Err(LibraryError::Invalid("候选字节数不符".into()));
-        }
-        let key = new_key("asset");
-        let temporary = TemporaryFile(self.root.join("commits").join(format!("{key}.tmp")));
-        let mut host_copy = create_private(&temporary.0)?;
-        let (bytes, hash) = copy_and_hash(&mut source, &mut host_copy, MAX_PNG_BYTES)?;
-        let after = source.metadata()?;
-        if bytes != candidate.byte_count
-            || hash != expected_hash
-            || before.len() != after.len()
-            || before.modified().ok() != after.modified().ok()
-        {
-            return Err(LibraryError::Invalid("候选在读取时改变或散列不符".into()));
+        let mut prepared = Vec::with_capacity(candidates.len());
+        for candidate in candidates {
+            let role = parse_output_role(&candidate.role)?;
+            validate_candidate_relative_path(&candidate.candidate.relative_path)?;
+            if recipe == Recipe::ZImageTurbo && candidate.candidate.relative_path != "result.png" {
+                return Err(LibraryError::Invalid("v1 候选路径必须为 result.png".into()));
+            }
+            let expected_dimensions = (
+                record.plan.effective_output.width,
+                record.plan.effective_output.height,
+            );
+            if (candidate.candidate.width, candidate.candidate.height) != expected_dimensions {
+                return Err(LibraryError::Invalid("候选尺寸不符合冻结计划".into()));
+            }
+            let max_bytes = recipe
+                .max_output_bytes(role)
+                .ok_or_else(|| LibraryError::Invalid("候选角色不属于冻结配方".into()))?;
+            if candidate.candidate.byte_count == 0 || candidate.candidate.byte_count > max_bytes {
+                return Err(LibraryError::Invalid("候选字节数超过配方上限".into()));
+            }
+            let expected_hash = ContentHash::new(&candidate.candidate.sha256)?;
+            let mut source = open_regular(&run.join(&candidate.candidate.relative_path), false)?;
+            let before = source.metadata()?;
+            if before.len() != candidate.candidate.byte_count || before.len() > max_bytes {
+                return Err(LibraryError::Invalid("候选字节数不符".into()));
+            }
+            let key = new_key("asset");
+            let temporary = TemporaryFile(self.root.join("commits").join(format!("{key}.tmp")));
+            let mut host_copy = create_private(&temporary.0)?;
+            let (bytes, hash) = copy_and_hash(&mut source, &mut host_copy, max_bytes)?;
+            let after = source.metadata()?;
+            if bytes != candidate.candidate.byte_count
+                || hash != expected_hash
+                || before.len() != after.len()
+                || before.modified().ok() != after.modified().ok()
+            {
+                return Err(LibraryError::Invalid("候选在读取时改变或散列不符".into()));
+            }
+            let color_type = png_color_type(&temporary.0)?;
+            let data_type = match color_type {
+                0 => AssetKind::Mask,
+                2 => AssetKind::ImageRgb,
+                6 => AssetKind::ImageRgba,
+                _ => {
+                    return Err(LibraryError::Invalid("候选 PNG 像素类型不符合配方".into()));
+                }
+            };
+            if !recipe.accepts_output(role, data_type.clone()) {
+                return Err(LibraryError::Invalid("候选 PNG 类型与输出角色不符".into()));
+            }
+            let relative_path = format!("assets/{key}.png");
+            let asset = AssetRef {
+                asset_id: AssetId::new(new_key("asset"))?,
+                content_hash: hash,
+                data_type,
+                location: StorageLocation::Managed {
+                    storage_id: StorageLocationId::new("library")?,
+                    relative_path: relative_path.clone(),
+                },
+            };
+            prepared.push(PreparedOutput {
+                role,
+                asset,
+                temporary,
+                final_path: self.root.join(relative_path),
+                width: candidate.candidate.width,
+                height: candidate.candidate.height,
+                bytes,
+            });
         }
         hook(CommitStage::Copied)?;
-        host_copy.flush()?;
-        host_copy.seek(SeekFrom::Start(0))?;
-        validate_png(&mut host_copy, output.width, output.height)?;
-        host_copy.sync_all()?;
+        for output in &mut prepared {
+            let mut file = open_regular(&output.temporary.0, false)?;
+            validate_png(
+                &mut file,
+                output.width,
+                output.height,
+                max_output_pixels(recipe, output.role),
+                output.role,
+            )?;
+            file.sync_all()?;
+            let mut permissions = file.metadata()?.permissions();
+            permissions.set_readonly(true);
+            file.set_permissions(permissions)?;
+            file.sync_all()?;
+        }
         hook(CommitStage::Synced)?;
-        let mut permissions = host_copy.metadata()?.permissions();
-        permissions.set_readonly(true);
-        host_copy.set_permissions(permissions)?;
-        host_copy.sync_all()?;
-        drop(host_copy);
-        let relative_path = format!("assets/{key}.png");
-        let final_path = self.root.join(&relative_path);
-        fs::rename(&temporary.0, &final_path)?;
+        let mut published = PublishedAssets {
+            paths: Vec::with_capacity(prepared.len()),
+            quarantine: self.root.join("quarantine"),
+            committed: false,
+        };
+        for output in &prepared {
+            fs::rename(&output.temporary.0, &output.final_path)?;
+            published.paths.push(output.final_path.clone());
+        }
         sync_directory(&self.root.join("assets"))?;
         sync_directory(&self.root.join("commits"))?;
         hook(CommitStage::Renamed)?;
-        let asset = AssetRef {
-            asset_id: AssetId::new(new_key("asset"))?,
-            content_hash: hash,
-            data_type: if png_color_type(&final_path)? == 6 {
-                AssetKind::ImageRgba
-            } else {
-                AssetKind::ImageRgb
-            },
-            location: StorageLocation::Managed {
-                storage_id: StorageLocationId::new("library")?,
-                relative_path: relative_path.clone(),
-            },
-        };
         let tx = self
             .db
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
         let current = current_job(&tx, attempt)?;
         commit_eligible(&current)?;
-        tx.execute("INSERT INTO assets(id,job_id,attempt_id,output_role,asset_json,relative_path,width,height,byte_count,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)",params![asset.asset_id.as_str(),attempt.job_id.as_str(),attempt.attempt_id.as_str(),PRIMARY_ROLE,serde_json::to_string(&asset)?,relative_path,candidate.width,candidate.height,sqlite_integer(bytes)?,now()])?;
+        for output in &prepared {
+            let StorageLocation::Managed { relative_path, .. } = &output.asset.location else {
+                unreachable!("host assets are managed")
+            };
+            tx.execute("INSERT INTO assets(id,job_id,attempt_id,output_role,asset_json,relative_path,width,height,byte_count,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)",params![output.asset.asset_id.as_str(),attempt.job_id.as_str(),attempt.attempt_id.as_str(),output.role.as_str(),serde_json::to_string(&output.asset)?,relative_path,output.width,output.height,sqlite_integer(output.bytes)?,now()])?;
+        }
+        let outputs = recipe
+            .outputs()
+            .iter()
+            .map(|role| {
+                prepared
+                    .iter()
+                    .find(|output| output.role == *role)
+                    .map(|output| output.asset.clone())
+                    .ok_or_else(|| LibraryError::Invalid("缺少冻结输出".into()))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        let primary = prepared
+            .iter()
+            .find(|output| output.role == OutputRole::Primary)
+            .ok_or_else(|| LibraryError::Invalid("缺少主图输出".into()))?;
         write_terminal(
             &tx,
             &current,
             AttemptState::Succeeded,
             FinalResult::Succeeded,
-            vec![asset.clone()],
+            outputs,
             None,
         )?;
         tx.execute(
             "UPDATE projects SET selected_asset_id=? WHERE id='default'",
-            [asset.asset_id.as_str()],
+            [primary.asset.asset_id.as_str()],
         )?;
         hook(CommitStage::BeforeDatabaseCommit)?;
         tx.commit()?;
+        published.committed = true;
         hook(CommitStage::AfterDatabaseCommit)?;
         self.job(&attempt.job_id)
     }
@@ -220,10 +358,10 @@ impl Library {
         let mut file = open_regular(&path, false)?;
         let mut bytes = Vec::new();
         Read::by_ref(&mut file)
-            .take(MAX_PNG_BYTES + 1)
+            .take(MAX_ASSET_BYTES + 1)
             .read_to_end(&mut bytes)?;
         if bytes.len() as u64 != record.byte_count
-            || bytes.len() as u64 > MAX_PNG_BYTES
+            || bytes.len() as u64 > MAX_ASSET_BYTES
             || digest(&bytes) != record.asset.content_hash
         {
             return Err(LibraryError::Invalid("资产缺失或散列不符".into()));
@@ -279,7 +417,7 @@ impl Library {
         )));
         let mut destination = create_private(&temporary.0)?;
         let mut source = open_regular(&self.asset_path(&record.asset)?, false)?;
-        let (bytes, hash) = copy_and_hash(&mut source, &mut destination, MAX_PNG_BYTES)?;
+        let (bytes, hash) = copy_and_hash(&mut source, &mut destination, MAX_ASSET_BYTES)?;
         if bytes != record.byte_count || hash != record.asset.content_hash {
             return Err(LibraryError::Invalid("导出源资产散列不符".into()));
         }
@@ -325,7 +463,7 @@ impl Library {
     pub(super) fn verify_asset(&self, record: &AssetRecord) -> Result<()> {
         let mut source = open_regular(&self.asset_path(&record.asset)?, false)?;
         let fingerprint = AssetFingerprint::from_metadata(&source.metadata()?);
-        if fingerprint.length != record.byte_count || record.byte_count > MAX_PNG_BYTES {
+        if fingerprint.length != record.byte_count || record.byte_count > MAX_ASSET_BYTES {
             return Err(LibraryError::Invalid("资产大小已改变".into()));
         }
         let id = record.asset.asset_id.to_string();
@@ -341,7 +479,7 @@ impl Library {
                 .map_or(Ok(()), |error| Err(LibraryError::Invalid(error.clone())));
         }
         let result = (|| {
-            let (bytes, hash) = hash_reader(&mut source, MAX_PNG_BYTES)?;
+            let (bytes, hash) = hash_reader(&mut source, MAX_ASSET_BYTES)?;
             if bytes != record.byte_count || hash != record.asset.content_hash {
                 return Err(LibraryError::Invalid("资产散列不符".into()));
             }
@@ -409,6 +547,37 @@ fn commit_eligible(record: &JobRecord) -> Result<()> {
     }
     Ok(())
 }
+fn parse_output_role(value: &str) -> Result<OutputRole> {
+    match value {
+        PRIMARY_ROLE => Ok(OutputRole::Primary),
+        "mask" => Ok(OutputRole::Mask),
+        _ => Err(LibraryError::Invalid("未知输出角色".into())),
+    }
+}
+fn max_output_pixels(recipe: Recipe, role: OutputRole) -> u64 {
+    match (recipe, role) {
+        (Recipe::RealEsrgan, OutputRole::Primary) => 16 * 1024 * 1024,
+        (Recipe::BiRefNet, OutputRole::Primary | OutputRole::Mask) => 4 * 1024 * 1024,
+        _ => 1024 * 1024,
+    }
+}
+fn validate_candidate_relative_path(value: &str) -> Result<()> {
+    if value.is_empty()
+        || value.len() > 256
+        || value.contains(['\\', ':', '\0'])
+        || Path::new(value).components().count() != 1
+        || !matches!(
+            Path::new(value).components().next(),
+            Some(std::path::Component::Normal(_))
+        )
+        || !value.ends_with(".png")
+    {
+        return Err(LibraryError::Invalid(
+            "候选输出路径必须为同级 PNG 文件名".into(),
+        ));
+    }
+    Ok(())
+}
 fn create_private(path: &Path) -> Result<File> {
     let mut options = OpenOptions::new();
     options.read(true).write(true).create_new(true);
@@ -436,7 +605,7 @@ fn copy_and_hash(
         }
         total += n as u64;
         if total > limit {
-            return Err(LibraryError::Invalid("PNG 超过 32 MiB".into()));
+            return Err(LibraryError::Invalid("PNG 超过配方字节上限".into()));
         }
         target.write_all(&buffer[..n])?;
         hash.update(&buffer[..n]);
@@ -450,7 +619,13 @@ fn digest(bytes: &[u8]) -> ContentHash {
     ContentHash::new(format!("{:x}", Sha256::digest(bytes))).expect("SHA-256 output")
 }
 
-fn validate_png(file: &mut File, width: u32, height: u32) -> Result<()> {
+fn validate_png(
+    file: &mut File,
+    width: u32,
+    height: u32,
+    max_pixels: u64,
+    role: OutputRole,
+) -> Result<()> {
     // Read a fixed 33-byte IHDR before allowing the decoder to allocate anything.
     let mut header = [0u8; 33];
     file.read_exact(&mut header)?;
@@ -462,10 +637,15 @@ fn validate_png(file: &mut File, width: u32, height: u32) -> Result<()> {
     }
     let actual_width = u32::from_be_bytes(header[16..20].try_into().expect("four bytes"));
     let actual_height = u32::from_be_bytes(header[20..24].try_into().expect("four bytes"));
+    let allowed_colors: &[u8] = if role == OutputRole::Mask {
+        &[0]
+    } else {
+        &[2, 6]
+    };
     if (actual_width, actual_height) != (width, height)
-        || u64::from(width) * u64::from(height) > 1024 * 1024
+        || u64::from(width) * u64::from(height) > max_pixels
         || header[24] != 8
-        || !matches!(header[25], 2 | 6)
+        || !allowed_colors.contains(&header[25])
     {
         return Err(LibraryError::Invalid(
             "PNG 头部尺寸或像素格式不符合冻结计划".into(),

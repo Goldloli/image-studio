@@ -107,17 +107,117 @@ fn png_bytes() -> Vec<u8> {
     png_bytes_for(1024, 768)
 }
 fn png_bytes_for(width: u32, height: u32) -> Vec<u8> {
+    png_bytes_with_color(width, height, png::ColorType::Rgb, 3)
+}
+fn rgba_png_bytes_for(width: u32, height: u32) -> Vec<u8> {
+    png_bytes_with_color(width, height, png::ColorType::Rgba, 4)
+}
+fn mask_png_bytes_for(width: u32, height: u32) -> Vec<u8> {
+    png_bytes_with_color(width, height, png::ColorType::Grayscale, 1)
+}
+fn png_bytes_with_color(
+    width: u32,
+    height: u32,
+    color: png::ColorType,
+    channels: usize,
+) -> Vec<u8> {
     let mut bytes = vec![];
     {
         let mut encoder = png::Encoder::new(&mut bytes, width, height);
-        encoder.set_color(png::ColorType::Rgb);
+        encoder.set_color(color);
         encoder.set_depth(png::BitDepth::Eight);
         let mut writer = encoder.write_header().unwrap();
         writer
-            .write_image_data(&vec![128; width as usize * height as usize * 3])
+            .write_image_data(&vec![128; width as usize * height as usize * channels])
             .unwrap();
     }
     bytes
+}
+
+fn birefnet_job(library: &mut Library, key: &str, width: u32, height: u32) -> JobRecord {
+    let input_root = tempfile::tempdir().unwrap();
+    let input_path = input_root.path().join("source.png");
+    fs::write(&input_path, png_bytes_for(width, height)).unwrap();
+    let imported = library.import_source(&input_path).unwrap();
+    let source = library.resolve_source(&imported.asset_id).unwrap().asset;
+    let request = UserRequest {
+        schema_version: REQUEST_SCHEMA_VERSION,
+        request_id: RequestId::new(format!("request:{key}")).unwrap(),
+        project_id: ProjectId::new("default").unwrap(),
+        capability: CapabilityDescriptor {
+            capability_id: studio_core::recipes::BIREFNET_CAPABILITY.into(),
+            instruction_required: false,
+            input_roles: vec![RoleRule {
+                role: studio_core::recipes::SOURCE_ROLE.into(),
+                minimum: 1,
+                maximum: 1,
+            }],
+        },
+        instruction: String::new(),
+        inputs: vec![InputBinding {
+            asset: source,
+            role: studio_core::recipes::SOURCE_ROLE.into(),
+            order: 0,
+        }],
+        model_variant_id: ModelVariantId::new(studio_core::recipes::BIREFNET_MODEL).unwrap(),
+        requested_output: ImageOutput {
+            width,
+            height,
+            count: 1,
+        },
+        policy: AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: false,
+        },
+        parameters: Default::default(),
+        idempotency_key: IdempotencyKey::new(format!("submit:{key}")).unwrap(),
+    };
+    let plan = ExecutionPlan {
+        schema_version: PLAN_SCHEMA_VERSION,
+        plan_id: PlanId::new(format!("plan:{key}")).unwrap(),
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: vec![ComponentSnapshot {
+            role: "onnx".into(),
+            source: SourceRevision {
+                source: "test-fixture".into(),
+                revision: "immutable".into(),
+            },
+            content_hash: ContentHash::new("d".repeat(64)).unwrap(),
+        }],
+        runtime: RuntimeSnapshot {
+            package_id: "onnxruntime-1.31.1-cpu".into(),
+            engine: "onnxruntime".into(),
+            source: SourceRevision {
+                source: "test-fixture".into(),
+                revision: "immutable".into(),
+            },
+        },
+        device: DeviceSnapshot {
+            device_id: "cpu".into(),
+            precision: "float32".into(),
+        },
+        effective_output: request.requested_output.clone(),
+        effective_parameters: std::collections::BTreeMap::from([
+            (
+                "recipe".into(),
+                serde_json::json!("birefnet-general-cpu-v1"),
+            ),
+            ("recipe_version".into(), serde_json::json!(1)),
+            ("provider".into(), serde_json::json!("CPUExecutionProvider")),
+            ("precision".into(), serde_json::json!("float32")),
+            (
+                "preprocessing".into(),
+                serde_json::json!("birefnet-1024-rgb-v1"),
+            ),
+            ("intra_op_threads".into(), serde_json::json!(4)),
+            ("inter_op_threads".into(), serde_json::json!(1)),
+            ("execution_mode".into(), serde_json::json!("sequential")),
+        ]),
+        adjustments: vec![],
+    };
+    library.submit(request, plan).unwrap().job
 }
 fn candidate(library: &Library, attempt: &Attempt, bytes: &[u8]) -> CandidateDescriptor {
     fs::write(
@@ -799,6 +899,121 @@ fn untrusted_candidates_fail_before_asset_registration() {
         library.job(&job.job_id).unwrap().state,
         AttemptState::Succeeded
     );
+}
+
+#[test]
+fn birefnet_commits_primary_and_mask_as_one_job_result() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let job = birefnet_job(&mut library, "birefnet-success", 10, 12);
+    let run = library.attempt_run_dir(&job.attempt).unwrap();
+    let primary = rgba_png_bytes_for(10, 12);
+    let mask = mask_png_bytes_for(10, 12);
+    fs::write(run.join("primary.png"), &primary).unwrap();
+    fs::write(run.join("mask.png"), &mask).unwrap();
+    let success = library
+        .commit_outputs_after_reap(
+            &job.attempt,
+            vec![
+                RoleCandidate {
+                    role: "primary".into(),
+                    candidate: CandidateDescriptor {
+                        relative_path: "primary.png".into(),
+                        width: 10,
+                        height: 12,
+                        byte_count: primary.len() as u64,
+                        sha256: format!("{:x}", Sha256::digest(&primary)),
+                    },
+                },
+                RoleCandidate {
+                    role: "mask".into(),
+                    candidate: CandidateDescriptor {
+                        relative_path: "mask.png".into(),
+                        width: 10,
+                        height: 12,
+                        byte_count: mask.len() as u64,
+                        sha256: format!("{:x}", Sha256::digest(&mask)),
+                    },
+                },
+            ],
+        )
+        .unwrap();
+    assert_eq!(success.state, AttemptState::Succeeded);
+    assert_eq!(success.manifest.as_ref().unwrap().outputs.len(), 2);
+    assert_eq!(library.assets(100, 0).unwrap().len(), 1);
+    let primary_id = success.manifest.as_ref().unwrap().outputs[0]
+        .asset_id
+        .clone();
+    let mask_id = success.manifest.as_ref().unwrap().outputs[1]
+        .asset_id
+        .clone();
+    assert_eq!(library.asset(&primary_id).unwrap().output_role, "primary");
+    let mask_record = library.asset(&mask_id).unwrap();
+    assert_eq!(mask_record.output_role, "mask");
+    assert_eq!(mask_record.asset.data_type, AssetKind::Mask);
+    assert_eq!(library.read_asset_png(&mask_id).unwrap(), mask);
+}
+
+#[test]
+fn birefnet_requires_both_valid_outputs_and_rolls_back_as_a_unit() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let job = birefnet_job(&mut library, "birefnet-atomic", 10, 12);
+    let run = library.attempt_run_dir(&job.attempt).unwrap();
+    let primary = rgba_png_bytes_for(10, 12);
+    fs::write(run.join("primary.png"), &primary).unwrap();
+    let missing = library
+        .commit_outputs_after_reap(
+            &job.attempt,
+            vec![RoleCandidate {
+                role: "primary".into(),
+                candidate: CandidateDescriptor {
+                    relative_path: "primary.png".into(),
+                    width: 10,
+                    height: 12,
+                    byte_count: primary.len() as u64,
+                    sha256: format!("{:x}", Sha256::digest(&primary)),
+                },
+            }],
+        )
+        .unwrap_err();
+    assert!(missing.to_string().contains("角色集合"));
+
+    let mask = mask_png_bytes_for(10, 12);
+    fs::write(run.join("mask.png"), &mask).unwrap();
+    library.db.execute_batch("CREATE TRIGGER reject_terminal BEFORE UPDATE OF state ON attempts WHEN NEW.state='succeeded' BEGIN SELECT RAISE(ABORT,'fixture commit failure'); END;").unwrap();
+    assert!(
+        library
+            .commit_outputs_after_reap(
+                &job.attempt,
+                vec![
+                    RoleCandidate {
+                        role: "primary".into(),
+                        candidate: CandidateDescriptor {
+                            relative_path: "primary.png".into(),
+                            width: 10,
+                            height: 12,
+                            byte_count: primary.len() as u64,
+                            sha256: format!("{:x}", Sha256::digest(&primary)),
+                        },
+                    },
+                    RoleCandidate {
+                        role: "mask".into(),
+                        candidate: CandidateDescriptor {
+                            relative_path: "mask.png".into(),
+                            width: 10,
+                            height: 12,
+                            byte_count: mask.len() as u64,
+                            sha256: format!("{:x}", Sha256::digest(&mask)),
+                        },
+                    },
+                ],
+            )
+            .is_err()
+    );
+    assert!(library.assets(100, 0).unwrap().is_empty());
+    assert!(library.job(&job.job_id).unwrap().manifest.is_none());
+    assert_eq!(fs::read_dir(root.path().join("assets")).unwrap().count(), 0);
 }
 
 #[cfg(unix)]

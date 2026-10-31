@@ -723,7 +723,8 @@ impl Library {
         request: UserRequest,
         plan: ExecutionPlan,
     ) -> Result<BoundTurn> {
-        validate_z_image_plan(&request, &plan)?;
+        let source = self.source_facts_for_request(&request)?;
+        studio_core::recipes::validate_recipe_plan(&request, &plan, source)?;
         let turn = self.turn(turn_id)?;
         let (width, height) = match turn.aspect.as_str() {
             "1:1" => (1024, 1024),

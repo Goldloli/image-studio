@@ -5,6 +5,7 @@ use image::{
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use std::io::{Cursor, Read, Write};
+use studio_core::recipes::SourceFacts;
 use studio_core::recipes::{MAX_SOURCE_BYTES, MAX_SOURCE_EDGE, MAX_SOURCE_PIXELS};
 
 const SOURCE_PROCESSING_VERSION: &str = "source-normalize-v1";
@@ -247,6 +248,27 @@ impl Library {
             byte_count: record.byte_count,
             has_transparent_pixels: facts,
         })
+    }
+
+    pub fn source_facts_for_request(
+        &self,
+        request: &studio_core::contracts::UserRequest,
+    ) -> Result<Option<SourceFacts>> {
+        request.validate()?;
+        let Some(binding) = request.inputs.first() else {
+            return Ok(None);
+        };
+        let source = self.resolve_source(&binding.asset.asset_id)?;
+        if source.asset != binding.asset {
+            return Err(LibraryError::Invalid(
+                "请求源图身份与本地受控资产不一致".into(),
+            ));
+        }
+        Ok(Some(SourceFacts {
+            width: source.width,
+            height: source.height,
+            has_transparent_pixels: source.has_transparent_pixels,
+        }))
     }
 
     pub fn read_source_png(&self, id: &AssetId) -> Result<Vec<u8>> {

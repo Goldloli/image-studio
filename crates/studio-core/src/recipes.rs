@@ -121,10 +121,12 @@ impl Recipe {
 
     pub fn accepts_output(self, role: OutputRole, kind: AssetKind) -> bool {
         match (self, role) {
-            (
-                Self::ZImageTurbo | Self::KleinText | Self::KleinEdit | Self::RealEsrgan,
-                OutputRole::Primary,
-            ) => matches!(kind, AssetKind::ImageRgb),
+            (Self::ZImageTurbo, OutputRole::Primary) => {
+                matches!(kind, AssetKind::ImageRgb | AssetKind::ImageRgba)
+            }
+            (Self::KleinText | Self::KleinEdit | Self::RealEsrgan, OutputRole::Primary) => {
+                matches!(kind, AssetKind::ImageRgb)
+            }
             (Self::BiRefNet, OutputRole::Primary) => matches!(kind, AssetKind::ImageRgba),
             (Self::BiRefNet, OutputRole::Mask) => matches!(kind, AssetKind::Mask),
             _ => false,
