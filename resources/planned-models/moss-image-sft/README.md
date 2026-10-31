@@ -1,11 +1,12 @@
 # OpenMOSS-Team/MOSS-Image-SFT
 
-- Revision: `f972bd4b4b9e3852133cc5da954d87bc32cd8fb9`
+- Frozen Hugging Face revision: `f972bd4b4b9e3852133cc5da954d87bc32cd8fb9`
+- Default download source: ModelScope `OpenMOSS/MOSS-Image-SFT`
 - License: `Apache-2.0`
 - Component bytes: `27219783878`
 - Runtime: `mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3`
 
-The executable manifest fixes every download URL, byte count, and content SHA-256. Ordinary-file hashes were derived from the pinned files; LFS hashes come from the Hugging Face blob metadata.
+The executable manifest fixes every ModelScope file revision and download URL. File size and SHA-256 must match the frozen Hugging Face snapshot; ordinary files additionally match its Git blob IDs.
 
 ## Files
 

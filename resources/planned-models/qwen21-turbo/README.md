@@ -1,11 +1,12 @@
 # Qwen/Qwen-Image-2.1-Turbo
 
-- Revision: `fc13ba1986fcb905854dc8de2f52eee395f49b5b`
+- Frozen Hugging Face revision: `fc13ba1986fcb905854dc8de2f52eee395f49b5b`
+- Default download source: ModelScope `Qwen/Qwen-Image-2.1-Turbo`
 - License: `qwen-research`
 - Component bytes: `32451607098`
 - Runtime: `mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3`
 
-The executable manifest fixes every download URL, byte count, and content SHA-256. Ordinary-file hashes were derived from the pinned files; LFS hashes come from the Hugging Face blob metadata.
+The executable manifest fixes every ModelScope file revision and download URL. File size and SHA-256 must match the frozen Hugging Face snapshot; ordinary files additionally match its Git blob IDs.
 
 ## Files
 

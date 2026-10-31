@@ -134,11 +134,13 @@ def verify_text_models(shared_directory, model_directories):
     expected = {
         "qwen21": (
             "Qwen/Qwen-Image-2.1",
+            "Qwen/Qwen-Image-2.1",
             "d26bb61231c349cf6b7896fa83353113880e1ba3",
             33_131_609_424,
             25,
         ),
         "qwen21-turbo": (
+            "Qwen/Qwen-Image-2.1-Turbo",
             "Qwen/Qwen-Image-2.1-Turbo",
             "fc13ba1986fcb905854dc8de2f52eee395f49b5b",
             32_451_607_098,
@@ -146,6 +148,7 @@ def verify_text_models(shared_directory, model_directories):
         ),
         "moss-image-sft": (
             "OpenMOSS-Team/MOSS-Image-SFT",
+            "OpenMOSS/MOSS-Image-SFT",
             "f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
             27_219_783_878,
             19,
@@ -164,12 +167,17 @@ def verify_text_models(shared_directory, model_directories):
     verified = []
     for directory in model_directories:
         model = json.loads((directory / "model-manifest.json").read_text())
-        repository, revision, component_bytes, file_count = expected[directory.name]
+        repository, download_repository, revision, component_bytes, file_count = expected[
+            directory.name
+        ]
         source_model = source_by_repository[repository]
         source_files = {item["path"]: item for item in source_model["files"]}
         assert model["schema_version"] == 1
         assert model["repository"] == repository
         assert model["revision"] == revision
+        assert model["download_source"]["provider"] == "modelscope"
+        assert model["download_source"]["repository"] == download_repository
+        assert model["download_source"]["revision_policy"] == "per-file"
         assert source_model["revision"] == revision
         assert model["component_bytes"] == component_bytes
         assert len(model["files"]) == file_count
@@ -179,7 +187,13 @@ def verify_text_models(shared_directory, model_directories):
             assert not path.is_absolute() and ".." not in path.parts
             assert file["bytes"] > 0
             assert re.fullmatch("[0-9a-f]{64}", file["sha256"])
-            assert f"/resolve/{revision}/" in file["url"]
+            source_revision = file["source_revision"]
+            assert re.fullmatch("[0-9a-f]{40}", source_revision)
+            assert file["url"] == (
+                f"https://www.modelscope.cn/models/{download_repository}/resolve/"
+                f"{source_revision}/{file['path']}"
+            )
+            assert "/master/" not in file["url"]
             assert file["license"]
             source_file = source_files[file["path"]]
             assert file["bytes"] == source_file["bytes"]

@@ -8,7 +8,7 @@
 - [x] 1.2 固定三个官方 revision、组件角色、模板和采样语义；验证 sources 与正式拟接入型号一致，未引入编辑路线、MOSS Base 或其他 LoRA。
 - [x] 1.3 补齐正式 model manifest 的全部内容 SHA-256、配置/索引/采样依赖和原文来源；验证 N01 的文件闭包及摘要完整，metadata 没有被误当执行清单。
 - [x] 1.4 在独立源目录创建新版 worker wheel 和独立 runtime lock，锁定必要包/平台/来源；验证 N02 的原Z-Image、前置Klein及新增Qwen/MOSS源码/wheel各自一致，旧包与清单摘要不变。
-- [ ] 1.5 将Qwen/MOSS默认分发切换到ModelScope固定文件revision，保留冻结HF内容身份；验证全部60个组件的路径、字节数、SHA-256一致，固定地址不含`master`，未登记域名和内容漂移均拒绝。
+- [x] 1.5 将Qwen/MOSS默认分发切换到ModelScope固定文件revision，保留冻结HF内容身份；验证全部60个组件的路径、字节数、SHA-256一致，固定地址不含`master`，未登记域名和内容漂移均拒绝。
 
 ## 2. 复用前置公共边界并增补三配方
 

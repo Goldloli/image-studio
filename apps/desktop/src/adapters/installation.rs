@@ -2069,6 +2069,8 @@ fn allowed_url(url: &reqwest::Url) -> bool {
             host == "huggingface.co"
                 || host.ends_with(".cdn.hf.co")
                 || host.ends_with(".xethub.hf.co")
+                || host == "modelscope.cn"
+                || host.ends_with(".modelscope.cn")
                 || matches!(
                     host,
                     "github.com"
@@ -2853,6 +2855,33 @@ mod tests {
     }
 
     #[test]
+    fn qwen_and_moss_manifests_use_pinned_modelscope_files() {
+        for (profile, repository) in [
+            (QWEN_IMAGE_21_PROFILE, "Qwen/Qwen-Image-2.1"),
+            (QWEN_IMAGE_21_TURBO_PROFILE, "Qwen/Qwen-Image-2.1-Turbo"),
+            (MOSS_IMAGE_SFT_PROFILE, "OpenMOSS/MOSS-Image-SFT"),
+        ] {
+            let manifest: serde_json::Value = serde_json::from_str(profile.model_manifest).unwrap();
+            assert_eq!(manifest["download_source"]["provider"], "modelscope");
+            assert_eq!(manifest["download_source"]["repository"], repository);
+            assert_eq!(manifest["download_source"]["revision_policy"], "per-file");
+            let files = manifest["files"].as_array().unwrap();
+            assert!(!files.is_empty());
+            for file in files {
+                let revision = file["source_revision"].as_str().unwrap();
+                assert_eq!(revision.len(), 40);
+                assert!(revision.bytes().all(|byte| byte.is_ascii_hexdigit()));
+                let url = file["url"].as_str().unwrap();
+                assert!(url.starts_with(&format!(
+                    "https://www.modelscope.cn/models/{repository}/resolve/{revision}/"
+                )));
+                assert!(!url.contains("/master/"));
+                assert!(allowed_url(&reqwest::Url::parse(url).unwrap()));
+            }
+        }
+    }
+
+    #[test]
     fn birefnet_has_an_independent_onnx_runtime_and_worker() {
         let temp = tempfile::tempdir().unwrap();
         let paths = AppPaths::resolve(Some(temp.path())).unwrap();
@@ -3208,11 +3237,26 @@ mod tests {
         assert!(allowed_url(
             &reqwest::Url::parse("https://us.gcp.cdn.hf.co/official-object").unwrap()
         ));
+        assert!(allowed_url(
+            &reqwest::Url::parse("https://www.modelscope.cn/models/Qwen/model").unwrap()
+        ));
+        assert!(allowed_url(
+            &reqwest::Url::parse("https://cdn-lfs-cn-1.modelscope.cn/prod/object").unwrap()
+        ));
         assert!(!allowed_url(
             &reqwest::Url::parse("https://us.aws.cdn.hf.co.evil.test/object").unwrap()
         ));
         assert!(!allowed_url(
             &reqwest::Url::parse("https://evilcdn.hf.co.evil.test/object").unwrap()
+        ));
+        assert!(!allowed_url(
+            &reqwest::Url::parse("https://modelscope.cn.evil.test/model").unwrap()
+        ));
+        assert!(!allowed_url(
+            &reqwest::Url::parse("https://evilmodelscope.cn/model").unwrap()
+        ));
+        assert!(!allowed_url(
+            &reqwest::Url::parse("http://www.modelscope.cn/model").unwrap()
         ));
         let tmp = tempfile::tempdir().unwrap();
         let path = tmp.path().join("a");
