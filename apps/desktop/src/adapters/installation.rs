@@ -38,6 +38,8 @@ const KLEIN_WORKER_WHEEL: &[u8] = include_bytes!(
     "../../../../resources/planned-models/klein/studio_mflux_worker_v2-0.2.0-py3-none-any.whl"
 );
 const RESERVE: u64 = 4 * 1024 * 1024 * 1024;
+const SEGMENTED_DOWNLOAD_THRESHOLD: u64 = 2 * 1024 * 1024 * 1024;
+const DOWNLOAD_SEGMENTS: usize = 8;
 
 #[derive(Clone, Copy)]
 struct InstallProfile {
@@ -968,18 +970,10 @@ impl Installation {
             }
             fs::remove_file(&final_path).map_err(err)?;
         }
-        let client = reqwest::Client::builder()
-            .connect_timeout(Duration::from_secs(30))
-            .read_timeout(Duration::from_secs(45))
-            .redirect(reqwest::redirect::Policy::custom(|attempt| {
-                if attempt.previous().len() >= 6 || !allowed_url(attempt.url()) {
-                    attempt.error("下载重定向不在许可域名中")
-                } else {
-                    attempt.follow()
-                }
-            }))
-            .build()
-            .map_err(err)?;
+        if a.bytes >= SEGMENTED_DOWNLOAD_THRESHOLD && a.path.ends_with(".safetensors") {
+            return self.download_segmented(a).await;
+        }
+        let client = http_client()?;
         let part = final_path.with_extension("part");
         let meta = final_path.with_extension("resume.json");
         let previous = fs::read(&meta)
@@ -1020,6 +1014,7 @@ impl Installation {
                     .and_then(|v| v.to_str().ok()),
                 offset,
                 a.bytes,
+                a.bytes - offset,
             );
         if response.status() == reqwest::StatusCode::PARTIAL_CONTENT && !append {
             fs::remove_file(&part).ok();
@@ -1070,6 +1065,273 @@ impl Installation {
         verify(&part, a.bytes, &a.sha256)?;
         fs::rename(&part, &final_path).map_err(err)?;
         fs::remove_file(&meta).ok();
+        Ok(())
+    }
+
+    async fn download_segmented(&self, a: &Artifact) -> Result<(), String> {
+        let final_path = self.cache().join(&a.sha256);
+        let part = final_path.with_extension("part");
+        let meta = final_path.with_extension("resume.json");
+        let seed_marker = final_path.with_extension("segments-seeded");
+        let ranges = segment_ranges(a.bytes, DOWNLOAD_SEGMENTS)?;
+        let segment_paths = (0..ranges.len())
+            .map(|index| part.with_extension(format!("segment-{index:02}")))
+            .collect::<Vec<_>>();
+        let segment_meta_paths = (0..ranges.len())
+            .map(|index| part.with_extension(format!("segment-{index:02}.json")))
+            .collect::<Vec<_>>();
+        let previous = fs::read(&meta)
+            .ok()
+            .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok());
+        let mut etag = previous
+            .as_ref()
+            .and_then(|value| value["etag"].as_str())
+            .filter(|value| !value.is_empty() && !value.starts_with("W/"))
+            .map(str::to_owned);
+        let client = http_client()?;
+        if etag.is_none() {
+            let response = self
+                .cancellable(
+                    client
+                        .get(&a.url)
+                        .header(reqwest::header::RANGE, "bytes=0-0")
+                        .send(),
+                )
+                .await?;
+            if response.status() != reqwest::StatusCode::PARTIAL_CONTENT {
+                return Err(format!("{}：服务器不支持分段续传。", a.path));
+            }
+            etag = response
+                .headers()
+                .get(reqwest::header::ETAG)
+                .and_then(|value| value.to_str().ok())
+                .filter(|value| !value.is_empty() && !value.starts_with("W/"))
+                .map(str::to_owned);
+            if !valid_range(
+                response
+                    .headers()
+                    .get(reqwest::header::CONTENT_RANGE)
+                    .and_then(|value| value.to_str().ok()),
+                0,
+                a.bytes,
+                1,
+            ) {
+                return Err(format!("{}：分段探针范围不符。", a.path));
+            }
+        }
+        let etag = etag.ok_or_else(|| format!("{}：缺少可靠 ETag，无法分段。", a.path))?;
+
+        if !seed_marker.exists() {
+            for path in segment_paths.iter().chain(&segment_meta_paths) {
+                if path.exists() {
+                    fs::remove_file(path).map_err(err)?;
+                }
+            }
+            let seeded = if part.exists() {
+                seed_segments(&part, &ranges, &segment_paths)?
+            } else {
+                for path in &segment_paths {
+                    open_regular(path, true, true)?;
+                }
+                0
+            };
+            atomic_json(&seed_marker, &serde_json::json!({"sha256":a.sha256}))?;
+            self.update(|state| state.received_bytes += seeded);
+        } else {
+            let existing: u64 = segment_paths
+                .iter()
+                .filter_map(|path| fs::metadata(path).ok().map(|metadata| metadata.len()))
+                .sum();
+            self.update(|state| state.received_bytes += existing);
+        }
+        if part.exists() {
+            fs::remove_file(&part).map_err(err)?;
+        }
+
+        let mut tasks = tokio::task::JoinSet::new();
+        for (index, (start, end)) in ranges.iter().copied().enumerate() {
+            let worker = self.clone();
+            let client = client.clone();
+            let url = a.url.clone();
+            let path = segment_paths[index].clone();
+            let metadata_path = segment_meta_paths[index].clone();
+            let sha256 = a.sha256.clone();
+            let etag = etag.clone();
+            let total = a.bytes;
+            tasks.spawn(async move {
+                worker
+                    .download_segment(
+                        &client,
+                        &url,
+                        &path,
+                        &metadata_path,
+                        &sha256,
+                        &etag,
+                        start,
+                        end,
+                        total,
+                    )
+                    .await
+            });
+        }
+        let mut first_error = None;
+        while let Some(result) = tasks.join_next().await {
+            match result {
+                Ok(Ok(())) => {}
+                Ok(Err(error)) => {
+                    first_error.get_or_insert(error);
+                    tasks.abort_all();
+                }
+                Err(error) => {
+                    first_error.get_or_insert_with(|| format!("分段下载线程失败：{error}"));
+                    tasks.abort_all();
+                }
+            }
+        }
+        if let Some(error) = first_error {
+            return Err(error);
+        }
+        for ((start, end), path) in ranges.iter().zip(&segment_paths) {
+            let length = end - start;
+            if fs::metadata(path).map_err(err)?.len() != length {
+                return Err(format!("{}：分段文件长度不符。", a.path));
+            }
+        }
+        let mut output = open_regular(&part, true, true)?;
+        for path in &segment_paths {
+            let mut input = open_regular(path, false, false)?;
+            std::io::copy(&mut input, &mut output).map_err(err)?;
+        }
+        output.sync_all().map_err(err)?;
+        drop(output);
+        verify(&part, a.bytes, &a.sha256)?;
+        fs::rename(&part, &final_path).map_err(err)?;
+        for path in segment_paths.iter().chain(&segment_meta_paths) {
+            fs::remove_file(path).ok();
+        }
+        fs::remove_file(seed_marker).ok();
+        fs::remove_file(meta).ok();
+        Ok(())
+    }
+
+    async fn download_segment(
+        &self,
+        client: &reqwest::Client,
+        url: &str,
+        path: &Path,
+        metadata_path: &Path,
+        sha256: &str,
+        etag: &str,
+        start: u64,
+        end: u64,
+        total: u64,
+    ) -> Result<(), String> {
+        let expected = end - start;
+        let offset = fs::metadata(path).map(|value| value.len()).unwrap_or(0);
+        if offset > expected {
+            fs::remove_file(path).map_err(err)?;
+        }
+        let raw_offset = if path.exists() {
+            fs::metadata(path).map_err(err)?.len()
+        } else {
+            open_regular(path, true, true)?;
+            0
+        };
+        if raw_offset == expected {
+            atomic_json(
+                metadata_path,
+                &serde_json::json!({
+                    "sha256": sha256,
+                    "etag": etag,
+                    "start": start,
+                    "end": end,
+                    "total": total,
+                    "offset": raw_offset,
+                }),
+            )?;
+            return Ok(());
+        }
+        let previous = fs::read(metadata_path)
+            .ok()
+            .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok());
+        let resumable = raw_offset > 0
+            && previous.as_ref().is_some_and(|value| {
+                value["sha256"] == sha256
+                    && value["etag"] == etag
+                    && value["start"] == start
+                    && value["end"] == end
+            });
+        let offset = if resumable { raw_offset } else { 0 };
+        atomic_json(
+            metadata_path,
+            &serde_json::json!({
+                "sha256": sha256,
+                "etag": etag,
+                "start": start,
+                "end": end,
+                "total": total,
+                "offset": offset,
+            }),
+        )?;
+        let request_start = start + offset;
+        let response = self
+            .cancellable(
+                client
+                    .get(url)
+                    .header(
+                        reqwest::header::RANGE,
+                        format!("bytes={request_start}-{}", end - 1),
+                    )
+                    .header(reqwest::header::IF_RANGE, etag)
+                    .send(),
+            )
+            .await?;
+        if response.status() != reqwest::StatusCode::PARTIAL_CONTENT
+            || response
+                .headers()
+                .get(reqwest::header::ETAG)
+                .and_then(|value| value.to_str().ok())
+                != Some(etag)
+            || !valid_range(
+                response
+                    .headers()
+                    .get(reqwest::header::CONTENT_RANGE)
+                    .and_then(|value| value.to_str().ok()),
+                request_start,
+                total,
+                end - request_start,
+            )
+        {
+            return Err("分段 Range 响应身份或范围不符。".into());
+        }
+        if let Some(length) = response.content_length()
+            && length != end - request_start
+        {
+            return Err("分段响应字节数不符。".into());
+        }
+        let mut file = open_regular(path, true, offset > 0)?;
+        if offset > 0 {
+            use std::io::{Seek, SeekFrom};
+            file.seek(SeekFrom::Start(offset)).map_err(err)?;
+        }
+        let mut response = response;
+        let mut received = offset;
+        loop {
+            self.check_cancel()?;
+            let Some(chunk) = self.cancellable(response.chunk()).await? else {
+                break;
+            };
+            received += chunk.len() as u64;
+            if received > expected {
+                return Err("分段下载超过清单范围。".into());
+            }
+            file.write_all(&chunk).map_err(err)?;
+            self.update(|state| state.received_bytes += chunk.len() as u64);
+        }
+        file.sync_all().map_err(err)?;
+        if received != expected {
+            return Err("分段下载未达到清单长度。".into());
+        }
         Ok(())
     }
 }
@@ -1187,6 +1449,64 @@ fn allowed_url(url: &reqwest::Url) -> bool {
             )
         )
 }
+fn http_client() -> Result<reqwest::Client, String> {
+    reqwest::Client::builder()
+        .connect_timeout(Duration::from_secs(30))
+        .read_timeout(Duration::from_secs(45))
+        .redirect(reqwest::redirect::Policy::custom(|attempt| {
+            if attempt.previous().len() >= 6 || !allowed_url(attempt.url()) {
+                attempt.error("下载重定向不在许可域名中")
+            } else {
+                attempt.follow()
+            }
+        }))
+        .build()
+        .map_err(err)
+}
+fn segment_ranges(total: u64, count: usize) -> Result<Vec<(u64, u64)>, String> {
+    if total == 0 || count == 0 || usize::try_from(total).is_err() {
+        return Err("分段下载范围无效。".into());
+    }
+    let size = total.div_ceil(count as u64);
+    let mut ranges = Vec::with_capacity(count);
+    let mut start = 0;
+    while start < total {
+        let end = (start + size).min(total);
+        ranges.push((start, end));
+        start = end;
+    }
+    Ok(ranges)
+}
+fn seed_segments(
+    source_path: &Path,
+    ranges: &[(u64, u64)],
+    segment_paths: &[PathBuf],
+) -> Result<u64, String> {
+    use std::io::{Seek, SeekFrom};
+    let mut source = open_regular(source_path, false, false)?;
+    let available = source.metadata().map_err(err)?.len();
+    let mut total = 0;
+    for ((start, end), path) in ranges.iter().zip(segment_paths) {
+        let mut output = open_regular(path, true, true)?;
+        if available <= *start {
+            continue;
+        }
+        let length = (available.min(*end) - *start).min(end - start);
+        source.seek(SeekFrom::Start(*start)).map_err(err)?;
+        if std::io::copy(
+            &mut std::io::Read::by_ref(&mut source).take(length),
+            &mut output,
+        )
+        .map_err(err)?
+            != length
+        {
+            return Err("旧下载恢复文件无法完整分段。".into());
+        }
+        output.sync_all().map_err(err)?;
+        total += length;
+    }
+    Ok(total)
+}
 fn validate_artifact(a: &Artifact) -> Result<(), String> {
     safe_relative(&a.path)?;
     if a.bytes == 0 || a.sha256.len() != 64 || !a.sha256.bytes().all(|b| b.is_ascii_hexdigit()) {
@@ -1197,8 +1517,10 @@ fn validate_artifact(a: &Artifact) -> Result<(), String> {
     }
     Ok(())
 }
-fn valid_range(value: Option<&str>, offset: u64, total: u64) -> bool {
-    value.is_some_and(|s| s == format!("bytes {offset}-{}/{total}", total - 1))
+fn valid_range(value: Option<&str>, offset: u64, total: u64, length: u64) -> bool {
+    length > 0
+        && offset < total
+        && value.is_some_and(|s| s == format!("bytes {offset}-{}/{total}", offset + length - 1))
 }
 fn verify(path: &Path, bytes: u64, sha: &str) -> Result<(), String> {
     let metadata =
@@ -1761,9 +2083,32 @@ mod tests {
     }
     #[test]
     fn range_requires_exact_start_end_and_total() {
-        assert!(valid_range(Some("bytes 5-9/10"), 5, 10));
-        assert!(!valid_range(Some("bytes 0-9/10"), 5, 10));
-        assert!(!valid_range(Some("bytes 5-8/9"), 5, 10));
+        assert!(valid_range(Some("bytes 5-9/10"), 5, 10, 5));
+        assert!(!valid_range(Some("bytes 0-9/10"), 5, 10, 5));
+        assert!(!valid_range(Some("bytes 5-8/9"), 5, 10, 4));
+    }
+
+    #[test]
+    fn segmented_ranges_are_complete_disjoint_and_resumeable() {
+        assert_eq!(
+            segment_ranges(10, 3).unwrap(),
+            vec![(0, 4), (4, 8), (8, 10)]
+        );
+        let root = tempfile::tempdir().unwrap();
+        let source = root.path().join("source.part");
+        fs::write(&source, b"0123456").unwrap();
+        let segments = vec![
+            root.path().join("segment-0"),
+            root.path().join("segment-1"),
+            root.path().join("segment-2"),
+        ];
+        assert_eq!(
+            seed_segments(&source, &segment_ranges(10, 3).unwrap(), &segments).unwrap(),
+            7
+        );
+        assert_eq!(fs::read(&segments[0]).unwrap(), b"0123");
+        assert_eq!(fs::read(&segments[1]).unwrap(), b"456");
+        assert_eq!(fs::read(&segments[2]).unwrap(), b"");
     }
     #[test]
     fn activation_records_bind_bytes_even_when_version_labels_are_reused() {
