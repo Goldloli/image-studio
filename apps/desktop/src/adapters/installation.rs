@@ -289,6 +289,9 @@ impl Installations {
     }
 
     pub fn start(&self, install_id: &str) -> Result<InstallationSnapshot, String> {
+        if self.is_busy() {
+            return Err("另一个型号正在安装，请等待完成或停止后再试。".into());
+        }
         self.for_id(install_id)
             .ok_or_else(|| "未登记的安装标识。".to_string())?
             .start(install_id)
@@ -2915,6 +2918,30 @@ mod tests {
                 .snapshot(INSTALL_ID)
                 .is_some_and(|snapshot| snapshot.phase == "not_installed")
         );
+    }
+
+    #[test]
+    fn native_install_admission_is_exclusive_and_wrong_row_stop_is_isolated() {
+        let temp = tempfile::tempdir().unwrap();
+        let manager = Installations::new(AppPaths::resolve(Some(temp.path())).unwrap()).unwrap();
+        manager
+            .realesrgan
+            .update(|state| state.phase = "downloading".into());
+        assert!(
+            manager
+                .start(BIREFNET_INSTALL_ID)
+                .unwrap_err()
+                .contains("另一个型号")
+        );
+        manager.cancel(BIREFNET_INSTALL_ID).unwrap();
+        assert!(!manager.realesrgan.inner.cancelled.load(Ordering::SeqCst));
+        assert_eq!(
+            manager.snapshot(REALESRGAN_INSTALL_ID).unwrap().phase,
+            "downloading"
+        );
+        manager.cancel(REALESRGAN_INSTALL_ID).unwrap();
+        assert!(manager.realesrgan.inner.cancelled.load(Ordering::SeqCst));
+        assert_eq!(manager.snapshot(INSTALL_ID).unwrap().phase, "not_installed");
     }
     #[test]
     fn range_requires_exact_start_end_and_total() {
