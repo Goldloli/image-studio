@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "modelId": "qwen-image-2.1-mflux-v1",
+  "capabilityId": "image.text-to-image.qwen-image-2.1.v1",
+  "recipe": "qwen21-txt2img-q8-40-v1",
+  "processElapsedMilliseconds": 920737,
+  "sourceEvidence": "batch.jsonl",
+  "tasks": [
+    {
+      "id": "T01",
+      "seed": 42,
+      "turnId": "turn-cccefb8205274f24a65290953b682953",
+      "jobId": "job-4f65f9189a454687a6cb160138c3a102",
+      "attemptId": "attempt-18773323ab224722a4ae1c1743c98372",
+      "assetId": "asset-2078dcd1bd31491f976f93a3036f8627",
+      "assetSha256": "f364d6d783d7831725f8f976b65c3c933e75dc9b2211b9d64dda22e5c59d396c",
+      "elapsedMilliseconds": 298037,
+      "maxSamplingStep": 40,
+      "stageSequence": ["preparing", "loading", "sampling", "writing", "succeeded"],
+      "workerProcessesAfterCompletion": []
+    },
+    {
+      "id": "T02",
+      "seed": 43,
+      "turnId": "turn-a48d5e6702c54658a6d63947a7521509",
+      "jobId": "job-b11a689373c549c9a653cd6acd9367d9",
+      "attemptId": "attempt-4561650b7b8a4277aec776ecc6164fe5",
+      "assetId": "asset-a0e1c5513f244101a13fc097ab8ce282",
+      "assetSha256": "63334e5253d56cb09bdda067e8eec58f4aadd30e77aa9faecb8f4171c45c769c",
+      "elapsedMilliseconds": 312572,
+      "maxSamplingStep": 40,
+      "stageSequence": ["preparing", "loading", "sampling", "writing", "succeeded"],
+      "workerProcessesAfterCompletion": []
+    },
+    {
+      "id": "T03",
+      "seed": 44,
+      "turnId": "turn-21a566724ce74ef7a0ca00efa24e2dbe",
+      "jobId": "job-67de1ba4c65c4b0a8711fdb2b3ce108d",
+      "attemptId": "attempt-8e8ee8d26c6d4e3d924a99fe9beced94",
+      "assetId": "asset-c09a8070c1f340b69516ce1a61c5978f",
+      "assetSha256": "e78daff221e79141357940df1c461e204caac43b94e9f0f8902336e67a5d2825",
+      "elapsedMilliseconds": 309884,
+      "maxSamplingStep": 40,
+      "stageSequence": ["preparing", "loading", "sampling", "writing", "succeeded"],
+      "workerProcessesAfterCompletion": []
+    }
+  ],
+  "qualityReview": {
+    "T01": "水彩猫主体、窗边秋叶与暖光均符合提示词。",
+    "T02": "白瓷茶壶、蓝杯和产品摄影构图均符合提示词。",
+    "T03": "标题“秋日咖啡”和副标题“周末限定”完整清晰，版式符合提示词。"
+  },
+  "exportHashesMatch": true
+}
