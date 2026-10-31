@@ -1,22 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Palette, Boxes, ListTodo, Settings2, Sun, Moon, X, CircleHelp, Image, Images, Sparkles, Terminal, Play, Square, LoaderCircle } from 'lucide-react';
+import { Palette, Boxes, ListTodo, Settings2, Sun, Moon, X, CircleHelp, Image, Images, Sparkles, Terminal, Play, Square, LoaderCircle, Lightbulb } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Workspace from './Workspace';
 import { TaskLibrary } from './LibraryPages';
 import { AssetLibrary } from './AssetLibrary';
 import { FeatureLibrary } from './FeatureLibrary';
 import { ModelLibrary } from './ModelLibrary';
+import { PromptLibrary, type PromptUseRequest } from './PromptLibrary';
 import { SettingsPage } from './SettingsPage';
 import { api, native, type AssetView, type StoredDraft, type StudioSnapshot } from './studio-api';
 import { defaultAppearance, resolveTheme, type AppearancePreferences, type PreferencesEnvelope } from './settings-types';
 import './local-generation.css';
 import './library-pages.css';
 
-type Page = 'create' | 'features' | 'models' | 'works' | 'tasks' | 'settings';
+type Page = 'create' | 'inspiration' | 'features' | 'models' | 'works' | 'tasks' | 'settings';
 type SettingsGroup = 'appearance' | 'defaults' | 'storage' | 'runtime' | 'about';
 type AppearanceSaveStatus = 'saved' | 'saving' | 'error';
 type RequestedModel = { draft: StoredDraft; conversationId: string; nonce: number };
+type RequestedPrompt = PromptUseRequest & { nonce: number };
 type RequestedAsset = {
   asset: AssetView;
   conversationTitle: string;
@@ -37,6 +39,7 @@ type HostStatus = { inferenceAvailable: boolean; status: string; supportedModels
 type DiagnosticState = { enabled: boolean; mode: string; modes: string[]; snapshot: null | { phase: string; summary: string; probePassed: boolean; isRunning: boolean; pid: number | null; errorCode: string | null; logs: string; progressEvents: number } };
 const pages: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: 'create', label: '创作', icon: Palette },
+  { id: 'inspiration', label: '灵感库', icon: Lightbulb },
   { id: 'features', label: '功能', icon: Sparkles },
   { id: 'models', label: '模型', icon: Boxes },
   { id: 'works', label: '作品', icon: Images },
@@ -73,6 +76,7 @@ export default function App() {
   const [requestedConversation, setRequestedConversation] = useState<RequestedConversation | null>(null);
   const [requestedComposer, setRequestedComposer] = useState<{ nonce: number } | null>(null);
   const [requestedModel, setRequestedModel] = useState<RequestedModel | null>(null);
+  const [requestedPrompt, setRequestedPrompt] = useState<RequestedPrompt | null>(null);
   const [focusJob, setFocusJob] = useState<{ id: string; nonce: number } | null>(null);
   const requestNonce = useRef(0);
   const refreshStudio = useRef<()=>void>(()=>{});
@@ -219,7 +223,8 @@ export default function App() {
       </nav>
       <main className="main-surface">
         {hostError && <div className="host-error" role="status">{hostError}<button aria-label="关闭提示" onClick={() => setHostError('')}><X size={12}/></button></div>}
-        <div className="workspace-page" hidden={page !== 'create'}><Workspace onModels={() => navigate('models')} studio={studio} requestedAsset={requestedAsset} requestedConversation={requestedConversation} requestedComposer={requestedComposer} requestedModel={requestedModel} sidebarCollapsed={appearance.sidebarCollapsed} onSidebarCollapsedChange={collapsed => commitAppearance({ ...appearanceRef.current, sidebarCollapsed: collapsed })} onRefresh={refresh} onAssetReturn={() => { const returnPage = requestedAsset?.returnPage ?? 'create'; setRequestedAsset(null); navigate(returnPage); }}/></div>
+        <div className="workspace-page" hidden={page !== 'create'}><Workspace onModels={() => navigate('models')} studio={studio} requestedAsset={requestedAsset} requestedConversation={requestedConversation} requestedComposer={requestedComposer} requestedModel={requestedModel} requestedPrompt={requestedPrompt} sidebarCollapsed={appearance.sidebarCollapsed} onSidebarCollapsedChange={collapsed => commitAppearance({ ...appearanceRef.current, sidebarCollapsed: collapsed })} onRefresh={refresh} onAssetReturn={() => { const returnPage = requestedAsset?.returnPage ?? 'create'; setRequestedAsset(null); navigate(returnPage); }}/></div>
+        <div className="workspace-page" hidden={page !== 'inspiration'}><PromptLibrary active={page === 'inspiration'} onBack={() => navigate('create')} onUsePrompt={request => { setRequestedPrompt({ ...request, nonce: ++requestNonce.current }); navigate('create'); }} onError={setHostError}/></div>
         <div className="workspace-page" hidden={page !== 'features'}><FeatureLibrary studio={studio} onBack={() => navigate('create')} onModels={() => navigate('models')} onStartTextToImage={() => { setRequestedComposer({ nonce: Date.now() }); navigate('create'); }} onError={setHostError}/></div>
         {page === 'models' && <ModelLibrary studio={studio} onRefresh={refresh} onBack={()=>navigate('create')} onError={setHostError} onUseModel={(draft, conversationId) => { setRequestedModel({ draft, conversationId, nonce: Date.now() }); navigate('create'); }}/>}
         <div className="workspace-page" hidden={page !== 'works'}><AssetLibrary active={page === 'works'} onBack={() => navigate('create')} onOpenAsset={item => openAsset({ id: item.id, jobId: item.jobId, conversationId: item.conversationId, turnId: item.turnId, prompt: item.prompt, width: item.width, height: item.height, seed: item.seed, bytes: item.byteCount, available: item.available, error: item.availabilityError }, item.conversationTitle, item.draftId, item.turnSequence, 'works')} onOpenTask={jobId => { setFocusJob({ id: jobId, nonce: Date.now() }); navigate('tasks'); }} onError={setHostError}/></div>

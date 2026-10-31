@@ -2,7 +2,7 @@ import { convertFileSrc, invoke, isTauri } from '@tauri-apps/api/core';
 import type { DraftParams } from './workspace-state';
 
 export const native = isTauri();
-export type StoredDraft = { id: number; name: string; prompt: string; collapsed: boolean; params: DraftParams; version: number };
+export type StoredDraft = { id: number; name: string; prompt: string; collapsed: boolean; promptSourceId?: string | null; params: DraftParams; version: number };
 export type ModelView = { id: string; name: string; phase: string; summary: string; ready: boolean; runtimeReady: boolean; modelReady: boolean; deviceVerified: boolean; receivedBytes: number; totalBytes: number; modelBytes: number; runtimeBytes: number; requiredBytes: number; error: string | null; busy: boolean };
 export type JobView = { id: string; turnId: string | null; conversationId: string | null; attemptId: string; state: string; prompt: string; width: number; height: number; seed: number | null; error: string | null; assetId: string | null; manifest: unknown | null };
 export type AssetView = { id: string; jobId: string; conversationId: string | null; turnId: string | null; prompt: string; width: number; height: number; seed: number | null; bytes: number; available: boolean; error: string | null };
@@ -75,10 +75,11 @@ export type StudioSnapshot = {
 };
 export const api = <T>(command: string, args?: Record<string, unknown>) => invoke<T>(command, args);
 export const assetUrl = (id: string) => convertFileSrc(id, 'studio-asset');
+export const promptImageUrl = (sourceCaseId: number) => convertFileSrc(String(sourceCaseId), 'studio-prompt');
 export const bytesLabel = (value: number) => value >= 1e9 ? `${(value / 1e9).toFixed(2)} GB` : value >= 1e6 ? `${(value / 1e6).toFixed(1)} MB` : `${Math.round(value / 1e3)} KB`;
 export const stateLabel = (state: string): string => ({ Pending: '正在发送', Submitted: '已接收', Preparing: '准备中', Running: '生成中', Committing: '保存结果', CancelRequested: '正在取消', Succeeded: '已完成', Failed: '失败', Rejected: '未启动', Cancelled: '已取消', Interrupted: '已中断' }[state] ?? state);
 
-export const draftContent = (draft: Omit<StoredDraft, 'version'>) => ({ id: draft.id, name: draft.name, prompt: draft.prompt, collapsed: draft.collapsed, params: { ...draft.params } });
+export const draftContent = (draft: Omit<StoredDraft, 'version'>) => ({ id: draft.id, name: draft.name, prompt: draft.prompt, collapsed: draft.collapsed, promptSourceId: draft.promptSourceId ?? null, params: { ...draft.params } });
 type SaveStatus = 'saved' | 'pending' | 'saving' | 'error';
 
 /** Serial, coalescing CAS writes. Acknowledging an older write never marks newer edits saved. */

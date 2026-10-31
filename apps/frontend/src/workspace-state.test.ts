@@ -35,6 +35,25 @@ describe('workspace draft isolation',()=>{
     state=reduce(state,{type:'redo'});
     expect(state.drafts[0].prompt).toBe('很长的示例提示词');
   });
+  it('applies a library prompt as one editable step and clears provenance after undo',()=>{
+    let state=reduce(initialWorkspace(),{type:'edit',value:'原来的草稿'});
+    state=reduce(state,{type:'params',patch:{seed:'42'}});
+    state=reduce(state,{type:'applyPrompt',id:1,value:'完整案例原文\n[VARIABLE]',sourceId:'awesome-gpt-image-2:case:544',expected:'原来的草稿'});
+    expect(state.drafts[0].prompt).toBe('完整案例原文\n[VARIABLE]');
+    expect(state.drafts[0].promptSourceId).toBe('awesome-gpt-image-2:case:544');
+    expect(state.drafts[0].params.seed).toBe('42');
+    state=reduce(state,{type:'undo'});
+    expect(state.drafts[0].prompt).toBe('原来的草稿');
+    expect(state.drafts[0].promptSourceId).toBeNull();
+  });
+  it('rejects a stale prompt replacement and clears provenance after manual edits',()=>{
+    let state=reduce(initialWorkspace(),{type:'edit',value:'新内容'});
+    state=reduce(state,{type:'applyPrompt',id:1,value:'案例原文',sourceId:'awesome-gpt-image-2:case:544',expected:'旧内容'});
+    expect(state.drafts[0].prompt).toBe('新内容');
+    state=reduce(state,{type:'applyPrompt',id:1,value:'案例原文',sourceId:'awesome-gpt-image-2:case:544',expected:'新内容'});
+    state=reduce(state,{type:'edit',value:'用户改写'});
+    expect(state.drafts[0].promptSourceId).toBeNull();
+  });
   it('composition commits a whole candidate rather than its transient preedit',()=>{
     let state=initialWorkspace();
     state=reduce(state,{type:'edit',value:'zhongwen',record:false});

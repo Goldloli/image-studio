@@ -45,6 +45,7 @@ import {
 import {
   clampZoom,
   confirmedDraft,
+  createDraft,
   DEFAULT_MODEL_ID,
   initialWorkspace,
   validSeed,
@@ -91,6 +92,21 @@ type RequestedConversation = {
   turnSequence: number | null;
   nonce: number;
 };
+type RequestedPrompt = {
+  caseId: string;
+  title: string;
+  prompt: string;
+  target: 'new' | 'current';
+  nonce: number;
+};
+type PendingLibraryPrompt = {
+  draftId: number;
+  expectedVersion: number;
+  expectedPrompt: string;
+  sourceId: string;
+  prompt: string;
+  title: string;
+};
 const resetTransform = (): Transform => ({ zoom: 1, x: 0, y: 0, rotation: 0 });
 const activeStates = ['Pending', 'Submitted', 'Preparing', 'Running', 'Committing', 'CancelRequested'];
 const retryStates = ['Failed', 'Cancelled', 'Interrupted'];
@@ -105,6 +121,7 @@ function storedDraft(record: StoredDraft): Draft {
     name: record.name,
     prompt: record.prompt,
     collapsed: record.collapsed,
+    promptSourceId: record.promptSourceId ?? null,
     params: { ...record.params },
     past: [],
     future: [],
@@ -270,7 +287,7 @@ function ImageViewer({ title, prompt, source, isAsset, backLabel = '返回会话
   </div>;
 }
 
-export default function Workspace({ onModels, studio, requestedAsset, requestedConversation, requestedComposer, requestedModel, sidebarCollapsed, onSidebarCollapsedChange, onRefresh, onAssetReturn }: { onModels: () => void; studio: StudioSnapshot | null; requestedAsset: RequestedAsset | null; requestedConversation: RequestedConversation | null; requestedComposer: { nonce: number } | null; requestedModel: { draft: StoredDraft; conversationId: string; nonce: number } | null; sidebarCollapsed: boolean; onSidebarCollapsedChange: (value: boolean) => void; onRefresh: () => void; onAssetReturn: () => void }) {
+export default function Workspace({ onModels, studio, requestedAsset, requestedConversation, requestedComposer, requestedModel, requestedPrompt, sidebarCollapsed, onSidebarCollapsedChange, onRefresh, onAssetReturn }: { onModels: () => void; studio: StudioSnapshot | null; requestedAsset: RequestedAsset | null; requestedConversation: RequestedConversation | null; requestedComposer: { nonce: number } | null; requestedModel: { draft: StoredDraft; conversationId: string; nonce: number } | null; requestedPrompt: RequestedPrompt | null; sidebarCollapsed: boolean; onSidebarCollapsedChange: (value: boolean) => void; onRefresh: () => void; onAssetReturn: () => void }) {
   const [state, setState] = useState(initialWorkspace);
   const [conversations, setConversations] = useState<ConversationView[]>([]);
   const [conversationsHasMore, setConversationsHasMore] = useState(false);
@@ -293,6 +310,8 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [replacePromptTurn, setReplacePromptTurn] = useState<TurnView | null>(null);
+  const [replaceLibraryPrompt, setReplaceLibraryPrompt] = useState<PendingLibraryPrompt | null>(null);
+  const [promptActionBusy, setPromptActionBusy] = useState(false);
   const [exporting, setExporting] = useState(false);
   const initialized = useRef(false);
   const saveQueue = useRef<DraftSaveQueue | null>(null);
@@ -308,6 +327,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   const cancellationKeys = useRef(new Set<string>());
   const submissionGate = useRef(createSubmissionGate());
   const handledAssetNonce = useRef<number | null>(null);
+  const handledPromptNonce = useRef<number | null>(null);
   const lastSavedSelection = useRef<string | null>(null);
   const loadedMoreConversations = useRef(false);
   const activeRef = useRef<{ state: WorkspaceState; activeConversationId: string | null; optimistic: TurnView[]; conversations: ConversationView[] }>({ state, activeConversationId, optimistic, conversations });
@@ -451,6 +471,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       const hadPopup = popup !== null;
       setPopup(null);
       setReplacePromptTurn(null);
+      setReplaceLibraryPrompt(null);
       if (hadPopup) requestAnimationFrame(() => textarea.current?.focus());
     };
     const click = (event: globalThis.PointerEvent) => {
@@ -517,8 +538,112 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     }
   };
 
+  const applyCreatedConversation = (created: ConversationCreateAck) => {
+    saveQueue.current!.remember(created.draft);
+    dispatch({ type: 'append', draft: storedDraft(created.draft) });
+    setConversations(previous => [created.conversation, ...previous.filter(conversation => conversation.id !== created.conversation.id)]);
+    setTurnPages(previous => ({ ...previous, [created.conversation.id]: { turns: [], hasMore: false, nextCursor: null } }));
+    selectConversationLocally(created.conversation.id);
+    nearBottom.current = true;
+    setViewer(null);
+    setPopup(null);
+    if (created.defaultsWarnings?.length) setActionError(created.defaultsWarnings.join('；'));
+    onRefresh();
+    requestAnimationFrame(() => textarea.current?.focus());
+  };
+
+  const createPromptConversation = async (request: RequestedPrompt) => {
+    setPromptActionBusy(true);
+    setActionError('');
+    try {
+      if (!native) {
+        const id = Math.max(...activeRef.current.state.drafts.map(draft => draft.id)) + 1;
+        const draft = { ...createDraft(id, request.title), prompt: request.prompt, promptSourceId: request.caseId };
+        dispatch({ type: 'append', draft });
+        const conversation = { ...previewConversation, id: `local-conversation-${id}`, draftId: id, title: request.title };
+        setConversations(previous => [conversation, ...previous.filter(item => item.id !== conversation.id)]);
+        selectConversationLocally(conversation.id);
+        setPopup(null);
+        requestAnimationFrame(() => textarea.current?.focus());
+        return;
+      }
+      await flushAll();
+      const created = await api<ConversationCreateAck>('conversation_create', {
+        input: {
+          initialTitle: request.title,
+          initialPrompt: request.prompt,
+          promptSourceId: request.caseId,
+        },
+      });
+      applyCreatedConversation(created);
+    } catch (error) {
+      setActionError(String(error));
+    } finally {
+      setPromptActionBusy(false);
+    }
+  };
+
+  const applyPromptToDraft = (draftId: number, prompt: string, sourceId: string) => {
+    const draft = activeRef.current.state.drafts.find(value => value.id === draftId);
+    if (!draft) {
+      setActionError('目标会话已不存在，请重新打开灵感案例。');
+      return false;
+    }
+    dispatch({ type: 'applyPrompt', id: draftId, value: prompt, sourceId, expected: draft.prompt });
+    setPopup(null);
+    setReplaceLibraryPrompt(null);
+    requestAnimationFrame(() => textarea.current?.focus());
+    void flushAll().catch(() => {});
+    return true;
+  };
+
+  const beginLibraryPrompt = (request: RequestedPrompt) => {
+    const draft = activeRef.current.state.drafts.find(value => value.id === activeRef.current.state.activeId);
+    if (!draft) {
+      setActionError('当前没有可用的目标会话。');
+      return;
+    }
+    if (request.target === 'new') {
+      void createPromptConversation(request);
+      return;
+    }
+    if (draft.prompt === request.prompt) {
+      applyPromptToDraft(draft.id, request.prompt, request.caseId);
+      return;
+    }
+    if (!draft.prompt.trim()) {
+      applyPromptToDraft(draft.id, request.prompt, request.caseId);
+      return;
+    }
+    setReplaceLibraryPrompt({
+      draftId: draft.id,
+      expectedVersion: saveQueue.current!.version(draft.id),
+      expectedPrompt: draft.prompt,
+      sourceId: request.caseId,
+      prompt: request.prompt,
+      title: request.title,
+    });
+  };
+
+  const confirmLibraryPrompt = () => {
+    const pending = replaceLibraryPrompt;
+    if (!pending) return;
+    if (activeRef.current.state.activeId !== pending.draftId) {
+      setReplaceLibraryPrompt(null);
+      setActionError('目标会话已切换，本次替换未执行。请回到目标会话后重新应用。');
+      return;
+    }
+    const draft = activeRef.current.state.drafts.find(value => value.id === pending.draftId);
+    if (!draft || draft.prompt !== pending.expectedPrompt || saveQueue.current!.version(draft.id) !== pending.expectedVersion) {
+      setReplaceLibraryPrompt(null);
+      setActionError('目标草稿已发生变化，本次替换未执行。请重新应用案例。');
+      return;
+    }
+    applyPromptToDraft(pending.draftId, pending.prompt, pending.sourceId);
+  };
+
   const createConversation = async () => {
-    if (switching || submittingDraftId !== null) return;
+    if (switching || submittingDraftId !== null || promptActionBusy) return;
     if (compositions.current.size > 0) {
       textarea.current?.focus();
       setActionError('请先完成中文输入法候选确认，再新建会话。');
@@ -536,17 +661,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       }
       await flushAll();
       const created = await api<ConversationCreateAck>('conversation_create', { input: null });
-      saveQueue.current!.remember(created.draft);
-      dispatch({ type: 'append', draft: storedDraft(created.draft) });
-      setConversations(previous => [created.conversation, ...previous.filter(conversation => conversation.id !== created.conversation.id)]);
-      setTurnPages(previous => ({ ...previous, [created.conversation.id]: { turns: [], hasMore: false, nextCursor: null } }));
-      selectConversationLocally(created.conversation.id);
-      nearBottom.current = true;
-      setViewer(null);
-      setPopup(null);
-      if (created.defaultsWarnings?.length) setActionError(created.defaultsWarnings.join('；'));
-      onRefresh();
-      requestAnimationFrame(() => textarea.current?.focus());
+      applyCreatedConversation(created);
     } catch (error) {
       setActionError(String(error));
     }
@@ -865,6 +980,19 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     requestAnimationFrame(() => textarea.current?.focus());
   }, [requestedModel?.nonce, loaded]);
 
+  useEffect(() => {
+    if (!requestedPrompt || !loaded) return;
+    const claim = claimOneShotNonce(requestedPrompt.nonce, handledPromptNonce.current);
+    if (!claim.claimed) return;
+    handledPromptNonce.current = claim.processed;
+    if (compositions.current.size > 0) {
+      textarea.current?.focus();
+      setActionError('请先完成中文输入法候选确认，再使用灵感提示词。');
+      return;
+    }
+    beginLibraryPrompt(requestedPrompt);
+  }, [requestedPrompt?.nonce, loaded]);
+
   const handleEditorKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.nativeEvent.isComposing || compositions.current.has(active.id)) return;
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
@@ -921,7 +1049,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   return <div className={`workspace conversation-workspace ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
     <aside className={`conversation-sidebar ${sidebarCollapsed ? 'is-collapsed' : ''}`} aria-label="会话列表">
       <div className="conversation-sidebar-heading"><span>会话</span><IconButton label={sidebarCollapsed ? '展开会话列表' : '收起会话列表'} onClick={() => onSidebarCollapsedChange(!sidebarCollapsed)}>{sidebarCollapsed ? <PanelLeft size={17}/> : <PanelLeftClose size={17}/>}</IconButton></div>
-      <button className="new-conversation" disabled={!loaded || switching || submittingDraftId !== null} onClick={() => void createConversation()}><Plus size={16}/><span>新建会话</span></button>
+      <button className="new-conversation" disabled={!loaded || switching || submittingDraftId !== null || promptActionBusy} onClick={() => void createConversation()}><Plus size={16}/><span>新建会话</span></button>
       <div className="conversation-list">
         {visibleConversations.map(conversation => <div className={`conversation-list-item ${conversation.id === currentConversation.id ? 'is-active' : ''}`} key={conversation.id}>
           {renamingId === conversation.id
@@ -937,7 +1065,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       <header className="conversation-header">
         <button className="sidebar-toggle" aria-label={sidebarCollapsed ? '展开会话列表' : '收起会话列表'} onClick={() => onSidebarCollapsedChange(!sidebarCollapsed)}>{sidebarCollapsed ? <PanelLeft size={18}/> : <PanelLeftClose size={18}/>}</button>
         <div className="conversation-heading"><h1>{currentConversation.title}</h1><span>{studio?.execution.busy && currentActiveTurn ? studio.execution.summary : '本地图片创作'}</span></div>
-        <div className="header-actions">{runningConversation && runningConversation.id !== currentConversation.id && <button className="running-session-link" onClick={() => void switchConversation(runningConversation)}><span className="running-dot"/>查看正在生成的会话</button>}<button className="header-new" disabled={!loaded || switching || submittingDraftId !== null} onClick={() => void createConversation()}><Plus size={14}/>新建</button></div>
+        <div className="header-actions">{runningConversation && runningConversation.id !== currentConversation.id && <button className="running-session-link" onClick={() => void switchConversation(runningConversation)}><span className="running-dot"/>查看正在生成的会话</button>}<button className="header-new" disabled={!loaded || switching || submittingDraftId !== null || promptActionBusy} onClick={() => void createConversation()}><Plus size={14}/>新建</button></div>
       </header>
       <div className="conversation-timeline" ref={timeline} onScroll={event => { const element = event.currentTarget; nearBottom.current = element.scrollHeight - element.scrollTop - element.clientHeight < 96; }}>
         {turns.length > 0 && serverPage?.hasMore && <div className="history-loader"><button disabled={loadingOlder} onClick={() => void loadOlder()}>{loadingOlder ? <LoaderCircle size={13} className="spin"/> : <ChevronUp size={13}/>}加载更早记录</button></div>}
@@ -963,6 +1091,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       </div>
       <section className={`conversation-composer-area ${active.collapsed ? 'is-collapsed' : ''}`}>
         {replacePromptTurn && <div className="replace-prompt-bar" role="dialog" aria-label="替换当前提示词"><span>当前输入框已有文字。用这条历史提示词替换吗？</span><button onClick={() => applyPrompt(replacePromptTurn.prompt)}>替换</button><button onClick={() => setReplacePromptTurn(null)}>取消</button></div>}
+        {replaceLibraryPrompt && <div className="replace-prompt-bar" role="dialog" aria-label="替换为灵感提示词"><span>当前输入已有文字。用「{replaceLibraryPrompt.title}」的完整提示词替换吗？</span><button onClick={confirmLibraryPrompt}>替换</button><button onClick={() => setReplaceLibraryPrompt(null)}>取消</button></div>}
         <button className="collapsed-composer" onClick={() => dispatch({ type: 'collapse' })}><ChevronUp size={15}/><span>{active.prompt || '展开提示词，继续创作'}</span></button>
         <div className="conversation-composer">
           <div className="composer-caption"><span>{currentConversation.title}</span><span>{Array.from(active.prompt).length} 字符<IconButton label="收起提示词" onClick={() => { textarea.current?.blur(); dispatch({ type: 'collapse' }); }}><ChevronDown size={14}/></IconButton></span></div>
