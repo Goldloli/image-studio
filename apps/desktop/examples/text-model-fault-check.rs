@@ -60,6 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let model_id = model_id.ok_or("--model-id is required")?;
     let export_directory = export_directory.ok_or("--export-dir is required")?;
     std::fs::create_dir_all(&export_directory)?;
+    let export_directory = export_directory.canonicalize()?;
     for stage in cancel_stage.iter().chain(kill_stage.iter()) {
         if !matches!(
             stage.as_str(),
