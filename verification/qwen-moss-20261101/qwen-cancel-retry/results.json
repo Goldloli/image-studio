@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "modelId": "qwen-image-2.1-mflux-v1",
+  "mode": "cancel-retry",
+  "cancelledAt": {
+    "stage": "sampling",
+    "step": 1,
+    "total": 40,
+    "elapsedMilliseconds": 22114
+  },
+  "jobId": "job-d57cefcc6d9e4702a03fb0c61f4c1510",
+  "cancelledAttempt": {
+    "id": "attempt-f18eed479a234c95b604431b750e9b95",
+    "state": "cancelled"
+  },
+  "retryAttempt": {
+    "id": "attempt-f8eefef8ac94456a97f8e99e596fa547",
+    "state": "succeeded"
+  },
+  "assetId": "asset-8259ce3c83764089b4328667886a27d3",
+  "exportPath": "cancel-retry.png",
+  "exportSha256": "63f5f542c1e4fb6f51f6051925faafb69a85d79fc5afec6a4ba51b35fd265bac",
+  "workerProcessesAfterCompletion": [],
+  "sourceEvidence": "result.jsonl"
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "modelId": "qwen-image-2.1-mflux-v1",
+  "mode": "kill-retry",
+  "killedAt": {
+    "stage": "sampling",
+    "step": 1,
+    "total": 40,
+    "elapsedMilliseconds": 22220,
+    "exitCode": 73
+  },
+  "jobId": "job-9fcffa3127ff4384aacbc54c12148ef1",
+  "turnId": "turn-4adc91e5f3fe4e859a5311417a0a4840",
+  "interruptedAttempt": {
+    "id": "attempt-db2f78a1a7b5496db0b08e6fc79da3fc",
+    "state": "interrupted",
+    "error": "宿主中断；请确认旧执行已清理后显式重试"
+  },
+  "retryAttempt": {
+    "id": "attempt-44045668c7224cd3b88b832a6dff5bc6",
+    "state": "succeeded"
+  },
+  "assetId": "asset-89ee1311d77f4286bfd56bcadecda4d3",
+  "exportPath": "retry.png",
+  "exportSha256": "087d2989dea7abd715d6afe8d2efade0d0b0e2d2e55c6f2e871be9716a16eebd",
+  "workerProcessesAfterCompletion": [],
+  "sourceEvidence": ["kill.jsonl", "retry.jsonl"]
+}
