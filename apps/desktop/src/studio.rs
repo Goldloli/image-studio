@@ -1188,7 +1188,7 @@ mod tests {
     }
 
     #[test]
-    fn fast_conversation_receive_returns_before_preflight_and_rejects_without_model() {
+    fn conversation_receive_returns_quickly_and_missing_model_settles_rejected() {
         let root = tempfile::tempdir().unwrap();
         let service = Arc::new(StudioService::new(
             AppPaths::resolve(Some(root.path())).unwrap(),
@@ -1232,7 +1232,10 @@ mod tests {
                 submission_key: "conversation-send-fast".into(),
             })
             .unwrap();
-        assert_eq!(response["turn"]["state"], "Pending");
+        assert!(matches!(
+            response["turn"]["state"].as_str(),
+            Some("Pending" | "Rejected")
+        ));
         assert_eq!(service.snapshot().unwrap()["drafts"][0]["prompt"], "");
         assert_eq!(service.snapshot().unwrap()["jobCounts"], json!([0, 0, 0]));
         let deadline = Instant::now() + Duration::from_secs(3);

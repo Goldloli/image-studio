@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Wrap already-built binaries for local macOS UI verification; no signing or installation."""
+import argparse
 from pathlib import Path
 import plistlib
 import shutil
@@ -8,7 +9,16 @@ import sys
 root = Path(__file__).resolve().parent.parent
 if sys.platform != "darwin":
     raise SystemExit("This helper only prepares a local macOS development bundle.")
-bundle = root / "target/dev/Image Studio.app"
+parser = argparse.ArgumentParser()
+parser.add_argument("--name", default="Image Studio")
+parser.add_argument("--identifier", default="local.image-studio.foundation.dev")
+parser.add_argument(
+    "--output",
+    type=Path,
+    default=root / "target/dev/Image Studio.app",
+)
+args = parser.parse_args()
+bundle = args.output.resolve()
 executables = bundle / "Contents/MacOS"
 resources = bundle / "Contents/Resources"
 executables.mkdir(parents=True, exist_ok=True)
@@ -20,10 +30,10 @@ for name in ["image-studio-desktop", "diagnostic-worker", "inference-supervisor"
     shutil.copy2(source, executables / name)
 shutil.copy2(root / "apps/desktop/icons/icon.icns", resources / "AppIcon.icns")
 metadata = {
-    "CFBundleName": "Image Studio",
-    "CFBundleDisplayName": "Image Studio",
+    "CFBundleName": args.name,
+    "CFBundleDisplayName": args.name,
     "CFBundleExecutable": "image-studio-desktop",
-    "CFBundleIdentifier": "local.image-studio.foundation.dev",
+    "CFBundleIdentifier": args.identifier,
     "CFBundleVersion": "0.1.0",
     "CFBundleShortVersionString": "0.1.0",
     "CFBundleIconFile": "AppIcon",
