@@ -96,6 +96,10 @@
 .conversation-composer textarea{display:block;width:100%;height:58px;min-height:52px;max-height:112px;resize:vertical;border:0;outline:none!important;background:transparent;color:var(--text);padding:6px 4px 5px;font-size:13px;line-height:1.65;overflow:auto}
 .conversation-composer textarea::placeholder{color:var(--muted);opacity:.72}
 .conversation-composer textarea[readonly]{opacity:.8}
+.tool-composer-summary{display:flex;align-items:center;gap:10px;min-height:58px;padding:7px 5px;color:var(--accent)}
+.tool-composer-summary>span{display:flex;min-width:0;flex-direction:column;gap:2px}
+.tool-composer-summary strong{color:var(--text);font-size:11px;font-weight:560}
+.tool-composer-summary small{color:var(--muted);font-size:9px;line-height:1.5}
 .composer-toolbar{height:33px;display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
 .composer-left,.composer-right{display:flex;align-items:center;gap:5px;min-width:0}
 .composer-right{margin-left:auto}
@@ -160,7 +164,7 @@
 .viewer-export{border:1px solid var(--border);background:var(--surface);color:var(--text)}
 .viewer-canvas{position:relative;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:grab;user-select:none;touch-action:none;background:radial-gradient(circle at center,var(--input),var(--surface) 68%)}
 .viewer-canvas:active{cursor:grabbing}
-.viewer-canvas img{display:block;max-width:none;max-height:none;object-fit:contain;pointer-events:none;transform-origin:center;will-change:transform}
+.viewer-canvas img{display:block;max-width:none;max-height:none;object-fit:contain;pointer-events:none;transform-origin:center;will-change:transform;background:repeating-conic-gradient(var(--chrome) 0 25%,transparent 0 50%) 50%/18px 18px}
 .viewer-tools{position:absolute;z-index:2;left:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:3px;padding:7px 5px;border:1px solid var(--border);border-radius:23px;background:var(--popover);box-shadow:var(--shadow)}
 .viewer-tools .ws-icon-button{width:29px;height:29px;border-radius:50%}
 .ws-tool-divider{width:17px;height:1px;background:var(--border);margin:2px auto}

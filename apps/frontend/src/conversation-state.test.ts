@@ -61,6 +61,9 @@ describe('composer keyboard and parameters', () => {
     expect(supportedDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', sourceAssetId: 'source-1', aspect: '1:1', count: 1, seed: '7' })).toBe(true);
     expect(supportedDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(false);
     expect(supportedDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.text-to-image.flux2-klein-4b.v1', sourceAssetId: null, aspect: '4:3', count: 1, seed: '' })).toBe(false);
+    expect(supportedDraftParams({ modelId: 'birefnet-general-epoch-244', capabilityId: 'image.remove-background.birefnet-general-epoch-244.v1', sourceAssetId: 'source-1', aspect: '1:1', count: 1, seed: '' })).toBe(true);
+    expect(supportedDraftParams({ modelId: 'birefnet-general-epoch-244', capabilityId: 'image.remove-background.birefnet-general-epoch-244.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(false);
+    expect(supportedDraftParams({ modelId: 'birefnet-general-epoch-244', capabilityId: 'image.remove-background.birefnet-general-epoch-244.v1', sourceAssetId: 'source-1', aspect: '1:1', count: 1, seed: '7' })).toBe(false);
   });
 });
 

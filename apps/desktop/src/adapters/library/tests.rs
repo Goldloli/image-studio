@@ -214,6 +214,10 @@ fn birefnet_job(library: &mut Library, key: &str, width: u32, height: u32) -> Jo
                 "preprocessing".into(),
                 serde_json::json!("birefnet-1024-rgb-v1"),
             ),
+            (
+                "postprocessing".into(),
+                serde_json::json!("birefnet-logits-sigmoid-v1"),
+            ),
             ("intra_op_threads".into(), serde_json::json!(4)),
             ("inter_op_threads".into(), serde_json::json!(1)),
             ("execution_mode".into(), serde_json::json!("sequential")),
@@ -959,6 +963,13 @@ fn birefnet_commits_primary_and_mask_as_one_job_result() {
     assert_eq!(mask_record.output_role, "mask");
     assert_eq!(mask_record.asset.data_type, AssetKind::Mask);
     assert_eq!(library.read_asset_png(&mask_id).unwrap(), mask);
+    let page = library
+        .asset_library_query(AssetLibraryQuery::default())
+        .unwrap();
+    assert_eq!(page.total, 1);
+    assert_eq!(page.items.len(), 1);
+    assert_eq!(page.items[0].id, primary_id.to_string());
+    assert_eq!(page.facets.sizes[0].count, 1);
 }
 
 #[test]

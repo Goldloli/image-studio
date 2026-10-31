@@ -488,7 +488,7 @@ impl Library {
     fn asset_library_facets(&self) -> Result<AssetLibraryFacets> {
         let models = {
             let mut statement = self.db.prepare(
-                "SELECT coalesce(t.model_id,?1),count(*) FROM assets a JOIN jobs j ON j.id=a.job_id LEFT JOIN generation_turns t ON t.job_id=j.id WHERE j.project_id='default' GROUP BY coalesce(t.model_id,?1) ORDER BY count(*) DESC,coalesce(t.model_id,?1)",
+                "SELECT coalesce(t.model_id,?1),count(*) FROM assets a JOIN jobs j ON j.id=a.job_id LEFT JOIN generation_turns t ON t.job_id=j.id WHERE j.project_id='default' AND a.output_role='primary' GROUP BY coalesce(t.model_id,?1) ORDER BY count(*) DESC,coalesce(t.model_id,?1)",
             )?;
             statement
                 .query_map([DEFAULT_MODEL_ID], |row| {
@@ -501,7 +501,7 @@ impl Library {
         };
         let sizes = {
             let mut statement = self.db.prepare(
-                "SELECT a.width,a.height,count(*) FROM assets a JOIN jobs j ON j.id=a.job_id WHERE j.project_id='default' GROUP BY a.width,a.height ORDER BY a.width*a.height DESC,a.width DESC",
+                "SELECT a.width,a.height,count(*) FROM assets a JOIN jobs j ON j.id=a.job_id WHERE j.project_id='default' AND a.output_role='primary' GROUP BY a.width,a.height ORDER BY a.width*a.height DESC,a.width DESC",
             )?;
             statement
                 .query_map([], |row| {
@@ -515,7 +515,7 @@ impl Library {
         };
         let conversations = {
             let mut statement = self.db.prepare(
-                "SELECT c.id,c.title,count(*) FROM assets a JOIN jobs j ON j.id=a.job_id JOIN generation_turns t ON t.job_id=j.id JOIN conversations c ON c.id=t.conversation_id WHERE j.project_id='default' GROUP BY c.id,c.title ORDER BY count(*) DESC,c.title",
+                "SELECT c.id,c.title,count(*) FROM assets a JOIN jobs j ON j.id=a.job_id JOIN generation_turns t ON t.job_id=j.id JOIN conversations c ON c.id=t.conversation_id WHERE j.project_id='default' AND a.output_role='primary' GROUP BY c.id,c.title ORDER BY count(*) DESC,c.title",
             )?;
             statement
                 .query_map([], |row| {
@@ -574,7 +574,10 @@ fn task_from() -> &'static str {
 }
 
 fn asset_filters(query: &AssetLibraryQuery) -> Result<(String, Vec<SqlValue>)> {
-    let mut clauses = vec!["j.project_id='default'".to_string()];
+    let mut clauses = vec![
+        "j.project_id='default'".to_string(),
+        "a.output_role='primary'".to_string(),
+    ];
     let mut args = Vec::new();
     if let Some(model_id) = nonempty_filter(&query.model_id) {
         clauses.push("coalesce(t.model_id,?) = ?".into());

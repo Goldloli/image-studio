@@ -5,7 +5,7 @@ export const native = isTauri();
 export type StoredDraft = { id: number; name: string; prompt: string; collapsed: boolean; promptSourceId?: string | null; params: DraftParams; version: number };
 export type ModelView = { id: string; name: string; phase: string; summary: string; ready: boolean; runtimeReady: boolean; modelReady: boolean; deviceVerified: boolean; receivedBytes: number; totalBytes: number; modelBytes: number; runtimeBytes: number; requiredBytes: number; error: string | null; busy: boolean };
 export type JobView = { id: string; turnId: string | null; conversationId: string | null; attemptId: string; state: string; prompt: string; width: number; height: number; seed: number | null; error: string | null; assetId: string | null; manifest: unknown | null };
-export type AssetView = { id: string; jobId: string; conversationId: string | null; turnId: string | null; prompt: string; width: number; height: number; seed: number | null; bytes: number; available: boolean; error: string | null };
+export type AssetView = { id: string; jobId: string; conversationId: string | null; turnId: string | null; prompt: string; width: number; height: number; seed: number | null; bytes: number; outputRole?: 'primary' | 'mask'; dataType?: 'image_rgb' | 'image_rgba' | 'mask'; available: boolean; error: string | null };
 export type StableCursor = { createdAt: number; id: string };
 export type AssetLibraryItem = {
   id: string; jobId: string; attemptId: string; turnId: string | null; turnSequence: number | null;
@@ -62,7 +62,8 @@ export type TurnView = {
   capabilityId: string; sourceAssetId: string | null;
   aspect: string; count: number; seed: number | null; requestedSeed: string; status: string; state: string;
   jobId: string | null; attemptId: string | null; width: number; height: number; assetId: string | null;
-  assetAvailable: boolean; assetError: string | null; error: string | null; progressStage: string | null; progressStep: number | null;
+  assetAvailable: boolean; assetError: string | null; maskAssetId?: string | null; maskAssetAvailable?: boolean; maskAssetError?: string | null;
+  error: string | null; progressStage: string | null; progressStep: number | null;
   progressTotal: number | null; receivedAt: number;
 };
 export type TurnDetail = { turnId: string; attempts: JobView[] };

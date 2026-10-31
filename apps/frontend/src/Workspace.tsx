@@ -11,6 +11,7 @@ import {
   Expand,
   FileText,
   Image as ImageIcon,
+  ListChecks,
   LoaderCircle,
   MessageCircle,
   Palette,
@@ -111,6 +112,18 @@ type PendingLibraryPrompt = {
 const resetTransform = (): Transform => ({ zoom: 1, x: 0, y: 0, rotation: 0 });
 const activeStates = ['Pending', 'Submitted', 'Preparing', 'Running', 'Committing', 'CancelRequested'];
 const retryStates = ['Failed', 'Cancelled', 'Interrupted'];
+const BIREFNET_MODEL = 'birefnet-general-epoch-244';
+const BIREFNET_CAPABILITY = 'image.remove-background.birefnet-general-epoch-244.v1';
+const capabilityForModel = (modelId: string) => modelId === 'flux2-klein-4b-distilled'
+  ? 'image.text-to-image.flux2-klein-4b.v1'
+  : modelId === BIREFNET_MODEL
+    ? BIREFNET_CAPABILITY
+    : 'image.text-to-image.z-image-turbo.v1';
+const modelDisplayName = (modelId: string) => modelId === 'flux2-klein-4b-distilled'
+  ? 'FLUX.2 Klein 4B'
+  : modelId === BIREFNET_MODEL
+    ? 'BiRefNet epoch_244 · 去背景'
+    : 'Z-Image Turbo';
 
 function IconButton({ label, children, onClick, disabled = false, className = '' }: { label: string; children: ReactNode; onClick: () => void; disabled?: boolean; className?: string }) {
   return <button type="button" className={`ws-icon-button ${className}`} aria-label={label} title={label} disabled={disabled} onClick={onClick}>{children}</button>;
@@ -176,8 +189,8 @@ function TurnCard({
   execution: StudioSnapshot['execution'] | null | undefined;
   onCancel: () => void;
   onRetry: () => void;
-  onOpen: () => void;
-  onExport: () => void;
+  onOpen: (mask: boolean) => void;
+  onExport: (mask: boolean) => void;
   onCopy: () => void;
   onEdit: () => void;
   onReload: () => void;
@@ -188,24 +201,33 @@ function TurnCard({
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [details, setDetails] = useState<TurnDetail | null>(null);
   const [detailsError, setDetailsError] = useState('');
+  const [showMask, setShowMask] = useState(false);
   const progress = progressForTurn(turn, execution, imageReady);
   const active = activeStates.includes(turn.state);
-  const complete = turn.state === 'Succeeded' && turn.assetId && turn.assetAvailable && !imageFailed;
+  const displayedAssetId = showMask ? turn.maskAssetId : turn.assetId;
+  const displayedAvailable = showMask ? turn.maskAssetAvailable : turn.assetAvailable;
+  const displayedError = showMask ? turn.maskAssetError : turn.assetError;
+  const complete = turn.state === 'Succeeded' && displayedAssetId && displayedAvailable && !imageFailed;
   const cardStyle = { '--turn-aspect': `${turn.width} / ${turn.height}` } as CSSProperties;
+  const toggleMask = () => {
+    setShowMask(value => !value);
+    setImageReady(false);
+    setImageFailed(false);
+  };
   return <article className={`conversation-turn state-${turn.state}`} data-turn-id={turn.id} aria-label={`第 ${turn.sequence} 轮生成`}>
     <div className="user-message">
       <div className="user-message-body">
-        <p>{turn.prompt}</p>
+        <p>{turn.prompt || (turn.capabilityId.includes('.remove-background.') ? '去除背景，保留主体' : '未命名操作')}</p>
         <button type="button" aria-label="复制提示词" title="复制提示词" onClick={onCopy}><Copy size={13}/></button>
       </div>
       <span className="message-author">你</span>
     </div>
     <div className="assistant-response">
-      <div className="response-source"><span className="assistant-mark"><Palette size={15}/></span><div><strong>Image Studio</strong><span>{turn.modelId === 'flux2-klein-4b-distilled' ? 'FLUX.2 Klein 4B' : 'Z-Image Turbo'} · {turn.capabilityId.includes('.edit.') ? '单图编辑' : `${turn.aspect} · 种子 ${turn.seed ?? '随机'}`}</span></div></div>
+      <div className="response-source"><span className="assistant-mark"><Palette size={15}/></span><div><strong>Image Studio</strong><span>{turn.modelId === 'flux2-klein-4b-distilled' ? 'FLUX.2 Klein 4B' : turn.modelId === 'birefnet-general-epoch-244' ? 'BiRefNet epoch_244' : 'Z-Image Turbo'} · {turn.capabilityId.includes('.edit.') ? '单图编辑' : turn.capabilityId.includes('.remove-background.') ? (showMask ? '前景蒙版' : '透明背景') : `${turn.aspect} · 种子 ${turn.seed ?? '随机'}`}</span></div></div>
       <div className="image-card" style={cardStyle}>
-        {complete && <button className="image-card-open" type="button" onClick={onOpen} aria-label="放大查看生成图片"><img src={assetUrl(turn.assetId!)} alt={turn.prompt} draggable={false} onLoad={() => setImageReady(true)} onError={() => setImageFailed(true)}/>{imageReady && <span className="image-open-hint"><Expand size={14}/>查看大图</span>}</button>}
+        {complete && <button className="image-card-open" type="button" onClick={() => onOpen(showMask)} aria-label={showMask ? '放大查看前景蒙版' : '放大查看生成图片'}><img src={assetUrl(displayedAssetId!)} alt={showMask ? '前景蒙版' : turn.prompt} draggable={false} onLoad={() => setImageReady(true)} onError={() => setImageFailed(true)}/>{imageReady && <span className="image-open-hint"><Expand size={14}/>查看大图</span>}</button>}
         {(!complete || !imageReady) && <div className="image-card-placeholder">
-          {turn.state === 'Succeeded' && (!turn.assetAvailable || imageFailed) ? <><ImageIcon size={25}/><strong>任务已完成，图片无法显示</strong><span>{turn.assetError || 'PNG 可能已被移动、改写或无法解码。'}</span></> : active || turn.state === 'Succeeded' ? <><LoaderCircle size={25} className="spin"/><strong>{progress.label}</strong><span>{turn.state === 'Succeeded' ? '正在解码并校验 PNG' : '生成结果会在此处原位出现'}</span></> : <>{turn.state === 'Rejected' ? <X size={24}/> : <ImageIcon size={25}/>}<strong>{stateLabel(turn.state)}</strong><span>{turn.error || (turn.state === 'Cancelled' ? '本次生成已取消' : '本次执行没有可显示结果')}</span></>}
+          {turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) ? <><ImageIcon size={25}/><strong>任务已完成，图片无法显示</strong><span>{displayedError || 'PNG 可能已被移动、改写或无法解码。'}</span></> : active || turn.state === 'Succeeded' ? <><LoaderCircle size={25} className="spin"/><strong>{progress.label}</strong><span>{turn.state === 'Succeeded' ? '正在解码并校验 PNG' : '生成结果会在此处原位出现'}</span></> : <>{turn.state === 'Rejected' ? <X size={24}/> : <ImageIcon size={25}/>}<strong>{stateLabel(turn.state)}</strong><span>{turn.error || (turn.state === 'Cancelled' ? '本次生成已取消' : '本次执行没有可显示结果')}</span></>}
         </div>}
         {(active || turn.state === 'CancelRequested' || turn.state === 'Succeeded') && <div className="image-card-progress">
           <div className="progress-copy" role="status"><span>{progress.label}</span><strong>{progress.percent}%</strong></div>
@@ -215,9 +237,10 @@ function TurnCard({
         <div className="image-card-actions">
           {active && <button className="danger-quiet" disabled={turn.state === 'CancelRequested' || turn.id.startsWith('local-') && turn.state === 'CancelRequested'} onClick={onCancel}><Square size={12}/>{turn.state === 'CancelRequested' ? '正在取消' : '停止'}</button>}
           {turn.jobId && retryStates.includes(turn.state) && <button onClick={onRetry}><RefreshCw size={12}/>重试</button>}
-          {!active && <button onClick={onEdit}><Pencil size={12}/>编辑后重发</button>}
-          {turn.assetId && <><button onClick={onOpen}><Expand size={12}/>查看</button><button disabled={!turn.assetAvailable} onClick={onExport}><Download size={12}/>导出 PNG</button></>}
-          {turn.state === 'Succeeded' && (!turn.assetAvailable || imageFailed) && <button onClick={() => { setImageFailed(false); setImageReady(false); onReload(); }}><RefreshCw size={12}/>重新加载</button>}
+          {!active && !turn.capabilityId.includes('.remove-background.') && <button onClick={onEdit}><Pencil size={12}/>编辑后重发</button>}
+          {turn.maskAssetId && <button aria-pressed={showMask} onClick={toggleMask}><ImageIcon size={12}/>{showMask ? '查看透明图' : '查看蒙版'}</button>}
+          {displayedAssetId && <><button onClick={() => onOpen(showMask)}><Expand size={12}/>查看</button><button disabled={!displayedAvailable} onClick={() => onExport(showMask)}><Download size={12}/>{showMask ? '导出蒙版' : '导出 PNG'}</button></>}
+          {turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) && <button onClick={() => { setImageFailed(false); setImageReady(false); onReload(); }}><RefreshCw size={12}/>重新加载</button>}
           <button onClick={onCopy}><Copy size={12}/>复制提示词</button>
           <button aria-expanded={detailsOpen} onClick={async () => {
             const next = !detailsOpen;
@@ -233,7 +256,7 @@ function TurnCard({
   </article>;
 }
 
-function ImageViewer({ title, prompt, source, isAsset, backLabel = '返回会话', onClose, onUsePrompt, onExport }: { title: string; prompt: string; source: string; isAsset: boolean; backLabel?: string; onClose: () => void; onUsePrompt: () => void; onExport?: () => void }) {
+function ImageViewer({ title, prompt, source, isAsset, backLabel = '返回会话', onClose, onUsePrompt, onExport }: { title: string; prompt: string; source: string; isAsset: boolean; backLabel?: string; onClose: () => void; onUsePrompt?: () => void; onExport?: () => void }) {
   const [transform, setTransform] = useState<Transform>(resetTransform);
   const [viewport, setViewport] = useState({ width: 800, height: 500 });
   const [natural, setNatural] = useState({ width: 1200, height: 800 });
@@ -274,7 +297,7 @@ function ImageViewer({ title, prompt, source, isAsset, backLabel = '返回会话
   };
   return <div className="image-viewer" role="dialog" aria-modal="true" aria-label="图片查看器">
     <header><button className="viewer-back" onClick={onClose}><ChevronLeft size={17}/>{backLabel}</button><button className="viewer-title" onClick={() => setDescriptionOpen(!descriptionOpen)}><Palette size={15}/><span>{prompt}</span></button><span className="viewer-source">{isAsset ? '本机生成' : '示例 · 非本机生成'}</span>{onExport && <button className="viewer-export" onClick={onExport}><Download size={13}/>导出 PNG</button>}</header>
-    {descriptionOpen && <aside className="viewer-description"><div><strong>{title}</strong><button onClick={() => setDescriptionOpen(false)}><X size={13}/></button></div><p>{prompt}</p><button onClick={onUsePrompt}>用于当前会话</button></aside>}
+    {descriptionOpen && <aside className="viewer-description"><div><strong>{title}</strong><button onClick={() => setDescriptionOpen(false)}><X size={13}/></button></div><p>{prompt}</p>{onUsePrompt && <button onClick={onUsePrompt}>用于当前会话</button>}</aside>}
     <div ref={canvasRef} className="viewer-canvas" onPointerDown={startPan} onPointerMove={movePan} onPointerUp={() => { pointer.current = null; }} onPointerCancel={() => { pointer.current = null; }} onWheel={event => { event.preventDefault(); setTransform(current => ({ ...current, zoom: clampZoom(current.zoom + (event.deltaY < 0 ? .25 : -.25)) })); }}>
       {failed ? <div className="viewer-error"><ImageIcon size={30}/><h3>无法显示这张图片</h3><p>文件可能已被移动或改写，历史记录保持不变。</p><button onClick={onClose}>返回会话</button></div> : <img src={source} alt={title} draggable={false} style={imageStyle} onLoad={event => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} onError={() => setFailed(true)}/>}
     </div>
@@ -290,7 +313,7 @@ function ImageViewer({ title, prompt, source, isAsset, backLabel = '返回会话
   </div>;
 }
 
-export default function Workspace({ onModels, studio, requestedAsset, requestedConversation, requestedComposer, requestedModel, requestedPrompt, sidebarCollapsed, onSidebarCollapsedChange, onRefresh, onAssetReturn }: { onModels: () => void; studio: StudioSnapshot | null; requestedAsset: RequestedAsset | null; requestedConversation: RequestedConversation | null; requestedComposer: { nonce: number } | null; requestedModel: { draft: StoredDraft; conversationId: string; nonce: number } | null; requestedPrompt: RequestedPrompt | null; sidebarCollapsed: boolean; onSidebarCollapsedChange: (value: boolean) => void; onRefresh: () => void; onAssetReturn: () => void }) {
+export default function Workspace({ onModels, studio, requestedAsset, requestedConversation, requestedComposer, requestedModel, requestedPrompt, sidebarCollapsed, onSidebarCollapsedChange, onRefresh, onAssetReturn }: { onModels: () => void; studio: StudioSnapshot | null; requestedAsset: RequestedAsset | null; requestedConversation: RequestedConversation | null; requestedComposer: { modelId: string; capabilityId: string; nonce: number } | null; requestedModel: { draft: StoredDraft; conversationId: string; nonce: number } | null; requestedPrompt: RequestedPrompt | null; sidebarCollapsed: boolean; onSidebarCollapsedChange: (value: boolean) => void; onRefresh: () => void; onAssetReturn: () => void }) {
   const [state, setState] = useState(initialWorkspace);
   const [conversations, setConversations] = useState<ConversationView[]>([]);
   const [conversationsHasMore, setConversationsHasMore] = useState(false);
@@ -357,18 +380,21 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     ?? visibleConversations.find(conversation => optimistic.some(turn => turn.id.startsWith('local-') && turn.conversationId === conversation.id && activeStates.includes(turn.state)));
   const overByteBudget = new TextEncoder().encode(active.prompt).length > 16384;
   const validParams = supportedDraftParams(active.params);
-  const validText = Boolean(active.prompt.trim()) && !overByteBudget;
+  const isRemoveBackground = active.params.capabilityId === BIREFNET_CAPABILITY;
+  const validText = isRemoveBackground ? active.prompt === '' : Boolean(active.prompt.trim()) && !overByteBudget;
   const availableModels = studio?.models ?? (studio?.model ? [studio.model] : []);
   const selectedModel = availableModels.find(model => model.id === active.params.modelId);
   const modelReady = selectedModel?.ready ?? false;
   const selectedModelExecutable = modelReady;
-  const selectedModelLabel = active.params.capabilityId === 'image.edit.flux2-klein-4b.v1'
+  const selectedModelLabel = isRemoveBackground
+    ? modelReady ? 'BiRefNet · 去背景' : 'BiRefNet · 去背景 · 未就绪'
+    : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1'
     ? modelReady ? 'Klein · 单图编辑' : 'Klein · 单图编辑 · 未就绪'
     : active.params.modelId === 'flux2-klein-4b-distilled'
       ? modelReady ? 'Klein 4B' : 'Klein 4B · 未就绪'
       : modelReady ? 'Z-Image Turbo' : 'Z-Image Turbo · 未就绪';
   const busyInAnotherConversation = Boolean(systemBusy && !currentActiveTurn && runningConversation && runningConversation.id !== currentConversation.id);
-  const canSend = native && loaded && selectedModelExecutable && validText && validParams && validSeed(active.params.seed) && !switching && submittingDraftId === null && !systemBusy;
+  const canSend = native && loaded && selectedModelExecutable && validText && validParams && (isRemoveBackground || validSeed(active.params.seed)) && !switching && submittingDraftId === null && !systemBusy;
 
   const dispatch = (action: WorkspaceAction) => {
     const next = workspaceReducer(activeRef.current.state, action);
@@ -723,11 +749,12 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       const imported = await api<SourceImportAck>('source_import');
       if ('cancelled' in imported) return;
       setDraftParams({
-        modelId: 'flux2-klein-4b-distilled',
-        capabilityId: 'image.edit.flux2-klein-4b.v1',
+        modelId: isRemoveBackground ? BIREFNET_MODEL : 'flux2-klein-4b-distilled',
+        capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : 'image.edit.flux2-klein-4b.v1',
         sourceAssetId: imported.assetId,
         aspect: '1:1',
         count: 1,
+        seed: isRemoveBackground ? '' : active.params.seed,
       });
     } catch (error) {
       setActionError(String(error));
@@ -766,8 +793,8 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       setActionError(composerStatus);
       return;
     }
-    if (!source.prompt.trim() || !supportedDraftParams(source.params) || !validSeed(source.params.seed)) {
-      setActionError('请先填写有效提示词和参数。');
+    if ((!isRemoveBackground && !source.prompt.trim()) || !supportedDraftParams(source.params) || (!isRemoveBackground && !validSeed(source.params.seed))) {
+      setActionError(isRemoveBackground ? '请先导入一张有效源图。' : '请先填写有效提示词和参数。');
       return;
     }
     if (systemBusy) {
@@ -781,6 +808,13 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       if (intent.current?.content !== content) intent.current = { content, key: crypto.randomUUID() };
       submissionKey = intent.current.key;
       const pendingTurn = localTurn(currentConversation.id, source, submissionKey);
+      if (isRemoveBackground && source.params.sourceAssetId) {
+        const sourceAsset = studio?.assets.find(asset => asset.id === source.params.sourceAssetId);
+        if (sourceAsset) {
+          pendingTurn.width = sourceAsset.width;
+          pendingTurn.height = sourceAsset.height;
+        }
+      }
       forceScroll.current = true;
       setOptimistic(previous => [...previous.filter(turn => turn.submissionKey !== submissionKey), pendingTurn]);
       setSubmittingDraftId(source.id);
@@ -869,20 +903,23 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     setViewer({ kind: 'asset', asset });
     if (native) void api('workspace_select', { activeId: active.id, selectedAssetId: asset.id }).catch(() => {});
   };
-  const assetFromTurn = (turn: TurnView): AssetView | null => {
-    if (!turn.assetId) return null;
-    return studio?.assets.find(value => value.id === turn.assetId) ?? {
-      id: turn.assetId,
+  const assetFromTurn = (turn: TurnView, mask = false): AssetView | null => {
+    const assetId = mask ? turn.maskAssetId : turn.assetId;
+    if (!assetId) return null;
+    return studio?.assets.find(value => value.id === assetId) ?? {
+      id: assetId,
       jobId: turn.jobId ?? '',
       conversationId: turn.conversationId,
       turnId: turn.id,
-      prompt: turn.prompt,
+      prompt: mask ? '前景蒙版' : turn.prompt,
       width: turn.width,
       height: turn.height,
       seed: turn.seed,
       bytes: 0,
-      available: turn.assetAvailable,
-      error: turn.assetError,
+      outputRole: mask ? 'mask' : 'primary',
+      dataType: mask ? 'mask' : turn.modelId === BIREFNET_MODEL ? 'image_rgba' : 'image_rgb',
+      available: mask ? Boolean(turn.maskAssetAvailable) : turn.assetAvailable,
+      error: mask ? turn.maskAssetError ?? null : turn.assetError,
     };
   };
   const loadOlder = async () => {
@@ -993,7 +1030,24 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     if (!requestedComposer || !loaded) return;
     setViewer(null);
     setPopup(null);
-    requestAnimationFrame(() => textarea.current?.focus());
+    const source = requestedComposer.capabilityId === 'image.edit.flux2-klein-4b.v1'
+      || requestedComposer.capabilityId === BIREFNET_CAPABILITY
+      ? active.params.sourceAssetId ?? null
+      : null;
+    dispatch({
+      type: 'params',
+      patch: {
+        modelId: requestedComposer.modelId,
+        capabilityId: requestedComposer.capabilityId,
+        sourceAssetId: source,
+        aspect: '1:1',
+        seed: '',
+        count: 1,
+      },
+    });
+    if (requestedComposer.capabilityId !== BIREFNET_CAPABILITY) {
+      requestAnimationFrame(() => textarea.current?.focus());
+    }
   }, [requestedComposer?.nonce, loaded]);
 
   useEffect(() => {
@@ -1064,11 +1118,15 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
         : busyInAnotherConversation
           ? '其他会话正在生成'
           : !validParams
-            ? '参数不受当前模型支持'
+            ? isRemoveBackground
+              ? '请先导入源图'
+              : '参数不受当前模型支持'
             : overByteBudget
               ? '提示词超过 16 KiB'
               : !validText
-                ? '输入提示词后发送'
+                ? isRemoveBackground
+                  ? '导入源图后开始'
+                  : '输入提示词后发送'
                 : 'Enter 发送 · Shift+Enter 换行';
   const composerAction = composerActionFor({ submittingDraftId, currentActiveTurn, canSend });
   const sendButton = composerAction.kind === 'stop' && currentActiveTurn
@@ -1109,8 +1167,8 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
         </section> : turns.map(turn => <TurnCard key={`${turn.conversationId}:${turn.submissionKey}`} turn={turn} execution={studio?.execution}
           onCancel={() => void cancelTurn(turn)}
           onRetry={() => void retryTurn(turn)}
-          onOpen={() => { const asset = assetFromTurn(turn); if (asset) openAsset(asset); }}
-          onExport={() => { const asset = assetFromTurn(turn); if (asset) void exportAsset(asset); }}
+          onOpen={mask => { const asset = assetFromTurn(turn, mask); if (asset) openAsset(asset); }}
+          onExport={mask => { const asset = assetFromTurn(turn, mask); if (asset) void exportAsset(asset); }}
           onCopy={() => void copyText(turn.prompt, `turn-${turn.id}`)}
           onEdit={() => requestEdit(turn)}
           onReload={onRefresh}
@@ -1121,10 +1179,10 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       <section className={`conversation-composer-area ${active.collapsed ? 'is-collapsed' : ''}`}>
         {replacePromptTurn && <div className="replace-prompt-bar" role="dialog" aria-label="替换当前提示词"><span>当前输入框已有文字。用这条历史提示词替换吗？</span><button onClick={() => applyPrompt(replacePromptTurn.prompt)}>替换</button><button onClick={() => setReplacePromptTurn(null)}>取消</button></div>}
         {replaceLibraryPrompt && <div className="replace-prompt-bar" role="dialog" aria-label="替换为灵感提示词"><span>当前输入已有文字。用「{replaceLibraryPrompt.title}」的完整提示词替换吗？</span><button onClick={confirmLibraryPrompt}>替换</button><button onClick={() => setReplaceLibraryPrompt(null)}>取消</button></div>}
-        <button className="collapsed-composer" onClick={() => dispatch({ type: 'collapse' })}><ChevronUp size={15}/><span>{active.prompt || '展开提示词，继续创作'}</span></button>
+        <button className="collapsed-composer" onClick={() => dispatch({ type: 'collapse' })}><ChevronUp size={15}/><span>{isRemoveBackground ? 'BiRefNet 去背景' : active.prompt || '展开提示词，继续创作'}</span></button>
         <div className="conversation-composer">
-          <div className="composer-caption"><span>{currentConversation.title}</span><span>{Array.from(active.prompt).length} 字符<IconButton label="收起提示词" onClick={() => { textarea.current?.blur(); dispatch({ type: 'collapse' }); }}><ChevronDown size={14}/></IconButton></span></div>
-          <textarea ref={textarea} value={active.prompt} readOnly={submittingDraftId === active.id} aria-label="图片提示词" placeholder="描述你想创作的画面……" spellCheck={false}
+          <div className="composer-caption"><span>{currentConversation.title}</span><span>{isRemoveBackground ? '透明 PNG + 蒙版' : `${Array.from(active.prompt).length} 字符`}<IconButton label="收起输入区" onClick={() => { textarea.current?.blur(); dispatch({ type: 'collapse' }); }}><ChevronDown size={14}/></IconButton></span></div>
+          {isRemoveBackground ? <div className="tool-composer-summary" role="note"><ListChecks size={17}/><span><strong>提取主体并去除背景</strong><small>使用 BiRefNet epoch_244 · CPU · 输出原图尺寸的透明 PNG 与 8-bit 蒙版</small></span></div> : <textarea ref={textarea} value={active.prompt} readOnly={submittingDraftId === active.id} aria-label="图片提示词" placeholder="描述你想创作的画面……" spellCheck={false}
             onChange={event => dispatch({ type: 'edit', value: event.target.value, record: !compositions.current.has(active.id) })}
             onKeyDown={handleEditorKeyDown}
             onCompositionStart={() => { compositionDraftId.current = active.id; compositions.current.set(active.id, active.prompt); }}
@@ -1136,26 +1194,26 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
               compositionDraftId.current = null;
               dispatch({ type: 'edit', id: targetId, value: event.currentTarget.value, before });
             }}
-          />
+          />}
           <div className="composer-toolbar">
             <div className="composer-left">
-              <div className="composer-popup-anchor" data-composer-popup>
+              {!isRemoveBackground && <div className="composer-popup-anchor" data-composer-popup>
                 <button className={`composer-chip ${popup === 'params' ? 'is-open' : ''}`} aria-expanded={popup === 'params'} onClick={() => { if (popup === 'params') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('params'); }}><SlidersHorizontal size={15}/><span>{active.params.aspect} · {active.params.count} 张</span></button>
                 {popup === 'params' && <div className="composer-popover params-popover" role="dialog" aria-label="创作参数"><div className="popover-heading"><strong>创作参数</strong><span>当前型号 {active.params.modelId === 'flux2-klein-4b-distilled' ? '4 步' : '9 步'} · q4 · 单张</span></div><span className="popover-label">画幅</span><div className="aspect-options">{(active.params.modelId === 'flux2-klein-4b-distilled' ? ['1:1'] : ['1:1', '4:3', '3:4']).map(aspect => <button key={aspect} className={active.params.aspect === aspect ? 'is-selected' : ''} aria-pressed={active.params.aspect === aspect} onClick={() => setDraftParams({ aspect })}><i style={{ aspectRatio: aspect.replace(':', '/') }}/><span>{aspect}</span></button>)}</div><label className="seed-field"><span>数量</span><input type="number" min={1} max={1} step={1} value={active.params.count} onChange={event => setDraftParams({ count: Number(event.target.value) })}/></label><label className="seed-field"><span>种子</span><input inputMode="numeric" value={active.params.seed} aria-invalid={!validSeed(active.params.seed)} placeholder="留空随机" onChange={event => setDraftParams({ seed: event.target.value })}/></label>{!validSeed(active.params.seed) && <p className="field-error">请输入 0–4294967295 的整数，或留空。</p>}<p className="popover-note">只修改当前会话的下一条请求，不会改变已发送记录。</p></div>}
-              </div>
-              <button className="composer-chip" disabled={sourceImporting || submittingDraftId !== null} onClick={() => void importSource()} title="导入一张 PNG 或 JPEG 作为编辑源图">{sourceImporting ? <LoaderCircle size={14} className="spin"/> : <ImageIcon size={14}/>}<span>{active.params.sourceAssetId ? '更换源图' : '导入源图'}</span></button>
+              </div>}
+              <button className="composer-chip" disabled={sourceImporting || submittingDraftId !== null} onClick={() => void importSource()} title={isRemoveBackground ? '导入一张 PNG 或 JPEG 用于去背景' : '导入一张 PNG 或 JPEG 作为编辑源图'}>{sourceImporting ? <LoaderCircle size={14} className="spin"/> : <ImageIcon size={14}/>}<span>{active.params.sourceAssetId ? '更换源图' : '导入源图'}</span></button>
               <div className="composer-popup-anchor" data-composer-popup>
                 <button className="composer-chip" disabled={submittingDraftId !== null} onClick={() => { if (popup === 'sources') setPopup(null); else setPopup('sources'); }}>作品</button>
-                {popup === 'sources' && <div className="composer-popover model-popover source-popover" role="dialog" aria-label="选择已有作品作为源图"><div className="popover-heading"><strong>选择已有作品</strong><span>{studio?.assets.filter(asset => asset.available && (asset.width * asset.height) <= 4194304).length ?? 0} 张可用</span></div>{(studio?.assets ?? []).filter(asset => asset.available && (asset.width * asset.height) <= 4194304).map(asset => <button key={asset.id} className={`single-model-option ${active.params.sourceAssetId === asset.id ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', sourceAssetId: asset.id, aspect: '1:1', count: 1 }); setPopup(null); }}><img className="source-option-image" src={assetUrl(asset.id)} alt="" draggable={false}/><span><strong>{asset.width} × {asset.height}</strong><small>{asset.prompt}</small></span>{active.params.sourceAssetId === asset.id && <Check size={14}/>}</button>)}{!studio?.assets.some(asset => asset.available && asset.width * asset.height <= 4194304) && <p className="popover-note">本机还没有可用作源图的正式作品。</p>}</div>}
+                {popup === 'sources' && <div className="composer-popover model-popover source-popover" role="dialog" aria-label="选择已有作品作为源图"><div className="popover-heading"><strong>选择已有作品</strong><span>{studio?.assets.filter(asset => asset.available && (asset.outputRole ?? 'primary') === 'primary' && (asset.width * asset.height) <= 4194304).length ?? 0} 张可用</span></div>{(studio?.assets ?? []).filter(asset => asset.available && (asset.outputRole ?? 'primary') === 'primary' && (asset.width * asset.height) <= 4194304).map(asset => <button key={asset.id} className={`single-model-option ${active.params.sourceAssetId === asset.id ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: isRemoveBackground ? BIREFNET_MODEL : 'flux2-klein-4b-distilled', capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : 'image.edit.flux2-klein-4b.v1', sourceAssetId: asset.id, aspect: '1:1', count: 1, seed: isRemoveBackground ? '' : active.params.seed }); setPopup(null); }}><img className="source-option-image" src={assetUrl(asset.id)} alt="" draggable={false}/><span><strong>{asset.width} × {asset.height}</strong><small>{asset.prompt}</small></span>{active.params.sourceAssetId === asset.id && <Check size={14}/>}</button>)}{!studio?.assets.some(asset => asset.available && (asset.outputRole ?? 'primary') === 'primary' && asset.width * asset.height <= 4194304) && <p className="popover-note">本机还没有可用作源图的正式作品。</p>}</div>}
               </div>
-              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前编辑源图"/><span>{active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? '单图编辑 · 保比例缩放至 1 MP' : '源图'}</span><button aria-label="移除编辑源图" title="移除编辑源图" onClick={() => setDraftParams({ sourceAssetId: null, capabilityId: active.params.modelId === 'flux2-klein-4b-distilled' ? 'image.text-to-image.flux2-klein-4b.v1' : 'image.text-to-image.z-image-turbo.v1' })}><X size={11}/></button></span>}
-              <IconButton label={copyState === 'composer' ? '已复制提示词' : '复制提示词'} disabled={!active.prompt} onClick={() => void copyText(active.prompt, 'composer')}>{copyState === 'composer' ? <Check size={14}/> : <Copy size={14}/>}</IconButton>
+              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前受控源图"/><span>{isRemoveBackground ? '去背景 · 原尺寸输出' : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? '单图编辑 · 保比例缩放至 1 MP' : '源图'}</span><button aria-label="移除源图" title="移除源图" onClick={() => setDraftParams({ sourceAssetId: null, capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : active.params.modelId === 'flux2-klein-4b-distilled' ? 'image.text-to-image.flux2-klein-4b.v1' : 'image.text-to-image.z-image-turbo.v1' })}><X size={11}/></button></span>}
+              {!isRemoveBackground && <IconButton label={copyState === 'composer' ? '已复制提示词' : '复制提示词'} disabled={!active.prompt} onClick={() => void copyText(active.prompt, 'composer')}>{copyState === 'composer' ? <Check size={14}/> : <Copy size={14}/>}</IconButton>}
             </div>
             <div className="composer-right">
               <span className="composer-status">{currentActiveTurn ? studio?.execution.summary : composerStatus}</span>
               <div className="composer-popup-anchor" data-composer-popup>
                 <button className="model-select" aria-expanded={popup === 'models'} title={selectedModelExecutable ? '当前模型可执行' : '当前模型不可执行，请在模型菜单中选择已就绪型号'} onClick={() => { if (popup === 'models') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('models'); }}><span className="model-mark"><Palette size={13}/></span><span>{selectedModelLabel}</span><ChevronDown size={12}/></button>
-                {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型"><div className="popover-heading"><strong>图片模型</strong><span>{availableModels.filter(model => model.ready).length} 个可执行模型</span></div>{availableModels.map(model => <button key={model.id} className={`single-model-option ${active.params.modelId === model.id && active.params.capabilityId !== 'image.edit.flux2-klein-4b.v1' ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: model.id, capabilityId: model.id === 'flux2-klein-4b-distilled' ? 'image.text-to-image.flux2-klein-4b.v1' : 'image.text-to-image.z-image-turbo.v1', sourceAssetId: null, aspect: model.id === 'flux2-klein-4b-distilled' ? '1:1' : active.params.aspect }); setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); }}><span className="model-mark"><Palette size={14}/></span><span><strong>{model.id === 'flux2-klein-4b-distilled' ? 'FLUX.2 Klein 4B' : 'Z-Image Turbo'}</strong><small>{model.summary}</small></span>{active.params.modelId === model.id && active.params.capabilityId !== 'image.edit.flux2-klein-4b.v1' && <Check size={14}/>}</button>)}{active.params.sourceAssetId && <button className={`single-model-option ${active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', aspect: '1:1' }); setPopup(null); }}><span className="model-mark"><ImageIcon size={14}/></span><span><strong>Klein 单图编辑</strong><small>使用当前源图和编辑指令</small></span>{active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' && <Check size={14}/>}</button>}<button className="popover-action" onClick={() => { setPopup(null); onModels(); }}>前往模型中心 <ArrowUp size={12}/></button></div>}
+                {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型"><div className="popover-heading"><strong>本地图片模型</strong><span>{availableModels.filter(model => model.ready).length} 个可执行模型</span></div>{availableModels.map(model => { const capability = capabilityForModel(model.id); const selected = active.params.modelId === model.id && active.params.capabilityId === capability; return <button key={model.id} className={`single-model-option ${selected ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: model.id, capabilityId: capability, sourceAssetId: null, aspect: '1:1', seed: model.id === BIREFNET_MODEL ? '' : active.params.seed }); setPopup(null); if (model.id !== BIREFNET_MODEL) requestAnimationFrame(() => textarea.current?.focus()); }}><span className="model-mark"><Palette size={14}/></span><span><strong>{modelDisplayName(model.id)}</strong><small>{model.summary}</small></span>{selected && <Check size={14}/>}</button>; })}{active.params.sourceAssetId && !isRemoveBackground && <button className={`single-model-option ${active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', aspect: '1:1' }); setPopup(null); }}><span className="model-mark"><ImageIcon size={14}/></span><span><strong>Klein 单图编辑</strong><small>使用当前源图和编辑指令</small></span>{active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' && <Check size={14}/>}</button>}<button className="popover-action" onClick={() => { setPopup(null); onModels(); }}>前往模型中心 <ArrowUp size={12}/></button></div>}
               </div>
               {sendButton}
             </div>
@@ -1165,7 +1223,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
         <div className={`composer-save-note ${saveStatus === 'error' ? 'error-text' : ''}`} role="status">{!native ? '浏览器预览 · 草稿保留于本次页面' : !loaded ? '正在恢复本地会话' : saveStatus === 'error' ? `保存失败：${saveError}` : saveStatus === 'saved' ? '草稿已保存到本机' : '正在保存草稿…'}{saveStatus === 'error' && <button onClick={() => void flushAll().catch(() => {})}>重试</button>}</div>
       </section>
     </main>
-    {selectedAsset && <ImageViewer title="生成结果" prompt={selectedAsset.prompt} source={assetUrl(selectedAsset.id)} isAsset backLabel={viewerReturnsToPage ? '返回来源页' : '返回会话'} onClose={closeViewer} onUsePrompt={() => applyPrompt(selectedAsset.prompt)} onExport={() => void exportAsset(selectedAsset)}/>}
+    {selectedAsset && <ImageViewer title={selectedAsset.outputRole === 'mask' ? '前景蒙版' : '生成结果'} prompt={selectedAsset.outputRole === 'mask' ? '8-bit 前景蒙版' : selectedAsset.prompt} source={assetUrl(selectedAsset.id)} isAsset backLabel={viewerReturnsToPage ? '返回来源页' : '返回会话'} onClose={closeViewer} onUsePrompt={selectedAsset.outputRole === 'mask' ? undefined : () => applyPrompt(selectedAsset.prompt)} onExport={() => void exportAsset(selectedAsset)}/>}
     {selectedSample && <ImageViewer title={selectedSample.title} prompt={selectedSample.prompt} source={selectedSample.src} isAsset={false} onClose={closeViewer} onUsePrompt={() => applyPrompt(selectedSample.prompt)}/>}
   </div>;
 }

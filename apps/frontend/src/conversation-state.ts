@@ -64,6 +64,7 @@ export function progressForTurn(
   }
   if (stage === 'loading') return { percent: 10, label: '正在加载模型' };
   if (stage === 'encoding') return { percent: 15, label: '正在编码提示词' };
+  if (stage === 'inference') return { percent: 45, label: '正在执行本地推理' };
   if (stage === 'sampling') {
     const resolvedTotal = total && total > 0 ? total : 9;
     const resolvedStep = Math.max(0, Math.min(step ?? 0, resolvedTotal));
@@ -121,6 +122,13 @@ export function supportedDraftParams(params: DraftParams): boolean {
     const text = params.capabilityId === 'image.text-to-image.flux2-klein-4b.v1' && !params.sourceAssetId;
     const edit = params.capabilityId === 'image.edit.flux2-klein-4b.v1' && Boolean(params.sourceAssetId);
     return params.aspect === '1:1' && params.count === 1 && (text || edit) && seedValid;
+  }
+  if (params.modelId === 'birefnet-general-epoch-244') {
+    return params.capabilityId === 'image.remove-background.birefnet-general-epoch-244.v1'
+      && Boolean(params.sourceAssetId)
+      && params.aspect === '1:1'
+      && params.count === 1
+      && params.seed === '';
   }
   return false;
 }

@@ -128,9 +128,13 @@ class CatalogContractTests(unittest.TestCase):
         self.assertEqual(result.status, "passed")
         self.assertEqual(
             result.details["implemented"],
-            ["flux2-klein-4b-distilled", "z-image-turbo-mflux-v1"],
+            [
+                "birefnet-general-epoch-244",
+                "flux2-klein-4b-distilled",
+                "z-image-turbo-mflux-v1",
+            ],
         )
-        self.assertEqual(len(result.details["planned"]), 2)
+        self.assertEqual(result.details["planned"], ["realesrgan-x4plus"])
 
 
 class CliTests(unittest.TestCase):

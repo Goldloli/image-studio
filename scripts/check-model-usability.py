@@ -932,13 +932,15 @@ def run_contract_c04(_: Path) -> CaseResult:
         len(entries) == 4
         and implemented_ids
         == [
+            "birefnet-general-epoch-244",
             "flux2-klein-4b-distilled",
             "z-image-turbo-mflux-v1",
         ]
-        and len(planned) == 2
-        and len(executable) == 2
+        and planned_ids == ["realesrgan-x4plus"]
+        and len(executable) == 3
         and {entry.get("id") for entry in executable}
         == {
+            "birefnet-general-epoch-244",
             "flux2-klein-4b-distilled",
             "z-image-turbo-mflux-v1",
         }
@@ -948,7 +950,7 @@ def run_contract_c04(_: Path) -> CaseResult:
     return build_case_result(
         "C04",
         "passed" if passed else "failed",
-        "two implemented executable entries and two non-executable planned entries"
+        "three implemented executable entries and one non-executable planned entry"
         if passed
         else "catalog status or executable actions do not match the certification scope",
         evidence_items=[evidence(catalog_path)],

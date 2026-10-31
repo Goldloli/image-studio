@@ -423,6 +423,25 @@ impl Library {
         params.insert("modelId".into(), Value::String(model_id.to_owned()));
         if model_id == studio_core::recipes::KLEIN_MODEL {
             params.insert("aspect".into(), Value::String("1:1".into()));
+            params.insert(
+                "capabilityId".into(),
+                Value::String(studio_core::recipes::KLEIN_TEXT_CAPABILITY.into()),
+            );
+            params.insert("sourceAssetId".into(), Value::Null);
+        } else if model_id == studio_core::recipes::BIREFNET_MODEL {
+            params.insert("aspect".into(), Value::String("1:1".into()));
+            params.insert("seed".into(), Value::String(String::new()));
+            params.insert(
+                "capabilityId".into(),
+                Value::String(studio_core::recipes::BIREFNET_CAPABILITY.into()),
+            );
+            params.insert("sourceAssetId".into(), Value::Null);
+        } else {
+            params.insert(
+                "capabilityId".into(),
+                Value::String(studio_core::generation::Z_IMAGE_CAPABILITY.into()),
+            );
+            params.insert("sourceAssetId".into(), Value::Null);
         }
         let version = draft.version;
         self.save_draft(draft, version)
@@ -700,7 +719,15 @@ impl Library {
             .expected_version
             .checked_add(1)
             .ok_or_else(|| LibraryError::Invalid("草稿版本溢出".into()))?;
-        let auto_title = auto_title(&input.prompt);
+        let auto_title = auto_title(
+            if input.prompt.trim().is_empty()
+                && input.model_id == studio_core::recipes::BIREFNET_MODEL
+            {
+                "去背景"
+            } else {
+                &input.prompt
+            },
+        );
         let title_source: String = tx.query_row(
             "SELECT title_source FROM conversations WHERE id=?",
             [input.conversation_id.as_str()],
@@ -774,13 +801,14 @@ impl Library {
         } else {
             turn.model_id.as_str()
         };
+        let tool_output_matches = turn.model_id == studio_core::recipes::BIREFNET_MODEL
+            || request.requested_output.width == width && request.requested_output.height == height;
         if request.model_variant_id.as_str() != expected_model
             || request.capability.capability_id != turn.capability_id
             || request.instruction != turn.prompt && request.capability.instruction_required
             || (!request.capability.instruction_required && !turn.prompt.is_empty())
             || !source_matches
-            || request.requested_output.width != width
-            || request.requested_output.height != height
+            || !tool_output_matches
             || request.requested_output.count != turn.count
             || request
                 .parameters
@@ -1084,7 +1112,11 @@ fn ensure_no_other_pending_turn(db: &Connection, turn_id: &TurnId) -> Result<()>
 }
 
 fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
-    if input.prompt.trim().is_empty()
+    let tool_without_prompt = input.model_id == studio_core::recipes::BIREFNET_MODEL
+        && input.capability_id == studio_core::recipes::BIREFNET_CAPABILITY
+        && input.prompt.is_empty()
+        && input.seed.is_empty();
+    if (!tool_without_prompt && input.prompt.trim().is_empty())
         || input.prompt.len() > studio_core::generation::MAX_PROMPT_BYTES
         || !["1:1", "4:3", "3:4"].contains(&input.aspect.as_str())
         || input.count != 1
@@ -1103,6 +1135,9 @@ fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
         }
         (studio_core::recipes::KLEIN_MODEL, studio_core::recipes::KLEIN_EDIT_CAPABILITY, true) => {
             input.aspect == "1:1"
+        }
+        (studio_core::recipes::BIREFNET_MODEL, studio_core::recipes::BIREFNET_CAPABILITY, true) => {
+            input.aspect == "1:1" && input.prompt.is_empty() && input.seed.is_empty()
         }
         _ => false,
     };
