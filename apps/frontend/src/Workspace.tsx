@@ -239,6 +239,7 @@ function TurnCard({
     <div className="assistant-response">
       <div className="response-source"><span className="assistant-mark"><Palette size={15}/></span><div><strong>Image Studio</strong><span>{modelShortName(turn.modelId)} · {turn.capabilityId.includes('.edit.') ? '单图编辑' : turn.capabilityId.includes('.remove-background.') ? (showMask ? '前景蒙版' : '透明背景') : turn.capabilityId.includes('.upscale.') ? turn.jobId ? `精确 4× · ${turn.width}×${turn.height}` : '固定 4× · 正在校验源图' : `${turn.aspect} · 种子 ${turn.seed ?? '随机'}`}</span></div></div>
       <div className="image-card" style={cardStyle}>
+        <div className="image-card-media">
         {complete && <button className="image-card-open" type="button" onClick={() => onOpen(showMask)} aria-label={showMask ? '放大查看前景蒙版' : '放大查看生成图片'}><img src={assetUrl(displayedAssetId!)} alt={showMask ? '前景蒙版' : turn.prompt} draggable={false} onLoad={() => setImageReady(true)} onError={() => setImageFailed(true)}/>{imageReady && <span className="image-open-hint"><Expand size={14}/>查看大图</span>}</button>}
         {(!complete || !imageReady) && <div className="image-card-placeholder">
           {turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) ? <><ImageIcon size={25}/><strong>任务已完成，图片无法显示</strong><span>{displayedError || 'PNG 可能已被移动、改写或无法解码。'}</span></> : active || turn.state === 'Succeeded' ? <><LoaderCircle size={25} className="spin"/><strong>{progress.label}</strong><span>{turn.state === 'Succeeded' ? '正在解码并校验 PNG' : '生成结果会在此处原位出现'}</span></> : <>{turn.state === 'Rejected' ? <X size={24}/> : <ImageIcon size={25}/>}<strong>{stateLabel(turn.state)}</strong><span>{turn.error || (turn.state === 'Cancelled' ? '本次生成已取消' : '本次执行没有可显示结果')}</span></>}
@@ -247,6 +248,7 @@ function TurnCard({
           <div className="progress-copy" role="status"><span>{progress.label}</span>{progress.percent !== null && <strong>{progress.percent}%</strong>}</div>
           <div className={`progress-track ${progress.percent === null || turn.state === 'Succeeded' && !imageReady ? 'is-indeterminate' : ''}`}><span style={{ width: `${progress.percent ?? 40}%` }}/></div>
         </div>}
+        </div>
         {turn.error && !active && <p className="turn-error" role="alert">{turn.error}</p>}
         <div className="image-card-actions">
           {active && <button className="danger-quiet" disabled={turn.state === 'CancelRequested' || turn.id.startsWith('local-') && turn.state === 'CancelRequested'} onClick={onCancel}><Square size={12}/>{turn.state === 'CancelRequested' ? '正在取消' : '停止'}</button>}
