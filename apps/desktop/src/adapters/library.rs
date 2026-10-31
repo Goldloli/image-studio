@@ -3,6 +3,7 @@
 mod assets;
 mod conversations;
 mod queries;
+mod schema;
 
 pub use conversations::{
     AcceptTurnInput, AcceptedTurn, ConversationListPage, ConversationRecord, CreatedConversation,
@@ -28,6 +29,7 @@ use studio_core::{
     contracts::*,
     domain::*,
     generation::{AttemptState, validate_z_image_plan},
+    recipes::PRIMARY_ROLE,
 };
 use thiserror::Error;
 use uuid::Uuid;
@@ -98,6 +100,7 @@ pub struct AssetRecord {
     pub asset: AssetRef,
     pub job_id: JobId,
     pub attempt_id: AttemptId,
+    pub output_role: String,
     pub width: u32,
     pub height: u32,
     pub byte_count: u64,
@@ -193,7 +196,7 @@ impl Library {
             }
         })?;
         let host_lock = HostLock(host_lock);
-        for name in ["runs", "commits", "assets", "quarantine"] {
+        for name in ["runs", "commits", "assets", "inputs", "quarantine"] {
             managed_directory(&root.join(name))?;
         }
         let db_path = root.join("library.sqlite3");
@@ -229,8 +232,11 @@ impl Library {
             conversations::migrate_v3_to_v4(&mut db)?;
         } else if version == 3 {
             conversations::migrate_v3_to_v4(&mut db)?;
-        } else if version != 4 {
+        } else if version > 5 {
             return Err(LibraryError::Schema(format!("user_version={version}")));
+        }
+        if version <= 4 {
+            schema::migrate_v4_to_v5(&mut db)?;
         }
         let integrity: String = db.query_row("PRAGMA quick_check(1)", [], |r| r.get(0))?;
         if integrity != "ok" {

@@ -160,7 +160,7 @@ impl Library {
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
         let current = current_job(&tx, attempt)?;
         commit_eligible(&current)?;
-        tx.execute("INSERT INTO assets(id,job_id,attempt_id,asset_json,relative_path,width,height,byte_count,created_at) VALUES(?,?,?,?,?,?,?,?,?)",params![asset.asset_id.as_str(),attempt.job_id.as_str(),attempt.attempt_id.as_str(),serde_json::to_string(&asset)?,relative_path,candidate.width,candidate.height,sqlite_integer(bytes)?,now()])?;
+        tx.execute("INSERT INTO assets(id,job_id,attempt_id,output_role,asset_json,relative_path,width,height,byte_count,created_at) VALUES(?,?,?,?,?,?,?,?,?,?)",params![asset.asset_id.as_str(),attempt.job_id.as_str(),attempt.attempt_id.as_str(),PRIMARY_ROLE,serde_json::to_string(&asset)?,relative_path,candidate.width,candidate.height,sqlite_integer(bytes)?,now()])?;
         write_terminal(
             &tx,
             &current,
@@ -180,14 +180,15 @@ impl Library {
     }
 
     pub fn asset(&self, id: &AssetId) -> Result<AssetRecord> {
-        let row=self.db.query_row("SELECT asset_json,job_id,attempt_id,width,height,byte_count FROM assets WHERE id=?",[id.as_str()],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?,r.get::<_,String>(2)?,r.get(3)?,r.get(4)?,read_unsigned(r,5)?))).optional()?.ok_or_else(||LibraryError::NotFound(id.to_string()))?;
+        let row=self.db.query_row("SELECT asset_json,job_id,attempt_id,output_role,width,height,byte_count FROM assets WHERE id=?",[id.as_str()],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?,r.get::<_,String>(2)?,r.get::<_,String>(3)?,r.get(4)?,r.get(5)?,read_unsigned(r,6)?))).optional()?.ok_or_else(||LibraryError::NotFound(id.to_string()))?;
         let mut record = AssetRecord {
             asset: serde_json::from_str(&row.0)?,
             job_id: JobId::new(row.1)?,
             attempt_id: AttemptId::new(row.2)?,
-            width: row.3,
-            height: row.4,
-            byte_count: row.5,
+            output_role: row.3,
+            width: row.4,
+            height: row.5,
+            byte_count: row.6,
             available: true,
             availability_error: None,
         };
@@ -200,7 +201,7 @@ impl Library {
 
     pub fn assets(&self, limit: u32, offset: u32) -> Result<Vec<AssetRecord>> {
         let mut statement = self.db.prepare(
-            "SELECT id FROM assets ORDER BY created_at DESC,rowid DESC LIMIT ? OFFSET ?",
+            "SELECT id FROM assets WHERE output_role='primary' ORDER BY created_at DESC,rowid DESC LIMIT ? OFFSET ?",
         )?;
         let ids = statement
             .query_map(params![limit.clamp(1, 100), offset], |r| {

@@ -379,6 +379,90 @@ fn sqlite_configuration_unknown_schema_and_corruption_are_explicit() {
 }
 
 #[test]
+fn v4_to_v5_preserves_legacy_records_and_adds_output_role() {
+    let root = TempDir::new().unwrap();
+    let db_path = root.path().join("library.sqlite3");
+    let db = Connection::open(&db_path).unwrap();
+    db.pragma_update(None, "foreign_keys", "ON").unwrap();
+    db.execute_batch(SCHEMA_V3).unwrap();
+    db.execute_batch(
+        "
+        INSERT INTO projects(id) VALUES('default');
+        INSERT INTO drafts(
+            id,project_id,name,prompt,prompt_source,params_json,collapsed,version
+        ) VALUES(
+            1,'default','legacy','prompt',NULL,
+            '{\"modelId\":\"z-image-turbo-mflux-v1\",\"aspect\":\"1:1\",\"count\":1,\"seed\":\"\"}',
+            0,1
+        );
+        INSERT INTO conversations(
+            id,project_id,draft_id,title,title_source,created_at,activity_seq
+        ) VALUES('conv-legacy','default',1,'legacy','manual',1,1);
+        INSERT INTO jobs(
+            id,project_id,submission_key,request_json,current_attempt_id,created_at
+        ) VALUES('job-legacy','default','submit-legacy','{}','attempt-legacy',1);
+        INSERT INTO attempts(
+            id,job_id,token,storage_key,state,plan_json,manifest_json,error,
+            created_at,completed_at
+        ) VALUES(
+            'attempt-legacy','job-legacy','token-legacy','run-legacy','succeeded',
+            '{}','{}',NULL,1,2
+        );
+        INSERT INTO assets(
+            id,job_id,attempt_id,asset_json,relative_path,width,height,
+            byte_count,created_at
+        ) VALUES(
+            'asset-legacy','job-legacy','attempt-legacy','{\"legacy\":true}',
+            'assets/asset-legacy.png',8,8,64,2
+        );
+        INSERT INTO generation_turns(
+            id,project_id,conversation_id,sequence,submission_key,source_draft_id,
+            prompt,model_id,aspect,count,seed,status,job_id,received_at
+        ) VALUES(
+            'turn-legacy','default','conv-legacy',1,'submit-legacy',1,
+            'prompt','z-image-turbo-mflux-v1','1:1',1,'','job','job-legacy',1
+        );
+        ",
+    )
+    .unwrap();
+    drop(db);
+
+    let library = open(root.path());
+    assert_eq!(
+        library
+            .db
+            .pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
+            .unwrap(),
+        5
+    );
+    let asset: (String, String, String) = library
+        .db
+        .query_row(
+            "SELECT id,asset_json,output_role FROM assets WHERE attempt_id='attempt-legacy'",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        )
+        .unwrap();
+    assert_eq!(
+        asset,
+        (
+            "asset-legacy".into(),
+            "{\"legacy\":true}".into(),
+            "primary".into()
+        )
+    );
+    let turn: (String, Option<String>) = library
+        .db
+        .query_row(
+            "SELECT capability_id,source_asset_id FROM generation_turns WHERE id='turn-legacy'",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .unwrap();
+    assert_eq!(turn, ("image.text-to-image.z-image-turbo.v1".into(), None));
+}
+
+#[test]
 fn drafts_use_cas_and_restore_content_selection_and_unsupported_values() {
     let root = TempDir::new().unwrap();
     let mut library = open(root.path());
@@ -1315,7 +1399,7 @@ PRAGMA user_version=1;
             .db
             .pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
             .unwrap(),
-        4
+        5
     );
     assert_eq!(snapshot.drafts.len(), 3);
     assert_eq!(snapshot.drafts[0].params["modelId"], DEFAULT_MODEL_ID);
@@ -1349,11 +1433,18 @@ PRAGMA user_version=1;
 fn v3_migration_preserves_drafts_and_adds_prompt_source() {
     let root = TempDir::new().unwrap();
     {
-        let library = open(root.path());
-        let draft = library.drafts().unwrap().remove(0);
-        assert_eq!(draft.prompt_source, None);
-        drop(library);
         let db = Connection::open(root.path().join("library.sqlite3")).unwrap();
+        db.execute_batch(SCHEMA_V3).unwrap();
+        db.execute(
+            "INSERT INTO projects(id,active_draft_id) VALUES('default',1)",
+            [],
+        )
+        .unwrap();
+        db.execute(
+            "INSERT INTO drafts(project_id,name,prompt,params_json,collapsed,version) VALUES('default','草稿','', '{}',0,1)",
+            [],
+        )
+        .unwrap();
         db.execute_batch("ALTER TABLE drafts DROP COLUMN prompt_source; PRAGMA user_version=3;")
             .unwrap();
     }
@@ -1362,7 +1453,7 @@ fn v3_migration_preserves_drafts_and_adds_prompt_source() {
         .db
         .pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
         .unwrap();
-    assert_eq!(version, 4);
+    assert_eq!(version, 5);
     let draft = library.drafts().unwrap().remove(0);
     assert_eq!(draft.prompt, "");
     assert_eq!(draft.prompt_source, None);
