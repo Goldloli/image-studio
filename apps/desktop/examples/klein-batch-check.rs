@@ -389,6 +389,7 @@ fn save_task_draft(
         .map_err(|error| error.to_string())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn conversation_input(
     conversation_id: &str,
     draft_id: u64,

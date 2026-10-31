@@ -58,6 +58,17 @@ struct InstallProfile {
     installing_relative: &'static str,
 }
 
+struct SegmentDownload<'a> {
+    url: &'a str,
+    path: &'a Path,
+    metadata_path: &'a Path,
+    sha256: &'a str,
+    etag: &'a str,
+    start: u64,
+    end: u64,
+    total: u64,
+}
+
 const Z_PROFILE: InstallProfile = InstallProfile {
     install_id: INSTALL_ID,
     model_manifest: MODEL_MANIFEST,
@@ -906,7 +917,7 @@ impl Installation {
                 if status.success() {
                     return Ok(output);
                 }
-                let detail = fs::read(&self.inner.paths.logs.join("installation-process.log"))
+                let detail = fs::read(self.inner.paths.logs.join("installation-process.log"))
                     .ok()
                     .map(|bytes| {
                         let skip = bytes.len().saturating_sub(4096);
@@ -1162,14 +1173,16 @@ impl Installation {
             let metadata_path = segment_meta_paths[index].clone();
             self.download_segment(
                 &client,
-                &a.url,
-                &path,
-                &metadata_path,
-                &a.sha256,
-                &etag,
-                start,
-                end,
-                a.bytes,
+                SegmentDownload {
+                    url: &a.url,
+                    path: &path,
+                    metadata_path: &metadata_path,
+                    sha256: &a.sha256,
+                    etag: &etag,
+                    start,
+                    end,
+                    total: a.bytes,
+                },
             )
             .await?;
         }
@@ -1208,15 +1221,18 @@ impl Installation {
     async fn download_segment(
         &self,
         client: &reqwest::Client,
-        url: &str,
-        path: &Path,
-        metadata_path: &Path,
-        sha256: &str,
-        etag: &str,
-        start: u64,
-        end: u64,
-        total: u64,
+        request: SegmentDownload<'_>,
     ) -> Result<(), String> {
+        let SegmentDownload {
+            url,
+            path,
+            metadata_path,
+            sha256,
+            etag,
+            start,
+            end,
+            total,
+        } = request;
         let expected = end - start;
         let offset = fs::metadata(path).map(|value| value.len()).unwrap_or(0);
         if offset > expected {

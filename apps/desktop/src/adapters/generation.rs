@@ -275,10 +275,10 @@ impl GenerationController {
         job: &JobRecord,
         ready: &ReadyPaths,
     ) -> Result<(SupervisorConfig, PathBuf, Arc<Control>), String> {
-        if ready.worker_module != "studio_mflux_worker" {
-            if ready.worker_module != "studio_mflux_worker_v2" {
-                return Err("计算模块身份不符".into());
-            }
+        if ready.worker_module != "studio_mflux_worker"
+            && ready.worker_module != "studio_mflux_worker_v2"
+        {
+            return Err("计算模块身份不符".into());
         }
         let control = self
             .inner

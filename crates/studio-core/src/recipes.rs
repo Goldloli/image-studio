@@ -366,7 +366,7 @@ impl Recipe {
             Self::ZImageTurbo => unreachable!(),
         };
         require(
-            &plan.effective_parameters == &expected,
+            plan.effective_parameters == expected,
             "effective recipe parameters do not match the pinned recipe",
         )
     }
