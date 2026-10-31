@@ -347,6 +347,11 @@ fn decode_source(bytes: &[u8]) -> Result<DecodedSource> {
         .format()
         .filter(|format| matches!(format, ImageFormat::Png | ImageFormat::Jpeg))
         .ok_or_else(|| LibraryError::Invalid("源图只接受 PNG 或 JPEG".into()))?;
+    match format {
+        ImageFormat::Png => validate_input_png(bytes)?,
+        ImageFormat::Jpeg => validate_jpeg_components(bytes)?,
+        _ => unreachable!(),
+    }
     let mut limits = image::Limits::default();
     limits.max_image_width = Some(MAX_SOURCE_EDGE);
     limits.max_image_height = Some(MAX_SOURCE_EDGE);
@@ -370,9 +375,6 @@ fn decode_source(bytes: &[u8]) -> Result<DecodedSource> {
             .icc_profile()
             .map_err(|error| LibraryError::Invalid(format!("源图颜色配置读取失败：{error}")))?,
     )?;
-    if format == ImageFormat::Png {
-        validate_input_png(bytes)?;
-    }
     let orientation = decoder
         .orientation()
         .map_err(|error| LibraryError::Invalid(format!("源图方向读取失败：{error}")))?;
@@ -428,6 +430,67 @@ fn validate_input_png(bytes: &[u8]) -> Result<()> {
         return Err(LibraryError::Invalid("PNG 只接受 8-bit RGB 或 RGBA".into()));
     }
     Ok(())
+}
+
+fn validate_jpeg_components(bytes: &[u8]) -> Result<()> {
+    if !bytes.starts_with(&[0xff, 0xd8]) {
+        return Err(LibraryError::Invalid("JPEG 头部无效".into()));
+    }
+    let mut position = 2;
+    while position + 1 < bytes.len() {
+        while position < bytes.len() && bytes[position] != 0xff {
+            position += 1;
+        }
+        while position < bytes.len() && bytes[position] == 0xff {
+            position += 1;
+        }
+        let Some(&marker) = bytes.get(position) else {
+            break;
+        };
+        position += 1;
+        if marker == 0xd9 || marker == 0xda {
+            break;
+        }
+        if marker == 0x00 || (0xd0..=0xd7).contains(&marker) {
+            continue;
+        }
+        let Some(length_bytes) = bytes.get(position..position + 2) else {
+            return Err(LibraryError::Invalid("JPEG 段长度缺失".into()));
+        };
+        let length = usize::from(u16::from_be_bytes([length_bytes[0], length_bytes[1]]));
+        if length < 2 || position + length > bytes.len() {
+            return Err(LibraryError::Invalid("JPEG 段长度无效".into()));
+        }
+        if matches!(
+            marker,
+            0xc0 | 0xc1
+                | 0xc2
+                | 0xc3
+                | 0xc5
+                | 0xc6
+                | 0xc7
+                | 0xc9
+                | 0xca
+                | 0xcb
+                | 0xcd
+                | 0xce
+                | 0xcf
+        ) {
+            if length < 8 {
+                return Err(LibraryError::Invalid("JPEG 帧头无效".into()));
+            }
+            let components = bytes[position + 7];
+            return if components == 3 {
+                Ok(())
+            } else {
+                Err(LibraryError::Invalid(
+                    "JPEG 源图只接受 3 分量 RGB；不支持灰度或 CMYK".into(),
+                ))
+            };
+        }
+        position += length;
+    }
+    Err(LibraryError::Invalid("JPEG 帧头缺失".into()))
 }
 
 fn inspect_normalized_png(bytes: &[u8]) -> Result<bool> {
@@ -655,5 +718,27 @@ mod tests {
 
         assert!(library.imported_sources().unwrap().is_empty());
         assert_eq!(fs::read_dir(root.path().join("inputs")).unwrap().count(), 0);
+    }
+
+    #[test]
+    fn jpeg_component_gate_rejects_gray_and_cmyk_before_decode() {
+        fn frame(components: u8) -> Vec<u8> {
+            let segment_length = 8 + usize::from(components) * 3;
+            let mut value = vec![0xff, 0xd8, 0xff, 0xc0];
+            value.extend_from_slice(&(segment_length as u16).to_be_bytes());
+            value.extend_from_slice(&[8, 0, 1, 0, 1, components]);
+            value.resize(4 + segment_length, 0);
+            value.extend_from_slice(&[0xff, 0xd9]);
+            value
+        }
+        assert!(validate_jpeg_components(&frame(3)).is_ok());
+        for components in [1, 4] {
+            assert!(
+                validate_jpeg_components(&frame(components))
+                    .unwrap_err()
+                    .to_string()
+                    .contains("3 分量")
+            );
+        }
     }
 }
