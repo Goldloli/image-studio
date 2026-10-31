@@ -96,6 +96,18 @@ pub struct DraftParams {
     pub capability_id: String,
     #[serde(default)]
     pub source_asset_id: Option<String>,
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub capability_drafts: std::collections::BTreeMap<String, CapabilityDraft>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CapabilityDraft {
+    pub prompt: String,
+    pub aspect: String,
+    pub seed: String,
+    pub source_asset_id: Option<String>,
+    pub prompt_source_id: Option<String>,
 }
 
 fn default_capability_id() -> String {
@@ -111,6 +123,7 @@ impl Default for DraftParams {
             seed: String::new(),
             capability_id: default_capability_id(),
             source_asset_id: None,
+            capability_drafts: Default::default(),
         }
     }
 }
@@ -427,6 +440,37 @@ impl StudioService {
         let params: DraftParams =
             serde_json::from_value(value.clone()).map_err(|_| "创作参数结构无效".to_string())?;
         let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
+        for (capability, saved) in &params.capability_drafts {
+            let aspect_valid = match capability.as_str() {
+                studio_core::generation::Z_IMAGE_CAPABILITY => {
+                    matches!(saved.aspect.as_str(), "1:1" | "4:3" | "3:4")
+                }
+                studio_core::recipes::KLEIN_TEXT_CAPABILITY
+                | studio_core::recipes::KLEIN_EDIT_CAPABILITY
+                | studio_core::recipes::BIREFNET_CAPABILITY
+                | studio_core::recipes::REALESRGAN_CAPABILITY => saved.aspect == "1:1",
+                _ => false,
+            };
+            let tool = matches!(
+                capability.as_str(),
+                studio_core::recipes::BIREFNET_CAPABILITY
+                    | studio_core::recipes::REALESRGAN_CAPABILITY
+            );
+            if !aspect_valid
+                || saved.prompt.len() > 1024 * 1024
+                || !valid_seed(&saved.seed)
+                || tool && (!saved.prompt.is_empty() || !saved.seed.is_empty())
+                || saved
+                    .prompt_source_id
+                    .as_ref()
+                    .is_some_and(|id| id.is_empty() || id.len() > 128)
+            {
+                return Err("能力草稿结构或范围无效".into());
+            }
+            if let Some(source) = &saved.source_asset_id {
+                AssetId::new(source).map_err(|error| error.to_string())?;
+            }
+        }
         if !catalog.contains(&params.model_id) {
             return Err("所选模型未在权威目录中登记".into());
         }
@@ -443,11 +487,9 @@ impl StudioService {
                 studio_core::recipes::KLEIN_TEXT_CAPABILITY,
                 false,
             )
-            | (
-                studio_core::recipes::KLEIN_MODEL,
-                studio_core::recipes::KLEIN_EDIT_CAPABILITY,
-                true,
-            ) => params.aspect == "1:1",
+            | (studio_core::recipes::KLEIN_MODEL, studio_core::recipes::KLEIN_EDIT_CAPABILITY, _) => {
+                params.aspect == "1:1"
+            }
             (
                 studio_core::recipes::BIREFNET_MODEL,
                 studio_core::recipes::BIREFNET_CAPABILITY,
@@ -499,6 +541,7 @@ impl StudioService {
             seed: snapshot.creation_defaults.seed,
             capability_id: default_capability_id(),
             source_asset_id: None,
+            capability_drafts: Default::default(),
         };
         if !catalog.supports(&params.model_id, "text_to_image") {
             warnings.push("已保存的默认模型不在当前目录中，已回退为 Z-Image Turbo".into());
@@ -1704,6 +1747,97 @@ mod tests {
         assert_eq!(planned["productStatus"], "implemented");
         assert_eq!(planned["canInstall"], true);
         assert_eq!(planned["executable"], false);
+    }
+
+    #[test]
+    fn capability_drafts_survive_tool_switches_and_restart_without_consuming_text() {
+        let (root, service) = fixture();
+        let prompt = "中文原文".repeat(12_000);
+        service.save_draft(DraftInput {
+            id: 1, name: "能力隔离".into(), prompt: prompt.clone(),
+            params: json!({"modelId": DEFAULT_MODEL_ID, "aspect":"4:3", "count":1,"seed":"73"}),
+            collapsed:false, prompt_source_id:None,
+        }, 1).unwrap();
+        let conversation = service.snapshot().unwrap()["activeConversationId"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let switched = service
+            .with_library(|library| {
+                library.apply_model_to_conversation(
+                    &ConversationId::new(&conversation).unwrap(),
+                    studio_core::recipes::REALESRGAN_MODEL,
+                )
+            })
+            .unwrap();
+        assert!(switched.prompt.is_empty());
+        assert_eq!(switched.params["seed"], "");
+        service
+            .validate_registered_draft_params(&switched.params)
+            .unwrap();
+        assert_eq!(
+            switched.params["capabilityDrafts"][studio_core::generation::Z_IMAGE_CAPABILITY]["prompt"],
+            prompt
+        );
+        drop(service);
+        let restored = StudioService::new(
+            AppPaths::resolve(Some(root.path())).unwrap(),
+            root.path().join("not-installed-supervisor"),
+        );
+        let switched_back = restored
+            .with_library(|library| {
+                library.apply_model_to_conversation(
+                    &ConversationId::new(&conversation).unwrap(),
+                    DEFAULT_MODEL_ID,
+                )
+            })
+            .unwrap();
+        assert_eq!(switched_back.prompt, prompt);
+        assert_eq!(switched_back.params["aspect"], "4:3");
+        assert_eq!(switched_back.params["seed"], "73");
+        assert_eq!(restored.snapshot().unwrap()["jobCounts"], json!([0, 0, 0]));
+        let editable = restored
+            .save_draft(
+                DraftInput {
+                    id: 1,
+                    name: "能力隔离".into(),
+                    prompt: "可提交的短提示词".into(),
+                    params: switched_back.params.clone(),
+                    collapsed: false,
+                    prompt_source_id: None,
+                },
+                switched_back.version,
+            )
+            .unwrap();
+        let accepted = restored
+            .with_library(|library| {
+                library.accept_turn(AcceptTurnInput {
+                    conversation_id: ConversationId::new(&conversation).unwrap(),
+                    draft_id: 1,
+                    expected_version: editable.version,
+                    submission_key: IdempotencyKey::new("scoped-draft-send").unwrap(),
+                    prompt: editable.prompt.clone(),
+                    model_id: DEFAULT_MODEL_ID.into(),
+                    capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+                    source_asset_id: None,
+                    aspect: "4:3".into(),
+                    count: 1,
+                    seed: "73".into(),
+                })
+            })
+            .unwrap();
+        assert!(accepted.draft.prompt.is_empty());
+        assert_eq!(
+            accepted.draft.params["capabilityDrafts"],
+            editable.params["capabilityDrafts"]
+        );
+        let mut invalid = switched_back.params.clone();
+        invalid["capabilityDrafts"]["unknown.capability"] = json!({"prompt":"", "aspect":"1:1", "seed":"", "sourceAssetId":null,"promptSourceId":null});
+        assert!(restored.validate_registered_draft_params(&invalid).is_err());
+        invalid = switched_back.params;
+        invalid["capabilityDrafts"][studio_core::recipes::REALESRGAN_CAPABILITY]["seed"] =
+            json!("42");
+        assert!(restored.validate_registered_draft_params(&invalid).is_err());
     }
 
     #[test]

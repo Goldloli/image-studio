@@ -1,3 +1,10 @@
+export type CapabilityDraft = {
+  prompt: string;
+  aspect: string;
+  seed: string;
+  sourceAssetId: string | null;
+  promptSourceId: string | null;
+};
 export type DraftParams = {
   modelId: string;
   aspect: string;
@@ -5,6 +12,7 @@ export type DraftParams = {
   seed: string;
   capabilityId?: string;
   sourceAssetId?: string | null;
+  capabilityDrafts?: Record<string, CapabilityDraft>;
 };
 export type Draft = {
   id: number; name: string; prompt: string; collapsed: boolean; params: DraftParams;
@@ -57,8 +65,17 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
     }
     if(action.type==='collapse') return {...d,collapsed:!d.collapsed};
     if(action.type==='params') {
-      const params={...d.params,...action.patch};
+      let params={...d.params,...action.patch};
       if(!/^[A-Za-z0-9._:-]{1,128}$/.test(params.modelId)||!['1:1','4:3','3:4'].includes(params.aspect)||params.count!==1) return d;
+      const current=d.params.capabilityId??'image.text-to-image.z-image-turbo.v1';
+      const next=params.capabilityId??'image.text-to-image.z-image-turbo.v1';
+      if(current!==next) {
+        const slots={...d.params.capabilityDrafts,[current]:{prompt:d.prompt,aspect:d.params.aspect,seed:d.params.seed,sourceAssetId:d.params.sourceAssetId??null,promptSourceId:d.promptSourceId??null}};
+        const saved=slots[next];
+        const tool=next.includes('.remove-background.')||next.includes('.upscale.');
+        params={...d.params,aspect:'1:1',seed:tool?'':d.params.seed,sourceAssetId:null,...(saved?{aspect:saved.aspect,seed:saved.seed,sourceAssetId:saved.sourceAssetId}:{}),...action.patch,capabilityDrafts:slots};
+        return {...d,params,prompt:saved?.prompt??(tool?'':d.prompt),promptSourceId:saved?.promptSourceId??null,past:[],future:[]};
+      }
       return {...d,params};
     }
     return d;

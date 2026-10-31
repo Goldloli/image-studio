@@ -420,6 +420,15 @@ impl Library {
             .params
             .as_object_mut()
             .ok_or_else(|| LibraryError::Invalid("会话创作参数不是对象".into()))?;
+        let previous_capability = params
+            .get("capabilityId")
+            .and_then(Value::as_str)
+            .unwrap_or(studio_core::generation::Z_IMAGE_CAPABILITY)
+            .to_owned();
+        let previous = serde_json::json!({
+            "prompt": draft.prompt, "aspect": params.get("aspect"), "seed": params.get("seed"),
+            "sourceAssetId": params.get("sourceAssetId"), "promptSourceId": draft.prompt_source,
+        });
         params.insert("modelId".into(), Value::String(model_id.to_owned()));
         if model_id == studio_core::recipes::KLEIN_MODEL {
             params.insert("aspect".into(), Value::String("1:1".into()));
@@ -452,6 +461,31 @@ impl Library {
                 Value::String(studio_core::generation::Z_IMAGE_CAPABILITY.into()),
             );
             params.insert("sourceAssetId".into(), Value::Null);
+        }
+        let next_capability = params["capabilityId"].as_str().unwrap().to_owned();
+        if previous_capability != next_capability {
+            let slots = params
+                .entry("capabilityDrafts")
+                .or_insert_with(|| serde_json::json!({}))
+                .as_object_mut()
+                .ok_or_else(|| LibraryError::Invalid("能力草稿不是对象".into()))?;
+            slots.insert(previous_capability, previous);
+            let restored = slots.get(&next_capability).cloned();
+            if let Some(restored) = restored {
+                draft.prompt = restored["prompt"].as_str().unwrap_or("").into();
+                draft.prompt_source = restored["promptSourceId"].as_str().map(str::to_string);
+                for key in ["aspect", "seed", "sourceAssetId"] {
+                    if let Some(value) = restored.get(key) {
+                        params.insert(key.into(), value.clone());
+                    }
+                }
+            } else if matches!(
+                model_id,
+                studio_core::recipes::BIREFNET_MODEL | studio_core::recipes::REALESRGAN_MODEL
+            ) {
+                draft.prompt.clear();
+                draft.prompt_source = None;
+            }
         }
         let version = draft.version;
         self.save_draft(draft, version)
@@ -690,9 +724,14 @@ impl Library {
             )
             .optional()?
             .ok_or_else(|| LibraryError::NotFound(format!("draft {}", input.draft_id)))?;
+        let mut active_params: Value = serde_json::from_str(&current.1)?;
+        if let Some(params) = active_params.as_object_mut() {
+            // Inactive capability drafts are retained editing state, not execution inputs.
+            params.remove("capabilityDrafts");
+        }
         if current.2 != input.expected_version
             || current.0 != input.prompt
-            || current.1 != params_json
+            || active_params != serde_json::from_str::<Value>(&params_json)?
         {
             return Err(LibraryError::TurnConflict);
         }

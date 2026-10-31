@@ -345,7 +345,8 @@ impl Library {
             || draft.name.len() > 1024
             || draft.prompt.len() > 1024 * 1024
             || !draft.params.is_object()
-            || serde_json::to_vec(&draft.params)?.len() > 65536
+            // Five bounded capability slots may each retain the existing 1 MiB draft budget.
+            || serde_json::to_vec(&draft.params)?.len() > 6 * 1024 * 1024
             || draft
                 .prompt_source
                 .as_ref()

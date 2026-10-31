@@ -2,6 +2,31 @@ import { describe, expect, it } from 'vitest';
 import { clampZoom, initialWorkspace, validSeed, workspaceReducer as reduce } from './workspace-state';
 
 describe('workspace draft isolation',()=>{
+  it('persists separate prompts, source images and parameters across capability switches and tool sends',()=>{
+    const z='image.text-to-image.z-image-turbo.v1';
+    const r='image.upscale.realesrgan-x4plus.v1';
+    const e='image.edit.flux2-klein-4b.v1';
+    let state=reduce(initialWorkspace(),{type:'edit',value:'尚未发送的中文想法'});
+    state=reduce(state,{type:'params',patch:{aspect:'4:3',seed:'42'}});
+    state=reduce(state,{type:'params',patch:{modelId:'realesrgan-x4plus',capabilityId:r}});
+    expect(state.drafts[0].prompt).toBe('');
+    expect(state.drafts[0].params.seed).toBe('');
+    state=reduce(state,{type:'params',patch:{sourceAssetId:'source-upscale'}});
+    state=reduce(state,{type:'params',patch:{modelId:'flux2-klein-4b-distilled',capabilityId:e,sourceAssetId:'source-edit'}});
+    state=reduce(state,{type:'edit',value:'只把外套改为蓝色'});
+    state=reduce(state,{type:'params',patch:{modelId:'realesrgan-x4plus',capabilityId:r}});
+    expect(state.drafts[0].prompt).toBe('');
+    expect(state.drafts[0].params.sourceAssetId).toBe('source-upscale');
+    state=reduce(state,{type:'consume',draftId:1,name:'放大',params:state.drafts[0].params});
+    // JSON round-trip simulates the persisted params restored after app restart.
+    state=JSON.parse(JSON.stringify(state));
+    state=reduce(state,{type:'params',patch:{modelId:'z-image-turbo-mflux-v1',capabilityId:z}});
+    expect(state.drafts[0].prompt).toBe('尚未发送的中文想法');
+    expect(state.drafts[0].params).toMatchObject({aspect:'4:3',seed:'42',sourceAssetId:null});
+    state=reduce(state,{type:'params',patch:{modelId:'flux2-klein-4b-distilled',capabilityId:e}});
+    expect(state.drafts[0].prompt).toBe('只把外套改为蓝色');
+    expect(state.drafts[0].params.sourceAssetId).toBe('source-edit');
+  });
   it('routes late IME events to their original draft after navigation',()=>{
     let state=reduce(initialWorkspace(),{type:'edit',id:1,value:'zhongwen',record:false});
     state=reduce(state,{type:'new'});

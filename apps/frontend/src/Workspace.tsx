@@ -1063,20 +1063,11 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     if (!requestedComposer || !loaded) return;
     setViewer(null);
     setPopup(null);
-    const source = requestedComposer.capabilityId === 'image.edit.flux2-klein-4b.v1'
-      || requestedComposer.capabilityId === BIREFNET_CAPABILITY
-      || requestedComposer.capabilityId === REALESRGAN_CAPABILITY
-      ? active.params.sourceAssetId ?? null
-      : null;
     dispatch({
       type: 'params',
       patch: {
         modelId: requestedComposer.modelId,
         capabilityId: requestedComposer.capabilityId,
-        sourceAssetId: source,
-        aspect: '1:1',
-        seed: '',
-        count: 1,
       },
     });
     if (requestedComposer.capabilityId !== BIREFNET_CAPABILITY
@@ -1248,7 +1239,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
               <span className="composer-status">{currentActiveTurn ? studio?.execution.summary : composerStatus}</span>
               <div className="composer-popup-anchor" data-composer-popup>
                 <button className="model-select" aria-expanded={popup === 'models'} title={selectedModelExecutable ? '当前模型可执行' : '当前模型不可执行，请在模型菜单中选择已就绪型号'} onClick={() => { if (popup === 'models') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('models'); }}><span className="model-mark"><Palette size={13}/></span><span>{selectedModelLabel}</span><ChevronDown size={12}/></button>
-                {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型"><div className="popover-heading"><strong>本地图片模型</strong><span>{availableModels.filter(model => model.ready).length} 个可执行模型</span></div>{availableModels.map(model => { const capability = capabilityForModel(model.id); const selected = active.params.modelId === model.id && active.params.capabilityId === capability; const tool = capability === BIREFNET_CAPABILITY || capability === REALESRGAN_CAPABILITY; return <button key={model.id} className={`single-model-option ${selected ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: model.id, capabilityId: capability, sourceAssetId: null, aspect: '1:1', seed: tool ? '' : active.params.seed }); setPopup(null); if (!tool) requestAnimationFrame(() => textarea.current?.focus()); }}><span className="model-mark"><Palette size={14}/></span><span><strong>{modelDisplayName(model.id)}</strong><small>{model.summary}</small></span>{selected && <Check size={14}/>}</button>; })}{active.params.sourceAssetId && !isToolComposer && <button className={`single-model-option ${active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', aspect: '1:1' }); setPopup(null); }}><span className="model-mark"><ImageIcon size={14}/></span><span><strong>Klein 单图编辑</strong><small>使用当前源图和编辑指令</small></span>{active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' && <Check size={14}/>}</button>}<button className="popover-action" onClick={() => { setPopup(null); onModels(); }}>前往模型中心 <ArrowUp size={12}/></button></div>}
+                {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型"><div className="popover-heading"><strong>本地图片模型</strong><span>{availableModels.filter(model => model.ready).length} 个可执行模型</span></div>{availableModels.map(model => { const capability = capabilityForModel(model.id); const selected = active.params.modelId === model.id && active.params.capabilityId === capability; const tool = capability === BIREFNET_CAPABILITY || capability === REALESRGAN_CAPABILITY; return <button key={model.id} className={`single-model-option ${selected ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: model.id, capabilityId: capability }); setPopup(null); if (!tool) requestAnimationFrame(() => textarea.current?.focus()); }}><span className="model-mark"><Palette size={14}/></span><span><strong>{modelDisplayName(model.id)}</strong><small>{model.summary}</small></span>{selected && <Check size={14}/>}</button>; })}{active.params.sourceAssetId && !isToolComposer && <button className={`single-model-option ${active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', aspect: '1:1' }); setPopup(null); }}><span className="model-mark"><ImageIcon size={14}/></span><span><strong>Klein 单图编辑</strong><small>使用当前源图和编辑指令</small></span>{active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' && <Check size={14}/>}</button>}<button className="popover-action" onClick={() => { setPopup(null); onModels(); }}>前往模型中心 <ArrowUp size={12}/></button></div>}
               </div>
               {sendButton}
             </div>
