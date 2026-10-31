@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "finalNativeCodeCommit": "97e746f0623856dda53d58eb1d14f7f27d95101a",
+  "finalNativeApplicationSha256": "abc16ed35ce3a74318d14fa8599f696d7ca6a59a4dfd79d4fe7c5cdd34997273",
+  "device": {
+    "name": "Apple M3 Max",
+    "memoryBytes": 137438953472,
+    "system": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434\n",
+    "architecture": "arm64",
+    "backend": "ncnn Vulkan via bundled MoltenVK, GPU 0"
+  },
+  "recipeId": "realesrgan-x4plus-t128-v1",
+  "capabilityId": "image.upscale.realesrgan-x4plus.v1",
+  "modelSnapshotId": "realesrgan-x4plus-ncnn",
+  "runtimeLockId": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+  "workerBuildId": "studio-realesrgan-worker-0.1.0",
+  "manifests": {
+    "resources/planned-models/realesrgan/model-manifest.json": "fdc1606ae5c910eb00f59ec0c8a8d1c27f9b694f9147b400a2802ad382938294",
+    "resources/planned-models/realesrgan/runtime-manifest.json": "9501ce3131a6909f713505b294c0cc1dff236635b41e2f665f77c173d2ad296c"
+  },
+  "finalBinarySha256": {
+    "target/debug/image-studio-desktop": "abc16ed35ce3a74318d14fa8599f696d7ca6a59a4dfd79d4fe7c5cdd34997273",
+    "target/debug/inference-supervisor": "a592191c671ea64934db2c165f5b1a8c67b233bf9762872f2495c22f6c014c92",
+    "target/debug/realesrgan-worker": "ad1cb50d4baeaedd3b792a66d42bd9b1b6a2a78549cbc3be8bdff873112d8080",
+    "target/debug/examples/realesrgan-batch-check": "24a8f02932d0bb889573898e8dba37967ff2c744c0ed76d95c9f26a5f6bb043f"
+  },
+  "workerSources": {
+    "tools/realesrgan-worker/Cargo.toml": "d681fc7c7037c3fb9833adb8d8ffcfa0d74a97675e34b2d74aa0b18fa755a01e",
+    "tools/realesrgan-worker/src/main.rs": "daff5dae9124368ef95245a790e33309a7ac89cf68d75d9360dae51b36d8f1e2"
+  },
+  "executionBindings": {
+    "continuity": "P03-P08-realesrgan-continuity.json",
+    "loadingAndInferenceCancellation": "P04-P05-realesrgan-cancellation.json",
+    "hostCrash": "P07-realesrgan-host-crash.json",
+    "offline": "B10-P02-realesrgan-offline.json",
+    "nativeInterleave": "R01-native-interleave.json"
+  },
+  "changeImpact": "Cancellation/crash reports retain their original binary identities. Subsequent changes affected legacy Z retry, recipe-scoped PNG bounds, existing IPC permission generation and UI; affected bounds, Z recovery and native UI were rerun. Native ncnn worker source and pinned recipe are unchanged.",
+  "scopeAdjustment": {
+    "manualImeRepeat": "User waived this repeated manual check on 2026-11-01; no new manual IME pass is claimed. Existing composition unit tests and Klein-stage native evidence remain."
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "R04",
+  "configurationKey": "batch",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "fixture",
+  "reason": "Rust216、前端36、Python38全部通过，Clippy/格式/构建/锁与worker源码审计、禁网原生启动和无生成文件的干净源码离线构建通过。",
+  "evidencePaths": [
+    "realesrgan-quality-gates.json",
+    "clean-source-build.json",
+    "native-offline-startup-final.json"
+  ],
+  "qualityGates": {
+    "schemaVersion": 1,
+    "runId": "planned-models-20261031",
+    "status": "passed",
+    "codeCommit": "97e746f0623856dda53d58eb1d14f7f27d95101a",
+    "applicationSha256": "abc16ed35ce3a74318d14fa8599f696d7ca6a59a4dfd79d4fe7c5cdd34997273",
+    "rustPassed": 216,
+    "rustIgnored": 4,
+    "frontendPassed": 36,
+    "pythonPassed": 38,
+    "pythonSkipped": 0,
+    "commands": [
+      {
+        "name": "Rust format",
+        "command": "cargo fmt --all -- --check",
+        "status": "passed",
+        "log": null
+      },
+      {
+        "name": "Clippy",
+        "command": "cargo clippy --workspace --all-targets --locked -- -D warnings",
+        "status": "passed",
+        "log": "logs/final-clippy.log"
+      },
+      {
+        "name": "Rust tests",
+        "command": "cargo test --workspace --locked",
+        "status": "passed",
+        "log": "logs/final-cargo-test.log"
+      },
+      {
+        "name": "Frontend tests",
+        "command": "npm --prefix apps/frontend test",
+        "status": "passed",
+        "log": "logs/final-frontend-test.log"
+      },
+      {
+        "name": "Frontend build",
+        "command": "npm --prefix apps/frontend run build",
+        "status": "passed",
+        "log": "logs/final-frontend-build.log"
+      },
+      {
+        "name": "Workspace build",
+        "command": "cargo build --workspace --locked",
+        "status": "passed",
+        "log": "logs/final-build.log"
+      },
+      {
+        "name": "Python tests",
+        "command": "target/planned-models-test-env/bin/python -m pytest -q tools/mflux-worker/tests tools/mflux-worker-v2/tests tools/onnx-worker/tests scripts/tests",
+        "status": "passed",
+        "log": "logs/realesrgan-python-gates.log"
+      },
+      {
+        "name": "Lock/source audit",
+        "command": "python3 scripts/verify-planned-model-locks.py",
+        "status": "passed",
+        "log": "logs/final-lock-audit.log"
+      },
+      {
+        "name": "OpenSpec",
+        "command": "openspec validate integrate-planned-models --strict",
+        "status": "passed",
+        "log": "logs/final-openspec-validate.log"
+      },
+      {
+        "name": "Offline native startup",
+        "command": "python3 scripts/check-offline-startup.py --report-prefix planned-models",
+        "status": "passed",
+        "log": "logs/native-offline-startup-final.log"
+      },
+      {
+        "name": "Clean source",
+        "command": "python3 scripts/check-clean-source.py --report-prefix first-generation",
+        "status": "passed",
+        "log": "logs/clean-source-build.log"
+      }
+    ],
+    "cleanSourceReport": "clean-source-build.json",
+    "ignoredCoverage": "三个受环境约束的安装/监督helper由真实阶段安装与生命周期证据覆盖；第四个为本变更无关的灵感图库远程图片下载测试。必需模型验收均已实际执行。",
+    "resolvedGateFailures": "首次无界并发Rust测试有6个本地HTTP fixture超时；单测、限定4线程完整测试及随后默认并发完整测试均通过。干净构建曾发现4个既有IPC权限生成遗漏，66cbd1c修复后通过。",
+    "problems": []
+  }
+}

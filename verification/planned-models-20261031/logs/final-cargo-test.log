@@ -1,0 +1,328 @@
+   Compiling image-studio-desktop v0.1.0 (/Users/gejiawei/Desktop/ai_code/image-studio/apps/desktop)
+   Compiling diagnostic-worker v0.1.0 (/Users/gejiawei/Desktop/ai_code/image-studio/tools/diagnostic-worker)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.15s
+     Running unittests src/main.rs (target/debug/deps/diagnostic_worker-31015b7c500a5d62)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/exchange.rs (target/debug/deps/exchange-4913211d4e3c47a8)
+
+running 5 tests
+test eof_inside_a_control_frame_is_reported_on_stderr ... ok
+test unknown_mode_fails_fast_without_starting_a_probe ... ok
+test a_request_before_hello_is_rejected_without_success_output ... ok
+test unsupported_range_returns_bootstrap_error_without_selected_version ... ok
+test normal_process_completes_only_diagnostic_exchange ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+
+     Running tests/supervision.rs (target/debug/deps/supervision-d0716877b2922ce1)
+
+running 9 tests
+test normal_probe_and_orderly_stop_use_real_process ... ok
+test graceful_parent_and_controller_drop_clean_descendants ... ok
+test progress_and_stderr_flood_remain_bounded_and_reach_terminal_state ... ok
+test rejected_events_do_not_prevent_later_correct_response ... ok
+test immediate_stop_always_reports_a_terminal_state ... ok
+test stop_interrupts_a_pending_probe ... ok
+test ignore_shutdown_has_distinct_forced_termination_result ... ok
+test unicode_space_and_shell_symbols_in_executable_and_workdir_are_literal ... ok
+test malformed_versions_frames_crashes_and_timeouts_never_pass ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.04s
+
+     Running unittests src/lib.rs (target/debug/deps/image_studio_desktop-812facc54680d2e1)
+
+running 128 tests
+test adapters::generation::tests::actual_native_supervisor_sigkill_is_reclaimed_by_its_current_host ... ignored, explicit acceptance: build inference-supervisor and set STUDIO_TEST_NATIVE_SUPERVISOR
+test adapters::diagnostics::tests::unicode_log_tail_stays_within_byte_budget ... ok
+test adapters::diagnostics::tests::unfinished_line_is_rejected_before_unbounded_allocation ... ok
+test adapters::diagnostics::tests::eof_does_not_complete_a_json_line_without_its_delimiter ... ok
+test adapters::installation::tests::actual_private_runtime_installs_offline_without_activating_missing_model ... ignored, explicit acceptance: requires all fixed runtime artifacts in validation cache
+test adapters::catalog::tests::install_states_are_joined_by_install_id ... ok
+test adapters::catalog::tests::active_install_is_exposed_without_fake_completion ... ok
+test adapters::feature_catalog::tests::registry_only_marks_implemented_model_with_real_ready_facts ... ok
+test adapters::feature_catalog::tests::ready_projection_uses_catalog_not_family_keywords ... ok
+test adapters::catalog::tests::planned_models_never_borrow_z_image_install_state ... ok
+test adapters::catalog::tests::catalog_contains_exactly_the_first_four_targets ... ok
+test adapters::installation::tests::installation_space_accounts_for_separate_and_shared_volumes ... ok
+test adapters::installation::tests::fixed_manifests_are_complete ... ok
+test adapters::installation::tests::klein_private_runtime_installs_offline_without_model_weights ... ignored, explicit acceptance: requires the pinned MFLUX wheel cache
+test adapters::installation::tests::birefnet_has_an_independent_onnx_runtime_and_worker ... ok
+test adapters::installation::tests::corrupt_segment_state_is_cleared_for_an_explicit_redownload ... ok
+test adapters::installation::tests::cached_part_and_managed_parent_links_cannot_write_outside ... ok
+test adapters::installation::tests::range_requires_exact_start_end_and_total ... ok
+test adapters::installation::tests::klein_has_an_independent_manifest_runtime_and_worker ... ok
+test adapters::installation::tests::installation_manager_keeps_model_states_and_actions_independent ... ok
+test adapters::installation::tests::native_install_admission_is_exclusive_and_wrong_row_stop_is_isolated ... ok
+test adapters::installation::tests::paths_urls_and_hashes_fail_closed ... ok
+test adapters::installation::tests::interrupted_transfer_keeps_a_resumable_part_but_never_a_final_file ... ok
+test adapters::installation::tests::runtime_inventory_detects_changed_link_targets ... ok
+test adapters::installation::tests::full_response_replaces_a_partial_without_appending ... ok
+test adapters::installation::tests::activation_records_bind_bytes_even_when_version_labels_are_reused ... ok
+test adapters::installation::tests::segmented_ranges_are_complete_disjoint_and_resumeable ... ok
+test adapters::installation::tests::realesrgan_has_a_native_archive_runtime_and_fixed_model_pair ... ok
+test adapters::installation::tests::tar_links_cannot_escape_the_private_runtime ... ok
+test adapters::installation::tests::plan_metadata_keeps_all_seventeen_pinned_components ... ok
+test adapters::library::schema::tests::migration_is_rejected_for_an_unexpected_intermediate_version ... ok
+test adapters::installation::tests::stalled_transfer_cancellation_does_not_wait_for_a_file_or_read_deadline ... ok
+test adapters::library::sources::tests::jpeg_component_gate_rejects_gray_and_cmyk_before_decode ... ok
+test adapters::installation::tests::range_resume_requires_identity_and_preserves_exact_bytes ... ok
+test adapters::installation::tests::wrong_digest_never_becomes_a_completed_cache_file ... ok
+test adapters::installation::tests::zip_extraction_requires_member_size_hash_and_presence ... ok
+test adapters::installation::tests::segmented_range_resume_preserves_the_existing_prefix ... ok
+test adapters::installation::tests::zip_extraction_rejects_links_and_paths_before_writing_members ... ok
+test adapters::installation::tests::zip_extraction_sets_native_mode_and_refuses_linked_parents ... ok
+test adapters::generation::tests::existing_lease_blocks_launch_and_does_not_claim_resource_release ... ok
+test adapters::library::tests::commit_crash_child ... ok
+test adapters::generation::tests::accepted_cancel_before_preparation_remains_cancelled ... ok
+test adapters::generation::tests::missing_supervisor_finishes_persisted_attempt_without_leaving_busy ... ok
+test adapters::library::sources::tests::jpeg_exif_orientation_is_applied_once ... ok
+test adapters::library::sources::tests::imports_an_immutable_normalized_source_and_ignores_the_original ... ok
+test adapters::library::sources::tests::rejects_grayscale_fake_and_oversize_inputs_before_storage ... ok
+test adapters::library::sources::tests::rejects_sixteen_bit_animated_icc_and_oversized_png ... ok
+test adapters::library::sources::tests::rgba_source_retains_alpha_and_reports_transparency ... ok
+test adapters::library::tests::accepted_cancel_wins_over_candidate_error_and_duplicate_terminal ... ok
+test adapters::library::tests::current_schema_installs_stable_query_indexes ... ok
+test adapters::library::tests::committed_asset_corruption_is_availability_not_history_mutation ... ok
+test adapters::library::tests::birefnet_commits_primary_and_mask_as_one_job_result ... ok
+test adapters::library::tests::birefnet_requires_both_valid_outputs_and_rolls_back_as_a_unit ... ok
+test adapters::library::tests::database_integer_boundaries_fail_without_wrapping_identifiers_or_versions ... ok
+test adapters::library::tests::drafts_use_cas_and_restore_content_selection_and_unsupported_values ... ok
+test adapters::library::tests::duplicate_submission_busy_gate_and_retry_preserve_immutable_history ... ok
+test adapters::library::tests::inherited_host_lock_child ... ok
+test adapters::library::tests::failed_draft_write_and_submission_transaction_do_not_claim_success ... ok
+test adapters::library::tests::failure_first_cannot_be_changed_by_cancel ... ok
+test adapters::library::tests::fresh_library_has_one_conversation_and_receive_is_fast_and_idempotent ... ok
+test adapters::library::tests::failed_v1_migration_rolls_back_without_replacing_the_database ... ok
+test adapters::generation::tests::framing_failure_closes_control_before_reaping_and_records_failure ... ok
+test adapters::library::tests::invalid_initial_content_does_not_leave_an_empty_conversation ... ok
+test adapters::library::tests::installation_records_are_separate_from_generation_evidence ... ok
+test adapters::generation::tests::cleanup_incomplete_is_nonterminal_and_later_cancel_can_finish ... ok
+test adapters::library::tests::initial_prompt_and_source_are_created_atomically ... ok
+test adapters::library::tests::host_ownership_precedes_recovery_and_default_project_is_not_reset ... ok
+test adapters::library::tests::database_asset_failure_rolls_back_manifest_and_asset_together ... ok
+test adapters::library::tests::manual_conversation_title_is_stable_and_draft_version_conflicts_do_not_consume ... ok
+test adapters::library::tests::legacy_v1_migration_preserves_drafts_jobs_and_is_idempotent ... ok
+test adapters::library::tests::pending_turn_without_cancel_becomes_interrupted_after_restart ... ok
+test adapters::library::tests::klein_edit_turn_copies_the_frozen_source_for_retry ... ok
+test adapters::library::tests::retired_host_unlocks_even_while_a_child_keeps_its_inherited_descriptor ... ok
+test adapters::library::tests::pending_turn_cancel_recovery_and_job_binding_are_explicit ... ok
+test adapters::library::tests::conversation_history_is_paginated_and_conversations_are_independent ... ok
+test adapters::library::tests::scratch_preparation_failure_does_not_leave_an_active_job ... ok
+test adapters::library::tests::sqlite_configuration_unknown_schema_and_corruption_are_explicit ... ok
+test adapters::library::tests::conversation_list_paginates_without_repeating_activity_cursor_items ... ok
+test adapters::paths::tests::occupied_directory_reports_action_without_overwriting ... ok
+test adapters::library::tests::exports_are_atomic_external_copies_and_require_overwrite_confirmation ... ok
+test adapters::generation::tests::candidate_waits_for_process_exit_before_durable_success ... ok
+test adapters::paths::tests::unicode_spaces_and_shell_characters_are_literal_paths ... ok
+test adapters::preferences::tests::corrupt_file_is_reported_and_not_overwritten_on_load ... ok
+test adapters::preferences::tests::malformed_fields_fall_back_individually_and_preserve_other_values ... ok
+test adapters::preferences::tests::missing_file_uses_defaults_without_writing ... ok
+test adapters::library::tests::repeated_asset_polling_invalidates_checks_after_same_length_replacement ... ok
+test adapters::preferences::tests::save_is_versioned_atomic_and_reloadable ... ok
+test adapters::generation::tests::current_supervisor_sigkill_reclaims_a_gil_holding_compute_group_and_honors_cancel ... ok
+test adapters::library::tests::symlink_and_fifo_are_rejected_without_following_or_blocking ... ok
+test adapters::library::tests::task_counts_and_search_cover_records_beyond_the_visible_page ... ok
+test adapters::prompt_library::tests::real_image_download_matches_the_catalog ... ignored, requires the fixed GitHub image source and network access
+test adapters::library::tests::feature_work_and_task_queries_are_stable_read_only_projections ... ok
+test adapters::storage::tests::arbitrary_paths_are_not_eligible_for_open ... ok
+test adapters::library::tests::untrusted_candidates_fail_before_asset_registration ... ok
+test adapters::storage::tests::summary_reports_real_files_and_missing_directories_without_hashing ... ok
+test options::tests::diagnostic_arguments_require_explicit_development_mode ... ok
+test options::tests::missing_unknown_or_empty_arguments_are_rejected ... ok
+test options::tests::ordinary_startup_does_not_enable_diagnostics ... ok
+test options::tests::paths_are_preserved_without_shell_interpretation ... ok
+test options::tests::viewport_controls_are_bounded_and_development_only ... ok
+test adapters::prompt_library::tests::built_in_catalog_is_complete_and_rejects_unknown_ids ... ok
+test adapters::prompt_library::tests::cache_requires_exact_catalog_hash ... ok
+test adapters::prompt_library::tests::cache_clear_leaves_unrelated_files_untouched ... ok
+test adapters::prompt_library::tests::catalog_validation_rejects_duplicate_and_incomplete_entries ... ok
+test adapters::library::tests::v3_migration_preserves_drafts_and_adds_prompt_source ... ok
+test adapters::prompt_library::tests::corrupt_favorites_are_reported_without_overwriting_the_file ... ok
+test adapters::library::tests::success_before_cancel_is_immutable_and_asset_reads_do_not_need_model ... ok
+test adapters::library::tests::v4_to_v5_preserves_legacy_records_and_adds_output_role ... ok
+test host::tests::ipc_does_not_accept_executable_or_unbounded_viewport_inputs ... ok
+test host::tests::startup_does_not_start_worker_or_allow_unrequested_diagnostics ... ok
+test studio::tests::legacy_source_url_notation_does_not_change_frozen_component_identity ... ok
+test adapters::prompt_library::tests::favorites_are_atomic_and_unknown_removed_ids_are_preserved ... ok
+test studio::tests::catalog_query_exposes_independent_model_install_actions ... ok
+test studio::tests::inspiration_prompt_is_created_with_resolved_defaults_and_source ... ok
+test studio::tests::conversation_receive_returns_quickly_and_missing_model_settles_rejected ... ok
+test studio::tests::invalid_create_override_is_rejected_without_creating_a_conversation ... ok
+test studio::tests::applying_a_model_to_one_conversation_preserves_its_prompt_and_other_settings ... ok
+test studio::tests::empty_library_can_save_and_restore_without_models ... ok
+test studio::tests::invalid_inspiration_source_is_rejected_without_a_partial_conversation ... ok
+test studio::tests::ipc_inputs_do_not_expose_paths_and_unready_submit_creates_no_job ... ok
+test studio::tests::legacy_v1_retry_checks_the_registered_z_image_installation ... ok
+test studio::tests::removed_saved_model_falls_back_only_that_field_and_reports_it ... ok
+test studio::tests::new_conversation_uses_persisted_defaults_and_explicit_override ... ok
+test studio::tests::capability_drafts_survive_tool_switches_and_restart_without_consuming_text ... ok
+test adapters::library::assets::bounds_tests::upscale_png_limits_do_not_relax_old_z_image_limits ... ok
+test adapters::library::tests::real_process_exit_at_all_commit_boundaries_recovers_exactly_once ... ok
+test adapters::library::tests::submission_lookup_and_counts_are_not_limited_to_the_history_page ... ok
+test adapters::library::tests::selected_asset_older_than_the_first_page_survives_restart ... ok
+
+test result: ok. 124 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 7.30s
+
+     Running unittests src/main.rs (target/debug/deps/image_studio_desktop-5cc1fccecd9784d9)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/inference_supervisor-bb783ce155364bbb)
+
+running 2 tests
+test tests::incomplete_and_oversize_frames_are_rejected ... ok
+test tests::logs_and_control_queues_have_hard_limits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running unittests src/main.rs (target/debug/deps/inference_supervisor-ccc4d9dcec759513)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/supervision.rs (target/debug/deps/supervision-205b5d3f3745f597)
+
+running 9 tests
+inference supervisor: execution lease is busy
+test candidate_is_delivered_after_normal_exit_and_control_sequence_is_valid ... ok
+test v2_candidate_is_forwarded_after_normal_process_exit ... ok
+inference supervisor: execution lease is busy
+test host_eof_reclaims_worker_and_descendant_without_host_cooperation ... ok
+test existing_execution_and_inherited_lease_prevent_new_compute ... ok
+test flood_is_bounded_and_terminal_cannot_be_starved_by_progress ... ok
+test cooperative_and_noncooperative_cancel_reap_before_cancelled ... ok
+test lifecycle_record_is_published_before_execute_and_bound_to_the_live_child_handle ... ok
+test candidates_wait_for_descendants_and_abnormal_workers_do_not_succeed ... ok
+test native_loading_and_generation_timeouts_are_distinct_and_cleanup ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.82s
+
+     Running unittests src/main.rs (target/debug/deps/realesrgan_worker-e482ecff0f9b45c8)
+
+running 3 tests
+[0 GPU] ready
+0.00%
+1.56%
+3.12%
+test tests::only_a_positive_native_percentage_proves_a_completed_tile ... ok[0 GPU] ready
+0.00%
+
+test tests::cancel_requires_the_exact_active_attempt_and_wire_sequence ... ok
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                1.56%
+test tests::native_logs_are_streamed_without_manufacturing_compute_from_startup ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/studio_core-2b81e3e6fb66f293)
+
+running 13 tests
+test generation::tests::phases_cannot_undo_cancellation_or_terminal ... ok
+test application::tests::shell_never_claims_model_support ... ok
+test generation::tests::random_seed_is_frozen_without_rewriting_request ... ok
+test generation::tests::explicit_seed_is_preserved ... ok
+test recipes::tests::transparent_images_are_rejected_for_edit_and_upscale ... ok
+test recipes::tests::klein_text_and_edit_have_distinct_source_rules ... ok
+test recipes::tests::tool_recipes_do_not_require_fake_instruction_or_seed ... ok
+test recipes::tests::upscale_output_must_be_exact_four_times_source ... ok
+test recipes::tests::freeze_realesrgan_exposes_exact_four_times_output_and_tile_recipe ... ok
+test generation::tests::unsupported_inputs_are_not_downgraded ... ok
+test recipes::tests::freeze_birefnet_preserves_source_dimensions_and_cpu_recipe ... ok
+test recipes::tests::freeze_klein_keeps_text_and_edit_as_separate_recipes ... ok
+test recipes::tests::plan_parameters_are_exact_for_each_new_backend ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/contracts.rs (target/debug/deps/contracts-1a5f10cb5acd9397)
+
+running 17 tests
+test ids_reject_paths_empty_strings_and_display_text ... ok
+test retry_preserves_job_and_old_attempt_while_fencing_old_events ... ok
+test changing_location_does_not_change_asset_identity_or_content ... ok
+test managed_paths_reject_traversal_but_external_locations_are_descriptions ... ok
+test independent_nested_versions_and_plan_request_links_are_checked ... ok
+test output_cannot_reuse_an_input_identity_with_different_bytes ... ok
+test one_input_identity_cannot_claim_two_hashes ... ok
+test resolution_adjustment_preserves_original_and_requires_permission_and_evidence ... ok
+test successful_manifests_require_outputs_and_complete_input_identity ... ok
+test model_substitution_and_count_changes_cannot_be_silent ... ok
+test capability_rejects_unknown_roles_duplicates_and_invalid_counts ... ok
+test input_roles_and_orders_survive_without_reordering ... ok
+test snapshots_do_not_requery_mutable_catalog_information ... ok
+test missing_unknown_invalid_and_malformed_values_have_distinct_errors ... ok
+test future_versions_are_rejected_before_current_fields_are_interpreted ... ok
+test nested_unknown_fields_and_missing_hashes_are_rejected ... ok
+test current_document_versions_round_trip_every_defined_field ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/worker_protocol-de93b6c4201cc6fc)
+
+running 33 tests
+test tests::challenge_scope_and_execution_are_checked_before_state_changes ... ok
+test tests::changed_build_identity_cannot_become_a_successful_probe ... ok
+test tests::duplicate_progress_does_not_prevent_valid_result ... ok
+test tests::cannot_send_probe_before_handshake ... ok
+test tests::bootstrap_error_does_not_require_a_selected_version ... ok
+test tests::eof_inside_a_frame_is_not_a_completed_message ... ok
+test tests::first_worker_sequence_must_be_zero ... ok
+test tests::handshake_must_select_highest_common_version ... ok
+test tests::incompatible_version_is_distinct_from_malformed_json ... ok
+test tests::decoder_preserves_legal_message_and_requires_no_unbounded_line_read ... ok
+test tests::incomplete_execution_context_is_not_silently_accepted ... ok
+test tests::initial_handshake_and_sequences_continue_without_reset ... ok
+test generation::tests::v2_rejects_fake_tool_fields_path_escape_and_bad_roles ... ok
+test tests::invalid_progress_cannot_advance_a_pending_probe ... ok
+test tests::later_message_must_use_selected_version ... ok
+test generation::tests::v1_and_v2_messages_cannot_cross_protocol_boundaries ... ok
+test tests::selects_highest_common_and_rejects_invalid_ranges ... ok
+test tests::rejected_old_session_does_not_advance_sequence ... ok
+test tests::response_to_wrong_or_completed_request_is_rejected ... ok
+test generation::tests::v2_handshake_and_two_role_candidates_are_strict ... ok
+test tests::remote_error_for_unknown_request_does_not_terminate_current_probe ... ok
+test tests::shutdown_invalidates_in_flight_probe_and_accepts_ack ... ok
+test tests::worker_cannot_declare_generation_capability ... ok
+test tests::unknown_fields_and_generation_message_types_are_not_accepted ... ok
+test tests::exact_limit_and_multiple_frames_have_correct_boundaries ... ok
+test generation::tests::recipe_and_progress_cannot_silently_downgrade ... ok
+test generation::tests::a_process_executes_only_once_and_candidate_matches_plan ... ok
+test generation::tests::highest_common_version_identity_and_family_are_required ... ok
+test tests::frame_limit_is_checked_before_appending_unterminated_bytes ... ok
+test generation::tests::codec_rejects_unknown_fields_truncated_and_oversize_before_decode ... ok
+test generation::tests::golden_exchange_is_strict_and_round_trips ... ok
+test generation::tests::stale_identity_and_duplicate_rejection_do_not_advance_state ... ok
+test tests::encoder_and_decoder_both_reject_oversized_frames ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests image_studio_desktop
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests inference_supervisor
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests studio_core
+
+running 1 test
+test crates/studio-core/src/lib.rs - (line 6) - compile fail ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+   Doc-tests worker_protocol
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

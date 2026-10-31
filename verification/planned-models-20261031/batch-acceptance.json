@@ -1,0 +1,2235 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "gateStatus": "passed",
+  "finalCodeCommit": "97e746f0623856dda53d58eb1d14f7f27d95101a",
+  "finalApplicationSha256": "abc16ed35ce3a74318d14fa8599f696d7ca6a59a4dfd79d4fe7c5cdd34997273",
+  "requiredCaseCount": 118,
+  "modelConfigurationCaseCount": 114,
+  "batchRegressionCaseCount": 4,
+  "summary": {
+    "passed": 118,
+    "failed": 0,
+    "not_run": 0,
+    "blocked": 0
+  },
+  "countsByConfiguration": {
+    "K-T": 25,
+    "K-E": 29,
+    "B-R": 31,
+    "R-U": 29,
+    "batch": 4
+  },
+  "reason": "按已批准的适用矩阵逐配置展开，四配置114项与整批4项共118个必需P0全部通过。三型号正式安装、真实推理、质量、生命周期、默认目录原生使用与当前Z回归均有独立证据。",
+  "normalization": "历史阶段报告合计110条记录含Klein共享配置/合并case标签。此处将I01/I02与K-T/K-E逐项展开，保留K-T上额外通过的两个源图检查在additionalPassedChecks，不把它们计入适用矩阵。",
+  "scopeAdjustments": {
+    "manualImeRepeat": "User waived this repeated manual check on 2026-11-01; no new manual IME pass is claimed. Existing composition unit tests and Klein-stage native evidence remain."
+  },
+  "stageReports": [
+    "klein-acceptance.json",
+    "birefnet-acceptance.json",
+    "realesrgan-acceptance.json"
+  ],
+  "reportSchemaValidation": "batch-report-schema-validation.json",
+  "nextAction": "Archive integrate-planned-models and then proceed to the already conditionally approved Qwen base/Turbo stage. MOSS waits for Qwen acceptance.",
+  "cases": [
+    {
+      "caseId": "I01",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "Pinned official Klein components, licenses, runtime closure and hashes are complete.",
+      "evidencePaths": [
+        "I01-I02-sources.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I01/I02",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "I02",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "Pinned official Klein components, licenses, runtime closure and hashes are complete.",
+      "evidencePaths": [
+        "I01-I02-sources.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I01/I02",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "I05",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "Fresh-cache official installation, runtime probe and activation passed.",
+      "evidencePaths": [
+        "I05-cold-install.json",
+        "klein-install.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I05",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "I06",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "Offline cache installation passed in a second isolated root with matching identities.",
+      "evidencePaths": [
+        "I06-offline-install.json",
+        "logs/klein-offline-install.log"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I06",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "I07",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "Live range resume, explicit repair/redownload, exact hashes and offline final activation passed.",
+      "evidencePaths": [
+        "I07-resume.json",
+        "I07-mirror-cache.json",
+        "klein-resume-install.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I07",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "I08",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Corrupt, wrong-identity, partial and archive escape cases fail closed; actual corrupt segments trigger explicit redownload state reset.",
+      "evidencePaths": [
+        "I08-I09-recovery.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I08",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "I09",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Per-install locking, target binding, independent state and single-execution gates are covered by current tests.",
+      "evidencePaths": [
+        "I08-I09-recovery.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I09",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "P01",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Formal tasks bind recipe, source, seed and one primary output with matching hashes.",
+      "evidencePaths": [
+        "P01-integrity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P01",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "P02",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Both capabilities completed in the whole host/worker tree under deny-network.",
+      "evidencePaths": [
+        "P02-B10-offline.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P02",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "P03",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Three sequential tasks used one StudioService and yielded independent successful attempts/assets.",
+      "evidencePaths": [
+        "P03-P08-batch.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P03",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "P04",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Loading-stage cancellation left no asset and explicit retry succeeded with a new token.",
+      "evidencePaths": [
+        "P04-P05-cancellation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P04",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "P05",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Sampling-step cancellation left no asset and explicit retry succeeded with a new token.",
+      "evidencePaths": [
+        "P04-P05-cancellation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P05",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "P07",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Host SIGKILL after sampling released the lease and process tree; no asset was promoted and retry succeeded.",
+      "evidencePaths": [
+        "P07-klein-host-crash.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P07",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "P08",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Duplicate keys return one Turn; busy distinct submission creates no Turn and preserves the next draft.",
+      "evidencePaths": [
+        "P03-P08-batch.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P08",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "P09",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Invalid capability/source/seed/dimension cases fail before sampling without substitution.",
+      "evidencePaths": [
+        "P09-validation.json",
+        "B03-P09-source-rejections.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P09",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "P10",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Strict v2 identity, recipe, role, frame, stale-token and timeout fixtures pass; v1 remains separate.",
+      "evidencePaths": [
+        "P09-validation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P10",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "S03",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "v1-v4 migration fixtures preserve records and roll back failures; current schema v5 is recoverable.",
+      "evidencePaths": [
+        "installation-identity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "S03",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "S07",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Retry reuses the frozen source hash and plan; unavailable originals do not substitute current draft inputs.",
+      "evidencePaths": [
+        "S01-S07-source-integrity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "S07",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "I01",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "Pinned official Klein components, licenses, runtime closure and hashes are complete.",
+      "evidencePaths": [
+        "I01-I02-sources.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I01/I02",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "I02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "Pinned official Klein components, licenses, runtime closure and hashes are complete.",
+      "evidencePaths": [
+        "I01-I02-sources.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I01/I02",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "I05",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "Fresh-cache official installation, runtime probe and activation passed.",
+      "evidencePaths": [
+        "I05-cold-install.json",
+        "klein-install.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I05",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "I06",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "Offline cache installation passed in a second isolated root with matching identities.",
+      "evidencePaths": [
+        "I06-offline-install.json",
+        "logs/klein-offline-install.log"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I06",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "I07",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "Live range resume, explicit repair/redownload, exact hashes and offline final activation passed.",
+      "evidencePaths": [
+        "I07-resume.json",
+        "I07-mirror-cache.json",
+        "klein-resume-install.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I07",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "I08",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Corrupt, wrong-identity, partial and archive escape cases fail closed; actual corrupt segments trigger explicit redownload state reset.",
+      "evidencePaths": [
+        "I08-I09-recovery.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I08",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "I09",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Per-install locking, target binding, independent state and single-execution gates are covered by current tests.",
+      "evidencePaths": [
+        "I08-I09-recovery.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "I09",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "P01",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Formal tasks bind recipe, source, seed and one primary output with matching hashes.",
+      "evidencePaths": [
+        "P01-integrity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P01",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "P02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Both capabilities completed in the whole host/worker tree under deny-network.",
+      "evidencePaths": [
+        "P02-B10-offline.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P02",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "P03",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Three sequential tasks used one StudioService and yielded independent successful attempts/assets.",
+      "evidencePaths": [
+        "P03-P08-batch.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P03",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "P04",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Loading-stage cancellation left no asset and explicit retry succeeded with a new token.",
+      "evidencePaths": [
+        "P04-P05-cancellation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P04",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "P05",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Sampling-step cancellation left no asset and explicit retry succeeded with a new token.",
+      "evidencePaths": [
+        "P04-P05-cancellation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P05",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "P07",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Host SIGKILL after sampling released the lease and process tree; no asset was promoted and retry succeeded.",
+      "evidencePaths": [
+        "P07-klein-edit-host-crash.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P07",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "P08",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Duplicate keys return one Turn; busy distinct submission creates no Turn and preserves the next draft.",
+      "evidencePaths": [
+        "P03-P08-batch.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P08",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "P09",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Invalid capability/source/seed/dimension cases fail before sampling without substitution.",
+      "evidencePaths": [
+        "P09-validation.json",
+        "B03-P09-source-rejections.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P09",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "P10",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Strict v2 identity, recipe, role, frame, stale-token and timeout fixtures pass; v1 remains separate.",
+      "evidencePaths": [
+        "P09-validation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "P10",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "S01",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Imported and selected sources are managed immutable identities; external originals do not control execution.",
+      "evidencePaths": [
+        "S01-S07-source-integrity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "S01",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "S02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Bounded decode gates reject unsupported color types, formats, sizes, links and special files.",
+      "evidencePaths": [
+        "B03-P09-source-rejections.json",
+        "I08-I09-recovery.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "S02",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "S03",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "v1-v4 migration fixtures preserve records and roll back failures; current schema v5 is recoverable.",
+      "evidencePaths": [
+        "installation-identity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "S03",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "S07",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Retry reuses the frozen source hash and plan; unavailable originals do not substitute current draft inputs.",
+      "evidencePaths": [
+        "S01-S07-source-integrity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "S07",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "U01",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Default-root native model page shows both Klein capabilities and ready file/runtime/probe facts.",
+      "evidencePaths": [
+        "U-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "U01",
+        "originalConfigurationKey": "K-T/K-E"
+      }
+    },
+    {
+      "caseId": "U01",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Default-root native model page shows both Klein capabilities and ready file/runtime/probe facts.",
+      "evidencePaths": [
+        "U-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "U01",
+        "originalConfigurationKey": "K-T/K-E"
+      }
+    },
+    {
+      "caseId": "U02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Native file import, existing-work selection, canceled replacement, and no-source behavior passed.",
+      "evidencePaths": [
+        "U-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "U02",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Live task kept its Klein request while next draft, conversation, and model selector changed.",
+      "evidencePaths": [
+        "U-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "U03",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Live task kept its Klein request while next draft, conversation, and model selector changed.",
+      "evidencePaths": [
+        "U-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "U03",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "U05",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Normal restart restored records/source/draft; system save panels exported byte-identical PNGs to a Chinese/space path.",
+      "evidencePaths": [
+        "U-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "U05",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "U05",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Normal restart restored records/source/draft; system save panels exported byte-identical PNGs to a Chinese/space path.",
+      "evidencePaths": [
+        "U-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "U05",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "U06",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "1280×800 and 960×640, keyboard focus, SCIM confirmation, and invalid-seed recovery passed.",
+      "evidencePaths": [
+        "U-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "U06",
+        "originalConfigurationKey": "K-T/K-E"
+      }
+    },
+    {
+      "caseId": "U06",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "1280×800 and 960×640, keyboard focus, SCIM confirmation, and invalid-seed recovery passed.",
+      "evidencePaths": [
+        "U-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "U06",
+        "originalConfigurationKey": "K-T/K-E"
+      }
+    },
+    {
+      "caseId": "B01",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Chinese and English prompts plus seeds 42 and 73 produced complete fixed-recipe baselines.",
+      "evidencePaths": [
+        "klein-quality-review.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "B01",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "B04",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Installed tokenizer measured exactly 512 tokens and rejected 513 with the original prompt retained; boundary generation succeeded.",
+      "evidencePaths": [
+        "B04-result.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "B04",
+        "originalConfigurationKey": "K-T/K-E"
+      }
+    },
+    {
+      "caseId": "B04",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Installed tokenizer measured exactly 512 tokens and rejected 513 with the original prompt retained; boundary generation succeeded.",
+      "evidencePaths": [
+        "B04-result.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "B04",
+        "originalConfigurationKey": "K-T/K-E"
+      }
+    },
+    {
+      "caseId": "B10",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Text and edit tasks completed with network denied to the launched process tree.",
+      "evidencePaths": [
+        "P02-B10-offline.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "B10",
+        "originalConfigurationKey": "K-T/K-E"
+      }
+    },
+    {
+      "caseId": "B10",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Text and edit tasks completed with network denied to the launched process tree.",
+      "evidencePaths": [
+        "P02-B10-offline.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "B10",
+        "originalConfigurationKey": "K-T/K-E"
+      }
+    },
+    {
+      "caseId": "B02",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Real edits changed object color, background and atmosphere while preserving the scene and required subjects.",
+      "evidencePaths": [
+        "klein-quality-review.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "B02",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "B03",
+      "configurationKey": "K-E",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Large landscape and odd portrait references match upstream resize/crop behavior; directional orientation and source immutability pass.",
+      "evidencePaths": [
+        "B03-reference-landscape.json",
+        "B03-reference-portrait.json",
+        "klein-quality-review.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "B03",
+        "originalConfigurationKey": "K-E"
+      }
+    },
+    {
+      "caseId": "I01",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "The official release asset, byte count, SHA-256, MIT license, ONNX Runtime closure and worker source are fixed in versioned manifests.",
+      "evidencePaths": [
+        "I03-I05-I06-birefnet-install.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "I01",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "I03",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "The actual graph is opset 17 with one float32 1x3x1024x1024 input, one float32 1x1x1024x1024 output, no external initializer and a final Conv output that requires one explicit sigmoid.",
+      "evidencePaths": [
+        "I03-I05-I06-birefnet-install.json",
+        "B05-graph-contract.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "I03",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "I05",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "A new empty-cache formal install downloaded 1,022,243,898 bytes, verified the model and isolated ONNX runtime, probed the CPU graph and reached Ready.",
+      "evidencePaths": [
+        "I03-I05-I06-birefnet-install.json",
+        "logs/birefnet-cold-install.log"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "I05",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "I06",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "A separate cache install reached the same model, runtime, manifest hashes and CPU probe while the formal installer and descendants ran with networking denied.",
+      "evidencePaths": [
+        "I03-I05-I06-birefnet-install.json",
+        "logs/birefnet-offline-install.log"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "I06",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "I07",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "A live download was stopped and reopened. The model prefix remained resumable; a changed wheel range failed closed and cleared its partial before explicit retry completed and activated the cold-install identity.",
+      "evidencePaths": [
+        "I07-I09-birefnet-recovery.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "I07",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "I08",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Wrong hashes, corrupt segment state, inconsistent ranges, insufficient space, unsafe archive links and wrong private runtime identities fail without activation.",
+      "evidencePaths": [
+        "I07-I09-birefnet-recovery.json",
+        "logs/birefnet-installation-recovery-tests.log"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "I08",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "I09",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Per-model actions, installation locks and execution leases remain independent; stalled transfers cancel, and an existing lease cannot report resources released.",
+      "evidencePaths": [
+        "I07-I09-birefnet-recovery.json",
+        "logs/birefnet-installation-recovery-tests.log"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "I09",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "B05",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "upstream_baseline",
+      "reason": "The fixed NumPy preprocessing matches the official cv2 linear reference within one 8-bit step; align-corners resizing, one-sigmoid postprocessing and product mask parity passed.",
+      "evidencePaths": [
+        "B05-graph-contract.json",
+        "B05-preprocessing-and-mask-parity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "B05",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "B06",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Six real runs using original or project-owned sources cover hair, long cat fur, hard product edges, translucent glass, same-tone background and fine contours; every mask has spatial variation and reviewed limitations.",
+      "evidencePaths": [
+        "B06-quality-review.json",
+        "B06-source-provenance.json",
+        "birefnet-quality-contact-sheet.jpg"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "B06",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "B07",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "RGBA alpha, straight-alpha composition, exact 8-bit mask equality, normalized EXIF orientation and source-dimension restoration passed.",
+      "evidencePaths": [
+        "B07-rgba-alpha.json",
+        "B07-exif-orientation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "B07",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "B10",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "The host, supervisor and ONNX worker completed real background removal with networking denied.",
+      "evidencePaths": [
+        "B10-P02-birefnet-offline.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "B10",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "P01",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "One frozen formal request and plan produced one Job, one Attempt, one primary ImageRgba and one Mask with matching source and output identities.",
+      "evidencePaths": [
+        "P01-birefnet.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "P01",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "P02",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "A complete product run and byte-identical outputs completed inside the deny-network profile.",
+      "evidencePaths": [
+        "B10-P02-birefnet-offline.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "P02",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "P03",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Three independent tasks completed in one StudioService process with unique turns, jobs, attempts, primary assets and masks, followed by idle cleanup.",
+      "evidencePaths": [
+        "P03-P08-birefnet.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "P03",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "P04",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Cancellation during loading left no assets, and explicit retry with a new token atomically committed both outputs.",
+      "evidencePaths": [
+        "P04-P06-birefnet-cancellation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "P04",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "P06",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Cancellation during real ONNX session.run left no assets and returned only after process-tree cleanup; explicit retry succeeded.",
+      "evidencePaths": [
+        "P04-P06-birefnet-cancellation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "P06",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "P07",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Host SIGKILL during real inference was recovered as Interrupted with zero assets after 3.09-second lease release and descendant cleanup; retry succeeded.",
+      "evidencePaths": [
+        "P07-birefnet-host-crash.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "P07",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "P08",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Duplicate submission keys returned the original Turn; a distinct busy submission was rejected without creating another Turn.",
+      "evidencePaths": [
+        "P03-P08-birefnet.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "P08",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "P09",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "Missing source, prompt or seed misuse, wrong capability, source corruption and invalid imports fail before execution while preserving the prior source.",
+      "evidencePaths": [
+        "P09-P10-birefnet.json",
+        "native-birefnet-960x640-no-source.png",
+        "native-birefnet-invalid-icc-recovered.png"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "P09",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "P10",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Wrong identity, recipe, provider, output roles, dimensions, data types, paths, stale frames and timeouts are rejected without durable success.",
+      "evidencePaths": [
+        "P09-P10-birefnet.json",
+        "tools/onnx-worker/tests/test_onnx_worker.py"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "P10",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "S01",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Imported and existing-work sources use immutable managed identities; changing or removing the external original does not affect the frozen request.",
+      "evidencePaths": [
+        "S01-S07-birefnet.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "S01",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "S02",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Bounded PNG/JPEG decoding rejects unsupported color, bit depth, animation, ICC, dimensions, links and special files before allocation or commit.",
+      "evidencePaths": [
+        "S01-S07-birefnet.json",
+        "P09-P10-birefnet.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "S02",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "S03",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "v1-v5 migration preserves IDs, request JSON, inputs and assets; output-role migration and rollback failures are explicit.",
+      "evidencePaths": [
+        "S03-birefnet.json",
+        "logs/birefnet-final-cargo-test.log"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "S03",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "S04",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Primary ImageRgba and Mask are validated by exact role, dimensions, bytes and hashes; only a complete pair becomes one successful Job result.",
+      "evidencePaths": [
+        "S01-S07-birefnet.json",
+        "B07-rgba-alpha.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "S04",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "S05",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Copy, move and commit crash boundaries recover exactly once; missing or invalid outputs roll back as one unit, and accepted cancellation promotes neither asset.",
+      "evidencePaths": [
+        "S01-S07-birefnet.json",
+        "P07-birefnet-host-crash.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "S05",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "S07",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Retry uses the original managed source hash and frozen recipe; current draft source or model changes are not substituted.",
+      "evidencePaths": [
+        "S01-S07-birefnet.json",
+        "P04-P06-birefnet-cancellation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "S07",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "U01",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "The native model page showed installed BiRefNet, CPU runtime, verified device and a use action into the correct background-removal composer.",
+      "evidencePaths": [
+        "U-birefnet-native.json",
+        "native-birefnet-model-ready.png"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "U01",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "U02",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Native file import, primary-work selection, canceled replacement and no-source behavior preserved drafts and created no empty Turn.",
+      "evidencePaths": [
+        "U-birefnet-native.json",
+        "native-birefnet-import-source.png",
+        "native-birefnet-existing-work-picker.png",
+        "native-birefnet-960x640-no-source.png"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "U02",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "A live BiRefNet task retained its source and frozen request while the next conversation changed, and returning restored the same progress and stop controls.",
+      "evidencePaths": [
+        "U-birefnet-native.json",
+        "native-birefnet-running.png",
+        "native-birefnet-live-switch.png"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "U03",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "U04",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Checkerboard, mask viewer, system exports to a Chinese/space directory, byte equality, independent mask exclusion and one work per Job passed.",
+      "evidencePaths": [
+        "U-birefnet-native.json",
+        "U04-birefnet-export.json",
+        "native-birefnet-works-primary-only.png"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "U04",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "U06",
+      "configurationKey": "B-R",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "1280x800 and 960x640 keep navigation, source, model, send/stop and results reachable; keyboard paths and invalid-ICC recovery pass without a fake text field.",
+      "evidencePaths": [
+        "U-birefnet-native.json",
+        "native-birefnet-model-960x640.png",
+        "native-birefnet-invalid-icc-recovered.png",
+        "native-offline-startup.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "birefnet-acceptance.json",
+        "originalCaseId": "U06",
+        "originalConfigurationKey": "B-R"
+      }
+    },
+    {
+      "caseId": "I01",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "固定官方模型/程序归档、普通文件SHA和许可齐全。",
+      "evidencePaths": [
+        "I04-realesrgan-source.json",
+        "realesrgan-run-identity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "I01",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "I04",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "官方两个归档、universal arm64程序、系统动态依赖和x4plus模型对已核验。",
+      "evidencePaths": [
+        "I04-realesrgan-source.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "I04",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "I05",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "空根空缓存由正式安装器下载、探针并原子激活。",
+      "evidencePaths": [
+        "I05-I06-realesrgan-install.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "I05",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "I06",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "另一隔离根整树禁网缓存安装同一模型/运行时身份。",
+      "evidencePaths": [
+        "I05-I06-realesrgan-install.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "I06",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "I07",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "默认目录下载停止、正常退出重开、显式继续和Range身份反例通过。",
+      "evidencePaths": [
+        "I07-realesrgan-native-resume.json",
+        "S01-S07-P09-realesrgan.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "I07",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "I08",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "缺param、损坏程序、可执行位丢失、GPU探针拒绝及ZIP/空间边界不激活。",
+      "evidencePaths": [
+        "I08-realesrgan-fail-closed.json",
+        "S01-S07-P09-realesrgan.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "I08",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "I09",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "绑定安装动作互斥；计算中本型号和另一型号修复均被同步拒绝。",
+      "evidencePaths": [
+        "P03-P08-realesrgan-continuity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "I09",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "B08",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "upstream_baseline",
+      "reason": "三类原创/项目自有输入的正式输出与同快照t128上游逐字节一致，人工质量通过。",
+      "evidencePaths": [
+        "B08-realesrgan-quality.json",
+        "B08-realesrgan-upstream-reference.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "B08",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "B09",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "1024²真实64tile输出4096²，14条完整接缝带审阅通过，保留大tile误差统计。",
+      "evidencePaths": [
+        "B09-realesrgan-tiles.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "B09",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "B10",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "整个固定本地执行树禁网完成。",
+      "evidencePaths": [
+        "B10-P02-realesrgan-offline.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "B10",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "P01",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "正式冻结、持久化和RGB资产身份一一对应。",
+      "evidencePaths": [
+        "P01-realesrgan-integrity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "P01",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "P02",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "禁网正式执行导出hash与上游基线一致。",
+      "evidencePaths": [
+        "B10-P02-realesrgan-offline.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "P02",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "P03",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "同一宿主连续三个独立任务逐一完成并等待空闲；每次保存耗时/RSS。",
+      "evidencePaths": [
+        "P03-P08-realesrgan-continuity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "P03",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "P04",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "实际加载取消零资产，整树清理，显式新token重试成功。",
+      "evidencePaths": [
+        "P04-P05-realesrgan-cancellation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "P04",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "P05",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "正百分比tile进度证明确实计算后取消，包装器/ncnn回收，显式重试成功。",
+      "evidencePaths": [
+        "P04-P05-realesrgan-cancellation.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "P05",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "P07",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "实际tile计算强杀宿主，租约忙3.10秒后释放，零旧输出，Interrupted后显式重试成功。",
+      "evidencePaths": [
+        "P07-realesrgan-host-crash.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "P07",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "P08",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "同键重发只返回原Turn；不同合法内容同键拒绝，跨型号忙碌无隐式排队。",
+      "evidencePaths": [
+        "P03-P08-realesrgan-continuity.json",
+        "R01-native-interleave.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "P08",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "P09",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "尺寸/透明/源图和工具参数门禁在计算前拒绝并保留草稿。",
+      "evidencePaths": [
+        "S01-S07-P09-realesrgan.json",
+        "U-realesrgan-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "P09",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "P10",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "实际包装器9个协议反例和当前监督超时/身份测试无错误成功。",
+      "evidencePaths": [
+        "P10-realesrgan-worker-fixtures.json",
+        "logs/final-cargo-test.log"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "P10",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "S01",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "导入/已有作品受控源图身份独立于外部原文件。",
+      "evidencePaths": [
+        "S01-S07-P09-realesrgan.json",
+        "U-realesrgan-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "S01",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "S02",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "受限PNG/JPEG、有界头部解码及链接/特殊文件反例通过。",
+      "evidencePaths": [
+        "S01-S07-P09-realesrgan.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "S02",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "S03",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "旧库迁移与事务回滚保持历史请求、资产和外键。",
+      "evidencePaths": [
+        "S01-S07-P09-realesrgan.json",
+        "logs/final-cargo-test.log"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "S03",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "S06",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "4096²合法输出和像素/字节/缓冲溢出反例通过，旧Z仍64MiB预算和1MP限制。",
+      "evidencePaths": [
+        "S01-S07-P09-realesrgan.json",
+        "native-exports-verified.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "S06",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "S07",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "下一条换源图不替换重试的原冻结输入；新Attempt成功。",
+      "evidencePaths": [
+        "P04-P05-realesrgan-cancellation.json",
+        "S01-S07-P09-realesrgan.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "S07",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "U01",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "默认目录原生状态和固定放大能力真实可用。",
+      "evidencePaths": [
+        "U-realesrgan-native.json",
+        "R03-native-integration.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "U01",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "U02",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "系统导入/作品选图、取消和透明反例保留已有合法输入。",
+      "evidencePaths": [
+        "U-realesrgan-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "U02",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "真实任务期间新会话与下一条草稿不影响旧输入，无重复或串图。",
+      "evidencePaths": [
+        "U-realesrgan-native.json",
+        "R01-native-interleave.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "U03",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "U05",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "正常退出重开，来源/记录/4096²结果可恢复且系统导出字节一致。",
+      "evidencePaths": [
+        "U-realesrgan-native.json",
+        "native-exports-verified.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "U05",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "caseId": "U06",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "1280/960布局、键盘焦点和错误恢复通过；按用户要求免去本轮手动IME复测。",
+      "evidencePaths": [
+        "U-realesrgan-native.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "realesrgan-acceptance.json",
+        "originalCaseId": "U06",
+        "originalConfigurationKey": "R-U"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "caseId": "R01",
+      "configurationKey": "batch",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "Six ordered real submissions in the dedicated default-root native conversation routed Z v1, Klein text v2, Klein edit v2, BiRefNet CPU v2, fixed RGB upscale v2 and Z v1. Each has one successful owned Attempt and correctly typed formal outputs. Existing user conversations and works were retained.",
+      "evidencePaths": [
+        "R01-native-interleave.json"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "caseId": "R02",
+      "configurationKey": "batch",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "当前构建六项中英文/三尺寸真实生成和目视质量通过；重试安装标识和旧官方URL记法修复后，四项真实加载/采样取消、随机种子冻结、宿主强杀恢复全部通过，历史v1冻结计划显式重试成功。默认目录Z原生结果重开后系统导出hash相同。",
+      "evidencePaths": [
+        "R02-z-current-regression.json"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "caseId": "R03",
+      "configurationKey": "batch",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "原生目录显示4正式接入/4安装/4可执行/4运行环境，Real搜索只匹配指定型号；默认生成菜单只列Z与Klein。专用会话7个Job只显示7件primary作品，四型号筛选为Z2/K2/B1/R2，mask不重复计数。禁网启动没有下载或推理。",
+      "evidencePaths": [
+        "R03-native-integration.json"
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "caseId": "R04",
+      "configurationKey": "batch",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Rust216、前端36、Python38全部通过，Clippy/格式/构建/锁与worker源码审计、禁网原生启动和无生成文件的干净源码离线构建通过。",
+      "evidencePaths": [
+        "R04-final-quality-gates.json"
+      ]
+    }
+  ],
+  "additionalPassedChecks": [
+    {
+      "caseId": "S01",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Imported and selected sources are managed immutable identities; external originals do not control execution.",
+      "evidencePaths": [
+        "S01-S07-source-integrity.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "S01",
+        "originalConfigurationKey": "K-T"
+      }
+    },
+    {
+      "caseId": "S02",
+      "configurationKey": "K-T",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "Bounded decode gates reject unsupported color types, formats, sizes, links and special files.",
+      "evidencePaths": [
+        "B03-P09-source-rejections.json",
+        "I08-I09-recovery.json"
+      ],
+      "schemaVersion": 1,
+      "runId": "planned-models-20261031",
+      "stageEvidence": {
+        "report": "klein-acceptance.json",
+        "originalCaseId": "S02",
+        "originalConfigurationKey": "K-T"
+      }
+    }
+  ]
+}

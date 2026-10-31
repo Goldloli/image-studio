@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "phase": "Real-ESRGAN",
+  "configurationKey": "R-U",
+  "modelId": "realesrgan-x4plus",
+  "modelSnapshotId": "realesrgan-x4plus-ncnn",
+  "runtimeLockId": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+  "workerBuildId": "studio-realesrgan-worker-0.1.0",
+  "finalApplicationSha256": "abc16ed35ce3a74318d14fa8599f696d7ca6a59a4dfd79d4fe7c5cdd34997273",
+  "finalCodeCommit": "97e746f0623856dda53d58eb1d14f7f27d95101a",
+  "identity": "realesrgan-run-identity.json",
+  "requiredCaseCount": 29,
+  "summary": {
+    "passed": 29,
+    "failed": 0,
+    "not_run": 0,
+    "blocked": 0
+  },
+  "gateStatus": "passed",
+  "reason": "全部29个适用P0按用户确认后的验收范围通过，保留人工质量局限、真实性边界与原始失败审计。",
+  "scopeAdjustments": {
+    "manualImeRepeat": "User waived this repeated manual check on 2026-11-01; no new manual IME pass is claimed. Existing composition unit tests and Klein-stage native evidence remain."
+  },
+  "qualityGates": "realesrgan-quality-gates.json",
+  "cases": [
+    {
+      "caseId": "I01",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "固定官方模型/程序归档、普通文件SHA和许可齐全。",
+      "evidencePaths": [
+        "I04-realesrgan-source.json",
+        "realesrgan-run-identity.json"
+      ]
+    },
+    {
+      "caseId": "I04",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "source_review",
+      "reason": "官方两个归档、universal arm64程序、系统动态依赖和x4plus模型对已核验。",
+      "evidencePaths": [
+        "I04-realesrgan-source.json"
+      ]
+    },
+    {
+      "caseId": "I05",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "空根空缓存由正式安装器下载、探针并原子激活。",
+      "evidencePaths": [
+        "I05-I06-realesrgan-install.json"
+      ]
+    },
+    {
+      "caseId": "I06",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "device_probe",
+      "reason": "另一隔离根整树禁网缓存安装同一模型/运行时身份。",
+      "evidencePaths": [
+        "I05-I06-realesrgan-install.json"
+      ]
+    },
+    {
+      "caseId": "I07",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "默认目录下载停止、正常退出重开、显式继续和Range身份反例通过。",
+      "evidencePaths": [
+        "I07-realesrgan-native-resume.json",
+        "S01-S07-P09-realesrgan.json"
+      ]
+    },
+    {
+      "caseId": "I08",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "缺param、损坏程序、可执行位丢失、GPU探针拒绝及ZIP/空间边界不激活。",
+      "evidencePaths": [
+        "I08-realesrgan-fail-closed.json",
+        "S01-S07-P09-realesrgan.json"
+      ]
+    },
+    {
+      "caseId": "I09",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "绑定安装动作互斥；计算中本型号和另一型号修复均被同步拒绝。",
+      "evidencePaths": [
+        "P03-P08-realesrgan-continuity.json"
+      ]
+    },
+    {
+      "caseId": "B08",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "upstream_baseline",
+      "reason": "三类原创/项目自有输入的正式输出与同快照t128上游逐字节一致，人工质量通过。",
+      "evidencePaths": [
+        "B08-realesrgan-quality.json",
+        "B08-realesrgan-upstream-reference.json"
+      ]
+    },
+    {
+      "caseId": "B09",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "1024²真实64tile输出4096²，14条完整接缝带审阅通过，保留大tile误差统计。",
+      "evidencePaths": [
+        "B09-realesrgan-tiles.json"
+      ]
+    },
+    {
+      "caseId": "B10",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "整个固定本地执行树禁网完成。",
+      "evidencePaths": [
+        "B10-P02-realesrgan-offline.json"
+      ]
+    },
+    {
+      "caseId": "P01",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "正式冻结、持久化和RGB资产身份一一对应。",
+      "evidencePaths": [
+        "P01-realesrgan-integrity.json"
+      ]
+    },
+    {
+      "caseId": "P02",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "禁网正式执行导出hash与上游基线一致。",
+      "evidencePaths": [
+        "B10-P02-realesrgan-offline.json"
+      ]
+    },
+    {
+      "caseId": "P03",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "同一宿主连续三个独立任务逐一完成并等待空闲；每次保存耗时/RSS。",
+      "evidencePaths": [
+        "P03-P08-realesrgan-continuity.json"
+      ]
+    },
+    {
+      "caseId": "P04",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "实际加载取消零资产，整树清理，显式新token重试成功。",
+      "evidencePaths": [
+        "P04-P05-realesrgan-cancellation.json"
+      ]
+    },
+    {
+      "caseId": "P05",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "正百分比tile进度证明确实计算后取消，包装器/ncnn回收，显式重试成功。",
+      "evidencePaths": [
+        "P04-P05-realesrgan-cancellation.json"
+      ]
+    },
+    {
+      "caseId": "P07",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "实际tile计算强杀宿主，租约忙3.10秒后释放，零旧输出，Interrupted后显式重试成功。",
+      "evidencePaths": [
+        "P07-realesrgan-host-crash.json"
+      ]
+    },
+    {
+      "caseId": "P08",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "同键重发只返回原Turn；不同合法内容同键拒绝，跨型号忙碌无隐式排队。",
+      "evidencePaths": [
+        "P03-P08-realesrgan-continuity.json",
+        "R01-native-interleave.json"
+      ]
+    },
+    {
+      "caseId": "P09",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "尺寸/透明/源图和工具参数门禁在计算前拒绝并保留草稿。",
+      "evidencePaths": [
+        "S01-S07-P09-realesrgan.json",
+        "U-realesrgan-native.json"
+      ]
+    },
+    {
+      "caseId": "P10",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "实际包装器9个协议反例和当前监督超时/身份测试无错误成功。",
+      "evidencePaths": [
+        "P10-realesrgan-worker-fixtures.json",
+        "logs/final-cargo-test.log"
+      ]
+    },
+    {
+      "caseId": "S01",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "导入/已有作品受控源图身份独立于外部原文件。",
+      "evidencePaths": [
+        "S01-S07-P09-realesrgan.json",
+        "U-realesrgan-native.json"
+      ]
+    },
+    {
+      "caseId": "S02",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "受限PNG/JPEG、有界头部解码及链接/特殊文件反例通过。",
+      "evidencePaths": [
+        "S01-S07-P09-realesrgan.json"
+      ]
+    },
+    {
+      "caseId": "S03",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "旧库迁移与事务回滚保持历史请求、资产和外键。",
+      "evidencePaths": [
+        "S01-S07-P09-realesrgan.json",
+        "logs/final-cargo-test.log"
+      ]
+    },
+    {
+      "caseId": "S06",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "fixture",
+      "reason": "4096²合法输出和像素/字节/缓冲溢出反例通过，旧Z仍64MiB预算和1MP限制。",
+      "evidencePaths": [
+        "S01-S07-P09-realesrgan.json",
+        "native-exports-verified.json"
+      ]
+    },
+    {
+      "caseId": "S07",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "product_execution",
+      "reason": "下一条换源图不替换重试的原冻结输入；新Attempt成功。",
+      "evidencePaths": [
+        "P04-P05-realesrgan-cancellation.json",
+        "S01-S07-P09-realesrgan.json"
+      ]
+    },
+    {
+      "caseId": "U01",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "默认目录原生状态和固定放大能力真实可用。",
+      "evidencePaths": [
+        "U-realesrgan-native.json",
+        "R03-native-integration.json"
+      ]
+    },
+    {
+      "caseId": "U02",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "系统导入/作品选图、取消和透明反例保留已有合法输入。",
+      "evidencePaths": [
+        "U-realesrgan-native.json"
+      ]
+    },
+    {
+      "caseId": "U03",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "真实任务期间新会话与下一条草稿不影响旧输入，无重复或串图。",
+      "evidencePaths": [
+        "U-realesrgan-native.json",
+        "R01-native-interleave.json"
+      ]
+    },
+    {
+      "caseId": "U05",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "正常退出重开，来源/记录/4096²结果可恢复且系统导出字节一致。",
+      "evidencePaths": [
+        "U-realesrgan-native.json",
+        "native-exports-verified.json"
+      ]
+    },
+    {
+      "caseId": "U06",
+      "configurationKey": "R-U",
+      "required": true,
+      "status": "passed",
+      "evidenceKind": "native_daily",
+      "reason": "1280/960布局、键盘焦点和错误恢复通过；按用户要求免去本轮手动IME复测。",
+      "evidencePaths": [
+        "U-realesrgan-native.json"
+      ]
+    }
+  ]
+}

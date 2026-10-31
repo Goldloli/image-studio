@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "status": "passed",
+  "method": "Validate 29 unique R-U cases, required/status/evidenceKind fields, expected applicability and local evidence existence; compare each referenced formal PNG hash to the stored AssetRef.",
+  "caseCount": 29,
+  "missingEvidence": [],
+  "duplicateCases": [],
+  "problems": []
+}
