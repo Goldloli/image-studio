@@ -1210,7 +1210,16 @@ impl Installation {
         }
         output.sync_all().map_err(err)?;
         drop(output);
-        verify(&part, a.bytes, &a.sha256)?;
+        if let Err(error) = verify(&part, a.bytes, &a.sha256) {
+            let cleanup =
+                clear_segment_state(&part, &segment_paths, &segment_meta_paths, &seed_marker);
+            return Err(match cleanup {
+                Ok(()) => format!("{error}；损坏分段已清除，请重试下载"),
+                Err(cleanup_error) => {
+                    format!("{error}；损坏分段清理失败：{cleanup_error}")
+                }
+            });
+        }
         fs::rename(&part, &final_path).map_err(err)?;
         for path in segment_paths.iter().chain(&segment_meta_paths) {
             fs::remove_file(path).ok();
@@ -1528,6 +1537,23 @@ fn seed_segments(
         total += length;
     }
     Ok(total)
+}
+fn clear_segment_state(
+    part: &Path,
+    segment_paths: &[PathBuf],
+    segment_meta_paths: &[PathBuf],
+    seed_marker: &Path,
+) -> Result<(), String> {
+    for path in std::iter::once(part)
+        .chain(segment_paths.iter().map(PathBuf::as_path))
+        .chain(segment_meta_paths.iter().map(PathBuf::as_path))
+        .chain(std::iter::once(seed_marker))
+    {
+        if path.exists() {
+            fs::remove_file(path).map_err(err)?;
+        }
+    }
+    Ok(())
 }
 fn validate_artifact(a: &Artifact) -> Result<(), String> {
     safe_relative(&a.path)?;
@@ -2131,6 +2157,29 @@ mod tests {
         assert_eq!(fs::read(&segments[0]).unwrap(), b"0123");
         assert_eq!(fs::read(&segments[1]).unwrap(), b"456");
         assert_eq!(fs::read(&segments[2]).unwrap(), b"");
+    }
+    #[test]
+    fn corrupt_segment_state_is_cleared_for_an_explicit_redownload() {
+        let root = tempfile::tempdir().unwrap();
+        let part = root.path().join("artifact.part");
+        let seed_marker = root.path().join("artifact.segments-seeded");
+        let segments = vec![
+            root.path().join("artifact.segment-00"),
+            root.path().join("artifact.segment-01"),
+        ];
+        let metadata = vec![
+            root.path().join("artifact.segment-00.json"),
+            root.path().join("artifact.segment-01.json"),
+        ];
+        fs::write(&part, b"corrupt").unwrap();
+        fs::write(&seed_marker, b"seeded").unwrap();
+        for path in segments.iter().chain(&metadata) {
+            fs::write(path, b"partial").unwrap();
+        }
+        clear_segment_state(&part, &segments, &metadata, &seed_marker).unwrap();
+        assert!(!part.exists());
+        assert!(!seed_marker.exists());
+        assert!(segments.iter().chain(&metadata).all(|path| !path.exists()));
     }
     #[test]
     fn activation_records_bind_bytes_even_when_version_labels_are_reused() {
