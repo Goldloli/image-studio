@@ -1,6 +1,9 @@
 //! Explicit retry of a cancelled Real-ESRGAN Job for lifecycle acceptance.
 
-use image_studio_desktop::{adapters::AppPaths, studio::StudioService};
+use image_studio_desktop::{
+    adapters::AppPaths,
+    studio::{DraftInput, StudioService},
+};
 use serde_json::json;
 use sha2::{Digest, Sha256};
 use std::{
@@ -15,12 +18,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut job_id = None;
     let mut export = None;
     let mut snapshot_only = false;
+    let mut draft_source = None;
     while let Some(flag) = args.next() {
         match flag.as_str() {
             "--data-dir" => root = Some(PathBuf::from(args.next().ok_or("missing data root")?)),
             "--job-id" => job_id = Some(args.next().ok_or("missing job id")?),
             "--export" => export = Some(PathBuf::from(args.next().ok_or("missing export path")?)),
             "--snapshot-only" => snapshot_only = true,
+            "--draft-source" => {
+                draft_source = Some(PathBuf::from(
+                    args.next().ok_or("missing replacement source")?,
+                ))
+            }
             _ => return Err(format!("unknown option: {flag}").into()),
         }
     }
@@ -47,6 +56,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if !export.is_absolute() {
         return Err("--export must be absolute".into());
     }
+    let replacement_source = if let Some(path) = draft_source {
+        let imported = service.import_source(&path)?;
+        let snapshot = service.snapshot()?;
+        let draft_id = snapshot["activeId"].as_u64().ok_or("missing draft")?;
+        let draft = snapshot["drafts"]
+            .as_array()
+            .and_then(|drafts| drafts.iter().find(|d| d["id"] == draft_id))
+            .ok_or("missing active draft")?;
+        let mut params = draft["params"].clone();
+        params["sourceAssetId"] = imported["assetId"].clone();
+        service.save_draft(
+            DraftInput {
+                id: draft_id,
+                name: "Changed next upscale source".into(),
+                prompt: String::new(),
+                params,
+                collapsed: false,
+                prompt_source_id: None,
+            },
+            draft["version"].as_u64().ok_or("missing draft version")?,
+        )?;
+        Some(imported["assetId"].clone())
+    } else {
+        None
+    };
     let retried = service.retry(&job_id)?;
     let turn_id = retried["turnId"]
         .as_str()
@@ -75,6 +109,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         "jobId": job_id,
                         "turnId": turn_id,
                         "assetId": asset_id,
+                        "sourceAssetId": turn["sourceAssetId"],
+                        "replacementDraftSourceAssetId": replacement_source,
                         "sha256": format!("{:x}", Sha256::digest(&bytes)),
                         "bytes": bytes.len(),
                         "export": export,
