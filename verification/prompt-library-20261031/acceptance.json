@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-31",
+  "implementationCommit": "8b1fca1",
+  "environment": {
+    "osVersion": "27.0.1",
+    "architecture": "arm64",
+    "device": "Apple M3 Max",
+    "memoryBytes": 137438953472
+  },
+  "catalog": {
+    "upstreamCommit": "63e6176fa01be51c000108dacd72716d3e46784b",
+    "caseCount": 541,
+    "categoryCount": 13,
+    "featuredCount": 26,
+    "missingCaseIds": [12, 169, 170],
+    "emptySourceUrlCount": 25,
+    "imageBytesTotal": 157178325,
+    "imageBytesMaximum": 5434675,
+    "imagePixelsMaximum": 13422592,
+    "catalogSha256": "c33355ca0dba6c0cc6d1078b101182be359549824a1786b9eee9e1b4dad1deff"
+  },
+  "checks": {
+    "pythonImport": {
+      "tests": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "frontend": {
+      "tests": 35,
+      "passed": 35,
+      "typecheck": "passed",
+      "build": "passed"
+    },
+    "rust": {
+      "testsPassed": 96,
+      "testsFailed": 0,
+      "testsIgnored": 3,
+      "clippyWarningsDenied": true
+    },
+    "browserFlow": "passed",
+    "openspecStrict": "passed",
+    "nativeFlow": "passed",
+    "realGeneration": "passed"
+  },
+  "nativeGeneration": {
+    "sourceCaseId": 510,
+    "sourceCaseTitle": "Bichon Shop 拟物 App 图标",
+    "model": "Z-Image Turbo",
+    "seed": 217823722,
+    "steps": 9,
+    "jobId": "job-4001f665275e4360bec57274d54ee847",
+    "turnId": "turn-afcd4b130e6c460bacf10fb217bd1db4",
+    "attemptId": "attempt-594b8615d87442d294bc506bc29a671f",
+    "assetId": "asset-19289eeed39c4b208eecdd3b650b3f24",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 624648,
+    "sha256": "d86ed8d20c429883014691c6b06fcbdcfeeeec8e3b8dd1aefb62df53166dbde2"
+  },
+  "nonMutation": {
+    "sourceJobs": 10,
+    "resultJobs": 11,
+    "sourceAssets": 7,
+    "resultAssets": 8,
+    "browsingCreatedJobsOrAssets": false
+  },
+  "status": "passed"
+}
