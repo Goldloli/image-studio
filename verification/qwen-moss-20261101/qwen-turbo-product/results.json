@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "modelId": "qwen-image-2.1-turbo-mflux-v1",
+  "capabilityId": "image.text-to-image.qwen-image-2.1-turbo.v1",
+  "recipe": "qwen21-turbo-txt2img-q8-8-v1",
+  "processElapsedMilliseconds": 251107,
+  "sourceEvidence": "batch.jsonl",
+  "tasks": [
+    {
+      "id": "T01",
+      "seed": 42,
+      "turnId": "turn-8c3490f0d6374f2eaee6070794c27948",
+      "jobId": "job-5967e6a072f04ca887751e2492976549",
+      "attemptId": "attempt-05af916e08ca4ff8bc30578e64bec6cb",
+      "assetId": "asset-4d6ab96b38c14d87af2c6656de763a1f",
+      "assetSha256": "46ff1003e7f9d39684cc27bf775cfba96915769e71916e4fb9676d9f53231e0f",
+      "elapsedMilliseconds": 93708,
+      "maxSamplingStep": 8,
+      "stageSequence": ["preparing", "loading", "sampling", "writing", "succeeded"],
+      "workerProcessesAfterCompletion": []
+    },
+    {
+      "id": "T02",
+      "seed": 43,
+      "turnId": "turn-7e64155af8914d93a99a4cad55aa377c",
+      "jobId": "job-48263b352e7b40008c7d668528d71238",
+      "attemptId": "attempt-3957605b8dfa46e29b9752411707edbd",
+      "assetId": "asset-a71afb94126c4ed18044fd9b1a179e1e",
+      "assetSha256": "a4aa8ad5bfb7476535fb91803e2f966e2b8179f040de6880943a441d007b758c",
+      "elapsedMilliseconds": 78473,
+      "maxSamplingStep": 8,
+      "stageSequence": ["preparing", "loading", "sampling", "writing", "succeeded"],
+      "workerProcessesAfterCompletion": []
+    },
+    {
+      "id": "T03",
+      "seed": 44,
+      "turnId": "turn-7b14b7fb811744a3a651604c3b024c01",
+      "jobId": "job-d83e33a9842248e5aadf77abb15fc7af",
+      "attemptId": "attempt-e32c645b83cb411ab7b01aa35c5a30de",
+      "assetId": "asset-1048eedbef2343b1af0043f405084b19",
+      "assetSha256": "5420fa705934ecceb2a2524e7e9c4c70dd86b175db732badb1dd309a806f2c6d",
+      "elapsedMilliseconds": 78555,
+      "maxSamplingStep": 8,
+      "stageSequence": ["preparing", "loading", "sampling", "writing", "succeeded"],
+      "workerProcessesAfterCompletion": []
+    }
+  ],
+  "qualityReview": {
+    "T01": "8 步 Turbo 水彩猫构图正常，主体与秋叶完整。",
+    "T02": "8 步 Turbo 产品静物结构正常。",
+    "T03": "标题“秋日咖啡”和副标题“周末限定”完整清晰。"
+  },
+  "exportHashesMatch": true
+}
