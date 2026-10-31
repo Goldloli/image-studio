@@ -60,6 +60,8 @@ Qwen 选 `qwen21/variants/txt2img`，不选 reference/edit。后者虽然也能�
 
 每个 model manifest 覆盖完整 transformer、文本编码器、VAE、tokenizer/processor、配置、索引及采样需要的文件；不盲目下载整个仓库，也不能漏掉小文件。普通文件须取得内容 SHA-256，Git blob ID 不能替代。组件共享只按相同内容证明；首轮不实现用户可见的通用组件管理器或卸载引用计数。
 
+Qwen与MOSS默认使用ModelScope固定文件revision分发的同一内容。manifest继续记录Hugging Face原始revision与许可证作为内容身份，同时把每个文件的下载URL固定为ModelScope API返回的文件revision，禁止`master`或短签名地址。切换来源前须逐路径、字节数和SHA-256核对全部正式文件；运行时仍按摘要校验。首轮不做自动跨镜像回退，避免同一安装名绑定无法证明的不同对象。
+
 复用前置已交付激活记录布局：`data/installations/models/<install-id>.json` 保存模型 manifest 摘要、快照和所需 runtime lock；`data/installations/runtimes/<runtime-id>.json` 保存运行时 inventory/摘要及探针。记录位于被散列的运行时树之外，避免自包含摘要。旧 `installation-ready.json` 继续只表示原 Z-Image 组合，读取时映射到旧型号，不搬迁、不重新登记为新环境。
 
 就绪核验顺序为登记和锁身份 → 模型完整文件 → runtime inventory/链接 → 包版本和设备探针 → 原子型号激活。共享 runtime Ready 只证明环境可引用，不能证明另一个型号权重齐备；实机证据又与设备探针分开。模型页仍可快速读取激活元数据，生成前在后台执行完整核验，不在搜索/展开时散列几十 GB。
@@ -70,7 +72,7 @@ Qwen 选 `qwen21/variants/txt2img`，不选 reference/edit。后者虽然也能�
 
 `model_install`、停止/继续调用和事件均绑定 install_id；现有无目标的停止调用在同版本前后端一起调整为明确目标。活跃安装身份必须由宿主核对，不能依据当前展开行猜测。没有等待队列，冲突直接返回可行动的忙碌原因。
 
-安装计划区分原始组件下载、已核验缓存、目标文件、运行时展开和临时保留；缓存缺失与目标完整副本按实际卷分别预检。显示下载量用完整正式 manifest，当前 sources 的候选统计只作研究依据。无法证明共享块或去重收益时不扣减空间承诺。
+安装计划区分原始组件下载、已核验缓存、目标文件、运行时展开和临时保留；缓存缺失与目标完整副本按实际卷分别预检。显示下载量用完整正式 manifest。无法证明共享块或去重收益时不扣减空间承诺。国内源只改变传输路径，缓存仍以内容SHA-256命名，已经完整核验的同内容文件可以在来源切换后续用；来源或Range身份不一致的分段文件必须重新开始。
 
 运行时因绝对链接绑定位置，应在目标目录经正式安装器创建，不复制旧 venv 或篡改 inventory。修复新环境不会覆盖旧 Z-Image；某个新模型失败只改变对应状态，其他已就绪组合保持可用。
 

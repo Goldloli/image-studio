@@ -1,6 +1,6 @@
 # 来源、精确变体与研究边界
 
-初次核对：2026-10-30；固定revision/许可元数据复核：2026-10-31，Asia/Shanghai。这里只查询了官方元数据与现有固定运行时源码，没有下载或运行新权重。
+初次核对：2026-10-30；固定revision/许可元数据复核：2026-10-31；ModelScope逐文件内容身份核验：2026-11-01，Asia/Shanghai。这里只查询了官方与ModelScope元数据、测试了固定文件Range响应，没有下载或运行新权重。
 
 ## 1. 型号身份
 
@@ -23,6 +23,8 @@
 | MOSS-SFT | 27,229,060,886 bytes | 27,219,772,520 bytes | 18 |
 
 候选按固定 MFLUX 组件布局筛选，包含权重、配置、tokenizer/processor，以及 Qwen Turbo 所需根配置/采样信息。它们**不是可执行 manifest**：普通非 LFS 文件尚未取得内容 SHA-256，组件闭包仍需通过无网络加载审计，来源 README/许可证和必要运行配置还须纳入正式记录。全仓库体积不能直接用作最终下载计划。
+
+正式清单随后为全部普通文件取得内容 SHA-256，并补齐许可证与权重索引闭包；最终为25、16、19个文件，组件字节分别为33,131,609,424、32,451,607,098、27,219,783,878。上表保留最初候选元数据，作为筛选过程记录，不再代表执行清单。
 
 q8 代表运行加载选择，不代表下载已是 q8；组件是否可以共享必须按内容散列证明。此处没有把潜在共享扣成确定节省，也没有推导峰值内存。安装时按缺失缓存、完整目标、运行时展开和保留空间分别预算。
 
@@ -51,4 +53,18 @@ Qwen 旧版、其他 Turbo/LoRA、编辑/控制分支不因名称相近而纳入
 
 ## 6. 接入顺序修订
 
-2026-10-31用户明确要求先接通并测试三个计划型号，再到Qwen/MOSS；前置已于2026-11-01认证并归档，用户随后明确恢复本方案实施。最新固定revision及许可元数据见[本次复核](../archive/2026-11-01-integrate-planned-models/references/hf-and-runtime-metadata.json)。本方案尚未重新拉取三个完整文件清单，原组件大小仍是2026-10-30候选统计，不声称已重新核验权重内容；正式安装前仍须补齐来源清单和内容摘要。
+2026-10-31用户明确要求先接通并测试三个计划型号，再到Qwen/MOSS；前置已于2026-11-01认证并归档，用户随后明确恢复本方案实施。最新固定revision及许可元数据见[本次复核](../archive/2026-11-01-integrate-planned-models/references/hf-and-runtime-metadata.json)。
+
+## 7. 默认国内分发源
+
+2026-11-01用户要求模型尽量默认通过国内网络下载，可使用ModelScope等国内源。Qwen与MOSS三个正式清单因此改用ModelScope作为默认下载源：
+
+| 原始内容身份（HF） | ModelScope仓库 | 正式文件数 | 核验结果 |
+|---|---|---:|---|
+| Qwen/Qwen-Image-2.1@`d26bb61231c349cf6b7896fa83353113880e1ba3` | Qwen/Qwen-Image-2.1 | 25 | 25/25路径、字节数、SHA-256一致 |
+| Qwen/Qwen-Image-2.1-Turbo@`fc13ba1986fcb905854dc8de2f52eee395f49b5b` | Qwen/Qwen-Image-2.1-Turbo | 16 | 16/16路径、字节数、SHA-256一致 |
+| OpenMOSS-Team/MOSS-Image-SFT@`f972bd4b4b9e3852133cc5da954d87bc32cd8fb9` | OpenMOSS/MOSS-Image-SFT | 19 | 19/19路径、字节数、SHA-256一致 |
+
+核验通过ModelScope官方递归文件API完成；每个正式文件使用API返回的逐文件revision构造不可变下载地址，不使用`master`。抽样及最终安装继续以冻结HF清单的字节数和SHA-256为内容身份，ModelScope只是分发来源，不能替换模型、revision或文件。当前60个组件全部匹配，没有允许自动跨来源漂移的回退。
+
+模型下载入口只接受`modelscope.cn`及其HTTPS LFS子域，并继续执行重定向白名单、Range/Content-Range、强ETag、取消和完整SHA-256校验。ModelScope LFS响应实测支持206、强ETag和跨请求续传；普通小文件由最终完整摘要校验。
