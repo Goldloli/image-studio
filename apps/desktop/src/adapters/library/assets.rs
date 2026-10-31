@@ -7,7 +7,8 @@ use std::{
 use studio_core::recipes::{OutputRole, Recipe};
 
 const MAX_ASSET_BYTES: u64 = 128 * 1024 * 1024;
-const DECODE_LIMIT: usize = 256 * 1024 * 1024;
+const LEGACY_DECODE_LIMIT: usize = 64 * 1024 * 1024;
+const UPSCALE_DECODE_LIMIT: usize = 256 * 1024 * 1024;
 const MAX_ASSET_CHECKS: usize = 512;
 
 /// A lightweight poll may reuse a verified result only while the same file's
@@ -246,13 +247,7 @@ impl Library {
         hook(CommitStage::Copied)?;
         for output in &mut prepared {
             let mut file = open_regular(&output.temporary.0, false)?;
-            validate_png(
-                &mut file,
-                output.width,
-                output.height,
-                max_output_pixels(recipe, output.role),
-                output.role,
-            )?;
+            validate_png(&mut file, output.width, output.height, recipe, output.role)?;
             file.sync_all()?;
             let mut permissions = file.metadata()?.permissions();
             permissions.set_readonly(true);
@@ -631,7 +626,7 @@ fn validate_png(
     file: &mut File,
     width: u32,
     height: u32,
-    max_pixels: u64,
+    recipe: Recipe,
     role: OutputRole,
 ) -> Result<()> {
     // Read a fixed 33-byte IHDR before allowing the decoder to allocate anything.
@@ -651,7 +646,7 @@ fn validate_png(
         &[2, 6]
     };
     if (actual_width, actual_height) != (width, height)
-        || u64::from(width) * u64::from(height) > max_pixels
+        || u64::from(width) * u64::from(height) > max_output_pixels(recipe, role)
         || header[24] != 8
         || !allowed_colors.contains(&header[25])
     {
@@ -660,12 +655,23 @@ fn validate_png(
         ));
     }
     file.seek(SeekFrom::Start(0))?;
-    // Reserve the host's output allocation from the same 64 MiB budget used by
-    // the decoder for metadata, decompression scratch and interlacing buffers.
-    let output_budget = width as usize * height as usize * 4;
+    // Reserve host output and decoder scratch from one recipe-specific budget.
+    // The 16 MP upscale recipe must not expand the legacy decoder's allowance.
+    let decode_limit = if recipe == Recipe::RealEsrgan {
+        UPSCALE_DECODE_LIMIT
+    } else {
+        LEGACY_DECODE_LIMIT
+    };
+    let output_budget = (width as usize)
+        .checked_mul(height as usize)
+        .and_then(|pixels| pixels.checked_mul(4))
+        .ok_or_else(|| LibraryError::Invalid("PNG 解码分配溢出".into()))?;
+    let scratch_budget = decode_limit
+        .checked_sub(output_budget)
+        .ok_or_else(|| LibraryError::Invalid("PNG 解码分配超限".into()))?;
     let mut decoder = png::Decoder::new(BufReader::new(file));
     decoder.set_limits(png::Limits {
-        bytes: DECODE_LIMIT - output_budget,
+        bytes: scratch_budget,
     });
     let mut reader = decoder
         .read_info()
@@ -675,7 +681,7 @@ fn validate_png(
     }
     let size = reader
         .output_buffer_size()
-        .filter(|size| *size <= DECODE_LIMIT && *size <= width as usize * height as usize * 4)
+        .filter(|size| *size <= output_budget)
         .ok_or_else(|| LibraryError::Invalid("PNG 解码分配超限".into()))?;
     let mut output = vec![0; size];
     let frame = reader
@@ -694,4 +700,77 @@ fn png_color_type(path: &Path) -> Result<u8> {
     let mut header = [0u8; 26];
     file.read_exact(&mut header)?;
     Ok(header[25])
+}
+
+#[cfg(test)]
+mod bounds_tests {
+    use super::*;
+
+    #[test]
+    fn upscale_png_limits_do_not_relax_old_z_image_limits() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("4096.png");
+        let mut encoder = png::Encoder::new(File::create(&path).unwrap(), 4096, 4096);
+        encoder.set_color(png::ColorType::Rgb);
+        encoder.set_depth(png::BitDepth::Eight);
+        let mut writer = encoder
+            .write_header()
+            .unwrap()
+            .into_stream_writer()
+            .unwrap();
+        let row = vec![32_u8; 4096 * 3];
+        for _ in 0..4096 {
+            writer.write_all(&row).unwrap();
+        }
+        writer.finish().unwrap();
+        validate_png(
+            &mut File::open(&path).unwrap(),
+            4096,
+            4096,
+            Recipe::RealEsrgan,
+            OutputRole::Primary,
+        )
+        .unwrap();
+        assert!(
+            validate_png(
+                &mut File::open(&path).unwrap(),
+                4096,
+                4096,
+                Recipe::ZImageTurbo,
+                OutputRole::Primary
+            )
+            .is_err()
+        );
+        let mut header = fs::read(&path).unwrap()[..33].to_vec();
+        header[16..20].copy_from_slice(&4097_u32.to_be_bytes());
+        fs::write(&path, &header).unwrap();
+        assert!(
+            validate_png(
+                &mut File::open(&path).unwrap(),
+                4097,
+                4096,
+                Recipe::RealEsrgan,
+                OutputRole::Primary
+            )
+            .is_err()
+        );
+        header[16..20].copy_from_slice(&u32::MAX.to_be_bytes());
+        header[20..24].copy_from_slice(&u32::MAX.to_be_bytes());
+        fs::write(&path, header).unwrap();
+        assert!(
+            validate_png(
+                &mut File::open(&path).unwrap(),
+                u32::MAX,
+                u32::MAX,
+                Recipe::RealEsrgan,
+                OutputRole::Primary
+            )
+            .is_err()
+        );
+        for recipe in [Recipe::ZImageTurbo, Recipe::RealEsrgan] {
+            let bytes = recipe.max_output_bytes(OutputRole::Primary).unwrap();
+            let mut oversized = std::io::repeat(0).take(bytes + 1);
+            assert!(copy_and_hash(&mut oversized, &mut std::io::sink(), bytes).is_err());
+        }
+    }
 }
