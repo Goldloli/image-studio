@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "B10",
+  "additionalCases": [
+    "P02"
+  ],
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution",
+  "reason": "正式StudioService、监督进程、Rust包装器和ncnn在同一deny-network进程树中完成真实固定4倍放大；产物与正式联网产品和上游t128基线逐字节相同。",
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "verification/deny-network.sb",
+    "target/debug/examples/realesrgan-check",
+    "--data-dir",
+    "target/planned-models-realesrgan-20261031",
+    "--source",
+    "fixtures/realesrgan-nonsquare-360x640.png",
+    "--export-dir",
+    "target/planned-models-realesrgan-20261031/final-offline-export"
+  ],
+  "networkProfileSha256": "c1c00c2dd67840639e0f0484c1134e66210ad22475167c8eec9e121a7bb51292",
+  "networkControl": "logs/realesrgan-network-control.log",
+  "networkControlExit": 6,
+  "log": "logs/realesrgan-offline-final.log",
+  "logSha256": "1f0c439ab881756f0d3967a952c0ed4b49ee7fc7b4da478860651e00332070ea",
+  "executionResult": {
+    "assetId": "asset-388f3c86197349bb994a05605c14d4f4",
+    "bytes": 5964248,
+    "elapsedMilliseconds": 4507,
+    "execution": {
+      "attemptId": "attempt-4c9e7dbdbd7247f1a782d6725c0278c2",
+      "busy": true,
+      "cleanupError": null,
+      "jobId": "job-3fd3b9e9af2a4c03906b8e21693d13db",
+      "logs": "[0 Apple M3 Max]  queueC=0[1]  queueG=0[1]  queueT=0[1]\n[0 Apple M3 Max]  bugsbn1=0  bugbilz=103  bugcopc=0  bugihfa=0\n[0 Apple M3 Max]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\n[0 Apple M3 Max]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\n0.00%\n6.67%\n13.33%\n20.00%\n26.67%\n33.33%\n40.00%\n46.67%\n53.33%\n60.00%\n66.67%\n73.33%\n80.00%\n86.67%\n93.33%\n",
+      "stage": "inference",
+      "step": null,
+      "summary": "正在执行本地推理",
+      "total": null
+    },
+    "export": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/final-offline-export/realesrgan-primary.png",
+    "height": 2560,
+    "sha256": "1a45da218783d965eb5138fea2524d76b42f81d2d70df8eb5f930b7120d2b59a",
+    "sourceAssetId": "source-6602fe3346b740df9a170913c1f436d2",
+    "stageSequence": [
+      "preparing",
+      "loading",
+      "inference"
+    ],
+    "status": "passed",
+    "turnId": "turn-3665c6b429174ba5b077970ce17fd8d5",
+    "width": 1440
+  },
+  "binarySha256": {
+    "target/debug/examples/realesrgan-check": "1d30fa897a47960d12bd16fa3b2e583f6d884b48d008babb946847403fbd3d2f",
+    "target/debug/inference-supervisor": "a592191c671ea64934db2c165f5b1a8c67b233bf9762872f2495c22f6c014c92",
+    "target/debug/realesrgan-worker": "ad1cb50d4baeaedd3b792a66d42bd9b1b6a2a78549cbc3be8bdff873112d8080"
+  },
+  "resourceCleanupEvidence": "P03-P08-realesrgan-continuity.json",
+  "note": "输出提交与宿主空闲不是同一时点：单次helper最后的busy快照可能仍为true，退出时Drop会回收；逐次等待idle的证据在P03另存。"
+}

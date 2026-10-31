@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "P07",
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution",
+  "reason": "Host SIGKILL during real ncnn Vulkan inference left the supervisor to reclaim the wrapper and ncnn tree, persisted Interrupted without output, and an explicit new-token retry committed one primary PNG.",
+  "command": [
+    "/Users/gejiawei/Desktop/ai_code/image-studio/target/debug/examples/realesrgan-check",
+    "--data-dir",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031",
+    "--source",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/fixtures/realesrgan-tiles-1024.png",
+    "--export-dir",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031"
+  ],
+  "hostReturncode": -9,
+  "observedExecution": {
+    "elapsedMilliseconds": 3262,
+    "stage": "inference",
+    "turnId": "turn-62dc8dae2c84444e9f2226fc38bfc408"
+  },
+  "turnId": "turn-62dc8dae2c84444e9f2226fc38bfc408",
+  "jobId": "job-2c88b675101b41d796d9377c5c02a1aa",
+  "executionLeaseWasBusyDuringRecovery": true,
+  "executionLeaseReleaseSeconds": 3.1014676250051707,
+  "lingeringOwnedProcesses": [],
+  "recoveredTurn": {
+    "aspect": "1:1",
+    "assetAvailable": false,
+    "assetError": null,
+    "assetId": null,
+    "attemptId": "attempt-a8445ce408394573b540701045cef054",
+    "capabilityId": "image.upscale.realesrgan-x4plus.v1",
+    "conversationId": "conv-default",
+    "count": 1,
+    "error": "宿主中断；请确认旧执行已清理后显式重试",
+    "height": 4096,
+    "id": "turn-62dc8dae2c84444e9f2226fc38bfc408",
+    "jobId": "job-2c88b675101b41d796d9377c5c02a1aa",
+    "maskAssetAvailable": false,
+    "maskAssetError": null,
+    "maskAssetId": null,
+    "modelId": "realesrgan-x4plus",
+    "progressStage": "inference",
+    "progressStep": null,
+    "progressTotal": null,
+    "prompt": "",
+    "receivedAt": 1793460146781,
+    "requestedSeed": "",
+    "seed": null,
+    "sequence": 23,
+    "sourceAssetId": "source-3edde5285ba94c2798f317e562ab3f36",
+    "state": "Interrupted",
+    "status": "Job",
+    "submissionKey": "realesrgan-103d2ebe-1b9b-41ea-8f34-6a95d3b8cadb",
+    "width": 4096
+  },
+  "attempts": [
+    {
+      "id": "attempt-a8445ce408394573b540701045cef054",
+      "token": "token-f73792bdc3814bbba303f1048dbd4631",
+      "state": "interrupted",
+      "assetCount": 0,
+      "error": "宿主中断；请确认旧执行已清理后显式重试"
+    },
+    {
+      "id": "attempt-f19d008b08e04445acd7839aec3af01e",
+      "token": "token-5de12a10815e44baa7d59ff977bcc947",
+      "state": "succeeded",
+      "assetCount": 1,
+      "error": null
+    }
+  ],
+  "retryExport": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/P07-current.png",
+  "log": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/logs/realesrgan-current-host-crash.log",
+  "elapsedSeconds": 86.43113987497054,
+  "tileLog": "logs/realesrgan-current-crash-native-worker.log",
+  "identity": {
+    "codeCommit": "deaf6bf9c9730c24541169daa2e0e7c5bf9d1e1c",
+    "binariesSha256": {
+      "target/debug/examples/realesrgan-check": "0e693a64ef2f2639dcbbdc7b29003e88615769dd4fe5a46239456444fd1e3670",
+      "target/debug/examples/realesrgan-retry-check": "9751740ce4dcaf205559bba9220542043024834c71093440ee91121e82b52a12",
+      "target/debug/inference-supervisor": "a592191c671ea64934db2c165f5b1a8c67b233bf9762872f2495c22f6c014c92",
+      "target/debug/realesrgan-worker": "ad1cb50d4baeaedd3b792a66d42bd9b1b6a2a78549cbc3be8bdff873112d8080"
+    }
+  }
+}

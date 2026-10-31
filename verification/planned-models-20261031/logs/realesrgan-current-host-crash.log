@@ -1,0 +1,3 @@
+{"elapsedMilliseconds":118,"stage":"loading","turnId":"turn-62dc8dae2c84444e9f2226fc38bfc408"}
+{"elapsedMilliseconds":3262,"stage":"inference","turnId":"turn-62dc8dae2c84444e9f2226fc38bfc408"}
+{"acceptanceControl": {"action": "SIGKILL", "pid": 37172, "stage": "inference", "turnId": "turn-62dc8dae2c84444e9f2226fc38bfc408"}}

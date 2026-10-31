@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "P10",
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "fixture",
+  "reason": "The actual native wrapper rejects wrong handshake identities, versions/capabilities, unknown/oversized/truncated frames and control EOF without spawning an inference candidate. Supervisor process-tree timeout/disconnect tests are additionally covered by the current Rust gates.",
+  "checks": [
+    {
+      "case": "wrong-build",
+      "returncode": 70,
+      "stdout": "",
+      "stderr": "realesrgan worker: handshake identity or version differs",
+      "noCandidate": true
+    },
+    {
+      "case": "wrong-runtime",
+      "returncode": 70,
+      "stdout": "",
+      "stderr": "realesrgan worker: handshake identity or version differs",
+      "noCandidate": true
+    },
+    {
+      "case": "wrong-snapshot",
+      "returncode": 70,
+      "stdout": "",
+      "stderr": "realesrgan worker: handshake identity or version differs",
+      "noCandidate": true
+    },
+    {
+      "case": "wrong-version",
+      "returncode": 70,
+      "stdout": "",
+      "stderr": "realesrgan worker: handshake identity or version differs",
+      "noCandidate": true
+    },
+    {
+      "case": "wrong-capability",
+      "returncode": 70,
+      "stdout": "",
+      "stderr": "realesrgan worker: handshake identity or version differs",
+      "noCandidate": true
+    },
+    {
+      "case": "unknown-field",
+      "returncode": 70,
+      "stdout": "",
+      "stderr": "realesrgan worker: invalid generation JSON: unknown field `unexpected`, expected one of `family`, `version`, `session_id`, `request_id`, `sequence`, `execution`, `message` at line 1 column 488",
+      "noCandidate": true
+    },
+    {
+      "case": "oversize-frame",
+      "returncode": 70,
+      "stdout": "",
+      "stderr": "realesrgan worker: generation control frame exceeds 64 KiB",
+      "noCandidate": true
+    },
+    {
+      "case": "truncated-frame",
+      "returncode": 70,
+      "stdout": "",
+      "stderr": "realesrgan worker: control stream ended inside a frame",
+      "noCandidate": true
+    },
+    {
+      "case": "closed-control",
+      "returncode": 70,
+      "stdout": "",
+      "stderr": "realesrgan worker: control channel closed",
+      "noCandidate": true
+    }
+  ]
+}

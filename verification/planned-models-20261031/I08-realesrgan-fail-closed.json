@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "I08",
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "device_probe_and_fault_injection",
+  "reason": "Isolated missing model data, same-length binary corruption, executable mode loss and an OS-denied GPU probe all fail without formal outputs or a new activation. Disk budget boundaries are covered by current installer fixtures; no fault injection touches the default user directory.",
+  "checks": [
+    {
+      "kind": "missing-model-param",
+      "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/missing-model-param",
+      "exitCode": 1,
+      "turns": [
+        {
+          "id": "turn-3e62b357ca9141c3b3ea859e2262b03b",
+          "status": "rejected",
+          "error": "文件缺失：/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/missing-model-param/data/models/realesrgan-x4plus-ncnn/realesrgan-x4plus.param",
+          "job_id": null
+        }
+      ],
+      "formalAssets": 0,
+      "log": "logs/realesrgan-fault-missing-model-param.log"
+    },
+    {
+      "kind": "corrupt-native-binary",
+      "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/corrupt-native-binary",
+      "exitCode": 1,
+      "turns": [
+        {
+          "id": "turn-afe51c71bb9d47b6a05af74dd3e0f4f3",
+          "status": "rejected",
+          "error": "SHA-256 校验失败：/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/corrupt-native-binary/data/runtimes/realesrgan-x4plus-ncnn-macos-v0.2.0-v1/bin/realesrgan-ncnn-vulkan；请继续以修复。",
+          "job_id": null
+        }
+      ],
+      "formalAssets": 0,
+      "log": "logs/realesrgan-fault-corrupt-native-binary.log"
+    },
+    {
+      "kind": "lost-native-executable-mode",
+      "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/lost-native-executable-mode",
+      "exitCode": 1,
+      "turns": [
+        {
+          "id": "turn-96cef1d7d3f444fcbe8ea2f2f0f5e1e7",
+          "status": "rejected",
+          "error": "运行时文件缺失、类型或大小不符。",
+          "job_id": null
+        }
+      ],
+      "formalAssets": 0,
+      "log": "logs/realesrgan-fault-lost-native-executable-mode.log"
+    },
+    {
+      "kind": "probe-gpu-denied",
+      "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/probe-gpu-denied",
+      "exitCode": 1,
+      "activationExists": false,
+      "profile": "deny-network-and-gpu.sb",
+      "log": "logs/realesrgan-fault-probe-gpu-denied.log",
+      "stageSnapshots": [
+        {
+          "cacheRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/probe-gpu-denied/cache",
+          "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/probe-gpu-denied/data",
+          "model": {
+            "busy": true,
+            "deviceVerified": false,
+            "error": null,
+            "id": "realesrgan-x4plus",
+            "modelBytes": 33540549,
+            "modelReady": false,
+            "name": "Real-ESRGAN x4plus",
+            "phase": "preparing",
+            "ready": false,
+            "receivedBytes": 0,
+            "requiredBytes": 4458327196,
+            "runtimeBytes": 8532236,
+            "runtimeReady": false,
+            "summary": "准备安装",
+            "totalBytes": 60349360
+          }
+        },
+        {
+          "cacheRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/probe-gpu-denied/cache",
+          "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/probe-gpu-denied/data",
+          "model": {
+            "busy": true,
+            "deviceVerified": false,
+            "error": null,
+            "id": "realesrgan-x4plus",
+            "modelBytes": 33540549,
+            "modelReady": true,
+            "name": "Real-ESRGAN x4plus",
+            "phase": "probing",
+            "ready": false,
+            "receivedBytes": 60349360,
+            "requiredBytes": 4354104553,
+            "runtimeBytes": 8532236,
+            "runtimeReady": false,
+            "summary": "检查运行环境与设备",
+            "totalBytes": 60349360
+          }
+        },
+        {
+          "cacheRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/probe-gpu-denied/cache",
+          "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-faults-20261031/probe-gpu-denied/data",
+          "model": {
+            "busy": false,
+            "deviceVerified": false,
+            "error": "私有环境安装或探针失败 (exit status: 255)；安装日志末尾：[mvk-error] VK_ERROR_INCOMPATIBLE_DRIVER: Vulkan is not supported on this device. MoltenVK requires Metal, which is not available on this device.\nvkCreateInstance failed -9\n[mvk-error] VK_ERROR_INCOMPATIBLE_DRIVER: Vulkan is not supported on this device. MoltenVK requires Metal, which is not available on this device.\nvkCreateInstance failed -9\ninvalid gpu device",
+            "id": "realesrgan-x4plus",
+            "modelBytes": 33540549,
+            "modelReady": false,
+            "name": "Real-ESRGAN x4plus",
+            "phase": "failed",
+            "ready": false,
+            "receivedBytes": 60349360,
+            "requiredBytes": 4354104553,
+            "runtimeBytes": 8532236,
+            "runtimeReady": false,
+            "summary": "安装失败，可重试",
+            "totalBytes": 60349360
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "S01",
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "fixture",
+  "reason": "受控不可变源图、有界导入、历史迁移、配方化输出上限和原源图重试均通过当前测试；真实重试更改下一条草稿源图后仍使用原1024²源图。合法4096²原生结果及超像素、字节、整数溢出和旧Z限制反例另有记录。",
+  "additionalCases": [
+    "S02",
+    "S03",
+    "S06",
+    "S07",
+    "P09",
+    "I08"
+  ],
+  "tests": {
+    "S01": [
+      "adapters::library::sources::tests::imports_an_immutable_normalized_source_and_ignores_the_original",
+      "adapters::library::tests::klein_edit_turn_copies_the_frozen_source_for_retry"
+    ],
+    "S02": [
+      "adapters::library::sources::tests::rejects_sixteen_bit_animated_icc_and_oversized_png",
+      "adapters::library::sources::tests::jpeg_component_gate_rejects_gray_and_cmyk_before_decode",
+      "adapters::library::tests::symlink_and_fifo_are_rejected_without_following_or_blocking",
+      "adapters::library::sources::tests::jpeg_exif_orientation_is_applied_once"
+    ],
+    "S03": [
+      "adapters::library::tests::legacy_v1_migration_preserves_drafts_jobs_and_is_idempotent",
+      "adapters::library::tests::failed_v1_migration_rolls_back_without_replacing_the_database",
+      "adapters::library::tests::v3_migration_preserves_drafts_and_adds_prompt_source",
+      "adapters::library::tests::v4_to_v5_preserves_legacy_records_and_adds_output_role"
+    ],
+    "S06": [
+      "adapters::library::assets::bounds_tests::upscale_png_limits_do_not_relax_old_z_image_limits",
+      "recipes::tests::upscale_output_must_be_exact_four_times_source"
+    ],
+    "S07": [
+      "adapters::library::tests::duplicate_submission_busy_gate_and_retry_preserve_immutable_history",
+      "studio::tests::capability_drafts_survive_tool_switches_and_restart_without_consuming_text",
+      "studio::tests::legacy_source_url_notation_does_not_change_frozen_component_identity"
+    ],
+    "P09": [
+      "recipes::tests::tool_recipes_do_not_require_fake_instruction_or_seed",
+      "recipes::tests::transparent_images_are_rejected_for_edit_and_upscale",
+      "recipes::tests::plan_parameters_are_exact_for_each_new_backend",
+      "generation::tests::v2_rejects_fake_tool_fields_path_escape_and_bad_roles"
+    ],
+    "I08": [
+      "adapters::installation::tests::zip_extraction_rejects_links_and_paths_before_writing_members",
+      "adapters::installation::tests::zip_extraction_requires_member_size_hash_and_presence",
+      "adapters::installation::tests::zip_extraction_sets_native_mode_and_refuses_linked_parents",
+      "adapters::installation::tests::wrong_digest_never_becomes_a_completed_cache_file",
+      "adapters::installation::tests::range_resume_requires_identity_and_preserves_exact_bytes"
+    ]
+  },
+  "testLog": "logs/final-cargo-test.log",
+  "realEvidence": [
+    "P01-realesrgan-integrity.json",
+    "P04-P05-realesrgan-cancellation.json",
+    "native-exports-verified.json",
+    "realesrgan-native-transparent-rejected.png",
+    "realesrgan-native-960-no-source.png"
+  ],
+  "decoderBudgets": {
+    "realesrganBytes": 268435456,
+    "legacyAndOtherRecipesBytes": 67108864
+  },
+  "problems": []
+}

@@ -1,0 +1,161 @@
+{
+  "caseIds": [
+    "P03",
+    "P08",
+    "I09"
+  ],
+  "configurationKey": "R-U",
+  "evidenceKind": "product_execution",
+  "executionAfterCompletion": {
+    "attemptId": "attempt-4c3cd25e1c8946e193ed9baf9e063804",
+    "busy": false,
+    "cleanupError": null,
+    "jobId": "job-8ba6cd2535694ec1bf4cfe0caf0e8fa0",
+    "logs": "[0 Apple M3 Max]  queueC=0[1]  queueG=0[1]  queueT=0[1]\n[0 Apple M3 Max]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0\n[0 Apple M3 Max]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\n[0 Apple M3 Max]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\n0.00%\n6.67%\n13.33%\n20.00%\n26.67%\n33.33%\n40.00%\n46.67%\n53.33%\n60.00%\n66.67%\n73.33%\n80.00%\n86.67%\n93.33%\n",
+    "stage": "succeeded",
+    "step": null,
+    "summary": "图片已生成并保存到本机",
+    "total": null
+  },
+  "problems": [],
+  "reason": "Three independent Real-ESRGAN jobs completed in one StudioService process with unique attempts/assets and final idle cleanup. Duplicate keys reused the original Turn; a distinct busy submission was rejected without an additional Turn.",
+  "required": true,
+  "runId": "planned-models-20261031",
+  "sameProcess": true,
+  "schemaVersion": 1,
+  "status": "passed",
+  "tasks": [
+    {
+      "assetId": "asset-4d0bd680fbfd41e3accbf6168debe96a",
+      "attemptId": "attempt-5432d31e45cb4d2a81e08fbd8b3cd55e",
+      "busyRequestRejected": true,
+      "conflictingDuplicateRejected": true,
+      "draftSourceChangedDuringExecution": true,
+      "duplicateCreated": false,
+      "elapsedMilliseconds": 9319,
+      "execution": {
+        "attemptId": "attempt-5432d31e45cb4d2a81e08fbd8b3cd55e",
+        "busy": false,
+        "cleanupError": null,
+        "jobId": "job-bcb3056ccc9c4c5eb79a598e23249431",
+        "logs": "[0 Apple M3 Max]  queueC=0[1]  queueG=0[1]  queueT=0[1]\n[0 Apple M3 Max]  bugsbn1=0  bugbilz=103  bugcopc=0  bugihfa=0\n[0 Apple M3 Max]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\n[0 Apple M3 Max]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\n0.00%\n6.25%\n12.50%\n18.75%\n25.00%\n31.25%\n37.50%\n43.75%\n50.00%\n56.25%\n62.50%\n68.75%\n75.00%\n81.25%\n87.50%\n93.75%\n",
+        "stage": "succeeded",
+        "step": null,
+        "summary": "图片已生成并保存到本机",
+        "total": null
+      },
+      "executionRepairRejected": true,
+      "export": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/continuous-final-bound/continuous-1.png",
+      "height": 2048,
+      "index": 1,
+      "jobId": "job-bcb3056ccc9c4c5eb79a598e23249431",
+      "resources": {
+        "backendPeakBytes": null,
+        "method": "macOS ps RSS in KiB sampled every >=100 ms for host plus descendants; shared pages may be counted more than once; excludes unified GPU allocation; observation, not an SLA",
+        "sampledNcnnRssPeakKiB": 332560,
+        "sampledTreeRssPeakKiB": 366528,
+        "samples": 36
+      },
+      "sha256": "937c0805257f6a5c3358b8e795db69a3ee2936a57500ae083643aa636772fef8",
+      "sourceAssetId": "source-52478a3a58d1476992510976eb1531cf",
+      "turnId": "turn-9e6666ca4ee2419eabbc732ba812ca2f",
+      "width": 2048
+    },
+    {
+      "assetId": "asset-dc14eae738fe4a649e4107ebc28e7283",
+      "attemptId": "attempt-62f7a756920c47ef9b6266e5421fabeb",
+      "busyRequestRejected": false,
+      "conflictingDuplicateRejected": true,
+      "draftSourceChangedDuringExecution": false,
+      "duplicateCreated": false,
+      "elapsedMilliseconds": 7355,
+      "execution": {
+        "attemptId": "attempt-62f7a756920c47ef9b6266e5421fabeb",
+        "busy": false,
+        "cleanupError": null,
+        "jobId": "job-754b30d7f32f4f3bb9a5ec7e0bfec301",
+        "logs": "[0 Apple M3 Max]  queueC=0[1]  queueG=0[1]  queueT=0[1]\n[0 Apple M3 Max]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0\n[0 Apple M3 Max]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\n[0 Apple M3 Max]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\n0.00%\n5.00%\n10.00%\n15.00%\n20.00%\n25.00%\n30.00%\n35.00%\n40.00%\n45.00%\n50.00%\n55.00%\n60.00%\n65.00%\n70.00%\n75.00%\n80.00%\n85.00%\n90.00%\n95.00%\n",
+        "stage": "succeeded",
+        "step": null,
+        "summary": "图片已生成并保存到本机",
+        "total": null
+      },
+      "executionRepairRejected": false,
+      "export": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/continuous-final-bound/continuous-2.png",
+      "height": 1708,
+      "index": 2,
+      "jobId": "job-754b30d7f32f4f3bb9a5ec7e0bfec301",
+      "resources": {
+        "backendPeakBytes": null,
+        "method": "macOS ps RSS in KiB sampled every >=100 ms for host plus descendants; shared pages may be counted more than once; excludes unified GPU allocation; observation, not an SLA",
+        "sampledNcnnRssPeakKiB": 448672,
+        "sampledTreeRssPeakKiB": 500752,
+        "samples": 28
+      },
+      "sha256": "c15a97749965c96e756a105aa73ff7a9a079cbd8e80e5faff7e4469332103e16",
+      "sourceAssetId": "source-640eeaec7d204777b962041115490b93",
+      "turnId": "turn-587d86ecf24b45829aee45aadcbccedc",
+      "width": 2560
+    },
+    {
+      "assetId": "asset-1008f37a2193472d9bc1568aab7fd4b6",
+      "attemptId": "attempt-4c3cd25e1c8946e193ed9baf9e063804",
+      "busyRequestRejected": false,
+      "conflictingDuplicateRejected": true,
+      "draftSourceChangedDuringExecution": false,
+      "duplicateCreated": false,
+      "elapsedMilliseconds": 6710,
+      "execution": {
+        "attemptId": "attempt-4c3cd25e1c8946e193ed9baf9e063804",
+        "busy": false,
+        "cleanupError": null,
+        "jobId": "job-8ba6cd2535694ec1bf4cfe0caf0e8fa0",
+        "logs": "[0 Apple M3 Max]  queueC=0[1]  queueG=0[1]  queueT=0[1]\n[0 Apple M3 Max]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0\n[0 Apple M3 Max]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\n[0 Apple M3 Max]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\n0.00%\n6.67%\n13.33%\n20.00%\n26.67%\n33.33%\n40.00%\n46.67%\n53.33%\n60.00%\n66.67%\n73.33%\n80.00%\n86.67%\n93.33%\n",
+        "stage": "succeeded",
+        "step": null,
+        "summary": "图片已生成并保存到本机",
+        "total": null
+      },
+      "executionRepairRejected": false,
+      "export": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/continuous-final-bound/continuous-3.png",
+      "height": 2560,
+      "index": 3,
+      "jobId": "job-8ba6cd2535694ec1bf4cfe0caf0e8fa0",
+      "resources": {
+        "backendPeakBytes": null,
+        "method": "macOS ps RSS in KiB sampled every >=100 ms for host plus descendants; shared pages may be counted more than once; excludes unified GPU allocation; observation, not an SLA",
+        "sampledNcnnRssPeakKiB": 449296,
+        "sampledTreeRssPeakKiB": 517600,
+        "samples": 27
+      },
+      "sha256": "1a45da218783d965eb5138fea2524d76b42f81d2d70df8eb5f930b7120d2b59a",
+      "sourceAssetId": "source-c09a79c2651b484abf4243c6b6bc2e59",
+      "turnId": "turn-af92eb3513dd466086abdd2aed1d47de",
+      "width": 1440
+    }
+  ],
+  "identity": {
+    "codeCommit": "97e746f",
+    "binariesSha256": {
+      "target/debug/examples/realesrgan-batch-check": "24a8f02932d0bb889573898e8dba37967ff2c744c0ed76d95c9f26a5f6bb043f",
+      "target/debug/inference-supervisor": "a592191c671ea64934db2c165f5b1a8c67b233bf9762872f2495c22f6c014c92",
+      "target/debug/realesrgan-worker": "ad1cb50d4baeaedd3b792a66d42bd9b1b6a2a78549cbc3be8bdff873112d8080"
+    },
+    "buildCodeCommit": "66cbd1c",
+    "note": "CLI helpers last rebuilt after permission-generation fix; later change 97e746f only filters the settings UI. Binary SHA values were recorded immediately before this run."
+  },
+  "command": [
+    "target/debug/examples/realesrgan-batch-check",
+    "--data-dir",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031",
+    "--export-dir",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/continuous-final-bound",
+    "--source",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/fixtures/realesrgan-text-lines-en-512.png",
+    "--source",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/fixtures/realesrgan-natural-640x427.png",
+    "--source",
+    "/Users/gejiawei/Desktop/ai_code/image-studio/verification/planned-models-20261031/fixtures/realesrgan-nonsquare-360x640.png"
+  ],
+  "log": "logs/realesrgan-batch-final-bound.log"
+}

@@ -1,0 +1,1012 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "P01",
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution",
+  "reason": "三次正式提交均保留独立Turn/Job/Attempt、冻结请求/计划和源AssetRef，单一primary RGB结果各边精确4倍，且与上游t128基线逐字节一致。",
+  "identityBinding": "realesrgan-run-identity.json",
+  "records": [
+    {
+      "task": {
+        "assetId": "asset-4d0bd680fbfd41e3accbf6168debe96a",
+        "attemptId": "attempt-5432d31e45cb4d2a81e08fbd8b3cd55e",
+        "busyRequestRejected": true,
+        "conflictingDuplicateRejected": true,
+        "draftSourceChangedDuringExecution": true,
+        "duplicateCreated": false,
+        "elapsedMilliseconds": 9319,
+        "execution": {
+          "attemptId": "attempt-5432d31e45cb4d2a81e08fbd8b3cd55e",
+          "busy": false,
+          "cleanupError": null,
+          "jobId": "job-bcb3056ccc9c4c5eb79a598e23249431",
+          "logs": "[0 Apple M3 Max]  queueC=0[1]  queueG=0[1]  queueT=0[1]\n[0 Apple M3 Max]  bugsbn1=0  bugbilz=103  bugcopc=0  bugihfa=0\n[0 Apple M3 Max]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\n[0 Apple M3 Max]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\n0.00%\n6.25%\n12.50%\n18.75%\n25.00%\n31.25%\n37.50%\n43.75%\n50.00%\n56.25%\n62.50%\n68.75%\n75.00%\n81.25%\n87.50%\n93.75%\n",
+          "stage": "succeeded",
+          "step": null,
+          "summary": "图片已生成并保存到本机",
+          "total": null
+        },
+        "executionRepairRejected": true,
+        "export": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/continuous-final-bound/continuous-1.png",
+        "height": 2048,
+        "index": 1,
+        "jobId": "job-bcb3056ccc9c4c5eb79a598e23249431",
+        "resources": {
+          "backendPeakBytes": null,
+          "method": "macOS ps RSS in KiB sampled every >=100 ms for host plus descendants; shared pages may be counted more than once; excludes unified GPU allocation; observation, not an SLA",
+          "sampledNcnnRssPeakKiB": 332560,
+          "sampledTreeRssPeakKiB": 366528,
+          "samples": 36
+        },
+        "sha256": "937c0805257f6a5c3358b8e795db69a3ee2936a57500ae083643aa636772fef8",
+        "sourceAssetId": "source-52478a3a58d1476992510976eb1531cf",
+        "turnId": "turn-9e6666ca4ee2419eabbc732ba812ca2f",
+        "width": 2048
+      },
+      "job": {
+        "id": "job-bcb3056ccc9c4c5eb79a598e23249431",
+        "project_id": "default",
+        "submission_key": "realesrgan-batch-0a2fa8d6-cf7f-4540-8898-2c220fd431d4",
+        "current_attempt_id": "attempt-5432d31e45cb4d2a81e08fbd8b3cd55e",
+        "created_at": 1793465315180
+      },
+      "attempt": {
+        "id": "attempt-5432d31e45cb4d2a81e08fbd8b3cd55e",
+        "job_id": "job-bcb3056ccc9c4c5eb79a598e23249431",
+        "token": "token-0402641e9e794b02a461d31da99e140a",
+        "storage_key": "run-44f478c145c34840a538309f30f8a05a",
+        "state": "succeeded",
+        "error": null,
+        "created_at": 1793465315180,
+        "completed_at": 1793465324148
+      },
+      "request": {
+        "schema_version": 1,
+        "request_id": "request-realesrgan-batch-0a2fa8d6-cf7f-4540-8898-2c220fd431d4",
+        "project_id": "default",
+        "capability": {
+          "capability_id": "image.upscale.realesrgan-x4plus.v1",
+          "instruction_required": false,
+          "input_roles": [
+            {
+              "role": "source",
+              "minimum": 1,
+              "maximum": 1
+            }
+          ]
+        },
+        "instruction": "",
+        "inputs": [
+          {
+            "asset": {
+              "asset_id": "source-52478a3a58d1476992510976eb1531cf",
+              "content_hash": "58f6f5c559f9ab703f0e540a11d956dbfda43fd87420a7fb39d1a24cb5c6a51f",
+              "data_type": "image_rgb",
+              "location": {
+                "kind": "managed",
+                "storage_id": "library",
+                "relative_path": "inputs/source-52478a3a58d1476992510976eb1531cf.png"
+              }
+            },
+            "role": "source",
+            "order": 0
+          }
+        ],
+        "model_variant_id": "realesrgan-x4plus",
+        "requested_output": {
+          "width": 2048,
+          "height": 2048,
+          "count": 1
+        },
+        "policy": {
+          "allow_model_substitution": false,
+          "allow_resolution_change": false,
+          "allow_cpu_fallback": false
+        },
+        "parameters": {},
+        "idempotency_key": "realesrgan-batch-0a2fa8d6-cf7f-4540-8898-2c220fd431d4"
+      },
+      "plan": {
+        "schema_version": 1,
+        "plan_id": "plan-realesrgan-batch-0a2fa8d6-cf7f-4540-8898-2c220fd431d4",
+        "request_id": "request-realesrgan-batch-0a2fa8d6-cf7f-4540-8898-2c220fd431d4",
+        "model_variant_id": "realesrgan-x4plus",
+        "components": [
+          {
+            "role": "component-00-realesrgan-x4plus.bin",
+            "source": {
+              "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+              "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+            },
+            "content_hash": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf"
+          },
+          {
+            "role": "component-01-realesrgan-x4plus.param",
+            "source": {
+              "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+              "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+            },
+            "content_hash": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+          }
+        ],
+        "runtime": {
+          "package_id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+          "engine": "Real-ESRGAN ncnn Vulkan v0.2.0",
+          "source": {
+            "source": "image-studio:runtime-manifest:realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+            "revision": "9501ce3131a6909f713505b294c0cc1dff236635b41e2f665f77c173d2ad296c"
+          }
+        },
+        "device": {
+          "device_id": "Apple M3 Max",
+          "precision": "vulkan-fp16;tile=128"
+        },
+        "effective_output": {
+          "width": 2048,
+          "height": 2048,
+          "count": 1
+        },
+        "effective_parameters": {
+          "model": "realesrgan-x4plus",
+          "recipe": "realesrgan-x4plus-t128-v1",
+          "recipe_version": 1,
+          "scale": 4,
+          "threads": "1:1:1",
+          "tile": 128,
+          "tta": false
+        },
+        "adjustments": []
+      },
+      "manifest": {
+        "schema_version": 1,
+        "evidence_kind": "execution_record",
+        "job_id": "job-bcb3056ccc9c4c5eb79a598e23249431",
+        "attempt": {
+          "attempt_id": "attempt-5432d31e45cb4d2a81e08fbd8b3cd55e",
+          "job_id": "job-bcb3056ccc9c4c5eb79a598e23249431",
+          "execution_token": "token-0402641e9e794b02a461d31da99e140a"
+        },
+        "request": {
+          "schema_version": 1,
+          "request_id": "request-realesrgan-batch-0a2fa8d6-cf7f-4540-8898-2c220fd431d4",
+          "project_id": "default",
+          "capability": {
+            "capability_id": "image.upscale.realesrgan-x4plus.v1",
+            "instruction_required": false,
+            "input_roles": [
+              {
+                "role": "source",
+                "minimum": 1,
+                "maximum": 1
+              }
+            ]
+          },
+          "instruction": "",
+          "inputs": [
+            {
+              "asset": {
+                "asset_id": "source-52478a3a58d1476992510976eb1531cf",
+                "content_hash": "58f6f5c559f9ab703f0e540a11d956dbfda43fd87420a7fb39d1a24cb5c6a51f",
+                "data_type": "image_rgb",
+                "location": {
+                  "kind": "managed",
+                  "storage_id": "library",
+                  "relative_path": "inputs/source-52478a3a58d1476992510976eb1531cf.png"
+                }
+              },
+              "role": "source",
+              "order": 0
+            }
+          ],
+          "model_variant_id": "realesrgan-x4plus",
+          "requested_output": {
+            "width": 2048,
+            "height": 2048,
+            "count": 1
+          },
+          "policy": {
+            "allow_model_substitution": false,
+            "allow_resolution_change": false,
+            "allow_cpu_fallback": false
+          },
+          "parameters": {},
+          "idempotency_key": "realesrgan-batch-0a2fa8d6-cf7f-4540-8898-2c220fd431d4"
+        },
+        "plan": {
+          "schema_version": 1,
+          "plan_id": "plan-realesrgan-batch-0a2fa8d6-cf7f-4540-8898-2c220fd431d4",
+          "request_id": "request-realesrgan-batch-0a2fa8d6-cf7f-4540-8898-2c220fd431d4",
+          "model_variant_id": "realesrgan-x4plus",
+          "components": [
+            {
+              "role": "component-00-realesrgan-x4plus.bin",
+              "source": {
+                "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+                "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+              },
+              "content_hash": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf"
+            },
+            {
+              "role": "component-01-realesrgan-x4plus.param",
+              "source": {
+                "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+                "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+              },
+              "content_hash": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+            }
+          ],
+          "runtime": {
+            "package_id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+            "engine": "Real-ESRGAN ncnn Vulkan v0.2.0",
+            "source": {
+              "source": "image-studio:runtime-manifest:realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+              "revision": "9501ce3131a6909f713505b294c0cc1dff236635b41e2f665f77c173d2ad296c"
+            }
+          },
+          "device": {
+            "device_id": "Apple M3 Max",
+            "precision": "vulkan-fp16;tile=128"
+          },
+          "effective_output": {
+            "width": 2048,
+            "height": 2048,
+            "count": 1
+          },
+          "effective_parameters": {
+            "model": "realesrgan-x4plus",
+            "recipe": "realesrgan-x4plus-t128-v1",
+            "recipe_version": 1,
+            "scale": 4,
+            "threads": "1:1:1",
+            "tile": 128,
+            "tta": false
+          },
+          "adjustments": []
+        },
+        "input_assets": [
+          {
+            "asset_id": "source-52478a3a58d1476992510976eb1531cf",
+            "content_hash": "58f6f5c559f9ab703f0e540a11d956dbfda43fd87420a7fb39d1a24cb5c6a51f",
+            "data_type": "image_rgb",
+            "location": {
+              "kind": "managed",
+              "storage_id": "library",
+              "relative_path": "inputs/source-52478a3a58d1476992510976eb1531cf.png"
+            }
+          }
+        ],
+        "outputs": [
+          {
+            "asset_id": "asset-4d0bd680fbfd41e3accbf6168debe96a",
+            "content_hash": "937c0805257f6a5c3358b8e795db69a3ee2936a57500ae083643aa636772fef8",
+            "data_type": "image_rgb",
+            "location": {
+              "kind": "managed",
+              "storage_id": "library",
+              "relative_path": "assets/asset-4e9eac815eb84409b49c28c1f5fd61de.png"
+            }
+          }
+        ],
+        "final_result": {
+          "status": "succeeded"
+        }
+      },
+      "source": {
+        "id": "source-52478a3a58d1476992510976eb1531cf",
+        "relative_path": "inputs/source-52478a3a58d1476992510976eb1531cf.png",
+        "width": 512,
+        "height": 512,
+        "byte_count": 22819,
+        "original_name": "realesrgan-text-lines-en-512.png",
+        "original_sha256": "4467010bce243d871c9262837a7d2d821a5b125c748dce0f7a8a9fdf44eb1922",
+        "orientation": "1",
+        "processing_version": "source-normalize-v1",
+        "has_transparent_pixels": 0,
+        "created_at": 1793465314725,
+        "asset": {
+          "asset_id": "source-52478a3a58d1476992510976eb1531cf",
+          "content_hash": "58f6f5c559f9ab703f0e540a11d956dbfda43fd87420a7fb39d1a24cb5c6a51f",
+          "data_type": "image_rgb",
+          "location": {
+            "kind": "managed",
+            "storage_id": "library",
+            "relative_path": "inputs/source-52478a3a58d1476992510976eb1531cf.png"
+          }
+        }
+      },
+      "assets": [
+        {
+          "id": "asset-4d0bd680fbfd41e3accbf6168debe96a",
+          "job_id": "job-bcb3056ccc9c4c5eb79a598e23249431",
+          "attempt_id": "attempt-5432d31e45cb4d2a81e08fbd8b3cd55e",
+          "output_role": "primary",
+          "relative_path": "assets/asset-4e9eac815eb84409b49c28c1f5fd61de.png",
+          "width": 2048,
+          "height": 2048,
+          "byte_count": 4083129,
+          "created_at": 1793465324148,
+          "asset": {
+            "asset_id": "asset-4d0bd680fbfd41e3accbf6168debe96a",
+            "content_hash": "937c0805257f6a5c3358b8e795db69a3ee2936a57500ae083643aa636772fef8",
+            "data_type": "image_rgb",
+            "location": {
+              "kind": "managed",
+              "storage_id": "library",
+              "relative_path": "assets/asset-4e9eac815eb84409b49c28c1f5fd61de.png"
+            }
+          },
+          "fileSha256": "937c0805257f6a5c3358b8e795db69a3ee2936a57500ae083643aa636772fef8"
+        }
+      ]
+    },
+    {
+      "task": {
+        "assetId": "asset-dc14eae738fe4a649e4107ebc28e7283",
+        "attemptId": "attempt-62f7a756920c47ef9b6266e5421fabeb",
+        "busyRequestRejected": false,
+        "conflictingDuplicateRejected": true,
+        "draftSourceChangedDuringExecution": false,
+        "duplicateCreated": false,
+        "elapsedMilliseconds": 7355,
+        "execution": {
+          "attemptId": "attempt-62f7a756920c47ef9b6266e5421fabeb",
+          "busy": false,
+          "cleanupError": null,
+          "jobId": "job-754b30d7f32f4f3bb9a5ec7e0bfec301",
+          "logs": "[0 Apple M3 Max]  queueC=0[1]  queueG=0[1]  queueT=0[1]\n[0 Apple M3 Max]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0\n[0 Apple M3 Max]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\n[0 Apple M3 Max]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\n0.00%\n5.00%\n10.00%\n15.00%\n20.00%\n25.00%\n30.00%\n35.00%\n40.00%\n45.00%\n50.00%\n55.00%\n60.00%\n65.00%\n70.00%\n75.00%\n80.00%\n85.00%\n90.00%\n95.00%\n",
+          "stage": "succeeded",
+          "step": null,
+          "summary": "图片已生成并保存到本机",
+          "total": null
+        },
+        "executionRepairRejected": false,
+        "export": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/continuous-final-bound/continuous-2.png",
+        "height": 1708,
+        "index": 2,
+        "jobId": "job-754b30d7f32f4f3bb9a5ec7e0bfec301",
+        "resources": {
+          "backendPeakBytes": null,
+          "method": "macOS ps RSS in KiB sampled every >=100 ms for host plus descendants; shared pages may be counted more than once; excludes unified GPU allocation; observation, not an SLA",
+          "sampledNcnnRssPeakKiB": 448672,
+          "sampledTreeRssPeakKiB": 500752,
+          "samples": 28
+        },
+        "sha256": "c15a97749965c96e756a105aa73ff7a9a079cbd8e80e5faff7e4469332103e16",
+        "sourceAssetId": "source-640eeaec7d204777b962041115490b93",
+        "turnId": "turn-587d86ecf24b45829aee45aadcbccedc",
+        "width": 2560
+      },
+      "job": {
+        "id": "job-754b30d7f32f4f3bb9a5ec7e0bfec301",
+        "project_id": "default",
+        "submission_key": "realesrgan-batch-27c7774b-172c-43d3-bba5-8089e5f935d6",
+        "current_attempt_id": "attempt-62f7a756920c47ef9b6266e5421fabeb",
+        "created_at": 1793465324640
+      },
+      "attempt": {
+        "id": "attempt-62f7a756920c47ef9b6266e5421fabeb",
+        "job_id": "job-754b30d7f32f4f3bb9a5ec7e0bfec301",
+        "token": "token-94191aa74ecb43e2a528b7ab2bfd47ba",
+        "storage_key": "run-7433636b74b54575bec1858578de9705",
+        "state": "succeeded",
+        "error": null,
+        "created_at": 1793465324640,
+        "completed_at": 1793465331678
+      },
+      "request": {
+        "schema_version": 1,
+        "request_id": "request-realesrgan-batch-27c7774b-172c-43d3-bba5-8089e5f935d6",
+        "project_id": "default",
+        "capability": {
+          "capability_id": "image.upscale.realesrgan-x4plus.v1",
+          "instruction_required": false,
+          "input_roles": [
+            {
+              "role": "source",
+              "minimum": 1,
+              "maximum": 1
+            }
+          ]
+        },
+        "instruction": "",
+        "inputs": [
+          {
+            "asset": {
+              "asset_id": "source-640eeaec7d204777b962041115490b93",
+              "content_hash": "79fb91040ce2be63937adeac99cc578a674c45d35af472fcefd2417bfd483ba3",
+              "data_type": "image_rgb",
+              "location": {
+                "kind": "managed",
+                "storage_id": "library",
+                "relative_path": "inputs/source-640eeaec7d204777b962041115490b93.png"
+              }
+            },
+            "role": "source",
+            "order": 0
+          }
+        ],
+        "model_variant_id": "realesrgan-x4plus",
+        "requested_output": {
+          "width": 2560,
+          "height": 1708,
+          "count": 1
+        },
+        "policy": {
+          "allow_model_substitution": false,
+          "allow_resolution_change": false,
+          "allow_cpu_fallback": false
+        },
+        "parameters": {},
+        "idempotency_key": "realesrgan-batch-27c7774b-172c-43d3-bba5-8089e5f935d6"
+      },
+      "plan": {
+        "schema_version": 1,
+        "plan_id": "plan-realesrgan-batch-27c7774b-172c-43d3-bba5-8089e5f935d6",
+        "request_id": "request-realesrgan-batch-27c7774b-172c-43d3-bba5-8089e5f935d6",
+        "model_variant_id": "realesrgan-x4plus",
+        "components": [
+          {
+            "role": "component-00-realesrgan-x4plus.bin",
+            "source": {
+              "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+              "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+            },
+            "content_hash": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf"
+          },
+          {
+            "role": "component-01-realesrgan-x4plus.param",
+            "source": {
+              "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+              "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+            },
+            "content_hash": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+          }
+        ],
+        "runtime": {
+          "package_id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+          "engine": "Real-ESRGAN ncnn Vulkan v0.2.0",
+          "source": {
+            "source": "image-studio:runtime-manifest:realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+            "revision": "9501ce3131a6909f713505b294c0cc1dff236635b41e2f665f77c173d2ad296c"
+          }
+        },
+        "device": {
+          "device_id": "Apple M3 Max",
+          "precision": "vulkan-fp16;tile=128"
+        },
+        "effective_output": {
+          "width": 2560,
+          "height": 1708,
+          "count": 1
+        },
+        "effective_parameters": {
+          "model": "realesrgan-x4plus",
+          "recipe": "realesrgan-x4plus-t128-v1",
+          "recipe_version": 1,
+          "scale": 4,
+          "threads": "1:1:1",
+          "tile": 128,
+          "tta": false
+        },
+        "adjustments": []
+      },
+      "manifest": {
+        "schema_version": 1,
+        "evidence_kind": "execution_record",
+        "job_id": "job-754b30d7f32f4f3bb9a5ec7e0bfec301",
+        "attempt": {
+          "attempt_id": "attempt-62f7a756920c47ef9b6266e5421fabeb",
+          "job_id": "job-754b30d7f32f4f3bb9a5ec7e0bfec301",
+          "execution_token": "token-94191aa74ecb43e2a528b7ab2bfd47ba"
+        },
+        "request": {
+          "schema_version": 1,
+          "request_id": "request-realesrgan-batch-27c7774b-172c-43d3-bba5-8089e5f935d6",
+          "project_id": "default",
+          "capability": {
+            "capability_id": "image.upscale.realesrgan-x4plus.v1",
+            "instruction_required": false,
+            "input_roles": [
+              {
+                "role": "source",
+                "minimum": 1,
+                "maximum": 1
+              }
+            ]
+          },
+          "instruction": "",
+          "inputs": [
+            {
+              "asset": {
+                "asset_id": "source-640eeaec7d204777b962041115490b93",
+                "content_hash": "79fb91040ce2be63937adeac99cc578a674c45d35af472fcefd2417bfd483ba3",
+                "data_type": "image_rgb",
+                "location": {
+                  "kind": "managed",
+                  "storage_id": "library",
+                  "relative_path": "inputs/source-640eeaec7d204777b962041115490b93.png"
+                }
+              },
+              "role": "source",
+              "order": 0
+            }
+          ],
+          "model_variant_id": "realesrgan-x4plus",
+          "requested_output": {
+            "width": 2560,
+            "height": 1708,
+            "count": 1
+          },
+          "policy": {
+            "allow_model_substitution": false,
+            "allow_resolution_change": false,
+            "allow_cpu_fallback": false
+          },
+          "parameters": {},
+          "idempotency_key": "realesrgan-batch-27c7774b-172c-43d3-bba5-8089e5f935d6"
+        },
+        "plan": {
+          "schema_version": 1,
+          "plan_id": "plan-realesrgan-batch-27c7774b-172c-43d3-bba5-8089e5f935d6",
+          "request_id": "request-realesrgan-batch-27c7774b-172c-43d3-bba5-8089e5f935d6",
+          "model_variant_id": "realesrgan-x4plus",
+          "components": [
+            {
+              "role": "component-00-realesrgan-x4plus.bin",
+              "source": {
+                "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+                "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+              },
+              "content_hash": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf"
+            },
+            {
+              "role": "component-01-realesrgan-x4plus.param",
+              "source": {
+                "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+                "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+              },
+              "content_hash": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+            }
+          ],
+          "runtime": {
+            "package_id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+            "engine": "Real-ESRGAN ncnn Vulkan v0.2.0",
+            "source": {
+              "source": "image-studio:runtime-manifest:realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+              "revision": "9501ce3131a6909f713505b294c0cc1dff236635b41e2f665f77c173d2ad296c"
+            }
+          },
+          "device": {
+            "device_id": "Apple M3 Max",
+            "precision": "vulkan-fp16;tile=128"
+          },
+          "effective_output": {
+            "width": 2560,
+            "height": 1708,
+            "count": 1
+          },
+          "effective_parameters": {
+            "model": "realesrgan-x4plus",
+            "recipe": "realesrgan-x4plus-t128-v1",
+            "recipe_version": 1,
+            "scale": 4,
+            "threads": "1:1:1",
+            "tile": 128,
+            "tta": false
+          },
+          "adjustments": []
+        },
+        "input_assets": [
+          {
+            "asset_id": "source-640eeaec7d204777b962041115490b93",
+            "content_hash": "79fb91040ce2be63937adeac99cc578a674c45d35af472fcefd2417bfd483ba3",
+            "data_type": "image_rgb",
+            "location": {
+              "kind": "managed",
+              "storage_id": "library",
+              "relative_path": "inputs/source-640eeaec7d204777b962041115490b93.png"
+            }
+          }
+        ],
+        "outputs": [
+          {
+            "asset_id": "asset-dc14eae738fe4a649e4107ebc28e7283",
+            "content_hash": "c15a97749965c96e756a105aa73ff7a9a079cbd8e80e5faff7e4469332103e16",
+            "data_type": "image_rgb",
+            "location": {
+              "kind": "managed",
+              "storage_id": "library",
+              "relative_path": "assets/asset-1d6295ddbea54a899125f9077301ad1b.png"
+            }
+          }
+        ],
+        "final_result": {
+          "status": "succeeded"
+        }
+      },
+      "source": {
+        "id": "source-640eeaec7d204777b962041115490b93",
+        "relative_path": "inputs/source-640eeaec7d204777b962041115490b93.png",
+        "width": 640,
+        "height": 427,
+        "byte_count": 430788,
+        "original_name": "realesrgan-natural-640x427.png",
+        "original_sha256": "609b0850ffb60625b7b3d68e5aa843b41dd4eed4e09817e529303211ef52e817",
+        "orientation": "1",
+        "processing_version": "source-normalize-v1",
+        "has_transparent_pixels": 0,
+        "created_at": 1793465324463,
+        "asset": {
+          "asset_id": "source-640eeaec7d204777b962041115490b93",
+          "content_hash": "79fb91040ce2be63937adeac99cc578a674c45d35af472fcefd2417bfd483ba3",
+          "data_type": "image_rgb",
+          "location": {
+            "kind": "managed",
+            "storage_id": "library",
+            "relative_path": "inputs/source-640eeaec7d204777b962041115490b93.png"
+          }
+        }
+      },
+      "assets": [
+        {
+          "id": "asset-dc14eae738fe4a649e4107ebc28e7283",
+          "job_id": "job-754b30d7f32f4f3bb9a5ec7e0bfec301",
+          "attempt_id": "attempt-62f7a756920c47ef9b6266e5421fabeb",
+          "output_role": "primary",
+          "relative_path": "assets/asset-1d6295ddbea54a899125f9077301ad1b.png",
+          "width": 2560,
+          "height": 1708,
+          "byte_count": 7415211,
+          "created_at": 1793465331678,
+          "asset": {
+            "asset_id": "asset-dc14eae738fe4a649e4107ebc28e7283",
+            "content_hash": "c15a97749965c96e756a105aa73ff7a9a079cbd8e80e5faff7e4469332103e16",
+            "data_type": "image_rgb",
+            "location": {
+              "kind": "managed",
+              "storage_id": "library",
+              "relative_path": "assets/asset-1d6295ddbea54a899125f9077301ad1b.png"
+            }
+          },
+          "fileSha256": "c15a97749965c96e756a105aa73ff7a9a079cbd8e80e5faff7e4469332103e16"
+        }
+      ]
+    },
+    {
+      "task": {
+        "assetId": "asset-1008f37a2193472d9bc1568aab7fd4b6",
+        "attemptId": "attempt-4c3cd25e1c8946e193ed9baf9e063804",
+        "busyRequestRejected": false,
+        "conflictingDuplicateRejected": true,
+        "draftSourceChangedDuringExecution": false,
+        "duplicateCreated": false,
+        "elapsedMilliseconds": 6710,
+        "execution": {
+          "attemptId": "attempt-4c3cd25e1c8946e193ed9baf9e063804",
+          "busy": false,
+          "cleanupError": null,
+          "jobId": "job-8ba6cd2535694ec1bf4cfe0caf0e8fa0",
+          "logs": "[0 Apple M3 Max]  queueC=0[1]  queueG=0[1]  queueT=0[1]\n[0 Apple M3 Max]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0\n[0 Apple M3 Max]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\n[0 Apple M3 Max]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\n0.00%\n6.67%\n13.33%\n20.00%\n26.67%\n33.33%\n40.00%\n46.67%\n53.33%\n60.00%\n66.67%\n73.33%\n80.00%\n86.67%\n93.33%\n",
+          "stage": "succeeded",
+          "step": null,
+          "summary": "图片已生成并保存到本机",
+          "total": null
+        },
+        "executionRepairRejected": false,
+        "export": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/continuous-final-bound/continuous-3.png",
+        "height": 2560,
+        "index": 3,
+        "jobId": "job-8ba6cd2535694ec1bf4cfe0caf0e8fa0",
+        "resources": {
+          "backendPeakBytes": null,
+          "method": "macOS ps RSS in KiB sampled every >=100 ms for host plus descendants; shared pages may be counted more than once; excludes unified GPU allocation; observation, not an SLA",
+          "sampledNcnnRssPeakKiB": 449296,
+          "sampledTreeRssPeakKiB": 517600,
+          "samples": 27
+        },
+        "sha256": "1a45da218783d965eb5138fea2524d76b42f81d2d70df8eb5f930b7120d2b59a",
+        "sourceAssetId": "source-c09a79c2651b484abf4243c6b6bc2e59",
+        "turnId": "turn-af92eb3513dd466086abdd2aed1d47de",
+        "width": 1440
+      },
+      "job": {
+        "id": "job-8ba6cd2535694ec1bf4cfe0caf0e8fa0",
+        "project_id": "default",
+        "submission_key": "realesrgan-batch-a42bac33-56e1-40de-93d9-849c79cf129a",
+        "current_attempt_id": "attempt-4c3cd25e1c8946e193ed9baf9e063804",
+        "created_at": 1793465332071
+      },
+      "attempt": {
+        "id": "attempt-4c3cd25e1c8946e193ed9baf9e063804",
+        "job_id": "job-8ba6cd2535694ec1bf4cfe0caf0e8fa0",
+        "token": "token-c76589c59b2f4844bc1a9fe7960fa8be",
+        "storage_key": "run-1786c1f0a0134d66bf73dd3f682b5343",
+        "state": "succeeded",
+        "error": null,
+        "created_at": 1793465332071,
+        "completed_at": 1793465338549
+      },
+      "request": {
+        "schema_version": 1,
+        "request_id": "request-realesrgan-batch-a42bac33-56e1-40de-93d9-849c79cf129a",
+        "project_id": "default",
+        "capability": {
+          "capability_id": "image.upscale.realesrgan-x4plus.v1",
+          "instruction_required": false,
+          "input_roles": [
+            {
+              "role": "source",
+              "minimum": 1,
+              "maximum": 1
+            }
+          ]
+        },
+        "instruction": "",
+        "inputs": [
+          {
+            "asset": {
+              "asset_id": "source-c09a79c2651b484abf4243c6b6bc2e59",
+              "content_hash": "703c4abd573f79d238076910fb4853bb1bc4e586e5377cf7747df28893e8cf77",
+              "data_type": "image_rgb",
+              "location": {
+                "kind": "managed",
+                "storage_id": "library",
+                "relative_path": "inputs/source-c09a79c2651b484abf4243c6b6bc2e59.png"
+              }
+            },
+            "role": "source",
+            "order": 0
+          }
+        ],
+        "model_variant_id": "realesrgan-x4plus",
+        "requested_output": {
+          "width": 1440,
+          "height": 2560,
+          "count": 1
+        },
+        "policy": {
+          "allow_model_substitution": false,
+          "allow_resolution_change": false,
+          "allow_cpu_fallback": false
+        },
+        "parameters": {},
+        "idempotency_key": "realesrgan-batch-a42bac33-56e1-40de-93d9-849c79cf129a"
+      },
+      "plan": {
+        "schema_version": 1,
+        "plan_id": "plan-realesrgan-batch-a42bac33-56e1-40de-93d9-849c79cf129a",
+        "request_id": "request-realesrgan-batch-a42bac33-56e1-40de-93d9-849c79cf129a",
+        "model_variant_id": "realesrgan-x4plus",
+        "components": [
+          {
+            "role": "component-00-realesrgan-x4plus.bin",
+            "source": {
+              "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+              "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+            },
+            "content_hash": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf"
+          },
+          {
+            "role": "component-01-realesrgan-x4plus.param",
+            "source": {
+              "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+              "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+            },
+            "content_hash": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+          }
+        ],
+        "runtime": {
+          "package_id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+          "engine": "Real-ESRGAN ncnn Vulkan v0.2.0",
+          "source": {
+            "source": "image-studio:runtime-manifest:realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+            "revision": "9501ce3131a6909f713505b294c0cc1dff236635b41e2f665f77c173d2ad296c"
+          }
+        },
+        "device": {
+          "device_id": "Apple M3 Max",
+          "precision": "vulkan-fp16;tile=128"
+        },
+        "effective_output": {
+          "width": 1440,
+          "height": 2560,
+          "count": 1
+        },
+        "effective_parameters": {
+          "model": "realesrgan-x4plus",
+          "recipe": "realesrgan-x4plus-t128-v1",
+          "recipe_version": 1,
+          "scale": 4,
+          "threads": "1:1:1",
+          "tile": 128,
+          "tta": false
+        },
+        "adjustments": []
+      },
+      "manifest": {
+        "schema_version": 1,
+        "evidence_kind": "execution_record",
+        "job_id": "job-8ba6cd2535694ec1bf4cfe0caf0e8fa0",
+        "attempt": {
+          "attempt_id": "attempt-4c3cd25e1c8946e193ed9baf9e063804",
+          "job_id": "job-8ba6cd2535694ec1bf4cfe0caf0e8fa0",
+          "execution_token": "token-c76589c59b2f4844bc1a9fe7960fa8be"
+        },
+        "request": {
+          "schema_version": 1,
+          "request_id": "request-realesrgan-batch-a42bac33-56e1-40de-93d9-849c79cf129a",
+          "project_id": "default",
+          "capability": {
+            "capability_id": "image.upscale.realesrgan-x4plus.v1",
+            "instruction_required": false,
+            "input_roles": [
+              {
+                "role": "source",
+                "minimum": 1,
+                "maximum": 1
+              }
+            ]
+          },
+          "instruction": "",
+          "inputs": [
+            {
+              "asset": {
+                "asset_id": "source-c09a79c2651b484abf4243c6b6bc2e59",
+                "content_hash": "703c4abd573f79d238076910fb4853bb1bc4e586e5377cf7747df28893e8cf77",
+                "data_type": "image_rgb",
+                "location": {
+                  "kind": "managed",
+                  "storage_id": "library",
+                  "relative_path": "inputs/source-c09a79c2651b484abf4243c6b6bc2e59.png"
+                }
+              },
+              "role": "source",
+              "order": 0
+            }
+          ],
+          "model_variant_id": "realesrgan-x4plus",
+          "requested_output": {
+            "width": 1440,
+            "height": 2560,
+            "count": 1
+          },
+          "policy": {
+            "allow_model_substitution": false,
+            "allow_resolution_change": false,
+            "allow_cpu_fallback": false
+          },
+          "parameters": {},
+          "idempotency_key": "realesrgan-batch-a42bac33-56e1-40de-93d9-849c79cf129a"
+        },
+        "plan": {
+          "schema_version": 1,
+          "plan_id": "plan-realesrgan-batch-a42bac33-56e1-40de-93d9-849c79cf129a",
+          "request_id": "request-realesrgan-batch-a42bac33-56e1-40de-93d9-849c79cf129a",
+          "model_variant_id": "realesrgan-x4plus",
+          "components": [
+            {
+              "role": "component-00-realesrgan-x4plus.bin",
+              "source": {
+                "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+                "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+              },
+              "content_hash": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf"
+            },
+            {
+              "role": "component-01-realesrgan-x4plus.param",
+              "source": {
+                "source": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip",
+                "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus"
+              },
+              "content_hash": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+            }
+          ],
+          "runtime": {
+            "package_id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+            "engine": "Real-ESRGAN ncnn Vulkan v0.2.0",
+            "source": {
+              "source": "image-studio:runtime-manifest:realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+              "revision": "9501ce3131a6909f713505b294c0cc1dff236635b41e2f665f77c173d2ad296c"
+            }
+          },
+          "device": {
+            "device_id": "Apple M3 Max",
+            "precision": "vulkan-fp16;tile=128"
+          },
+          "effective_output": {
+            "width": 1440,
+            "height": 2560,
+            "count": 1
+          },
+          "effective_parameters": {
+            "model": "realesrgan-x4plus",
+            "recipe": "realesrgan-x4plus-t128-v1",
+            "recipe_version": 1,
+            "scale": 4,
+            "threads": "1:1:1",
+            "tile": 128,
+            "tta": false
+          },
+          "adjustments": []
+        },
+        "input_assets": [
+          {
+            "asset_id": "source-c09a79c2651b484abf4243c6b6bc2e59",
+            "content_hash": "703c4abd573f79d238076910fb4853bb1bc4e586e5377cf7747df28893e8cf77",
+            "data_type": "image_rgb",
+            "location": {
+              "kind": "managed",
+              "storage_id": "library",
+              "relative_path": "inputs/source-c09a79c2651b484abf4243c6b6bc2e59.png"
+            }
+          }
+        ],
+        "outputs": [
+          {
+            "asset_id": "asset-1008f37a2193472d9bc1568aab7fd4b6",
+            "content_hash": "1a45da218783d965eb5138fea2524d76b42f81d2d70df8eb5f930b7120d2b59a",
+            "data_type": "image_rgb",
+            "location": {
+              "kind": "managed",
+              "storage_id": "library",
+              "relative_path": "assets/asset-95b24b4e80b9442f889e51922a69cb13.png"
+            }
+          }
+        ],
+        "final_result": {
+          "status": "succeeded"
+        }
+      },
+      "source": {
+        "id": "source-c09a79c2651b484abf4243c6b6bc2e59",
+        "relative_path": "inputs/source-c09a79c2651b484abf4243c6b6bc2e59.png",
+        "width": 360,
+        "height": 640,
+        "byte_count": 385308,
+        "original_name": "realesrgan-nonsquare-360x640.png",
+        "original_sha256": "ea954fb4054b27efb6dbdf3eb3383d7a09f59620c32e350ba78a5e63fdfb193d",
+        "orientation": "1",
+        "processing_version": "source-normalize-v1",
+        "has_transparent_pixels": 0,
+        "created_at": 1793465331970,
+        "asset": {
+          "asset_id": "source-c09a79c2651b484abf4243c6b6bc2e59",
+          "content_hash": "703c4abd573f79d238076910fb4853bb1bc4e586e5377cf7747df28893e8cf77",
+          "data_type": "image_rgb",
+          "location": {
+            "kind": "managed",
+            "storage_id": "library",
+            "relative_path": "inputs/source-c09a79c2651b484abf4243c6b6bc2e59.png"
+          }
+        }
+      },
+      "assets": [
+        {
+          "id": "asset-1008f37a2193472d9bc1568aab7fd4b6",
+          "job_id": "job-8ba6cd2535694ec1bf4cfe0caf0e8fa0",
+          "attempt_id": "attempt-4c3cd25e1c8946e193ed9baf9e063804",
+          "output_role": "primary",
+          "relative_path": "assets/asset-95b24b4e80b9442f889e51922a69cb13.png",
+          "width": 1440,
+          "height": 2560,
+          "byte_count": 5964248,
+          "created_at": 1793465338549,
+          "asset": {
+            "asset_id": "asset-1008f37a2193472d9bc1568aab7fd4b6",
+            "content_hash": "1a45da218783d965eb5138fea2524d76b42f81d2d70df8eb5f930b7120d2b59a",
+            "data_type": "image_rgb",
+            "location": {
+              "kind": "managed",
+              "storage_id": "library",
+              "relative_path": "assets/asset-95b24b4e80b9442f889e51922a69cb13.png"
+            }
+          },
+          "fileSha256": "1a45da218783d965eb5138fea2524d76b42f81d2d70df8eb5f930b7120d2b59a"
+        }
+      ]
+    }
+  ]
+}
