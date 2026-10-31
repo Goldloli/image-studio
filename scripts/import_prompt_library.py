@@ -336,7 +336,7 @@ def normalize_case(
             for value in case["scenes"]
         ],
         "image": {
-            "path": case["image"].lstrip("/"),
+            "path": f"data/images/{filename}",
             "filename": filename,
             "sha256": image_hash,
             "bytes": byte_count,
