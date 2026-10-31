@@ -19,6 +19,7 @@ parser.add_argument(
         'model-settings',
         'model-usability',
         'planned-models',
+        'qwen-moss',
     ],
     default='cherry',
 )
