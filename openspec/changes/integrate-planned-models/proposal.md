@@ -28,6 +28,7 @@
 - `generation-conversation`：在统一会话提交源图功能，保存并恢复操作上下文。
 - `generation-worker-protocol`：严格 v2 输入与多候选输出，支持 Python 和原生执行器。
 - `project-storage`：导入来源、多输出原子提交与历史数据库迁移。
+- `application-settings`：默认生成模型排除工具型号，环境与关于信息反映实际能力。
 - `model-validation`：三个型号分别认证并作为 Qwen/MOSS 的前置门槛。
 
 ## Impact
