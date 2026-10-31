@@ -2,6 +2,8 @@
 
 核对日期：2026-10-31，Asia/Shanghai。结论来自项目现状与固定上游资料；没有下载模型或执行新后端。机器可读来源为 [HF/运行时元数据](references/hf-and-runtime-metadata.json)和 [GitHub 发布元数据](references/github-source-metadata.json)。这些文件不是正式安装 manifest。
 
+2026-10-31 实施期间，用户明确允许在 Hugging Face 直连或代理不可用时使用已允许的国内 HF 镜像。镜像只可作为同一固定快照的传输备用端点；每个文件仍必须匹配正式 manifest 的字节数和 SHA-256，任何差异都拒绝。模型 revision、许可、来源身份和正式安装验收不因传输端点改变。
+
 ## 1. 当前产品事实
 
 `resources/model-catalog/catalog.json` 登记四项：Z-Image 已接入，`flux2-klein-4b-distilled`、`birefnet-general-epoch-244`、`realesrgan-x4plus` 均为 planned/installerSupported=false。功能目录的编辑、去背景和放大也都是 planned。
