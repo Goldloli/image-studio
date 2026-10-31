@@ -260,7 +260,8 @@ fn v2_envelope(sequence: u64, request_id: &str, message: Message) -> Envelope {
 fn v2_handshake_and_two_role_candidates_are_strict() {
     let expected = v2_expected();
     let capability = "image.remove-background.birefnet-general-epoch-244.v1";
-    let mut session = HostSession::new_v2("session:v2", expected.clone(), capability).unwrap();
+    let mut session =
+        HostSession::new_v2("session:v2", expected.clone(), vec![capability.into()]).unwrap();
     let hello = session.hello("request:hello", "studio-host").unwrap();
     let accepted = Envelope {
         family: FAMILY.into(),

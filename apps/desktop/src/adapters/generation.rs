@@ -3,7 +3,10 @@
 use super::{
     AppPaths,
     installation::ReadyPaths,
-    library::{CancelOutcome, CandidateDescriptor, Completion, JobRecord, Library, LibraryError},
+    library::{
+        CancelOutcome, CandidateDescriptor, Completion, JobRecord, Library, LibraryError,
+        RoleCandidate,
+    },
 };
 use fs2::FileExt;
 use inference_supervisor::{SupervisorConfig, Timeouts};
@@ -20,11 +23,16 @@ use std::{
     },
     time::{Duration, Instant},
 };
-use studio_core::{domain::JobId, generation::AttemptState};
+use studio_core::{
+    domain::JobId,
+    generation::AttemptState,
+    recipes::{KLEIN_EDIT_CAPABILITY, KLEIN_TEXT_CAPABILITY, Recipe, validate_recipe_plan},
+};
 use uuid::Uuid;
 use worker_protocol::generation::{
-    self as wire, Envelope, ExecuteRequest, ExecutionContext, HostSession, Message,
-    OutputCandidate, ProgressStage, WorkerEvent, WorkerIdentity,
+    self as wire, Envelope, ExecuteRequest, ExecuteRequestV2, ExecutionContext, HostSession,
+    InputAssetDescriptor, Message, OutputCandidate, OutputCandidateV2, OutputSpec, ProgressStage,
+    WorkerEvent, WorkerIdentity,
 };
 
 #[derive(Clone, Debug, Default, Serialize)]
@@ -268,9 +276,10 @@ impl GenerationController {
         ready: &ReadyPaths,
     ) -> Result<(SupervisorConfig, PathBuf, Arc<Control>), String> {
         if ready.worker_module != "studio_mflux_worker" {
-            return Err("计算模块身份不符".into());
+            if ready.worker_module != "studio_mflux_worker_v2" {
+                return Err("计算模块身份不符".into());
+            }
         }
-        studio_core::generation::validate_z_image_plan(&job.request, &job.plan).map_err(error)?;
         let control = self
             .inner
             .state
@@ -280,6 +289,10 @@ impl GenerationController {
             .clone()
             .ok_or("执行控制已失效")?;
         let mut library = self.inner.library.lock().map_err(error)?;
+        let source = library
+            .source_facts_for_request(&job.request)
+            .map_err(error)?;
+        validate_recipe_plan(&job.request, &job.plan, source).map_err(error)?;
         library
             .mark_phase(&job.attempt, AttemptState::Preparing)
             .map_err(error)?;
@@ -288,6 +301,7 @@ impl GenerationController {
             .map_err(error)?
             .canonicalize()
             .map_err(error)?;
+        let recipe = Recipe::from_request(&job.request).map_err(error)?;
         let config = SupervisorConfig {
             python_program: ready.python.clone(),
             worker_args: vec!["-I".into(), "-m".into(), ready.worker_module.clone()],
@@ -298,6 +312,12 @@ impl GenerationController {
                 build_id: ready.worker_build_id.clone(),
                 runtime_lock_id: ready.runtime_lock_id.clone(),
                 model_snapshot_id: ready.model_snapshot_id.clone(),
+            },
+            protocol_version: if recipe == Recipe::ZImageTurbo { 1 } else { 2 },
+            expected_capabilities: if recipe == Recipe::KleinText || recipe == Recipe::KleinEdit {
+                vec![KLEIN_TEXT_CAPABILITY.into(), KLEIN_EDIT_CAPABILITY.into()]
+            } else {
+                vec![job.request.capability.capability_id.clone()]
             },
             timeouts: Timeouts::default(),
         };
@@ -353,15 +373,28 @@ impl GenerationController {
             })
         });
         let mut terminal = None;
+        let mut candidates = Vec::new();
         let mut fatal = None;
         let mut eof = reader.is_none();
-        let mut session = match HostSession::new(
-            format!("session-{}", Uuid::new_v4()),
-            config.expected_worker.clone(),
-        ) {
+        let recipe = Recipe::from_request(&job.request).map_err(error);
+        let session_id = format!("session-{}", Uuid::new_v4());
+        let mut session = match recipe.and_then(|recipe| {
+            if recipe == Recipe::ZImageTurbo {
+                HostSession::new(session_id, config.expected_worker.clone()).map_err(error)
+            } else if recipe == Recipe::KleinText || recipe == Recipe::KleinEdit {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![KLEIN_TEXT_CAPABILITY.into(), KLEIN_EDIT_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else {
+                Err("该后端会话尚未接入".into())
+            }
+        }) {
             Ok(s) => Some(s),
             Err(e) => {
-                fatal = Some(e.to_string());
+                fatal = Some(e);
                 None
             }
         };
@@ -424,25 +457,30 @@ impl GenerationController {
                                 close_since.get_or_insert_with(Instant::now);
                                 continue;
                             }
-                            let request = execute_request(job, ready, &config.working_dir);
-                            let sent = request
-                                .and_then(|request| {
-                                    session
-                                        .as_mut()
-                                        .ok_or("缺少协议会话")?
-                                        .execute(
+                            let execution = ExecutionContext {
+                                job_id: job.job_id.to_string(),
+                                attempt_id: job.attempt.attempt_id.to_string(),
+                                execution_token: job.attempt.execution_token.to_string(),
+                            };
+                            let sent = Recipe::from_request(&job.request)
+                                .map_err(error)
+                                .and_then(|recipe| {
+                                    let session = session.as_mut().ok_or("缺少协议会话")?;
+                                    let envelope = if recipe == Recipe::ZImageTurbo {
+                                        session.execute(
                                             format!("execute-{}", Uuid::new_v4()),
-                                            ExecutionContext {
-                                                job_id: job.job_id.to_string(),
-                                                attempt_id: job.attempt.attempt_id.to_string(),
-                                                execution_token: job
-                                                    .attempt
-                                                    .execution_token
-                                                    .to_string(),
-                                            },
-                                            request,
+                                            execution,
+                                            execute_request(job, ready, &config.working_dir)?,
                                         )
-                                        .map_err(error)
+                                    } else {
+                                        session.execute_v2(
+                                            format!("execute-{}", Uuid::new_v4()),
+                                            execution,
+                                            execute_request_v2(job, ready, &config.working_dir)?,
+                                        )
+                                    }
+                                    .map_err(error)?;
+                                    Ok::<_, String>(envelope)
                                 })
                                 .and_then(|envelope| {
                                     wire::write_message(
@@ -466,11 +504,17 @@ impl GenerationController {
                                 self.progress(job, *stage, *completed, *total);
                             }
                         }
-                        Ok(WorkerEvent::OutputCandidate) => {
-                            if let Message::OutputCandidate { candidate } = envelope.message {
-                                terminal = Some(Terminal::Candidate(candidate));
+                        Ok(WorkerEvent::OutputCandidate) => match envelope.message {
+                            Message::OutputCandidate { candidate } => {
+                                candidates.push(v1_role_candidate(candidate));
                             }
-                        }
+                            Message::OutputCandidateV2 { candidate } => {
+                                candidates.push(v2_role_candidate(candidate));
+                            }
+                            _ => {
+                                fatal = Some("候选消息与协议版本不符".into());
+                            }
+                        },
                         Ok(WorkerEvent::Cancelled) => terminal = Some(Terminal::Cancelled),
                         Ok(WorkerEvent::Error) => {
                             if let Message::Error { code, summary } = envelope.message {
@@ -574,6 +618,9 @@ impl GenerationController {
                 },
             });
         }
+        if !candidates.is_empty() {
+            return Ok(Terminal::Candidates(candidates));
+        }
         Ok(terminal.unwrap_or(Terminal::Failed {
             code: "MISSING_OUTPUT".into(),
             detail: "执行未提交候选图片".into(),
@@ -643,15 +690,8 @@ impl GenerationController {
     fn commit_terminal(&self, job: &JobRecord, terminal: Terminal) -> Result<JobRecord, String> {
         let mut library = self.inner.library.lock().map_err(error)?;
         match terminal {
-            Terminal::Candidate(candidate) => {
-                let descriptor = CandidateDescriptor {
-                    relative_path: candidate.relative_path,
-                    width: candidate.width,
-                    height: candidate.height,
-                    byte_count: candidate.size_bytes,
-                    sha256: candidate.sha256,
-                };
-                match library.commit_candidate_after_reap(&job.attempt, descriptor) {
+            Terminal::Candidates(candidates) => {
+                match library.commit_outputs_after_reap(&job.attempt, candidates) {
                     Ok(record) => Ok(record),
                     Err(LibraryError::CancelAccepted) => library
                         .finish_after_reap(&job.attempt, Completion::Cancelled)
@@ -670,7 +710,7 @@ impl GenerationController {
 }
 
 enum Terminal {
-    Candidate(OutputCandidate),
+    Candidates(Vec<RoleCandidate>),
     Cancelled,
     Failed { code: String, detail: String },
 }
@@ -699,6 +739,100 @@ fn execute_request(
         model_path: ready.model_path.to_str().ok_or("模型路径不是UTF-8")?.into(),
         output_dir: run.to_str().ok_or("执行路径不是UTF-8")?.into(),
     })
+}
+fn execute_request_v2(
+    job: &JobRecord,
+    ready: &ReadyPaths,
+    run: &Path,
+) -> Result<ExecuteRequestV2, String> {
+    let recipe_id = job
+        .plan
+        .effective_parameters
+        .get("recipe")
+        .and_then(|value| value.as_str())
+        .ok_or("冻结计划缺少 recipe")?;
+    let inputs = job
+        .request
+        .inputs
+        .first()
+        .map(|binding| {
+            let path = run.join("input.png");
+            let (width, height) = image::ImageReader::open(&path)
+                .map_err(error)?
+                .into_dimensions()
+                .map_err(error)?;
+            Ok::<InputAssetDescriptor, String>(InputAssetDescriptor {
+                role: binding.role.clone(),
+                path: path.to_str().ok_or("源图路径不是 UTF-8")?.into(),
+                width,
+                height,
+                sha256: binding.asset.content_hash.as_str().into(),
+            })
+        })
+        .transpose()?
+        .into_iter()
+        .collect();
+    let outputs = vec![OutputSpec {
+        role: "primary".into(),
+        data_type: "image_rgb".into(),
+        width: job.plan.effective_output.width,
+        height: job.plan.effective_output.height,
+        max_bytes: 32 * 1024 * 1024,
+    }];
+    Ok(ExecuteRequestV2 {
+        model_id: job.request.model_variant_id.to_string(),
+        capability_id: job.request.capability.capability_id.clone(),
+        recipe_id: recipe_id.into(),
+        recipe_version: 1,
+        runtime_lock_id: ready.runtime_lock_id.clone(),
+        model_snapshot_id: ready.model_snapshot_id.clone(),
+        instruction: job.request.instruction.clone(),
+        seed: job
+            .plan
+            .effective_parameters
+            .get("seed")
+            .and_then(|value| value.as_u64())
+            .and_then(|value| u32::try_from(value).ok()),
+        sampling_steps: job
+            .plan
+            .effective_parameters
+            .get("steps")
+            .and_then(|value| value.as_u64())
+            .and_then(|value| u32::try_from(value).ok()),
+        parameters: job.plan.effective_parameters.clone(),
+        inputs,
+        outputs,
+        model_path: ready
+            .model_path
+            .to_str()
+            .ok_or("模型路径不是 UTF-8")?
+            .into(),
+        output_dir: run.to_str().ok_or("执行路径不是 UTF-8")?.into(),
+    })
+}
+fn v1_role_candidate(candidate: OutputCandidate) -> RoleCandidate {
+    RoleCandidate {
+        role: "primary".into(),
+        candidate: CandidateDescriptor {
+            relative_path: candidate.relative_path,
+            width: candidate.width,
+            height: candidate.height,
+            byte_count: candidate.size_bytes,
+            sha256: candidate.sha256,
+        },
+    }
+}
+fn v2_role_candidate(candidate: OutputCandidateV2) -> RoleCandidate {
+    RoleCandidate {
+        role: candidate.role,
+        candidate: CandidateDescriptor {
+            relative_path: candidate.relative_path,
+            width: candidate.width,
+            height: candidate.height,
+            byte_count: candidate.size_bytes,
+            sha256: candidate.sha256,
+        },
+    }
 }
 fn error(value: impl std::fmt::Display) -> String {
     value.to_string()

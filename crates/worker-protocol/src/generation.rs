@@ -644,7 +644,7 @@ pub struct HostSession {
     expected: WorkerIdentity,
     supported_versions: VersionRange,
     protocol_version: u16,
-    expected_capability: String,
+    expected_capabilities: Vec<String>,
     maximum_candidates: usize,
     hello_request: Option<String>,
     handshaken: bool,
@@ -663,7 +663,7 @@ impl HostSession {
             expected,
             VERSIONS,
             PROTOCOL_VERSION,
-            CAPABILITY,
+            vec![CAPABILITY.into()],
             1,
         )
     }
@@ -671,16 +671,14 @@ impl HostSession {
     pub fn new_v2(
         session_id: impl Into<String>,
         expected: WorkerIdentity,
-        capability_id: impl Into<String>,
+        capabilities: Vec<String>,
     ) -> Result<Self, Error> {
-        let capability_id = capability_id.into();
-        identifier(&capability_id)?;
         Self::new_for(
             session_id,
             expected,
             VERSIONS_V2,
             PROTOCOL_VERSION_V2,
-            &capability_id,
+            capabilities,
             2,
         )
     }
@@ -690,7 +688,7 @@ impl HostSession {
         expected: WorkerIdentity,
         supported_versions: VersionRange,
         protocol_version: u16,
-        expected_capability: impl Into<String>,
+        expected_capabilities: Vec<String>,
         maximum_candidates: usize,
     ) -> Result<Self, Error> {
         let session_id = session_id.into();
@@ -699,8 +697,16 @@ impl HostSession {
         supported_versions
             .validate()
             .map_err(|_| Error::VersionMismatch)?;
-        let expected_capability = expected_capability.into();
-        identifier(&expected_capability)?;
+        if expected_capabilities.is_empty() {
+            return Err(Error::IdentityMismatch);
+        }
+        let mut unique_capabilities = BTreeSet::new();
+        for capability in &expected_capabilities {
+            identifier(capability)?;
+            if !unique_capabilities.insert(capability) {
+                return Err(Error::IdentityMismatch);
+            }
+        }
         if supported_versions.highest_common(VersionRange {
             min: protocol_version,
             max: protocol_version,
@@ -715,7 +721,7 @@ impl HostSession {
             expected,
             supported_versions,
             protocol_version,
-            expected_capability,
+            expected_capabilities,
             maximum_candidates,
             hello_request: None,
             handshaken: false,
@@ -747,7 +753,7 @@ impl HostSession {
             versions: self.supported_versions,
             build_id: build_id.into(),
             expected_worker: self.expected.clone(),
-            capabilities: vec![self.expected_capability.clone()],
+            capabilities: self.expected_capabilities.clone(),
         };
         let envelope = self.make(request_id.clone(), None, message);
         envelope.validate()?;
@@ -904,7 +910,7 @@ impl HostSession {
                     if identity != &self.expected {
                         return Err(Error::IdentityMismatch);
                     }
-                    capability(capabilities, &self.expected_capability)?;
+                    capabilities_match(capabilities, &self.expected_capabilities)?;
                     WorkerEvent::HandshakeAccepted
                 }
                 _ => return Err(Error::UnexpectedMessage),
@@ -1080,18 +1086,25 @@ fn expect_two_outputs(
     Ok(())
 }
 
-fn capability(values: &[String], expected: &str) -> Result<(), Error> {
-    if values.len() != 1 || values[0] != expected {
+fn capabilities_match(values: &[String], expected: &[String]) -> Result<(), Error> {
+    if values != expected {
         return Err(Error::IdentityMismatch);
     }
     Ok(())
 }
 
 fn validate_capabilities(values: &[String]) -> Result<(), Error> {
-    if values.len() != 1 {
+    if values.is_empty() || values.len() > 2 {
         return Err(Error::IdentityMismatch);
     }
-    identifier(&values[0])
+    let mut unique = BTreeSet::new();
+    for value in values {
+        identifier(value)?;
+        if !unique.insert(value) {
+            return Err(Error::IdentityMismatch);
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]

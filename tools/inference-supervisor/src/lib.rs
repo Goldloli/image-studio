@@ -14,6 +14,7 @@ use std::{
 use worker_protocol::generation::{
     self as protocol, Envelope, HostSession, Message, ProgressStage, WorkerEvent, WorkerIdentity,
 };
+use worker_protocol::generation;
 
 pub const MEMORY_LOG_BYTES: usize = 128 * 1024;
 pub const DISK_LOG_BYTES: usize = 8 * 1024 * 1024;
@@ -137,12 +138,22 @@ pub struct SupervisorConfig {
     pub execution_lock: PathBuf,
     pub log_path: PathBuf,
     pub expected_worker: WorkerIdentity,
+    #[serde(default = "generation_protocol_version")]
+    pub protocol_version: u16,
+    #[serde(default = "expected_capabilities")]
+    pub expected_capabilities: Vec<String>,
     #[serde(default)]
     pub timeouts: Timeouts,
 }
 
 fn worker_args() -> Vec<String> {
     vec!["-I".into(), "-m".into(), "studio_mflux_worker".into()]
+}
+fn generation_protocol_version() -> u16 {
+    generation::PROTOCOL_VERSION
+}
+fn expected_capabilities() -> Vec<String> {
+    vec![generation::CAPABILITY.into()]
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -180,6 +191,18 @@ impl SupervisorConfig {
             }
         }
         self.expected_worker.validate().map_err(invalid)?;
+        if !matches!(
+            self.protocol_version,
+            generation::PROTOCOL_VERSION | generation::PROTOCOL_VERSION_V2
+        ) || self.expected_capabilities.is_empty()
+            || self.expected_capabilities.len() > 2
+            || self
+                .expected_capabilities
+                .iter()
+                .any(|value| value.is_empty() || value.len() > 256)
+        {
+            return Err(invalid("invalid generation protocol configuration"));
+        }
         if self.worker_args.is_empty()
             || self.worker_args.len() > 16
             || self
@@ -302,7 +325,7 @@ pub fn run(config: SupervisorConfig) -> io::Result<i32> {
     let mut session: Option<HostSession> = None;
     let mut execute_envelope: Option<Envelope> = None;
     let mut wire_sequence = 0;
-    let mut candidate: Option<Envelope> = None;
+    let mut candidates: Vec<Envelope> = Vec::new();
     let mut result_error: Option<(String, String)> = None;
     let mut cancel_started: Option<Instant> = None;
     let mut cleanup_reported = false;
@@ -329,17 +352,27 @@ pub fn run(config: SupervisorConfig) -> io::Result<i32> {
                         let accepted = (|| -> Result<(), protocol::Error> {
                             let envelope = Envelope::decode_frame(&frame)?;
                             if session.is_none() {
-                                session = Some(HostSession::new(
-                                    envelope.session_id.clone(),
-                                    config.expected_worker.clone(),
-                                )?);
+                                session = Some(
+                                    if config.protocol_version == generation::PROTOCOL_VERSION_V2 {
+                                        HostSession::new_v2(
+                                            envelope.session_id.clone(),
+                                            config.expected_worker.clone(),
+                                            config.expected_capabilities.clone(),
+                                        )?
+                                    } else {
+                                        HostSession::new(
+                                            envelope.session_id.clone(),
+                                            config.expected_worker.clone(),
+                                        )?
+                                    },
+                                );
                             }
                             session
                                 .as_mut()
                                 .expect("session created")
                                 .observe_outbound(&envelope)?;
                             match &envelope.message {
-                                Message::Execute { .. } => {
+                                Message::Execute { .. } | Message::ExecuteV2 { .. } => {
                                     execution_started = Some(Instant::now());
                                     execute_envelope = Some(envelope.clone());
                                 }
@@ -387,7 +420,7 @@ pub fn run(config: SupervisorConfig) -> io::Result<i32> {
                             .ok_or(protocol::Error::UnexpectedMessage)?
                             .accept(&envelope)?;
                         match event {
-                            WorkerEvent::OutputCandidate => candidate = Some(envelope),
+                            WorkerEvent::OutputCandidate => candidates.push(envelope),
                             WorkerEvent::Cancelled => {
                                 cancel_started.get_or_insert_with(Instant::now);
                             }
@@ -517,31 +550,39 @@ pub fn run(config: SupervisorConfig) -> io::Result<i32> {
             guard.armed = false;
             if host_connected && let Some(execute) = &execute_envelope {
                 let cancelled = session.as_ref().is_some_and(HostSession::cancel_requested);
-                let message = if cancelled {
-                    Message::Cancelled
+                let messages = if cancelled {
+                    vec![Message::Cancelled]
                 } else if let Some((code, summary)) = &result_error {
-                    Message::Error {
+                    vec![Message::Error {
                         code: code.clone(),
                         summary: summary.clone(),
-                    }
+                    }]
                 } else if child_status.is_some_and(|s| s.success()) {
-                    candidate
-                        .take()
-                        .map(|env| env.message)
-                        .unwrap_or(Message::Error {
+                    if candidates.is_empty() {
+                        vec![Message::Error {
                             code: "MISSING_OUTPUT".into(),
                             summary: "worker exited without an output candidate".into(),
-                        })
+                        }]
+                    } else {
+                        candidates
+                            .drain(..)
+                            .map(|envelope| envelope.message)
+                            .collect()
+                    }
                 } else {
-                    Message::Error {
+                    vec![Message::Error {
                         code: "WORKER_EXIT".into(),
                         summary: "worker exited abnormally".into(),
-                    }
+                    }]
                 };
-                terminal_failed = matches!(message, Message::Error { .. });
-                // A terminal/candidate event outranks the last coalesced progress snapshot.
+                terminal_failed = messages
+                    .iter()
+                    .any(|message| matches!(message, Message::Error { .. }));
+                // Terminal/candidate events outrank the last coalesced progress snapshot.
                 to_host.progress = None;
-                queue_host(&mut to_host, response(execute, message), &mut wire_sequence)?;
+                for message in messages {
+                    queue_host(&mut to_host, response(execute, message), &mut wire_sequence)?;
+                }
             }
             terminal_queued = true;
         }
@@ -612,7 +653,7 @@ pub fn run(config: SupervisorConfig) -> io::Result<i32> {
 fn response(execute: &Envelope, message: Message) -> Envelope {
     Envelope {
         family: protocol::FAMILY.into(),
-        version: Some(protocol::PROTOCOL_VERSION),
+        version: execute.version,
         session_id: execute.session_id.clone(),
         request_id: execute.request_id.clone(),
         sequence: 0,

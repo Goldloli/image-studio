@@ -2,9 +2,10 @@
 
 use crate::{
     ContractError,
-    contracts::ExecutionPlan,
-    contracts::UserRequest,
-    domain::AssetKind,
+    contracts::{ExecutionPlan, InputBinding, UserRequest},
+    domain::{
+        AssetKind, AssetRef, IdempotencyKey, ModelVariantId, PlanId, ProjectId, RequestId,
+    },
     generation::{
         MAX_PROMPT_BYTES, Z_IMAGE_CAPABILITY, Z_IMAGE_MODEL, validate_z_image_plan,
         validate_z_image_request,
@@ -65,6 +66,29 @@ pub struct SourceFacts {
     pub width: u32,
     pub height: u32,
     pub has_transparent_pixels: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct SourceAsset {
+    pub asset: AssetRef,
+    pub facts: SourceFacts,
+}
+
+#[derive(Clone, Debug)]
+pub struct KleinInput {
+    pub request_id: RequestId,
+    pub project_id: ProjectId,
+    pub idempotency_key: IdempotencyKey,
+    pub plan_id: PlanId,
+    pub prompt: String,
+    pub seed: Option<u32>,
+    pub source: Option<SourceAsset>,
+}
+
+#[derive(Clone, Debug)]
+pub struct FrozenRecipe {
+    pub request: UserRequest,
+    pub plan: ExecutionPlan,
 }
 
 impl SourceFacts {
@@ -369,6 +393,88 @@ pub fn validate_recipe_plan(
     Ok(recipe)
 }
 
+pub fn freeze_klein(
+    input: KleinInput,
+    resolved_seed: u32,
+    env: crate::generation::PlanEnvironment,
+) -> Result<FrozenRecipe, ContractError> {
+    let (capability_id, recipe, inputs, source) = match input.source {
+        Some(source) => (
+            KLEIN_EDIT_CAPABILITY,
+            Recipe::KleinEdit,
+            vec![InputBinding {
+                asset: source.asset,
+                role: SOURCE_ROLE.into(),
+                order: 0,
+            }],
+            Some(source.facts),
+        ),
+        None => (KLEIN_TEXT_CAPABILITY, Recipe::KleinText, vec![], None),
+    };
+    let request = UserRequest {
+        schema_version: crate::contracts::REQUEST_SCHEMA_VERSION,
+        request_id: input.request_id,
+        project_id: input.project_id,
+        capability: crate::contracts::CapabilityDescriptor {
+            capability_id: capability_id.into(),
+            instruction_required: true,
+            input_roles: inputs
+                .iter()
+                .map(|_| crate::contracts::RoleRule {
+                    role: SOURCE_ROLE.into(),
+                    minimum: 1,
+                    maximum: 1,
+                })
+                .collect(),
+        },
+        instruction: input.prompt,
+        inputs,
+        model_variant_id: ModelVariantId::new(KLEIN_MODEL)?,
+        requested_output: crate::contracts::ImageOutput {
+            width: 1024,
+            height: 1024,
+            count: 1,
+        },
+        policy: crate::contracts::AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: false,
+        },
+        parameters: BTreeMap::from([(
+            "seed".into(),
+            input
+                .seed
+                .map_or(serde_json::Value::Null, |seed| json!(seed)),
+        )]),
+        idempotency_key: input.idempotency_key,
+    };
+    let plan = ExecutionPlan {
+        schema_version: crate::contracts::PLAN_SCHEMA_VERSION,
+        plan_id: input.plan_id,
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: env.components,
+        runtime: env.runtime,
+        device: env.device,
+        effective_output: request.requested_output.clone(),
+        effective_parameters: BTreeMap::from([
+            ("seed".into(), json!(input.seed.unwrap_or(resolved_seed))),
+            ("steps".into(), json!(4)),
+            ("quantization".into(), json!(4)),
+            ("guidance".into(), json!(1.0)),
+            ("scheduler".into(), json!("flow_match_euler_discrete")),
+            ("recipe".into(), json!(recipe.id())),
+            ("recipe_version".into(), json!(1)),
+            ("token_budget".into(), json!(512)),
+            ("thinking".into(), json!(false)),
+            ("truncation".into(), json!(false)),
+        ]),
+        adjustments: vec![],
+    };
+    recipe.validate_plan(&request, &plan, source)?;
+    Ok(FrozenRecipe { request, plan })
+}
+
 fn validate_klein_instruction(request: &UserRequest) -> Result<(), ContractError> {
     require(
         request.capability.instruction_required
@@ -435,6 +541,7 @@ mod tests {
             AssetId, AssetRef, ContentHash, IdempotencyKey, ModelVariantId, PlanId, ProjectId,
             RequestId, StorageLocation, StorageLocationId,
         },
+        generation::PlanEnvironment,
     };
 
     fn asset(kind: AssetKind) -> AssetRef {
@@ -670,5 +777,63 @@ mod tests {
         assert!(validate_recipe_request(&request, Some(facts)).is_ok());
         request.requested_output.width = 2047;
         assert!(validate_recipe_request(&request, Some(facts)).is_err());
+    }
+
+    #[test]
+    fn freeze_klein_keeps_text_and_edit_as_separate_recipes() {
+        let env = PlanEnvironment {
+            components: vec![ComponentSnapshot {
+                role: "transformer".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+                content_hash: ContentHash::new("f".repeat(64)).unwrap(),
+            }],
+            runtime: RuntimeSnapshot {
+                package_id: "recipes-v2".into(),
+                engine: "mlx".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+            },
+            device: DeviceSnapshot {
+                device_id: "gpu".into(),
+                precision: "bfloat16".into(),
+            },
+            scheduler: "flow_match_euler_discrete".into(),
+        };
+        let input = || KleinInput {
+            request_id: RequestId::new("request:klein").unwrap(),
+            project_id: ProjectId::new("default").unwrap(),
+            idempotency_key: IdempotencyKey::new("submit:klein").unwrap(),
+            plan_id: PlanId::new("plan:klein").unwrap(),
+            prompt: "cobalt cube".into(),
+            seed: None,
+            source: None,
+        };
+        let text = freeze_klein(input(), 17, env.clone()).unwrap();
+        assert_eq!(
+            text.request.capability.capability_id,
+            KLEIN_TEXT_CAPABILITY
+        );
+        assert_eq!(text.plan.effective_parameters["seed"], 17);
+
+        let mut edit_input = input();
+        edit_input.source = Some(SourceAsset {
+            asset: asset(AssetKind::ImageRgb),
+            facts: SourceFacts {
+                width: 512,
+                height: 512,
+                has_transparent_pixels: false,
+            },
+        });
+        let edit = freeze_klein(edit_input, 17, env).unwrap();
+        assert_eq!(
+            edit.request.capability.capability_id,
+            KLEIN_EDIT_CAPABILITY
+        );
+        assert_eq!(edit.request.inputs.len(), 1);
     }
 }

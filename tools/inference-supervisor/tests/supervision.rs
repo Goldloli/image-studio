@@ -52,6 +52,8 @@ impl Harness {
                 runtime_lock_id: "fixture-runtime".into(),
                 model_snapshot_id: "fixture-model".into(),
             },
+            protocol_version: 1,
+            expected_capabilities: vec!["image.text-to-image.z-image-turbo.v1".into()],
             timeouts: Timeouts {
                 handshake_ms: 1000,
                 loading_ms: 2000,
