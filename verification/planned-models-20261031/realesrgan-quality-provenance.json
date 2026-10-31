@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "purpose": "Real-ESRGAN quality-acceptance source provenance",
+  "sources": [
+    {
+      "id": "text-fine-lines",
+      "path": "fixtures/realesrgan-text-lines-en-512.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "4467010bce243d871c9262837a7d2d821a5b125c748dce0f7a8a9fdf44eb1922",
+      "rights": "Created from scratch for this user-authorized acceptance run using system fonts; no third-party image input.",
+      "method": "Pillow drawing of English text, one-pixel rules and a regular grid."
+    },
+    {
+      "id": "natural-texture",
+      "path": "fixtures/realesrgan-natural-640x427.png",
+      "width": 640,
+      "height": 427,
+      "sha256": "609b0850ffb60625b7b3d68e5aa843b41dd4eed4e09817e529303211ef52e817",
+      "rights": "Resized crop of original Image Studio demonstration artwork generated for this user-authorized implementation.",
+      "provenance": "apps/frontend/public/examples/provenance.json"
+    },
+    {
+      "id": "non-square-illustration",
+      "path": "fixtures/realesrgan-nonsquare-360x640.png",
+      "width": 360,
+      "height": 640,
+      "sha256": "ea954fb4054b27efb6dbdf3eb3383d7a09f59620c32e350ba78a5e63fdfb193d",
+      "rights": "Resized original Image Studio demonstration artwork generated for this user-authorized implementation.",
+      "provenance": "apps/frontend/public/examples/provenance.json"
+    },
+    {
+      "id": "multi-tile-still-life",
+      "path": "fixtures/realesrgan-tiles-1024.png",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "d479e2cec27e34994bcceb37fdfed957eb184637f74173c24fb8330fc378ae79",
+      "rights": "Resized crop of original Image Studio still-life demonstration artwork.",
+      "provenance": "apps/frontend/public/examples/provenance.json"
+    }
+  ],
+  "thirdPartyImagesUsed": false,
+  "problems": []
+}

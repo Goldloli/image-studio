@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "B08",
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution",
+  "reason": "Three real x4plus product runs on original/project-owned text and fine lines, natural landscape texture and a non-square illustration produced exact 4x RGB PNGs. Lettering stayed legible, lines remained continuous, color and orientation were preserved and all outputs were free of model-default anime behavior or whole-image corruption.",
+  "contactSheet": "realesrgan-quality-contact-sheet.jpg",
+  "sourceProvenance": "realesrgan-quality-provenance.json",
+  "samples": [
+    {
+      "id": "text-fine-lines",
+      "source": "fixtures/realesrgan-text-lines-en-512.png",
+      "sourceSize": [
+        512,
+        512
+      ],
+      "sourceSha256": "4467010bce243d871c9262837a7d2d821a5b125c748dce0f7a8a9fdf44eb1922",
+      "output": "realesrgan-quality/text/output.png",
+      "outputSize": [
+        2048,
+        2048
+      ],
+      "outputSha256": "937c0805257f6a5c3358b8e795db69a3ee2936a57500ae083643aa636772fef8",
+      "observation": "English lettering remains readable, the smallest line is continuous and one-pixel rules do not acquire visible breaks or halos."
+    },
+    {
+      "id": "natural-texture",
+      "source": "fixtures/realesrgan-natural-640x427.png",
+      "sourceSize": [
+        640,
+        427
+      ],
+      "sourceSha256": "609b0850ffb60625b7b3d68e5aa843b41dd4eed4e09817e529303211ef52e817",
+      "output": "realesrgan-quality/natural/output.png",
+      "outputSize": [
+        2560,
+        1708
+      ],
+      "outputSha256": "c15a97749965c96e756a105aa73ff7a9a079cbd8e80e5faff7e4469332103e16",
+      "observation": "Mountain, forest and water detail is sharpened with preserved sunrise palette and reflection geometry; no horizontal strip or swapped channel is visible."
+    },
+    {
+      "id": "non-square-illustration",
+      "source": "fixtures/realesrgan-nonsquare-360x640.png",
+      "sourceSize": [
+        360,
+        640
+      ],
+      "sourceSha256": "ea954fb4054b27efb6dbdf3eb3383d7a09f59620c32e350ba78a5e63fdfb193d",
+      "output": "realesrgan-quality/nonsquare/output.png",
+      "outputSize": [
+        1440,
+        2560
+      ],
+      "outputSha256": "1a45da218783d965eb5138fea2524d76b42f81d2d70df8eb5f930b7120d2b59a",
+      "observation": "Portrait aspect ratio and window, plant and staircase geometry are preserved; texture enhanced without anime-model line replacement."
+    }
+  ],
+  "knownLimitations": [
+    "Real-ESRGAN can invent plausible micro-texture and thin-edge detail even when the source contains little detail.",
+    "This quality decision applies only to the pinned x4plus ncnn snapshot and the recorded inputs."
+  ],
+  "problems": []
+}

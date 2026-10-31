@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseIds": [
+    "I05",
+    "I06"
+  ],
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "device_probe",
+  "reason": "The formal installer completed a new-root online install from the two pinned official archives and activated the isolated ncnn runtime after a real GPU 0 smoke inference. A second root reused only verified cache bytes and reached the identical Ready identity while networking was denied.",
+  "coldInstall": {
+    "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/data",
+    "cacheRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/cache",
+    "activationPath": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-20261031/data/installations/models/realesrgan-x4plus.json",
+    "activationSha256": "6dd450febdfe2ad31567431652614e6c9669e4a2ffb2d3290a48657f7e99c2c5",
+    "receivedBytes": 60349360,
+    "requiredBytes": 4458327196,
+    "modelSnapshotId": "realesrgan-x4plus-ncnn",
+    "runtimeLockId": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+    "modelManifestSha256": "fdc1606ae5c910eb00f59ec0c8a8d1c27f9b694f9147b400a2802ad382938294",
+    "runtimeManifestSha256": "9501ce3131a6909f713505b294c0cc1dff236635b41e2f665f77c173d2ad296c",
+    "probe": {
+      "device": "gpu",
+      "deviceName": "Apple M3 Max",
+      "gpuId": 0,
+      "backend": "ncnn Vulkan",
+      "model": "realesrgan-x4plus",
+      "scale": 4,
+      "tile": 128,
+      "threads": "1:1:1",
+      "tta": false,
+      "inputSize": [
+        8,
+        6
+      ],
+      "outputSize": [
+        32,
+        24
+      ],
+      "outputSha256": "249ff74371ebf8877158c17eaef3bad4309de8b447a6866f93c3d7c3da12c848"
+    },
+    "log": "logs/realesrgan-install.log"
+  },
+  "offlineCacheInstall": {
+    "dataRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-offline-20261031/data",
+    "cacheRoot": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-offline-20261031/cache",
+    "activationPath": "/Users/gejiawei/Desktop/ai_code/image-studio/target/planned-models-realesrgan-offline-20261031/data/installations/models/realesrgan-x4plus.json",
+    "activationSha256": "6dd450febdfe2ad31567431652614e6c9669e4a2ffb2d3290a48657f7e99c2c5",
+    "networkDenied": true,
+    "networkControlExit": 6,
+    "networkControlLog": "logs/realesrgan-network-control.log",
+    "cacheReused": true,
+    "log": "logs/realesrgan-offline-install.log"
+  },
+  "identityMatches": {
+    "runtimeLockId": true,
+    "modelSnapshotId": true,
+    "runtimeManifestSha256": true,
+    "modelManifestSha256": true,
+    "activationRecordSha256": true,
+    "probe": true
+  },
+  "problems": []
+}

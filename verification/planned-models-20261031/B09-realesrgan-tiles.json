@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "B09",
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "product_execution",
+  "reason": "A 1024x1024 product run produced 64 real ncnn progress ticks and a 4096x4096 output with fixed tile 128. A same-snapshot t=4096 reference was compared against the complete product output; the amplified difference contains broad texture changes but no distinct boundary line, and manual review of all 14 internal seam bands found no visible join.",
+  "source": "fixtures/realesrgan-tiles-1024.png",
+  "sourceSha256": "d479e2cec27e34994bcceb37fdfed957eb184637f74173c24fb8330fc378ae79",
+  "formalT128": {
+    "output": "realesrgan-quality/tiles/t128.png",
+    "sha256": "f726137c3419be076bbf3e2abbbbc4d43eeee420562676cfe5dafbdc21ab606b",
+    "size": [
+      4096,
+      4096
+    ],
+    "tile": 128,
+    "progressMarkers": 64,
+    "elapsedMilliseconds": 9134
+  },
+  "referenceLargeTile": {
+    "output": "realesrgan-quality/tiles/t4096.png",
+    "sha256": "cd3b92accd86d1ceb49f2b73cb6f0451bbcf288abdec70a17ce4822e24f56705",
+    "size": [
+      4096,
+      4096
+    ],
+    "tile": 4096,
+    "label": "reference only; not the supported product recipe"
+  },
+  "comparison": {
+    "meanAbsoluteError": 0.5099772214889526,
+    "maxAbsoluteError": 45,
+    "changedPixelPercent": 59.8799467086792,
+    "channelsAbove2Percent": 5.032116174697876,
+    "internalTileBoundariesChecked": 14,
+    "maximumSeamToNeighborMeanRatio": 1.3595275833077374,
+    "visibleSeams": false
+  },
+  "amplifiedDifference": "realesrgan-quality/tiles/diff-x8.png",
+  "reviewContactSheet": "realesrgan-tile-seam-review.jpg",
+  "referenceLog": "logs/realesrgan-tile4096.log",
+  "problems": [],
+  "fullSeamReview": [
+    {
+      "path": "realesrgan-all-seams-1.png",
+      "sha256": "56d8065cb02119009ead048dc650fadf0a494f50079b14da9a90f83b099e1569",
+      "alongRange": [
+        0,
+        1024
+      ],
+      "nativePixelScale": 1,
+      "all14StripsReviewed": true
+    },
+    {
+      "path": "realesrgan-all-seams-2.png",
+      "sha256": "cccd18b2c3bd41e49bb536fb7258aff5b93f2bc24f8bb248953c18563dc00033",
+      "alongRange": [
+        1024,
+        2048
+      ],
+      "nativePixelScale": 1,
+      "all14StripsReviewed": true
+    },
+    {
+      "path": "realesrgan-all-seams-3.png",
+      "sha256": "2b9d4de345b06370cf63093fa41374013ceb14b831525d8671a49fbba2a7b1d8",
+      "alongRange": [
+        2048,
+        3072
+      ],
+      "nativePixelScale": 1,
+      "all14StripsReviewed": true
+    },
+    {
+      "path": "realesrgan-all-seams-4.png",
+      "sha256": "e666e96a7459c5c0b48a66fe0cefc67c900fc7a206033eab561a5c93b5b6ae90",
+      "alongRange": [
+        3072,
+        4096
+      ],
+      "nativePixelScale": 1,
+      "all14StripsReviewed": true
+    }
+  ],
+  "reviewObservations": "All 7 vertical and 7 horizontal boundaries were inspected along their full 4096-pixel extent in four 1:1 sections. Ceramic edges, wall texture, leaves and pear transitions remain continuous; no straight tile join or color step is visible. Texture details differ slightly from the large-tile reference, as quantified above.",
+  "additionalEvidenceKinds": [
+    "upstream_baseline"
+  ]
+}

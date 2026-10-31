@@ -1,0 +1,19 @@
+[0 Apple M3 Max]  queueC=0[1]  queueG=0[1]  queueT=0[1]
+[0 Apple M3 Max]  bugsbn1=0  bugbilz=103  bugcopc=0  bugihfa=0
+[0 Apple M3 Max]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1
+[0 Apple M3 Max]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1
+0.00%
+6.67%
+13.33%
+20.00%
+26.67%
+33.33%
+40.00%
+46.67%
+53.33%
+60.00%
+66.67%
+73.33%
+80.00%
+86.67%
+93.33%
