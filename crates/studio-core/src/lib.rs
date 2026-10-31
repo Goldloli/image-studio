@@ -14,6 +14,7 @@ pub mod contracts;
 pub mod domain;
 pub mod generation;
 pub mod ports;
+pub mod recipes;
 
 use thiserror::Error;
 
