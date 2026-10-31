@@ -91,6 +91,14 @@ impl ModelCatalog {
         })
     }
 
+    pub fn supports(&self, id: &str, capability: &str) -> bool {
+        self.entries.iter().any(|entry| {
+            entry.id == id
+                && entry.product_status == "implemented"
+                && entry.capabilities.iter().any(|item| item.id == capability)
+        })
+    }
+
     pub fn entries(&self) -> Vec<Value> {
         self.entries
             .iter()
@@ -307,9 +315,7 @@ mod tests {
         let mut klein = z_snapshot("not_installed");
         klein.install_id = "flux2-klein-4b-distilled".into();
         klein.model_bytes = 15_980_131_745;
-        let query = catalog
-            .query(&[z_snapshot("ready"), klein], None)
-            .unwrap();
+        let query = catalog.query(&[z_snapshot("ready"), klein], None).unwrap();
         let entries = query["entries"].as_array().unwrap();
         let z = entries
             .iter()

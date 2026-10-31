@@ -245,6 +245,13 @@ mod tests {
                 "componentsReady": true,
                 "runtimeReady": true,
                 "error": null
+            }, {
+                "id": "flux2-klein-4b-distilled",
+                "family": "FLUX.2",
+                "executable": true,
+                "componentsReady": true,
+                "runtimeReady": true,
+                "error": null
             }]
         });
         let result = catalog.query(&model_catalog, false);

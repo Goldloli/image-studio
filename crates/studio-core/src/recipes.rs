@@ -3,9 +3,7 @@
 use crate::{
     ContractError,
     contracts::{ExecutionPlan, InputBinding, UserRequest},
-    domain::{
-        AssetKind, AssetRef, IdempotencyKey, ModelVariantId, PlanId, ProjectId, RequestId,
-    },
+    domain::{AssetKind, AssetRef, IdempotencyKey, ModelVariantId, PlanId, ProjectId, RequestId},
     generation::{
         MAX_PROMPT_BYTES, Z_IMAGE_CAPABILITY, Z_IMAGE_MODEL, validate_z_image_plan,
         validate_z_image_request,
@@ -814,10 +812,7 @@ mod tests {
             source: None,
         };
         let text = freeze_klein(input(), 17, env.clone()).unwrap();
-        assert_eq!(
-            text.request.capability.capability_id,
-            KLEIN_TEXT_CAPABILITY
-        );
+        assert_eq!(text.request.capability.capability_id, KLEIN_TEXT_CAPABILITY);
         assert_eq!(text.plan.effective_parameters["seed"], 17);
 
         let mut edit_input = input();
@@ -830,10 +825,7 @@ mod tests {
             },
         });
         let edit = freeze_klein(edit_input, 17, env).unwrap();
-        assert_eq!(
-            edit.request.capability.capability_id,
-            KLEIN_EDIT_CAPABILITY
-        );
+        assert_eq!(edit.request.capability.capability_id, KLEIN_EDIT_CAPABILITY);
         assert_eq!(edit.request.inputs.len(), 1);
     }
 }

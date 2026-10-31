@@ -13,7 +13,7 @@
       "productStatus": "implemented",
       "scope": "支持 Z-Image Turbo（1:1、4:3、3:4）与 FLUX.2 Klein 4B（1:1），单轮 1 张。",
       "action": "open-composer",
-      "modelId": "z-image-turbo-mflux-v1",
+      "modelId": "flux2-klein-4b-distilled",
       "dependencies": [
         { "kind": "model", "label": "已登记且已完成的本地模型安装" },
         { "kind": "runtime", "label": "通过设备检查的隔离运行环境" },

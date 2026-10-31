@@ -298,7 +298,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [turnPages, setTurnPages] = useState<ConversationTurnPages>({});
   const [optimistic, setOptimistic] = useState<TurnView[]>([]);
-  const [popup, setPopup] = useState<'params' | 'models' | null>(null);
+  const [popup, setPopup] = useState<'params' | 'models' | 'sources' | null>(null);
   const [loaded, setLoaded] = useState(!native);
   const [switching, setSwitching] = useState(false);
   const [submittingDraftId, setSubmittingDraftId] = useState<number | null>(null);

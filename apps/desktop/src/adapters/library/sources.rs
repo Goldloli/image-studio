@@ -492,6 +492,7 @@ mod tests {
         let imported = library.import_source(&original).unwrap();
         fs::remove_file(original).unwrap();
         let bytes = library.read_source_png(&imported.asset_id).unwrap();
+        assert_eq!(library.read_asset_png(&imported.asset_id).unwrap(), bytes);
         assert_eq!(
             image::load_from_memory(&bytes).unwrap().dimensions(),
             (3, 2)

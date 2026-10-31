@@ -303,8 +303,8 @@ impl StudioService {
     }
     pub fn save_creation_defaults(&self, defaults: CreationDefaults) -> Result<Value, String> {
         let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
-        if !catalog.contains(&defaults.model_id) {
-            return Err("默认模型未在权威目录中登记".into());
+        if !catalog.supports(&defaults.model_id, "text_to_image") {
+            return Err("默认模型必须支持已接入的文生图能力".into());
         }
         self.preferences.save_creation_defaults(defaults)?;
         Ok(self.preferences_snapshot())
@@ -416,11 +416,9 @@ impl StudioService {
             params.capability_id.as_str(),
             params.source_asset_id.is_some(),
         ) {
-            (
-                DEFAULT_MODEL_ID,
-                studio_core::generation::Z_IMAGE_CAPABILITY,
-                false,
-            ) => matches!(params.aspect.as_str(), "1:1" | "4:3" | "3:4"),
+            (DEFAULT_MODEL_ID, studio_core::generation::Z_IMAGE_CAPABILITY, false) => {
+                matches!(params.aspect.as_str(), "1:1" | "4:3" | "3:4")
+            }
             (
                 studio_core::recipes::KLEIN_MODEL,
                 studio_core::recipes::KLEIN_TEXT_CAPABILITY,
@@ -466,14 +464,14 @@ impl StudioService {
             capability_id: default_capability_id(),
             source_asset_id: None,
         };
-        if !catalog.contains(&params.model_id) {
+        if !catalog.supports(&params.model_id, "text_to_image") {
             warnings.push("已保存的默认模型不在当前目录中，已回退为 Z-Image Turbo".into());
             params.model_id = DEFAULT_MODEL_ID.into();
         }
         if let Some(input) = input {
             if let Some(model_id) = &input.model_id {
-                if !catalog.contains(model_id) {
-                    return Err("创建入口覆盖的模型未登记".into());
+                if !catalog.supports(model_id, "text_to_image") {
+                    return Err("创建入口覆盖的模型不支持文生图".into());
                 }
                 params.model_id = model_id.clone();
             }
@@ -495,6 +493,14 @@ impl StudioService {
                 }
                 params.seed = seed.clone();
             }
+        }
+        if params.model_id == KLEIN_INSTALL_ID {
+            params.aspect = "1:1".into();
+            params.capability_id = studio_core::recipes::KLEIN_TEXT_CAPABILITY.into();
+            params.source_asset_id = None;
+        } else {
+            params.capability_id = studio_core::generation::Z_IMAGE_CAPABILITY.into();
+            params.source_asset_id = None;
         }
         Ok((params, warnings))
     }

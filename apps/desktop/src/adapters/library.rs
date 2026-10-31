@@ -424,10 +424,8 @@ impl Library {
         // No process may start until the transaction above has committed.
         self.prepare_run_directory(&attempt, &key)?;
         if let Some(source) = request.inputs.first()
-            && let Err(error) = self.copy_source_snapshot(
-                &source.asset.asset_id,
-                &self.root.join("runs").join(&key),
-            )
+            && let Err(error) = self
+                .copy_source_snapshot(&source.asset.asset_id, &self.root.join("runs").join(&key))
         {
             self.finish_after_reap(
                 &attempt,
@@ -470,10 +468,8 @@ impl Library {
         tx.commit()?;
         self.prepare_run_directory(&attempt, &key)?;
         if let Some(source) = previous.request.inputs.first()
-            && let Err(error) = self.copy_source_snapshot(
-                &source.asset.asset_id,
-                &self.root.join("runs").join(&key),
-            )
+            && let Err(error) = self
+                .copy_source_snapshot(&source.asset.asset_id, &self.root.join("runs").join(&key))
         {
             self.finish_after_reap(
                 &attempt,

@@ -312,9 +312,12 @@ impl Installation {
             .and_then(|b| serde_json::from_slice::<ReadyRecord>(&b).map_err(std::io::Error::other))
         {
             if ready_record_matches(&record, profile, &runtime.id, &model.id) {
-                let runtime = paths.data.join("runtimes").join(&runtime.id);
+                let runtime_root = paths.data.join("runtimes").join(&runtime.id);
                 let model_root = paths.data.join("models").join(&model.id);
                 let healthy = record.probe["device"] == profile.probe_device
+                    && record.probe["identity"]["build_id"] == profile.worker_build_id
+                    && record.probe["identity"]["runtime_lock_id"] == runtime.id
+                    && record.probe["identity"]["model_snapshot_id"] == model.id
                     && record.probe["device_name"]
                         .as_str()
                         .is_some_and(|s| !s.is_empty())
@@ -343,7 +346,7 @@ impl Installation {
                             .iter()
                             .find(|entry| entry.path == *path)
                             .is_some_and(|entry| {
-                                inventory_metadata_matches(&runtime, entry).is_ok()
+                                inventory_metadata_matches(&runtime_root, entry).is_ok()
                             })
                     });
                 if healthy {
@@ -648,10 +651,10 @@ impl Installation {
             &serde_json::json!({"runtime_lock_id":self.inner.runtime.id,"model_snapshot_id":self.inner.model.id}),
         )?;
         self.update(|s| s.phase = "downloading".into());
-        // Two bounded workers, each keeps at most a 1 MiB transfer buffer.
+        // Four bounded workers, each keeps at most a 1 MiB transfer buffer.
         let first_error = Mutex::new(None);
         std::thread::scope(|scope| -> Result<(), String> {
-            let split = all.len().div_ceil(2);
+            let split = all.len().div_ceil(4);
             let error = &first_error;
             let handles: Vec<_> = all
                 .chunks(split)
@@ -1710,10 +1713,7 @@ mod tests {
             .iter()
             .find(|wheel| wheel.url == "bundled:worker-wheel")
             .unwrap();
-        assert_eq!(
-            worker.path,
-            "studio_mflux_worker_v2-0.2.0-py3-none-any.whl"
-        );
+        assert_eq!(worker.path, "studio_mflux_worker_v2-0.2.0-py3-none-any.whl");
         assert_eq!(
             installer
                 .inner
@@ -1730,10 +1730,7 @@ mod tests {
         );
         assert!(installer.ready_paths().is_err());
         assert_ne!(
-            installer
-                .inner
-                .runtime
-                .id,
+            installer.inner.runtime.id,
             "mflux-0.24.0-py3.13.12-macos-arm64-v1"
         );
     }
@@ -1745,12 +1742,13 @@ mod tests {
         let manager = Installations::new(paths).unwrap();
         let snapshots = manager.snapshots();
         assert_eq!(snapshots.len(), 2);
-        assert!(snapshots.iter().all(|snapshot| snapshot.phase == "not_installed"));
+        assert!(
+            snapshots
+                .iter()
+                .all(|snapshot| snapshot.phase == "not_installed")
+        );
         assert_eq!(
-            manager
-                .snapshot(KLEIN_INSTALL_ID)
-                .unwrap()
-                .install_id,
+            manager.snapshot(KLEIN_INSTALL_ID).unwrap().install_id,
             KLEIN_INSTALL_ID
         );
         assert!(manager.start("https://untrusted").is_err());
