@@ -439,6 +439,21 @@ impl Library {
             params.insert("sourceAssetId".into(), Value::Null);
         } else if matches!(
             model_id,
+            studio_core::recipes::QWEN_IMAGE_21_MODEL
+                | studio_core::recipes::QWEN_IMAGE_21_TURBO_MODEL
+                | studio_core::recipes::MOSS_IMAGE_SFT_MODEL
+        ) {
+            let capability = if model_id == studio_core::recipes::QWEN_IMAGE_21_MODEL {
+                studio_core::recipes::QWEN_IMAGE_21_CAPABILITY
+            } else if model_id == studio_core::recipes::QWEN_IMAGE_21_TURBO_MODEL {
+                studio_core::recipes::QWEN_IMAGE_21_TURBO_CAPABILITY
+            } else {
+                studio_core::recipes::MOSS_IMAGE_SFT_CAPABILITY
+            };
+            params.insert("capabilityId".into(), Value::String(capability.into()));
+            params.insert("sourceAssetId".into(), Value::Null);
+        } else if matches!(
+            model_id,
             studio_core::recipes::BIREFNET_MODEL | studio_core::recipes::REALESRGAN_MODEL
         ) {
             params.insert("aspect".into(), Value::String("1:1".into()));

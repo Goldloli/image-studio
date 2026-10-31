@@ -2171,4 +2171,55 @@ mod tests {
         let selected = snapshot["activeConversationId"].as_str().unwrap();
         assert_eq!(selected, second_conversation);
     }
+
+    #[test]
+    fn applying_new_text_models_preserves_incompatible_aspect_until_user_edits() {
+        let (_root, service) = fixture();
+        service
+            .save_draft(
+                DraftInput {
+                    id: 1,
+                    name: "会话".into(),
+                    prompt: "保持提示词与画幅".into(),
+                    params: json!({
+                        "modelId": DEFAULT_MODEL_ID,
+                        "aspect": "4:3",
+                        "count": 1,
+                        "seed": "17"
+                    }),
+                    collapsed: false,
+                    prompt_source_id: None,
+                },
+                1,
+            )
+            .unwrap();
+        let snapshot = service.snapshot().unwrap();
+        let conversation =
+            ConversationId::new(snapshot["activeConversationId"].as_str().unwrap()).unwrap();
+        for (model_id, capability) in [
+            (
+                studio_core::recipes::QWEN_IMAGE_21_MODEL,
+                studio_core::recipes::QWEN_IMAGE_21_CAPABILITY,
+            ),
+            (
+                studio_core::recipes::QWEN_IMAGE_21_TURBO_MODEL,
+                studio_core::recipes::QWEN_IMAGE_21_TURBO_CAPABILITY,
+            ),
+            (
+                studio_core::recipes::MOSS_IMAGE_SFT_MODEL,
+                studio_core::recipes::MOSS_IMAGE_SFT_CAPABILITY,
+            ),
+        ] {
+            let changed = service
+                .with_library(|library| {
+                    library.apply_model_to_conversation(&conversation, model_id)
+                })
+                .unwrap();
+            assert_eq!(changed.prompt, "保持提示词与画幅");
+            assert_eq!(changed.params["modelId"], model_id);
+            assert_eq!(changed.params["capabilityId"], capability);
+            assert_eq!(changed.params["aspect"], "4:3");
+            assert_eq!(changed.params["seed"], "17");
+        }
+    }
 }
