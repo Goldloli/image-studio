@@ -649,10 +649,15 @@ impl Installation {
         // Check both volumes independently; never rely on cross-volume rename.
         let data_free = fs2::available_space(&self.inner.paths.data).map_err(err)?;
         let cache_free = fs2::available_space(&self.inner.paths.cache).map_err(err)?;
-        if data_free < target + runtime_budget + RESERVE
-            || cache_free < missing + RESERVE
-            || same_volume(&self.inner.paths.data, &self.inner.paths.cache)? && data_free < required
-        {
+        if !installation_space_available(
+            data_free,
+            cache_free,
+            missing,
+            target,
+            runtime_budget,
+            RESERVE,
+            same_volume(&self.inner.paths.data, &self.inner.paths.cache)?,
+        ) {
             return Err("磁盘空间不足；请释放安装计划所需空间后继续。".into());
         }
         atomic_json(
@@ -1547,6 +1552,28 @@ fn clear_segment_state(
     }
     Ok(())
 }
+fn installation_space_available(
+    data_free: u64,
+    cache_free: u64,
+    missing_cache: u64,
+    target_files: u64,
+    runtime_budget: u64,
+    reserve: u64,
+    same_volume: bool,
+) -> bool {
+    let data_required = target_files
+        .saturating_add(runtime_budget)
+        .saturating_add(reserve);
+    let cache_required = missing_cache.saturating_add(reserve);
+    data_free >= data_required
+        && cache_free >= cache_required
+        && (!same_volume
+            || data_free
+                >= missing_cache
+                    .saturating_add(target_files)
+                    .saturating_add(runtime_budget)
+                    .saturating_add(reserve))
+}
 fn validate_artifact(a: &Artifact) -> Result<(), String> {
     safe_relative(&a.path)?;
     if a.bytes == 0 || a.sha256.len() != 64 || !a.sha256.bytes().all(|b| b.is_ascii_hexdigit()) {
@@ -2172,6 +2199,14 @@ mod tests {
         assert!(!part.exists());
         assert!(!seed_marker.exists());
         assert!(segments.iter().chain(&metadata).all(|path| !path.exists()));
+    }
+    #[test]
+    fn installation_space_accounts_for_separate_and_shared_volumes() {
+        assert!(installation_space_available(100, 100, 60, 70, 20, 5, false));
+        assert!(!installation_space_available(100, 100, 60, 70, 20, 5, true));
+        assert!(installation_space_available(200, 100, 60, 70, 20, 5, true));
+        assert!(!installation_space_available(60, 100, 60, 70, 20, 5, false));
+        assert!(!installation_space_available(100, 20, 60, 70, 20, 5, false));
     }
     #[test]
     fn activation_records_bind_bytes_even_when_version_labels_are_reused() {
