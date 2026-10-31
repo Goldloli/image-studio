@@ -26,6 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut cancel_step = None;
     let mut poll_milliseconds = 5000;
     let mut accept_cancelled = false;
+    let mut snapshot_only = false;
     while let Some(flag) = args.next() {
         match flag.as_str() {
             "--data-dir" => root = Some(PathBuf::from(args.next().ok_or("missing data root")?)),
@@ -55,6 +56,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
             "--accept-cancelled" => accept_cancelled = true,
+            "--snapshot-only" => snapshot_only = true,
             _ => return Err(format!("unknown option: {flag}").into()),
         }
     }
@@ -83,6 +85,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ));
     if let Some(error) = &service.startup_error {
         return Err(error.clone().into());
+    }
+    if snapshot_only {
+        println!("{}", json!({"snapshot": service.snapshot()?}));
+        return Ok(());
     }
     if let Some(job_id) = retry_job {
         let retried = service.retry(&job_id)?;
