@@ -2060,27 +2060,23 @@ fn safe_relative(value: &str) -> Result<(), String> {
     Ok(())
 }
 fn allowed_url(url: &reqwest::Url) -> bool {
+    let host = url.host_str();
     url.scheme() == "https"
         && url.port_or_known_default() == Some(443)
         && url.username().is_empty()
         && url.password().is_none()
-        && matches!(
-            url.host_str(),
-            Some(
-                "huggingface.co"
-                    | "us.aws.cdn.hf.co"
-                    | "cdn-lfs.huggingface.co"
-                    | "cdn-lfs.hf.co"
-                    | "cdn-lfs-us-1.hf.co"
-                    | "cas-bridge.xethub.hf.co"
-                    | "cas-server.xethub.hf.co"
-                    | "transfer.xethub.hf.co"
-                    | "github.com"
-                    | "release-assets.githubusercontent.com"
-                    | "objects.githubusercontent.com"
-                    | "files.pythonhosted.org"
-            )
-        )
+        && host.is_some_and(|host| {
+            host == "huggingface.co"
+                || host.ends_with(".cdn.hf.co")
+                || host.ends_with(".xethub.hf.co")
+                || matches!(
+                    host,
+                    "github.com"
+                        | "release-assets.githubusercontent.com"
+                        | "objects.githubusercontent.com"
+                        | "files.pythonhosted.org"
+                )
+        })
 }
 fn http_client() -> Result<reqwest::Client, String> {
     reqwest::Client::builder()
@@ -3209,8 +3205,14 @@ mod tests {
         assert!(allowed_url(
             &reqwest::Url::parse("https://us.aws.cdn.hf.co/official-object").unwrap()
         ));
+        assert!(allowed_url(
+            &reqwest::Url::parse("https://us.gcp.cdn.hf.co/official-object").unwrap()
+        ));
         assert!(!allowed_url(
             &reqwest::Url::parse("https://us.aws.cdn.hf.co.evil.test/object").unwrap()
+        ));
+        assert!(!allowed_url(
+            &reqwest::Url::parse("https://evilcdn.hf.co.evil.test/object").unwrap()
         ));
         let tmp = tempfile::tempdir().unwrap();
         let path = tmp.path().join("a");
