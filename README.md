@@ -1,6 +1,6 @@
 # Image Studio
 
-Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，工作区参考 Cherry Studio 绘图页。已接入 Z-Image Turbo 的受控安装、独立推理进程、任务记录和 PNG 资产保存；创作页以多会话组织多轮提示词和图片，发送后立即显示图片占位与真实阶段进度，正式结果在同一卡片原位出现。功能页按创作目的展示真实能力，作品页跨会话浏览正式 AssetRef，任务中心提供宿主侧状态筛选、检索、稳定分页和可读制作记录。模型页由宿主目录驱动，可检索首批四个目标并分开展示接入、安装、运行时、设备与可执行状态；设置页提供持久外观偏好、显式新会话默认值、真实存储和诊断信息。草稿、会话、未发送输入、界面偏好与新会话默认值可跨重启恢复。M3 Max / 128 GiB 已完成三个尺寸的真实中英文生成、禁网生成、原生 PNG 导出与取消；完整范围和恢复证据见 [首个模型验收](verification/first-generation-results.md)、[会话式生成验收](verification/conversation-generation-results.md)、[模型设置验收](verification/model-catalog-settings-results.md) 与 [功能作品任务验收](verification/feature-works-task-results.md)。
+Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，工作区参考 Cherry Studio 绘图页。已接入 Z-Image Turbo 与 FLUX.2 Klein 4B distilled 的受控安装、独立推理进程、任务记录和 PNG 资产保存；Z-Image 提供文生图，Klein 提供文生图与单图指令编辑。创作页以多会话组织多轮提示词和图片，发送后立即显示图片占位与真实阶段进度，正式结果在同一卡片原位出现。功能页按创作目的展示真实能力，作品页跨会话浏览正式 AssetRef，任务中心提供宿主侧状态筛选、检索、稳定分页和可读制作记录。模型页由宿主目录驱动，可检索首批四个目标并分开展示接入、安装、运行时、设备与可执行状态；设置页提供持久外观偏好、显式新会话默认值、真实存储和诊断信息。草稿、会话、未发送输入、界面偏好与新会话默认值可跨重启恢复。M3 Max / 128 GiB 已完成 Z-Image 与 Klein 的真实中英文生成、Klein 单图编辑、禁网执行、原生 PNG 导出、取消和恢复；Klein 阶段 50/50 必需项通过，完整证据见 [Klein 阶段验收](verification/planned-models-20261031/results.md)，Z-Image 基线见 [首个模型验收](verification/first-generation-results.md)、[会话式生成验收](verification/conversation-generation-results.md)、[模型设置验收](verification/model-catalog-settings-results.md) 与 [功能作品任务验收](verification/feature-works-task-results.md)。
 
 ## 构建和启动
 
@@ -30,9 +30,13 @@ npm --prefix apps/frontend run dev
 
 浏览器预览不提供原生安装、生成、持久化或通信诊断；修改界面后，重新运行前端 build 和 cargo build 以刷新原生内嵌页面。
 
-## 首个本地模型
+## 本地模型
 
-在模型页明确点击“安装模型与运行环境”，安装完成并通过组件校验和设备探针后，才能提交真实生成。普通启动不会下载或加载模型。固定组合为 Z-Image Turbo revision `f332072aa78be7aecdf3ee76d5c247082da564a6`、MFLUX 0.24.0 和应用管理的 Python 3.13.12；不修改系统 Python，也不接收任意下载 URL 或 Python 命令。
+在模型页明确点击“安装模型与运行环境”，安装完成并通过组件校验和设备探针后，才能提交真实生成。普通启动不会下载或加载模型。各型号只使用已登记的固定清单、运行时和配方；应用不修改系统 Python，也不接收任意下载 URL 或 Python 命令。
+
+### Z-Image Turbo
+
+固定组合为 revision `f332072aa78be7aecdf3ee76d5c247082da564a6`、MFLUX 0.24.0 和应用管理的 Python 3.13.12。
 
 - 原始模型组件约 **32.85 GB / 30.59 GiB**，另需运行时和安装临时空间。q4 在加载时执行，不减少原始下载量。
 - 每次一张 PNG，支持 1024×1024、1024×768、768×1024，固定 9 步。种子可为空或 u32；实际种子保存在制作记录中。
@@ -40,9 +44,17 @@ npm --prefix apps/frontend run dev
 - 一次只运行一个任务。取消先请求合作退出，必要时由原生监督强制回收；清理完成前不会显示资源已释放。
 - 安装完整后生成只用本地组件。探针只证明版本和设备小算子通过；整模型验证范围以验收材料为准。目前仅面向 macOS arm64 / M3 Max 128 GiB 验收。
 
+### FLUX.2 Klein 4B distilled
+
+固定快照为 revision `e7b7dc27f91deacad38e78976d1f2b499d76a294`，使用独立 `mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2` 运行时与 `studio-mflux-worker-0.2.0`。18 个模型组件共 `15,980,131,745` bytes，安装与执行前逐文件校验 SHA-256。
+
+- 文生图固定 1024×1024、q4 加载、4 步、guidance 1.0；单图编辑使用 Klein 单参考条件分支，不把 img2img 强度伪装成指令编辑。
+- 两者共用同一已核验模型快照和运行时，但分别完成真实执行、质量、生命周期和原生 UI 验收。
+- Klein 不借用 Z-Image 的安装或就绪状态；多参考编辑、其他 Klein 变体和替换文本编码器不在当前范围。
+
 ## 模型目录与应用设置
 
-模型页的权威目录位于 [catalog.json](resources/model-catalog/catalog.json)，只把 Z-Image Turbo 标为已接入和当前可执行；FLUX.2 Klein 4B distilled、BiRefNet general epoch_244、Real-ESRGAN x4plus 是计划型号。列表搜索、一级筛选与能力筛选组合在本地有界目录中完成，不触发下载、散列、设备探针或推理。安装动作仍只调用现有 Z-Image 安装器。
+模型页的权威目录位于 [catalog.json](resources/model-catalog/catalog.json)，当前把 Z-Image Turbo 与 FLUX.2 Klein 4B distilled 标为已接入并支持受控安装；BiRefNet general epoch_244 与 Real-ESRGAN x4plus 仍是计划型号。列表搜索、一级筛选与能力筛选组合在本地有界目录中完成，不触发下载、散列、设备探针或推理。安装动作按登记 `install_id` 调用对应型号的安装器，不接收前端提供的路径、地址或命令。
 
 设置页分为“通用与外观、创作默认值、存储、运行环境与诊断、关于”：
 
@@ -56,12 +68,12 @@ npm --prefix apps/frontend run dev
 
 ## 功能、作品与任务
 
-- 功能页只把宿主登记为已接入且依赖真实的文生图显示为可开始；图片编辑、去背景和放大仅展示计划范围，不创建假任务。文生图入口直接定位当前会话的现有 composer。
+- 功能页只把宿主登记为已接入且依赖真实的能力显示为可开始；当前文生图和 Klein 单图编辑可进入统一 composer，去背景和放大仅展示计划范围，不创建假任务。
 - 作品页只投影正式 AssetRef，可按日期、型号、尺寸与会话组合筛选，支持网格/列表、预览、原生 PNG 导出、制作记录和可靠的来源会话返回。示例、候选与失败 Attempt 不计入作品。
 - 任务中心在宿主持久库执行状态筛选、提示词/会话/型号检索和稳定游标分页，同条件返回计数。详情先显示请求、来源、实际种子、Attempt、阶段、错误与下一步，完整 manifest/日志按需展开。
 - 没有可靠会话归属的旧任务或直接验收任务明确显示“历史生成”，不会按提示词猜测绑定到当前草稿。
 
-默认数据位于 `~/Library/Application Support/ImageStudio`：SQLite schema v3 保存项目、会话、轮次、每会话草稿、任务、完成时间和制作记录；版本化 `application-preferences.json` 保存应用偏好与新会话默认值，`models/` 与 `runtimes/` 保存版本化安装，`assets/` 保存不可变结果。v1 草稿会逐一迁移成会话，无法确认归属的旧 Job 统一进入“历史生成”，不按提示词猜关联。v2 任务可完整读取，但历史记录没有保存精确完成时间时会显示“时间未记录”。缓存与日志分别位于 `~/Library/Caches/ImageStudio`、`~/Library/Logs/ImageStudio`。可用 `--data-dir PATH` 创建独立测试根；同一数据根只允许一个宿主。
+默认数据位于 `~/Library/Application Support/ImageStudio`：SQLite schema v5 保存项目、会话、轮次、受控源图、任务、完成时间和制作记录；版本化 `application-preferences.json` 保存应用偏好与新会话默认值，`models/`、`runtimes/` 与 `inputs/` 保存版本化安装和受控来源，`assets/` 保存不可变结果。v1 草稿会逐一迁移成会话，无法确认归属的旧 Job 统一进入“历史生成”，不按提示词猜关联。旧任务仍可完整读取，历史记录没有保存精确完成时间时会显示“时间未记录”。缓存与日志分别位于 `~/Library/Caches/ImageStudio`、`~/Library/Logs/ImageStudio`。可用 `--data-dir PATH` 创建独立测试根；同一数据根只允许一个宿主。
 
 只有图片验证并完成数据库提交后，任务才成功。重启把未终结执行标为中断，用户明确重试才创建新 Attempt；不恢复采样步数。模型缺失不影响查看和导出已有图片。外部删除或改写图片会显示资产异常，原制作记录保留。保存失败时请重试或复制草稿；强制结束应用只恢复最近已提交版本。
 
@@ -136,6 +148,8 @@ python3 scripts/check-offline-startup.py
 前者在独立源码副本中执行离线 npm 安装、前端构建和 Rust 构建，复用隔离 target 缓存，不宣称冷构建；后者仅对测试进程施加禁止联网的 sandbox profile，观测 Tauri 主 WebView 页面加载完成后自动结束测试进程，不修改系统网络设置。
 
 会话、发送、进度、迁移和恢复结果见 [会话式生成验收](verification/conversation-generation-results.md)，机器可读记录见 [会话验收数据](verification/conversation-validation.json)。模型目录、设置持久化和窄窗结果见 [模型设置验收](verification/model-catalog-settings-results.md) 与 [机器可读记录](verification/model-catalog-settings-acceptance.json)。功能目录、作品库、任务中心与真实生成联动见 [功能作品任务验收](verification/feature-works-task-results.md) 和 [机器可读记录](verification/feature-works-task-acceptance.json)。原始工作区结果见 [Cherry 工作区验收](verification/cherry-workspace-results.md)，基础框架记录见 [基础框架验收记录](verification/foundation-results.md)、[依赖与版本](verification/dependencies.json) 和 [字体来源及许可](resources/fonts/README.md)。
+
+2026-10-31 的 Klein 阶段认证覆盖安装、文生图、单图编辑、质量、生命周期、安全边界和原生日常操作，结果为 50 通过、0 失败、0 未运行、0 阻塞。真实中断续传使用用户授权的国内镜像补齐传输，但 18/18 文件仍按官方固定 revision、字节数和 SHA-256 核验；正式安装器随后在全树禁网环境完成校验、运行时探针和激活。完整结果见 [Klein 阶段报告](verification/planned-models-20261031/results.md) 与 [机器可读明细](verification/planned-models-20261031/klein-acceptance.json)。
 
 2026-10-31 的当前模型复认证覆盖 37 个 P0 用例，结果为 37 通过、0 失败、0 阻塞。空缓存安装经固定 Hugging Face revision 完成组件校验、运行时激活和 M3 Max GPU 探针；原生 SCIM 拼音候选确认与未确认组合门禁通过。快速双击误取消、作品页首次旧计数和图片查看器重开问题也已完成原生回归。完整结果见 [模型复认证报告](verification/model-usability-20261031/results.md)、[机器可读明细](verification/model-usability-20261031/acceptance.json) 与 [质量审阅](verification/model-usability-20261031/quality-review.json)。
 

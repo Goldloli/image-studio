@@ -13,6 +13,6 @@
 | 5 | Qwen 2.1 / 官方 Turbo | 按[既有方案](../introduce-qwen21-and-moss-image/README.md)执行 |
 | 6 | MOSS-Image-SFT | 在 Qwen 阶段通过后执行 |
 
-三个新型号的本机加载、推理、性能、质量和取消恢复目前均为 **not_run**。本轮证据只有官方源码/发布元数据与现有代码审阅。文档校验、上游支持或设备小算子探针都不能计为模型通过。
+Klein 已在 Apple M3 Max / 128 GiB 完成安装、文生图、单图编辑、质量、生命周期、禁网、恢复和原生日常验收，结构化结果为 `50 passed / 0 failed / 0 not_run / 0 blocked`，见[阶段报告](../../../verification/planned-models-20261031/results.md)。BiRefNet 和 Real-ESRGAN 的实现与真实执行仍为 **not_run**；文档校验、上游支持或设备小算子探针都不能计为模型通过。
 
 用户明确确认后才能开始实现；OpenSpec artifacts complete / apply ready 仅表示文档齐全。本 change 获批后可按既定阶段连续推进，不要求每个步骤重复审批。Qwen/MOSS 实施还须其自身方案获批且本批认证通过。

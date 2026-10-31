@@ -2,7 +2,7 @@
 
 模型中心的四个首批目标只有 Z-Image Turbo 已接入；Klein、BiRefNet 和 Real-ESRGAN 仍只有目录说明。用户要求先接通并测试这三个计划型号，全部验收后再推进 Qwen 和 MOSS，因此需要补齐实际安装、图片输入、不同执行器及真实产品验收。
 
-**状态：用户已确认实施。** 2026-10-31 用户确认按 Klein → BiRefNet → Real-ESRGAN → 三型号整批验收的顺序推进。调研阶段没有下载新权重、安装依赖或执行新模型；Z-Image 历史认证为 37/37 P0，通过结论见[现有验收报告](../../../verification/model-usability-20261031/results.md)，不能代替本批测试。
+**状态：用户已确认实施。** 2026-10-31 用户确认按 Klein → BiRefNet → Real-ESRGAN → 三型号整批验收的顺序推进。Klein 阶段已完成并通过 50/50 必需项，见[阶段报告](../../../verification/planned-models-20261031/results.md)；BiRefNet 与 Real-ESRGAN 尚未开始真实实现和认证。Z-Image 历史认证为 37/37 P0，通过结论见[现有验收报告](../../../verification/model-usability-20261031/results.md)，不能代替本批剩余测试。
 
 ## What Changes
 

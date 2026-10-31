@@ -1,5 +1,7 @@
 # 09 · ASRbox 全页面调查与 Image Studio 页面蓝图
 
+> 时点说明：本文保留 2026-10-30 的方案调研快照。下文“计划中/未实现”的判断反映当时状态；FLUX.2 Klein 4B distilled 已于 2026-10-31 完成文生图与单图编辑阶段验收，当前状态以 [Klein 阶段报告](../verification/planned-models-20261031/results.md) 和模型目录为准。
+
 研究日期：2026-10-30，Asia/Shanghai。用户要求模型管理具备模型列表，并深入调查设置、功能与其他页面。本记录承接已讨论的 Codex/ZCode 式会话管理，保留当前用户满意的桌面视觉方向。
 
 **本文中的后续页面仍属于研究或待确认建议，不是新增功能已经批准或实现的验收。** [introduce-generation-conversation](../openspec/changes/archive/2026-10-30-introduce-generation-conversation/proposal.md) 已按用户确认完成实现、[实机验收](../verification/conversation-generation-results.md)并归档。这里保留整体页面地图与后续建议边界，其余范围须分别走 change 流程。
