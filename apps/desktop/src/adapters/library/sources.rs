@@ -475,7 +475,7 @@ fn digest(bytes: &[u8]) -> ContentHash {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use image::{GenericImageView, ImageBuffer, Luma, Rgb};
+    use image::{GenericImageView, ImageBuffer, Luma, Rgb, Rgba};
 
     fn open_library(root: &Path) -> Library {
         Library::open(root, vec![]).unwrap()
@@ -575,6 +575,84 @@ mod tests {
         let oversized = outside.path().join("oversized.bin");
         fs::write(&oversized, vec![0u8; MAX_SOURCE_BYTES as usize + 1]).unwrap();
         assert!(library.import_source(&oversized).is_err());
+        assert!(library.imported_sources().unwrap().is_empty());
+        assert_eq!(fs::read_dir(root.path().join("inputs")).unwrap().count(), 0);
+    }
+
+    #[test]
+    fn rejects_sixteen_bit_animated_icc_and_oversized_png() {
+        let root = tempfile::tempdir().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        let mut library = open_library(root.path());
+
+        let sixteen_bit = outside.path().join("sixteen-bit.png");
+        ImageBuffer::from_pixel(2, 2, Rgba([100u16, 200, 300, u16::MAX]))
+            .save(&sixteen_bit)
+            .unwrap();
+        assert!(
+            library
+                .import_source(&sixteen_bit)
+                .unwrap_err()
+                .to_string()
+                .contains("8-bit")
+        );
+
+        let animated = outside.path().join("animated.png");
+        let mut encoder = png::Encoder::new(fs::File::create(&animated).unwrap(), 1, 1);
+        encoder.set_color(png::ColorType::Rgba);
+        encoder.set_depth(png::BitDepth::Eight);
+        encoder.set_animated(2, 0).unwrap();
+        let mut writer = encoder.write_header().unwrap();
+        writer.write_image_data(&[10, 20, 30, 255]).unwrap();
+        drop(writer);
+        assert!(
+            library
+                .import_source(&animated)
+                .unwrap_err()
+                .to_string()
+                .contains("动画")
+        );
+
+        let mut compressed =
+            flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::default());
+        std::io::Write::write_all(&mut compressed, b"unsupported ICC profile").unwrap();
+        let compressed = compressed.finish().unwrap();
+        let mut iccp = b"fixture\0".to_vec();
+        iccp.push(0);
+        iccp.extend_from_slice(&compressed);
+        let unsupported_icc = outside.path().join("icc.png");
+        let mut encoder = png::Encoder::new(fs::File::create(&unsupported_icc).unwrap(), 1, 1);
+        encoder.set_color(png::ColorType::Rgb);
+        encoder.set_depth(png::BitDepth::Eight);
+        let mut writer = encoder.write_header().unwrap();
+        writer
+            .write_chunk(png::chunk::ChunkType(*b"iCCP"), &iccp)
+            .unwrap();
+        writer.write_image_data(&[10, 20, 30]).unwrap();
+        drop(writer);
+        assert!(
+            library
+                .import_source(&unsupported_icc)
+                .unwrap_err()
+                .to_string()
+                .contains("ICC")
+        );
+
+        let oversized_header = outside.path().join("oversized-header.png");
+        let mut encoder = png::Encoder::new(
+            fs::File::create(&oversized_header).unwrap(),
+            MAX_SOURCE_EDGE + 1,
+            1,
+        );
+        encoder.set_color(png::ColorType::Rgb);
+        encoder.set_depth(png::BitDepth::Eight);
+        let mut writer = encoder.write_header().unwrap();
+        writer
+            .write_image_data(&vec![0; usize::try_from(MAX_SOURCE_EDGE + 1).unwrap() * 3])
+            .unwrap();
+        drop(writer);
+        assert!(library.import_source(&oversized_header).is_err());
+
         assert!(library.imported_sources().unwrap().is_empty());
         assert_eq!(fs::read_dir(root.path().join("inputs")).unwrap().count(), 0);
     }
