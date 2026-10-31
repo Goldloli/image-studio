@@ -1,0 +1,17 @@
+[
+  {
+    "id": "T01",
+    "prompt": "一只橙色的小猫坐在窗边，窗外是秋天的树叶，温暖自然光，细腻的水彩插画。",
+    "seed": "42"
+  },
+  {
+    "id": "T02",
+    "prompt": "A white ceramic teapot and a blue cup on a wooden table, soft morning light, clean product photography, plain warm background.",
+    "seed": "43"
+  },
+  {
+    "id": "T03",
+    "prompt": "一张简洁的咖啡店海报，标题文字必须是“秋日咖啡”，副标题是“周末限定”，米色背景，中间一杯热咖啡，清晰的中文排版。",
+    "seed": "44"
+  }
+]

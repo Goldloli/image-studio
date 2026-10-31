@@ -131,6 +131,9 @@ class CatalogContractTests(unittest.TestCase):
             [
                 "birefnet-general-epoch-244",
                 "flux2-klein-4b-distilled",
+                "moss-image-sft-mflux-v1",
+                "qwen-image-2.1-mflux-v1",
+                "qwen-image-2.1-turbo-mflux-v1",
                 "realesrgan-x4plus",
                 "z-image-turbo-mflux-v1",
             ],

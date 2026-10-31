@@ -929,20 +929,26 @@ def run_contract_c04(_: Path) -> CaseResult:
         if entry.get("installerSupported") is True or entry.get("installId")
     ]
     passed = (
-        len(entries) == 4
+        len(entries) == 7
         and implemented_ids
         == [
             "birefnet-general-epoch-244",
             "flux2-klein-4b-distilled",
+            "moss-image-sft-mflux-v1",
+            "qwen-image-2.1-mflux-v1",
+            "qwen-image-2.1-turbo-mflux-v1",
             "realesrgan-x4plus",
             "z-image-turbo-mflux-v1",
         ]
         and planned_ids == []
-        and len(executable) == 4
+        and len(executable) == 7
         and {entry.get("id") for entry in executable}
         == {
             "birefnet-general-epoch-244",
             "flux2-klein-4b-distilled",
+            "moss-image-sft-mflux-v1",
+            "qwen-image-2.1-mflux-v1",
+            "qwen-image-2.1-turbo-mflux-v1",
             "realesrgan-x4plus",
             "z-image-turbo-mflux-v1",
         }
@@ -952,7 +958,7 @@ def run_contract_c04(_: Path) -> CaseResult:
     return build_case_result(
         "C04",
         "passed" if passed else "failed",
-        "four implemented executable entries and no planned entries"
+        "seven implemented executable entries and no planned entries"
         if passed
         else "catalog status or executable actions do not match the certification scope",
         evidence_items=[evidence(catalog_path)],

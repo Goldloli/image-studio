@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "createdDate": "2026-11-01",
+  "sources": {
+    "textInputs": {
+      "path": "text-inputs.json",
+      "sha256": "1f2561587e1783e284d21e588572f58da17931705b9b2251f238c46ea3ca127b"
+    },
+    "mossInputs": {
+      "path": "moss-inputs.json",
+      "sha256": "91f49891ef72d6cd838a16b432a197170c22c8fdbb7a422ea127c2cbf36a22a6"
+    },
+    "mossLayout": {
+      "path": "moss-layout-t04.prompt.json",
+      "sha256": "3f31c9ecd39b0b23300845c5b3d87a6cca926670dbb2452f8f8a11772f226651",
+      "sourceRepository": "https://github.com/OpenMOSS/MOSS-Image",
+      "sourceRevision": "2b46b1e0e13b5aaec253879e0d006a42564b8b27",
+      "sourceDocument": "USERGUIDE.md"
+    }
+  }
+}

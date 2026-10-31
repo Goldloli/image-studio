@@ -1,0 +1,55 @@
+{
+  "summary": {
+    "meta": [
+      "poster"
+    ],
+    "canvas": "single",
+    "caption": "一张温暖明亮的周末市集海报，奶油色背景，左侧是新鲜水果篮，右侧是手工面包，顶部有清晰的中文标题与英文副标题，简洁平面设计。"
+  },
+  "items": [
+    {
+      "label": "text",
+      "caption": "顶部居中的深棕色中文标题。",
+      "text": "周末市集",
+      "bbox": [
+        -460,
+        -400,
+        -260,
+        400
+      ]
+    },
+    {
+      "label": "text",
+      "caption": "标题下方居中的橙红色英文副标题。",
+      "text": "OPEN",
+      "bbox": [
+        -250,
+        -250,
+        -150,
+        250
+      ]
+    },
+    {
+      "label": "object",
+      "caption": "画面左侧的新鲜水果篮。",
+      "bbox": [
+        -100,
+        -420,
+        300,
+        -80
+      ]
+    },
+    {
+      "label": "object",
+      "caption": "画面右侧的手工面包。",
+      "bbox": [
+        -100,
+        80,
+        300,
+        420
+      ]
+    }
+  ],
+  "bbox_coord_space": "abs_centralized",
+  "bbox_format": "yxyx"
+}
