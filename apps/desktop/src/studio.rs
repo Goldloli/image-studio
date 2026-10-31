@@ -1256,9 +1256,16 @@ impl StudioService {
         let id = JobId::new(id).map_err(|e| e.to_string())?;
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
         let previous = self.with_library(|library| library.job(&id))?;
-        let ready = installation.ready_paths(previous.request.model_variant_id.as_str())?;
-        let environment =
-            installation.plan_environment(previous.request.model_variant_id.as_str())?;
+        // Legacy v1 froze the model variant, which predates the product install ID.
+        let install_id = if previous.request.model_variant_id.as_str()
+            == studio_core::generation::Z_IMAGE_MODEL
+        {
+            INSTALL_ID
+        } else {
+            previous.request.model_variant_id.as_str()
+        };
+        let ready = installation.ready_paths(install_id)?;
+        let environment = installation.plan_environment(install_id)?;
         let scheduler_matches = studio_core::recipes::Recipe::from_request(&previous.request)
             .is_ok_and(|recipe| {
                 matches!(
@@ -1446,6 +1453,64 @@ mod tests {
             root.path().join("not-installed-supervisor"),
         );
         (root, service)
+    }
+    #[test]
+    fn legacy_v1_retry_checks_the_registered_z_image_installation() {
+        use studio_core::{
+            contracts::{ComponentSnapshot, DeviceSnapshot, RuntimeSnapshot, SourceRevision},
+            generation::PlanEnvironment,
+        };
+        let (_root, service) = fixture();
+        let frozen = freeze_z_image(
+            GenerationInput {
+                request_id: RequestId::new("legacy-retry-request").unwrap(),
+                project_id: ProjectId::new("default").unwrap(),
+                idempotency_key: IdempotencyKey::new("legacy-retry-key").unwrap(),
+                plan_id: PlanId::new("legacy-retry-plan").unwrap(),
+                prompt: "Legacy v1 image".into(),
+                width: 1024,
+                height: 1024,
+                count: 1,
+                seed: Some(42),
+            },
+            42,
+            PlanEnvironment {
+                components: vec![ComponentSnapshot {
+                    role: "transformer".into(),
+                    source: SourceRevision {
+                        source: "fixture:legacy-model".into(),
+                        revision: "fixed".into(),
+                    },
+                    content_hash: ContentHash::new("a".repeat(64)).unwrap(),
+                }],
+                runtime: RuntimeSnapshot {
+                    package_id: "fixture-runtime".into(),
+                    engine: "fixture".into(),
+                    source: SourceRevision {
+                        source: "fixture:legacy-runtime".into(),
+                        revision: "fixed".into(),
+                    },
+                },
+                device: DeviceSnapshot {
+                    device_id: "fixture-device".into(),
+                    precision: "fixture".into(),
+                },
+                scheduler: "linear".into(),
+            },
+        )
+        .unwrap();
+        let submitted = service
+            .with_library(|library| library.submit(frozen.request, frozen.plan))
+            .unwrap();
+        let error = service.retry(submitted.job.job_id.as_str()).unwrap_err();
+        assert!(!error.contains("未登记的安装标识"), "{error}");
+        let models = service.model_views();
+        assert_eq!(models[0]["phase"], "unavailable");
+        assert!(
+            models[1..]
+                .iter()
+                .all(|model| model["phase"] == "not_installed")
+        );
     }
     #[test]
     fn empty_library_can_save_and_restore_without_models() {
