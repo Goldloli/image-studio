@@ -89,6 +89,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .to_owned();
         let started = Instant::now();
         let mut cancel_requested = false;
+        let mut last_observation = String::new();
         loop {
             let current = service.snapshot()?;
             let job = current["jobs"]
@@ -96,14 +97,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .and_then(|jobs| jobs.iter().find(|job| job["id"] == job_id.as_str()))
                 .cloned()
                 .ok_or("retried job is not visible")?;
-            println!(
-                "{}",
-                json!({
-                    "job": job,
-                    "execution": current["execution"],
-                    "elapsed_seconds": started.elapsed().as_secs()
-                })
+            let observation = format!(
+                "{}|{}|{}|{}|{}",
+                current["execution"]["stage"].as_str().unwrap_or(""),
+                current["execution"]["step"],
+                current["execution"]["total"],
+                job["state"].as_str().unwrap_or(""),
+                started.elapsed().as_secs()
             );
+            if observation != last_observation {
+                println!(
+                    "{}",
+                    json!({
+                        "job": job,
+                        "execution": current["execution"],
+                        "elapsed_seconds": started.elapsed().as_secs()
+                    })
+                );
+                last_observation = observation;
+            }
             if !cancel_requested {
                 let by_time = cancel_after
                     .is_some_and(|seconds| started.elapsed() >= Duration::from_secs(seconds));
@@ -244,6 +256,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .to_owned();
     let started = Instant::now();
     let mut cancel_requested = false;
+    let mut last_observation = String::new();
     loop {
         let current = service.snapshot()?;
         let turn = current["turns"]
@@ -251,14 +264,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .and_then(|turns| turns.iter().find(|turn| turn["id"] == turn_id))
             .cloned()
             .ok_or("accepted turn is not visible")?;
-        println!(
-            "{}",
-            json!({
-                "turn": turn,
-                "execution": current["execution"],
-                "elapsed_seconds": started.elapsed().as_secs()
-            })
+        let observation = format!(
+            "{}|{}|{}|{}|{}",
+            current["execution"]["stage"].as_str().unwrap_or(""),
+            current["execution"]["step"],
+            current["execution"]["total"],
+            turn["state"].as_str().unwrap_or(""),
+            started.elapsed().as_secs()
         );
+        if observation != last_observation {
+            println!(
+                "{}",
+                json!({
+                    "turn": turn,
+                    "execution": current["execution"],
+                    "elapsed_seconds": started.elapsed().as_secs()
+                })
+            );
+            last_observation = observation;
+        }
         if !cancel_requested {
             let by_time = cancel_after
                 .is_some_and(|seconds| started.elapsed() >= Duration::from_secs(seconds));
