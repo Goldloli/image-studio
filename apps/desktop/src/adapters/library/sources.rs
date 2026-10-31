@@ -509,8 +509,7 @@ mod tests {
             .unwrap();
         let jpeg = fs::read(&original).unwrap();
         let mut exif =
-            b"Exif\0\0II\x2a\0\x08\0\0\0\x01\0\x12\x01\x03\0\x01\0\0\0\x06\0\0\0\0\0\0\0"
-                .to_vec();
+            b"Exif\0\0II\x2a\0\x08\0\0\0\x01\0\x12\x01\x03\0\x01\0\0\0\x06\0\0\0\0\0\0\0".to_vec();
         let segment_length = (exif.len() + 2) as u16;
         let mut with_exif = Vec::with_capacity(jpeg.len() + exif.len() + 4);
         with_exif.extend_from_slice(&jpeg[..2]);
