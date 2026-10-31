@@ -1326,7 +1326,7 @@ impl Installation {
         {
             return Err("分段响应字节数不符。".into());
         }
-        let mut file = open_regular(path, true, offset > 0)?;
+        let mut file = open_regular(path, true, offset == 0)?;
         if offset > 0 {
             use std::io::{Seek, SeekFrom};
             file.seek(SeekFrom::Start(offset)).map_err(err)?;
@@ -1948,6 +1948,51 @@ mod tests {
         task.join().unwrap();
         assert_eq!(fs::read(dest).unwrap(), data);
         assert_eq!(i.snapshot().received_bytes, 11);
+    }
+    #[test]
+    fn segmented_range_resume_preserves_the_existing_prefix() {
+        let (_temp, i) = fixture();
+        let data = b"hello world";
+        let(url,request,task)=server(b"HTTP/1.1 206 Partial Content\r\nContent-Length: 6\r\nContent-Range: bytes 5-10/11\r\nETag: \"one\"\r\nConnection: close\r\n\r\n world".to_vec());
+        let path = i.cache().join("segment.part");
+        let metadata_path = path.with_extension("part.json");
+        fs::write(&path, b"hello").unwrap();
+        atomic_json(
+            &metadata_path,
+            &serde_json::json!({
+                "sha256": format!("{:x}", Sha256::digest(data)),
+                "etag": "\"one\"",
+                "start": 0,
+                "end": 11,
+                "total": 11,
+                "offset": 5
+            }),
+        )
+        .unwrap();
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        runtime
+            .block_on(i.download_segment(
+                &http_client().unwrap(),
+                SegmentDownload {
+                    url: &url,
+                    path: &path,
+                    metadata_path: &metadata_path,
+                    sha256: &format!("{:x}", Sha256::digest(data)),
+                    etag: "\"one\"",
+                    start: 0,
+                    end: 11,
+                    total: 11,
+                },
+            ))
+            .unwrap();
+        let headers = request.recv().unwrap().to_ascii_lowercase();
+        assert!(headers.contains("range: bytes=5-"));
+        assert!(headers.contains("if-range: \"one\""));
+        task.join().unwrap();
+        assert_eq!(fs::read(path).unwrap(), data);
     }
     #[test]
     fn full_response_replaces_a_partial_without_appending() {
