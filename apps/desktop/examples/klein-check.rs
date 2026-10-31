@@ -23,6 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut retry_job = None;
     let mut cancel_after = None;
     let mut cancel_stage = None;
+    let mut cancel_step = None;
     let mut poll_milliseconds = 5000;
     let mut accept_cancelled = false;
     while let Some(flag) = args.next() {
@@ -43,6 +44,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     return Err("unsupported cancel stage".into());
                 }
                 cancel_stage = Some(stage);
+            }
+            "--cancel-at-step" => {
+                cancel_step = Some(args.next().ok_or("missing cancel step")?.parse::<u32>()?)
             }
             "--poll-milliseconds" => {
                 poll_milliseconds = args.next().ok_or("missing poll interval")?.parse::<u64>()?;
@@ -119,7 +123,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             if !cancel_requested {
                 let by_time = cancel_after
                     .is_some_and(|seconds| started.elapsed() >= Duration::from_secs(seconds));
-                let by_stage = cancel_stage.as_deref() == current["execution"]["stage"].as_str();
+                let minimum_step = cancel_step.unwrap_or_else(|| {
+                    if cancel_stage.as_deref() == Some("sampling") {
+                        1
+                    } else {
+                        0
+                    }
+                });
+                let by_stage = cancel_stage.as_deref() == current["execution"]["stage"].as_str()
+                    && current["execution"]["step"].as_u64().unwrap_or(0)
+                        >= u64::from(minimum_step);
                 if by_time || by_stage {
                     service.cancel(&job_id)?;
                     cancel_requested = true;
@@ -286,7 +299,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         if !cancel_requested {
             let by_time = cancel_after
                 .is_some_and(|seconds| started.elapsed() >= Duration::from_secs(seconds));
-            let by_stage = cancel_stage.as_deref() == current["execution"]["stage"].as_str();
+            let minimum_step = cancel_step.unwrap_or_else(|| {
+                if cancel_stage.as_deref() == Some("sampling") {
+                    1
+                } else {
+                    0
+                }
+            });
+            let by_stage = cancel_stage.as_deref() == current["execution"]["stage"].as_str()
+                && current["execution"]["step"].as_u64().unwrap_or(0) >= u64::from(minimum_step);
             if by_time || by_stage {
                 service.conversation_cancel_turn(&turn_id)?;
                 cancel_requested = true;
