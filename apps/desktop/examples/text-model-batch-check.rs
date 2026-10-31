@@ -47,9 +47,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         match flag.as_str() {
             "--data-dir" => root = Some(PathBuf::from(args.next().ok_or("missing data root")?)),
             "--model-id" => model_id = Some(args.next().ok_or("missing model ID")?),
-            "--specs" => {
-                specs_path = Some(PathBuf::from(args.next().ok_or("missing specs path")?))
-            }
+            "--specs" => specs_path = Some(PathBuf::from(args.next().ok_or("missing specs path")?)),
             "--export-dir" => {
                 export_directory = Some(PathBuf::from(
                     args.next().ok_or("missing export directory")?,
@@ -232,7 +230,10 @@ fn wait_for_turn(service: &StudioService, turn_id: &str) -> Result<Value, String
             if stage_sequence.last() != Some(&stage) {
                 stage_sequence.push(stage);
             }
-            if stage_sequence.last().is_some_and(|stage| stage == "sampling") {
+            if stage_sequence
+                .last()
+                .is_some_and(|stage| stage == "sampling")
+            {
                 max_sampling_step = max_sampling_step
                     .max(snapshot["execution"]["step"].as_u64().unwrap_or_default());
             }

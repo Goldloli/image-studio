@@ -288,10 +288,7 @@ fn text_v2_request(
             "quantized_components".into(),
             serde_json::json!(["transformer", "text_encoder"]),
         );
-        parameters.insert(
-            "text_encoder_precision".into(),
-            serde_json::json!("q8"),
-        );
+        parameters.insert("text_encoder_precision".into(), serde_json::json!("q8"));
         parameters.insert("vae_precision".into(), serde_json::json!("bfloat16"));
     }
     ExecuteRequestV2 {
@@ -472,7 +469,9 @@ fn qwen_and_moss_v2_payloads_require_exact_recipe_identity_and_parameters() {
     wrong.capability_id = "image.text-to-image.qwen-image-2.1-turbo.v1".into();
     assert!(wrong.validate().is_err());
     wrong = requests.remove(0);
-    wrong.parameters.insert("steps".into(), serde_json::json!(9));
+    wrong
+        .parameters
+        .insert("steps".into(), serde_json::json!(9));
     assert!(wrong.validate().is_err());
     wrong = requests.remove(0);
     wrong.inputs.push(InputAssetDescriptor {

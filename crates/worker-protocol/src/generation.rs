@@ -316,10 +316,9 @@ impl ExecuteRequestV2 {
                     return Err(Error::Invalid("invalid Qwen 2.1 parameters"));
                 }
             }
-            (
-                "qwen-image-2.1-turbo-mflux-v1",
-                "image.text-to-image.qwen-image-2.1-turbo.v1",
-            ) if self.recipe_id == "qwen21-turbo-txt2img-q8-8-v1" => {
+            ("qwen-image-2.1-turbo-mflux-v1", "image.text-to-image.qwen-image-2.1-turbo.v1")
+                if self.recipe_id == "qwen21-turbo-txt2img-q8-8-v1" =>
+            {
                 validate_text_model_shape(self, &output_roles, 8, 2048)?;
                 let mut expected = text_model_parameters(
                     &self.recipe_id,
@@ -356,10 +355,7 @@ impl ExecuteRequestV2 {
                     "quantized_components".into(),
                     serde_json::json!(["transformer", "text_encoder"]),
                 );
-                expected.insert(
-                    "text_encoder_precision".into(),
-                    serde_json::json!("q8"),
-                );
+                expected.insert("text_encoder_precision".into(), serde_json::json!("q8"));
                 expected.insert("vae_precision".into(), serde_json::json!("bfloat16"));
                 if self.parameters != expected {
                     return Err(Error::Invalid("invalid MOSS-Image-SFT parameters"));
@@ -1126,7 +1122,12 @@ fn validate_text_model_shape(
     {
         return Err(Error::Invalid("invalid text model recipe shape"));
     }
-    expect_outputs(request.outputs.as_slice(), output_roles, &["primary"], "image_rgb")?;
+    expect_outputs(
+        request.outputs.as_slice(),
+        output_roles,
+        &["primary"],
+        "image_rgb",
+    )?;
     if request
         .outputs
         .iter()

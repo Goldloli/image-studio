@@ -24,11 +24,9 @@ pub const REALESRGAN_CAPABILITY: &str = "image.upscale.realesrgan-x4plus.v1";
 pub const QWEN_IMAGE_21_MODEL: &str = "qwen-image-2.1-mflux-v1";
 pub const QWEN_IMAGE_21_CAPABILITY: &str = "image.text-to-image.qwen-image-2.1.v1";
 pub const QWEN_IMAGE_21_TURBO_MODEL: &str = "qwen-image-2.1-turbo-mflux-v1";
-pub const QWEN_IMAGE_21_TURBO_CAPABILITY: &str =
-    "image.text-to-image.qwen-image-2.1-turbo.v1";
+pub const QWEN_IMAGE_21_TURBO_CAPABILITY: &str = "image.text-to-image.qwen-image-2.1-turbo.v1";
 pub const MOSS_IMAGE_SFT_MODEL: &str = "moss-image-sft-mflux-v1";
-pub const MOSS_IMAGE_SFT_CAPABILITY: &str =
-    "image.text-to-image.moss-image-sft.v1";
+pub const MOSS_IMAGE_SFT_CAPABILITY: &str = "image.text-to-image.moss-image-sft.v1";
 
 pub const SOURCE_ROLE: &str = "source";
 pub const PRIMARY_ROLE: &str = "primary";
@@ -153,9 +151,7 @@ impl Recipe {
             (BIREFNET_MODEL, BIREFNET_CAPABILITY) => Self::BiRefNet,
             (REALESRGAN_MODEL, REALESRGAN_CAPABILITY) => Self::RealEsrgan,
             (QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_CAPABILITY) => Self::QwenImage21,
-            (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY) => {
-                Self::QwenImage21Turbo
-            }
+            (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY) => Self::QwenImage21Turbo,
             (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY) => Self::MossImageSft,
             _ => {
                 return Err(ContractError::InvalidValue(
@@ -687,9 +683,7 @@ pub fn freeze_text_model(
 ) -> Result<FrozenRecipe, ContractError> {
     let (model, capability) = match recipe {
         Recipe::QwenImage21 => (QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_CAPABILITY),
-        Recipe::QwenImage21Turbo => {
-            (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY)
-        }
+        Recipe::QwenImage21Turbo => (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY),
         Recipe::MossImageSft => (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY),
         _ => {
             return Err(ContractError::InvalidValue(
@@ -756,8 +750,7 @@ fn validate_text_model_request(
         "Qwen/MOSS text-to-image requires text and no source image",
     )?;
     require(
-        !request.instruction.trim().is_empty()
-            && request.instruction.len() <= MAX_PROMPT_BYTES,
+        !request.instruction.trim().is_empty() && request.instruction.len() <= MAX_PROMPT_BYTES,
         "Qwen/MOSS prompt must contain text and be at most 16 KiB UTF-8",
     )?;
     require(
@@ -1389,10 +1382,7 @@ mod tests {
             ),
         ] {
             let request = request(model, capability, true, false);
-            assert_eq!(
-                validate_recipe_request(&request, None).unwrap(),
-                recipe
-            );
+            assert_eq!(validate_recipe_request(&request, None).unwrap(), recipe);
             let mut altered = request;
             altered.requested_output.width = 768;
             assert!(validate_recipe_request(&altered, None).is_err());
@@ -1450,8 +1440,7 @@ mod tests {
             json!(["transformer"])
         );
 
-        let turbo =
-            freeze_text_model(Recipe::QwenImage21Turbo, input(), 18, env.clone()).unwrap();
+        let turbo = freeze_text_model(Recipe::QwenImage21Turbo, input(), 18, env.clone()).unwrap();
         assert_eq!(turbo.plan.effective_parameters["steps"], 8);
         assert_eq!(
             turbo.plan.effective_parameters["sampling_schedule"],

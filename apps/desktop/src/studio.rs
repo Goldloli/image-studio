@@ -6,8 +6,8 @@ use crate::adapters::{
     generation::GenerationController,
     installation::{
         BIREFNET_INSTALL_ID, INSTALL_ID, InstallationSnapshot, Installations, KLEIN_INSTALL_ID,
-        MOSS_IMAGE_SFT_INSTALL_ID, QWEN_IMAGE_21_INSTALL_ID,
-        QWEN_IMAGE_21_TURBO_INSTALL_ID, REALESRGAN_INSTALL_ID,
+        MOSS_IMAGE_SFT_INSTALL_ID, QWEN_IMAGE_21_INSTALL_ID, QWEN_IMAGE_21_TURBO_INSTALL_ID,
+        REALESRGAN_INSTALL_ID,
     },
     library::{
         AcceptTurnInput, AssetLibraryQuery, DEFAULT_MODEL_ID, DraftRecord, JobRecord, Library,
@@ -544,19 +544,9 @@ impl StudioService {
                 studio_core::recipes::REALESRGAN_CAPABILITY,
                 _,
             ) => params.aspect == "1:1",
-            (
-                QWEN_IMAGE_21_MODEL,
-                QWEN_IMAGE_21_CAPABILITY,
-                false,
-            )
-            | (
-                QWEN_IMAGE_21_TURBO_MODEL,
-                QWEN_IMAGE_21_TURBO_CAPABILITY,
-                false,
-            )
-            | (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY, false) => {
-                params.aspect == "1:1"
-            }
+            (QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_CAPABILITY, false)
+            | (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY, false)
+            | (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY, false) => params.aspect == "1:1",
             _ => false,
         };
         if !supported_combo {
@@ -1117,9 +1107,7 @@ impl StudioService {
             (frozen.request, frozen.plan)
         } else if matches!(
             turn.model_id.as_str(),
-            QWEN_IMAGE_21_INSTALL_ID
-                | QWEN_IMAGE_21_TURBO_INSTALL_ID
-                | MOSS_IMAGE_SFT_INSTALL_ID
+            QWEN_IMAGE_21_INSTALL_ID | QWEN_IMAGE_21_TURBO_INSTALL_ID | MOSS_IMAGE_SFT_INSTALL_ID
         ) {
             let recipe = match turn.model_id.as_str() {
                 QWEN_IMAGE_21_INSTALL_ID => Recipe::QwenImage21,

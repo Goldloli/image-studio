@@ -27,9 +27,9 @@ use studio_core::{
     domain::JobId,
     generation::AttemptState,
     recipes::{
-        BIREFNET_CAPABILITY, KLEIN_EDIT_CAPABILITY, KLEIN_TEXT_CAPABILITY, REALESRGAN_CAPABILITY,
+        BIREFNET_CAPABILITY, KLEIN_EDIT_CAPABILITY, KLEIN_TEXT_CAPABILITY,
         MOSS_IMAGE_SFT_CAPABILITY, QWEN_IMAGE_21_CAPABILITY, QWEN_IMAGE_21_TURBO_CAPABILITY,
-        Recipe, validate_recipe_plan,
+        REALESRGAN_CAPABILITY, Recipe, validate_recipe_plan,
     },
 };
 use uuid::Uuid;

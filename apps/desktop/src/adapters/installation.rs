@@ -353,10 +353,7 @@ impl Installations {
             birefnet: Installation::new_birefnet(paths.clone())?,
             realesrgan: Installation::new_realesrgan(paths.clone())?,
             qwen_image_21: Installation::new_for(paths.clone(), QWEN_IMAGE_21_PROFILE)?,
-            qwen_image_21_turbo: Installation::new_for(
-                paths.clone(),
-                QWEN_IMAGE_21_TURBO_PROFILE,
-            )?,
+            qwen_image_21_turbo: Installation::new_for(paths.clone(), QWEN_IMAGE_21_TURBO_PROFILE)?,
             moss_image_sft: Installation::new_for(paths, MOSS_IMAGE_SFT_PROFILE)?,
         })
     }
@@ -1210,9 +1207,7 @@ impl Installation {
         let mut probe = Command::new(&python);
         probe.args(["-I", "-m", self.inner.profile.worker_module]);
         if self.inner.profile.worker_model_argument {
-            probe
-                .arg("--model-snapshot-id")
-                .arg(&self.inner.model.id);
+            probe.arg("--model-snapshot-id").arg(&self.inner.model.id);
         }
         probe.arg("--probe");
         if self.inner.profile.probe_with_model {
@@ -2838,11 +2833,13 @@ mod tests {
                 installer.inner.runtime.id,
                 "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3"
             );
-            assert_eq!(installer.inner.profile.worker_module, RECIPES_V3_WORKER_MODULE);
+            assert_eq!(
+                installer.inner.profile.worker_module,
+                RECIPES_V3_WORKER_MODULE
+            );
             assert!(installer.inner.profile.worker_model_argument);
             assert!(installer.inner.model.files.iter().all(|file| {
-                file.sha256.len() == 64
-                    && file.sha256.bytes().all(|byte| byte.is_ascii_hexdigit())
+                file.sha256.len() == 64 && file.sha256.bytes().all(|byte| byte.is_ascii_hexdigit())
             }));
             let worker = installer
                 .inner
