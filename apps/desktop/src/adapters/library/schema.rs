@@ -31,8 +31,10 @@ pub(super) fn migrate_v4_to_v5(db: &mut Connection) -> Result<()> {
             byte_count INTEGER NOT NULL CHECK(byte_count > 0),
             original_name TEXT NOT NULL,
             original_sha256 TEXT NOT NULL,
-            orientation INTEGER NOT NULL,
+            orientation TEXT NOT NULL,
             processing_version TEXT NOT NULL,
+            has_transparent_pixels INTEGER NOT NULL DEFAULT 0
+                CHECK(has_transparent_pixels IN (0,1)),
             created_at INTEGER NOT NULL
         );
         CREATE INDEX imported_sources_created

@@ -23,6 +23,7 @@ uuid.workspace = true
 fs2.workspace = true
 rusqlite.workspace = true
 png.workspace = true
+image.workspace = true
 reqwest.workspace = true
 flate2.workspace = true
 tar.workspace = true

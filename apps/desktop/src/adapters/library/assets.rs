@@ -298,7 +298,7 @@ impl Library {
         Ok(())
     }
 
-    fn asset_path(&self, asset: &AssetRef) -> Result<PathBuf> {
+    pub(super) fn asset_path(&self, asset: &AssetRef) -> Result<PathBuf> {
         asset.validate()?;
         let StorageLocation::Managed {
             storage_id,
@@ -322,7 +322,7 @@ impl Library {
         Ok(path)
     }
 
-    fn verify_asset(&self, record: &AssetRecord) -> Result<()> {
+    pub(super) fn verify_asset(&self, record: &AssetRecord) -> Result<()> {
         let mut source = open_regular(&self.asset_path(&record.asset)?, false)?;
         let fingerprint = AssetFingerprint::from_metadata(&source.metadata()?);
         if fingerprint.length != record.byte_count || record.byte_count > MAX_PNG_BYTES {
@@ -365,17 +365,23 @@ impl Library {
     }
 
     pub(super) fn quarantine_orphans(&self) -> Result<()> {
-        let references = {
-            let mut s = self.db.prepare("SELECT relative_path FROM assets")?;
-            s.query_map([], |r| r.get::<_, String>(0))?
-                .collect::<std::result::Result<BTreeSet<_>, _>>()?
-        };
+        let mut references = BTreeSet::new();
+        for table in ["assets", "imported_sources"] {
+            let mut statement = self
+                .db
+                .prepare(&format!("SELECT relative_path FROM {table}"))?;
+            references.extend(
+                statement
+                    .query_map([], |row| row.get::<_, String>(0))?
+                    .collect::<std::result::Result<BTreeSet<_>, _>>()?,
+            );
+        }
         let mut moved = false;
-        for directory in ["assets", "commits"] {
+        for directory in ["assets", "inputs", "commits"] {
             for entry in fs::read_dir(self.root.join(directory))? {
                 let entry = entry?;
                 let relative = format!("{directory}/{}", entry.file_name().to_string_lossy());
-                if directory == "assets" && references.contains(&relative) {
+                if matches!(directory, "assets" | "inputs") && references.contains(&relative) {
                     continue;
                 }
                 fs::rename(
@@ -386,7 +392,7 @@ impl Library {
             }
         }
         if moved {
-            for name in ["assets", "commits", "quarantine"] {
+            for name in ["assets", "inputs", "commits", "quarantine"] {
                 sync_directory(&self.root.join(name))?;
             }
         }

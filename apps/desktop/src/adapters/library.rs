@@ -4,6 +4,7 @@ mod assets;
 mod conversations;
 mod queries;
 mod schema;
+mod sources;
 
 pub use conversations::{
     AcceptTurnInput, AcceptedTurn, ConversationListPage, ConversationRecord, CreatedConversation,
@@ -14,6 +15,7 @@ pub use queries::{
     AssetLibraryQuery, AssetModelFacet, AssetSizeFacet, StableCursor, TaskAdvancedView,
     TaskAttemptView, TaskCenterDetail, TaskCenterItem, TaskCenterPage, TaskCenterQuery, TaskCounts,
 };
+pub use sources::{ImportedSourceRecord, ResolvedSource};
 
 use fs2::FileExt;
 use rusqlite::{Connection, OptionalExtension, TransactionBehavior, params};
