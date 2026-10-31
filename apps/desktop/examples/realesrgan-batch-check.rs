@@ -159,11 +159,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             return Err("duplicate submission did not return the original Turn".into());
         }
         let mut conflicting = request;
-        conflicting.seed = "42".into();
+        let replacement = service.import_source(&sources[(index + 1) % sources.len()])?;
+        conflicting.source_asset_id = replacement["assetId"].as_str().map(str::to_string);
         if service.conversation_send(conflicting).is_ok() {
             return Err("same key with different content was accepted".into());
         }
         let mut busy_request_rejected = false;
+        let mut execution_repair_rejected = false;
         if index == 0 {
             let wait_deadline = Instant::now() + Duration::from_secs(10);
             while !service.snapshot()?["execution"]["busy"]
@@ -175,18 +177,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
                 std::thread::sleep(Duration::from_millis(10));
             }
+            if service.install("realesrgan-x4plus").is_ok()
+                || service.install("birefnet-general-epoch-244").is_ok()
+            {
+                return Err("model repair was admitted during active ncnn execution".into());
+            }
+            execution_repair_rejected = true;
             let draft = accepted["draft"]
                 .as_object()
                 .ok_or("accepted response has no draft")?;
-            let replacement = service.import_source(&sources[1])?;
-            let mut changed_params = draft["params"].clone();
-            changed_params["sourceAssetId"] = replacement["assetId"].clone();
             let busy_draft = service.save_draft(
                 DraftInput {
                     id: draft["id"].as_u64().ok_or("accepted draft has no ID")?,
                     name: "Real-ESRGAN busy request".into(),
-                    prompt: String::new(),
-                    params: changed_params,
+                    prompt: "A new request while ncnn is busy".into(),
+                    params: json!({"modelId":"z-image-turbo-mflux-v1", "capabilityId":"image.text-to-image.z-image-turbo.v1", "sourceAssetId":null, "aspect":"1:1", "count":1, "seed":""}),
                     collapsed: false,
                     prompt_source_id: None,
                 },
@@ -238,6 +243,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .ok_or("accepted turn is not visible")?;
             match turn["state"].as_str() {
                 Some("Succeeded") => {
+                    // Observe the admission gate's final cleanup acknowledgement as
+                    // well as the durable Job before starting the next task.
+                    if current["execution"]["busy"] == true {
+                        if started.elapsed() > Duration::from_secs(600) {
+                            return Err("successful output did not reach idle cleanup".into());
+                        }
+                        std::thread::sleep(Duration::from_millis(10));
+                        continue;
+                    }
                     if turn["sourceAssetId"] != source_id {
                         return Err("changing the draft mutated the active Turn source".into());
                     }
@@ -261,6 +275,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         "duplicateCreated": false,
                         "conflictingDuplicateRejected": true,
                         "busyRequestRejected": busy_request_rejected,
+                        "executionRepairRejected": execution_repair_rejected,
                         "draftSourceChangedDuringExecution": index == 0,
                         "elapsedMilliseconds": started.elapsed().as_millis() as u64,
                         "resources": {
@@ -295,7 +310,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         json!({
             "schemaVersion": 1,
             "runId": "planned-models-20261031",
-            "caseIds": ["P03", "P08"],
+            "caseIds": ["P03", "P08", "I09"],
             "configurationKey": "R-U",
             "required": true,
             "status": "passed",
