@@ -1,0 +1,9 @@
+The following is a diff from the previous accessibility tree for Window: "Image Studio" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 157
+~					110 button (expanded) Secondary Actions: Collapse, Real-ESRGAN x4plus RealESRGAN_x4plus · ncnn
+放大
+
+安装已停止，可继续
++					154 text 安装已取消；已校验文件可供继续。
++					155 button 继续安装
+The focused UI element is 2 HTML content Description: Image Studio, URL: tauri://localhost

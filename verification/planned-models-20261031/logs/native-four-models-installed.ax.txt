@@ -1,0 +1,113 @@
+Window: "Image Studio", App: Image Studio Real-ESRGAN.
+0 standard window Image Studio, Secondary Actions: Raise
+	1 scroll area
+		2 HTML content Description: Image Studio, URL: tauri://localhost
+			3 container
+				4 tab group (selectable) 打开的页面
+					5 tab (selectable) 创作
+					6 tab (selected) 模型
+					7 button 关闭模型标签
+				8 button (collapsed) 开发, Secondary Actions: Expand
+			9 container 主导航
+				10 button Image Studio · 返回创作
+				11 button 创作
+				12 button 灵感库
+				13 button 功能
+				14 button 模型
+				15 button 作品
+				16 button 任务
+				17 button 切换为深色主题, Help: 深色主题
+				18 button 关于 Image Studio, Help: 关于
+				19 button 设置
+			20 container
+				21 heading 模型, Value: 2
+					22 text 模型
+				23 toggle button 全部 4, Value: on
+				24 toggle button 已安装 4, Value: off
+				25 toggle button 可执行 4, Value: off
+				26 toggle button 计划中 0, Value: off
+				27 toggle button 运行环境 4, Value: off
+				28 container
+					29 text 已接入、文件已安装、运行时就绪、当前可执行和设备验证分别显示。 计划中型号不会提供安装或生成入口。
+				30 heading 模型, Value: 1
+					31 text 模型
+				32 text 查找、理解并管理本地图片模型
+				33 button 刷新
+				34 container 模型目录统计
+					35 text 目录 4 正式接入 4 已安装 4 可执行 4
+				36 text field (settable) 搜索模型, Placeholder: 搜索名称、型号、家族或运行时
+				37 text 能力
+				38 pop up button (collapsed) 能力, Value: 全部能力, Secondary Actions: Expand
+				39 button (collapsed) Secondary Actions: Expand, Z-Image Turbo Tongyi-MAI/Z-Image-Turbo · mflux-v1
+文生图
+
+当前可执行
+				40 button (collapsed) Secondary Actions: Expand, FLUX.2 Klein 4B distilled black-forest-labs/FLUX.2-klein-4B · distilled
+文生图 图片编辑
+
+当前可执行
+				41 container 运行与范围
+					42 button (expanded) Secondary Actions: Collapse, BiRefNet general epoch_244 BiRefNet-general-epoch_244.onnx
+去背景
+
+当前可执行
+					43 text 固定使用官方 general epoch_244 ONNX 权重，CPUExecutionProvider、float32、1024² 预处理，并按源图规范化尺寸输出 RGBA 与 8-bit mask。
+					44 text BiRefNet 1024² 网络预处理 · 原尺寸输出 · CPU MIT 原始模型 972.7 MB 运行时 49.6 MB 安装预算 6.56 GB 产品接入
+					45 text 已接入
+					46 text 模型组件
+					47 text 文件齐备
+					48 text 运行时
+					49 text 已就绪
+					50 text 设备探针
+					51 text 已通过
+					52 text 当前可执行
+					53 text 是
+					54 heading 运行与范围, Value: 3
+						55 text 运行与范围
+					56 content list
+						57 container ONNX Runtime 1.31.1 · CPU
+							58 list marker •
+							59 text ONNX Runtime 1.31.1 · CPU
+						60 container 核对后的 ONNX 图与 CPU 运行时
+							61 list marker •
+							62 text 核对后的 ONNX 图与 CPU 运行时
+						63 container 透明 PNG 与 mask 同 Job 原子提交
+							64 list marker •
+							65 text 透明 PNG 与 mask 同 Job 原子提交
+						66 container CPU 路线实机验收
+							67 list marker •
+							68 text CPU 路线实机验收
+					69 heading 不包含, Value: 3
+						70 text 不包含
+					71 content list
+						72 container Core ML / MPS 认证
+							73 list marker •
+							74 text Core ML / MPS 认证
+						75 container Portrait 或其他 checkpoint
+							76 list marker •
+							77 text Portrait 或其他 checkpoint
+						78 container 把文件元数据当作已完成哈希
+							79 list marker •
+							80 text 把文件元数据当作已完成哈希
+					81 text 版本与来源
+					82 text https://github.com/ZhengPeng7/BiRefNet/releases/tag/v1
+					83 text revision / release：v1 / asset 186740004 / sha256:58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c 实机验证：Apple M3 Max / 128 GiB / macOS arm64 · CPU
+					84 button 用于当前会话
+					85 button 前往创作
+					86 button 返回创作
+				87 button (collapsed) Secondary Actions: Expand, Real-ESRGAN x4plus RealESRGAN_x4plus · ncnn
+放大
+
+当前可执行
+	88 close button
+	89 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	90 minimize button
+91 menu bar
+	92 Image Studio Real-ESRGAN
+	93 File
+	94 Edit
+	95 View
+	96 Window
+	97 Help
+
+The focused UI element is 2 HTML content Description: Image Studio, URL: tauri://localhost

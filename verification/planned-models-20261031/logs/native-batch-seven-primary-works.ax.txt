@@ -1,0 +1,2 @@
+There has been no change in the accessibility tree for Window: "Image Studio".
+The focused UI element is 39 pop up button (collapsed) 会话, Value: 一只红色陶瓷茶壶放在浅色木桌上，窗边柔和自然光， · 7, Secondary Actions: Expand

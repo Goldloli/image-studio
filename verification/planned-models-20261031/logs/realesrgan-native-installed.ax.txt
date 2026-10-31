@@ -1,0 +1,113 @@
+Window: "Image Studio", App: Image Studio Real-ESRGAN.
+0 standard window Image Studio, Secondary Actions: Raise
+	1 scroll area
+		2 HTML content Description: Image Studio, URL: tauri://localhost
+			3 container
+				4 tab group (selectable) 打开的页面
+					5 tab (selectable) 创作
+					6 tab (selected) 模型
+					7 button 关闭模型标签
+				8 button (collapsed) 开发, Secondary Actions: Expand
+			9 container 主导航
+				10 button Image Studio · 返回创作
+				11 button 创作
+				12 button 灵感库
+				13 button 功能
+				14 button 模型
+				15 button 作品
+				16 button 任务
+				17 button 切换为深色主题, Help: 深色主题
+				18 button 关于 Image Studio, Help: 关于
+				19 button 设置
+			20 container
+				21 heading 模型, Value: 2
+					22 text 模型
+				23 toggle button 全部 4, Value: on
+				24 toggle button 已安装 3, Value: off
+				25 toggle button 可执行 3, Value: off
+				26 toggle button 计划中 0, Value: off
+				27 toggle button 运行环境 3, Value: off
+				28 container
+					29 text 已接入、文件已安装、运行时就绪、当前可执行和设备验证分别显示。 计划中型号不会提供安装或生成入口。
+				30 heading 模型, Value: 1
+					31 text 模型
+				32 text 查找、理解并管理本地图片模型
+				33 button 刷新
+				34 container 模型目录统计
+					35 text 目录 4 正式接入 4 已安装 3 可执行 3
+				36 text field (settable) 搜索模型, Placeholder: 搜索名称、型号、家族或运行时
+				37 text 能力
+				38 pop up button (collapsed) 能力, Value: 全部能力, Secondary Actions: Expand
+				39 button (collapsed) Secondary Actions: Expand, Z-Image Turbo Tongyi-MAI/Z-Image-Turbo · mflux-v1
+文生图
+
+当前可执行
+				40 button (collapsed) Secondary Actions: Expand, FLUX.2 Klein 4B distilled black-forest-labs/FLUX.2-klein-4B · distilled
+文生图 图片编辑
+
+当前可执行
+				41 button (collapsed) Secondary Actions: Expand, BiRefNet general epoch_244 BiRefNet-general-epoch_244.onnx
+去背景
+
+尚未安装
+				42 container 运行与范围
+					43 button (expanded) Secondary Actions: Collapse, Real-ESRGAN x4plus RealESRGAN_x4plus · ncnn
+放大
+
+当前可执行
+					44 text 固定 realesrgan-x4plus 的 ncnn 权重、官方 macOS 程序、单 GPU、tile 128 和 1:1:1 线程；首轮输出 PNG，不启用 TTA。
+					45 text Real-ESRGAN ncnn Vulkan · x4plus · tile 128 · 固定 4× Real-ESRGAN BSD-3-Clause · ncnn app MIT 原始模型 33.5 MB 运行时 8.5 MB 安装预算 4.41 GB 产品接入
+					46 text 已接入
+					47 text 模型组件
+					48 text 文件齐备
+					49 text 运行时
+					50 text 已就绪
+					51 text 设备探针
+					52 text 已通过
+					53 text 当前可执行
+					54 text 是
+					55 heading 运行与范围, Value: 3
+						56 text 运行与范围
+					57 content list
+						58 container Real-ESRGAN ncnn Vulkan v0.2.0 · Metal GPU
+							59 list marker •
+							60 text Real-ESRGAN ncnn Vulkan v0.2.0 · Metal GPU
+						61 container 官方 ncnn 程序与 x4plus 模型对分别校验
+							62 list marker •
+							63 text 官方 ncnn 程序与 x4plus 模型对分别校验
+						64 container 显式指定 x4plus、4×、tile 128 与单 GPU
+							65 list marker •
+							66 text 显式指定 x4plus、4×、tile 128 与单 GPU
+						67 container 分块接缝、取消和强杀回收实机验收
+							68 list marker •
+							69 text 分块接缝、取消和强杀回收实机验收
+					70 heading 不包含, Value: 3
+						71 text 不包含
+					72 content list
+						73 container 动漫专用模型
+							74 list marker •
+							75 text 动漫专用模型
+						76 container 人脸修复
+							77 list marker •
+							78 text 人脸修复
+						79 container 任意倍率重采样
+							80 list marker •
+							81 text 任意倍率重采样
+					82 text 版本与来源
+					83 text https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.2.5.0
+					84 text revision / release：v0.2.5.0 ncnn package / x4plus bin sha256:713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf 尚未完成目标设备实机验证。
+					85 button 用于当前会话
+					86 button 前往创作
+					87 button 返回创作
+	88 close button
+	89 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	90 minimize button
+91 menu bar
+	92 Image Studio Real-ESRGAN
+	93 File
+	94 Edit
+	95 View
+	96 Window
+	97 Help
+
+The focused UI element is 2 HTML content Description: Image Studio, URL: tauri://localhost

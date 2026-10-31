@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "dataDirectory": "/Users/gejiawei/Library/Application Support/ImageStudio",
+  "nativeStopObservedBytes": 34057980,
+  "cacheAtOrderlyStop": [
+    {
+      "path": "/Users/gejiawei/Library/Caches/ImageStudio/downloads/e0ad05580abfeb25f8d8fb55aaf7bedf552c375b5b4d9bd3c8d59764d2cc333a.resume.json",
+      "bytes": 108,
+      "metadata": {
+        "etag": "\"0x8DA25EB4352032F\"",
+        "sha256": "e0ad05580abfeb25f8d8fb55aaf7bedf552c375b5b4d9bd3c8d59764d2cc333a"
+      }
+    },
+    {
+      "path": "/Users/gejiawei/Library/Caches/ImageStudio/downloads/e0ad05580abfeb25f8d8fb55aaf7bedf552c375b5b4d9bd3c8d59764d2cc333a.part",
+      "bytes": 25542132,
+      "partialSha256": "04e389972f1897a934070bbacf2a83923ddc2b3a61a640beba40765063a7800e"
+    },
+    {
+      "path": "/Users/gejiawei/Library/Caches/ImageStudio/downloads/f1cc31f13398126ddec25a186b9e50c7ab3e4f2bc011d0222331b43ce2037d3b",
+      "bytes": 8532236
+    }
+  ],
+  "caseId": "I07",
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "native_daily",
+  "reason": "The native installer was stopped after a nonzero official archive prefix, the app exited normally, reopened with an interrupted state, and explicit Continue completed hash verification and the GPU probe. No model bytes were copied into the managed directories. Exact network Range identity behavior is additionally verified by installer fixtures.",
+  "activationSha256": "6dd450febdfe2ad31567431652614e6c9669e4a2ffb2d3290a48657f7e99c2c5",
+  "activation": {
+    "runtime_lock_id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+    "model_snapshot_id": "realesrgan-x4plus-ncnn",
+    "runtime_manifest_sha256": "9501ce3131a6909f713505b294c0cc1dff236635b41e2f665f77c173d2ad296c",
+    "model_manifest_sha256": "fdc1606ae5c910eb00f59ec0c8a8d1c27f9b694f9147b400a2802ad382938294",
+    "runtime_files": [
+      {
+        "path": "bin/realesrgan-ncnn-vulkan",
+        "sha256": "c1c35d92079085de96b9d547fd7e4464bc8a2e9ccf28d7b8c712d72ade91b7cc",
+        "bytes": 26787080,
+        "link_target": null,
+        "mode": 33261
+      },
+      {
+        "path": "README-ncnn-app.md",
+        "sha256": "b7e6d9b329d057aba2dee56bf6fa8bdb7b79e90df959b39b92ed2873255f028b",
+        "bytes": 6052,
+        "link_target": null,
+        "mode": 33152
+      },
+      {
+        "path": "LICENSE-ncnn-app.txt",
+        "sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937",
+        "bytes": 2228,
+        "link_target": null,
+        "mode": 33152
+      }
+    ],
+    "probe": {
+      "backend": "ncnn Vulkan",
+      "device": "gpu",
+      "device_name": "Apple M3 Max",
+      "gpu_id": 0,
+      "identity": {
+        "build_id": "studio-realesrgan-worker-0.1.0",
+        "model_snapshot_id": "realesrgan-x4plus-ncnn",
+        "runtime_lock_id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1"
+      },
+      "model": "realesrgan-x4plus",
+      "probe_input_size": [
+        8,
+        6
+      ],
+      "probe_output_sha256": "249ff74371ebf8877158c17eaef3bad4309de8b447a6866f93c3d7c3da12c848",
+      "probe_output_size": [
+        32,
+        24
+      ],
+      "scale": 4,
+      "threads": "1:1:1",
+      "tile": 128,
+      "tta": false
+    }
+  },
+  "screens": [
+    "realesrgan-native-install-stopped.png",
+    "realesrgan-native-installed.png"
+  ],
+  "proxy": "http://127.0.0.1:7897",
+  "identityChangedRangeFixture": "adapters::installation::tests::full_response_replaces_a_partial_without_appending"
+}

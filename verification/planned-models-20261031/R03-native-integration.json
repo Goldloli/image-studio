@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "R03",
+  "configurationKey": "batch",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "native_daily",
+  "reason": "原生目录显示4正式接入/4安装/4可执行/4运行环境，Real搜索只匹配指定型号；默认生成菜单只列Z与Klein。专用会话7个Job只显示7件primary作品，四型号筛选为Z2/K2/B1/R2，mask不重复计数。禁网启动没有下载或推理。",
+  "applicationCodeCommit": "97e746f0623856dda53d58eb1d14f7f27d95101a",
+  "applicationSha256": "abc16ed35ce3a74318d14fa8599f696d7ca6a59a4dfd79d4fe7c5cdd34997273",
+  "directoryCounts": {
+    "supported": 4,
+    "installed": 4,
+    "executable": 4,
+    "runtimeReady": 4
+  },
+  "allowedGenerationDefaults": [
+    "z-image-turbo-mflux-v1",
+    "flux2-klein-4b-distilled"
+  ],
+  "nativeConversationPrimaryCounts": {
+    "z-image": 2,
+    "klein": 2,
+    "birefnet": 1,
+    "realesrgan": 2
+  },
+  "databaseRoles": {
+    "mask": 1,
+    "primary": 7
+  },
+  "primaryWorks": 7,
+  "jobs": 7,
+  "evidencePaths": [
+    "native-four-runtimes-final.png",
+    "logs/native-four-runtimes-final.ax.txt",
+    "logs/native-model-search-final.ax.txt",
+    "native-default-model-whitelist.png",
+    "logs/native-default-model-whitelist.ax.txt",
+    "native-batch-seven-primary-works.png",
+    "logs/native-realesrgan-filtered-works.ax.txt",
+    "logs/native-klein-filtered-works.ax.txt",
+    "logs/native-birefnet-filtered-works.ax.txt",
+    "logs/native-zimage-filtered-works.ax.txt",
+    "native-offline-startup-final.json"
+  ],
+  "problems": []
+}

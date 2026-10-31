@@ -1,0 +1,85 @@
+Window: "Image Studio", App: Image Studio Real-ESRGAN.
+0 standard window Image Studio, Secondary Actions: Raise
+	1 scroll area
+		2 HTML content Description: Image Studio, URL: tauri://localhost
+			3 container
+				4 tab group (selectable) 打开的页面
+					5 tab (selectable) 创作
+					6 tab (selectable) 设置
+					7 button 关闭设置标签
+					8 tab (selected) 作品
+					9 button 关闭作品标签
+				10 button (collapsed) 开发, Secondary Actions: Expand
+			11 container 主导航
+				12 button Image Studio · 返回创作
+				13 button 创作
+				14 button 灵感库
+				15 button 功能
+				16 button 模型
+				17 button 作品
+				18 button 任务
+				19 button 切换为深色主题, Help: 深色主题
+				20 button 关于 Image Studio, Help: 关于
+				21 button 设置
+			22 container 作品
+				23 container
+					24 text 正式 ASSETREF · 跨会话
+					25 heading 作品, Value: 1
+						26 text 作品
+					27 button 刷新
+					28 button 返回创作
+				29 container
+					30 text 型号
+					31 pop up button (collapsed) 型号, Value: Z-Image Turbo · 18, Secondary Actions: Expand
+						32 menu Secondary Actions: Cancel
+				33 container
+					34 text 尺寸
+					35 pop up button (collapsed) 尺寸, Value: 全部尺寸, Secondary Actions: Expand
+						36 menu Secondary Actions: Cancel
+				37 container
+					38 text 会话
+					39 pop up button (collapsed) 会话, Value: 一只红色陶瓷茶壶放在浅色木桌上，窗边柔和自然光， · 7, Secondary Actions: Expand
+						40 menu Secondary Actions: Cancel
+				41 date time area 作品开始日期, Value: 2026/11/1
+					42 container
+						43 stepper (settable, float) year, Value: 0
+						44 text /
+						45 stepper (settable, float) month, Value: 0
+						46 text /
+						47 stepper (settable, float) day, Value: 0
+				48 text 至
+				49 date time area 作品结束日期, Value: 2026/11/1
+					50 container
+						51 stepper (settable, float) year, Value: 0
+						52 text /
+						53 stepper (settable, float) month, Value: 0
+						54 text /
+						55 stepper (settable, float) day, Value: 0
+				56 button 清除筛选
+				57 text 2 件正式作品
+				58 container 作品布局
+					59 toggle button 网格, Value: on
+					60 toggle button 列表, Value: off
+				61 content list 正式作品
+					62 container
+						63 button 预览作品 1：A sunflower in a white ceramic vase on a wooden table, vertical still life, warm window daylight.
+						64 text A sunflower in a white ceramic vase on a wooden table, vertical still life, warm window daylight. 一只红色陶瓷茶壶放在浅色木桌上，窗边柔和自然光， Z-Image Turbo · 768×1024 · 2026/10/31 23:04
+						65 button 预览
+						66 text 可用
+					67 container
+						68 button 预览作品 2：一只红色陶瓷茶壶放在浅色木桌上，窗边柔和自然光，写实静物摄影。
+						69 text 一只红色陶瓷茶壶放在浅色木桌上，窗边柔和自然光，写实静物摄影。 一只红色陶瓷茶壶放在浅色木桌上，窗边柔和自然光， Z-Image Turbo · 1024×768 · 2026/10/31 19:52
+						70 button 预览
+						71 text 可用
+	72 close button
+	73 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	74 minimize button
+75 menu bar
+	76 Image Studio Real-ESRGAN
+	77 File
+	78 Edit
+	79 View
+	80 Window
+	81 Help
+
+The focused UI element is 31 pop up button (collapsed) 型号, Value: Z-Image Turbo · 18, Secondary Actions: Expand

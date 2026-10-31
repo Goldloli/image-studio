@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "U05",
+  "configurationKey": "batch",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "native_daily",
+  "reason": "在默认目录正常退出并重开Tauri应用后，通过实际系统保存对话框导出Klein文生图、编辑、旧Z和Real结果；另含BiRefNet主图/蒙版独立导出。每份字节散列与对应正式内部资产一致。",
+  "dataRoot": "/Users/gejiawei/Library/Application Support/ImageStudio",
+  "conversationId": "conv-b903c8b6abd2406e8a292fa60b6e09b7",
+  "exports": [
+    {
+      "path": "native-exports/中文 空格/原生 重开4倍4096.png",
+      "sha256": "83ccd7d95197830e52d4fc4ed1cd1db3dd71399951cfa8097329ab3f8cc7fdd9",
+      "bytes": 22105415,
+      "assetId": "asset-858b66022ae7414693c0b6bf2fb40ab2",
+      "jobId": "job-15622aad883c463e8b4aa7da9d9a757a",
+      "attemptId": "attempt-62a0ea17d44c42ffa58e3032af1b3978",
+      "role": "primary",
+      "width": 4096,
+      "height": 4096
+    },
+    {
+      "path": "native-exports/中文 空格/原生 重开Klein编辑.png",
+      "sha256": "2343c850624db8d26a2e87d364593581bcc6fbb3aab5defe26a0bcc010af6b6b",
+      "bytes": 1196714,
+      "assetId": "asset-efc1c6ed04594a779c9b3a93e394c94c",
+      "jobId": "job-f66bb701c72642f280663c462d93d951",
+      "attemptId": "attempt-f1df392167fd46dab773d62013f4dcfa",
+      "role": "primary",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "native-exports/中文 空格/原生 重开ZImage.png",
+      "sha256": "7e7a29f5aab63fadb070588a8636d2039aef0f431be6dc817ce745d1902c2fb3",
+      "bytes": 871598,
+      "assetId": "asset-410e4c88ffbd4e06a3bea7676c83a2d5",
+      "jobId": "job-3306be744e044b729aea6432c0890970",
+      "attemptId": "attempt-c4acf21fddc44b33bd5ac7db8bef7cb3",
+      "role": "primary",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "path": "native-exports/中文 空格/原生 重开Klein生成.png",
+      "sha256": "eba5d91a866a11a03cd347b2b7fb2ceab43da4f3db0529ddf0db41e104b2839a",
+      "bytes": 1137252,
+      "assetId": "asset-51278d0c7de340e7ab011023061a37e6",
+      "jobId": "job-8ee1b37d44c44aa2a5ccaef7ffb45d30",
+      "attemptId": "attempt-b1990d8d42164c4a8da05df9ab8c7903",
+      "role": "primary",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "native-exports/中文 空格/原生 茶壶透明.png",
+      "sha256": "7be765bc33f5f5fef1c6eb3deca8b44a3f4bbed55589fbc62f385a520589f90d",
+      "bytes": 1369229,
+      "assetId": "asset-8ea67e6dfa5f41cf821ad6c3f860fc0f",
+      "jobId": "job-5c0387aea7044fbbbd27aa2133ee1515",
+      "attemptId": "attempt-106223c7b4e846328914433f96882ea3",
+      "role": "primary",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "path": "native-exports/中文 空格/原生 茶壶蒙版.png",
+      "sha256": "babc0ff0f951e273380fcac5dd7beba9419c4038056a84b92e11a4356902d74f",
+      "bytes": 20197,
+      "assetId": "asset-d0701402c02f433da26de831ce37a216",
+      "jobId": "job-5c0387aea7044fbbbd27aa2133ee1515",
+      "attemptId": "attempt-106223c7b4e846328914433f96882ea3",
+      "role": "mask",
+      "width": 1024,
+      "height": 1024
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+Window: "Image Studio", App: Image Studio Real-ESRGAN.
+0 standard window Image Studio, Secondary Actions: Raise
+	1 scroll area
+		2 HTML content Description: Image Studio, URL: tauri://localhost
+			3 container
+				4 tab group (selectable) 打开的页面
+					5 tab (selected) 创作
+				6 button (collapsed) 开发, Secondary Actions: Expand
+			7 container 主导航
+				8 button Image Studio · 返回创作
+				9 button 创作
+				10 button 灵感库
+				11 button 功能
+				12 button 模型
+				13 button 作品
+				14 button 任务
+				15 button 切换为深色主题, Help: 深色主题
+				16 button 关于 Image Studio, Help: 关于
+				17 button 设置
+			18 container
+				19 button 展开会话列表
+				20 heading 一只红色陶瓷茶壶放在浅色木桌上，窗边柔和自然光，, Value: 1
+					21 text 一只红色陶瓷茶壶放在浅色木桌上，窗边柔和自然光，
+				22 text 本地图片创作
+				23 button 新建
+				24 container 第 1 轮生成
+					25 text 一只红色陶瓷茶壶放在浅色木桌上，窗边柔和自然光，写实静物摄影。
+					26 button 复制提示词
+					27 text 你
+					28 text Image Studio
+					29 text Z-Image Turbo · 4:3 · 种子 20261031
+					30 button 放大查看生成图片
+					31 container
+						32 text 图片已生成 100%
+					33 button 编辑后重发
+					34 button 查看
+					35 button 导出 PNG
+					36 button 复制提示词
+					37 button (collapsed) 制作记录, Secondary Actions: Expand
+				38 container 第 2 轮生成
+					39 text A cobalt blue ceramic teapot on a pale wooden table, soft window daylight, realistic still life photography.
+					40 button 复制提示词
+					41 text 你
+					42 text Image Studio
+					43 text FLUX.2 Klein 4B · 1:1 · 种子 20261031
+					44 button 放大查看生成图片
+					45 container
+						46 text 图片已生成 100%
+					47 button 编辑后重发
+					48 button 查看
+					49 button 导出 PNG
+					50 button 复制提示词
+					51 button (collapsed) 制作记录, Secondary Actions: Expand
+				52 container 第 3 轮生成
+					53 text Change only the teapot from cobalt blue to bright red, preserving the table, daylight and composition.
+					54 button 复制提示词
+					55 text 你
+					56 text Image Studio
+					57 text FLUX.2 Klein 4B · 单图编辑
+					58 button 放大查看生成图片
+					59 container
+						60 text 图片已生成 100%
+					61 button 编辑后重发
+					62 button 查看
+					63 button 导出 PNG
+					64 button 复制提示词
+					65 button (collapsed) 制作记录, Secondary Actions: Expand
+				66 container 第 4 轮生成
+					67 text 去除背景，保留主体
+					68 text 你
+					69 text Image Studio
+					70 text BiRefNet epoch_244 · 透明背景
+					71 button 放大查看生成图片
+					72 container
+						73 text 图片已生成 100%
+					74 toggle button 查看蒙版, Value: off
+					75 button 查看
+					76 button 导出 PNG
+					77 button (collapsed) 制作记录, Secondary Actions: Expand
+				78 container 第 5 轮生成
+					79 text 使用固定 4× 模型放大图片
+					80 text 你
+					81 text Image Studio
+					82 text Real-ESRGAN x4plus · 精确 4× · 1440×2560
+					83 button 放大查看生成图片
+					84 container
+						85 text 图片已生成 100%
+					86 button 查看
+					87 button 导出 PNG
+					88 button (collapsed) 制作记录, Secondary Actions: Expand
+				89 container 第 6 轮生成
+					90 text A sunflower in a white ceramic vase on a wooden table, vertical still life, warm window daylight.
+					91 button 复制提示词
+					92 text 你
+					93 text Image Studio
+					94 text Z-Image Turbo · 3:4 · 种子 20261031
+					95 button 放大查看生成图片
+					96 container
+						97 text 图片已生成 100%
+					98 button 编辑后重发
+					99 button 查看
+					100 button 导出 PNG
+					101 button 复制提示词
+					102 button (collapsed) 制作记录, Secondary Actions: Expand
+				103 container 第 7 轮生成
+					104 text 使用固定 4× 模型放大图片
+					105 text 你
+					106 text Image Studio
+					107 text Real-ESRGAN x4plus · 精确 4× · 4096×4096
+					108 button 放大查看生成图片
+					109 container
+						110 text 图片已生成 100%
+					111 button 查看
+					112 button 导出 PNG
+					113 button (expanded) 收起记录, Secondary Actions: Collapse
+					114 container
+						115 text 轮次 turn-81fed3b3a83e420b95bffb4745d83e7a 任务 job-15622aad883c463e8b4aa7da9d9a757a 执行 attempt-62a0ea17d44c42ffa58e3032af1b3978
+					116 text 已完成  ·  attempt-62a0ea17d44c42ffa58e3032af1b3978
+					117 text {
+  "attempt": {
+    "attempt_id": "attempt-62a0ea17d44c42ffa58e3032af1b3978",
+    "execution_token": "token-a6939f9908f444708a962270b5c99247",
+    "job_id": "job-15622aad883c463e8b4aa7da9d9a757a"
+  },
+  "evidence_kind": "execution_record",
+  "final_result": {
+    "status": "succeeded"
+  },
+  "input_assets": [
+    {
+      "asset_id": "asset-efc1c6ed04594a779c9b3a93e394c94c",
+      "content_hash": "2343c850624db8d26a2e87d364593581bcc6fbb3aab5defe26a0bcc010af6b6b",
+      "data_type": "image_rgb",
+      "locat
+				118 text 一只红色陶瓷茶壶放在浅色木桌上，窗边柔和自然光， 固定 4× PNG
+				119 button 收起输入区
+				120 text 将图片精确放大 4 倍
+				121 text 使用 Real-ESRGAN x4plus · Metal GPU · tile 128 · 输出各边精确 4 倍的 PNG
+				122 button 更换源图, Help: 导入最长边不超过 1024、最大 1 MP、无透明像素的 PNG 或 JPEG
+				123 button 作品
+				124 image 当前受控源图
+				125 text 1024×1024 → 4096×4096
+				126 button 移除源图
+				127 text Enter 发送 · Shift+Enter 换行
+				128 button (collapsed) Real-ESRGAN · 4× 放大, Help: 当前模型可执行, Secondary Actions: Expand
+				129 button 发送并生成, Help: 发送提示词并生成图片
+				130 text 草稿已保存到本机
+	131 close button
+	132 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	133 minimize button
+134 menu bar
+	135 Image Studio Real-ESRGAN
+	136 File
+	137 Edit
+	138 View
+	139 Window
+	140 Help
+
+The focused UI element is 129 button 发送并生成, Help: 发送提示词并生成图片

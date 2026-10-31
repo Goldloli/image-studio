@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "caseId": "U01",
+  "configurationKey": "R-U",
+  "required": true,
+  "status": "passed",
+  "evidenceKind": "native_daily",
+  "reason": "默认用户目录完成正式安装/中断重开继续、系统选图和已有作品选图、非方形与4096²真实放大。任务期间新会话草稿未被发送；正常退出重开后结果、来源、Attempt制作记录和系统导出恢复。两种窗口尺寸与键盘焦点均可操作，透明输入失败保留先前合法源图。",
+  "additionalCases": [
+    "U02",
+    "U03",
+    "U05",
+    "U06"
+  ],
+  "applicationCodeCommit": "97e746f0623856dda53d58eb1d14f7f27d95101a",
+  "applicationSha256": "abc16ed35ce3a74318d14fa8599f696d7ca6a59a4dfd79d4fe7c5cdd34997273",
+  "defaultDataRoot": "/Users/gejiawei/Library/Application Support/ImageStudio",
+  "defaultCacheRoot": "/Users/gejiawei/Library/Caches/ImageStudio",
+  "conversationId": "conv-b903c8b6abd2406e8a292fa60b6e09b7",
+  "restored4096": {
+    "turnId": "turn-81fed3b3a83e420b95bffb4745d83e7a",
+    "jobId": "job-15622aad883c463e8b4aa7da9d9a757a",
+    "attemptId": "attempt-62a0ea17d44c42ffa58e3032af1b3978",
+    "width": 4096,
+    "height": 4096
+  },
+  "exports": [
+    {
+      "path": "native-exports/中文 空格/原生 重开4倍4096.png",
+      "sha256": "83ccd7d95197830e52d4fc4ed1cd1db3dd71399951cfa8097329ab3f8cc7fdd9",
+      "bytes": 22105415,
+      "assetId": "asset-858b66022ae7414693c0b6bf2fb40ab2",
+      "jobId": "job-15622aad883c463e8b4aa7da9d9a757a",
+      "attemptId": "attempt-62a0ea17d44c42ffa58e3032af1b3978",
+      "role": "primary",
+      "width": 4096,
+      "height": 4096
+    }
+  ],
+  "screenshotEvidence": [
+    "realesrgan-native-install-stopped.png",
+    "realesrgan-native-installed.png",
+    "realesrgan-native-preview.png",
+    "realesrgan-native-transparent-rejected.png",
+    "realesrgan-native-960-no-source.png",
+    "native-realesrgan-1280-record.png",
+    "native-realesrgan-960-record.png",
+    "native-realesrgan-960-keyboard.png",
+    "native-realesrgan-filtered-works.png"
+  ],
+  "additionalEvidence": [
+    "I07-realesrgan-native-resume.json",
+    "R01-native-interleave.json",
+    "native-exports-verified.json"
+  ],
+  "manualImeRepeat": "用户明确免测；放大工具没有文字输入，不将自动化英文按键当作真实中文IME证据。",
+  "problems": []
+}

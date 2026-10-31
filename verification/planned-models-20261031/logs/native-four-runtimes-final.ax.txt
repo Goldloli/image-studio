@@ -1,0 +1,64 @@
+Window: "Image Studio", App: Image Studio Real-ESRGAN.
+0 standard window Image Studio, Secondary Actions: Raise
+	1 scroll area
+		2 HTML content Description: Image Studio, URL: tauri://localhost
+			3 container
+				4 tab group (selectable) 打开的页面
+					5 tab (selectable) 创作
+					6 tab (selected) 模型
+					7 button 关闭模型标签
+				8 button (collapsed) 开发, Secondary Actions: Expand
+			9 container 主导航
+				10 button Image Studio · 返回创作
+				11 button 创作
+				12 button 灵感库
+				13 button 功能
+				14 button 模型
+				15 button 作品
+				16 button 任务
+				17 button 切换为深色主题, Help: 深色主题
+				18 button 关于 Image Studio, Help: 关于
+				19 button 设置
+			20 container
+				21 heading 模型, Value: 2
+					22 text 模型
+				23 toggle button 全部 4, Value: off
+				24 toggle button 已安装 4, Value: off
+				25 toggle button 可执行 4, Value: off
+				26 toggle button 计划中 0, Value: off
+				27 toggle button 运行环境 4, Value: on
+				28 container
+					29 text 已接入、文件已安装、运行时就绪、当前可执行和设备验证分别显示。 计划中型号不会提供安装或生成入口。
+				30 heading 模型, Value: 1
+					31 text 模型
+				32 text 查找、理解并管理本地图片模型
+				33 button 刷新
+				34 container 模型目录统计
+					35 text 目录 4 正式接入 4 已安装 4 可执行 4
+				36 text field (settable) 搜索模型, Placeholder: 搜索名称、型号、家族或运行时
+				37 text 能力
+				38 pop up button (collapsed) 能力, Value: 全部能力, Secondary Actions: Expand
+				39 button (collapsed) Secondary Actions: Expand, Z-Image Turbo Tongyi-MAI/Z-Image-Turbo · mflux-v1
+
+当前可执行
+				40 button (collapsed) Secondary Actions: Expand, FLUX.2 Klein 4B distilled black-forest-labs/FLUX.2-klein-4B · distilled
+
+当前可执行
+				41 button (collapsed) Secondary Actions: Expand, BiRefNet general epoch_244 BiRefNet-general-epoch_244.onnx
+
+当前可执行
+				42 button (collapsed) Secondary Actions: Expand, Real-ESRGAN x4plus RealESRGAN_x4plus · ncnn
+
+当前可执行
+	43 close button
+	44 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	45 minimize button
+46 menu bar
+	47 Image Studio Real-ESRGAN
+	48 File
+	49 Edit
+	50 View
+	51 Window
+	52 Help
+
+The focused UI element is 2 HTML content Description: Image Studio, URL: tauri://localhost

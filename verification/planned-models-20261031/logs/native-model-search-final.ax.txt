@@ -1,0 +1,101 @@
+Window: "Image Studio", App: Image Studio Real-ESRGAN.
+0 standard window Image Studio, Secondary Actions: Raise
+	1 scroll area
+		2 HTML content Description: Image Studio, URL: tauri://localhost
+			3 container
+				4 tab group (selectable) 打开的页面
+					5 tab (selectable) 创作
+					6 tab (selected) 模型
+					7 button 关闭模型标签
+				8 button (collapsed) 开发, Secondary Actions: Expand
+			9 container 主导航
+				10 button Image Studio · 返回创作
+				11 button 创作
+				12 button 灵感库
+				13 button 功能
+				14 button 模型
+				15 button 作品
+				16 button 任务
+				17 button 切换为深色主题, Help: 深色主题
+				18 button 关于 Image Studio, Help: 关于
+				19 button 设置
+			20 container
+				21 heading 模型, Value: 2
+					22 text 模型
+				23 toggle button 全部 4, Value: off
+				24 toggle button 已安装 4, Value: off
+				25 toggle button 可执行 4, Value: off
+				26 toggle button 计划中 0, Value: off
+				27 toggle button 运行环境 4, Value: on
+				28 container
+					29 text 已接入、文件已安装、运行时就绪、当前可执行和设备验证分别显示。 计划中型号不会提供安装或生成入口。
+				30 heading 模型, Value: 1
+					31 text 模型
+				32 text 查找、理解并管理本地图片模型
+				33 button 刷新
+				34 container 模型目录统计
+					35 text 目录 4 正式接入 4 已安装 4 可执行 4
+				36 text field (settable) 搜索模型, Value: Real-ESRGAN, Placeholder: 搜索名称、型号、家族或运行时
+				37 button 清除模型搜索
+				38 text 能力
+				39 pop up button (collapsed) 能力, Value: 全部能力, Secondary Actions: Expand
+				40 container 运行与范围
+					41 button (expanded) Secondary Actions: Collapse, Real-ESRGAN x4plus RealESRGAN_x4plus · ncnn
+
+当前可执行
+					42 text 固定 realesrgan-x4plus 的 ncnn 权重、官方 macOS 程序、单 GPU、tile 128 和 1:1:1 线程；首轮输出 PNG，不启用 TTA。
+					43 text Real-ESRGAN ncnn Vulkan · x4plus · tile 128 · 固定 4× Real-ESRGAN BSD-3-Clause · ncnn app MIT 原始模型 33.5 MB 运行时 8.5 MB 安装预算 4.46 GB 产品接入
+					44 text 已接入
+					45 text 模型组件
+					46 text 文件齐备
+					47 text 运行时
+					48 text 已就绪
+					49 text 设备探针
+					50 text 已通过
+					51 text 当前可执行
+					52 text 是
+					53 heading 运行与范围, Value: 3
+						54 text 运行与范围
+					55 content list
+						56 container Real-ESRGAN ncnn Vulkan v0.2.0 · Metal GPU
+							57 list marker •
+							58 text Real-ESRGAN ncnn Vulkan v0.2.0 · Metal GPU
+						59 container 官方 ncnn 程序与 x4plus 模型对分别校验
+							60 list marker •
+							61 text 官方 ncnn 程序与 x4plus 模型对分别校验
+						62 container 显式指定 x4plus、4×、tile 128 与单 GPU
+							63 list marker •
+							64 text 显式指定 x4plus、4×、tile 128 与单 GPU
+						65 container 分块接缝、取消和强杀回收实机验收
+							66 list marker •
+							67 text 分块接缝、取消和强杀回收实机验收
+					68 heading 不包含, Value: 3
+						69 text 不包含
+					70 content list
+						71 container 动漫专用模型
+							72 list marker •
+							73 text 动漫专用模型
+						74 container 人脸修复
+							75 list marker •
+							76 text 人脸修复
+						77 container 任意倍率重采样
+							78 list marker •
+							79 text 任意倍率重采样
+					80 text 版本与来源
+					81 text https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.2.5.0
+					82 text revision / release：v0.2.5.0 ncnn package / x4plus bin sha256:713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf 实机验证：Apple M3 Max / 128 GiB / macOS arm64 · ncnn Vulkan GPU 0
+					83 button 用于当前会话
+					84 button 前往创作
+					85 button 返回创作
+	86 close button
+	87 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	88 minimize button
+89 menu bar
+	90 Image Studio Real-ESRGAN
+	91 File
+	92 Edit
+	93 View
+	94 Window
+	95 Help
+
+The focused UI element is 36 text field (settable) 搜索模型, Value: Real-ESRGAN, Placeholder: 搜索名称、型号、家族或运行时
