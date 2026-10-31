@@ -5,6 +5,7 @@ use reqwest::blocking::{Client, Response};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::{
     collections::{HashMap, HashSet},
     fs::{self, OpenOptions},
@@ -155,6 +156,7 @@ pub struct PromptLibraryStore {
     favorites: Mutex<FavoriteState>,
     downloads: Arc<DownloadGate>,
     inflight: Arc<InflightGate>,
+    cache_generation: AtomicU64,
 }
 
 impl PromptLibraryStore {
@@ -182,6 +184,7 @@ impl PromptLibraryStore {
             favorites: Mutex::new(favorites),
             downloads: DownloadGate::new(),
             inflight: InflightGate::new(),
+            cache_generation: AtomicU64::new(0),
         })
     }
 
@@ -202,6 +205,9 @@ impl PromptLibraryStore {
     }
 
     pub fn set_favorite(&self, case_id: &str, favorite: bool) -> Result<Value, String> {
+        if !valid_case_id(case_id) {
+            return Err("灵感案例标识无效".into());
+        }
         if favorite && !self.cases.contains_key(case_id) {
             return Err("未登记的灵感案例".into());
         }
@@ -251,7 +257,8 @@ impl PromptLibraryStore {
             "mimeType": case.mime_type,
             "bytes": case.bytes,
             "width": case.width,
-            "height": case.height
+            "height": case.height,
+            "cache": self.cache_status()
         }))
     }
 
@@ -283,6 +290,7 @@ impl PromptLibraryStore {
     }
 
     pub fn clear_cache(&self) -> Result<Value, String> {
+        self.cache_generation.fetch_add(1, Ordering::AcqRel);
         let mut removed_bytes = 0_u64;
         let mut removed_count = 0_u64;
         for case in self.cases.values() {
@@ -333,6 +341,7 @@ impl PromptLibraryStore {
     }
 
     fn download_image(&self, case: &CaseAsset) -> Result<(), String> {
+        let generation = self.cache_generation.load(Ordering::Acquire);
         let url = format!(
             "https://raw.githubusercontent.com/freestylefly/awesome-gpt-image-2/{}/{}",
             "63e6176fa01be51c000108dacd72716d3e46784b", case.image_path
@@ -378,7 +387,16 @@ impl PromptLibraryStore {
         if let Err(error) = file
             .write_all(&bytes)
             .and_then(|_| file.sync_all())
-            .and_then(|_| fs::rename(&temporary, &target))
+            .and_then(|_| {
+                if self.cache_generation.load(Ordering::Acquire) != generation {
+                    Err(std::io::Error::new(
+                        std::io::ErrorKind::Interrupted,
+                        "图片缓存已在本轮下载期间清理",
+                    ))
+                } else {
+                    fs::rename(&temporary, &target)
+                }
+            })
         {
             let _ = fs::remove_file(&temporary);
             return Err(format!("无法提交灵感库图片缓存：{error}"));
@@ -525,6 +543,13 @@ fn catalog_cases(catalog: &Value) -> Result<HashMap<String, CaseAsset>, String> 
         }
     }
     Ok(result)
+}
+
+fn valid_case_id(value: &str) -> bool {
+    value
+        .strip_prefix("awesome-gpt-image-2:case:")
+        .is_some_and(|id| !id.is_empty() && id.bytes().all(|byte| byte.is_ascii_digit()))
+        && value.len() <= 128
 }
 
 fn load_favorites(path: &Path) -> FavoriteState {
@@ -690,6 +715,7 @@ mod tests {
         assert_eq!(value["catalog"]["categories"].as_array().unwrap().len(), 13);
         assert!(store.ensure_image("not-a-case").is_err());
         assert!(store.set_favorite("not-a-case", true).is_err());
+        assert!(store.set_favorite("not-a-case", false).is_err());
     }
 
     #[test]
@@ -711,7 +737,7 @@ mod tests {
         store.set_favorite(id, true).unwrap();
         drop(store);
 
-        let orphan = "awesome-gpt-image-2:case:removed";
+        let orphan = "awesome-gpt-image-2:case:999";
         let document = FavoritesDocument {
             schema_version: STATE_SCHEMA_VERSION,
             favorites: vec![id.into(), orphan.into()],

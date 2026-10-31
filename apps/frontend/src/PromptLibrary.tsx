@@ -65,7 +65,7 @@ function previewImageUrl(item: PromptCase) {
 }
 
 function PromptImage({
-  item, active, state, onLoad, onImageError, compact = false,
+  item, active, state, onLoad, onImageError, compact = false, allowRetry = true,
 }: {
   item: PromptCase;
   active: boolean;
@@ -73,6 +73,7 @@ function PromptImage({
   onLoad: () => void;
   onImageError: () => void;
   compact?: boolean;
+  allowRetry?: boolean;
 }) {
   const holder = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -91,7 +92,7 @@ function PromptImage({
     {!loaded && <div className={`prompt-image-placeholder ${state?.status === 'error' ? 'is-error' : ''}`}>
       {state?.status === 'loading' ? <LoaderCircle size={20} className="spin"/> : <ImageIcon size={21}/>}
       <span>{state?.status === 'error' ? '图片加载失败' : state?.status === 'loading' ? '正在加载示例图' : '联网后加载示例图'}</span>
-      {state?.status === 'error' && <button type="button" onClick={onLoad}><RefreshCw size={11}/>重试</button>}
+      {state?.status === 'error' && (allowRetry ? <button type="button" onClick={onLoad}><RefreshCw size={11}/>重试</button> : <span>打开详情后重试</span>)}
     </div>}
     <span className="prompt-example-badge">上游示例</span>
   </div>;
@@ -111,7 +112,7 @@ function PromptCard({
 }) {
   return <article className="prompt-card">
     <button className="prompt-card-main" type="button" onClick={onOpen} aria-label={`查看${item.title}`}>
-      <PromptImage item={item} active={active} state={image} onLoad={onLoadImage} onImageError={onImageError}/>
+      <PromptImage item={item} active={active} state={image} onLoad={onLoadImage} onImageError={onImageError} allowRetry={false}/>
       <div className="prompt-card-copy">
         <span>{item.category.label}</span>
         <strong>{item.title}</strong>
@@ -148,6 +149,7 @@ export function PromptLibrary({
   const [cacheArmed, setCacheArmed] = useState(false);
   const [images, setImages] = useState<Record<string, ImageState>>({});
   const requests = useRef(new Set<string>());
+  const detailDialog = useRef<HTMLElement>(null);
   const detailClose = useRef<HTMLButtonElement>(null);
   const catalog = snapshot.catalog;
   const favoriteSet = useMemo(() => new Set(snapshot.favorites), [snapshot.favorites]);
@@ -173,14 +175,26 @@ export function PromptLibrary({
   }, []);
 
   useEffect(() => {
-    if (!selected) return;
+    if (!selected || !active) return;
     const close = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !event.isComposing) setSelectedId(null);
+      if (event.key !== 'Tab' || event.isComposing || !detailDialog.current) return;
+      const focusable = [...detailDialog.current.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],select:not(:disabled),input:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])')];
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', close);
     requestAnimationFrame(() => detailClose.current?.focus());
     return () => window.removeEventListener('keydown', close);
-  }, [selected]);
+  }, [active, selected]);
 
   useEffect(() => {
     if (!cacheArmed) return;
@@ -197,16 +211,16 @@ export function PromptLibrary({
       setImages(previous => ({ ...previous, [item.id]: { status: 'loaded' } }));
       return;
     }
-    api('prompt_library_image', { caseId: item.id })
-      .then(() => {
+    api<{ cache: PromptLibrarySnapshot['cache'] }>('prompt_library_image', { caseId: item.id })
+      .then(result => {
         setImages(previous => ({ ...previous, [item.id]: { status: 'loaded' } }));
-        setSnapshot(current => ({ ...current, cache: { ...current.cache, count: current.cache.count + (current.cache.count < catalog.cases.length ? 1 : 0) } }));
+        setSnapshot(current => ({ ...current, cache: result.cache }));
       })
       .catch(error => {
         setImages(previous => ({ ...previous, [item.id]: { status: 'error', error: String(error) } }));
       })
       .finally(() => requests.current.delete(item.id));
-  }, [active, catalog.cases.length, images, native]);
+  }, [active, images, native]);
 
   const favorite = async (item: PromptCase) => {
     const nextFavorite = !favoriteSet.has(item.id);
@@ -289,6 +303,14 @@ export function PromptLibrary({
         </button>
       </div>
     </header>
+    <details className="prompt-license-disclosure">
+      <summary>来源与内容许可</summary>
+      <p>目录数据固定自 {catalog.upstreamRepository} 的只读快照。上游代码与目录采用 MIT 许可，但第三方示例图片和提示词的商业使用、再分发条件独立且未统一验证。</p>
+      <div>
+        <a href={`${catalog.upstreamRepository}/blob/${catalog.upstreamCommit}/LICENSE`} target="_blank" rel="noreferrer">上游 MIT 许可<ExternalLink size={10}/></a>
+        <a href={`${catalog.upstreamRepository}/blob/${catalog.upstreamCommit}/docs/disclaimer.md`} target="_blank" rel="noreferrer">第三方内容声明<ExternalLink size={10}/></a>
+      </div>
+    </details>
 
     {(loadError || snapshot.favoritesLoadError || snapshot.favoritesSaveError) && <div className="prompt-error" role="alert"><span>{loadError || snapshot.favoritesLoadError || snapshot.favoritesSaveError}</span><button type="button" onClick={() => setLoadError('')} aria-label="关闭提示"><X size={12}/></button></div>}
     {!native && <div className="prompt-preview-note">界面预览：收藏保存在浏览器本地；桌面应用会使用受限宿主缓存。</div>}
@@ -326,7 +348,7 @@ export function PromptLibrary({
     </div>
 
     {selected && <div className="prompt-detail-backdrop" role="presentation" onPointerDown={event => { if (event.target === event.currentTarget) setSelectedId(null); }}>
-      <article className="prompt-detail" role="dialog" aria-modal="true" aria-label={selected.title}>
+      <article ref={detailDialog} className="prompt-detail" role="dialog" aria-modal="true" aria-label={selected.title}>
         <button ref={detailClose} className="prompt-detail-close" type="button" aria-label="关闭案例详情" onClick={() => setSelectedId(null)}><X size={16}/></button>
         <div className="prompt-detail-image"><PromptImage item={selected} active={active} state={images[selected.id]} onLoad={() => loadImage(selected)} onImageError={() => setImages(previous => ({ ...previous, [selected.id]: { status: 'error', error: '图片解码失败' } }))} compact/></div>
         <div className="prompt-detail-content">
