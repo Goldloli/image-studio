@@ -1,6 +1,6 @@
 # 实施任务
 
-状态：用户已条件确认；前置已认证归档；按用户2026-11-01要求暂停，当前全部未实施。Qwen 由 Beads `image-studio-u3q`、MOSS 由 `image-studio-g37` 跟踪；tasks 是本 change 的依赖和验收映射，不代替 Beads。执行门槛：前置`integrate-planned-models`三型号全部认证并归档；`image-studio-2px`是已完成历史基线，不能单独放行。
+状态：用户已确认并于2026-11-01明确恢复实施；前置已认证归档。Qwen 由 Beads `image-studio-u3q`、MOSS 由 `image-studio-g37` 跟踪；tasks 是本 change 的依赖和验收映射，不代替 Beads。按前置门槛和既定顺序先完成Qwen基础版/Turbo，再推进MOSS。
 
 ## 1. 前置、来源与冻结范围
 

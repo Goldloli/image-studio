@@ -1,8 +1,8 @@
 # Qwen-Image 2.1/Turbo 与 MOSS-Image-SFT 接入方案
 
-状态：**前置已完成；按用户2026-11-01要求暂停，尚未实施**。编写：2026-10-30；顺序与实施确认：2026-10-31。文档任务：`image-studio-ego`；执行跟踪：Qwen `image-studio-u3q`、MOSS `image-studio-g37`。
+状态：**前置已完成；用户于2026-11-01明确恢复，正在实施**。编写：2026-10-30；顺序与实施确认：2026-10-31；恢复实施：2026-11-01。文档任务：`image-studio-ego`；执行跟踪：Qwen `image-studio-u3q`、MOSS `image-studio-g37`。
 
-前置：[三个计划模型接入与验收](../archive/2026-11-01-integrate-planned-models/README.md)已完成并归档；[整批118/118认证](../../../verification/planned-models-20261031/batch-acceptance.json)通过。Qwen/MOSS不会自动开始，等待用户明确恢复；历史Z-Image认证已通过，见[归档记录](../archive/2026-10-31-certify-current-model-usability/README.md)。用户确认本方案与三个计划型号整批认证通过是独立条件，不能互相替代。
+前置：[三个计划模型接入与验收](../archive/2026-11-01-integrate-planned-models/README.md)已完成并归档；[整批118/118认证](../../../verification/planned-models-20261031/batch-acceptance.json)通过。用户已明确恢复Qwen/MOSS实施，按Qwen基础版/Turbo通过后再推进MOSS；历史Z-Image认证已通过，见[归档记录](../archive/2026-10-31-certify-current-model-usability/README.md)。
 
 建议阅读顺序：[提案](proposal.md) → [来源和型号](sources.md) → [技术设计](design.md) → [验收计划](test-plan.md) → [规格目录](specs/) → [实施任务](tasks.md)。
 

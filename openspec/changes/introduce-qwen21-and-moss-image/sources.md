@@ -51,4 +51,4 @@ Qwen 旧版、其他 Turbo/LoRA、编辑/控制分支不因名称相近而纳入
 
 ## 6. 接入顺序修订
 
-2026-10-31用户明确要求先接通并测试三个计划型号，再到Qwen/MOSS。最新固定revision及许可元数据见[本次复核](../archive/2026-11-01-integrate-planned-models/references/hf-and-runtime-metadata.json)。这次没有重新拉取三个完整文件清单，原组件大小仍是2026-10-30候选统计，不声称已重新核验权重内容。公共边界由[前置方案](../archive/2026-11-01-integrate-planned-models/README.md)交付，前置已于2026-11-01认证并归档；本方案虽已获条件确认，但用户要求此后暂停，等待明确恢复。
+2026-10-31用户明确要求先接通并测试三个计划型号，再到Qwen/MOSS；前置已于2026-11-01认证并归档，用户随后明确恢复本方案实施。最新固定revision及许可元数据见[本次复核](../archive/2026-11-01-integrate-planned-models/references/hf-and-runtime-metadata.json)。本方案尚未重新拉取三个完整文件清单，原组件大小仍是2026-10-30候选统计，不声称已重新核验权重内容；正式安装前仍须补齐来源清单和内容摘要。
