@@ -1,5 +1,8 @@
+import json
+import os
 import sys
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 
@@ -149,6 +152,84 @@ class WorkerTests(unittest.TestCase):
             parse_arguments(["--probe"])
         with self.assertRaises(ValueError):
             parse_arguments(["--model-snapshot-id", "unknown"])
+
+    def test_protocol_v2_success_uses_selected_snapshot_identity(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            request = self.request(QWEN_BASE_SNAPSHOT_ID, MODEL_SPECS[QWEN_BASE_SNAPSHOT_ID])
+            worker_identity = identity(QWEN_BASE_SNAPSHOT_ID)
+            hello = {
+                "family": "image-studio.generation",
+                "version": None,
+                "session_id": "session",
+                "request_id": "hello",
+                "sequence": 0,
+                "execution": None,
+                "message": {
+                    "type": "hello",
+                    "versions": {"min": 2, "max": 2},
+                    "build_id": "host",
+                    "expected_worker": worker_identity,
+                    "capabilities": [MODEL_SPECS[QWEN_BASE_SNAPSHOT_ID]["capability"]],
+                },
+            }
+            execute = {
+                "family": "image-studio.generation",
+                "version": 2,
+                "session_id": "session",
+                "request_id": "execute",
+                "sequence": 1,
+                "execution": {
+                    "job_id": "job",
+                    "attempt_id": "attempt",
+                    "execution_token": "token",
+                },
+                "message": {"type": "execute_v2", "request": request},
+            }
+            code = (
+                "from studio_mflux_worker_v3 import backend; "
+                "backend.generate=lambda request,progress,cancel: dict("
+                "role='primary',data_type='image_rgb',relative_path='primary.png',"
+                "width=1024,height=1024,size_bytes=9,sha256='a'*64); "
+                "from studio_mflux_worker_v3.__main__ import main; raise SystemExit(main())"
+            )
+            child = subprocess.Popen(
+                [
+                    sys.executable,
+                    "-c",
+                    code,
+                    "--model-snapshot-id",
+                    QWEN_BASE_SNAPSHOT_ID,
+                ],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env={
+                    **os.environ,
+                    "PYTHONPATH": str(Path(__file__).resolve().parents[1]),
+                },
+            )
+            try:
+                child.stdin.write(
+                    (json.dumps(hello) + "\n" + json.dumps(execute) + "\n").encode()
+                )
+                child.stdin.flush()
+                accepted = json.loads(child.stdout.readline())
+                self.assertEqual(accepted["message"]["identity"], worker_identity)
+                self.assertEqual(
+                    accepted["message"]["capabilities"],
+                    [MODEL_SPECS[QWEN_BASE_SNAPSHOT_ID]["capability"]],
+                )
+                candidate = json.loads(child.stdout.readline())
+                self.assertEqual(candidate["message"]["type"], "output_candidate_v2")
+                self.assertEqual(candidate["execution"], execute["execution"])
+                self.assertEqual(child.wait(timeout=5), 0, child.stderr.read().decode())
+            finally:
+                if child.poll() is None:
+                    child.kill()
+                    child.wait()
+                child.stdin.close()
+                child.stdout.close()
+                child.stderr.close()
 
 
 if __name__ == "__main__":
