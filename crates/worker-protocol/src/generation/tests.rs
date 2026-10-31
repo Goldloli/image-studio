@@ -184,3 +184,190 @@ fn recipe_and_progress_cannot_silently_downgrade() {
     }
     assert!(candidate.validate().is_err());
 }
+
+fn v2_expected() -> WorkerIdentity {
+    WorkerIdentity {
+        build_id: "studio-onnx-worker-0.1.0".into(),
+        runtime_lock_id: "onnxruntime-1.31.1-cpu".into(),
+        model_snapshot_id: "birefnet-epoch-244".into(),
+    }
+}
+
+fn v2_context() -> ExecutionContext {
+    ExecutionContext {
+        job_id: "job:v2".into(),
+        attempt_id: "attempt:v2".into(),
+        execution_token: "token:v2".into(),
+    }
+}
+
+fn v2_request() -> ExecuteRequestV2 {
+    ExecuteRequestV2 {
+        model_id: "birefnet-general-epoch-244".into(),
+        capability_id: "image.remove-background.birefnet-general-epoch-244.v1".into(),
+        recipe_id: "birefnet-general-cpu-v1".into(),
+        recipe_version: 1,
+        runtime_lock_id: "onnxruntime-1.31.1-cpu".into(),
+        model_snapshot_id: "birefnet-epoch-244".into(),
+        instruction: String::new(),
+        seed: None,
+        sampling_steps: None,
+        parameters: BTreeMap::from([
+            ("provider".into(), serde_json::json!("CPUExecutionProvider")),
+            ("precision".into(), serde_json::json!("float32")),
+        ]),
+        inputs: vec![InputAssetDescriptor {
+            role: "source".into(),
+            path: "/managed/runs/v2/input.png".into(),
+            width: 10,
+            height: 12,
+            sha256: "a".repeat(64),
+        }],
+        outputs: vec![
+            OutputSpec {
+                role: "primary".into(),
+                data_type: "image_rgba".into(),
+                width: 10,
+                height: 12,
+                max_bytes: MAX_OUTPUT_BYTES,
+            },
+            OutputSpec {
+                role: "mask".into(),
+                data_type: "mask".into(),
+                width: 10,
+                height: 12,
+                max_bytes: MAX_OUTPUT_BYTES,
+            },
+        ],
+        model_path: "/managed/models/birefnet".into(),
+        output_dir: "/managed/runs/v2".into(),
+    }
+}
+
+fn v2_envelope(sequence: u64, request_id: &str, message: Message) -> Envelope {
+    Envelope {
+        family: FAMILY.into(),
+        version: Some(PROTOCOL_VERSION_V2),
+        session_id: "session:v2".into(),
+        request_id: request_id.into(),
+        sequence,
+        execution: Some(v2_context()),
+        message,
+    }
+}
+
+#[test]
+fn v2_handshake_and_two_role_candidates_are_strict() {
+    let expected = v2_expected();
+    let capability = "image.remove-background.birefnet-general-epoch-244.v1";
+    let mut session = HostSession::new_v2("session:v2", expected.clone(), capability).unwrap();
+    let hello = session.hello("request:hello", "studio-host").unwrap();
+    let accepted = Envelope {
+        family: FAMILY.into(),
+        version: Some(PROTOCOL_VERSION_V2),
+        session_id: "session:v2".into(),
+        request_id: "request:hello".into(),
+        sequence: 0,
+        execution: None,
+        message: Message::HelloAccepted {
+            versions: VERSIONS_V2,
+            selected_version: PROTOCOL_VERSION_V2,
+            identity: expected,
+            capabilities: vec![capability.into()],
+        },
+    };
+    assert_eq!(hello.sequence, 0);
+    assert_eq!(
+        session.accept(&accepted).unwrap(),
+        WorkerEvent::HandshakeAccepted
+    );
+    let Message::Execute {
+        request: v1_request,
+    } = host_frames()[1].message.clone()
+    else {
+        unreachable!()
+    };
+    assert!(
+        session
+            .execute("request:v1", v2_context(), v1_request)
+            .is_err()
+    );
+    session
+        .execute_v2("request:execute", v2_context(), v2_request())
+        .unwrap();
+
+    let primary = v2_envelope(
+        1,
+        "request:execute",
+        Message::OutputCandidateV2 {
+            candidate: OutputCandidateV2 {
+                role: "primary".into(),
+                data_type: "image_rgba".into(),
+                relative_path: "primary.png".into(),
+                width: 10,
+                height: 12,
+                size_bytes: 128,
+                sha256: "b".repeat(64),
+            },
+        },
+    );
+    assert_eq!(
+        session.accept(&primary).unwrap(),
+        WorkerEvent::OutputCandidate
+    );
+    let mask = v2_envelope(
+        2,
+        "request:execute",
+        Message::OutputCandidateV2 {
+            candidate: OutputCandidateV2 {
+                role: "mask".into(),
+                data_type: "mask".into(),
+                relative_path: "mask.png".into(),
+                width: 10,
+                height: 12,
+                size_bytes: 64,
+                sha256: "c".repeat(64),
+            },
+        },
+    );
+    assert_eq!(session.accept(&mask).unwrap(), WorkerEvent::OutputCandidate);
+    let mut duplicate = mask.clone();
+    duplicate.sequence = 3;
+    assert!(session.accept(&duplicate).is_err());
+}
+
+#[test]
+fn v2_rejects_fake_tool_fields_path_escape_and_bad_roles() {
+    let mut request = v2_request();
+    request.instruction = "pretend prompt".into();
+    assert!(request.validate().is_err());
+    request = v2_request();
+    request.seed = Some(7);
+    assert!(request.validate().is_err());
+    request = v2_request();
+    request.inputs[0].path = "/managed/runs/other/input.png".into();
+    assert!(request.validate().is_err());
+    request = v2_request();
+    request.outputs[1].width = 11;
+    assert!(request.validate().is_err());
+    request = v2_request();
+    request.outputs.pop();
+    assert!(request.validate().is_err());
+}
+
+#[test]
+fn v1_and_v2_messages_cannot_cross_protocol_boundaries() {
+    let mut envelope = host_frames()[1].clone();
+    envelope.version = Some(PROTOCOL_VERSION_V2);
+    assert!(envelope.validate().is_err());
+    let mut v2 = v2_envelope(
+        1,
+        "request:execute",
+        Message::ExecuteV2 {
+            request: v2_request(),
+        },
+    );
+    assert!(v2.validate().is_ok());
+    v2.version = Some(PROTOCOL_VERSION);
+    assert!(v2.validate().is_err());
+}
