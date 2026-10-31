@@ -6,12 +6,12 @@
   "required": false,
   "status": "passed",
   "evidenceKind": "device_probe",
-  "reason": "The current Tauri binary and embedded frontend initialized under deny-network; live native interaction is still required for the U matrix.",
-  "applicationSha256": "babaebde9a771110071cbf1c4679fd8c90d1a27d2c8d526e9547f55bbe8d9558",
+  "reason": "Current final Tauri binary and embedded frontend initialized under deny-network; offline startup is supporting evidence for the completed U matrix.",
+  "applicationSha256": "200995dcb04c578caa5bdacec41e2249cbaa48ba1f09311c4ac3632b3bc84565",
   "networkControlExit": 6,
-  "networkControlStderr": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0curl: (6) Could not resolve host: example.com\n",
+  "networkControlStderr": "% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0curl: (6) Could not resolve host: example.com",
   "nativeWindowRendererInitialized": true,
   "log": [
-    "DIAGNOSTIC_DESKTOP_READY tauri=2 requested_scale=None native_dpr=webview window=Some([960, 640]); image inference unavailable"
+    "DIAGNOSTIC_DESKTOP_READY tauri=2 requested_scale=Some(2) native_dpr=webview window=Some([960, 640]); image inference unavailable"
   ]
 }

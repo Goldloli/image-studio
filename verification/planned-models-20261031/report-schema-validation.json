@@ -3,11 +3,11 @@
   "status": "passed",
   "caseCount": 50,
   "counts": {
-    "passed": 41,
-    "failed": 0,
     "not_run": 0,
-    "blocked": 9
+    "failed": 0,
+    "passed": 50,
+    "blocked": 0
   },
-  "gateStatus": "incomplete",
+  "gateStatus": "passed",
   "problems": []
 }

@@ -18,12 +18,12 @@
     "python3 -m pytest -q tools/mflux-worker/tests tools/mflux-worker-v2/tests scripts/tests"
   ],
   "results": {
-    "rust_workspace": "113 desktop tests passed, 4 explicit acceptance tests ignored; all other workspace suites passed",
+    "rust_workspace": "114 desktop tests passed, 4 explicit acceptance tests ignored; all other workspace suites passed",
     "frontend": "35/35 passed",
     "python": "32/32 passed",
     "frontend_build": "passed with existing large-chunk warning",
     "examples_build": "passed"
   },
   "log": "logs/quality-gates.log",
-  "gitCommit": "9bf1d938340027a0b6b2f64595f2bf6630e60bf7"
+  "gitCommit": "d08359c3611d19d3788ccd4db199a7fd60b97838"
 }
