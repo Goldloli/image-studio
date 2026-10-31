@@ -4,7 +4,10 @@ import sys
 from pathlib import Path
 import subprocess
 import tempfile
+import threading
+import types
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -17,7 +20,7 @@ from studio_mflux_worker_v3 import (
     identity,
 )
 from studio_mflux_worker_v3.__main__ import parse_arguments, validate_request
-from studio_mflux_worker_v3.backend import token_budget
+from studio_mflux_worker_v3.backend import generate, token_budget
 
 
 class TemplateTokenizer:
@@ -30,7 +33,7 @@ class TemplateTokenizer:
         self.count = count
 
     def __call__(self, prompt, **kwargs):
-        assert prompt == "<user>hello</user>"
+        assert prompt.startswith("<user>") and prompt.endswith("</user>")
         assert kwargs == dict(
             padding=False, truncation=False, add_special_tokens=True
         )
@@ -48,7 +51,7 @@ class ChatTokenizer:
         self.count = count
 
     def apply_chat_template(self, messages, **kwargs):
-        assert messages == [{"role": "user", "content": "hello"}]
+        assert len(messages) == 1 and messages[0]["role"] == "user"
         assert kwargs == dict(
             tokenize=False,
             add_generation_prompt=True,
@@ -57,7 +60,7 @@ class ChatTokenizer:
         return "chat hello"
 
     def __call__(self, prompt, **kwargs):
-        assert prompt == "chat hello"
+        assert prompt.startswith("chat ")
         assert kwargs == dict(
             padding=False, truncation=False, add_special_tokens=True
         )
@@ -152,6 +155,123 @@ class WorkerTests(unittest.TestCase):
             parse_arguments(["--probe"])
         with self.assertRaises(ValueError):
             parse_arguments(["--model-snapshot-id", "unknown"])
+
+    def test_backend_branches_use_exact_model_configs_and_sampling(self):
+        calls = []
+
+        class Image:
+            def save(self, path):
+                Path(path).write_bytes(b"png-data")
+
+        class BaseQwen:
+            def __init__(self, **kwargs):
+                calls.append(("qwen-init", kwargs))
+                self.callbacks = self
+
+            def register(self, value):
+                calls.append(("callback", value))
+
+            def generate_image(self, **kwargs):
+                calls.append(("qwen-generate", kwargs))
+                return Image()
+
+        class BaseMoss:
+            def __init__(self, **kwargs):
+                calls.append(("moss-init", kwargs))
+                self.callbacks = self
+
+            def register(self, value):
+                calls.append(("callback", value))
+
+            def generate_image(self, **kwargs):
+                calls.append(("moss-generate", kwargs))
+                return Image()
+
+        class Config:
+            @staticmethod
+            def qwen_image_21():
+                return "qwen-base"
+
+            @staticmethod
+            def qwen_image_21_turbo():
+                return "qwen-turbo"
+
+            @staticmethod
+            def moss_image_sft():
+                return "moss-sft"
+
+        tokenizer = TemplateTokenizer(100)
+        fake = {
+            "mflux.models.common.tokenizer.tokenizer_loader": types.SimpleNamespace(
+                TokenizerLoader=types.SimpleNamespace(
+                    load_all=lambda definitions, path: {"qwen21": tokenizer}
+                )
+            ),
+            "mflux.models.qwen21.weights.qwen_image21_weight_definition": types
+            .SimpleNamespace(
+                QwenImage21WeightDefinition=types.SimpleNamespace(
+                    get_tokenizers=lambda: []
+                )
+            ),
+            "mflux.models.common.config.model_config": types.SimpleNamespace(
+                ModelConfig=Config
+            ),
+            "mflux.models.qwen21.variants.txt2img.qwen_image_21": types.SimpleNamespace(
+                QwenImage21=BaseQwen
+            ),
+        }
+        request = self.request(
+            QWEN_TURBO_SNAPSHOT_ID, MODEL_SPECS[QWEN_TURBO_SNAPSHOT_ID]
+        )
+        with patch.dict(sys.modules, fake):
+            candidate = generate(request, lambda *args: None, threading.Event())
+        self.assertEqual(candidate["size_bytes"], 8)
+        self.assertEqual(
+            [value for kind, value in calls if kind == "qwen-init"][0]["model_config"],
+            "qwen-turbo",
+        )
+        qwen_generate = [
+            value for kind, value in calls if kind == "qwen-generate"
+        ][0]
+        self.assertEqual(qwen_generate["num_inference_steps"], 8)
+        self.assertEqual(qwen_generate["guidance"], 1.0)
+
+        calls.clear()
+        (Path(request["output_dir"]) / "primary.png").unlink()
+        tokenizer = ChatTokenizer(100)
+        fake = {
+            "mflux.models.common.tokenizer.tokenizer_loader": types.SimpleNamespace(
+                TokenizerLoader=types.SimpleNamespace(
+                    load_all=lambda definitions, path: {"qwen3_5": tokenizer}
+                )
+            ),
+            "mflux.models.moss_image.weights.moss_image_weight_definition": types
+            .SimpleNamespace(
+                MOSSImageWeightDefinition=types.SimpleNamespace(
+                    get_tokenizers=lambda: []
+                )
+            ),
+            "mflux.models.common.config.model_config": types.SimpleNamespace(
+                ModelConfig=Config
+            ),
+            "mflux.models.moss_image": types.SimpleNamespace(MOSSImage=BaseMoss),
+        }
+        request = self.request(
+            MOSS_SNAPSHOT_ID, MODEL_SPECS[MOSS_SNAPSHOT_ID]
+        )
+        with patch.dict(sys.modules, fake):
+            candidate = generate(request, lambda *args: None, threading.Event())
+        self.assertEqual(candidate["size_bytes"], 8)
+        self.assertEqual(
+            [value for kind, value in calls if kind == "moss-init"][0]["model_config"],
+            "moss-sft",
+        )
+        moss_generate = [
+            value for kind, value in calls if kind == "moss-generate"
+        ][0]
+        self.assertEqual(moss_generate["num_inference_steps"], 50)
+        self.assertEqual(moss_generate["guidance"], 3.0)
+        self.assertEqual(moss_generate["uncond_skip_layers"], (22,))
 
     def test_protocol_v2_success_uses_selected_snapshot_identity(self):
         with tempfile.TemporaryDirectory() as temporary:
