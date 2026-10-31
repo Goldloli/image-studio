@@ -11,6 +11,7 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any
 from urllib.parse import quote
 
@@ -178,10 +179,9 @@ def build_runtime() -> None:
             "license": "Apache-2.0",
         }
     )
-    runtime["wheels"] = wheels
+    runtime["wheels"] = sorted(wheels, key=lambda value: value["package"].lower())
     packages = {
-        item["package"]: item["version"]
-        for item in wheels
+        item["package"]: item["version"] for item in runtime["wheels"]
     }
     runtime["packages"] = packages
 
@@ -193,7 +193,7 @@ def build_runtime() -> None:
     lock = "".join(
         f"{item['package']}=={item['version']} "
         f"--hash=sha256:{item['sha256']}\n"
-        for item in sorted(wheels, key=lambda value: value["package"].lower())
+        for item in runtime["wheels"]
     )
     (directory / "requirements.lock").write_text(lock, encoding="utf-8")
     print(
@@ -203,6 +203,11 @@ def build_runtime() -> None:
 
 
 def main() -> None:
+    if sys.argv[1:] == ["--runtime-only"]:
+        build_runtime()
+        return
+    if sys.argv[1:]:
+        raise SystemExit("usage: prepare_qwen_moss_manifests.py [--runtime-only]")
     source = load_source()
     for model in MODELS:
         manifest = build_manifest(model, source)

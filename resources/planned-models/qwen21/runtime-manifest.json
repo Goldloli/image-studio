@@ -450,6 +450,15 @@
       "license": "MIT"
     },
     {
+      "path": "studio_mflux_worker_v3-0.3.0-py3-none-any.whl",
+      "url": "bundled:worker-wheel",
+      "bytes": 7577,
+      "sha256": "4c12a874c767c9d8a7548a8a8d926097eaf3ffb208615825d574af33b2cfc1ba",
+      "package": "studio-mflux-worker-v3",
+      "version": "0.3.0",
+      "license": "Apache-2.0"
+    },
+    {
       "path": "sympy-1.14.0-py3-none-any.whl",
       "url": "https://files.pythonhosted.org/packages/a2/09/77d55d46fd61b4a135c444fc97158ef34a095e5681d0a6c10b75bf356191/sympy-1.14.0-py3-none-any.whl",
       "bytes": 6299353,
@@ -538,15 +547,6 @@
       "package": "urllib3",
       "version": "2.8.0",
       "license": "MIT"
-    },
-    {
-      "path": "studio_mflux_worker_v3-0.3.0-py3-none-any.whl",
-      "url": "bundled:worker-wheel",
-      "bytes": 7577,
-      "sha256": "4c12a874c767c9d8a7548a8a8d926097eaf3ffb208615825d574af33b2cfc1ba",
-      "package": "studio-mflux-worker-v3",
-      "version": "0.3.0",
-      "license": "Apache-2.0"
     }
   ],
   "packages": {
@@ -598,6 +598,7 @@
     "setuptools": "84.2.1",
     "shellingham": "1.5.4",
     "six": "1.17.0",
+    "studio-mflux-worker-v3": "0.3.0",
     "sympy": "1.14.0",
     "tokenizers": "0.23.3",
     "toml": "0.10.2",
@@ -607,8 +608,7 @@
     "typer": "0.27.3",
     "typing-extensions": "4.16.0",
     "tzdata": "2026.6",
-    "urllib3": "2.8.0",
-    "studio-mflux-worker-v3": "0.3.0"
+    "urllib3": "2.8.0"
   },
   "worker_build_id": "studio-mflux-worker-0.3.0",
   "worker_module": "studio_mflux_worker_v3"
