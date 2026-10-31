@@ -132,7 +132,7 @@
         "人脸修复",
         "任意倍率重采样"
       ],
-      "verifiedDevices": [],
+      "verifiedDevices": ["Apple M3 Max / 128 GiB / macOS arm64 · ncnn Vulkan GPU 0"],
       "recipe": "ncnn Vulkan · x4plus · tile 128 · 固定 4×",
       "installId": "realesrgan-x4plus",
       "installerSupported": true
