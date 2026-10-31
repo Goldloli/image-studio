@@ -229,7 +229,12 @@ impl Harness {
                         height: 1024,
                         max_bytes: 32 * 1024 * 1024,
                     }],
-                    model_path: self.root.path().join("model").to_string_lossy().into_owned(),
+                    model_path: self
+                        .root
+                        .path()
+                        .join("model")
+                        .to_string_lossy()
+                        .into_owned(),
                     output_dir: self.root.path().to_string_lossy().into_owned(),
                 },
             )
