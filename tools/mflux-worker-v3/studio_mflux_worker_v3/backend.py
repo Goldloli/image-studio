@@ -3,6 +3,7 @@
 import hashlib
 import os
 from pathlib import Path
+import sys
 
 from . import MOSS_SNAPSHOT_ID, QWEN_TURBO_SNAPSHOT_ID, model_spec
 
@@ -128,7 +129,13 @@ def generate(request, progress, cancel):
     snapshot_id = request["model_snapshot_id"]
     spec = model_spec(snapshot_id)
     tokenizer = _load_tokenizers(snapshot_id, request["model_path"])
-    token_budget(tokenizer, request["instruction"], spec["token_budget"])
+    actual_tokens = token_budget(
+        tokenizer, request["instruction"], spec["token_budget"]
+    )
+    print(
+        f"token_count={actual_tokens} token_budget={spec['token_budget']}",
+        file=sys.stderr,
+    )
     checkpoint(cancel)
 
     progress("loading")

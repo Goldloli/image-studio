@@ -452,8 +452,8 @@
     {
       "path": "studio_mflux_worker_v3-0.3.0-py3-none-any.whl",
       "url": "bundled:worker-wheel",
-      "bytes": 7577,
-      "sha256": "4c12a874c767c9d8a7548a8a8d926097eaf3ffb208615825d574af33b2cfc1ba",
+      "bytes": 7640,
+      "sha256": "87f32600a2ef316cca061c68f1d1e90808e997da2cedae8bdfe77e3e05bdc55d",
       "package": "studio-mflux-worker-v3",
       "version": "0.3.0",
       "license": "Apache-2.0"
