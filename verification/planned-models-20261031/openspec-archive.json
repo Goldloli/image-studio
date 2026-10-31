@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "runId": "planned-models-20261031",
+  "status": "passed",
+  "change": "integrate-planned-models",
+  "archivedAs": "2026-11-01-integrate-planned-models",
+  "path": "openspec/changes/archive/2026-11-01-integrate-planned-models",
+  "specsUpdated": true,
+  "specDeltaTotals": {
+    "added": 16,
+    "modified": 14,
+    "removed": 0,
+    "renamed": 0
+  },
+  "postArchiveValidation": {
+    "command": "openspec validate --all --strict",
+    "passed": 21,
+    "failed": 0,
+    "checkedLocalLinks": 40,
+    "brokenLocalLinks": 0,
+    "requiredAcceptanceResults": 118
+  },
+  "followUpState": "用户于2026-11-01要求归档后暂停；Qwen/MOSS均未开始，两个Beads均已deferred。"
+}

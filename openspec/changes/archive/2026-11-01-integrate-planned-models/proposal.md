@@ -2,7 +2,7 @@
 
 模型中心的四个首批目标只有 Z-Image Turbo 已接入；Klein、BiRefNet 和 Real-ESRGAN 仍只有目录说明。用户要求先接通并测试这三个计划型号，全部验收后再推进 Qwen 和 MOSS，因此需要补齐实际安装、图片输入、不同执行器及真实产品验收。
 
-**状态：用户已确认实施，Klein 与 BiRefNet 阶段通过。** 2026-10-31 用户确认按 Klein → BiRefNet → Real-ESRGAN → 三型号整批验收的顺序推进。Klein 完成 50/50 必需项；BiRefNet 完成 31/31 必需项。两者均已覆盖安装、真实执行、质量、生命周期、禁网和原生日常链路，见[阶段报告](../../../verification/planned-models-20261031/results.md)。Real-ESRGAN 尚未开始真实实现和认证，三型号整批门禁保持关闭。Z-Image 历史认证为 37/37 P0，通过结论见[现有验收报告](../../../verification/model-usability-20261031/results.md)，不能代替本批剩余测试。
+**状态：已完成并于2026-11-01归档。** 用户按 Klein → BiRefNet → Real-ESRGAN → 整批验收顺序确认实施，最终四配置114个适用P0及4项整批回归全部通过（118/118），见[整批认证](../../../../verification/planned-models-20261031/batch-acceptance.json)和[阶段结果](../../../../verification/planned-models-20261031/results.md)。Z-Image本轮中英/三尺寸、取消恢复及历史v1重试已重新验证。用户明确要求归档之后暂停，Qwen/MOSS尚未开始。
 
 ## What Changes
 

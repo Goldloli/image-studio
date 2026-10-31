@@ -40,7 +40,7 @@
 
 目标为[官方 v1 release](https://github.com/ZhengPeng7/BiRefNet/releases/tag/v1)的 `BiRefNet-general-epoch_244.onnx`，asset ID 186740004、972,666,916 bytes。发布 API 没有提供内容digest，因此本轮不知道真实SHA-256；tag/文件名和大小不能替代下载后的完整哈希与图检查。源仓库及官方通用模型卡标注MIT，具体下载文件的来源/许可附件仍须进入正式清单，不混入RMBG等权重。
 
-**实施后修订：** 最终下载内容 SHA-256 为 `58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c`。实际图为 opset 17，固定输入 `input_image` float32 `1×3×1024×1024`，固定输出 `output_image` float32 `1×1×1024×1024`，无外置 initializer；输出节点是最终 Conv，因此配方只对 logits 做一次 sigmoid。正式安装、真实 CPU 推理、双输出、质量、恢复与原生验收均已通过，见[BirefNet 阶段结果](../../../verification/planned-models-20261031/birefnet-acceptance.json)。
+**实施后修订：** 最终下载内容 SHA-256 为 `58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c`。实际图为 opset 17，固定输入 `input_image` float32 `1×3×1024×1024`，固定输出 `output_image` float32 `1×1×1024×1024`，无外置 initializer；输出节点是最终 Conv，因此配方只对 logits 做一次 sigmoid。正式安装、真实 CPU 推理、双输出、质量、恢复与原生验收均已通过，见[BirefNet 阶段结果](../../../../verification/planned-models-20261031/birefnet-acceptance.json)。
 
 [固定官方 notebook](https://github.com/ZhengPeng7/BiRefNet/blob/f7079632d681ecf12161fcea8905682934e59e51/tutorials/BiRefNet_pth2onnx.ipynb)展示CPUExecutionProvider、RGB→1024²、float32 NCHW、[0,1]及ImageNet均值/标准差归一化，示例对最后输出做sigmoid。该 notebook 当前示例使用另一个dynamic checkpoint，不能证明epoch_244图的opset、输入名或是否自带sigmoid；实施先检查选定图，避免重复sigmoid。若实际图不兼容，保留阻塞并补充设计，不能暗换权重。
 
@@ -60,7 +60,7 @@
 
 ## 5. Qwen/MOSS 后置
 
-既有[详细方案](../introduce-qwen21-and-moss-image/README.md)已选择Qwen 2.1基础版、官方Turbo及MOSS-SFT。本次重新查询三个固定HF revision，仍可解析，Qwen两版元数据为qwen-research，MOSS为Apache-2.0；没有升级版本或更换路线。该后续方案已获条件确认，须等待本批三型号整批验收与归档后实施。
+既有[详细方案](../../introduce-qwen21-and-moss-image/README.md)已选择Qwen 2.1基础版、官方Turbo及MOSS-SFT。本次重新查询三个固定HF revision，仍可解析，Qwen两版元数据为qwen-research，MOSS为Apache-2.0；没有升级版本或更换路线。该后续方案已获条件确认，须等待本批三型号整批验收与归档后实施。
 
 公共多型号安装、配方路由和v2协议先由本批建立。后续只补Qwen/MOSS的manifest、模型分支和独立验收，不再另造第二套v2或覆盖Klein worker身份。先完成三个计划型号的全部必需项及旧模型回归，再做Qwen基础版/Turbo，随后MOSS。Z-Image历史认证或三个型号中的单项通过不能提前越过整批门槛。
 

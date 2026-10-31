@@ -1,6 +1,6 @@
 # 计划模型阶段验收结果
 
-状态：**Klein、BiRefNet 与 Real-ESRGAN 三阶段全部通过**；按配置展开后的型号/能力必需项114个，加整批R组4个，共118/118通过。当前可归档并进入已条件确认的Qwen阶段。
+状态：**Klein、BiRefNet 与 Real-ESRGAN 三阶段全部通过**；按配置展开后的型号/能力必需项114个，加整批R组4个，共118/118通过。已于2026-11-01完成OpenSpec归档；按用户要求暂停，Qwen/MOSS未开始。
 
 
 
@@ -123,3 +123,5 @@
 - 完整质量门日志：`logs/quality-gates.log`
 
 诊断运行 `klein-edit.png` 只把无纹理渐变改为橙色，明确排除在 B02 质量证据之外。
+
+归档：[2026-11-01-integrate-planned-models](../../openspec/changes/archive/2026-11-01-integrate-planned-models/README.md)。用户于2026-11-01明确要求归档后暂停，后续Qwen/MOSS均等待明确恢复。

@@ -31,7 +31,7 @@
     "realesrgan-acceptance.json"
   ],
   "reportSchemaValidation": "batch-report-schema-validation.json",
-  "nextAction": "Archive integrate-planned-models and then proceed to the already conditionally approved Qwen base/Turbo stage. MOSS waits for Qwen acceptance.",
+  "nextAction": "已完成OpenSpec归档。用户于2026-11-01明确要求归档后暂停；Qwen/MOSS保持未开始，须等待用户明确恢复。",
   "cases": [
     {
       "caseId": "I01",
