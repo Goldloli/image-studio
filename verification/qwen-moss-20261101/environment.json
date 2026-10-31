@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "capturedDate": "2026-11-01",
+  "timezone": "Asia/Shanghai",
+  "platform": "macOS",
+  "platformVersion": "27.0.1",
+  "platformBuild": "26A434",
+  "architecture": "arm64",
+  "chip": "Apple M3 Max",
+  "memoryBytes": 137438953472,
+  "execution": {
+    "backend": "MFLUX 0.24.0 / MLX 0.32.4",
+    "python": "3.13.12",
+    "quantization": 8,
+    "output": "1024x1024 RGB PNG"
+  }
+}
