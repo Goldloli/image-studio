@@ -76,6 +76,8 @@ pub struct DraftRecord {
     pub params: Value,
     pub collapsed: bool,
     pub version: u64,
+    #[serde(rename = "promptSourceId", default)]
+    pub prompt_source: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -160,7 +162,7 @@ pub struct Library {
 
 const SCHEMA_V3: &str = "
 CREATE TABLE projects(id TEXT PRIMARY KEY, active_draft_id INTEGER, active_conversation_id TEXT, selected_asset_id TEXT);
-CREATE TABLE drafts(id INTEGER PRIMARY KEY AUTOINCREMENT, project_id TEXT NOT NULL REFERENCES projects(id), name TEXT NOT NULL, prompt TEXT NOT NULL, params_json TEXT NOT NULL, collapsed INTEGER NOT NULL, version INTEGER NOT NULL CHECK(version > 0));
+CREATE TABLE drafts(id INTEGER PRIMARY KEY AUTOINCREMENT, project_id TEXT NOT NULL REFERENCES projects(id), name TEXT NOT NULL, prompt TEXT NOT NULL, prompt_source TEXT, params_json TEXT NOT NULL, collapsed INTEGER NOT NULL, version INTEGER NOT NULL CHECK(version > 0));
 CREATE TABLE conversations(id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), draft_id INTEGER NOT NULL UNIQUE REFERENCES drafts(id), title TEXT NOT NULL, title_source TEXT NOT NULL CHECK(title_source IN ('auto','manual')), created_at INTEGER NOT NULL, activity_seq INTEGER NOT NULL);
 CREATE INDEX conversations_project_activity ON conversations(project_id, activity_seq DESC, id);
 CREATE TABLE jobs(id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES projects(id), submission_key TEXT NOT NULL, request_json TEXT NOT NULL, current_attempt_id TEXT NOT NULL, created_at INTEGER NOT NULL, UNIQUE(project_id, submission_key));
@@ -174,7 +176,7 @@ CREATE TABLE assets(id TEXT PRIMARY KEY, job_id TEXT NOT NULL REFERENCES jobs(id
 CREATE INDEX jobs_project_created ON jobs(project_id, created_at DESC, id DESC);
 CREATE INDEX assets_created ON assets(created_at DESC, id DESC);
 CREATE TABLE installations(installation_id TEXT PRIMARY KEY, record_json TEXT NOT NULL);
-PRAGMA user_version=3;
+PRAGMA user_version=4;
 ";
 
 impl Library {
@@ -211,7 +213,7 @@ impl Library {
             let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
             tx.execute_batch(SCHEMA_V3)?;
             tx.execute("INSERT INTO projects(id) VALUES('default')", [])?;
-            tx.execute("INSERT INTO drafts(project_id,name,prompt,params_json,collapsed,version) VALUES('default','新会话','','{\"modelId\":\"z-image-turbo-mflux-v1\",\"aspect\":\"1:1\",\"count\":1,\"seed\":\"\"}',0,1)", [])?;
+            tx.execute("INSERT INTO drafts(project_id,name,prompt,prompt_source,params_json,collapsed,version) VALUES('default','新会话','',NULL,'{\"modelId\":\"z-image-turbo-mflux-v1\",\"aspect\":\"1:1\",\"count\":1,\"seed\":\"\"}',0,1)", [])?;
             tx.execute("INSERT INTO conversations(id,project_id,draft_id,title,title_source,created_at,activity_seq) VALUES('conv-default','default',1,'新会话','auto',?,1)", [now()])?;
             tx.execute(
                 "UPDATE projects SET active_draft_id=1,active_conversation_id='conv-default' WHERE id='default'",
@@ -221,9 +223,13 @@ impl Library {
         } else if version == 1 {
             conversations::migrate_v1_to_v2(&mut db)?;
             queries::migrate_v2_to_v3(&mut db)?;
+            conversations::migrate_v3_to_v4(&mut db)?;
         } else if version == 2 {
             queries::migrate_v2_to_v3(&mut db)?;
-        } else if version != 3 {
+            conversations::migrate_v3_to_v4(&mut db)?;
+        } else if version == 3 {
+            conversations::migrate_v3_to_v4(&mut db)?;
+        } else if version != 4 {
             return Err(LibraryError::Schema(format!("user_version={version}")));
         }
         let integrity: String = db.query_row("PRAGMA quick_check(1)", [], |r| r.get(0))?;
@@ -295,19 +301,20 @@ impl Library {
     }
 
     pub fn drafts(&self) -> Result<Vec<DraftRecord>> {
-        let mut statement = self.db.prepare("SELECT id,name,prompt,params_json,collapsed,version FROM drafts WHERE project_id='default' ORDER BY id")?;
+        let mut statement = self.db.prepare("SELECT id,name,prompt,prompt_source,params_json,collapsed,version FROM drafts WHERE project_id='default' ORDER BY id")?;
         let rows = statement.query_map([], |r| {
             Ok((
                 read_unsigned(r, 0)?,
                 r.get(1)?,
                 r.get(2)?,
-                r.get::<_, String>(3)?,
-                r.get(4)?,
-                read_unsigned(r, 5)?,
+                r.get::<_, Option<String>>(3)?,
+                r.get::<_, String>(4)?,
+                r.get(5)?,
+                read_unsigned(r, 6)?,
             ))
         })?;
         rows.map(|row| {
-            let (id, name, prompt, p, collapsed, version) = row?;
+            let (id, name, prompt, prompt_source, p, collapsed, version) = row?;
             Ok(DraftRecord {
                 id,
                 name,
@@ -315,6 +322,7 @@ impl Library {
                 params: serde_json::from_str(&p)?,
                 collapsed,
                 version,
+                prompt_source,
             })
         })
         .collect()
@@ -330,13 +338,17 @@ impl Library {
             || draft.prompt.len() > 1024 * 1024
             || !draft.params.is_object()
             || serde_json::to_vec(&draft.params)?.len() > 65536
+            || draft
+                .prompt_source
+                .as_ref()
+                .is_some_and(|value| value.is_empty() || value.len() > 128)
         {
             return Err(LibraryError::Invalid("草稿超出保存范围".into()));
         }
         let version = expected_version
             .checked_add(1)
             .ok_or_else(|| LibraryError::Invalid("草稿版本溢出".into()))?;
-        let changed=self.db.execute("UPDATE drafts SET name=?,prompt=?,params_json=?,collapsed=?,version=? WHERE id=? AND project_id='default' AND version=?",params![draft.name,draft.prompt,serde_json::to_string(&draft.params)?,draft.collapsed,sqlite_integer(version)?,sqlite_integer(draft.id)?,sqlite_integer(expected_version)?])?;
+        let changed=self.db.execute("UPDATE drafts SET name=?,prompt=?,prompt_source=?,params_json=?,collapsed=?,version=? WHERE id=? AND project_id='default' AND version=?",params![draft.name,draft.prompt,draft.prompt_source,serde_json::to_string(&draft.params)?,draft.collapsed,sqlite_integer(version)?,sqlite_integer(draft.id)?,sqlite_integer(expected_version)?])?;
         if changed != 1 {
             return Err(LibraryError::DraftConflict);
         }

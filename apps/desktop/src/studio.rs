@@ -41,13 +41,14 @@ pub struct StudioService {
 }
 
 #[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct DraftInput {
     pub id: u64,
     pub name: String,
     pub prompt: String,
     pub params: Value,
     pub collapsed: bool,
+    pub prompt_source_id: Option<String>,
 }
 
 pub struct SubmitInput {
@@ -100,6 +101,16 @@ pub struct ConversationCreateInput {
     pub aspect: Option<String>,
     pub count: Option<u32>,
     pub seed: Option<String>,
+    pub initial_title: Option<String>,
+    pub initial_prompt: Option<String>,
+    pub prompt_source_id: Option<String>,
+}
+
+fn valid_prompt_source(value: &str) -> bool {
+    value
+        .strip_prefix("awesome-gpt-image-2:case:")
+        .is_some_and(|id| !id.is_empty() && id.bytes().all(|byte| byte.is_ascii_digit()))
+        && value.len() <= 128
 }
 
 impl StudioService {
@@ -526,6 +537,7 @@ impl StudioService {
                     params: draft.params,
                     collapsed: draft.collapsed,
                     version: expected_version,
+                    prompt_source: draft.prompt_source_id,
                 },
                 expected_version,
             )
@@ -557,10 +569,39 @@ impl StudioService {
         &self,
         input: Option<ConversationCreateInput>,
     ) -> Result<Value, String> {
+        let initial_title = input
+            .as_ref()
+            .and_then(|value| value.initial_title.as_deref())
+            .unwrap_or("新会话");
+        let initial_prompt = input
+            .as_ref()
+            .and_then(|value| value.initial_prompt.as_deref())
+            .unwrap_or("");
+        let prompt_source = input
+            .as_ref()
+            .and_then(|value| value.prompt_source_id.as_deref());
+        if initial_title.is_empty() || initial_title.len() > 1024 {
+            return Err("新会话标题无效".into());
+        }
+        if initial_prompt.len() > 1024 * 1024 {
+            return Err("新会话初始提示词超出保存范围".into());
+        }
+        if prompt_source.is_some_and(|value| !valid_prompt_source(value)) {
+            return Err("灵感案例来源标识无效".into());
+        }
+        if prompt_source.is_some() && initial_prompt.is_empty() {
+            return Err("灵感案例来源缺少初始提示词".into());
+        }
         let (params, warnings) = self.resolve_new_conversation_defaults(input.as_ref())?;
         let params = serde_json::to_value(params).map_err(|error| error.to_string())?;
-        let created =
-            self.with_library(|library| library.create_conversation_with_params(params))?;
+        let created = self.with_library(|library| {
+            library.create_conversation_with_content(
+                params,
+                initial_title,
+                initial_prompt,
+                prompt_source,
+            )
+        })?;
         Ok(json!({
             "conversation": created.conversation,
             "draft": created.draft,
@@ -1096,6 +1137,7 @@ mod tests {
                     prompt: "中文\nA quiet lake".into(),
                     params: json!({"modelId":"z-image-turbo-mflux-v1","aspect":"4:3","count":1,"seed":"42"}),
                     collapsed: true,
+                    prompt_source_id: None,
                 },
                 1,
             )
@@ -1136,7 +1178,8 @@ mod tests {
                         name: "草稿 1".into(),
                         prompt: "preserved".into(),
                         params: json!({"modelId":"z-image-turbo-mflux-v1","aspect":{},"count":1,"seed":""}),
-                        collapsed: false
+                        collapsed: false,
+                        prompt_source_id: None,
                     },
                     1
                 )
@@ -1164,6 +1207,7 @@ mod tests {
                         "seed": ""
                     }),
                     collapsed: false,
+                    prompt_source_id: None,
                 },
                 1,
             )
@@ -1230,6 +1274,9 @@ mod tests {
                 aspect: Some("3:4".into()),
                 count: Some(1),
                 seed: Some(String::new()),
+                initial_title: None,
+                initial_prompt: None,
+                prompt_source_id: None,
             }))
             .unwrap();
         assert_eq!(overridden["draft"]["params"]["aspect"], "3:4");
@@ -1250,6 +1297,9 @@ mod tests {
                     aspect: None,
                     count: None,
                     seed: None,
+                    initial_title: None,
+                    initial_prompt: None,
+                    prompt_source_id: None,
                 }))
                 .is_err()
         );
@@ -1258,6 +1308,60 @@ mod tests {
             .unwrap()
             .len();
         assert_eq!(before, after);
+    }
+
+    #[test]
+    fn inspiration_prompt_is_created_with_resolved_defaults_and_source() {
+        let (_root, service) = fixture();
+        let created = service
+            .conversation_create(Some(ConversationCreateInput {
+                model_id: None,
+                aspect: None,
+                count: None,
+                seed: None,
+                initial_title: Some("秋季咖啡海报".into()),
+                initial_prompt: Some("完整案例提示词\n[COFFEE]".into()),
+                prompt_source_id: Some("awesome-gpt-image-2:case:544".into()),
+            }))
+            .unwrap();
+        assert_eq!(created["conversation"]["title"], "秋季咖啡海报");
+        assert_eq!(created["conversation"]["titleSource"], "manual");
+        assert_eq!(created["draft"]["prompt"], "完整案例提示词\n[COFFEE]");
+        assert_eq!(
+            created["draft"]["promptSourceId"],
+            "awesome-gpt-image-2:case:544"
+        );
+        assert_eq!(created["draft"]["params"]["modelId"], DEFAULT_MODEL_ID);
+        assert_eq!(service.snapshot().unwrap()["jobCounts"], json!([0, 0, 0]));
+    }
+
+    #[test]
+    fn invalid_inspiration_source_is_rejected_without_a_partial_conversation() {
+        let (_root, service) = fixture();
+        let before = service.snapshot().unwrap()["conversations"]
+            .as_array()
+            .unwrap()
+            .len();
+        assert!(
+            service
+                .conversation_create(Some(ConversationCreateInput {
+                    model_id: None,
+                    aspect: None,
+                    count: None,
+                    seed: None,
+                    initial_title: Some("案例".into()),
+                    initial_prompt: Some("提示词".into()),
+                    prompt_source_id: Some("https://unregistered.example/case".into()),
+                }))
+                .is_err()
+        );
+        assert_eq!(
+            service.snapshot().unwrap()["conversations"]
+                .as_array()
+                .unwrap()
+                .len(),
+            before
+        );
     }
 
     #[test]
@@ -1331,6 +1435,7 @@ mod tests {
                         "seed": "17"
                     }),
                     collapsed: false,
+                    prompt_source_id: None,
                 },
                 1,
             )
@@ -1367,6 +1472,7 @@ mod tests {
                         "seed": ""
                     }),
                     collapsed: false,
+                    prompt_source_id: None,
                 },
                 second["draft"]["version"].as_u64().unwrap(),
             )

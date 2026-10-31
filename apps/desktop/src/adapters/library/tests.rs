@@ -1315,7 +1315,7 @@ PRAGMA user_version=1;
             .db
             .pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
             .unwrap(),
-        3
+        4
     );
     assert_eq!(snapshot.drafts.len(), 3);
     assert_eq!(snapshot.drafts[0].params["modelId"], DEFAULT_MODEL_ID);
@@ -1343,6 +1343,106 @@ PRAGMA user_version=1;
         3
     );
     assert_eq!(reopened.drafts().unwrap().len(), 3);
+}
+
+#[test]
+fn v3_migration_preserves_drafts_and_adds_prompt_source() {
+    let root = TempDir::new().unwrap();
+    {
+        let library = open(root.path());
+        let draft = library.drafts().unwrap().remove(0);
+        assert_eq!(draft.prompt_source, None);
+        drop(library);
+        let db = Connection::open(root.path().join("library.sqlite3")).unwrap();
+        db.execute_batch("ALTER TABLE drafts DROP COLUMN prompt_source; PRAGMA user_version=3;")
+            .unwrap();
+    }
+    let library = open(root.path());
+    let version = library
+        .db
+        .pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
+        .unwrap();
+    assert_eq!(version, 4);
+    let draft = library.drafts().unwrap().remove(0);
+    assert_eq!(draft.prompt, "");
+    assert_eq!(draft.prompt_source, None);
+    let columns = {
+        let mut statement = library.db.prepare("PRAGMA table_info(drafts)").unwrap();
+        statement
+            .query_map([], |row| row.get::<_, String>(1))
+            .unwrap()
+            .collect::<std::result::Result<std::collections::BTreeSet<_>, _>>()
+            .unwrap()
+    };
+    assert!(columns.contains("prompt_source"));
+}
+
+#[test]
+fn initial_prompt_and_source_are_created_atomically() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let before = library
+        .conversations(100, None)
+        .unwrap()
+        .conversations
+        .len();
+    let created = library
+        .create_conversation_with_content(
+            serde_json::json!({
+                "modelId": DEFAULT_MODEL_ID,
+                "aspect": "1:1",
+                "count": 1,
+                "seed": ""
+            }),
+            "案例标题",
+            "完整案例提示词\n[VARIABLE]",
+            Some("awesome-gpt-image-2:case:544"),
+        )
+        .unwrap();
+    assert_eq!(created.draft.prompt, "完整案例提示词\n[VARIABLE]");
+    assert_eq!(
+        created.draft.prompt_source.as_deref(),
+        Some("awesome-gpt-image-2:case:544")
+    );
+    assert_eq!(created.draft.name, "案例标题");
+    assert_eq!(created.conversation.title, "案例标题");
+    assert_eq!(
+        library
+            .conversations(100, None)
+            .unwrap()
+            .conversations
+            .len(),
+        before + 1
+    );
+    assert_eq!(library.jobs(100, 0).unwrap().len(), 0);
+}
+
+#[test]
+fn invalid_initial_content_does_not_leave_an_empty_conversation() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let before = library.drafts().unwrap().len();
+    let result = library.create_conversation_with_content(
+        serde_json::json!({
+            "modelId": DEFAULT_MODEL_ID,
+            "aspect": "1:1",
+            "count": 1,
+            "seed": ""
+        }),
+        "",
+        "提示词",
+        Some("awesome-gpt-image-2:case:544"),
+    );
+    assert!(result.is_err());
+    assert_eq!(library.drafts().unwrap().len(), before);
+    assert_eq!(
+        library
+            .conversations(100, None)
+            .unwrap()
+            .conversations
+            .len(),
+        1
+    );
 }
 
 #[test]
@@ -1499,7 +1599,7 @@ fn task_counts_and_search_cover_records_beyond_the_visible_page() {
 }
 
 #[test]
-fn schema_v3_installs_stable_query_indexes() {
+fn current_schema_installs_stable_query_indexes() {
     let root = TempDir::new().unwrap();
     let library = open(root.path());
     let names = {

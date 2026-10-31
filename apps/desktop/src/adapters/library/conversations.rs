@@ -238,6 +238,14 @@ CREATE INDEX generation_turns_job ON generation_turns(job_id);
     Ok(())
 }
 
+pub(super) fn migrate_v3_to_v4(db: &mut Connection) -> Result<()> {
+    let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    tx.execute_batch("ALTER TABLE drafts ADD COLUMN prompt_source TEXT;")?;
+    tx.pragma_update(None, "user_version", 4)?;
+    tx.commit()?;
+    Ok(())
+}
+
 impl Library {
     pub fn active_conversation_id(&self) -> Result<ConversationId> {
         let id: Option<String> = self.db.query_row(
@@ -311,15 +319,37 @@ impl Library {
         &mut self,
         params: Value,
     ) -> Result<CreatedConversation> {
+        self.create_conversation_with_content(params, "新会话", "", None)
+    }
+
+    pub fn create_conversation_with_content(
+        &mut self,
+        params: Value,
+        title: &str,
+        prompt: &str,
+        prompt_source: Option<&str>,
+    ) -> Result<CreatedConversation> {
         if !params.is_object() || serde_json::to_vec(&params)?.len() > 65536 {
             return Err(LibraryError::Invalid("新会话参数结构无效".into()));
+        }
+        if title.is_empty()
+            || title.len() > 1024
+            || prompt.len() > 1024 * 1024
+            || prompt_source.is_some_and(|value| value.is_empty() || value.len() > 128)
+        {
+            return Err(LibraryError::Invalid("新会话初始内容无效".into()));
         }
         let tx = self
             .db
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
         tx.execute(
-            "INSERT INTO drafts(project_id,name,prompt,params_json,collapsed,version) VALUES('default','新会话','',?,0,1)",
-            [serde_json::to_string(&params)?],
+            "INSERT INTO drafts(project_id,name,prompt,prompt_source,params_json,collapsed,version) VALUES('default',?,?,?,?,0,1)",
+            params![
+                title,
+                prompt,
+                prompt_source,
+                serde_json::to_string(&params)?
+            ],
         )?;
         let draft_id = u64::try_from(tx.last_insert_rowid())
             .map_err(|_| LibraryError::Schema("新草稿 ID 为负数".into()))?;
@@ -330,12 +360,19 @@ impl Library {
             |row| row.get(0),
         )?;
         let created_at = now();
+        let title_source = if title == "新会话" {
+            "auto"
+        } else {
+            "manual"
+        };
         tx.execute(
-            "INSERT INTO conversations(id,project_id,draft_id,title,title_source,created_at,activity_seq) VALUES(?,? ,?,'新会话','auto',?,?)",
+            "INSERT INTO conversations(id,project_id,draft_id,title,title_source,created_at,activity_seq) VALUES(?,?,?,?,?,?,?)",
             params![
                 conversation_id,
                 "default",
                 sqlite_integer(draft_id)?,
+                title,
+                title_source,
                 created_at,
                 activity
             ],
@@ -830,18 +867,19 @@ impl Library {
     }
 
     pub fn draft(&self, id: u64) -> Result<DraftRecord> {
-        let (name, prompt, params, collapsed, version) = self
+        let (name, prompt, prompt_source, params, collapsed, version) = self
             .db
             .query_row(
-                "SELECT name,prompt,params_json,collapsed,version FROM drafts WHERE id=? AND project_id='default'",
+                "SELECT name,prompt,prompt_source,params_json,collapsed,version FROM drafts WHERE id=? AND project_id='default'",
                 [sqlite_integer(id)?],
                 |row| {
                     Ok((
                         row.get::<_, String>(0)?,
                         row.get::<_, String>(1)?,
-                        row.get::<_, String>(2)?,
-                        row.get::<_, bool>(3)?,
-                        read_unsigned(row, 4)?,
+                        row.get::<_, Option<String>>(2)?,
+                        row.get::<_, String>(3)?,
+                        row.get(4)?,
+                        read_unsigned(row, 5)?,
                     ))
                 },
             )
@@ -854,6 +892,7 @@ impl Library {
             params: serde_json::from_str(&params)?,
             collapsed,
             version,
+            prompt_source,
         })
     }
 
