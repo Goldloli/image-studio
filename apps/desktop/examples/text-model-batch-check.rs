@@ -106,6 +106,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let asset_id = observation["turn"]["assetId"]
             .as_str()
             .ok_or("successful turn has no asset ID")?;
+        let details = service.conversation_turn_detail(&turn_id)?;
         let bytes = service.read_asset(asset_id)?;
         let export = export_directory.join(format!("{}.png", spec.id));
         service.export(asset_id, &export, false)?;
@@ -130,6 +131,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "backendPeakBytes": Value::Null,
             "workerProcessesAfterCompletion": worker_processes(),
             "executionAfterCompletion": observation["execution"]
+            ,"details": details
         }));
         println!(
             "{}",
