@@ -11,7 +11,7 @@
       "inputs": ["提示词", "当前会话模型", "画幅", "可选种子"],
       "outputs": ["正式 PNG AssetRef"],
       "productStatus": "implemented",
-      "scope": "当前支持 Z-Image Turbo，单轮 1 张，1:1、4:3、3:4 三种画幅。",
+      "scope": "支持 Z-Image Turbo（1:1、4:3、3:4）与 FLUX.2 Klein 4B（1:1），单轮 1 张。",
       "action": "open-composer",
       "modelId": "z-image-turbo-mflux-v1",
       "dependencies": [
@@ -24,17 +24,17 @@
       "featureId": "image-edit",
       "title": "图片编辑",
       "category": "编辑",
-      "summary": "未来通过源图和有限指令生成一张新图片。",
-      "description": "规划为独立的源图输入和输出功能。当前没有可执行 worker，也不会把文生图参数伪装成图片编辑。",
+      "summary": "通过一张受控源图和有限指令生成一张 1024² 新图片。",
+      "description": "使用 FLUX.2 Klein 4B distilled 的单参考编辑分支；保持固定 4 步配方，不把文生图参数伪装成图片编辑。",
       "inputs": ["受控 AssetId", "编辑指令"],
       "outputs": ["新的 PNG AssetRef"],
-      "productStatus": "planned",
-      "scope": "仅登记范围；首轮计划不包含多参考编辑。",
-      "action": null,
+      "productStatus": "implemented",
+      "scope": "单张、无有效透明度、非空指令；不包含多参考编辑。",
+      "action": "open-composer",
       "modelId": "flux2-klein-4b-distilled",
       "dependencies": [
-        { "kind": "model", "label": "FLUX.2 Klein 模型尚未接入" },
-        { "kind": "runtime", "label": "源图输入与编辑 worker 尚未实现" }
+        { "kind": "model", "label": "已安装并完成设备检查的 FLUX.2 Klein 模型" },
+        { "kind": "runtime", "label": "受控源图输入与 recipes-v2 运行时" }
       ]
     },
     {

@@ -267,7 +267,9 @@ fn draft_with_prompt(library: &mut Library, id: u64, prompt: &str) -> DraftRecor
         "modelId": DEFAULT_MODEL_ID,
         "aspect": "1:1",
         "count": 1,
-        "seed": ""
+        "seed": "",
+        "capabilityId": studio_core::generation::Z_IMAGE_CAPABILITY,
+        "sourceAssetId": null
     });
     library.save_draft(draft.clone(), draft.version).unwrap()
 }
@@ -285,6 +287,8 @@ fn accept_prompt(library: &mut Library, prompt: &str, key: &str) -> AcceptedTurn
             submission_key: IdempotencyKey::new(key).unwrap(),
             prompt: prompt.into(),
             model_id: DEFAULT_MODEL_ID.into(),
+            capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+            source_asset_id: None,
             aspect: "1:1".into(),
             count: 1,
             seed: String::new(),
@@ -1327,6 +1331,8 @@ fn fresh_library_has_one_conversation_and_receive_is_fast_and_idempotent() {
             submission_key: IdempotencyKey::new("conversation:one").unwrap(),
             prompt: "清晨的山湖\n第二行".into(),
             model_id: DEFAULT_MODEL_ID.into(),
+            capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+            source_asset_id: None,
             aspect: "1:1".into(),
             count: 1,
             seed: String::new(),
@@ -1342,6 +1348,8 @@ fn fresh_library_has_one_conversation_and_receive_is_fast_and_idempotent() {
             submission_key: IdempotencyKey::new("conversation:one").unwrap(),
             prompt: "different".into(),
             model_id: DEFAULT_MODEL_ID.into(),
+            capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+            source_asset_id: None,
             aspect: "1:1".into(),
             count: 1,
             seed: String::new(),
@@ -1527,6 +1535,8 @@ fn manual_conversation_title_is_stable_and_draft_version_conflicts_do_not_consum
             submission_key: IdempotencyKey::new("stale-source").unwrap(),
             prompt: draft.prompt.clone(),
             model_id: DEFAULT_MODEL_ID.into(),
+            capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+            source_asset_id: None,
             aspect: "1:1".into(),
             count: 1,
             seed: String::new(),
@@ -1542,6 +1552,8 @@ fn manual_conversation_title_is_stable_and_draft_version_conflicts_do_not_consum
             submission_key: IdempotencyKey::new("manual-title").unwrap(),
             prompt: draft.prompt.clone(),
             model_id: DEFAULT_MODEL_ID.into(),
+            capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+            source_asset_id: None,
             aspect: "1:1".into(),
             count: 1,
             seed: String::new(),
@@ -1698,7 +1710,9 @@ fn initial_prompt_and_source_are_created_atomically() {
                 "modelId": DEFAULT_MODEL_ID,
                 "aspect": "1:1",
                 "count": 1,
-                "seed": ""
+                "seed": "",
+                "capabilityId": studio_core::generation::Z_IMAGE_CAPABILITY,
+                "sourceAssetId": null
             }),
             "案例标题",
             "完整案例提示词\n[VARIABLE]",

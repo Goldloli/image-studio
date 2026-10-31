@@ -205,6 +205,13 @@ mod tests {
                 "componentsReady": true,
                 "runtimeReady": false,
                 "error": null
+            }, {
+                "id": "flux2-klein-4b-distilled",
+                "family": "FLUX.2",
+                "executable": false,
+                "componentsReady": true,
+                "runtimeReady": false,
+                "error": null
             }]
         });
         let result = catalog.query(&model_catalog, false);
@@ -222,9 +229,9 @@ mod tests {
             .unwrap();
         assert_eq!(text["state"], "runtime-not-ready");
         assert_eq!(text["canStart"], false);
-        assert_eq!(edit["state"], "planned");
+        assert_eq!(edit["state"], "runtime-not-ready");
         assert_eq!(edit["canStart"], false);
-        assert_eq!(edit["action"], Value::Null);
+        assert_eq!(edit["action"], "open-composer");
     }
 
     #[test]

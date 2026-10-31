@@ -930,17 +930,25 @@ def run_contract_c04(_: Path) -> CaseResult:
     ]
     passed = (
         len(entries) == 4
-        and implemented_ids == ["z-image-turbo-mflux-v1"]
-        and len(planned) == 3
-        and len(executable) == 1
-        and executable[0].get("id") == "z-image-turbo-mflux-v1"
+        and implemented_ids
+        == [
+            "flux2-klein-4b-distilled",
+            "z-image-turbo-mflux-v1",
+        ]
+        and len(planned) == 2
+        and len(executable) == 2
+        and {entry.get("id") for entry in executable}
+        == {
+            "flux2-klein-4b-distilled",
+            "z-image-turbo-mflux-v1",
+        }
         and all(not entry.get("installerSupported") for entry in planned)
         and all(entry.get("installId") is None for entry in planned)
     )
     return build_case_result(
         "C04",
         "passed" if passed else "failed",
-        "one implemented executable entry and three non-executable planned entries"
+        "two implemented executable entries and two non-executable planned entries"
         if passed
         else "catalog status or executable actions do not match the certification scope",
         evidence_items=[evidence(catalog_path)],

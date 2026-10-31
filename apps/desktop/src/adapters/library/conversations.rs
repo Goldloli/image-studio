@@ -52,6 +52,8 @@ pub struct TurnRecord {
     pub source_draft_id: Option<u64>,
     pub prompt: String,
     pub model_id: String,
+    pub capability_id: String,
+    pub source_asset_id: Option<AssetId>,
     pub aspect: String,
     pub count: u32,
     pub seed: String,
@@ -107,6 +109,8 @@ pub struct AcceptTurnInput {
     pub submission_key: IdempotencyKey,
     pub prompt: String,
     pub model_id: String,
+    pub capability_id: String,
+    pub source_asset_id: Option<AssetId>,
     pub aspect: String,
     pub count: u32,
     pub seed: String,
@@ -417,6 +421,9 @@ impl Library {
             .as_object_mut()
             .ok_or_else(|| LibraryError::Invalid("会话创作参数不是对象".into()))?;
         params.insert("modelId".into(), Value::String(model_id.to_owned()));
+        if model_id == studio_core::recipes::KLEIN_MODEL {
+            params.insert("aspect".into(), Value::String("1:1".into()));
+        }
         let version = draft.version;
         self.save_draft(draft, version)
     }
@@ -506,7 +513,7 @@ impl Library {
         let row = self
             .db
             .query_row(
-                "SELECT id,conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,aspect,count,seed,status,job_id,error,progress_stage,progress_step,progress_total,received_at FROM generation_turns WHERE id=?",
+                "SELECT id,conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,count,seed,status,job_id,error,progress_stage,progress_step,progress_total,received_at FROM generation_turns WHERE id=?",
                 [id.as_str()],
                 |row| {
                     Ok((
@@ -518,22 +525,24 @@ impl Library {
                         row.get::<_, String>(5)?,
                         row.get::<_, String>(6)?,
                         row.get::<_, String>(7)?,
-                        row.get::<_, i64>(8)?,
+                        row.get::<_, Option<String>>(8)?,
                         row.get::<_, String>(9)?,
-                        row.get::<_, String>(10)?,
-                        row.get::<_, Option<String>>(11)?,
-                        row.get::<_, Option<String>>(12)?,
+                        row.get::<_, i64>(10)?,
+                        row.get::<_, String>(11)?,
+                        row.get::<_, String>(12)?,
                         row.get::<_, Option<String>>(13)?,
-                        row.get::<_, Option<i64>>(14)?,
-                        row.get::<_, Option<i64>>(15)?,
-                        row.get::<_, i64>(16)?,
+                        row.get::<_, Option<String>>(14)?,
+                        row.get::<_, Option<String>>(15)?,
+                        row.get::<_, Option<i64>>(16)?,
+                        row.get::<_, Option<i64>>(17)?,
+                        row.get::<_, i64>(18)?,
                     ))
                 },
             )
             .optional()?
             .ok_or_else(|| LibraryError::NotFound(format!("turn {id}")))?;
         let job = row
-            .11
+            .13
             .as_deref()
             .map(JobId::new)
             .transpose()?
@@ -550,29 +559,31 @@ impl Library {
                 .transpose()?,
             prompt: row.5,
             model_id: row.6,
-            aspect: row.7,
-            count: u32::try_from(unsigned_from_i64(row.8, "turn count")?)
+            capability_id: row.7,
+            source_asset_id: row.8.map(AssetId::new).transpose()?,
+            aspect: row.9,
+            count: u32::try_from(unsigned_from_i64(row.10, "turn count")?)
                 .map_err(|_| LibraryError::Schema("轮次数量超出范围".into()))?,
-            seed: row.9,
-            status: TurnStatus::try_from(row.10.as_str())?,
+            seed: row.11,
+            status: TurnStatus::try_from(row.12.as_str())?,
             job,
-            error: row.12,
-            progress_stage: row.13,
+            error: row.14,
+            progress_stage: row.15,
             progress_step: row
-                .14
+                .16
                 .map(|value| {
                     u32::try_from(unsigned_from_i64(value, "progress step").unwrap_or(u64::MAX))
                 })
                 .transpose()
                 .map_err(|_| LibraryError::Schema("进度步骤超出范围".into()))?,
             progress_total: row
-                .15
+                .17
                 .map(|value| {
                     u32::try_from(unsigned_from_i64(value, "progress total").unwrap_or(u64::MAX))
                 })
                 .transpose()
                 .map_err(|_| LibraryError::Schema("进度总数超出范围".into()))?,
-            received_at: unsigned_from_i64(row.16, "received_at")?,
+            received_at: unsigned_from_i64(row.18, "received_at")?,
         })
     }
 
@@ -584,7 +595,7 @@ impl Library {
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
         if let Some(existing) = tx
             .query_row(
-                "SELECT id,conversation_id,source_draft_id,prompt,model_id,aspect,count,seed FROM generation_turns WHERE project_id='default' AND submission_key=?",
+                "SELECT id,conversation_id,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,count,seed FROM generation_turns WHERE project_id='default' AND submission_key=?",
                 [input.submission_key.as_str()],
                 |row| {
                     Ok((
@@ -594,8 +605,10 @@ impl Library {
                         row.get::<_, String>(3)?,
                         row.get::<_, String>(4)?,
                         row.get::<_, String>(5)?,
-                        row.get::<_, i64>(6)?,
+                        row.get::<_, Option<String>>(6)?,
                         row.get::<_, String>(7)?,
+                        row.get::<_, i64>(8)?,
+                        row.get::<_, String>(9)?,
                     ))
                 },
             )
@@ -605,9 +618,11 @@ impl Library {
                 && existing.2 == Some(sqlite_integer(input.draft_id)?)
                 && existing.3 == input.prompt
                 && existing.4 == input.model_id
-                && existing.5 == input.aspect
-                && u32::try_from(existing.6).ok() == Some(input.count)
-                && existing.7 == input.seed;
+                && existing.5 == input.capability_id
+                && existing.6 == input.source_asset_id.as_ref().map(ToString::to_string)
+                && existing.7 == input.aspect
+                && u32::try_from(existing.8).ok() == Some(input.count)
+                && existing.9 == input.seed;
             if !matches {
                 return Err(LibraryError::IdempotencyConflict);
             }
@@ -660,7 +675,7 @@ impl Library {
         let turn_id = new_key("turn");
         let received_at = now();
         tx.execute(
-            "INSERT INTO generation_turns(id,project_id,conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,aspect,count,seed,status,received_at) VALUES(?,? ,?,?,?,?,?,?,?,?,?,'pending',?)",
+            "INSERT INTO generation_turns(id,project_id,conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,count,seed,status,received_at) VALUES(?,? ,?,?,?,?,?,?,?,?,?,?,?,'pending',?)",
             params![
                 turn_id,
                 "default",
@@ -670,6 +685,11 @@ impl Library {
                 sqlite_integer(input.draft_id)?,
                 input.prompt,
                 input.model_id,
+                input.capability_id,
+                input
+                    .source_asset_id
+                    .as_ref()
+                    .map(ToString::to_string),
                 input.aspect,
                 input.count,
                 input.seed,
@@ -741,8 +761,24 @@ impl Library {
                     .map_err(|_| LibraryError::Invalid("轮次种子不是 u32".into()))?,
             )
         };
-        if turn.model_id != DEFAULT_MODEL_ID
-            || request.instruction != turn.prompt
+        let source_matches = match &turn.source_asset_id {
+            Some(source) => {
+                request.inputs.len() == 1
+                    && request.inputs[0].role == studio_core::recipes::SOURCE_ROLE
+                    && &request.inputs[0].asset.asset_id == source
+            }
+            None => request.inputs.is_empty(),
+        };
+        let expected_model = if turn.model_id == DEFAULT_MODEL_ID {
+            studio_core::generation::Z_IMAGE_MODEL
+        } else {
+            turn.model_id.as_str()
+        };
+        if request.model_variant_id.as_str() != expected_model
+            || request.capability.capability_id != turn.capability_id
+            || request.instruction != turn.prompt && request.capability.instruction_required
+            || (!request.capability.instruction_required && !turn.prompt.is_empty())
+            || !source_matches
             || request.requested_output.width != width
             || request.requested_output.height != height
             || request.requested_output.count != turn.count
@@ -805,6 +841,19 @@ impl Library {
         }
         tx.commit()?;
         self.prepare_run_directory(&attempt, &storage_key)?;
+        if let Some(source) = &turn.source_asset_id
+            && let Err(error) =
+                self.copy_source_snapshot(source, &self.root.join("runs").join(&storage_key))
+        {
+            self.finish_after_reap(
+                &attempt,
+                Completion::Failed {
+                    code: "SOURCE_SNAPSHOT".into(),
+                    detail: error.to_string(),
+                },
+            )?;
+            return Err(error);
+        }
         Ok(BoundTurn {
             turn: self.turn(turn_id)?,
             job: self.job(&job_id)?,
@@ -949,7 +998,7 @@ struct TurnRowReader<'a> {
 impl TurnRowReader<'_> {
     fn read(self) -> Result<TurnRecord> {
         let row = self.db.query_row(
-            "SELECT conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,aspect,count,seed,status,error,progress_stage,progress_step,progress_total,received_at FROM generation_turns WHERE id=?",
+            "SELECT conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,count,seed,status,error,progress_stage,progress_step,progress_total,received_at FROM generation_turns WHERE id=?",
             [self.id.as_str()],
             |row| {
                 Ok((
@@ -960,14 +1009,16 @@ impl TurnRowReader<'_> {
                     row.get::<_, String>(4)?,
                     row.get::<_, String>(5)?,
                     row.get::<_, String>(6)?,
-                    row.get::<_, i64>(7)?,
+                    row.get::<_, Option<String>>(7)?,
                     row.get::<_, String>(8)?,
-                    row.get::<_, String>(9)?,
-                    row.get::<_, Option<String>>(10)?,
-                    row.get::<_, Option<String>>(11)?,
-                    row.get::<_, Option<i64>>(12)?,
-                    row.get::<_, Option<i64>>(13)?,
-                    row.get::<_, i64>(14)?,
+                    row.get::<_, i64>(9)?,
+                    row.get::<_, String>(10)?,
+                    row.get::<_, String>(11)?,
+                    row.get::<_, Option<String>>(12)?,
+                    row.get::<_, Option<String>>(13)?,
+                    row.get::<_, Option<i64>>(14)?,
+                    row.get::<_, Option<i64>>(15)?,
+                    row.get::<_, i64>(16)?,
                 ))
             },
         )?;
@@ -989,17 +1040,19 @@ impl TurnRowReader<'_> {
                 .transpose()?,
             prompt: row.4,
             model_id: row.5,
-            aspect: row.6,
-            count: u32::try_from(unsigned_from_i64(row.7, "turn count")?)
+            capability_id: row.6,
+            source_asset_id: row.7.map(AssetId::new).transpose()?,
+            aspect: row.8,
+            count: u32::try_from(unsigned_from_i64(row.9, "turn count")?)
                 .map_err(|_| LibraryError::Schema("轮次数量超出范围".into()))?,
-            seed: row.8,
-            status: TurnStatus::try_from(row.9.as_str())?,
+            seed: row.10,
+            status: TurnStatus::try_from(row.11.as_str())?,
             job,
-            error: row.10,
-            progress_stage: row.11,
-            progress_step: optional_u32(row.12, "progress step")?,
-            progress_total: optional_u32(row.13, "progress total")?,
-            received_at: unsigned_from_i64(row.14, "received_at")?,
+            error: row.12,
+            progress_stage: row.13,
+            progress_step: optional_u32(row.14, "progress step")?,
+            progress_total: optional_u32(row.15, "progress total")?,
+            received_at: unsigned_from_i64(row.16, "received_at")?,
         })
     }
 }
@@ -1036,9 +1089,25 @@ fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
         || !["1:1", "4:3", "3:4"].contains(&input.aspect.as_str())
         || input.count != 1
         || !valid_seed_text(&input.seed)
-        || input.model_id != DEFAULT_MODEL_ID
     {
         return Err(LibraryError::Invalid("发送内容或参数无效".into()));
+    }
+    let valid_recipe = match (
+        input.model_id.as_str(),
+        input.capability_id.as_str(),
+        input.source_asset_id.is_some(),
+    ) {
+        (DEFAULT_MODEL_ID, studio_core::generation::Z_IMAGE_CAPABILITY, false) => true,
+        (studio_core::recipes::KLEIN_MODEL, studio_core::recipes::KLEIN_TEXT_CAPABILITY, false) => {
+            input.aspect == "1:1"
+        }
+        (studio_core::recipes::KLEIN_MODEL, studio_core::recipes::KLEIN_EDIT_CAPABILITY, true) => {
+            input.aspect == "1:1"
+        }
+        _ => false,
+    };
+    if !valid_recipe {
+        return Err(LibraryError::Invalid("模型、能力与源图组合不受支持".into()));
     }
     Ok(())
 }
@@ -1055,7 +1124,9 @@ fn turn_params_json(input: &AcceptTurnInput) -> Result<String> {
         "modelId": input.model_id,
         "aspect": input.aspect,
         "count": input.count,
-        "seed": input.seed
+        "seed": input.seed,
+        "capabilityId": input.capability_id,
+        "sourceAssetId": input.source_asset_id
     })
     .to_string())
 }

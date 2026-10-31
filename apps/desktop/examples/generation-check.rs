@@ -15,6 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut aspect = "1:1".to_string();
     let mut seed = "42".to_string();
     let mut install = false;
+    let mut model_id = "z-image-turbo-mflux-v1".to_string();
     let mut cancel_after = None;
     let mut kill_after = None;
     let mut cancel_stage = None;
@@ -26,6 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "--aspect" => aspect = args.next().ok_or("missing aspect")?,
             "--seed" => seed = args.next().ok_or("missing seed")?,
             "--install" => install = true,
+            "--model-id" => model_id = args.next().ok_or("missing model ID")?,
             "--retry-job" => retry_job = Some(args.next().ok_or("missing retry job")?),
             "--cancel-at-stage" => {
                 let stage = args.next().ok_or("missing cancel stage")?;
@@ -55,9 +57,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Err(error.clone().into());
     }
     if install {
-        service.install("z-image-turbo-mflux-v1")?;
+        service.install(&model_id)?;
         loop {
-            let model = service.model_view();
+            let model = service
+                .model_views()
+                .into_iter()
+                .find(|model| model["id"] == model_id)
+                .ok_or("registered model view missing")?;
             println!("{}", serde_json::json!({"model":model}));
             if !model["busy"].as_bool().unwrap_or(false) {
                 if !model["ready"].as_bool().unwrap_or(false) {

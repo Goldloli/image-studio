@@ -41,19 +41,19 @@
       "displayName": "FLUX.2 Klein 4B distilled",
       "variant": "black-forest-labs/FLUX.2-klein-4B · distilled",
       "family": "FLUX.2",
-      "summary": "计划补充文生图与单图指令编辑，当前尚未接入安装或执行链路。",
-      "description": "首批规划中的同一 MFLUX 路线型号。产品首轮计划只验证文生图和单图指令编辑，不包含多参考编辑。",
+      "summary": "补充文生图与单图指令编辑，使用独立 MFLUX v2 运行时。",
+      "description": "固定 distilled 4B 快照，产品配方为 1024²、q4、4 步、guidance 1.0；单图编辑使用参考图条件分支，不包含多参考编辑。",
       "capabilities": [
         { "id": "text_to_image", "label": "文生图" },
         { "id": "image_edit", "label": "图片编辑" }
       ],
-      "productStatus": "planned",
-      "runtime": "MFLUX / MLX（计划）",
+      "productStatus": "implemented",
+      "runtime": "MFLUX / MLX · recipes-v2",
       "license": "Apache-2.0",
       "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B",
       "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
-      "modelBytes": null,
-      "knownArtifactBytes": null,
+      "modelBytes": 15980131745,
+      "knownArtifactBytes": 15980131745,
       "requirements": [
         "独立模型组件清单与完整哈希",
         "单图编辑输入、取消和资源回收验收",
@@ -65,9 +65,9 @@
         "替换小型文本编码器"
       ],
       "verifiedDevices": [],
-      "recipe": "计划：4-bit · 4 步",
-      "installId": null,
-      "installerSupported": false
+      "recipe": "q4 · 4 步 · 1024 × 1024",
+      "installId": "flux2-klein-4b-distilled",
+      "installerSupported": true
     },
     {
       "id": "birefnet-general-epoch-244",

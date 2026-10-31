@@ -246,9 +246,12 @@ async fn model_install(
     blocking(move || studio.install(&install_id)).await
 }
 #[tauri::command]
-async fn model_cancel(state: State<'_, HostState>) -> Result<serde_json::Value, String> {
+async fn model_cancel(
+    state: State<'_, HostState>,
+    install_id: String,
+) -> Result<serde_json::Value, String> {
     let studio = state.studio.clone();
-    blocking(move || studio.cancel_install()).await
+    blocking(move || studio.cancel_install(&install_id)).await
 }
 #[tauri::command]
 async fn draft_save(
@@ -461,6 +464,25 @@ async fn asset_export(
     Ok(serde_json::json!({"cancelled":false}))
 }
 #[tauri::command]
+async fn source_import(state: State<'_, HostState>) -> Result<serde_json::Value, String> {
+    let selected = rfd::AsyncFileDialog::new()
+        .set_title("选择源图")
+        .add_filter("PNG 或 JPEG", &["png", "jpg", "jpeg"])
+        .pick_file()
+        .await;
+    let Some(selected) = selected else {
+        return Ok(serde_json::json!({"cancelled":true}));
+    };
+    let studio = state.studio.clone();
+    let path = selected.path().to_path_buf();
+    blocking(move || studio.import_source(&path)).await
+}
+#[tauri::command]
+async fn source_list(state: State<'_, HostState>) -> Result<serde_json::Value, String> {
+    let studio = state.studio.clone();
+    blocking(move || studio.imported_sources()).await
+}
+#[tauri::command]
 fn app_close(app: tauri::AppHandle, state: State<'_, HostState>) {
     state.studio.allow_close();
     state.stop_for_exit();
@@ -653,7 +675,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 eprintln!("DIAGNOSTIC_DESKTOP_READY tauri=2 requested_scale={requested_scale:?} native_dpr=webview window={initial_size:?}; image inference unavailable");
             }
         })
-        .invoke_handler(tauri::generate_handler![workspace_status, diagnostic_enable, diagnostic_start, diagnostic_stop, diagnostic_snapshot, diagnostic_viewport, studio_snapshot, model_catalog, feature_catalog, prompt_library_snapshot, prompt_library_favorite, prompt_library_image, prompt_library_clear_cache, preferences_snapshot, preferences_reload, preferences_save, creation_defaults_save, settings_snapshot, storage_open, model_install, model_cancel, draft_save, draft_create, conversation_list, conversation_create, conversation_apply_model, conversation_select, conversation_rename, conversation_history, conversation_turn_detail, conversation_send, conversation_cancel_turn, workspace_select, generation_submit, generation_cancel, generation_retry, task_list, asset_library_query, asset_library_item, task_center_query, task_center_detail, asset_export, app_close])
+        .invoke_handler(tauri::generate_handler![workspace_status, diagnostic_enable, diagnostic_start, diagnostic_stop, diagnostic_snapshot, diagnostic_viewport, studio_snapshot, model_catalog, feature_catalog, prompt_library_snapshot, prompt_library_favorite, prompt_library_image, prompt_library_clear_cache, preferences_snapshot, preferences_reload, preferences_save, creation_defaults_save, settings_snapshot, storage_open, model_install, model_cancel, draft_save, draft_create, conversation_list, conversation_create, conversation_apply_model, conversation_select, conversation_rename, conversation_history, conversation_turn_detail, conversation_send, conversation_cancel_turn, workspace_select, generation_submit, generation_cancel, generation_retry, task_list, asset_library_query, asset_library_item, task_center_query, task_center_detail, asset_export, source_import, source_list, app_close])
         .build(tauri::generate_context!())?;
     app.run(|app, event| {
         if let tauri::RunEvent::ExitRequested { api, .. } = &event

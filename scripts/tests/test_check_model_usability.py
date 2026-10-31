@@ -126,8 +126,11 @@ class CatalogContractTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             result = module.run_contract_c04(Path(temporary))
         self.assertEqual(result.status, "passed")
-        self.assertEqual(result.details["implemented"], ["z-image-turbo-mflux-v1"])
-        self.assertEqual(len(result.details["planned"]), 3)
+        self.assertEqual(
+            result.details["implemented"],
+            ["flux2-klein-4b-distilled", "z-image-turbo-mflux-v1"],
+        )
+        self.assertEqual(len(result.details["planned"]), 2)
 
 
 class CliTests(unittest.TestCase):

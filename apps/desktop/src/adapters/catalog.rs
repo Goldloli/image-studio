@@ -109,13 +109,13 @@ impl ModelCatalog {
 
     pub fn query(
         &self,
-        installation: Option<&InstallationSnapshot>,
+        installations: &[InstallationSnapshot],
         installation_error: Option<&str>,
     ) -> Result<Value, String> {
         let entries = self
             .entries
             .iter()
-            .map(|entry| project_entry(entry, installation, installation_error))
+            .map(|entry| project_entry(entry, installations, installation_error))
             .collect::<Vec<_>>();
         let supported = entries
             .iter()
@@ -155,11 +155,11 @@ impl ModelCatalog {
 
 fn project_entry(
     entry: &RegisteredModel,
-    installation: Option<&InstallationSnapshot>,
+    installations: &[InstallationSnapshot],
     installation_error: Option<&str>,
 ) -> Value {
     let installed = entry.install_id.as_ref().and_then(|id| {
-        installation.filter(|snapshot| {
+        installations.iter().find(|snapshot| {
             snapshot.install_id == *id
                 && matches!(
                     snapshot.phase.as_str(),
@@ -199,7 +199,7 @@ fn project_entry(
         .map(|snapshot| snapshot.phase.clone())
         .unwrap_or_else(|| {
             if entry.installer_supported {
-                if installation.is_some() {
+                if !installations.is_empty() {
                     "not_installed".into()
                 } else {
                     "failed".into()
@@ -287,10 +287,10 @@ mod tests {
     #[test]
     fn catalog_contains_exactly_the_first_four_targets() {
         let catalog = ModelCatalog::load().unwrap();
-        let query = catalog.query(None, Some("安装器不可用")).unwrap();
+        let query = catalog.query(&[], Some("安装器不可用")).unwrap();
         assert_eq!(query["counts"]["total"], 4);
-        assert_eq!(query["counts"]["supported"], 1);
-        assert_eq!(query["counts"]["planned"], 3);
+        assert_eq!(query["counts"]["supported"], 2);
+        assert_eq!(query["counts"]["planned"], 2);
         let ids = query["entries"]
             .as_array()
             .unwrap()
@@ -302,9 +302,33 @@ mod tests {
     }
 
     #[test]
+    fn install_states_are_joined_by_install_id() {
+        let catalog = ModelCatalog::load().unwrap();
+        let mut klein = z_snapshot("not_installed");
+        klein.install_id = "flux2-klein-4b-distilled".into();
+        klein.model_bytes = 15_980_131_745;
+        let query = catalog
+            .query(&[z_snapshot("ready"), klein], None)
+            .unwrap();
+        let entries = query["entries"].as_array().unwrap();
+        let z = entries
+            .iter()
+            .find(|entry| entry["id"] == "z-image-turbo-mflux-v1")
+            .unwrap();
+        let klein = entries
+            .iter()
+            .find(|entry| entry["id"] == "flux2-klein-4b-distilled")
+            .unwrap();
+        assert_eq!(z["executable"], true);
+        assert_eq!(klein["executable"], false);
+        assert_eq!(klein["installPhase"], "not_installed");
+        assert_eq!(query["counts"]["installed"], 1);
+    }
+
+    #[test]
     fn planned_models_never_borrow_z_image_install_state() {
         let catalog = ModelCatalog::load().unwrap();
-        let query = catalog.query(Some(&z_snapshot("ready")), None).unwrap();
+        let query = catalog.query(&[z_snapshot("ready")], None).unwrap();
         let entries = query["entries"].as_array().unwrap();
         assert_eq!(query["counts"]["installed"], 1);
         assert_eq!(query["counts"]["executable"], 1);
@@ -321,7 +345,7 @@ mod tests {
     #[test]
     fn active_install_is_exposed_without_fake_completion() {
         let catalog = ModelCatalog::load().unwrap();
-        let query = catalog.query(Some(&z_snapshot("verifying")), None).unwrap();
+        let query = catalog.query(&[z_snapshot("verifying")], None).unwrap();
         let z = &query["entries"][0];
         assert_eq!(z["installPhase"], "verifying");
         assert_eq!(z["busy"], true);

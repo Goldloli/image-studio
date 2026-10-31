@@ -423,6 +423,21 @@ impl Library {
         tx.commit()?;
         // No process may start until the transaction above has committed.
         self.prepare_run_directory(&attempt, &key)?;
+        if let Some(source) = request.inputs.first()
+            && let Err(error) = self.copy_source_snapshot(
+                &source.asset.asset_id,
+                &self.root.join("runs").join(&key),
+            )
+        {
+            self.finish_after_reap(
+                &attempt,
+                Completion::Failed {
+                    code: "SOURCE_SNAPSHOT".into(),
+                    detail: error.to_string(),
+                },
+            )?;
+            return Err(error);
+        }
         Ok(Submission {
             job: self.job(&job_id)?,
             created: true,
@@ -454,6 +469,21 @@ impl Library {
         )?;
         tx.commit()?;
         self.prepare_run_directory(&attempt, &key)?;
+        if let Some(source) = previous.request.inputs.first()
+            && let Err(error) = self.copy_source_snapshot(
+                &source.asset.asset_id,
+                &self.root.join("runs").join(&key),
+            )
+        {
+            self.finish_after_reap(
+                &attempt,
+                Completion::Failed {
+                    code: "SOURCE_SNAPSHOT".into(),
+                    detail: error.to_string(),
+                },
+            )?;
+            return Err(error);
+        }
         self.job(job_id)
     }
 

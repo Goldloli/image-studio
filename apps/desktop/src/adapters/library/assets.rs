@@ -353,6 +353,14 @@ impl Library {
 
     /// Controlled asset URI handlers receive bytes by registered ID, never a client path.
     pub fn read_asset_png(&self, id: &AssetId) -> Result<Vec<u8>> {
+        let imported: bool = self.db.query_row(
+            "SELECT EXISTS(SELECT 1 FROM imported_sources WHERE id=?)",
+            [id.as_str()],
+            |row| row.get(0),
+        )?;
+        if imported {
+            return self.read_source_png(id);
+        }
         let record = self.asset(id)?;
         let path = self.asset_path(&record.asset)?;
         let mut file = open_regular(&path, false)?;

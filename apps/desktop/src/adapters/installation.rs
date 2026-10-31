@@ -17,6 +17,9 @@ use std::{
 pub const INSTALL_ID: &str = "z-image-turbo-mflux-v1";
 pub const WORKER_BUILD_ID: &str = "studio-mflux-worker-0.1.0";
 pub const WORKER_MODULE: &str = "studio_mflux_worker";
+pub const KLEIN_INSTALL_ID: &str = "flux2-klein-4b-distilled";
+pub const KLEIN_WORKER_BUILD_ID: &str = "studio-mflux-worker-0.2.0";
+pub const KLEIN_WORKER_MODULE: &str = "studio_mflux_worker_v2";
 const MODEL_MANIFEST: &str =
     include_str!("../../../../resources/local-generation/model-manifest.json");
 const RUNTIME_MANIFEST: &str =
@@ -25,7 +28,65 @@ const LOCK: &str = include_str!("../../../../resources/local-generation/requirem
 const WORKER_WHEEL: &[u8] = include_bytes!(
     "../../../../resources/local-generation/studio_mflux_worker-0.1.0-py3-none-any.whl"
 );
+const KLEIN_MODEL_MANIFEST: &str =
+    include_str!("../../../../resources/planned-models/klein/model-manifest.json");
+const KLEIN_RUNTIME_MANIFEST: &str =
+    include_str!("../../../../resources/planned-models/klein/runtime-manifest.json");
+const KLEIN_LOCK: &str =
+    include_str!("../../../../resources/planned-models/klein/requirements.lock");
+const KLEIN_WORKER_WHEEL: &[u8] = include_bytes!(
+    "../../../../resources/planned-models/klein/studio_mflux_worker_v2-0.2.0-py3-none-any.whl"
+);
 const RESERVE: u64 = 4 * 1024 * 1024 * 1024;
+
+#[derive(Clone, Copy)]
+struct InstallProfile {
+    install_id: &'static str,
+    model_manifest: &'static str,
+    runtime_manifest: &'static str,
+    requirements_lock: &'static str,
+    worker_wheel: &'static [u8],
+    worker_module: &'static str,
+    worker_build_id: &'static str,
+    engine: &'static str,
+    scheduler: &'static str,
+    probe_device: &'static str,
+    precision: &'static str,
+    ready_relative: &'static str,
+    installing_relative: &'static str,
+}
+
+const Z_PROFILE: InstallProfile = InstallProfile {
+    install_id: INSTALL_ID,
+    model_manifest: MODEL_MANIFEST,
+    runtime_manifest: RUNTIME_MANIFEST,
+    requirements_lock: LOCK,
+    worker_wheel: WORKER_WHEEL,
+    worker_module: WORKER_MODULE,
+    worker_build_id: WORKER_BUILD_ID,
+    engine: "MFLUX 0.24.0 / MLX",
+    scheduler: "linear",
+    probe_device: "gpu",
+    precision: "native;compute_precision=None;float32=False",
+    ready_relative: "installation-ready.json",
+    installing_relative: "installation-installing.json",
+};
+
+const KLEIN_PROFILE: InstallProfile = InstallProfile {
+    install_id: KLEIN_INSTALL_ID,
+    model_manifest: KLEIN_MODEL_MANIFEST,
+    runtime_manifest: KLEIN_RUNTIME_MANIFEST,
+    requirements_lock: KLEIN_LOCK,
+    worker_wheel: KLEIN_WORKER_WHEEL,
+    worker_module: KLEIN_WORKER_MODULE,
+    worker_build_id: KLEIN_WORKER_BUILD_ID,
+    engine: "MFLUX 0.24.0 / MLX",
+    scheduler: "flow_match_euler_discrete",
+    probe_device: "gpu",
+    precision: "native;compute_precision=None;float32=False",
+    ready_relative: "installations/models/flux2-klein-4b-distilled.json",
+    installing_relative: "installations/models/flux2-klein-4b-distilled.installing.json",
+};
 
 #[derive(Clone, Debug, Deserialize)]
 struct Artifact {
@@ -79,12 +140,88 @@ pub struct Installation {
 }
 struct Inner {
     paths: AppPaths,
+    profile: InstallProfile,
     model: ModelManifest,
     runtime: RuntimeManifest,
     state: Mutex<InstallationSnapshot>,
     active: AtomicBool,
     cancelled: AtomicBool,
     aborted: AtomicBool,
+}
+
+#[derive(Clone)]
+pub struct Installations {
+    legacy: Installation,
+    klein: Installation,
+}
+
+impl Installations {
+    pub fn new(paths: AppPaths) -> Result<Self, String> {
+        Ok(Self {
+            legacy: Installation::new(paths.clone())?,
+            klein: Installation::new_klein(paths)?,
+        })
+    }
+
+    pub fn snapshots(&self) -> Vec<InstallationSnapshot> {
+        vec![self.legacy.snapshot(), self.klein.snapshot()]
+    }
+
+    pub fn snapshot(&self, install_id: &str) -> Option<InstallationSnapshot> {
+        self.for_id(install_id).map(Installation::snapshot)
+    }
+
+    pub fn start(&self, install_id: &str) -> Result<InstallationSnapshot, String> {
+        self.for_id(install_id)
+            .ok_or_else(|| "未登记的安装标识。".to_string())?
+            .start(install_id)
+    }
+
+    pub fn cancel(&self, install_id: &str) -> Result<InstallationSnapshot, String> {
+        self.for_id(install_id)
+            .ok_or_else(|| "该型号没有活动安装。".to_string())?
+            .cancel();
+        Ok(self
+            .snapshot(install_id)
+            .expect("validated installation identity"))
+    }
+
+    pub fn ready_paths(&self, install_id: &str) -> Result<ReadyPaths, String> {
+        self.for_id(install_id)
+            .ok_or_else(|| "未登记的安装标识。".to_string())?
+            .ready_paths()
+    }
+
+    pub fn plan_environment(
+        &self,
+        install_id: &str,
+    ) -> Result<studio_core::generation::PlanEnvironment, String> {
+        self.for_id(install_id)
+            .ok_or_else(|| "未登记的安装标识。".to_string())?
+            .plan_environment()
+    }
+
+    pub fn is_busy(&self) -> bool {
+        self.snapshots().into_iter().any(|snapshot| {
+            matches!(
+                snapshot.phase.as_str(),
+                "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
+            )
+        })
+    }
+
+    pub fn shutdown(&self) {
+        self.legacy.cancel();
+        self.klein.cancel();
+    }
+
+    fn for_id(&self, install_id: &str) -> Option<&Installation> {
+        match install_id {
+            INSTALL_ID => Some(&self.legacy),
+            KLEIN_INSTALL_ID => Some(&self.klein),
+            _ => None,
+        }
+    }
 }
 #[derive(Serialize, Deserialize)]
 struct ReadyRecord {
@@ -98,12 +235,20 @@ struct ReadyRecord {
     probe: serde_json::Value,
 }
 impl ReadyRecord {
-    fn matches_manifests(&self, runtime_id: &str, model_id: &str) -> bool {
-        self.runtime_lock_id == runtime_id
-            && self.model_snapshot_id == model_id
-            && self.runtime_manifest_sha256 == manifest_digest(RUNTIME_MANIFEST)
-            && self.model_manifest_sha256 == manifest_digest(MODEL_MANIFEST)
+    fn matches_profile(&self, profile: InstallProfile) -> bool {
+        self.runtime_manifest_sha256 == manifest_digest(profile.runtime_manifest)
+            && self.model_manifest_sha256 == manifest_digest(profile.model_manifest)
     }
+}
+fn ready_record_matches(
+    record: &ReadyRecord,
+    profile: InstallProfile,
+    runtime_id: &str,
+    model_id: &str,
+) -> bool {
+    record.runtime_lock_id == runtime_id
+        && record.model_snapshot_id == model_id
+        && record.matches_profile(profile)
 }
 fn manifest_digest(manifest: &str) -> String {
     format!("{:x}", Sha256::digest(manifest.as_bytes()))
@@ -118,12 +263,21 @@ struct InventoryEntry {
 }
 
 impl Installation {
-    pub fn new(mut paths: AppPaths) -> Result<Self, String> {
+    pub fn new(paths: AppPaths) -> Result<Self, String> {
+        Self::new_for(paths, Z_PROFILE)
+    }
+
+    pub fn new_klein(paths: AppPaths) -> Result<Self, String> {
+        Self::new_for(paths, KLEIN_PROFILE)
+    }
+
+    fn new_for(mut paths: AppPaths, profile: InstallProfile) -> Result<Self, String> {
         paths.data = paths.data.canonicalize().map_err(err)?;
         paths.cache = paths.cache.canonicalize().map_err(err)?;
         paths.logs = paths.logs.canonicalize().map_err(err)?;
-        let model: ModelManifest = serde_json::from_str(MODEL_MANIFEST).map_err(err)?;
-        let runtime: RuntimeManifest = serde_json::from_str(RUNTIME_MANIFEST).map_err(err)?;
+        let model: ModelManifest = serde_json::from_str(profile.model_manifest).map_err(err)?;
+        let runtime: RuntimeManifest =
+            serde_json::from_str(profile.runtime_manifest).map_err(err)?;
         for file in model
             .files
             .iter()
@@ -140,7 +294,7 @@ impl Installation {
         // start() refines missing cache bytes and checks both volumes separately.
         let initial_required_bytes = model_file_bytes * 2 + runtime_bytes * 7 + RESERVE;
         let mut state = InstallationSnapshot {
-            install_id: INSTALL_ID.into(),
+            install_id: profile.install_id.into(),
             phase: "not_installed".into(),
             received_bytes: 0,
             total_bytes: model_file_bytes + runtime_bytes,
@@ -154,13 +308,13 @@ impl Installation {
         };
         // Startup reads activation metadata and checks only critical filesystem entries.
         // Full runtime inventory hashing happens off-thread before execution.
-        if let Ok(record) = fs::read(paths.data.join("installation-ready.json"))
+        if let Ok(record) = fs::read(paths.data.join(profile.ready_relative))
             .and_then(|b| serde_json::from_slice::<ReadyRecord>(&b).map_err(std::io::Error::other))
         {
-            if record.matches_manifests(&runtime.id, &model.id) {
+            if ready_record_matches(&record, profile, &runtime.id, &model.id) {
                 let runtime = paths.data.join("runtimes").join(&runtime.id);
                 let model_root = paths.data.join("models").join(&model.id);
-                let healthy = record.probe["device"] == "gpu"
+                let healthy = record.probe["device"] == profile.probe_device
                     && record.probe["device_name"]
                         .as_str()
                         .is_some_and(|s| !s.is_empty())
@@ -170,12 +324,17 @@ impl Installation {
                             .is_ok_and(|m| m.is_file() && m.len() == f.bytes)
                     })
                     && [
-                        "python/bin/python3.13",
-                        "python/bin/python3",
-                        "venv/bin/python3",
-                        "venv/lib/python3.13/site-packages/studio_mflux_worker/__init__.py",
-                        "venv/lib/python3.13/site-packages/studio_mflux_worker/__main__.py",
-                        "venv/lib/python3.13/site-packages/studio_mflux_worker/backend.py",
+                        "python/bin/python3.13".to_string(),
+                        "python/bin/python3".to_string(),
+                        "venv/bin/python3".to_string(),
+                        format!(
+                            "venv/lib/python3.13/site-packages/{}/__init__.py",
+                            profile.worker_module
+                        ),
+                        format!(
+                            "venv/lib/python3.13/site-packages/{}/__main__.py",
+                            profile.worker_module
+                        ),
                     ]
                     .iter()
                     .all(|path| {
@@ -200,12 +359,13 @@ impl Installation {
                 state.phase = "unavailable".into();
                 state.error = Some("安装清单已变化或记录缺少字节身份，请修复安装。".into());
             }
-        } else if paths.data.join("installation-installing.json").exists() {
+        } else if paths.data.join(profile.installing_relative).exists() {
             state.phase = "interrupted".into();
         }
         Ok(Self {
             inner: Arc::new(Inner {
                 paths,
+                profile,
                 model,
                 runtime,
                 state: Mutex::new(state),
@@ -219,7 +379,7 @@ impl Installation {
         self.inner.state.lock().unwrap().clone()
     }
     pub fn start(&self, install_id: &str) -> Result<InstallationSnapshot, String> {
-        if install_id != INSTALL_ID {
+        if install_id != self.inner.profile.install_id {
             return Err("未登记的安装标识。".into());
         }
         if !cfg!(all(target_os = "macos", target_arch = "aarch64")) {
@@ -293,11 +453,21 @@ impl Installation {
             generation::PlanEnvironment,
         };
         let record: ReadyRecord = serde_json::from_slice(
-            &fs::read(self.inner.paths.data.join("installation-ready.json")).map_err(err)?,
+            &fs::read(
+                self.inner
+                    .paths
+                    .data
+                    .join(self.inner.profile.ready_relative),
+            )
+            .map_err(err)?,
         )
         .map_err(err)?;
-        if !record.matches_manifests(&self.inner.runtime.id, &self.inner.model.id)
-            || record.probe["device"] != "gpu"
+        if !ready_record_matches(
+            &record,
+            self.inner.profile,
+            &self.inner.runtime.id,
+            &self.inner.model.id,
+        ) || record.probe["device"] != self.inner.profile.probe_device
         {
             return Err("安装探针身份不符。".into());
         }
@@ -330,17 +500,17 @@ impl Installation {
             components,
             runtime: RuntimeSnapshot {
                 package_id: self.inner.runtime.id.clone(),
-                engine: "MFLUX 0.24.0 / MLX".into(),
+                engine: self.inner.profile.engine.into(),
                 source: SourceRevision {
                     source: format!("image-studio:runtime-manifest:{}", self.inner.runtime.id),
-                    revision: manifest_digest(RUNTIME_MANIFEST),
+                    revision: manifest_digest(self.inner.profile.runtime_manifest),
                 },
             },
             device: DeviceSnapshot {
                 device_id: device.into(),
-                precision: "native;compute_precision=None;float32=False".into(),
+                precision: self.inner.profile.precision.into(),
             },
-            scheduler: "linear".into(),
+            scheduler: self.inner.profile.scheduler.into(),
         })
     }
     fn runtime_dir(&self) -> PathBuf {
@@ -374,16 +544,29 @@ impl Installation {
     }
     fn verify_ready(&self) -> Result<ReadyPaths, String> {
         let record: ReadyRecord = serde_json::from_slice(
-            &fs::read(self.inner.paths.data.join("installation-ready.json")).map_err(err)?,
+            &fs::read(
+                self.inner
+                    .paths
+                    .data
+                    .join(self.inner.profile.ready_relative),
+            )
+            .map_err(err)?,
         )
         .map_err(err)?;
-        if !record.matches_manifests(&self.inner.runtime.id, &self.inner.model.id) {
+        if !ready_record_matches(
+            &record,
+            self.inner.profile,
+            &self.inner.runtime.id,
+            &self.inner.model.id,
+        ) {
             return Err("安装身份已变化，请重新安装。".into());
         }
         for f in &self.inner.model.files {
             verify(&self.model_dir().join(&f.path), f.bytes, &f.sha256)?;
         }
-        if record.runtime_files.is_empty() || record.probe["device"] != "gpu" {
+        if record.runtime_files.is_empty()
+            || record.probe["device"] != self.inner.profile.probe_device
+        {
             return Err("运行时激活记录不完整。".into());
         }
         for f in record.runtime_files {
@@ -395,14 +578,23 @@ impl Installation {
         Ok(ReadyPaths {
             python: self.runtime_dir().join("venv/bin/python3"),
             model_path: self.model_dir(),
-            worker_module: WORKER_MODULE.into(),
-            worker_build_id: WORKER_BUILD_ID.into(),
+            worker_module: self.inner.profile.worker_module.into(),
+            worker_build_id: self.inner.profile.worker_build_id.into(),
             runtime_lock_id: self.inner.runtime.id.clone(),
             model_snapshot_id: self.inner.model.id.clone(),
         })
     }
     fn install(&self) -> Result<(), String> {
         ensure_child_dir(&self.inner.paths.cache, &self.cache())?;
+        ensure_child_dir(
+            &self.inner.paths.data,
+            self.inner
+                .paths
+                .data
+                .join(self.inner.profile.installing_relative)
+                .parent()
+                .ok_or("安装记录无父目录")?,
+        )?;
         let lock = open_regular(
             &self.inner.paths.data.join("installation.lock"),
             true,
@@ -448,7 +640,11 @@ impl Installation {
             return Err("磁盘空间不足；请释放安装计划所需空间后继续。".into());
         }
         atomic_json(
-            &self.inner.paths.data.join("installation-installing.json"),
+            &self
+                .inner
+                .paths
+                .data
+                .join(self.inner.profile.installing_relative),
             &serde_json::json!({"runtime_lock_id":self.inner.runtime.id,"model_snapshot_id":self.inner.model.id}),
         )?;
         self.update(|s| s.phase = "downloading".into());
@@ -503,11 +699,29 @@ impl Installation {
             s.phase = "installing_runtime".into();
         });
         let record = self.prepare_runtime()?;
+        ensure_child_dir(
+            &self.inner.paths.data,
+            self.inner
+                .paths
+                .data
+                .join(self.inner.profile.ready_relative)
+                .parent()
+                .ok_or("激活记录无父目录")?,
+        )?;
         atomic_json(
-            &self.inner.paths.data.join("installation-ready.json"),
+            &self
+                .inner
+                .paths
+                .data
+                .join(self.inner.profile.ready_relative),
             &record,
         )?;
-        let _ = fs::remove_file(self.inner.paths.data.join("installation-installing.json"));
+        let _ = fs::remove_file(
+            self.inner
+                .paths
+                .data
+                .join(self.inner.profile.installing_relative),
+        );
         self.update(|s| {
             s.phase = "ready".into();
             s.runtime_ready = true;
@@ -552,7 +766,11 @@ impl Installation {
                 &self.inner.paths.data,
             )?;
         }
-        fs::write(runtime.join("requirements.lock"), LOCK).map_err(err)?;
+        fs::write(
+            runtime.join("requirements.lock"),
+            self.inner.profile.requirements_lock,
+        )
+        .map_err(err)?;
         self.command(
             Command::new(&python)
                 .args([
@@ -574,15 +792,19 @@ impl Installation {
         )?;
         self.check_cancel()?;
         self.update(|s| s.phase = "probing".into());
-        let probe_output =
-            self.command(Command::new(&python).args(["-I", "-m", WORKER_MODULE, "--probe"]))?;
+        let probe_output = self.command(Command::new(&python).args([
+            "-I",
+            "-m",
+            self.inner.profile.worker_module,
+            "--probe",
+        ]))?;
         let probe: serde_json::Value =
             serde_json::from_slice(&probe_output).map_err(|e| format!("探针输出无效：{e}"))?;
         if probe["python"] != self.inner.runtime.python
-            || probe["identity"]["build_id"] != WORKER_BUILD_ID
+            || probe["identity"]["build_id"] != self.inner.profile.worker_build_id
             || probe["identity"]["runtime_lock_id"] != self.inner.runtime.id
             || probe["identity"]["model_snapshot_id"] != self.inner.model.id
-            || probe["device"] != "gpu"
+            || probe["device"] != self.inner.profile.probe_device
         {
             return Err("运行时探针版本或设备不符。".into());
         }
@@ -600,8 +822,8 @@ impl Installation {
         let record = ReadyRecord {
             runtime_lock_id: self.inner.runtime.id.clone(),
             model_snapshot_id: self.inner.model.id.clone(),
-            runtime_manifest_sha256: manifest_digest(RUNTIME_MANIFEST),
-            model_manifest_sha256: manifest_digest(MODEL_MANIFEST),
+            runtime_manifest_sha256: manifest_digest(self.inner.profile.runtime_manifest),
+            model_manifest_sha256: manifest_digest(self.inner.profile.model_manifest),
             runtime_files,
             probe,
         };
@@ -679,7 +901,17 @@ impl Installation {
                 if status.success() {
                     return Ok(output);
                 }
-                return Err(format!("私有环境安装或探针失败 ({status})；详见安装日志。"));
+                let detail = fs::read(&self.inner.paths.logs.join("installation-process.log"))
+                    .ok()
+                    .map(|bytes| {
+                        let skip = bytes.len().saturating_sub(4096);
+                        String::from_utf8_lossy(&bytes[skip..]).into_owned()
+                    })
+                    .unwrap_or_default();
+                return Err(format!(
+                    "私有环境安装或探针失败 ({status})；安装日志末尾：{}",
+                    detail.trim()
+                ));
             }
             if self.check_cancel().is_err() || std::time::Instant::now() > deadline {
                 #[cfg(unix)]
@@ -718,7 +950,8 @@ impl Installation {
         let final_path = self.cache().join(&a.sha256);
         if a.url == "bundled:worker-wheel" {
             let mut file = open_regular(&final_path, true, true)?;
-            file.write_all(WORKER_WHEEL).map_err(err)?;
+            file.write_all(self.inner.profile.worker_wheel)
+                .map_err(err)?;
             file.sync_all().map_err(err)?;
             drop(file);
             verify(&final_path, a.bytes, &a.sha256)?;
@@ -1148,10 +1381,53 @@ mod tests {
         assert!(i.ready_paths().is_err());
         atomic_json(&repo.join("verification/first-generation-runtime-install.json"),&serde_json::json!({"kind":"production-installer-offline-runtime-acceptance","is_full_model_inference":false,"installation_activated":false,"network_denied":std::env::var("STUDIO_ACCEPTANCE_NETWORK_DENIED").as_deref()==Ok("1"),"elapsed_seconds":started.elapsed().as_secs_f64(),"runtime_lock_id":record.runtime_lock_id,"model_snapshot_id":record.model_snapshot_id,"worker_wheel_sha256":i.inner.runtime.wheels.iter().find(|a|a.url=="bundled:worker-wheel").unwrap().sha256,"inventory_entries":record.runtime_files.len(),"probe":record.probe})).unwrap();
     }
+
+    #[test]
+    #[ignore = "explicit acceptance: requires the pinned MFLUX wheel cache"]
+    fn klein_private_runtime_installs_offline_without_model_weights() {
+        let (_temp, i) = fixture_for(Installation::new_klein);
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .canonicalize()
+            .unwrap();
+        let source = repo.join("target/model-usability-offline-cache-20261031/cache/downloads");
+        for artifact in i
+            .inner
+            .runtime
+            .wheels
+            .iter()
+            .filter(|wheel| wheel.url != "bundled:worker-wheel")
+            .chain(std::iter::once(&i.inner.runtime.interpreter))
+        {
+            let from = source.join(&artifact.sha256);
+            verify(&from, artifact.bytes, &artifact.sha256).unwrap();
+            fs::hard_link(from, i.cache().join(&artifact.sha256)).unwrap();
+        }
+        let worker = i
+            .inner
+            .runtime
+            .wheels
+            .iter()
+            .find(|wheel| wheel.url == "bundled:worker-wheel")
+            .unwrap();
+        i.download(worker).unwrap();
+        let started = std::time::Instant::now();
+        let record = i.prepare_runtime().unwrap();
+        assert_eq!(record.probe["identity"]["build_id"], KLEIN_WORKER_BUILD_ID);
+        assert_eq!(record.probe["device"], "gpu");
+        assert!(!i.snapshot().model_ready);
+        assert!(i.ready_paths().is_err());
+        atomic_json(&repo.join("verification/klein-runtime-install.json"),&serde_json::json!({"kind":"production-installer-offline-runtime-acceptance","is_full_model_inference":false,"installation_activated":false,"elapsed_seconds":started.elapsed().as_secs_f64(),"runtime_lock_id":record.runtime_lock_id,"model_snapshot_id":record.model_snapshot_id,"worker_wheel_sha256":i.inner.runtime.wheels.iter().find(|a|a.url=="bundled:worker-wheel").unwrap().sha256,"inventory_entries":record.runtime_files.len(),"probe":record.probe})).unwrap();
+    }
     fn fixture() -> (tempfile::TempDir, Installation) {
+        fixture_for(Installation::new)
+    }
+    fn fixture_for(
+        create: impl FnOnce(AppPaths) -> Result<Installation, String>,
+    ) -> (tempfile::TempDir, Installation) {
         let temp = tempfile::tempdir().unwrap();
         let paths = AppPaths::resolve(Some(temp.path())).unwrap();
-        let installer = Installation::new(paths).unwrap();
+        let installer = create(paths).unwrap();
         ensure_child_dir(&installer.inner.paths.cache, &installer.cache()).unwrap();
         (temp, installer)
     }
@@ -1410,6 +1686,81 @@ mod tests {
         assert!(installer.ready_paths().is_err());
         assert!(installer.start("https://untrusted").is_err());
     }
+
+    #[test]
+    fn klein_has_an_independent_manifest_runtime_and_worker() {
+        let temp = tempfile::tempdir().unwrap();
+        let paths = AppPaths::resolve(Some(temp.path())).unwrap();
+        let installer = Installation::new_klein(paths).unwrap();
+        assert_eq!(installer.snapshot().install_id, KLEIN_INSTALL_ID);
+        assert_eq!(
+            installer
+                .inner
+                .model
+                .files
+                .iter()
+                .map(|file| file.bytes)
+                .sum::<u64>(),
+            15_980_131_745
+        );
+        let worker = installer
+            .inner
+            .runtime
+            .wheels
+            .iter()
+            .find(|wheel| wheel.url == "bundled:worker-wheel")
+            .unwrap();
+        assert_eq!(
+            worker.path,
+            "studio_mflux_worker_v2-0.2.0-py3-none-any.whl"
+        );
+        assert_eq!(
+            installer
+                .inner
+                .runtime
+                .packages
+                .get("studio-mflux-worker-v2")
+                .map(String::as_str),
+            Some("0.2.0")
+        );
+        assert_eq!(worker.bytes, KLEIN_WORKER_WHEEL.len() as u64);
+        assert_eq!(
+            worker.sha256,
+            format!("{:x}", Sha256::digest(KLEIN_WORKER_WHEEL))
+        );
+        assert!(installer.ready_paths().is_err());
+        assert_ne!(
+            installer
+                .inner
+                .runtime
+                .id,
+            "mflux-0.24.0-py3.13.12-macos-arm64-v1"
+        );
+    }
+
+    #[test]
+    fn installation_manager_keeps_model_states_and_actions_independent() {
+        let temp = tempfile::tempdir().unwrap();
+        let paths = AppPaths::resolve(Some(temp.path())).unwrap();
+        let manager = Installations::new(paths).unwrap();
+        let snapshots = manager.snapshots();
+        assert_eq!(snapshots.len(), 2);
+        assert!(snapshots.iter().all(|snapshot| snapshot.phase == "not_installed"));
+        assert_eq!(
+            manager
+                .snapshot(KLEIN_INSTALL_ID)
+                .unwrap()
+                .install_id,
+            KLEIN_INSTALL_ID
+        );
+        assert!(manager.start("https://untrusted").is_err());
+        assert!(manager.cancel("birefnet-general-epoch-244").is_err());
+        assert!(
+            manager
+                .snapshot(INSTALL_ID)
+                .is_some_and(|snapshot| snapshot.phase == "not_installed")
+        );
+    }
     #[test]
     fn range_requires_exact_start_end_and_total() {
         assert!(valid_range(Some("bytes 5-9/10"), 5, 10));
@@ -1428,7 +1779,12 @@ mod tests {
             probe: serde_json::json!({"device":"gpu","device_name":"fixture-device"}),
         };
         let ready = i.inner.paths.data.join("installation-ready.json");
-        assert!(record.matches_manifests(&i.inner.runtime.id, &i.inner.model.id));
+        assert!(ready_record_matches(
+            &record,
+            Z_PROFILE,
+            &i.inner.runtime.id,
+            &i.inner.model.id
+        ));
         record.runtime_manifest_sha256 = "a".repeat(64);
         atomic_json(&ready, &record).unwrap();
         assert!(i.plan_environment().is_err());

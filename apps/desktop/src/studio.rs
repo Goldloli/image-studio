@@ -4,7 +4,7 @@ use crate::adapters::{
     catalog::ModelCatalog,
     feature_catalog::FeatureCatalog,
     generation::GenerationController,
-    installation::{INSTALL_ID, Installation},
+    installation::{INSTALL_ID, InstallationSnapshot, Installations, KLEIN_INSTALL_ID},
     library::{
         AcceptTurnInput, AssetLibraryQuery, DEFAULT_MODEL_ID, DraftRecord, JobRecord, Library,
         TaskCenterQuery, TurnRecord, TurnStatus,
@@ -24,6 +24,7 @@ use std::{
 use studio_core::{
     domain::*,
     generation::{GenerationInput, freeze_z_image},
+    recipes::{KleinInput, SourceAsset, SourceFacts, freeze_klein},
 };
 use uuid::Uuid;
 
@@ -33,7 +34,7 @@ pub struct StudioService {
     pub features: Result<FeatureCatalog, String>,
     pub preferences: PreferencesStore,
     pub library: Option<Arc<Mutex<Library>>>,
-    pub installation: Option<Installation>,
+    pub installation: Option<Installations>,
     pub generation: Option<GenerationController>,
     pub startup_error: Option<String>,
     pub closing: AtomicBool,
@@ -68,6 +69,10 @@ pub struct ConversationSendInput {
     pub expected_version: u64,
     pub prompt: String,
     pub model_id: String,
+    #[serde(default)]
+    pub capability_id: Option<String>,
+    #[serde(default)]
+    pub source_asset_id: Option<String>,
     pub aspect: String,
     pub count: u32,
     pub seed: String,
@@ -81,6 +86,14 @@ pub struct DraftParams {
     pub aspect: String,
     pub count: u32,
     pub seed: String,
+    #[serde(default = "default_capability_id")]
+    pub capability_id: String,
+    #[serde(default)]
+    pub source_asset_id: Option<String>,
+}
+
+fn default_capability_id() -> String {
+    studio_core::generation::Z_IMAGE_CAPABILITY.into()
 }
 
 impl Default for DraftParams {
@@ -90,6 +103,8 @@ impl Default for DraftParams {
             aspect: "1:1".into(),
             count: 1,
             seed: String::new(),
+            capability_id: default_capability_id(),
+            source_asset_id: None,
         }
     }
 }
@@ -137,7 +152,7 @@ impl StudioService {
             },
             Ok(library) => {
                 let library = Arc::new(Mutex::new(library));
-                let installation = Installation::new(paths.clone());
+                let installation = Installations::new(paths.clone());
                 let startup_error = installation.as_ref().err().cloned();
                 let service_paths = paths.clone();
                 let generation = GenerationController::new(paths, library.clone(), supervisor);
@@ -171,10 +186,32 @@ impl StudioService {
         f(&mut guard).map_err(|error| error.to_string())
     }
     pub fn model_view(&self) -> Value {
-        let Some(installation) = &self.installation else {
-            return json!({"id":"z-image-turbo-mflux-v1","name":"Z-Image Turbo","phase":"failed","summary":"安装清单不可用","ready":false,"runtimeReady":false,"modelReady":false,"deviceVerified":false,"receivedBytes":0,"totalBytes":0,"modelBytes":32848304893_u64,"runtimeBytes":0,"requiredBytes":0,"error":self.startup_error,"busy":false});
+        self.model_view_for(INSTALL_ID)
+    }
+    pub fn model_views(&self) -> Vec<Value> {
+        [INSTALL_ID, KLEIN_INSTALL_ID]
+            .into_iter()
+            .map(|id| self.model_view_for(id))
+            .collect()
+    }
+    fn model_view_for(&self, install_id: &str) -> Value {
+        let name = if install_id == KLEIN_INSTALL_ID {
+            "FLUX.2 Klein 4B distilled"
+        } else {
+            "Z-Image Turbo"
         };
-        let s = installation.snapshot();
+        let fallback_model_bytes = if install_id == KLEIN_INSTALL_ID {
+            15_980_131_745_u64
+        } else {
+            32_848_304_893_u64
+        };
+        let Some(s) = self
+            .installation
+            .as_ref()
+            .and_then(|installation| installation.snapshot(install_id))
+        else {
+            return json!({"id":install_id,"name":name,"phase":"failed","summary":"安装清单不可用","ready":false,"runtimeReady":false,"modelReady":false,"deviceVerified":false,"receivedBytes":0,"totalBytes":0,"modelBytes":fallback_model_bytes,"runtimeBytes":0,"requiredBytes":0,"error":self.startup_error,"busy":false});
+        };
         let busy = matches!(
             s.phase.as_str(),
             "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
@@ -193,17 +230,21 @@ impl StudioService {
             "failed" => "安装失败，可重试",
             _ => "检查安装状态",
         };
-        json!({"id":s.install_id,"name":"Z-Image Turbo","phase":s.phase,"summary":summary,"ready":s.phase=="ready"&&s.runtime_ready&&s.model_ready&&s.device_verified,"runtimeReady":s.runtime_ready,"modelReady":s.model_ready,"deviceVerified":s.device_verified,"receivedBytes":s.received_bytes,"totalBytes":s.total_bytes,"modelBytes":s.model_bytes,"runtimeBytes":s.runtime_bytes,"requiredBytes":s.required_bytes,"error":s.error,"busy":busy})
+        json!({"id":s.install_id,"name":name,"phase":s.phase,"summary":summary,"ready":s.phase=="ready"&&s.runtime_ready&&s.model_ready&&s.device_verified,"runtimeReady":s.runtime_ready,"modelReady":s.model_ready,"deviceVerified":s.device_verified,"receivedBytes":s.received_bytes,"totalBytes":s.total_bytes,"modelBytes":s.model_bytes,"runtimeBytes":s.runtime_bytes,"requiredBytes":s.required_bytes,"error":s.error,"busy":busy})
     }
     pub fn model_catalog(&self) -> Result<Value, String> {
         let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
-        let installation = self.installation.as_ref().map(Installation::snapshot);
+        let installations = self
+            .installation
+            .as_ref()
+            .map(Installations::snapshots)
+            .unwrap_or_default();
         let installation_error = self.installation.is_none().then(|| {
             self.startup_error
                 .clone()
                 .unwrap_or_else(|| "安装器不可用".into())
         });
-        catalog.query(installation.as_ref(), installation_error.as_deref())
+        catalog.query(&installations, installation_error.as_deref())
     }
     pub fn feature_catalog(&self) -> Result<Value, String> {
         let catalog = self.features.as_ref().map_err(|error| error.clone())?;
@@ -222,6 +263,14 @@ impl StudioService {
         let id = AssetId::new(id).map_err(|error| error.to_string())?;
         self.with_library(|library| library.asset_library_item(&id))
             .and_then(|value| serde_json::to_value(value).map_err(|error| error.to_string()))
+    }
+    pub fn import_source(&self, path: &Path) -> Result<Value, String> {
+        let record = self.with_library(|library| library.import_source(path))?;
+        serde_json::to_value(record).map_err(|error| error.to_string())
+    }
+    pub fn imported_sources(&self) -> Result<Value, String> {
+        let records = self.with_library(|library| library.imported_sources())?;
+        serde_json::to_value(records).map_err(|error| error.to_string())
     }
     pub fn task_center_query(&self, query: TaskCenterQuery) -> Result<Value, String> {
         self.with_library(|library| library.task_center_query(query))
@@ -264,9 +313,13 @@ impl StudioService {
         let preferences = self.preferences.snapshot();
         let catalog = self.model_catalog()?;
         let storage = storage::summary(&self.paths);
-        let installation = self.installation.as_ref().map(Installation::snapshot);
+        let installations = self
+            .installation
+            .as_ref()
+            .map(Installations::snapshots)
+            .unwrap_or_default();
         let model = self.model_view();
-        let runtime = installation.as_ref().map_or_else(
+        let runtime = installations.first().map_or_else(
             || {
                 json!({
                     "phase": "unavailable",
@@ -276,7 +329,7 @@ impl StudioService {
                     "lastError": self.startup_error
                 })
             },
-            |snapshot| {
+            |snapshot: &InstallationSnapshot| {
                 json!({
                     "phase": snapshot.phase,
                     "summary": model["summary"],
@@ -299,6 +352,7 @@ impl StudioService {
                 "pythonVersion": "3.13.12",
                 "diagnosticsEnabled": diagnostics_enabled,
                 "runtime": runtime
+                ,"runtimes": installations
             },
             "about": {
                 "version": env!("CARGO_PKG_VERSION"),
@@ -311,11 +365,11 @@ impl StudioService {
                 "fontLicense": "Noto Sans CJK SC · SIL Open Font License 1.1",
                 "modelSources": [
                     "Z-Image Turbo · Tongyi-MAI/Z-Image-Turbo · Apache-2.0",
-                    "FLUX.2 Klein 4B distilled · planned · Apache-2.0",
+                    "FLUX.2 Klein 4B distilled · black-forest-labs/FLUX.2-klein-4B · Apache-2.0",
                     "BiRefNet general epoch_244 · planned · exact release review pending",
                     "Real-ESRGAN x4plus · planned · program and conversion-weight reviews pending"
                 ],
-                "capabilityScope": "当前仅 Z-Image Turbo 文生图可安装与执行；其余三个型号仅登记规划用途。"
+                "capabilityScope": "Z-Image Turbo 与 FLUX.2 Klein 4B 已接入本地安装与执行链路；BiRefNet 和 Real-ESRGAN 仍按计划接入。"
             }
         }))
     }
@@ -328,11 +382,13 @@ impl StudioService {
         model_id: &str,
     ) -> Result<Value, String> {
         let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
-        if !catalog.executable(model_id) || model_id != INSTALL_ID {
+        if !catalog.executable(model_id) {
             return Err("该模型当前不可执行，不能用于会话".into());
         }
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
-        let snapshot = installation.snapshot();
+        let snapshot = installation
+            .snapshot(model_id)
+            .ok_or("该模型没有登记的安装状态")?;
         if snapshot.phase != "ready"
             || !snapshot.model_ready
             || !snapshot.runtime_ready
@@ -355,8 +411,34 @@ impl StudioService {
         if !catalog.contains(&params.model_id) {
             return Err("所选模型未在权威目录中登记".into());
         }
-        if !matches!(params.aspect.as_str(), "1:1" | "4:3" | "3:4") {
-            return Err("当前产品不支持该画幅".into());
+        let supported_combo = match (
+            params.model_id.as_str(),
+            params.capability_id.as_str(),
+            params.source_asset_id.is_some(),
+        ) {
+            (
+                DEFAULT_MODEL_ID,
+                studio_core::generation::Z_IMAGE_CAPABILITY,
+                false,
+            ) => matches!(params.aspect.as_str(), "1:1" | "4:3" | "3:4"),
+            (
+                studio_core::recipes::KLEIN_MODEL,
+                studio_core::recipes::KLEIN_TEXT_CAPABILITY,
+                false,
+            )
+            | (
+                studio_core::recipes::KLEIN_MODEL,
+                studio_core::recipes::KLEIN_EDIT_CAPABILITY,
+                true,
+            ) => params.aspect == "1:1",
+            _ => false,
+        };
+        if !supported_combo {
+            return Err("模型、能力、源图与画幅组合不受支持".into());
+        }
+        if let Some(source) = &params.source_asset_id {
+            let source = AssetId::new(source).map_err(|error| error.to_string())?;
+            self.with_library(|library| library.resolve_source(&source))?;
         }
         if params.count != 1 {
             return Err("当前产品每轮只接受 1 张图片".into());
@@ -381,6 +463,8 @@ impl StudioService {
             aspect: snapshot.creation_defaults.aspect,
             count: snapshot.creation_defaults.count,
             seed: snapshot.creation_defaults.seed,
+            capability_id: default_capability_id(),
+            source_asset_id: None,
         };
         if !catalog.contains(&params.model_id) {
             warnings.push("已保存的默认模型不在当前目录中，已回退为 Z-Image Turbo".into());
@@ -416,10 +500,11 @@ impl StudioService {
     }
     pub fn snapshot(&self) -> Result<Value, String> {
         let model = self.model_view();
+        let models = self.model_views();
         let execution = self.execution_view();
         if self.library.is_none() {
             return Ok(
-                json!({"model":model,"drafts":[],"activeId":null,"activeConversationId":null,"conversations":[],"turns":[],"turnsHasMore":false,"turnsNextCursor":null,"selectedAssetId":null,"jobs":[],"assets":[],"jobCounts":[0,0,0],"execution":execution,"error":self.startup_error}),
+                json!({"model":model,"models":models,"drafts":[],"activeId":null,"activeConversationId":null,"conversations":[],"turns":[],"turnsHasMore":false,"turnsNextCursor":null,"selectedAssetId":null,"jobs":[],"assets":[],"jobCounts":[0,0,0],"execution":execution,"error":self.startup_error}),
             );
         }
         let (lib, jobs, assets, turns, counts) = self.with_library(|library| {
@@ -461,6 +546,7 @@ impl StudioService {
         })?;
         Ok(json!({
             "model": model,
+            "models": models,
             "drafts": lib.drafts,
             "activeId": lib.active_draft_id,
             "activeConversationId": lib.active_conversation_id,
@@ -508,33 +594,34 @@ impl StudioService {
         }
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
         installation.start(id)?;
-        Ok(self.model_view())
+        Ok(self.model_view_for(id))
     }
-    pub fn cancel_install(&self) -> Result<Value, String> {
-        self.installation.as_ref().ok_or("安装器不可用")?.cancel();
-        Ok(self.model_view())
+    pub fn cancel_install(&self, id: &str) -> Result<Value, String> {
+        self.installation
+            .as_ref()
+            .ok_or("安装器不可用")?
+            .cancel(id)?;
+        Ok(self.model_view_for(id))
     }
     fn installation_busy(&self) -> bool {
-        self.installation.as_ref().is_some_and(|installation| {
-            matches!(
-                installation.snapshot().phase.as_str(),
-                "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
-            )
-        })
+        self.installation
+            .as_ref()
+            .is_some_and(Installations::is_busy)
     }
     pub fn save_draft(
         &self,
         draft: DraftInput,
         expected_version: u64,
     ) -> Result<DraftRecord, String> {
-        self.validate_registered_draft_params(&draft.params)?;
+        let params = self.validate_registered_draft_params(&draft.params)?;
+        let params = serde_json::to_value(params).map_err(|error| error.to_string())?;
         self.with_library(|library| {
             library.save_draft(
                 DraftRecord {
                     id: draft.id,
                     name: draft.name,
                     prompt: draft.prompt,
-                    params: draft.params,
+                    params,
                     collapsed: draft.collapsed,
                     version: expected_version,
                     prompt_source: draft.prompt_source_id,
@@ -672,7 +759,7 @@ impl StudioService {
         input: ConversationSendInput,
     ) -> Result<Value, String> {
         let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
-        if !catalog.executable(&input.model_id) || input.model_id != INSTALL_ID {
+        if !catalog.executable(&input.model_id) {
             return Err("当前会话选择的模型尚不可执行，请切换到已就绪模型".into());
         }
         let conversation_id =
@@ -692,6 +779,24 @@ impl StudioService {
         {
             return Err("生成、清理或模型安装仍在进行，请稍后重试".into());
         }
+        let source_asset_id = input
+            .source_asset_id
+            .as_deref()
+            .map(AssetId::new)
+            .transpose()
+            .map_err(|error| error.to_string())?;
+        if let Some(source) = &source_asset_id {
+            self.with_library(|library| library.resolve_source(source))?;
+        }
+        let capability_id = input.capability_id.unwrap_or_else(|| {
+            if input.model_id == KLEIN_INSTALL_ID && source_asset_id.is_some() {
+                studio_core::recipes::KLEIN_EDIT_CAPABILITY.into()
+            } else if input.model_id == KLEIN_INSTALL_ID {
+                studio_core::recipes::KLEIN_TEXT_CAPABILITY.into()
+            } else {
+                studio_core::generation::Z_IMAGE_CAPABILITY.into()
+            }
+        });
         let accepted = self.with_library(|library| {
             library.accept_turn(AcceptTurnInput {
                 conversation_id: conversation_id.clone(),
@@ -700,6 +805,8 @@ impl StudioService {
                 submission_key,
                 prompt: input.prompt,
                 model_id: input.model_id,
+                capability_id,
+                source_asset_id,
                 aspect: input.aspect,
                 count: input.count,
                 seed: input.seed,
@@ -762,8 +869,8 @@ impl StudioService {
             )
         };
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
-        let ready = installation.ready_paths()?;
-        let environment = installation.plan_environment()?;
+        let ready = installation.ready_paths(&turn.model_id)?;
+        let environment = installation.plan_environment(&turn.model_id)?;
         {
             let current = self.with_library(|library| library.turn(&turn.id))?;
             if current.status == TurnStatus::CancelRequested {
@@ -777,31 +884,69 @@ impl StudioService {
         let random = Uuid::new_v4();
         let bytes = random.as_bytes();
         let random_seed = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
-        let frozen = freeze_z_image(
-            GenerationInput {
-                request_id: RequestId::new(format!("request-{}", turn.submission_key))
-                    .map_err(|error| error.to_string())?,
-                project_id: ProjectId::new("default").map_err(|error| error.to_string())?,
-                idempotency_key: IdempotencyKey::new(turn.submission_key.clone())
-                    .map_err(|error| error.to_string())?,
-                plan_id: PlanId::new(format!("plan-{}", turn.submission_key))
-                    .map_err(|error| error.to_string())?,
-                prompt: turn.prompt.clone(),
-                width,
-                height,
-                count: turn.count,
-                seed,
-            },
-            random_seed,
-            environment,
-        )
-        .map_err(|error| error.to_string())?;
+        let request_id = RequestId::new(format!("request-{}", turn.submission_key))
+            .map_err(|error| error.to_string())?;
+        let plan_id = PlanId::new(format!("plan-{}", turn.submission_key))
+            .map_err(|error| error.to_string())?;
+        let idempotency_key =
+            IdempotencyKey::new(turn.submission_key.clone()).map_err(|error| error.to_string())?;
+        let project_id = ProjectId::new("default").map_err(|error| error.to_string())?;
+        let (request, plan) = if turn.model_id == KLEIN_INSTALL_ID {
+            let source = turn
+                .source_asset_id
+                .as_ref()
+                .map(|id| {
+                    let resolved = self.with_library(|library| library.resolve_source(id))?;
+                    Ok::<_, String>(SourceAsset {
+                        asset: resolved.asset,
+                        facts: SourceFacts {
+                            width: resolved.width,
+                            height: resolved.height,
+                            has_transparent_pixels: resolved.has_transparent_pixels,
+                        },
+                    })
+                })
+                .transpose()?;
+            let frozen = freeze_klein(
+                KleinInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    prompt: turn.prompt.clone(),
+                    seed,
+                    source,
+                },
+                random_seed,
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
+        } else {
+            let frozen = freeze_z_image(
+                GenerationInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    prompt: turn.prompt.clone(),
+                    width,
+                    height,
+                    count: turn.count,
+                    seed,
+                },
+                random_seed,
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
+        };
         let _schedule = self
             .scheduling
             .lock()
             .map_err(|_| "提交锁异常".to_string())?;
-        let binding = self
-            .with_library(|library| library.bind_turn_job(&turn.id, frozen.request, frozen.plan))?;
+        let binding =
+            self.with_library(|library| library.bind_turn_job(&turn.id, request, plan))?;
         if binding.job.state == studio_core::generation::AttemptState::CancelRequested {
             let cancelled = self.with_library(|library| {
                 library.finish_after_reap(
@@ -911,8 +1056,8 @@ impl StudioService {
             }
         })?;
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
-        let ready = installation.ready_paths()?;
-        let environment = installation.plan_environment()?;
+        let ready = installation.ready_paths(INSTALL_ID)?;
+        let environment = installation.plan_environment(INSTALL_ID)?;
         self.ensure_open()?;
         let random = Uuid::new_v4();
         let bytes = random.as_bytes();
@@ -964,9 +1109,10 @@ impl StudioService {
         }
         let id = JobId::new(id).map_err(|e| e.to_string())?;
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
-        let ready = installation.ready_paths()?;
-        let environment = installation.plan_environment()?;
         let previous = self.with_library(|library| library.job(&id))?;
+        let ready = installation.ready_paths(previous.request.model_variant_id.as_str())?;
+        let environment =
+            installation.plan_environment(previous.request.model_variant_id.as_str())?;
         if previous.plan.components != environment.components
             || previous.plan.runtime != environment.runtime
             || previous.plan.device != environment.device
@@ -1001,7 +1147,7 @@ impl StudioService {
             generation.shutdown();
         }
         if let Some(installation) = &self.installation {
-            installation.cancel();
+            installation.shutdown();
         }
     }
     fn ensure_open(&self) -> Result<(), String> {
@@ -1081,6 +1227,8 @@ fn turn_view(library: &Library, turn: &TurnRecord) -> crate::adapters::library::
         "submissionKey": turn.submission_key,
         "prompt": turn.prompt,
         "modelId": turn.model_id,
+        "capabilityId": turn.capability_id,
+        "sourceAssetId": turn.source_asset_id,
         "aspect": turn.aspect,
         "count": turn.count,
         "seed": seed,
@@ -1226,6 +1374,8 @@ mod tests {
                 expected_version: typed.version,
                 prompt: "接收后异步预检".into(),
                 model_id: DEFAULT_MODEL_ID.into(),
+                capability_id: None,
+                source_asset_id: None,
                 aspect: "1:1".into(),
                 count: 1,
                 seed: String::new(),
@@ -1407,7 +1557,7 @@ mod tests {
     }
 
     #[test]
-    fn catalog_query_exposes_planned_models_without_install_actions() {
+    fn catalog_query_exposes_independent_model_install_actions() {
         let (_root, service) = fixture();
         let catalog = service.model_catalog().unwrap();
         assert_eq!(catalog["counts"]["total"], 4);
@@ -1417,8 +1567,8 @@ mod tests {
             .iter()
             .find(|entry| entry["id"] == "flux2-klein-4b-distilled")
             .unwrap();
-        assert_eq!(planned["productStatus"], "planned");
-        assert_eq!(planned["canInstall"], false);
+        assert_eq!(planned["productStatus"], "implemented");
+        assert_eq!(planned["canInstall"], true);
         assert_eq!(planned["executable"], false);
     }
 
@@ -1456,7 +1606,7 @@ mod tests {
         assert_eq!(changed.version, record.version + 1);
         assert_eq!(changed.prompt, "保持这段提示词");
         assert_eq!(changed.params["modelId"], "flux2-klein-4b-distilled");
-        assert_eq!(changed.params["aspect"], "4:3");
+        assert_eq!(changed.params["aspect"], "1:1");
         assert_eq!(changed.params["seed"], "17");
 
         let second = service.conversation_create(None).unwrap();
@@ -1472,7 +1622,9 @@ mod tests {
                         "modelId": "flux2-klein-4b-distilled",
                         "aspect": "1:1",
                         "count": 1,
-                        "seed": ""
+                        "seed": "",
+                        "capabilityId": "image.text-to-image.flux2-klein-4b.v1",
+                        "sourceAssetId": null
                     }),
                     collapsed: false,
                     prompt_source_id: None,
