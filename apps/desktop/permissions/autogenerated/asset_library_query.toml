@@ -1,3 +1,5 @@
+# Automatically generated - DO NOT EDIT!
+
 [[permission]]
 identifier = "allow-asset-library-query"
 description = "Enables the asset_library_query command without any pre-configured scope."

@@ -1,3 +1,5 @@
+# Automatically generated - DO NOT EDIT!
+
 [[permission]]
 identifier = "allow-task-center-detail"
 description = "Enables the task_center_detail command without any pre-configured scope."
