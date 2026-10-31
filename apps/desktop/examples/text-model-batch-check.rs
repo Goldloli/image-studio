@@ -125,6 +125,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "elapsedMilliseconds": observation["elapsedMilliseconds"],
             "maxSamplingStep": observation["maxSamplingStep"],
             "stageSequence": observation["stageSequence"],
+            "logs": observation["execution"]["logs"],
             "hostResidentBytesAfterCompletion": resident_bytes()?,
             "backendPeakBytes": Value::Null,
             "workerProcessesAfterCompletion": worker_processes(),
