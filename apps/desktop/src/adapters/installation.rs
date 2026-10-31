@@ -1753,16 +1753,13 @@ impl Installation {
             atomic_json(&seed_marker, &serde_json::json!({"sha256":a.sha256}))?;
             self.update(|state| state.received_bytes += seeded);
         } else {
-            let existing: u64 = segment_paths
-                .iter()
-                .zip(&segment_meta_paths)
-                .filter_map(|(path, metadata_path)| {
-                    let bytes = fs::metadata(path).ok()?.len();
-                    let metadata = fs::read(metadata_path).ok()?;
-                    let metadata = serde_json::from_slice::<serde_json::Value>(&metadata).ok()?;
-                    (metadata["offset"] == bytes).then_some(bytes)
-                })
-                .sum();
+            let existing = resumable_segment_bytes(
+                &segment_paths,
+                &segment_meta_paths,
+                &ranges,
+                &a.sha256,
+                &etag,
+            );
             self.update(|state| state.received_bytes += existing);
         }
         if part.exists() {
@@ -2112,6 +2109,32 @@ fn segment_ranges(total: u64, count: usize) -> Result<Vec<(u64, u64)>, String> {
         start = end;
     }
     Ok(ranges)
+}
+
+fn resumable_segment_bytes(
+    segment_paths: &[std::path::PathBuf],
+    metadata_paths: &[std::path::PathBuf],
+    ranges: &[(u64, u64)],
+    sha256: &str,
+    etag: &str,
+) -> u64 {
+    segment_paths
+        .iter()
+        .zip(metadata_paths)
+        .zip(ranges)
+        .filter_map(|((path, metadata_path), (start, end))| {
+            let bytes = fs::metadata(path).ok()?.len();
+            let metadata = fs::read(metadata_path).ok()?;
+            let metadata = serde_json::from_slice::<serde_json::Value>(&metadata).ok()?;
+            (bytes <= end - start
+                && metadata["offset"] == bytes
+                && metadata["sha256"] == sha256
+                && metadata["etag"] == etag
+                && metadata["start"] == *start
+                && metadata["end"] == *end)
+                .then_some(bytes)
+        })
+        .sum()
 }
 fn seed_segments(
     source_path: &Path,
@@ -2631,6 +2654,43 @@ mod tests {
         assert!(headers.contains("if-range: \"one\""));
         task.join().unwrap();
         assert_eq!(fs::read(path).unwrap(), data);
+    }
+    #[test]
+    fn only_segments_matching_the_current_source_identity_count_as_progress() {
+        let temp = tempfile::tempdir().unwrap();
+        let paths = (0..3)
+            .map(|index| temp.path().join(format!("segment-{index}")))
+            .collect::<Vec<_>>();
+        let metadata_paths = paths
+            .iter()
+            .map(|path| path.with_extension("json"))
+            .collect::<Vec<_>>();
+        let ranges = [(0, 4), (4, 7), (7, 9)];
+        for (index, bytes) in [4_u64, 3, 2].into_iter().enumerate() {
+            fs::write(&paths[index], vec![b'x'; bytes as usize]).unwrap();
+            atomic_json(
+                &metadata_paths[index],
+                &serde_json::json!({
+                    "sha256": "a".repeat(64),
+                    "etag": if index == 1 { "\"old\"" } else { "\"current\"" },
+                    "start": ranges[index].0,
+                    "end": ranges[index].1,
+                    "offset": bytes,
+                    "total": 9,
+                }),
+            )
+            .unwrap();
+        }
+        assert_eq!(
+            resumable_segment_bytes(
+                &paths,
+                &metadata_paths,
+                &ranges,
+                &"a".repeat(64),
+                "\"current\"",
+            ),
+            6
+        );
     }
     #[test]
     fn full_response_replaces_a_partial_without_appending() {
