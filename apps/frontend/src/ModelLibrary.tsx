@@ -126,7 +126,7 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
     if (!entry.installId) return;
     setPending(entry.id);
     try {
-      await api(command, command === 'model_install' ? { installId: entry.installId } : undefined);
+      await api(command, { installId: entry.installId });
       onRefresh();
       await load();
     } catch (cause) {

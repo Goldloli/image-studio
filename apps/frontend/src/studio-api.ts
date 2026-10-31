@@ -59,6 +59,7 @@ export type ExecutionView = { busy: boolean; jobId: string | null; attemptId: st
 export type ConversationView = { id: string; draftId: number; title: string; titleSource: 'auto' | 'manual'; createdAt: number; activitySeq: number; running: boolean };
 export type TurnView = {
   id: string; conversationId: string; sequence: number; submissionKey: string; prompt: string; modelId: string;
+  capabilityId: string; sourceAssetId: string | null;
   aspect: string; count: number; seed: number | null; requestedSeed: string; status: string; state: string;
   jobId: string | null; attemptId: string | null; width: number; height: number; assetId: string | null;
   assetAvailable: boolean; assetError: string | null; error: string | null; progressStage: string | null; progressStep: number | null;
@@ -67,12 +68,18 @@ export type TurnView = {
 export type TurnDetail = { turnId: string; attempts: JobView[] };
 export type TurnPage = { turns: TurnView[]; hasMore: boolean; nextCursor: number | null };
 export type StudioSnapshot = {
-  model: ModelView; drafts: StoredDraft[]; activeId: number | null; activeConversationId: string | null;
+  model: ModelView; models: ModelView[]; drafts: StoredDraft[]; activeId: number | null; activeConversationId: string | null;
   conversations: ConversationView[]; conversationsHasMore: boolean; conversationsNextCursor: number | null;
   turns: TurnView[]; turnsHasMore: boolean; turnsNextCursor: number | null;
   selectedAssetId: string | null; jobs: JobView[]; jobCounts:[number,number,number]; assets: AssetView[];
   execution: ExecutionView; error: string | null;
 };
+export type ImportedSource = {
+  assetId: string; contentHash: string; width: number; height: number; byteCount: number;
+  originalName: string; originalSha256: string; orientation: string; processingVersion: string;
+  hasTransparentPixels: boolean;
+};
+export type SourceImportAck = ImportedSource | { cancelled: true };
 export const api = <T>(command: string, args?: Record<string, unknown>) => invoke<T>(command, args);
 export const assetUrl = (id: string) => convertFileSrc(id, 'studio-asset');
 export const promptImageUrl = (sourceCaseId: number) => convertFileSrc(String(sourceCaseId), 'studio-prompt');

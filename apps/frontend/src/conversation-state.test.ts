@@ -14,7 +14,8 @@ import { DEFAULT_MODEL_ID } from './workspace-state';
 
 const turn: TurnView = {
   id: 'turn-1', conversationId: 'conversation-1', sequence: 1, submissionKey: 'send-1', prompt: '湖',
-  modelId: DEFAULT_MODEL_ID, aspect: '1:1', count: 1, seed: null, requestedSeed: '', status: 'Job',
+  modelId: DEFAULT_MODEL_ID, capabilityId: 'image.text-to-image.z-image-turbo.v1', sourceAssetId: null,
+  aspect: '1:1', count: 1, seed: null, requestedSeed: '', status: 'Job',
   state: 'Running', jobId: 'job-1', attemptId: 'attempt-1', width: 1024, height: 1024,
   assetId: null, assetAvailable: false, assetError: null, error: null, progressStage: 'sampling',
   progressStep: 4, progressTotal: 9, receivedAt: 1,
@@ -56,6 +57,10 @@ describe('composer keyboard and parameters', () => {
     expect(supportedDraftParams({ modelId: DEFAULT_MODEL_ID, aspect: '3:4', count: 1, seed: '4294967295' })).toBe(true);
     expect(supportedDraftParams({ modelId: DEFAULT_MODEL_ID, aspect: '16:9', count: 1, seed: '' })).toBe(false);
     expect(supportedDraftParams({ modelId: DEFAULT_MODEL_ID, aspect: '1:1', count: 2, seed: '' })).toBe(false);
+    expect(supportedDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.text-to-image.flux2-klein-4b.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(true);
+    expect(supportedDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', sourceAssetId: 'source-1', aspect: '1:1', count: 1, seed: '7' })).toBe(true);
+    expect(supportedDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(false);
+    expect(supportedDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.text-to-image.flux2-klein-4b.v1', sourceAssetId: null, aspect: '4:3', count: 1, seed: '' })).toBe(false);
   });
 });
 

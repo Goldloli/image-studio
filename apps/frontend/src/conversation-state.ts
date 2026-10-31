@@ -110,9 +110,17 @@ export function shouldSendOnEnter(input: {
 }
 
 export function supportedDraftParams(params: DraftParams): boolean {
-  return params.modelId === 'z-image-turbo-mflux-v1'
-    && ['1:1', '4:3', '3:4'].includes(params.aspect)
-    && params.count === 1
-    && /^(?:|[0-9]+)$/.test(params.seed)
+  const seedValid = /^(?:|[0-9]+)$/.test(params.seed)
     && (params.seed === '' || Number(params.seed) <= 4294967295);
+  if (params.modelId === 'z-image-turbo-mflux-v1') {
+    return (params.capabilityId ?? 'image.text-to-image.z-image-turbo.v1') === 'image.text-to-image.z-image-turbo.v1'
+      && ['1:1', '4:3', '3:4'].includes(params.aspect)
+      && params.count === 1 && !params.sourceAssetId && seedValid;
+  }
+  if (params.modelId === 'flux2-klein-4b-distilled') {
+    const text = params.capabilityId === 'image.text-to-image.flux2-klein-4b.v1' && !params.sourceAssetId;
+    const edit = params.capabilityId === 'image.edit.flux2-klein-4b.v1' && Boolean(params.sourceAssetId);
+    return params.aspect === '1:1' && params.count === 1 && (text || edit) && seedValid;
+  }
+  return false;
 }

@@ -38,6 +38,7 @@ import {
   type ConversationView,
   type StoredDraft,
   type StudioSnapshot,
+  type SourceImportAck,
   type TurnDetail,
   type TurnPage,
   type TurnView,
@@ -136,6 +137,8 @@ function localTurn(conversationId: string, draft: Draft, submissionKey: string):
     submissionKey,
     prompt: draft.prompt,
     modelId: draft.params.modelId,
+    capabilityId: draft.params.capabilityId ?? 'image.text-to-image.z-image-turbo.v1',
+    sourceAssetId: draft.params.sourceAssetId ?? null,
     aspect: draft.params.aspect,
     count: draft.params.count,
     seed: null,
@@ -198,7 +201,7 @@ function TurnCard({
       <span className="message-author">你</span>
     </div>
     <div className="assistant-response">
-      <div className="response-source"><span className="assistant-mark"><Palette size={15}/></span><div><strong>Image Studio</strong><span>Z-Image Turbo · {turn.aspect} · 种子 {turn.seed ?? '随机'}</span></div></div>
+      <div className="response-source"><span className="assistant-mark"><Palette size={15}/></span><div><strong>Image Studio</strong><span>{turn.modelId === 'flux2-klein-4b-distilled' ? 'FLUX.2 Klein 4B' : 'Z-Image Turbo'} · {turn.capabilityId.includes('.edit.') ? '单图编辑' : `${turn.aspect} · 种子 ${turn.seed ?? '随机'}`}</span></div></div>
       <div className="image-card" style={cardStyle}>
         {complete && <button className="image-card-open" type="button" onClick={onOpen} aria-label="放大查看生成图片"><img src={assetUrl(turn.assetId!)} alt={turn.prompt} draggable={false} onLoad={() => setImageReady(true)} onError={() => setImageFailed(true)}/>{imageReady && <span className="image-open-hint"><Expand size={14}/>查看大图</span>}</button>}
         {(!complete || !imageReady) && <div className="image-card-placeholder">
@@ -312,6 +315,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   const [replacePromptTurn, setReplacePromptTurn] = useState<TurnView | null>(null);
   const [replaceLibraryPrompt, setReplaceLibraryPrompt] = useState<PendingLibraryPrompt | null>(null);
   const [promptActionBusy, setPromptActionBusy] = useState(false);
+  const [sourceImporting, setSourceImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const initialized = useRef(false);
   const saveQueue = useRef<DraftSaveQueue | null>(null);
@@ -354,11 +358,15 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   const overByteBudget = new TextEncoder().encode(active.prompt).length > 16384;
   const validParams = supportedDraftParams(active.params);
   const validText = Boolean(active.prompt.trim()) && !overByteBudget;
-  const modelReady = studio?.model.ready ?? false;
-  const selectedModelExecutable = modelReady && active.params.modelId === DEFAULT_MODEL_ID;
-  const selectedModelLabel = active.params.modelId === DEFAULT_MODEL_ID
-    ? modelReady ? 'Z-Image Turbo' : 'Z-Image Turbo · 未就绪'
-    : `未就绪模型 · ${active.params.modelId}`;
+  const availableModels = studio?.models ?? (studio?.model ? [studio.model] : []);
+  const selectedModel = availableModels.find(model => model.id === active.params.modelId);
+  const modelReady = selectedModel?.ready ?? false;
+  const selectedModelExecutable = modelReady;
+  const selectedModelLabel = active.params.capabilityId === 'image.edit.flux2-klein-4b.v1'
+    ? modelReady ? 'Klein · 单图编辑' : 'Klein · 单图编辑 · 未就绪'
+    : active.params.modelId === 'flux2-klein-4b-distilled'
+      ? modelReady ? 'Klein 4B' : 'Klein 4B · 未就绪'
+      : modelReady ? 'Z-Image Turbo' : 'Z-Image Turbo · 未就绪';
   const busyInAnotherConversation = Boolean(systemBusy && !currentActiveTurn && runningConversation && runningConversation.id !== currentConversation.id);
   const canSend = native && loaded && selectedModelExecutable && validText && validParams && validSeed(active.params.seed) && !switching && submittingDraftId === null && !systemBusy;
 
@@ -708,6 +716,25 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   };
 
   const setDraftParams = (patch: Partial<DraftParams>) => dispatch({ type: 'params', patch });
+  const importSource = async () => {
+    setSourceImporting(true);
+    setActionError('');
+    try {
+      const imported = await api<SourceImportAck>('source_import');
+      if ('cancelled' in imported) return;
+      setDraftParams({
+        modelId: 'flux2-klein-4b-distilled',
+        capabilityId: 'image.edit.flux2-klein-4b.v1',
+        sourceAssetId: imported.assetId,
+        aspect: '1:1',
+        count: 1,
+      });
+    } catch (error) {
+      setActionError(String(error));
+    } finally {
+      setSourceImporting(false);
+    }
+  };
   const applyPrompt = (prompt: string) => {
     dispatch({ type: 'edit', value: prompt });
     setReplacePromptTurn(null);
@@ -774,6 +801,8 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
           expectedVersion,
           prompt: source.prompt,
           modelId: source.params.modelId,
+          capabilityId: source.params.capabilityId ?? 'image.text-to-image.z-image-turbo.v1',
+          sourceAssetId: source.params.sourceAssetId ?? null,
           aspect: source.params.aspect,
           count: source.params.count,
           seed: source.params.seed,
@@ -1112,15 +1141,17 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
             <div className="composer-left">
               <div className="composer-popup-anchor" data-composer-popup>
                 <button className={`composer-chip ${popup === 'params' ? 'is-open' : ''}`} aria-expanded={popup === 'params'} onClick={() => { if (popup === 'params') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('params'); }}><SlidersHorizontal size={15}/><span>{active.params.aspect} · {active.params.count} 张</span></button>
-                {popup === 'params' && <div className="composer-popover params-popover" role="dialog" aria-label="创作参数"><div className="popover-heading"><strong>创作参数</strong><span>当前型号 9 步 · q4 · 单张</span></div><span className="popover-label">画幅</span><div className="aspect-options">{['1:1', '4:3', '3:4'].map(aspect => <button key={aspect} className={active.params.aspect === aspect ? 'is-selected' : ''} aria-pressed={active.params.aspect === aspect} onClick={() => setDraftParams({ aspect })}><i style={{ aspectRatio: aspect.replace(':', '/') }}/><span>{aspect}</span></button>)}</div><label className="seed-field"><span>数量</span><input type="number" min={1} max={1} step={1} value={active.params.count} onChange={event => setDraftParams({ count: Number(event.target.value) })}/></label><label className="seed-field"><span>种子</span><input inputMode="numeric" value={active.params.seed} aria-invalid={!validSeed(active.params.seed)} placeholder="留空随机" onChange={event => setDraftParams({ seed: event.target.value })}/></label>{!validSeed(active.params.seed) && <p className="field-error">请输入 0–4294967295 的整数，或留空。</p>}<p className="popover-note">只修改当前会话的下一条请求，不会改变已发送记录。</p></div>}
+                {popup === 'params' && <div className="composer-popover params-popover" role="dialog" aria-label="创作参数"><div className="popover-heading"><strong>创作参数</strong><span>当前型号 {active.params.modelId === 'flux2-klein-4b-distilled' ? '4 步' : '9 步'} · q4 · 单张</span></div><span className="popover-label">画幅</span><div className="aspect-options">{(active.params.modelId === 'flux2-klein-4b-distilled' ? ['1:1'] : ['1:1', '4:3', '3:4']).map(aspect => <button key={aspect} className={active.params.aspect === aspect ? 'is-selected' : ''} aria-pressed={active.params.aspect === aspect} onClick={() => setDraftParams({ aspect })}><i style={{ aspectRatio: aspect.replace(':', '/') }}/><span>{aspect}</span></button>)}</div><label className="seed-field"><span>数量</span><input type="number" min={1} max={1} step={1} value={active.params.count} onChange={event => setDraftParams({ count: Number(event.target.value) })}/></label><label className="seed-field"><span>种子</span><input inputMode="numeric" value={active.params.seed} aria-invalid={!validSeed(active.params.seed)} placeholder="留空随机" onChange={event => setDraftParams({ seed: event.target.value })}/></label>{!validSeed(active.params.seed) && <p className="field-error">请输入 0–4294967295 的整数，或留空。</p>}<p className="popover-note">只修改当前会话的下一条请求，不会改变已发送记录。</p></div>}
               </div>
+              <button className="composer-chip" disabled={sourceImporting || submittingDraftId !== null} onClick={() => void importSource()} title="导入一张 PNG 或 JPEG 作为编辑源图">{sourceImporting ? <LoaderCircle size={14} className="spin"/> : <ImageIcon size={14}/>}<span>{active.params.sourceAssetId ? '更换源图' : '导入源图'}</span></button>
+              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前编辑源图"/><span>{active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? '单图编辑' : '源图'}</span></span>}
               <IconButton label={copyState === 'composer' ? '已复制提示词' : '复制提示词'} disabled={!active.prompt} onClick={() => void copyText(active.prompt, 'composer')}>{copyState === 'composer' ? <Check size={14}/> : <Copy size={14}/>}</IconButton>
             </div>
             <div className="composer-right">
               <span className="composer-status">{currentActiveTurn ? studio?.execution.summary : composerStatus}</span>
               <div className="composer-popup-anchor" data-composer-popup>
                 <button className="model-select" aria-expanded={popup === 'models'} title={selectedModelExecutable ? '当前模型可执行' : '当前模型不可执行，请在模型菜单中选择已就绪型号'} onClick={() => { if (popup === 'models') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('models'); }}><span className="model-mark"><Palette size={13}/></span><span>{selectedModelLabel}</span><ChevronDown size={12}/></button>
-                {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型"><div className="popover-heading"><strong>图片模型</strong><span>{modelReady ? '1 个可执行模型' : '当前没有可执行模型'}</span></div><button className={`single-model-option ${active.params.modelId === DEFAULT_MODEL_ID ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: DEFAULT_MODEL_ID }); setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); }}><span className="model-mark"><Palette size={14}/></span><span><strong>Z-Image Turbo</strong><small>{studio?.model.summary ?? '正在读取模型状态'}</small></span>{active.params.modelId === DEFAULT_MODEL_ID && <Check size={14}/>}</button><button className="popover-action" onClick={() => { setPopup(null); onModels(); }}>前往模型中心 <ArrowUp size={12}/></button></div>}
+                {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型"><div className="popover-heading"><strong>图片模型</strong><span>{availableModels.filter(model => model.ready).length} 个可执行模型</span></div>{availableModels.map(model => <button key={model.id} className={`single-model-option ${active.params.modelId === model.id && active.params.capabilityId !== 'image.edit.flux2-klein-4b.v1' ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: model.id, capabilityId: model.id === 'flux2-klein-4b-distilled' ? 'image.text-to-image.flux2-klein-4b.v1' : 'image.text-to-image.z-image-turbo.v1', sourceAssetId: null, aspect: model.id === 'flux2-klein-4b-distilled' ? '1:1' : active.params.aspect }); setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); }}><span className="model-mark"><Palette size={14}/></span><span><strong>{model.id === 'flux2-klein-4b-distilled' ? 'FLUX.2 Klein 4B' : 'Z-Image Turbo'}</strong><small>{model.summary}</small></span>{active.params.modelId === model.id && active.params.capabilityId !== 'image.edit.flux2-klein-4b.v1' && <Check size={14}/>}</button>)}{active.params.sourceAssetId && <button className={`single-model-option ${active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', aspect: '1:1' }); setPopup(null); }}><span className="model-mark"><ImageIcon size={14}/></span><span><strong>Klein 单图编辑</strong><small>使用当前源图和编辑指令</small></span>{active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' && <Check size={14}/>}</button>}<button className="popover-action" onClick={() => { setPopup(null); onModels(); }}>前往模型中心 <ArrowUp size={12}/></button></div>}
               </div>
               {sendButton}
             </div>

@@ -102,6 +102,9 @@
 .composer-chip,.model-select{height:28px;border-radius:14px;display:flex;align-items:center;gap:6px;font-size:10px;white-space:nowrap}
 .composer-chip{background:transparent;color:var(--muted);padding:0 7px}
 .composer-chip.is-open,.composer-chip:hover{background:var(--hover);color:var(--text)}
+.source-pill{height:28px;max-width:170px;border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;gap:6px;padding:3px 8px 3px 3px;font-size:9px;color:var(--muted);background:var(--surface)}
+.source-pill img{width:22px;height:22px;border-radius:50%;object-fit:cover;background:var(--hover)}
+.source-pill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .model-select{background:var(--chrome);color:var(--text);padding:0 8px 0 4px}
 .model-select:hover{background:var(--selected)}
 .model-mark{width:21px;height:21px;border-radius:50%;background:var(--surface);display:grid;place-items:center;color:var(--accent);flex:none}

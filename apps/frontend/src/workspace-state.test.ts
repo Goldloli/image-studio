@@ -73,15 +73,15 @@ describe('workspace draft isolation',()=>{
     state=reduce(state,{type:'select',id:1});
     expect(state.drafts[0].prompt).toBe(prompt);
     expect(state.drafts[0].collapsed).toBe(true);
-    expect(state.drafts[0].params).toEqual({modelId:'z-image-turbo-mflux-v1',aspect:'4:3',count:1,seed:'4294967295'});
+    expect(state.drafts[0].params).toEqual({modelId:'z-image-turbo-mflux-v1',aspect:'4:3',count:1,seed:'4294967295',capabilityId:'image.text-to-image.z-image-turbo.v1',sourceAssetId:null});
   });
   it('creates a new conversation with application defaults instead of copying the current draft',()=>{
     let state=reduce(initialWorkspace(),{type:'edit',value:'当前会话'});
     state=reduce(state,{type:'params',patch:{aspect:'3:4',count:1,seed:'73'}});
     state=reduce(state,{type:'new'});
     expect(state.drafts[1].prompt).toBe('');
-    expect(state.drafts[1].params).toEqual({modelId:'z-image-turbo-mflux-v1',aspect:'1:1',count:1,seed:''});
-    expect(state.drafts[0].params).toEqual({modelId:'z-image-turbo-mflux-v1',aspect:'3:4',count:1,seed:'73'});
+    expect(state.drafts[1].params).toEqual({modelId:'z-image-turbo-mflux-v1',aspect:'1:1',count:1,seed:'',capabilityId:'image.text-to-image.z-image-turbo.v1',sourceAssetId:null});
+    expect(state.drafts[0].params).toEqual({modelId:'z-image-turbo-mflux-v1',aspect:'3:4',count:1,seed:'73',capabilityId:'image.text-to-image.z-image-turbo.v1',sourceAssetId:null});
   });
   it('clears only the acknowledged source conversation after send',()=>{
     let state=reduce(initialWorkspace(),{type:'edit',value:'发送中的 A'});

@@ -1,4 +1,11 @@
-export type DraftParams = { modelId: string; aspect: string; count: number; seed: string };
+export type DraftParams = {
+  modelId: string;
+  aspect: string;
+  count: number;
+  seed: string;
+  capabilityId?: string;
+  sourceAssetId?: string | null;
+};
 export type Draft = {
   id: number; name: string; prompt: string; collapsed: boolean; params: DraftParams;
   promptSourceId?: string | null;
@@ -6,7 +13,7 @@ export type Draft = {
 };
 export type WorkspaceState = { drafts: Draft[]; activeId: number; sample: number | null; nextId: number };
 export const DEFAULT_MODEL_ID = 'z-image-turbo-mflux-v1';
-export const createDraft = (id: number, name = '新会话'): Draft => ({id, name, prompt: '', collapsed: false, promptSourceId:null, params: {modelId:DEFAULT_MODEL_ID, aspect:'1:1', count:1, seed:''}, past:[], future:[]});
+export const createDraft = (id: number, name = '新会话'): Draft => ({id, name, prompt: '', collapsed: false, promptSourceId:null, params: {modelId:DEFAULT_MODEL_ID, aspect:'1:1', count:1, seed:'', capabilityId:'image.text-to-image.z-image-turbo.v1', sourceAssetId:null}, past:[], future:[]});
 export const initialWorkspace = (): WorkspaceState => ({drafts:[createDraft(1)], activeId:1, sample:null, nextId:2});
 export const validSeed = (seed: string): boolean => seed === '' || (/^\d+$/.test(seed) && Number(seed) <= 4294967295);
 export const clampZoom = (zoom: number): number => Math.min(4, Math.max(.25, Math.round(zoom * 4) / 4));
