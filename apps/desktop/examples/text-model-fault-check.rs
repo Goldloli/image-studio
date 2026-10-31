@@ -44,7 +44,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "--model-id" => model_id = Some(args.next().ok_or("missing model ID")?),
             "--prompt" => prompt = args.next().ok_or("missing prompt")?,
             "--seed" => seed = args.next().ok_or("missing seed")?,
-            "--cancel-stage" => cancel_stage = Some(args.next().ok_or("missing cancel stage")?),
+            "--cancel-stage" => {
+                let stage = args.next().ok_or("missing cancel stage")?;
+                cancel_stage = (stage != "none").then_some(stage);
+            }
             "--kill-at-stage" => kill_stage = Some(args.next().ok_or("missing kill stage")?),
             "--retry-after-cancel" => retry_after_cancel = true,
             "--retry-job" => retry_job = Some(args.next().ok_or("missing job ID")?),
