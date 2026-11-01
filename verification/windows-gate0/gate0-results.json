@@ -1,0 +1,250 @@
+{
+  "schema_version": 1,
+  "kind": "windows-gate0-result",
+  "status": "passed",
+  "product_activation": "not_run",
+  "target": {
+    "os": "Windows 10 Pro 22H2 10.0.19045",
+    "gpu": {
+      "index": "0",
+      "name": "NVIDIA GeForce RTX 3080 Ti",
+      "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7",
+      "pci_bus_id": "00000000:01:00.0",
+      "compute_capability": "8.6",
+      "memory_total_mib": "12288",
+      "driver_version": "596.49"
+    },
+    "ram_total_bytes": 34066575360
+  },
+  "runtime": {
+    "python": "3.12.10",
+    "versions": {
+      "torch": "2.10.0+cu126",
+      "torch_cuda": "12.6",
+      "diffusers": "0.36.0",
+      "transformers": "4.57.3",
+      "accelerate": "1.12.0",
+      "bitsandbytes": "0.48.2",
+      "numpy": "2.5.4"
+    },
+    "bf16_matmul": true,
+    "nf4_linear_forward_backward": true
+  },
+  "model": {
+    "repository": "Tongyi-MAI/Z-Image-Turbo",
+    "revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+    "component_bytes": 32848305533,
+    "verified_files": 20,
+    "modelscope_verified_files": 20,
+    "modelscope_equivalence": true
+  },
+  "selected_candidate": {
+    "id": "a",
+    "configuration": {
+      "text_encoder": "bitsandbytes-nf4;bf16;double-quant",
+      "transformer": "bitsandbytes-nf4;bf16;double-quant",
+      "vae": "bfloat16;tiling",
+      "offload": "diffusers-model-cpu-offload",
+      "attention": "PyTorch native memory-efficient SDPA"
+    },
+    "scheduler": "FlowMatchEulerDiscreteScheduler",
+    "scheduler_config": {
+      "num_train_timesteps": 1000,
+      "shift": 3.0,
+      "use_dynamic_shifting": false,
+      "base_shift": 0.5,
+      "max_shift": 1.15,
+      "base_image_seq_len": 256,
+      "max_image_seq_len": 4096,
+      "invert_sigmas": false,
+      "shift_terminal": null,
+      "use_karras_sigmas": false,
+      "use_exponential_sigmas": false,
+      "use_beta_sigmas": false,
+      "time_shift_type": "exponential",
+      "stochastic_sampling": false,
+      "_use_default_values": [
+        "shift_terminal",
+        "use_exponential_sigmas",
+        "max_image_seq_len",
+        "invert_sigmas",
+        "max_shift",
+        "base_image_seq_len",
+        "base_shift",
+        "time_shift_type",
+        "use_karras_sigmas",
+        "use_beta_sigmas",
+        "stochastic_sampling"
+      ],
+      "_class_name": "FlowMatchEulerDiscreteScheduler",
+      "_diffusers_version": "0.36.0.dev0"
+    },
+    "reason": "Candidate A passed all budgets; candidate B was loaded but not needed for a full second sequence."
+  },
+  "runs": [
+    {
+      "name": "run1",
+      "prompt": "一只橘猫坐在洒满午后阳光的木窗前，背景是现代城市，写实摄影，细节清晰",
+      "seed": 20261101,
+      "templated_tokens": 32,
+      "load_seconds": 24.35900000000038,
+      "generation_seconds": 14.328000000001339,
+      "stage_seconds": {
+        "tokenizer": 0.125,
+        "transformer_load": 13.343000000000757,
+        "text_encoder_load": 10.796999999998661,
+        "vae_load": 0.04700000000048021,
+        "pipeline_assemble": 0.04700000000048021,
+        "encoding": 1.1559999999990396,
+        "decoding": 2.936999999999898,
+        "sampling": 11.39100000000144
+      },
+      "cuda_peak_reserved_bytes": 9521070080,
+      "private_commit_peak_bytes": 20345380864,
+      "available_ram_min_bytes": 9417654272,
+      "callback_total": 9,
+      "image": "candidate-a-run1-cat.png",
+      "image_bytes": 1289018,
+      "image_sha256": "4bc2c2752e166bb8d1888179a81961ae9b95040998f3bf44a26f6e3c2a9a9637",
+      "visual_checks": {
+        "mode": "RGB",
+        "size": [
+          1024,
+          1024
+        ],
+        "pixel_mean": 125.42069244384766,
+        "pixel_std": 71.65374755859375,
+        "channel_std": [
+          59.33389663696289,
+          69.85570526123047,
+          79.01690673828125
+        ],
+        "non_black": true,
+        "decodable_png": true
+      }
+    },
+    {
+      "name": "run2",
+      "prompt": "Editorial photograph of a transparent glass teapot on a dark walnut table, morning light, shallow depth of field, realistic reflections and steam",
+      "seed": 20261102,
+      "templated_tokens": 35,
+      "load_seconds": 24.375,
+      "generation_seconds": 14.45299999999952,
+      "stage_seconds": {
+        "tokenizer": 0.125,
+        "transformer_load": 13.343999999999141,
+        "text_encoder_load": 10.813000000000102,
+        "vae_load": 0.046000000000276486,
+        "pipeline_assemble": 0.04700000000048021,
+        "encoding": 1.1569999999992433,
+        "decoding": 2.938000000000102,
+        "sampling": 11.514999999999418
+      },
+      "cuda_peak_reserved_bytes": 9523167232,
+      "private_commit_peak_bytes": 25440862208,
+      "available_ram_min_bytes": 9839173632,
+      "callback_total": 9,
+      "image": "candidate-a-run2-teapot.png",
+      "image_bytes": 1143813,
+      "image_sha256": "79f67fd727c01b268f9509e9b4f2d06f5a46ad064e2ef9669b41afc72147c941",
+      "visual_checks": {
+        "mode": "RGB",
+        "size": [
+          1024,
+          1024
+        ],
+        "pixel_mean": 127.20604705810547,
+        "pixel_std": 65.150146484375,
+        "channel_std": [
+          61.422122955322266,
+          64.50187683105469,
+          67.45559692382812
+        ],
+        "non_black": true,
+        "decodable_png": true
+      }
+    },
+    {
+      "name": "run3",
+      "prompt": "俯拍照片：深蓝色陶瓷杯放在画面左下角，旁边一本翻开的书和一支黄铜钢笔，右上角有一小枝白色绣球花，柔和窗光，杂志静物摄影，留白清晰",
+      "seed": 20261103,
+      "templated_tokens": 57,
+      "load_seconds": 23.89099999999962,
+      "generation_seconds": 14.45299999999952,
+      "stage_seconds": {
+        "tokenizer": 0.125,
+        "transformer_load": 13.25,
+        "text_encoder_load": 10.42200000000048,
+        "vae_load": 0.06300000000010186,
+        "pipeline_assemble": 0.030999999999039574,
+        "encoding": 1.2190000000009604,
+        "decoding": 2.9840000000003783,
+        "sampling": 11.468999999999141
+      },
+      "cuda_peak_reserved_bytes": 9523167232,
+      "private_commit_peak_bytes": 20330901504,
+      "available_ram_min_bytes": 11418542080,
+      "callback_total": 9,
+      "image": "candidate-a-run3-desk.png",
+      "image_bytes": 1142642,
+      "image_sha256": "09b6992d827bbe002f1418a37a4339a2b032b699c5b85b745f993aeefee7c172",
+      "visual_checks": {
+        "mode": "RGB",
+        "size": [
+          1024,
+          1024
+        ],
+        "pixel_mean": 189.57025146484375,
+        "pixel_std": 71.46214294433594,
+        "channel_std": [
+          70.24308013916016,
+          70.415771484375,
+          73.47078704833984
+        ],
+        "non_black": true,
+        "decodable_png": true
+      }
+    }
+  ],
+  "budget": {
+    "cuda_peak_reserved_limit_bytes": 11274289152,
+    "cuda_peak_reserved_max_bytes": 9523167232,
+    "private_commit_limit_bytes": 25769803776,
+    "private_commit_peak_max_bytes": 25440862208,
+    "available_ram_minimum_bytes": 2147483648,
+    "available_ram_min_bytes": 9417654272,
+    "load_limit_seconds": 600,
+    "generation_limit_seconds": 900,
+    "passed": true
+  },
+  "quality_review": {
+    "status": "passed",
+    "review": [
+      "Run 1 matches the orange cat, sunlit wood window, urban background, and realistic photo intent.",
+      "Run 2 has coherent glass teapot structure, reflections, steam, and the requested shallow depth of field.",
+      "Run 3 follows the requested overhead composition and places mug, book, brass pen, and hydrangea in the requested regions with clear whitespace."
+    ]
+  },
+  "evidence": {
+    "runtime_probe": "runtime-probe.json",
+    "model_download": "model-download.json",
+    "modelscope_equivalence": "modelscope-equivalence.json",
+    "candidate_a_load": "candidate-a-load.json",
+    "candidate_b_load": "candidate-b-load.json",
+    "successful_runs": [
+      "candidate-a-run1-cat.png",
+      "candidate-a-run2-teapot.png",
+      "candidate-a-run3-desk.png"
+    ],
+    "retained_failures": [
+      "candidate-a-default-attention-failed.json"
+    ]
+  },
+  "measurement_limitations": [
+    "CUDA reserved is sampled at stage boundaries and callback boundaries.",
+    "Process private commit and system available RAM are sampled every 50 ms.",
+    "nvidia-smi did not expose per-process compute-apps memory under this WDDM configuration; global NVML memory and Torch allocator data are retained.",
+    "WDDM shared-memory peak is unavailable from the selected tooling.",
+    "Gate 0 passing does not certify the installer, native UI, cancellation, packaging, or Mac regression."
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "kind": "windows-gate0-generation",
+  "status": "load_only_passed",
+  "candidate": "b",
+  "is_full_model_inference": false,
+  "started_at_unix": 1793541972.575357,
+  "platform": {
+    "system": "Windows",
+    "release": "10",
+    "version": "10.0.19045",
+    "python": "3.12.10"
+  },
+  "versions": {
+    "torch": "2.10.0+cu126",
+    "torch_cuda": "12.6",
+    "diffusers": "0.36.0",
+    "transformers": "4.57.3",
+    "accelerate": "1.12.0",
+    "bitsandbytes": "0.48.2",
+    "numpy": "2.5.4"
+  },
+  "request": {
+    "prompt": "一只橘猫坐在洒满午后阳光的木窗前，背景是现代城市，写实摄影，细节清晰",
+    "prompt_utf8_bytes": 102,
+    "width": 1024,
+    "height": 1024,
+    "steps": 9,
+    "guidance": 0.0,
+    "seed": 20261101,
+    "max_sequence_length": 512,
+    "templated_tokens": 32
+  },
+  "configuration": {
+    "text_encoder": "bfloat16",
+    "transformer": "bitsandbytes-nf4;bf16;double-quant",
+    "vae": "float32;tiling",
+    "offload": "diffusers-model-cpu-offload",
+    "attention": "diffusers default"
+  },
+  "stage_seconds": {
+    "tokenizer": 0.13999999999941792,
+    "transformer_load": 13.64100000000144,
+    "text_encoder_load": 0.10899999999855936,
+    "vae_load": 0.18800000000010186,
+    "pipeline_assemble": 0.06199999999989814
+  },
+  "device": {
+    "selected": {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 3080 Ti",
+      "uuid": "78b715aa-ec51-31af-8813-eac9653458a7",
+      "major": 8,
+      "minor": 6,
+      "total_memory_bytes": 12884377600,
+      "external": {
+        "index": "0",
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7",
+        "pci_bus_id": "00000000:01:00.0",
+        "compute_capability": "8.6",
+        "memory_total_mib": "12288",
+        "memory_used_mib": "1181",
+        "utilization_gpu_percent": "14",
+        "driver_version": "596.49"
+      }
+    },
+    "cuda_candidates": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "uuid": "78b715aa-ec51-31af-8813-eac9653458a7",
+        "major": 8,
+        "minor": 6,
+        "total_memory_bytes": 12884377600
+      }
+    ],
+    "external_nvidia_devices": [
+      {
+        "index": "0",
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7",
+        "pci_bus_id": "00000000:01:00.0",
+        "compute_capability": "8.6",
+        "memory_total_mib": "12288",
+        "memory_used_mib": "1402",
+        "utilization_gpu_percent": "14",
+        "driver_version": "596.49"
+      }
+    ]
+  },
+  "load_seconds": 14.139999999999418,
+  "elapsed_seconds": 14.32799999999952,
+  "resources": {
+    "sample_interval_ms": 50,
+    "sample_count": 205,
+    "private_commit_peak_bytes": 18823708672,
+    "available_ram_min_bytes": 11879079936,
+    "start": {
+      "physical_total_bytes": 34066575360,
+      "physical_available_bytes": 22425042944,
+      "commit_limit_bytes": 39166849024,
+      "commit_available_bytes": 23506685952
+    },
+    "end": {
+      "physical_total_bytes": 34066575360,
+      "physical_available_bytes": 18315706368,
+      "commit_limit_bytes": 40249257984,
+      "commit_available_bytes": 9719554048
+    },
+    "stages": {
+      "startup": {
+        "private_commit_peak_bytes": 2066915328,
+        "available_ram_min_bytes": 22322937856,
+        "sampled_seconds": 0.1
+      },
+      "tokenizer": {
+        "private_commit_peak_bytes": 2131054592,
+        "available_ram_min_bytes": 22254759936,
+        "sampled_seconds": 0.1
+      },
+      "transformer_load": {
+        "private_commit_peak_bytes": 15758536704,
+        "available_ram_min_bytes": 11879079936,
+        "sampled_seconds": 9.750000000000004
+      },
+      "text_encoder_load": {
+        "private_commit_peak_bytes": 18354151424,
+        "available_ram_min_bytes": 18646736896,
+        "sampled_seconds": 0.1
+      },
+      "vae_load": {
+        "private_commit_peak_bytes": 18823708672,
+        "available_ram_min_bytes": 18147684352,
+        "sampled_seconds": 0.15000000000000002
+      },
+      "pipeline_assemble": {
+        "private_commit_peak_bytes": 15688736768,
+        "available_ram_min_bytes": 18315706368,
+        "sampled_seconds": 0.05
+      }
+    },
+    "limitations": [
+      "Private commit and available RAM are polling observations, not exact peaks.",
+      "The process tree has one Python process in this runner; sampler frequency is 20 Hz."
+    ]
+  }
+}

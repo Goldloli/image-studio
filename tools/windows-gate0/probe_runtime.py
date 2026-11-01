@@ -203,7 +203,9 @@ def main() -> int:
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + ".pending")
     temporary.write_text(
-        json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
     os.replace(temporary, output)
     print(json.dumps(report, ensure_ascii=False))

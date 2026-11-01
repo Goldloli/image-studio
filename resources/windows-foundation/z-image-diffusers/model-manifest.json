@@ -3,6 +3,13 @@
   "id": "z-image-turbo-diffusers-cuda-nf4-v1",
   "repository": "Tongyi-MAI/Z-Image-Turbo",
   "revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+  "download_source": {
+    "provider": "modelscope",
+    "repository": "Tongyi-MAI/Z-Image-Turbo",
+    "revision": "master",
+    "url_template": "https://www.modelscope.cn/models/Tongyi-MAI/Z-Image-Turbo/resolve/master/{path}",
+    "content_identity": "verified against every upstream manifest byte count and SHA-256"
+  },
   "component_bytes": 32848305533,
   "files": [
     {

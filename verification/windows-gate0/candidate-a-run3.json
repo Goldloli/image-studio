@@ -1,0 +1,256 @@
+{
+  "schema_version": 1,
+  "kind": "windows-gate0-generation",
+  "status": "passed",
+  "candidate": "a",
+  "is_full_model_inference": true,
+  "started_at_unix": 1793542515.975408,
+  "platform": {
+    "system": "Windows",
+    "release": "10",
+    "version": "10.0.19045",
+    "python": "3.12.10"
+  },
+  "versions": {
+    "torch": "2.10.0+cu126",
+    "torch_cuda": "12.6",
+    "diffusers": "0.36.0",
+    "transformers": "4.57.3",
+    "accelerate": "1.12.0",
+    "bitsandbytes": "0.48.2",
+    "numpy": "2.5.4"
+  },
+  "request": {
+    "prompt": "俯拍照片：深蓝色陶瓷杯放在画面左下角，旁边一本翻开的书和一支黄铜钢笔，右上角有一小枝白色绣球花，柔和窗光，杂志静物摄影，留白清晰",
+    "prompt_utf8_bytes": 192,
+    "width": 1024,
+    "height": 1024,
+    "steps": 9,
+    "guidance": 0.0,
+    "seed": 20261103,
+    "max_sequence_length": 512,
+    "templated_tokens": 57
+  },
+  "configuration": {
+    "text_encoder": "bitsandbytes-nf4;bf16;double-quant",
+    "transformer": "bitsandbytes-nf4;bf16;double-quant",
+    "vae": "bfloat16;tiling",
+    "offload": "diffusers-model-cpu-offload",
+    "attention": "PyTorch native memory-efficient SDPA"
+  },
+  "stage_seconds": {
+    "tokenizer": 0.125,
+    "transformer_load": 13.25,
+    "text_encoder_load": 10.42200000000048,
+    "vae_load": 0.06300000000010186,
+    "pipeline_assemble": 0.030999999999039574,
+    "encoding": 1.2190000000009604,
+    "decoding": 2.9840000000003783,
+    "sampling": 11.468999999999141
+  },
+  "device": {
+    "selected": {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 3080 Ti",
+      "uuid": "78b715aa-ec51-31af-8813-eac9653458a7",
+      "major": 8,
+      "minor": 6,
+      "total_memory_bytes": 12884377600,
+      "external": {
+        "index": "0",
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7",
+        "pci_bus_id": "00000000:01:00.0",
+        "compute_capability": "8.6",
+        "memory_total_mib": "12288",
+        "memory_used_mib": "710",
+        "utilization_gpu_percent": "11",
+        "driver_version": "596.49"
+      }
+    },
+    "cuda_candidates": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "uuid": "78b715aa-ec51-31af-8813-eac9653458a7",
+        "major": 8,
+        "minor": 6,
+        "total_memory_bytes": 12884377600
+      }
+    ],
+    "external_nvidia_devices": [
+      {
+        "index": "0",
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7",
+        "pci_bus_id": "00000000:01:00.0",
+        "compute_capability": "8.6",
+        "memory_total_mib": "12288",
+        "memory_used_mib": "931",
+        "utilization_gpu_percent": "18",
+        "driver_version": "596.49"
+      }
+    ]
+  },
+  "load_seconds": 23.89099999999962,
+  "output": {
+    "path": "target\\windows-gate0\\runs\\candidate-a-004\\candidate-a.png",
+    "bytes": 1142642,
+    "sha256": "09b6992d827bbe002f1418a37a4339a2b032b699c5b85b745f993aeefee7c172",
+    "checks": {
+      "mode": "RGB",
+      "size": [
+        1024,
+        1024
+      ],
+      "pixel_mean": 189.57025146484375,
+      "pixel_std": 71.46214294433594,
+      "channel_std": [
+        70.24308013916016,
+        70.415771484375,
+        73.47078704833984
+      ],
+      "non_black": true,
+      "decodable_png": true
+    }
+  },
+  "generation_seconds": 14.45299999999952,
+  "callback_steps": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "cuda_peak_reserved_bytes": {
+    "tokenizer": 0,
+    "transformer_load": 3323985920,
+    "text_encoder_load": 3244294144,
+    "vae_load": 3244294144,
+    "pipeline_assemble": 2097152,
+    "encoding": 5819596800,
+    "decoding": 9523167232,
+    "sampling": 9523167232
+  },
+  "scheduler": {
+    "class": "FlowMatchEulerDiscreteScheduler",
+    "config": {
+      "num_train_timesteps": 1000,
+      "shift": 3.0,
+      "use_dynamic_shifting": false,
+      "base_shift": 0.5,
+      "max_shift": 1.15,
+      "base_image_seq_len": 256,
+      "max_image_seq_len": 4096,
+      "invert_sigmas": false,
+      "shift_terminal": null,
+      "use_karras_sigmas": false,
+      "use_exponential_sigmas": false,
+      "use_beta_sigmas": false,
+      "time_shift_type": "exponential",
+      "stochastic_sampling": false,
+      "_use_default_values": [
+        "use_karras_sigmas",
+        "max_shift",
+        "invert_sigmas",
+        "base_shift",
+        "max_image_seq_len",
+        "shift_terminal",
+        "stochastic_sampling",
+        "use_exponential_sigmas",
+        "use_beta_sigmas",
+        "base_image_seq_len",
+        "time_shift_type"
+      ],
+      "_class_name": "FlowMatchEulerDiscreteScheduler",
+      "_diffusers_version": "0.36.0.dev0"
+    },
+    "callback_total": 9
+  },
+  "budget": {
+    "cuda_peak_reserved_bytes": 9523167232,
+    "cuda_peak_reserved_limit_bytes": 11274289152,
+    "private_commit_peak_bytes": 20330901504,
+    "private_commit_limit_bytes": 25769803776,
+    "available_ram_min_bytes": 11418542080,
+    "available_ram_minimum_bytes": 2147483648,
+    "passed": true
+  },
+  "elapsed_seconds": 39.89099999999962,
+  "resources": {
+    "sample_interval_ms": 50,
+    "sample_count": 548,
+    "private_commit_peak_bytes": 20330901504,
+    "available_ram_min_bytes": 11418542080,
+    "start": {
+      "physical_total_bytes": 34066575360,
+      "physical_available_bytes": 21783916544,
+      "commit_limit_bytes": 39166849024,
+      "commit_available_bytes": 23371763712
+    },
+    "end": {
+      "physical_total_bytes": 34066575360,
+      "physical_available_bytes": 14758371328,
+      "commit_limit_bytes": 39166849024,
+      "commit_available_bytes": 9296224256
+    },
+    "gpu": {
+      "sample_interval_ms": 1000,
+      "sample_count": 39,
+      "global_memory_used_peak_mib": 10071,
+      "process_tree_compute_memory_peak_mib": 0,
+      "measurement_source": "nvidia-smi NVML counters",
+      "wddm_shared_memory_peak": "unavailable from nvidia-smi"
+    },
+    "stages": {
+      "startup": {
+        "private_commit_peak_bytes": 1747365888,
+        "available_ram_min_bytes": 21785276416,
+        "sampled_seconds": 0.05
+      },
+      "tokenizer": {
+        "private_commit_peak_bytes": 2131361792,
+        "available_ram_min_bytes": 21633699840,
+        "sampled_seconds": 0.1
+      },
+      "transformer_load": {
+        "private_commit_peak_bytes": 15759396864,
+        "available_ram_min_bytes": 11418542080,
+        "sampled_seconds": 8.599999999999987
+      },
+      "text_encoder_load": {
+        "private_commit_peak_bytes": 14364876800,
+        "available_ram_min_bytes": 14319861760,
+        "sampled_seconds": 7.249999999999982
+      },
+      "vae_load": {
+        "private_commit_peak_bytes": 10190315520,
+        "available_ram_min_bytes": 15687196672,
+        "sampled_seconds": 0.05
+      },
+      "encoding": {
+        "private_commit_peak_bytes": 12922814464,
+        "available_ram_min_bytes": 15673511936,
+        "sampled_seconds": 0.8500000000000002
+      },
+      "sampling": {
+        "private_commit_peak_bytes": 16336596992,
+        "available_ram_min_bytes": 15135543296,
+        "sampled_seconds": 8.249999999999982
+      },
+      "decoding": {
+        "private_commit_peak_bytes": 20330901504,
+        "available_ram_min_bytes": 14750613504,
+        "sampled_seconds": 2.25
+      }
+    },
+    "limitations": [
+      "Private commit and available RAM are polling observations, not exact peaks.",
+      "The process tree has one Python process in this runner; sampler frequency is 20 Hz."
+    ]
+  }
+}
