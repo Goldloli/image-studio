@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "kind": "windows-gate0-runtime-probe",
+  "status": "passed",
+  "is_full_model_inference": false,
+  "is_installer_activation": false,
+  "elapsed_seconds": 6.532000000000153,
+  "platform": {
+    "system": "Windows",
+    "release": "10",
+    "version": "10.0.19045",
+    "machine": "AMD64",
+    "python_executable": "target/windows-gate0/runtime/python.exe",
+    "python_version": "3.12.10"
+  },
+  "versions": {
+    "torch": "2.10.0+cu126",
+    "torch_cuda": "12.6",
+    "diffusers": "0.36.0",
+    "transformers": "4.57.3",
+    "accelerate": "1.12.0",
+    "bitsandbytes": "0.48.2",
+    "numpy": "2.5.4"
+  },
+  "imports": {
+    "ZImagePipeline": "ZImagePipeline",
+    "FlowMatchEulerDiscreteScheduler": "FlowMatchEulerDiscreteScheduler",
+    "Qwen3Model": "Qwen3Model",
+    "Qwen2Tokenizer": "Qwen2Tokenizer"
+  },
+  "cuda": {
+    "selected_device_index": 0,
+    "selected_device": {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 3080 Ti",
+      "major": 8,
+      "minor": 6,
+      "total_memory_bytes": 12884377600,
+      "uuid": "78b715aa-ec51-31af-8813-eac9653458a7"
+    },
+    "external_nvidia_devices": [
+      {
+        "index": "0",
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7",
+        "pci_bus_id": "00000000:01:00.0",
+        "compute_capability": "8.6",
+        "memory_total_mib": "12288",
+        "driver_version": "596.49"
+      }
+    ],
+    "external_uuid_match": {
+      "index": "0",
+      "name": "NVIDIA GeForce RTX 3080 Ti",
+      "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7",
+      "pci_bus_id": "00000000:01:00.0",
+      "compute_capability": "8.6",
+      "memory_total_mib": "12288",
+      "driver_version": "596.49"
+    },
+    "bf16_matmul": true,
+    "nf4_linear_forward_backward": true,
+    "peak_reserved_bytes": 23068672,
+    "allocated_after_probe_bytes": 9600000
+  },
+  "host": {
+    "cpu_count_logical": 24,
+    "ram_total_bytes": 34066575360,
+    "ram_available_bytes": 19743027200,
+    "process_rss_bytes": 1220775936
+  },
+  "model_manifest": "resources/windows-foundation/z-image-diffusers/model-manifest.json",
+  "limitations": [
+    "This probe imports packages and executes BF16/NF4 small operators only.",
+    "It does not prove model loading, pipeline compatibility, memory budgets, quality, or inference latency."
+  ]
+}

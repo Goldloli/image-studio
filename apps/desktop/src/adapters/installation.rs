@@ -2887,6 +2887,109 @@ mod tests {
         }
     }
 
+    #[test]
+    fn windows_gate_zero_runtime_manifest_is_fixed_and_binary_only() {
+        const RUNTIME_MANIFEST: &str = include_str!(
+            "../../../../resources/windows-foundation/python-runtime/runtime-manifest.json"
+        );
+        const RUNTIME_LOCK: &str = include_str!(
+            "../../../../resources/windows-foundation/python-runtime/requirements.lock"
+        );
+        let manifest: serde_json::Value = serde_json::from_str(RUNTIME_MANIFEST).unwrap();
+        assert_eq!(manifest["schema_version"], 1);
+        assert_eq!(
+            manifest["id"],
+            "windows-gate0-python31210-torch2100-cu126-bnb0482-v1"
+        );
+        assert_eq!(manifest["platform"], "windows-amd64");
+        assert_eq!(manifest["python"], "3.12.10");
+        assert_eq!(manifest["torch"], "2.10.0+cu126");
+        assert_eq!(manifest["cuda"], "12.6");
+        assert_eq!(manifest["artifact_count"], 38);
+        assert_eq!(manifest["total_bytes"], 2_713_854_538_u64);
+        let lock = &manifest["requirements_lock"];
+        assert_eq!(lock["bytes"], RUNTIME_LOCK.len() as u64);
+        assert_eq!(
+            lock["sha256"],
+            format!("{:x}", Sha256::digest(RUNTIME_LOCK.as_bytes()))
+        );
+
+        let interpreter = &manifest["interpreter"];
+        assert_eq!(interpreter["version"], "3.12.10");
+        assert_eq!(
+            interpreter["url"],
+            "https://www.python.org/ftp/python/3.12.10/python-3.12.10-embed-amd64.zip"
+        );
+        assert!(interpreter["path"].as_str().unwrap().ends_with(".zip"));
+
+        let wheels = manifest["wheels"].as_array().unwrap();
+        assert_eq!(wheels.len(), 37);
+        let mut paths = std::collections::BTreeSet::new();
+        for wheel in wheels {
+            let path = wheel["path"].as_str().unwrap();
+            assert!(path.ends_with(".whl"), "{path}");
+            assert!(!path.contains('/') && !path.contains('\\'), "{path}");
+            assert!(paths.insert(path), "duplicate wheel path: {path}");
+            assert!(wheel["bytes"].as_u64().unwrap() > 0);
+            assert_eq!(wheel["sha256"].as_str().unwrap().len(), 64);
+            let url = wheel["url"].as_str().unwrap();
+            assert!(url.starts_with("https://"), "{path}");
+            if wheel["package"] != "torch" {
+                assert!(url.starts_with("https://files.pythonhosted.org/"), "{path}");
+            }
+        }
+        for (package, version, path_fragment) in [
+            ("torch", "2.10.0+cu126", "cp312-cp312-win_amd64"),
+            ("bitsandbytes", "0.48.2", "win_amd64"),
+            ("diffusers", "0.36.0", "py3-none-any"),
+            ("transformers", "4.57.3", "py3-none-any"),
+            ("accelerate", "1.12.0", "py3-none-any"),
+        ] {
+            let wheel = wheels
+                .iter()
+                .find(|wheel| wheel["package"] == package)
+                .unwrap();
+            assert_eq!(wheel["version"], version);
+            assert!(wheel["path"].as_str().unwrap().contains(path_fragment));
+        }
+        assert_eq!(manifest["source_policy"]["binary_only"], true);
+        assert_eq!(manifest["source_policy"]["system_python_modified"], false);
+    }
+
+    #[test]
+    fn windows_gate_zero_runtime_probe_remains_explicitly_partial() {
+        const PROBE: &str =
+            include_str!("../../../../verification/windows-gate0/runtime-probe.json");
+        let probe: serde_json::Value = serde_json::from_str(PROBE).unwrap();
+        assert_eq!(probe["status"], "passed");
+        assert_eq!(probe["is_full_model_inference"], false);
+        assert_eq!(probe["is_installer_activation"], false);
+        assert_eq!(probe["versions"]["torch"], "2.10.0+cu126");
+        assert_eq!(probe["versions"]["bitsandbytes"], "0.48.2");
+        assert_eq!(
+            probe["cuda"]["selected_device"]["name"],
+            "NVIDIA GeForce RTX 3080 Ti"
+        );
+        assert_eq!(probe["cuda"]["selected_device"]["major"], 8);
+        assert_eq!(probe["cuda"]["selected_device"]["minor"], 6);
+        assert_eq!(
+            probe["cuda"]["external_uuid_match"]["pci_bus_id"],
+            "00000000:01:00.0"
+        );
+        assert_eq!(
+            probe["cuda"]["external_uuid_match"]["driver_version"],
+            "596.49"
+        );
+        assert_eq!(probe["cuda"]["bf16_matmul"], true);
+        assert_eq!(probe["cuda"]["nf4_linear_forward_backward"], true);
+        assert!(
+            probe["platform"]["python_executable"]
+                .as_str()
+                .unwrap()
+                .starts_with("target/windows-gate0/")
+        );
+    }
+
     #[cfg(windows)]
     #[test]
     fn windows_probe_cleanup_reaps_pipe_holding_descendants() {
