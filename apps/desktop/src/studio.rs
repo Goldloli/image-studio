@@ -122,6 +122,39 @@ fn default_capability_id() -> String {
     studio_core::generation::Z_IMAGE_CAPABILITY.into()
 }
 
+fn capability_for_model(model_id: &str) -> &'static str {
+    match model_id {
+        WINDOWS_ZIMAGE_INSTALL_ID => Z_IMAGE_WINDOWS_CAPABILITY,
+        INSTALL_ID => studio_core::generation::Z_IMAGE_CAPABILITY,
+        KLEIN_INSTALL_ID => studio_core::recipes::KLEIN_TEXT_CAPABILITY,
+        BIREFNET_INSTALL_ID => studio_core::recipes::BIREFNET_CAPABILITY,
+        REALESRGAN_INSTALL_ID => studio_core::recipes::REALESRGAN_CAPABILITY,
+        QWEN_IMAGE_21_INSTALL_ID => QWEN_IMAGE_21_CAPABILITY,
+        QWEN_IMAGE_21_TURBO_INSTALL_ID => QWEN_IMAGE_21_TURBO_CAPABILITY,
+        MOSS_IMAGE_SFT_INSTALL_ID => MOSS_IMAGE_SFT_CAPABILITY,
+        _ => {
+            #[cfg(windows)]
+            return Z_IMAGE_WINDOWS_CAPABILITY;
+            #[cfg(not(windows))]
+            studio_core::generation::Z_IMAGE_CAPABILITY
+        }
+    }
+}
+
+fn model_accepts_aspect(model_id: &str, aspect: &str) -> bool {
+    match model_id {
+        INSTALL_ID => matches!(aspect, "1:1" | "4:3" | "3:4"),
+        WINDOWS_ZIMAGE_INSTALL_ID
+        | KLEIN_INSTALL_ID
+        | BIREFNET_INSTALL_ID
+        | REALESRGAN_INSTALL_ID
+        | QWEN_IMAGE_21_INSTALL_ID
+        | QWEN_IMAGE_21_TURBO_INSTALL_ID
+        | MOSS_IMAGE_SFT_INSTALL_ID => aspect == "1:1",
+        _ => false,
+    }
+}
+
 impl Default for DraftParams {
     fn default() -> Self {
         Self {
@@ -647,10 +680,8 @@ impl StudioService {
             source_asset_id: None,
             capability_drafts: Default::default(),
         };
-        if !catalog.supports(&params.model_id, "text_to_image") {
-            warnings.push("已保存的默认模型不在当前目录中，已回退为 Z-Image Turbo".into());
-            params.model_id = DEFAULT_MODEL_ID.into();
-        }
+        let explicit_model = input.and_then(|value| value.model_id.as_deref());
+        let explicit_aspect = input.and_then(|value| value.aspect.as_deref());
         if let Some(input) = input {
             if let Some(model_id) = &input.model_id {
                 if !catalog.supports(model_id, "text_to_image") {
@@ -677,37 +708,23 @@ impl StudioService {
                 params.seed = seed.clone();
             }
         }
-        #[cfg(windows)]
-        if params.aspect != "1:1" {
-            return Err("当前 Windows Z-Image 仅支持 1:1；当前输入和默认画幅未被改写".into());
+        if !catalog.supports(&params.model_id, "text_to_image") && explicit_model.is_none() {
+            warnings.push(format!(
+                "已保存的默认模型 {} 在当前平台不可执行；原选择已保留，请明确选择可用模型",
+                params.model_id
+            ));
         }
-        if matches!(
-            params.model_id.as_str(),
-            QWEN_IMAGE_21_MODEL | QWEN_IMAGE_21_TURBO_MODEL | MOSS_IMAGE_SFT_MODEL
-        ) {
-            if params.aspect != "1:1" {
-                return Err("所选模型仅支持 1:1；当前输入和默认画幅未被改写".into());
+        if !model_accepts_aspect(&params.model_id, &params.aspect) {
+            if explicit_aspect.is_some() {
+                return Err("所选模型不支持该画幅；当前输入和默认画幅未被改写".into());
             }
-            params.capability_id = match params.model_id.as_str() {
-                QWEN_IMAGE_21_MODEL => QWEN_IMAGE_21_CAPABILITY,
-                QWEN_IMAGE_21_TURBO_MODEL => QWEN_IMAGE_21_TURBO_CAPABILITY,
-                MOSS_IMAGE_SFT_MODEL => MOSS_IMAGE_SFT_CAPABILITY,
-                _ => unreachable!(),
-            }
-            .into();
-            params.source_asset_id = None;
-        } else if params.model_id == KLEIN_INSTALL_ID {
-            params.aspect = "1:1".into();
-            params.capability_id = studio_core::recipes::KLEIN_TEXT_CAPABILITY.into();
-            params.source_asset_id = None;
-        } else if params.model_id == WINDOWS_ZIMAGE_INSTALL_ID {
-            params.aspect = "1:1".into();
-            params.capability_id = Z_IMAGE_WINDOWS_CAPABILITY.into();
-            params.source_asset_id = None;
-        } else {
-            params.capability_id = studio_core::generation::Z_IMAGE_CAPABILITY.into();
-            params.source_asset_id = None;
+            warnings.push(format!(
+                "已保存的默认画幅 {} 不适用于 {}；原画幅已保留，请明确修改",
+                params.aspect, params.model_id
+            ));
         }
+        params.capability_id = capability_for_model(&params.model_id).into();
+        params.source_asset_id = None;
         Ok((params, warnings))
     }
     pub fn snapshot(&self) -> Result<Value, String> {
@@ -2103,7 +2120,7 @@ mod tests {
     }
 
     #[test]
-    fn removed_saved_model_falls_back_only_that_field_and_reports_it() {
+    fn removed_saved_model_is_preserved_and_reported() {
         let root = tempfile::tempdir().unwrap();
         let paths = AppPaths::resolve(Some(root.path())).unwrap();
         std::fs::write(
@@ -2127,45 +2144,63 @@ mod tests {
         )
         .unwrap();
         let service = StudioService::new(paths, root.path().join("not-installed-supervisor"));
-        #[cfg(windows)]
-        {
-            let error = service.conversation_create(None).unwrap_err();
-            assert!(error.contains("仅支持 1:1"), "{error}");
-            let created = service
-                .conversation_create(Some(ConversationCreateInput {
-                    model_id: Some(DEFAULT_MODEL_ID.into()),
-                    aspect: Some("1:1".into()),
-                    count: None,
-                    seed: None,
-                    initial_title: None,
-                    initial_prompt: None,
-                    prompt_source_id: None,
-                }))
-                .unwrap();
-            assert_eq!(created["draft"]["params"]["modelId"], DEFAULT_MODEL_ID);
-            assert_eq!(created["draft"]["params"]["aspect"], "1:1");
-            assert_eq!(created["draft"]["params"]["seed"], "9");
-            assert!(
-                created["defaultsWarnings"]
-                    .as_array()
-                    .is_some_and(|warnings| !warnings.is_empty())
-            );
-        }
-        #[cfg(not(windows))]
-        {
-            let created = service.conversation_create(None).unwrap();
-            assert_eq!(
-                created["draft"]["params"]["modelId"],
-                "z-image-turbo-mflux-v1"
-            );
-            assert_eq!(created["draft"]["params"]["aspect"], "4:3");
-            assert_eq!(created["draft"]["params"]["seed"], "9");
-            assert!(
-                created["defaultsWarnings"]
-                    .as_array()
-                    .is_some_and(|warnings| !warnings.is_empty())
-            );
-        }
+        let created = service.conversation_create(None).unwrap();
+        assert_eq!(created["draft"]["params"]["modelId"], "removed-model");
+        assert_eq!(created["draft"]["params"]["aspect"], "4:3");
+        assert_eq!(created["draft"]["params"]["seed"], "9");
+        assert!(
+            created["defaultsWarnings"]
+                .as_array()
+                .is_some_and(|warnings| !warnings.is_empty())
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn mac_defaults_are_preserved_until_the_user_selects_windows() {
+        let root = tempfile::tempdir().unwrap();
+        let paths = AppPaths::resolve(Some(root.path())).unwrap();
+        std::fs::write(
+            paths.data.join("application-preferences.json"),
+            r#"{
+              "schemaVersion": 1,
+              "appearance": {
+                "theme": "light",
+                "fontScale": "default",
+                "density": "comfortable",
+                "reducedMotion": false,
+                "sidebarCollapsed": false
+              },
+              "creationDefaults": {
+                "modelId": "z-image-turbo-mflux-v1",
+                "aspect": "4:3",
+                "count": 1,
+                "seed": "17"
+              }
+            }"#,
+        )
+        .unwrap();
+        let service = StudioService::new(paths, root.path().join("not-installed-supervisor"));
+        let created = service.conversation_create(None).unwrap();
+        assert_eq!(
+            created["draft"]["params"]["modelId"],
+            "z-image-turbo-mflux-v1"
+        );
+        assert_eq!(created["draft"]["params"]["aspect"], "4:3");
+        assert_eq!(
+            created["draft"]["params"]["capabilityId"],
+            studio_core::generation::Z_IMAGE_CAPABILITY
+        );
+        assert!(
+            created["defaultsWarnings"]
+                .as_array()
+                .is_some_and(|warnings| !warnings.is_empty())
+        );
+        assert!(
+            service
+                .validate_registered_draft_params(&created["draft"]["params"])
+                .is_err()
+        );
     }
 
     #[test]
