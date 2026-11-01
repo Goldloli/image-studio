@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "kind": "windows-zimage-real-worker-protocol",
+  "status": "passed",
+  "supervisor": true,
+  "protocol_version": 2,
+  "identity": {
+    "build_id": "studio-zimage-cuda-worker-0.1.0",
+    "runtime_lock_id": "windows-python31210-torch2100-cu126-bnb0482-v1",
+    "model_snapshot_id": "z-image-turbo-diffusers-cuda-nf4-v1"
+  },
+  "elapsed_seconds": 57.57800000000134,
+  "request": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "seed": 20261101,
+    "model_path": "z-image-turbo-diffusers-cuda-nf4-v1",
+    "output_dir": "verification/windows-gate0/product-install-protocol"
+  },
+  "progress": [
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "encoding",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 0,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 1,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 2,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 3,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 4,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 5,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 6,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 7,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 8,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "decoding",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "writing",
+      "completed": null,
+      "total": null
+    }
+  ],
+  "candidate": {
+    "role": "primary",
+    "data_type": "image_rgb",
+    "relative_path": "primary.png",
+    "width": 1024,
+    "height": 1024,
+    "size_bytes": 1819147,
+    "sha256": "00bbb32f5b3798b99fa1500c63aec9bfa133fe36cc171d1bd637e62de6b26e95"
+  },
+  "worker_stderr": "",
+  "lifecycle": {
+    "schema_version": 1,
+    "supervisor_pid": 31892,
+    "compute_pgid": 30784
+  },
+  "worker_log_bytes": 1557
+}
