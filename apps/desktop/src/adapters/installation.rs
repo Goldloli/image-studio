@@ -91,6 +91,7 @@ const RECIPES_V3_WORKER_WHEEL: &[u8] = include_bytes!(
 const RESERVE: u64 = 4 * 1024 * 1024 * 1024;
 const SEGMENTED_DOWNLOAD_THRESHOLD: u64 = 2 * 1024 * 1024 * 1024;
 const DOWNLOAD_SEGMENTS: usize = 8;
+const SEGMENT_ATTEMPTS: usize = 5;
 
 #[derive(Clone, Copy)]
 struct InstallProfile {
@@ -113,6 +114,7 @@ struct InstallProfile {
 
 struct SegmentDownload<'a> {
     url: &'a str,
+    artifact_path: &'a str,
     path: &'a Path,
     metadata_path: &'a Path,
     sha256: &'a str,
@@ -1889,20 +1891,44 @@ impl Installation {
         for (index, (start, end)) in ranges.iter().copied().enumerate() {
             let path = segment_paths[index].clone();
             let metadata_path = segment_meta_paths[index].clone();
-            self.download_segment(
-                &client,
-                SegmentDownload {
-                    url: &a.url,
-                    path: &path,
-                    metadata_path: &metadata_path,
-                    sha256: &a.sha256,
-                    etag: &etag,
-                    start,
-                    end,
-                    total: a.bytes,
-                },
-            )
-            .await?;
+            let mut last_error = None;
+            for attempt in 1..=SEGMENT_ATTEMPTS {
+                match self
+                    .download_segment(
+                        &client,
+                        SegmentDownload {
+                            url: &a.url,
+                            artifact_path: &a.path,
+                            path: &path,
+                            metadata_path: &metadata_path,
+                            sha256: &a.sha256,
+                            etag: &etag,
+                            start,
+                            end,
+                            total: a.bytes,
+                        },
+                    )
+                    .await
+                {
+                    Ok(()) => {
+                        last_error = None;
+                        break;
+                    }
+                    Err(error) => {
+                        self.check_cancel()?;
+                        last_error = Some(error);
+                        if attempt < SEGMENT_ATTEMPTS {
+                            tokio::time::sleep(Duration::from_secs(attempt as u64)).await;
+                        }
+                    }
+                }
+            }
+            if let Some(error) = last_error {
+                return Err(format!(
+                    "{}：分段下载在 {SEGMENT_ATTEMPTS} 次尝试后失败：{error}",
+                    a.path
+                ));
+            }
         }
         for ((start, end), path) in ranges.iter().zip(&segment_paths) {
             let length = end - start;
@@ -1943,6 +1969,7 @@ impl Installation {
     ) -> Result<(), String> {
         let SegmentDownload {
             url,
+            artifact_path,
             path,
             metadata_path,
             sha256,
@@ -2016,23 +2043,23 @@ impl Installation {
                     .send(),
             )
             .await?;
-        if response.status() != reqwest::StatusCode::PARTIAL_CONTENT
-            || response
-                .headers()
-                .get(reqwest::header::ETAG)
-                .and_then(|value| value.to_str().ok())
-                != Some(etag)
-            || !valid_range(
-                response
-                    .headers()
-                    .get(reqwest::header::CONTENT_RANGE)
-                    .and_then(|value| value.to_str().ok()),
-                request_start,
-                total,
-                end - request_start,
-            )
+        let status = response.status();
+        let received_etag = response
+            .headers()
+            .get(reqwest::header::ETAG)
+            .and_then(|value| value.to_str().ok());
+        let content_range = response
+            .headers()
+            .get(reqwest::header::CONTENT_RANGE)
+            .and_then(|value| value.to_str().ok());
+        if status != reqwest::StatusCode::PARTIAL_CONTENT
+            || received_etag != Some(etag)
+            || !valid_range(content_range, request_start, total, end - request_start)
         {
-            return Err("分段 Range 响应身份或范围不符。".into());
+            return Err(format!(
+                "{artifact_path}：分段 Range 响应身份或范围不符（HTTP {status}，ETag {received_etag:?}，期望 {etag:?}，Content-Range {content_range:?}，请求 bytes={request_start}-{}）。",
+                end - 1
+            ));
         }
         if let Some(length) = response.content_length()
             && length != end - request_start
@@ -2048,7 +2075,11 @@ impl Installation {
         let mut received = offset;
         loop {
             self.check_cancel()?;
-            let Some(chunk) = self.cancellable(response.chunk()).await? else {
+            let Some(chunk) = self
+                .cancellable(response.chunk())
+                .await
+                .map_err(|error| format!("{artifact_path}：分段读取中断：{error}"))?
+            else {
                 break;
             };
             received += chunk.len() as u64;
@@ -3048,6 +3079,158 @@ mod tests {
         .unwrap();
     }
 
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "explicit acceptance: downloads the complete Windows product closure from an empty cache"]
+    fn actual_windows_product_installs_from_an_empty_cache() {
+        let root = tempfile::tempdir().unwrap();
+        let paths = AppPaths::resolve(Some(root.path())).unwrap();
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .canonicalize()
+            .unwrap();
+        let manager = Installations::new(paths.clone()).unwrap();
+        let installer = manager.for_id(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        let cache_initial_entries = fs::read_dir(installer.cache())
+            .map(|entries| entries.count())
+            .unwrap_or(0);
+        assert_eq!(
+            cache_initial_entries, 0,
+            "acceptance requires an empty cache"
+        );
+
+        let model_downloads = installer.inner.model.downloads();
+        assert_eq!(model_downloads.len(), 20);
+        assert!(model_downloads.iter().all(|artifact| {
+            reqwest::Url::parse(&artifact.url)
+                .is_ok_and(|url| url.host_str() == Some("www.modelscope.cn"))
+        }));
+        let runtime_downloads = installer.inner.runtime.downloads();
+        let model_download_bytes = model_downloads
+            .iter()
+            .map(|artifact| artifact.bytes)
+            .sum::<u64>();
+        let runtime_download_bytes = runtime_downloads
+            .iter()
+            .map(|artifact| artifact.bytes)
+            .sum::<u64>();
+        let mut runtime_hosts = std::collections::BTreeSet::new();
+        for artifact in runtime_downloads
+            .iter()
+            .filter(|artifact| artifact.url.starts_with("https://"))
+        {
+            runtime_hosts.insert(
+                reqwest::Url::parse(&artifact.url)
+                    .unwrap()
+                    .host_str()
+                    .unwrap()
+                    .to_string(),
+            );
+        }
+
+        let started_at_unix = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let started = std::time::Instant::now();
+        let deadline = started + std::time::Duration::from_secs(3 * 60 * 60);
+        let mut next_progress = started + std::time::Duration::from_secs(15);
+        let mut phase_history = vec![
+            manager
+                .snapshot(WINDOWS_ZIMAGE_INSTALL_ID)
+                .unwrap()
+                .phase
+                .clone(),
+        ];
+        let mut received_peak = 0;
+        let mut timed_out = false;
+        manager.start(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        loop {
+            let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+            received_peak = received_peak.max(snapshot.received_bytes);
+            if phase_history.last() != Some(&snapshot.phase) {
+                phase_history.push(snapshot.phase.clone());
+            }
+            if matches!(
+                snapshot.phase.as_str(),
+                "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
+            ) {
+                if std::time::Instant::now() >= deadline {
+                    timed_out = true;
+                    manager.cancel(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+                } else {
+                    if std::time::Instant::now() >= next_progress {
+                        eprintln!(
+                            "Windows empty-cache install: phase={} received={}/{} bytes elapsed={}s",
+                            snapshot.phase,
+                            snapshot.received_bytes,
+                            snapshot.total_bytes,
+                            started.elapsed().as_secs()
+                        );
+                        next_progress =
+                            std::time::Instant::now() + std::time::Duration::from_secs(15);
+                    }
+                    std::thread::sleep(std::time::Duration::from_secs(1));
+                    continue;
+                }
+            }
+            break;
+        }
+
+        let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        let passed = !timed_out && snapshot.phase == "ready";
+        let ready = passed.then(|| installer.ready_paths().unwrap());
+        let record = passed.then(|| {
+            serde_json::from_slice::<ReadyRecord>(
+                &fs::read(paths.data.join(installer.inner.profile.ready_relative)).unwrap(),
+            )
+            .unwrap()
+        });
+        atomic_json(
+            &repo.join("verification/windows-gate0/product-empty-cache-install.json"),
+            &serde_json::json!({
+                "schema_version": 1,
+                "kind": "windows-product-empty-cache-install",
+                "status": if passed { "passed" } else { "failed" },
+                "started_at_unix": started_at_unix,
+                "elapsed_seconds": started.elapsed().as_secs_f64(),
+                "timed_out": timed_out,
+                "network_denied": false,
+                "validation_cache_seeded": false,
+                "cache_initial_entries": cache_initial_entries,
+                "model_download_source": "modelscope",
+                "model_upstream_source": "huggingface",
+                "model_files": model_downloads.len(),
+                "model_download_bytes": model_download_bytes,
+                "model_component_bytes": installer.inner.model.component_bytes,
+                "runtime_artifacts": installer.inner.runtime.downloads().len(),
+                "runtime_download_bytes": runtime_download_bytes,
+                "runtime_hosts": runtime_hosts,
+                "total_download_bytes": model_download_bytes + runtime_download_bytes,
+                "received_peak_bytes": received_peak,
+                "phase_history": phase_history,
+                "phase": snapshot.phase,
+                "error": snapshot.error,
+                "runtime_lock_id": ready.as_ref().map(|ready| ready.runtime_lock_id.clone()),
+                "worker_build_id": ready.as_ref().map(|ready| ready.worker_build_id.clone()),
+                "model_snapshot_id": ready.as_ref().map(|ready| ready.model_snapshot_id.clone()),
+                "runtime_inventory_entries": record.as_ref().map(|record| record.runtime_files.len()),
+                "probe": record.as_ref().map(|record| record.probe.clone()),
+            }),
+        )
+        .unwrap();
+
+        assert!(!timed_out, "Windows empty-cache installation timed out");
+        assert_eq!(snapshot.phase, "ready", "{:?}", snapshot.error);
+        assert!(snapshot.runtime_ready && snapshot.model_ready && snapshot.device_verified);
+        let ready = ready.unwrap();
+        assert_eq!(ready.worker_build_id, WINDOWS_ZIMAGE_WORKER_BUILD_ID);
+        assert_eq!(ready.runtime_lock_id, installer.inner.runtime.id);
+        assert_eq!(ready.model_snapshot_id, WINDOWS_ZIMAGE_INSTALL_ID);
+        assert!(ready.worker_program.is_file());
+        assert!(ready.model_path.join("model_index.json").is_file());
+    }
+
     #[test]
     #[ignore = "explicit acceptance: requires all fixed runtime artifacts in validation cache"]
     fn actual_private_runtime_installs_offline_without_activating_missing_model() {
@@ -3285,6 +3468,7 @@ mod tests {
                 &http_client().unwrap(),
                 SegmentDownload {
                     url: &url,
+                    artifact_path: "fixture.bin",
                     path: &path,
                     metadata_path: &metadata_path,
                     sha256: &format!("{:x}", Sha256::digest(data)),
