@@ -1,7 +1,7 @@
 
 [frontend-install] cwd=apps/frontend command=['npm', 'ci', '--offline', '--no-audit', '--no-fund']
 
-added 47 packages in 985ms
+added 47 packages in 977ms
 
 [frontend-build] cwd=apps/frontend command=['npm', 'run', 'build']
 
@@ -10,16 +10,26 @@ added 47 packages in 985ms
 
 vite v8.3.5 building client environment for production...
 transforming...
-✓ 2039 modules transformed.
+✓ 2054 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                   0.41 kB │ gzip:  0.28 kB
-dist/assets/index-BQaB6Lue.css   35.79 kB │ gzip:  7.50 kB
-dist/assets/index-CIQKoFWg.js   292.52 kB │ gzip: 91.51 kB
+dist/index.html                      0.47 kB │ gzip:   0.32 kB
+dist/assets/index-Bwlxv91L.css      78.36 kB │ gzip:  14.26 kB
+dist/assets/index-DgqdJQUy.js      379.44 kB │ gzip: 115.09 kB
+dist/assets/catalog-D7Lr4Ai2.js  1,502.62 kB │ gzip: 457.50 kB
 
-✓ built in 217ms
+✓ built in 630ms
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
 
 [native-build] cwd=. command=['cargo', 'build', '--workspace', '--locked', '--offline']
-   Compiling image-studio-desktop v0.1.0 (/private/var/folders/6f/bw_544pn0ln_q8m0w8jtmz980000gn/T/image-studio-cherry-clean-bytgwwzu/apps/desktop)
-   Compiling studio-core v0.1.0 (/private/var/folders/6f/bw_544pn0ln_q8m0w8jtmz980000gn/T/image-studio-cherry-clean-bytgwwzu/crates/studio-core)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.69s
+   Compiling worker-protocol v0.1.0 (/private/var/folders/6f/bw_544pn0ln_q8m0w8jtmz980000gn/T/image-studio-cherry-clean-g8g9muu0/crates/worker-protocol)
+   Compiling image-studio-desktop v0.1.0 (/private/var/folders/6f/bw_544pn0ln_q8m0w8jtmz980000gn/T/image-studio-cherry-clean-g8g9muu0/apps/desktop)
+   Compiling studio-core v0.1.0 (/private/var/folders/6f/bw_544pn0ln_q8m0w8jtmz980000gn/T/image-studio-cherry-clean-g8g9muu0/crates/studio-core)
+   Compiling inference-supervisor v0.1.0 (/private/var/folders/6f/bw_544pn0ln_q8m0w8jtmz980000gn/T/image-studio-cherry-clean-g8g9muu0/tools/inference-supervisor)
+   Compiling diagnostic-worker v0.1.0 (/private/var/folders/6f/bw_544pn0ln_q8m0w8jtmz980000gn/T/image-studio-cherry-clean-g8g9muu0/tools/diagnostic-worker)
+   Compiling realesrgan-worker v0.1.0 (/private/var/folders/6f/bw_544pn0ln_q8m0w8jtmz980000gn/T/image-studio-cherry-clean-g8g9muu0/tools/realesrgan-worker)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.72s

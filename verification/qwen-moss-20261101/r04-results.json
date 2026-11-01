@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "caseId": "R04",
+  "date": "2026-11-01",
+  "status": "passed",
+  "commands": [
+    {
+      "command": "npm --prefix apps/frontend run check",
+      "exitCode": 0,
+      "log": "final-gates/r04-frontend-check.log"
+    },
+    {
+      "command": "npm --prefix apps/frontend run test",
+      "exitCode": 0,
+      "passed": 37,
+      "failed": 0,
+      "log": "final-gates/r04-frontend-test.log"
+    },
+    {
+      "command": "npm --prefix apps/frontend run build",
+      "exitCode": 0,
+      "log": "final-gates/r04-frontend-build.log"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "exitCode": 0,
+      "log": "final-gates/r04-cargo-fmt.log"
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "exitCode": 0,
+      "log": "final-gates/r04-cargo-clippy.log"
+    },
+    {
+      "command": "cargo test --workspace --locked",
+      "exitCode": 0,
+      "passed": 225,
+      "failed": 0,
+      "ignored": 5,
+      "log": "final-gates/r03-rust-tests.log"
+    },
+    {
+      "command": "cargo build --workspace --locked",
+      "exitCode": 0,
+      "log": "final-gates/r04-cargo-build.log"
+    },
+    {
+      "command": "target/planned-models-test-env/bin/pytest -q scripts/tests tools/mflux-worker/tests tools/mflux-worker-v2/tests tools/mflux-worker-v3/tests tools/onnx-worker/tests",
+      "exitCode": 0,
+      "passed": 44,
+      "failed": 0,
+      "log": "final-gates/r04-python-tests.log"
+    },
+    {
+      "command": "python3 scripts/verify-planned-model-locks.py",
+      "exitCode": 0,
+      "networkAccessed": false,
+      "workerSourcesMatchWheels": true,
+      "log": "final-gates/r04-model-locks.log"
+    },
+    {
+      "command": "openspec validate introduce-qwen21-and-moss-image --strict",
+      "exitCode": 0,
+      "log": "final-gates/r04-openspec-validate.log"
+    },
+    {
+      "command": "python3 scripts/check-offline-startup.py",
+      "exitCode": 0,
+      "networkDenied": true,
+      "frontendLoaded": true,
+      "workerStarted": false,
+      "report": "verification/cherry-offline-startup.json",
+      "log": "final-gates/r04-offline-startup.log"
+    },
+    {
+      "command": "python3 scripts/check-clean-source.py",
+      "exitCode": 0,
+      "networkMode": "npm --offline and cargo --offline against existing caches",
+      "report": "verification/cherry-clean-source-build.json",
+      "log": "final-gates/r04-clean-source.log"
+    }
+  ],
+  "warnings": [
+    "The frontend build reports only Vite's informational >500 kB chunk warning; the build exits 0.",
+    "The clean-source build reuses existing npm and Cargo caches and does not claim a cold build."
+  ],
+  "checks": {
+    "allRequiredCommandsPassed": true,
+    "explicitAcceptanceNotSilentlyIgnored": true,
+    "workerAndRuntimeLocksAudited": true,
+    "offlineStartupDidNotStartInference": true,
+    "isolatedSourceBuildSucceeded": true
+  }
+}

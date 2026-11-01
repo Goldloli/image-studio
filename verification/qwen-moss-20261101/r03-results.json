@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "caseId": "R03",
+  "date": "2026-11-01",
+  "status": "passed",
+  "commands": [
+    {
+      "command": "cargo test --workspace --locked",
+      "exitCode": 0,
+      "passed": 225,
+      "failed": 0,
+      "ignored": 5,
+      "log": "final-gates/r03-rust-tests.log"
+    },
+    {
+      "command": "target/planned-models-test-env/bin/pytest -q scripts/tests tools/mflux-worker/tests tools/mflux-worker-v2/tests tools/mflux-worker-v3/tests tools/onnx-worker/tests",
+      "exitCode": 0,
+      "passed": 44,
+      "failed": 0,
+      "log": "final-gates/r04-python-tests.log"
+    }
+  ],
+  "coveredInvariants": {
+    "idempotency": [
+      "duplicate_submission_busy_gate_and_retry_preserve_immutable_history",
+      "fresh_library_has_one_conversation_and_receive_is_fast_and_idempotent"
+    ],
+    "cancelRaceAndTerminalImmutability": [
+      "accepted_cancel_wins_over_candidate_error_and_duplicate_terminal",
+      "success_before_cancel_is_immutable_and_asset_reads_do_not_need_model",
+      "failure_first_cannot_be_changed_by_cancel"
+    ],
+    "candidateAndPathValidation": [
+      "untrusted_candidates_fail_before_asset_registration",
+      "symlink_and_fifo_are_rejected_without_following_or_blocking",
+      "v2_rejects_fake_tool_fields_path_escape_and_bad_roles",
+      "qwen_and_moss_v2_payloads_require_exact_recipe_identity_and_parameters"
+    ],
+    "multiOutputAtomicity": [
+      "birefnet_commits_primary_and_mask_as_one_job_result",
+      "birefnet_requires_both_valid_outputs_and_rolls_back_as_a_unit",
+      "database_asset_failure_rolls_back_manifest_and_asset_together"
+    ],
+    "commitCrashWindows": [
+      "real_process_exit_at_all_commit_boundaries_recovers_exactly_once"
+    ],
+    "unknownAndFutureVersions": [
+      "future_versions_are_rejected_before_current_fields_are_interpreted",
+      "incompatible_version_is_distinct_from_malformed_json",
+      "migration_is_rejected_for_an_unexpected_intermediate_version"
+    ],
+    "staleEventsAndRetry": [
+      "retry_preserves_job_and_old_attempt_while_fencing_old_events",
+      "stale_identity_and_duplicate_rejection_do_not_advance_state",
+      "a_process_executes_only_once_and_candidate_matches_plan"
+    ],
+    "nativeSupervision": [
+      "cooperative_and_noncooperative_cancel_reap_before_cancelled",
+      "candidates_wait_for_descendants_and_abnormal_workers_do_not_succeed",
+      "host_eof_reclaims_worker_and_descendant_without_host_cooperation",
+      "existing_execution_and_inherited_lease_prevent_new_compute"
+    ]
+  },
+  "explicitAcceptanceNotRunHere": {
+    "count": 5,
+    "reason": "The five ignored tests require separately supplied real network/model/runtime fixtures or native supervisor environment variables; corresponding real executions are recorded separately in the Qwen, MOSS, R01 and R05 evidence."
+  },
+  "checks": {
+    "transactionsAndRecoveryRemainAtomic": true,
+    "unknownModelsAndFutureVersionsFailClosed": true,
+    "invalidCandidatesNeverBecomeAssets": true,
+    "staleAttemptEventsCannotAdvanceCurrentState": true
+  }
+}
