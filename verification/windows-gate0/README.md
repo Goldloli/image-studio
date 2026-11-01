@@ -1,8 +1,9 @@
 # Windows Gate 0
 
-Status: passed on the target Windows 10 machine, 2026-11-01. Product
-installation and native application generation are not activated by this
-evidence.
+Status: Gate 0 passed on the target Windows 10 machine, 2026-11-01.
+Product installation and controller generation were subsequently validated as
+separate evidence linked below; those results do not change the original Gate
+0 measurements.
 
 ## Fixed runtime
 
@@ -67,3 +68,27 @@ was sampled at stage and callback boundaries. `nvidia-smi` did not expose a
 per-process compute-apps value under this WDDM setup; global NVML memory and
 Torch allocator values are retained. WDDM shared-memory peak is unavailable
 from the selected tooling.
+
+## Product closure evidence
+
+The product installer acceptance used the validated Gate 0 cache as immutable
+input and then exercised the formal installer instead of the Gate 0 helper:
+
+- all 20 ModelScope-verified model files and the private Python/wheel closure
+  were verified again;
+- the installed worker reported the fixed runtime, model snapshot, worker
+  build, RTX 3080 Ti, sm86 and required package versions;
+- all 19 model components were frozen into the Windows generation plan;
+- the direct supervisor protocol and `GenerationController` both produced a
+  valid 1024x1024 RGB PNG and matching SHA-256 candidate/asset identity.
+
+Reports:
+
+- [Product install](product-install.json)
+- [Installed worker protocol](product-install-worker-protocol.json)
+- [Controller generation](product-controller-generation.json)
+- [Controller asset](product-controller-primary.png)
+
+This is a cache-seeded installation acceptance, not a measure of empty-cache
+download time. Network denial, real-model cancellation/strong-kill recovery,
+clean-user installation and Mac regression remain separate pending gates.

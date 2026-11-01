@@ -1,6 +1,6 @@
 # 实施与验收范围
 
-状态：本 change 已获用户确认并进入实施；Windows Known Folder、受控文件边界、outer/inner Job Object、固定运行时与目标机 Gate 0 已完成。任务复选框保留为整个 change 的交付范围映射，只有完整产品接入与验收成立后才勾选或归档。本文件不代替 Beads；每个逻辑单元完成最小验证后精确暂存并本地提交，不做远程操作。
+状态：本 change 已获用户确认并进入实施；Windows Known Folder、受控文件边界、outer/inner Job Object、固定运行时、目标机 Gate 0、正式产品安装在环、worker/Controller 实图、平台目录投影与首次 NSIS 安装烟测已完成。任务复选框保留为整个 change 的交付范围映射，只有完整产品接入与验收成立后才勾选或归档。本文件不代替 Beads；每个逻辑单元完成最小验证后精确暂存并本地提交，不做远程操作。
 
 ## 1. 批准后的目标机 Gate 0
 

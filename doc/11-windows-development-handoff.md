@@ -6,7 +6,7 @@
 
 Mac M3 Max / 128 GiB 已完成七型号、八能力验收，相关变更已归档。现有 macOS 数据目录、模型安装、Python/MLX 环境和个人图片不随 Git 克隆迁移。
 
-用户已确认 Windows 开发机为 **Windows 10 x64 / RTX 3080 Ti 12 GB / 32 GB RAM / Intel Core i7-13700K**，明确要求继续开发，并确认了 `introduce-windows-foundation` 的实施范围。Gate 0 已完成；正式产品安装、原生生成闭环、NSIS、完整 UI/IME/DPI 与 Mac 回归仍未完成。
+用户已确认 Windows 开发机为 **Windows 10 x64 / RTX 3080 Ti 12 GB / 32 GB RAM / Intel Core i7-13700K**，明确要求继续开发，并确认了 `introduce-windows-foundation` 的实施范围。Gate 0、正式产品身份/安装在环、产品 worker/Controller 实图、平台投影与首次 NSIS 安装烟测已完成；干净用户/缺失 WebView2、完整 UI/IME/DPI、真实取消/强杀、禁网与 Mac 回归仍未完成。
 
 ## 2026-11-01 Windows 目标机预检
 
@@ -31,7 +31,17 @@ Gate 0 已在目标机通过：
 - 候选 A 使用双 NF4、BF16 计算、BF16 VAE tiling、组件 CPU offload 与 memory-efficient SDPA，通过三个独立进程的 1024×1024、9 步、guidance 0.0 实图。
 - 三次最大 CUDA reserved 为 `9,523,167,232` bytes，最大进程 private commit 为 `25,440,862,208` bytes，最低可用 RAM 为 `9,417,654,272` bytes；加载低于 25 秒，执行低于 15 秒。
 
-完整报告、资源原始记录与三张样图见 [Windows Gate 0](../verification/windows-gate0/README.md)。Gate 0 通过不等于产品安装已激活，下一步按 change 接入独立 Windows recipe/runtime/worker、正式安装与生成产品闭环。
+完整报告、资源原始记录与三张样图见 [Windows Gate 0](../verification/windows-gate0/README.md)。Gate 0 通过后，独立 Windows recipe/runtime/worker、正式私有安装在环与 `GenerationController` 实图已分别验证；缓存预置安装、正式空缓存下载计时和禁网仍是不同事实。
+
+## 2026-11-01 产品闭环与安装包进展
+
+- Windows 目录仅暴露一个已认证产品 profile：`z-image-turbo-diffusers-cuda-nf4-v1`；另外六个逻辑型号保留说明但不可安装或执行。
+- 产品安装器从 Gate 0 缓存预置 20 个 ModelScope 等价模型文件和完整运行时，重新校验后安装私有 Python/wheel，执行 worker/CUDA 探针并写入 Ready 记录。
+- 产品 worker 与 `GenerationController` 均生成真实 1024×1024 RGB PNG；Controller 路径还验证了 v2 载荷、`primary.png`、PNG 校验、SQLite Job/Asset 提交与资产读取。
+- Tauri 已生成 `244,754,768` 字节的当前用户 NSIS 内部测试包，嵌入离线 WebView2、VC runtime、`inference-supervisor.exe` 和 `diagnostic-worker.exe`。
+- 安装包已静默安装到 `%LOCALAPPDATA%\Image Studio`；安装版 WebView2 使用隔离数据根启动，可访问性树确认中文创作页和 Windows `Z-Image Turbo · 未就绪` 状态，首次启动没有创建私有运行时或模型文件。
+
+证据见 [Gate 0/产品闭环](../verification/windows-gate0/README.md) 和 [Windows 安装包](../verification/windows-installer/README.md)。
 
 ## 在 Windows 获取源码
 
@@ -76,7 +86,7 @@ GitHub 登录凭据由 Windows 自身凭据管理保存，不需要从 Mac 复�
 - Windows 已安装 Visual Studio Build Tools 2022 **17.14.40**、MSVC **19.44.35228**、Windows SDK **10.0.22621.0 / 10.0.26100.0** 和 VC++ Runtime **14.51.36247**。
 - OpenSpec 为 **1.12.0**，Beads 为 **1.2.2**；Windows 未安装 GitHub CLI，也没有系统 Python 3.12 或完整 CUDA Toolkit/`nvcc`。Gate 0 使用 `target/windows-gate0/runtime` 下的受控 Python 3.12.10 与固定 wheel，不修改系统 Python。
 
-这些不是 Windows 完整认证。Rust、Node/npm、Windows Known Folder、受控文件边界、outer/inner Job Object 与 Gate 0 模型执行已就绪；正式安装、产品 worker、完整 GUI/IME/DPI、NSIS 与 P0 仍未完成。
+这些不是 Windows 完整认证。Rust、Node/npm、Windows Known Folder、受控文件边界、outer/inner Job Object、Gate 0、正式安装在环、产品 worker/Controller 实图与首次 NSIS 安装烟测已就绪；干净用户/缺失 WebView2、完整 GUI/IME/DPI、真实取消/强杀、禁网与 Mac 回归仍未完成。
 
 初步可以检查源码状态、前端与无平台依赖的核心：
 
@@ -89,13 +99,13 @@ cargo check -p studio-core -p worker-protocol --target x86_64-pc-windows-msvc --
 openspec validate introduce-windows-foundation --strict --no-interactive
 ```
 
-这些命令不证明完整 Windows 应用可用。桌面默认目录、受控文件、Job Object 与 Gate 0 运行时已实现；Windows 专用正式 recipe/runtime/worker、安装/生成闭环与 NSIS 仍需实施。Python/CUDA/模型依赖按已冻结版本使用，不在系统 Python 安装浮动最新版。
+这些命令不证明完整 Windows 应用可用。桌面默认目录、受控文件、Job Object、Gate 0、Windows 专用正式 recipe/runtime/worker、安装在环与 NSIS 已实现；剩余工作是完整 P0 验收和缺陷修复，而不是重新建立产品身份。Python/CUDA/模型依赖按已冻结版本使用，不在系统 Python 安装浮动最新版。
 
 2026-11-01 已执行的非模型检查结果：前端 46 个包安装成功，6 个测试文件/37 项测试通过，生产构建通过；固定 Rust 的 Windows 核心/协议 `cargo check`、fmt、66 项测试、1 项文档测试和 clippy 均通过。检查中发现并修复了生成协议测试夹具硬编码 POSIX 路径的问题。
 
 `sha2` 的 `asm` 已限定到 macOS，Windows 不启用汇编后端，macOS 目标仍保留。随后 `cargo check/build --workspace --locked`、全 workspace 206 项测试 + 1 项文档测试以及 `cargo clippy --workspace --all-targets -- -D warnings` 均通过，4 项固定网络/运行时缓存测试为显式忽略。
 
-宿主还分别用显式隔离根和无参数默认路径启动成功。Windows 默认目录通过 Known Folder API 解析为 `%LOCALAPPDATA%\ImageStudio`，四个子目录正确创建；设置页目录定位使用 Explorer 且不经过 shell。Windows 平台配置已覆盖为原生窗口，release 构建隐藏控制台。生成、安装探针与诊断已使用 outer/inner Job Object、suspended launch 和整树回收；完整 UI/IME/DPI、NSIS 和所有产品 P0 仍未完成。
+宿主还分别用显式隔离根和无参数默认路径启动成功。Windows 默认目录通过 Known Folder API 解析为 `%LOCALAPPDATA%\ImageStudio`，四个子目录正确创建；设置页目录定位使用 Explorer 且不经过 shell。Windows 平台配置使用原生窗口，release 构建隐藏控制台。生成、安装探针与诊断已使用 outer/inner Job Object、suspended launch 和整树回收。NSIS 已组包、安装并启动；完整 UI/IME/DPI、干净用户/缺失 WebView2、真实取消/强杀、禁网和 Mac 回归仍未完成。
 
 原生 Computer Use 已完整读取 `Image Studio` 的 WebView2 可访问性树，确认中文创作页、导航、输入框、模型状态与原生窗口控件存在，并成功写入/清空中文提示词。Graphics Capture 截图仍超时、元素点击缺少坐标、Tab 未移动焦点，因此目前没有视觉截图或完整键盘证据；限制记录为 `image-studio-ba1`，不能据此假定 UI 全部通过或失败。
 
@@ -113,6 +123,6 @@ Windows 代理仍应先运行 `bd prime` 检查本地任务库，不把 JSONL �
 
 可粘贴以下内容开始新会话；这段文字只请求检查与接续准备，不代替用户批准实施：
 
-> 请使用中文，先读取 AGENTS.md 和 doc/11-windows-development-handoff.md。我在 Windows 10 x64，RTX 3080 Ti 12 GB、内存 32 GB、i7-13700K。请读取 introduce-windows-foundation 的 proposal、design、specs、tasks 和 test-plan，检查当前工具链、驱动、磁盘与 Beads 状态。提案尚待确认，请先报告准备情况，等我明确确认后按 Gate 0 开始；不要重做 Mac 接入、复制 Mac runtime 或把编译通过当完整模型认证。
+> 请使用中文，先读取 AGENTS.md 和 doc/11-windows-development-handoff.md。我在 Windows 10 x64，RTX 3080 Ti 12 GB、内存 32 GB、i7-13700K。请读取 introduce-windows-foundation 的 proposal、design、specs、tasks、test-plan 和当前证据，运行 `bd prime` 后从剩余 P0 继续开发；不要重做已完成的 Gate 0/产品身份，也不要复制 Mac runtime 或把安装包烟测当完整模型认证。
 
 本地小步提交已获项目长期授权。后续 `push`、`pull` 和 Dolt 同步仍按当前用户授权执行；本次首次源码上传不构成未来任意远程操作的默认许可。
