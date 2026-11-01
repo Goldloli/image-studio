@@ -519,6 +519,9 @@ fn ready_record_matches(
 fn manifest_digest(manifest: &str) -> String {
     format!("{:x}", Sha256::digest(manifest.as_bytes()))
 }
+fn canonical_requirements_lock(lock: &str) -> String {
+    lock.replace("\r\n", "\n")
+}
 #[derive(Serialize, Deserialize)]
 struct InventoryEntry {
     path: String,
@@ -1249,7 +1252,7 @@ impl Installation {
             }
             fs::write(
                 runtime.join("requirements.lock"),
-                self.inner.profile.requirements_lock,
+                canonical_requirements_lock(self.inner.profile.requirements_lock),
             )
             .map_err(err)?;
             runtime.join("python.exe")
@@ -1276,7 +1279,7 @@ impl Installation {
             }
             fs::write(
                 runtime.join("requirements.lock"),
-                self.inner.profile.requirements_lock,
+                canonical_requirements_lock(self.inner.profile.requirements_lock),
             )
             .map_err(err)?;
             self.command(
@@ -3536,6 +3539,14 @@ mod tests {
     }
 
     #[test]
+    fn requirements_lock_identity_normalizes_checkout_line_endings() {
+        assert_eq!(
+            canonical_requirements_lock("alpha==1\r\nbeta==2\r\n"),
+            "alpha==1\nbeta==2\n"
+        );
+    }
+
+    #[test]
     fn windows_gate_zero_runtime_manifest_is_fixed_and_binary_only() {
         const RUNTIME_MANIFEST: &str = include_str!(
             "../../../../resources/windows-foundation/python-runtime/runtime-manifest.json"
@@ -3556,10 +3567,11 @@ mod tests {
         assert_eq!(manifest["artifact_count"], 38);
         assert_eq!(manifest["total_bytes"], 2_713_854_538_u64);
         let lock = &manifest["requirements_lock"];
-        assert_eq!(lock["bytes"], RUNTIME_LOCK.len() as u64);
+        let runtime_lock = canonical_requirements_lock(RUNTIME_LOCK);
+        assert_eq!(lock["bytes"], runtime_lock.len() as u64);
         assert_eq!(
             lock["sha256"],
-            format!("{:x}", Sha256::digest(RUNTIME_LOCK.as_bytes()))
+            format!("{:x}", Sha256::digest(runtime_lock.as_bytes()))
         );
 
         let interpreter = &manifest["interpreter"];
