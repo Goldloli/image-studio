@@ -1,0 +1,9 @@
+{
+  "z-image-turbo-mflux-v1": 2,
+  "flux2-klein-4b-distilled": 2,
+  "birefnet-general-epoch-244": 1,
+  "realesrgan-x4plus": 1,
+  "qwen-image-2.1-mflux-v1": 12,
+  "qwen-image-2.1-turbo-mflux-v1": 12,
+  "moss-image-sft-mflux-v1": 11
+}

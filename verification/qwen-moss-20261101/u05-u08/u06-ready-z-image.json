@@ -1,0 +1,21 @@
+{
+  "legacyPath": "data/installation-ready.json",
+  "runtimeLockId": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+  "modelSnapshotId": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+  "probe": {
+    "device": "gpu",
+    "device_name": "Apple M3 Max",
+    "identity": {
+      "build_id": "studio-mflux-worker-0.1.0",
+      "model_snapshot_id": "z-image-turbo-f332072aa78be7aecdf3ee76d5c247082da564a6",
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-v1"
+    },
+    "packages": {
+      "mflux": "0.24.0",
+      "mlx": "0.32.4",
+      "torch": "2.15.0",
+      "transformers": "5.22.0"
+    },
+    "python": "3.13.12"
+  }
+}

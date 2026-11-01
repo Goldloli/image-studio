@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "caseId": "U06",
+  "modelPage": {
+    "catalogCount": 7,
+    "installedCount": 7,
+    "executableCount": 7,
+    "runtimeCount": 7,
+    "allDeviceVerified": true
+  },
+  "tasks": {
+    "total": 41,
+    "completed": 41,
+    "filterCounts": {
+      "z-image-turbo-mflux-v1": 2,
+      "flux2-klein-4b-distilled": 2,
+      "birefnet-general-epoch-244": 1,
+      "realesrgan-x4plus": 1,
+      "qwen-image-2.1-mflux-v1": 12,
+      "qwen-image-2.1-turbo-mflux-v1": 12,
+      "moss-image-sft-mflux-v1": 11
+    },
+    "filterCountsMatchDatabase": true
+  },
+  "works": {
+    "formalAssets": 41,
+    "allAssets": 42,
+    "primaryAssets": 41,
+    "maskAssets": 1,
+    "onlyPrimaryInFormalWorks": true
+  },
+  "isolation": {
+    "sharedRuntimeDoesNotActivateMissingModel": true,
+    "offlineInstallRootReadyInstallationCount": 1,
+    "evidencePath": "../moss-offline-install-results.json"
+  },
+  "sourceAndLicenseRegistry": "u06-model-sources.json",
+  "readyInstallationCount": 7,
+  "evidence": {
+    "dbCounts": {
+      "path": "u06-db-counts.json",
+      "sha256": "2a8c5cb293c9ba705f691396a2588a2c9a29675d0afc2a2825ca9f898fb599ef"
+    },
+    "taskFilterCounts": {
+      "path": "u06-task-filter-counts.json",
+      "sha256": "f48d20be113f12f5f3786984a9a1e2df8c5e2206f5ac77a8130ab7af395272d4"
+    },
+    "modelSources": {
+      "path": "u06-model-sources.json",
+      "sha256": "a334a204e47e3e181cab1d2841293eb8c10b9fcd1af4ec5c815593f4fe5ae4dd"
+    },
+    "readyModels": {
+      "path": "u06-ready-models.json",
+      "sha256": "687707e4c3a67075dd90544534b55d588e484b7e4cc408b05b85c90e7994600d"
+    },
+    "readyZImage": {
+      "path": "u06-ready-z-image.json",
+      "sha256": "2933fcd1629693d3c4704fefb0de8b5a2af3f64865e4de54e83c91dae487a8ae"
+    },
+    "models": {
+      "path": "u06-models-1280-light.jpg",
+      "sha256": "0b8d27d1f030ecdea65079a33bc1cec9f36be6faec1698f8c6f3742081462c7d"
+    },
+    "tasks": {
+      "path": "u06-tasks-moss-1280-light.jpg",
+      "sha256": "3fa7ed3b57899123c0921963d162d8e5606b66b17d8f2207793fddc3ca44a868"
+    },
+    "works": {
+      "path": "u06-works-1280-light.jpg",
+      "sha256": "daa52027f082aac7d07aac5acfac7ef13af36b0a36ed241789d5fdb8634096eb"
+    }
+  }
+}

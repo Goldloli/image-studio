@@ -1,0 +1,164 @@
+[
+  {
+    "path": "target/qwen-moss-validation-20261101/data/installations/models/birefnet-general-epoch-244.json",
+    "runtimeLockId": "onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1",
+    "modelSnapshotId": "birefnet-general-epoch-244-onnx",
+    "probe": {
+      "device": "cpu",
+      "device_name": "arm64",
+      "graph": {
+        "input": {
+          "name": "input_image",
+          "shape": [
+            1,
+            3,
+            1024,
+            1024
+          ],
+          "type": "tensor(float)"
+        },
+        "model_file": "BiRefNet-general-epoch_244.onnx",
+        "outputs": [
+          {
+            "name": "output_image",
+            "shape": [
+              1,
+              1,
+              1024,
+              1024
+            ],
+            "type": "tensor(float)"
+          }
+        ],
+        "providers": [
+          "CPUExecutionProvider"
+        ]
+      },
+      "identity": {
+        "build_id": "studio-onnx-worker-0.1.0",
+        "model_snapshot_id": "birefnet-general-epoch-244-onnx",
+        "runtime_lock_id": "onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1"
+      },
+      "packages": {
+        "numpy": "2.5.4",
+        "onnxruntime": "1.31.1",
+        "pillow": "13.0.0"
+      },
+      "python": "3.13.12"
+    }
+  },
+  {
+    "path": "target/qwen-moss-validation-20261101/data/installations/models/flux2-klein-4b-distilled.json",
+    "runtimeLockId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+    "modelSnapshotId": "flux2-klein-4b-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "probe": {
+      "device": "gpu",
+      "device_name": "Apple M3 Max",
+      "identity": {
+        "build_id": "studio-mflux-worker-0.2.0",
+        "model_snapshot_id": "flux2-klein-4b-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+        "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2"
+      },
+      "packages": {
+        "mflux": "0.24.0",
+        "mlx": "0.32.4",
+        "torch": "2.15.0",
+        "transformers": "5.22.0"
+      },
+      "python": "3.13.12"
+    }
+  },
+  {
+    "path": "target/qwen-moss-validation-20261101/data/installations/models/moss-image-sft-mflux-v1.json",
+    "runtimeLockId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+    "modelSnapshotId": "moss-image-sft-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+    "probe": {
+      "device": "gpu",
+      "device_name": "Apple M3 Max",
+      "identity": {
+        "build_id": "studio-mflux-worker-0.3.0",
+        "model_snapshot_id": "moss-image-sft-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+        "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3"
+      },
+      "packages": {
+        "mflux": "0.24.0",
+        "mlx": "0.32.4",
+        "torch": "2.15.0",
+        "transformers": "5.22.0"
+      },
+      "python": "3.13.12"
+    }
+  },
+  {
+    "path": "target/qwen-moss-validation-20261101/data/installations/models/qwen-image-2.1-mflux-v1.json",
+    "runtimeLockId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+    "modelSnapshotId": "qwen-image-2.1-d26bb61231c349cf6b7896fa83353113880e1ba3",
+    "probe": {
+      "device": "gpu",
+      "device_name": "Apple M3 Max",
+      "identity": {
+        "build_id": "studio-mflux-worker-0.3.0",
+        "model_snapshot_id": "qwen-image-2.1-d26bb61231c349cf6b7896fa83353113880e1ba3",
+        "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3"
+      },
+      "packages": {
+        "mflux": "0.24.0",
+        "mlx": "0.32.4",
+        "torch": "2.15.0",
+        "transformers": "5.22.0"
+      },
+      "python": "3.13.12"
+    }
+  },
+  {
+    "path": "target/qwen-moss-validation-20261101/data/installations/models/qwen-image-2.1-turbo-mflux-v1.json",
+    "runtimeLockId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+    "modelSnapshotId": "qwen-image-2.1-turbo-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+    "probe": {
+      "device": "gpu",
+      "device_name": "Apple M3 Max",
+      "identity": {
+        "build_id": "studio-mflux-worker-0.3.0",
+        "model_snapshot_id": "qwen-image-2.1-turbo-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+        "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3"
+      },
+      "packages": {
+        "mflux": "0.24.0",
+        "mlx": "0.32.4",
+        "torch": "2.15.0",
+        "transformers": "5.22.0"
+      },
+      "python": "3.13.12"
+    }
+  },
+  {
+    "path": "target/qwen-moss-validation-20261101/data/installations/models/realesrgan-x4plus.json",
+    "runtimeLockId": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+    "modelSnapshotId": "realesrgan-x4plus-ncnn",
+    "probe": {
+      "backend": "ncnn Vulkan",
+      "device": "gpu",
+      "device_name": "Apple M3 Max",
+      "gpu_id": 0,
+      "identity": {
+        "build_id": "studio-realesrgan-worker-0.1.0",
+        "model_snapshot_id": "realesrgan-x4plus-ncnn",
+        "runtime_lock_id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1"
+      },
+      "model": "realesrgan-x4plus",
+      "probe_input_size": [
+        8,
+        6
+      ],
+      "probe_output_sha256": "249ff74371ebf8877158c17eaef3bad4309de8b447a6866f93c3d7c3da12c848",
+      "probe_output_size": [
+        32,
+        24
+      ],
+      "scale": 4,
+      "threads": "1:1:1",
+      "tile": 128,
+      "tta": false
+    }
+  }
+]

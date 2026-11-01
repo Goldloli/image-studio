@@ -1,0 +1,86 @@
+[
+  {
+    "id": "z-image-turbo-mflux-v1",
+    "displayName": "Z-Image Turbo",
+    "license": "Apache-2.0",
+    "source": "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo",
+    "revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+    "runtime": "MFLUX / MLX · Python 3.13",
+    "verifiedDevices": [
+      "Apple M3 Max / 128 GiB / macOS arm64"
+    ],
+    "installId": "z-image-turbo-mflux-v1"
+  },
+  {
+    "id": "flux2-klein-4b-distilled",
+    "displayName": "FLUX.2 Klein 4B distilled",
+    "license": "Apache-2.0",
+    "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B",
+    "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "runtime": "MFLUX / MLX · recipes-v2",
+    "verifiedDevices": [
+      "Apple M3 Max / 128 GiB / macOS arm64"
+    ],
+    "installId": "flux2-klein-4b-distilled"
+  },
+  {
+    "id": "birefnet-general-epoch-244",
+    "displayName": "BiRefNet general epoch_244",
+    "license": "MIT",
+    "source": "https://github.com/ZhengPeng7/BiRefNet/releases/tag/v1",
+    "revision": "v1 / asset 186740004 / sha256:58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+    "runtime": "ONNX Runtime 1.31.1 · CPU",
+    "verifiedDevices": [
+      "Apple M3 Max / 128 GiB / macOS arm64 · CPU"
+    ],
+    "installId": "birefnet-general-epoch-244"
+  },
+  {
+    "id": "realesrgan-x4plus",
+    "displayName": "Real-ESRGAN x4plus",
+    "license": "Real-ESRGAN BSD-3-Clause · ncnn app MIT",
+    "source": "https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.2.5.0",
+    "revision": "v0.2.5.0 ncnn package / x4plus bin sha256:713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+    "runtime": "Real-ESRGAN ncnn Vulkan v0.2.0 · Metal GPU",
+    "verifiedDevices": [
+      "Apple M3 Max / 128 GiB / macOS arm64 · ncnn Vulkan GPU 0"
+    ],
+    "installId": "realesrgan-x4plus"
+  },
+  {
+    "id": "qwen-image-2.1-mflux-v1",
+    "displayName": "Qwen-Image 2.1",
+    "license": "qwen-research",
+    "source": "https://huggingface.co/Qwen/Qwen-Image-2.1",
+    "revision": "d26bb61231c349cf6b7896fa83353113880e1ba3",
+    "runtime": "MFLUX / MLX · recipes-v3",
+    "verifiedDevices": [
+      "Apple M3 Max / 128 GiB / macOS arm64"
+    ],
+    "installId": "qwen-image-2.1-mflux-v1"
+  },
+  {
+    "id": "qwen-image-2.1-turbo-mflux-v1",
+    "displayName": "Qwen-Image 2.1 Turbo",
+    "license": "qwen-research",
+    "source": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo",
+    "revision": "fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+    "runtime": "MFLUX / MLX · recipes-v3",
+    "verifiedDevices": [
+      "Apple M3 Max / 128 GiB / macOS arm64"
+    ],
+    "installId": "qwen-image-2.1-turbo-mflux-v1"
+  },
+  {
+    "id": "moss-image-sft-mflux-v1",
+    "displayName": "MOSS-Image-SFT",
+    "license": "Apache-2.0",
+    "source": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT",
+    "revision": "f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+    "runtime": "MFLUX / MLX · recipes-v3",
+    "verifiedDevices": [
+      "Apple M3 Max / 128 GiB / macOS arm64"
+    ],
+    "installId": "moss-image-sft-mflux-v1"
+  }
+]

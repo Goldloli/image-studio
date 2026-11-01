@@ -1,0 +1,79 @@
+{
+  "models": [
+    {
+      "modelId": "birefnet-general-epoch-244",
+      "turns": 1
+    },
+    {
+      "modelId": "flux2-klein-4b-distilled",
+      "turns": 2
+    },
+    {
+      "modelId": "moss-image-sft-mflux-v1",
+      "turns": 11
+    },
+    {
+      "modelId": "qwen-image-2.1-mflux-v1",
+      "turns": 12
+    },
+    {
+      "modelId": "qwen-image-2.1-turbo-mflux-v1",
+      "turns": 12
+    },
+    {
+      "modelId": "realesrgan-x4plus",
+      "turns": 1
+    },
+    {
+      "modelId": "z-image-turbo-mflux-v1",
+      "turns": 2
+    }
+  ],
+  "capabilities": [
+    {
+      "capabilityId": "image.edit.flux2-klein-4b.v1",
+      "turns": 1
+    },
+    {
+      "capabilityId": "image.remove-background.birefnet-general-epoch-244.v1",
+      "turns": 1
+    },
+    {
+      "capabilityId": "image.text-to-image.flux2-klein-4b.v1",
+      "turns": 1
+    },
+    {
+      "capabilityId": "image.text-to-image.moss-image-sft.v1",
+      "turns": 11
+    },
+    {
+      "capabilityId": "image.text-to-image.qwen-image-2.1-turbo.v1",
+      "turns": 12
+    },
+    {
+      "capabilityId": "image.text-to-image.qwen-image-2.1.v1",
+      "turns": 12
+    },
+    {
+      "capabilityId": "image.text-to-image.z-image-turbo.v1",
+      "turns": 2
+    },
+    {
+      "capabilityId": "image.upscale.realesrgan-x4plus.v1",
+      "turns": 1
+    }
+  ],
+  "outputRoles": [
+    {
+      "outputRole": "mask",
+      "assets": 1
+    },
+    {
+      "outputRole": "primary",
+      "assets": 41
+    }
+  ],
+  "totalTurns": 41,
+  "formalWorks": 41,
+  "allAssets": 42
+}
