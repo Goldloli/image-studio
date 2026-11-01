@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "modelId": "moss-image-sft-mflux-v1",
+  "capabilityId": "image.text-to-image.moss-image-sft.v1",
+  "networkDenied": true,
+  "sandboxProfile": "../../deny-network.sb",
+  "inputs": {
+    "path": "../moss-inputs.json",
+    "sha256": "91f49891ef72d6cd838a16b432a197170c22c8fdbb7a422ea127c2cbf36a22a6"
+  },
+  "sourceEvidence": {
+    "path": "batch.jsonl",
+    "sha256": "3eab9055082b16f5ea1da6ae032035eaa95842012745546e2230fccf43c24985",
+    "records": 5
+  },
+  "processElapsedMilliseconds": 2695401,
+  "exportHashesMatch": true,
+  "manifestChecks": {
+    "modelVariantId": "moss-image-sft-mflux-v1",
+    "quantization": 8,
+    "quantizedComponents": [
+      "transformer",
+      "text_encoder"
+    ],
+    "steps": 50,
+    "guidance": 3.0,
+    "negativePrompt": "",
+    "skipLayers": [
+      22
+    ],
+    "tokenBudget": 4096,
+    "truncation": false,
+    "outputCount": 1,
+    "width": 1024,
+    "height": 1024,
+    "dataType": "image_rgb"
+  },
+  "tasks": [
+    {
+      "id": "T01",
+      "jobId": "job-7268d8e1226e43d9b4994bfcff582969",
+      "attemptId": "attempt-58a3a3b818d747d092230f6245dff303",
+      "assetId": "asset-dd669a568b9549b780ab5097774ca2f9",
+      "assetSha256": "193507cc60ed568de1a45f720b16b05857ae94241d4574a8aad6679dc24768dc",
+      "elapsedMilliseconds": 625143,
+      "maxSamplingStep": 50,
+      "stageSequence": [
+        "preparing",
+        "loading",
+        "sampling",
+        "writing",
+        "succeeded"
+      ],
+      "workerProcessesAfterCompletion": []
+    },
+    {
+      "id": "T02",
+      "jobId": "job-201ba9a985df41e1ae37aa49ca9bea7b",
+      "attemptId": "attempt-5e69611abc694367adafe6ac8774d4b5",
+      "assetId": "asset-b1ace7cb44e440b58ac8447054cd8667",
+      "assetSha256": "1eee5f5653cac423eb7fea91abb968421a0c80e0588cf750d249b44656e154a2",
+      "elapsedMilliseconds": 648202,
+      "maxSamplingStep": 50,
+      "stageSequence": [
+        "preparing",
+        "loading",
+        "sampling",
+        "writing",
+        "succeeded"
+      ],
+      "workerProcessesAfterCompletion": []
+    },
+    {
+      "id": "T03",
+      "jobId": "job-fc5c2cbd4b4e42499065d6046c83fc40",
+      "attemptId": "attempt-23bfb34c2e7d4f2ab82ef8d5fe852353",
+      "assetId": "asset-9c607d62b9f9484bbbf8f30577f1d9c7",
+      "assetSha256": "46a6829f75684ae5b928da9456af361dbf75c49617ff9f7f6cab3e475c79b494",
+      "elapsedMilliseconds": 713655,
+      "maxSamplingStep": 50,
+      "stageSequence": [
+        "preparing",
+        "loading",
+        "sampling",
+        "writing",
+        "succeeded"
+      ],
+      "workerProcessesAfterCompletion": []
+    },
+    {
+      "id": "T04",
+      "jobId": "job-e11aa8663c3d4196a13c10f7c97aac7d",
+      "attemptId": "attempt-885b0afc6f994e74a73c1f62d8378f63",
+      "assetId": "asset-f5bca17cf27b4933b59b1d9fb96ce875",
+      "assetSha256": "eb84967ef1b10dbc4b1dae12e195f8afbba77f1998b5723e109191003f5eb144",
+      "elapsedMilliseconds": 708148,
+      "maxSamplingStep": 50,
+      "stageSequence": [
+        "preparing",
+        "loading",
+        "encoding",
+        "sampling",
+        "writing",
+        "succeeded"
+      ],
+      "workerProcessesAfterCompletion": []
+    }
+  ],
+  "qualityReview": {
+    "T01": "水彩小猫、窗边秋叶与暖光符合提示词。",
+    "T02": "白瓷茶壶、蓝杯、木桌和柔和晨光符合产品摄影要求。",
+    "T03": "标题“秋日咖啡”和副标题“周末限定”完整清晰。",
+    "T04": "标题“周末市集”和副标题“OPEN”清晰；水果篮在左、面包在右，符合布局样例。"
+  }
+}
