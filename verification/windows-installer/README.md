@@ -8,8 +8,8 @@ data root.
 ## Package
 
 - Installer: `target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe`
-- Size: `244,749,495` bytes
-- SHA-256: `085328ab46aed390f22bbc88487552eaed25356315afdab3096e3765f7b91d8e`
+- Size: `244,755,668` bytes
+- SHA-256: `43fde0053ea9d20171b32ce182c5c2f6f27c4c5c4ebc750d7bed9ab48ce1fc06`
 - Install mode: current user
 - WebView2: embedded offline installer
 - VC runtime: bundled
@@ -19,6 +19,10 @@ data root.
 The installer does not contain model weights or the private Python/CUDA
 runtime. A normal first launch created only the four application roots. It did
 not create the private runtime or model files.
+
+A same-root second launch was rejected by the Windows named root mutex. One
+normal window remained usable; the second window displayed the explicit
+in-use error and disabled its mutating controls.
 
 ## Evidence
 

@@ -3,15 +3,15 @@
   "kind": "windows-nsis-install-smoke",
   "status": "passed",
   "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
-  "installerSha256": "085328ab46aed390f22bbc88487552eaed25356315afdab3096e3765f7b91d8e",
-  "installerBytes": 244749495,
+  "installerSha256": "43fde0053ea9d20171b32ce182c5c2f6f27c4c5c4ebc750d7bed9ab48ce1fc06",
+  "installerBytes": 244755668,
   "installExitCode": 0,
   "installLocation": "%LOCALAPPDATA%\\Image Studio",
   "installedFiles": [
     {
       "name": "image-studio-desktop.exe",
-      "bytes": 41990144,
-      "sha256": "8c6cb115e7b32fbc354b431280dae074da4d6197d2cd6eb444a7986ea1f2c31f"
+      "bytes": 41997824,
+      "sha256": "09cda2c8067e28d091ade163cb71686db773063ac980aabef33c0c8b294a4698"
     },
     {
       "name": "inference-supervisor.exe",
@@ -35,6 +35,13 @@
     ],
     "privateRuntimeCreated": false,
     "modelFilesCreated": false,
+    "sameRootSecondInstance": {
+      "status": "rejected",
+      "normalWindowCount": 1,
+      "errorWindowCount": 1,
+      "observedError": "数据目录正在由另一个 Image Studio 实例使用",
+      "mutatingControlsDisabled": true
+    },
     "webview2Accessibility": {
       "windowTitle": "Image Studio",
       "documentUrl": "http://tauri.localhost/",
