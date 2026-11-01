@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "caseId": "R01",
+  "date": "2026-11-01",
+  "status": "passed",
+  "dataRoot": "target/qwen-moss-validation-20261101",
+  "runtime": {
+    "packageId": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+    "modelVariantId": "z-image-turbo-q4",
+    "quantization": 4,
+    "steps": 9,
+    "tokenBudget": 512,
+    "workerRoute": "generation-v1"
+  },
+  "sizes": [
+    {
+      "aspect": "1:1",
+      "jobId": "job-d31105fa0c2748c594790abd740faaed",
+      "attemptId": "attempt-ac93dc8de8e444aa921bd80350b0baa7",
+      "assetId": "asset-76a48056695c4a299aefbfafc44661a1",
+      "width": 1024,
+      "height": 1024,
+      "colorType": "RGB8",
+      "sha256": "cfd3b4494afd79cc22741e48dc8a12ed3aab832116b87d0931388b9fd2c02f08",
+      "evidence": "r01/z-1x1.png"
+    },
+    {
+      "aspect": "4:3",
+      "jobId": "job-95f2d453b3f44539b62e2044cd48bdc4",
+      "attemptId": "attempt-037faa0432264f20a141253f72f2f5d3",
+      "assetId": "asset-94caafff179643d4a106ee28b5191974",
+      "width": 1024,
+      "height": 768,
+      "colorType": "RGB8",
+      "sha256": "9af85d93e8408d0b20a602cee3b9fefebf7101a4688ce731f53748cb0b216a8d",
+      "evidence": "r01/z-4x3.png"
+    },
+    {
+      "aspect": "3:4",
+      "jobId": "job-836106fc2bb34effb2bd937ca7ada026",
+      "attemptId": "attempt-536e4b04d7d942aca586d78c146c28ac",
+      "assetId": "asset-28d0f558e0554675a71432edbfc52470",
+      "width": 768,
+      "height": 1024,
+      "colorType": "RGB8",
+      "sha256": "0bc4a9c805064c430b4231572b4730e470a2a29863eb2a37a54872c88ea2b3bf",
+      "evidence": "r01/z-3x4.png"
+    }
+  ],
+  "cancellationRetry": {
+    "jobId": "job-cd9e09dee6774512a8c5556ec1e7433c",
+    "cancelStage": "sampling",
+    "cancelObservedAfterSeconds": 2.13166925,
+    "cancelledAttemptId": "attempt-25e1aac66ce0485ba23e02baa76f3bc3",
+    "cancelledAttemptCreatedNoAsset": true,
+    "retryAttemptId": "attempt-098422188b4744c9bbc13d595fa5e920",
+    "retryState": "succeeded",
+    "assetId": "asset-2599c6de3751471c800acf9a4097a6c9",
+    "sha256": "1152481fb20938187ccd1baf5211dd84232b481518e28ec302752a0f50a72f48",
+    "evidence": "r01/z-cancel-retry.png"
+  },
+  "killRecovery": {
+    "report": "r01/r01-z-kill.json",
+    "jobId": "job-ab1e5c9edf0e4781a74a4b95070d82ac",
+    "killedAttemptId": "attempt-2024a099879d41229bd01d55fb5b585a",
+    "observedStep": 2,
+    "observedTotal": 9,
+    "hostReturnCode": -9,
+    "recoveredState": "interrupted",
+    "leasedUntilCleanup": true,
+    "retryAttemptId": "attempt-b0fc01287d114be6b239c52f6087c1f8",
+    "retryState": "succeeded",
+    "assetId": "asset-d1b100e594344d9fb763120e44548ea1",
+    "sha256": "7993edbfe736fd820010128b3f4a7b95ddd043356de02c0e84c0696272b2a2f9",
+    "recoveryElapsedSeconds": 89.05627562489826,
+    "evidence": "r01/z-kill-retry.png"
+  },
+  "checks": {
+    "allThreeSizesSucceeded": true,
+    "q4AndNineStepsPreserved": true,
+    "legacyV1WorkerRoutePreserved": true,
+    "cancelledAttemptHadNoAsset": true,
+    "killMarkedInterruptedBeforeRetry": true,
+    "retriesCreatedNewAttempts": true,
+    "outputsAre1024ScaleRgbPng": true
+  },
+  "evidence": {
+    "databaseSnapshot": "r01/r01-runtime-db.json",
+    "workerTokenBudgetTest": "final-gates/r03-rust-tests.log"
+  }
+}
