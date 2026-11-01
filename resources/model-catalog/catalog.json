@@ -164,7 +164,9 @@
         "LoRA、低内存配方与小文本编码器",
         "非 1024² 画幅"
       ],
-      "verifiedDevices": [],
+      "verifiedDevices": [
+        "Apple M3 Max / 128 GiB / macOS arm64"
+      ],
       "recipe": "q8 · 40 步 · 1024 × 1024",
       "installId": "qwen-image-2.1-mflux-v1",
       "installerSupported": true
@@ -196,7 +198,9 @@
         "LoRA、控制分支与非方图",
         "继承基础版实机认证"
       ],
-      "verifiedDevices": [],
+      "verifiedDevices": [
+        "Apple M3 Max / 128 GiB / macOS arm64"
+      ],
       "recipe": "q8 · 8 步官方曲线 · 1024 × 1024",
       "installId": "qwen-image-2.1-turbo-mflux-v1",
       "installerSupported": true
