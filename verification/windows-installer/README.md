@@ -8,8 +8,8 @@ data root.
 ## Package
 
 - Installer: `target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe`
-- Size: `244,755,668` bytes
-- SHA-256: `43fde0053ea9d20171b32ce182c5c2f6f27c4c5c4ebc750d7bed9ab48ce1fc06`
+- Size: `244,750,015` bytes
+- SHA-256: `d86db18ad8d35741087bc8c517257b4ddd0604daf5479996429ba1d208aaf99f`
 - Install mode: current user
 - WebView2: embedded offline installer
 - VC runtime: bundled
@@ -23,6 +23,11 @@ not create the private runtime or model files.
 A same-root second launch was rejected by the Windows named root mutex. One
 normal window remained usable; the second window displayed the explicit
 in-use error and disabled its mutating controls.
+
+Silent uninstall removed the program directory while leaving the default data
+root and SQLite/WAL bytes intact. Reinstalling restored the existing
+cross-platform warning state. A stale draft whose save failed no longer blocks
+native window close.
 
 ## Evidence
 

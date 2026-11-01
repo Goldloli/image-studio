@@ -3,25 +3,25 @@
   "kind": "windows-nsis-install-smoke",
   "status": "passed",
   "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
-  "installerSha256": "43fde0053ea9d20171b32ce182c5c2f6f27c4c5c4ebc750d7bed9ab48ce1fc06",
-  "installerBytes": 244755668,
+  "installerSha256": "d86db18ad8d35741087bc8c517257b4ddd0604daf5479996429ba1d208aaf99f",
+  "installerBytes": 244750015,
   "installExitCode": 0,
   "installLocation": "%LOCALAPPDATA%\\Image Studio",
   "installedFiles": [
     {
       "name": "image-studio-desktop.exe",
-      "bytes": 41997824,
-      "sha256": "09cda2c8067e28d091ade163cb71686db773063ac980aabef33c0c8b294a4698"
+      "bytes": 42038784,
+      "sha256": "620b565e208abf3f43fa1356b671627a632b7277b65b724a38d2ed7161241958"
     },
     {
       "name": "inference-supervisor.exe",
       "bytes": 1008640,
-      "sha256": "3cad6319ccb433f8fa844087f43c4d6f04216640af6757020777628a8575b170"
+      "sha256": "d3dd4a806d63c43e62844a8f9a538369f789dd4715ceec9aae27a7c7aaacde21"
     },
     {
       "name": "diagnostic-worker.exe",
       "bytes": 463360,
-      "sha256": "650ef8d5dea87ae9417c43435a72293bf2938aa90614978484c45d8da1d4a71d"
+      "sha256": "f5229ce44eeeb913987d426367b58ed34f104bbeb339278b388afe5011cd838b"
     }
   ],
   "launch": {
@@ -49,6 +49,19 @@
         "target/windows-installed-independent-a",
         "target/windows-installed-independent-b"
       ]
+    },
+    "uninstallReinstall": {
+      "status": "passed",
+      "programDirectoryRemoved": true,
+      "dataDirectoryPreserved": true,
+      "sqliteSha256": "89a2318c76452be80e1d743f163f3dd96623b2b05604aa06985c6b5501238362",
+      "sqliteWalSha256": "a8632483104d34bb3ff34ec63f77d30bc31519f2dc2ef0ec33af0440ca3e0de1",
+      "postReinstallObserved": "旧的跨平台模型选择、警告和原库均恢复"
+    },
+    "closeAfterSaveFailure": {
+      "status": "passed",
+      "observedSaveError": "所选模型未在权威目录中登记",
+      "processExited": true
     },
     "webview2Accessibility": {
       "windowTitle": "Image Studio",
