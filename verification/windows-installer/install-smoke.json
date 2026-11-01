@@ -42,6 +42,14 @@
       "observedError": "数据目录正在由另一个 Image Studio 实例使用",
       "mutatingControlsDisabled": true
     },
+    "independentRootInstances": {
+      "status": "passed",
+      "normalWindowCount": 2,
+      "dataRoots": [
+        "target/windows-installed-independent-a",
+        "target/windows-installed-independent-b"
+      ]
+    },
     "webview2Accessibility": {
       "windowTitle": "Image Studio",
       "documentUrl": "http://tauri.localhost/",
