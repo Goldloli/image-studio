@@ -49,7 +49,6 @@ import {
   clampZoom,
   confirmedDraft,
   createDraft,
-  DEFAULT_MODEL_ID,
   initialWorkspace,
   validSeed,
   workspaceReducer,
@@ -69,6 +68,7 @@ import {
   MOSS_IMAGE_SFT_MODEL_ID,
   QWEN_IMAGE_21_MODEL_ID,
   QWEN_IMAGE_21_TURBO_MODEL_ID,
+  Z_IMAGE_CAPABILITY_FALLBACK,
   textRecipeForModel,
 } from './model-recipes';
 import './workspace.css';
@@ -128,7 +128,7 @@ const capabilityForModel = (modelId: string) => textRecipeForModel(modelId)?.cap
     ? BIREFNET_CAPABILITY
     : modelId === REALESRGAN_MODEL
       ? REALESRGAN_CAPABILITY
-      : 'image.text-to-image.z-image-turbo.v1');
+      : Z_IMAGE_CAPABILITY_FALLBACK);
 const modelDisplayName = (modelId: string) => textRecipeForModel(modelId)?.displayName
   ?? (modelId === BIREFNET_MODEL
     ? 'BiRefNet epoch_244 · 去背景'
@@ -723,7 +723,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     try {
       if (!native) {
         const id = Math.max(...state.drafts.map(draft => draft.id)) + 1;
-        dispatch({ type: 'append', draft: { ...state.drafts[0], id, name: '新会话', prompt: '', past: [], future: [], params: { modelId: DEFAULT_MODEL_ID, aspect: '1:1', count: 1, seed: '' } } });
+        dispatch({ type: 'append', draft: createDraft(id) });
         const conversation = { ...previewConversation, id: `local-conversation-${id}`, draftId: id, title: '新会话' };
         setConversations([conversation, ...visibleConversations]);
         selectConversationLocally(conversation.id);
@@ -1257,7 +1257,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
                 <button className="composer-chip" disabled={submittingDraftId !== null} onClick={() => { if (popup === 'sources') setPopup(null); else setPopup('sources'); }}>作品</button>
                 {popup === 'sources' && <div className="composer-popover model-popover source-popover" role="dialog" aria-label="选择已有作品作为源图"><div className="popover-heading"><strong>选择已有作品</strong><span>{sourceAssets.length} 张可用</span></div>{sourceAssets.map(asset => <button key={asset.id} className={`single-model-option ${active.params.sourceAssetId === asset.id ? 'is-selected' : ''}`} onClick={() => chooseToolSource(asset)}><img className="source-option-image" src={assetUrl(asset.id)} alt="" draggable={false}/><span><strong>{asset.width} × {asset.height}</strong><small>{asset.prompt}</small></span>{active.params.sourceAssetId === asset.id && <Check size={14}/>}</button>)}{sourceAssets.length === 0 && <p className="popover-note">{isUpscale ? '本机还没有不超过 1 MP 的无透明 RGB 正式作品。' : '本机还没有可用作源图的正式作品。'}</p>}</div>}
               </div>}
-              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前受控源图"/><span>{isRemoveBackground ? '去背景 · 原尺寸输出' : isUpscale ? selectedSource ? `${selectedSource.width}×${selectedSource.height} → ${selectedSource.width*4}×${selectedSource.height*4}` : '4× 放大 · 最长边 ≤1024'  : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? '单图编辑 · 保比例缩放至 1 MP' : '源图'}</span><button aria-label="移除源图" title="移除源图" onClick={() => setDraftParams({ sourceAssetId: null, capabilityId: isToolComposer ? active.params.capabilityId : activeTextRecipe?.capabilityId ?? (active.params.modelId === 'flux2-klein-4b-distilled' ? 'image.text-to-image.flux2-klein-4b.v1' : 'image.text-to-image.z-image-turbo.v1') })}><X size={11}/></button></span>}
+              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前受控源图"/><span>{isRemoveBackground ? '去背景 · 原尺寸输出' : isUpscale ? selectedSource ? `${selectedSource.width}×${selectedSource.height} → ${selectedSource.width*4}×${selectedSource.height*4}` : '4× 放大 · 最长边 ≤1024'  : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? '单图编辑 · 保比例缩放至 1 MP' : '源图'}</span><button aria-label="移除源图" title="移除源图" onClick={() => setDraftParams({ sourceAssetId: null, capabilityId: isToolComposer ? active.params.capabilityId : activeTextRecipe?.capabilityId ?? capabilityForModel(active.params.modelId) })}><X size={11}/></button></span>}
               {!isToolComposer && <IconButton label={copyState === 'composer' ? '已复制提示词' : '复制提示词'} disabled={!active.prompt} onClick={() => void copyText(active.prompt, 'composer')}>{copyState === 'composer' ? <Check size={14}/> : <Copy size={14}/>}</IconButton>}
             </div>
             <div className="composer-right">

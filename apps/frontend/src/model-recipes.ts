@@ -8,7 +8,16 @@ export type TextRecipe = {
   aspects: readonly string[];
 };
 
-export const Z_IMAGE_MODEL_ID = 'z-image-turbo-mflux-v1';
+export const Z_IMAGE_MAC_MODEL_ID = 'z-image-turbo-mflux-v1';
+export const Z_IMAGE_WINDOWS_MODEL_ID = 'z-image-turbo-diffusers-cuda-nf4-v1';
+export const Z_IMAGE_MAC_CAPABILITY = 'image.text-to-image.z-image-turbo.v1';
+export const Z_IMAGE_WINDOWS_CAPABILITY = 'image.text-to-image.z-image-turbo-diffusers-cuda-nf4.v1';
+export const Z_IMAGE_MODEL_ID = typeof navigator !== 'undefined' && /Windows/i.test(navigator.userAgent)
+  ? Z_IMAGE_WINDOWS_MODEL_ID
+  : Z_IMAGE_MAC_MODEL_ID;
+export const Z_IMAGE_CAPABILITY_FALLBACK = Z_IMAGE_MODEL_ID === Z_IMAGE_WINDOWS_MODEL_ID
+  ? Z_IMAGE_WINDOWS_CAPABILITY
+  : Z_IMAGE_MAC_CAPABILITY;
 export const KLEIN_MODEL_ID = 'flux2-klein-4b-distilled';
 export const QWEN_IMAGE_21_MODEL_ID = 'qwen-image-2.1-mflux-v1';
 export const QWEN_IMAGE_21_TURBO_MODEL_ID = 'qwen-image-2.1-turbo-mflux-v1';
@@ -19,14 +28,23 @@ export const QWEN_IMAGE_21_TURBO_CAPABILITY = 'image.text-to-image.qwen-image-2.
 export const MOSS_IMAGE_SFT_CAPABILITY = 'image.text-to-image.moss-image-sft.v1';
 
 const textRecipes: Record<string, TextRecipe> = {
-  [Z_IMAGE_MODEL_ID]: {
-    modelId: Z_IMAGE_MODEL_ID,
-    capabilityId: 'image.text-to-image.z-image-turbo.v1',
+  [Z_IMAGE_MAC_MODEL_ID]: {
+    modelId: Z_IMAGE_MAC_MODEL_ID,
+    capabilityId: Z_IMAGE_MAC_CAPABILITY,
     displayName: 'Z-Image Turbo',
     shortName: 'Z-Image Turbo',
     steps: 9,
     quantization: 4,
     aspects: ['1:1', '4:3', '3:4'],
+  },
+  [Z_IMAGE_WINDOWS_MODEL_ID]: {
+    modelId: Z_IMAGE_WINDOWS_MODEL_ID,
+    capabilityId: Z_IMAGE_WINDOWS_CAPABILITY,
+    displayName: 'Z-Image Turbo',
+    shortName: 'Z-Image Turbo',
+    steps: 9,
+    quantization: 4,
+    aspects: ['1:1'],
   },
   [KLEIN_MODEL_ID]: {
     modelId: KLEIN_MODEL_ID,

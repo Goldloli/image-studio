@@ -1,4 +1,4 @@
-import { Z_IMAGE_MODEL_ID } from './model-recipes';
+import { textRecipeForModel, Z_IMAGE_CAPABILITY_FALLBACK, Z_IMAGE_MODEL_ID } from './model-recipes';
 
 export type CapabilityDraft = {
   prompt: string;
@@ -23,7 +23,8 @@ export type Draft = {
 };
 export type WorkspaceState = { drafts: Draft[]; activeId: number; sample: number | null; nextId: number };
 export const DEFAULT_MODEL_ID = Z_IMAGE_MODEL_ID;
-export const createDraft = (id: number, name = '新会话'): Draft => ({id, name, prompt: '', collapsed: false, promptSourceId:null, params: {modelId:DEFAULT_MODEL_ID, aspect:'1:1', count:1, seed:'', capabilityId:'image.text-to-image.z-image-turbo.v1', sourceAssetId:null}, past:[], future:[]});
+const defaultCapabilityId = (modelId: string) => textRecipeForModel(modelId)?.capabilityId ?? Z_IMAGE_CAPABILITY_FALLBACK;
+export const createDraft = (id: number, name = '新会话'): Draft => ({id, name, prompt: '', collapsed: false, promptSourceId:null, params: {modelId:DEFAULT_MODEL_ID, aspect:'1:1', count:1, seed:'', capabilityId:defaultCapabilityId(DEFAULT_MODEL_ID), sourceAssetId:null}, past:[], future:[]});
 export const initialWorkspace = (): WorkspaceState => ({drafts:[createDraft(1)], activeId:1, sample:null, nextId:2});
 export const validSeed = (seed: string): boolean => seed === '' || (/^\d+$/.test(seed) && Number(seed) <= 4294967295);
 export const clampZoom = (zoom: number): number => Math.min(4, Math.max(.25, Math.round(zoom * 4) / 4));
@@ -69,8 +70,8 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
     if(action.type==='params') {
       let params={...d.params,...action.patch};
       if(!/^[A-Za-z0-9._:-]{1,128}$/.test(params.modelId)||!['1:1','4:3','3:4'].includes(params.aspect)||params.count!==1) return d;
-      const current=d.params.capabilityId??'image.text-to-image.z-image-turbo.v1';
-      const next=params.capabilityId??'image.text-to-image.z-image-turbo.v1';
+      const current=d.params.capabilityId??defaultCapabilityId(d.params.modelId);
+      const next=params.capabilityId??defaultCapabilityId(params.modelId);
       if(current!==next) {
         const slots={...d.params.capabilityDrafts,[current]:{prompt:d.prompt,aspect:d.params.aspect,seed:d.params.seed,sourceAssetId:d.params.sourceAssetId??null,promptSourceId:d.promptSourceId??null}};
         const saved=slots[next];

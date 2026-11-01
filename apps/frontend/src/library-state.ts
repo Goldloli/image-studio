@@ -102,5 +102,5 @@ export function formatTime(value: number | null): string {
 }
 
 export function modelLabel(id: string): string {
-  return id === 'z-image-turbo-mflux-v1' ? 'Z-Image Turbo' : id;
+  return id === 'z-image-turbo-mflux-v1' || id === 'z-image-turbo-diffusers-cuda-nf4-v1' ? 'Z-Image Turbo' : id;
 }

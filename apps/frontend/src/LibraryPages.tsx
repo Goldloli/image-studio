@@ -26,6 +26,7 @@ import {
   type TaskStatus,
 } from './studio-api';
 import { formatTime, modelLabel, taskStatusOptions } from './library-state';
+import { Z_IMAGE_MAC_MODEL_ID, Z_IMAGE_WINDOWS_MODEL_ID } from './model-recipes';
 
 type Props = {
   studio: StudioSnapshot | null;
@@ -201,7 +202,11 @@ export function TaskLibrary({ studio, focusJob, onRefresh, onBack, onError, onOp
     <div className="task-query-bar">
       <label className="task-search"><Search size={14}/><input value={search} onChange={event => setSearch(event.target.value)} aria-label="搜索任务提示词、会话或型号" placeholder="搜索提示词、会话或型号"/></label>
       <select aria-label="按会话筛选" value={conversationId} onChange={event => setConversationId(event.target.value)}><option value="">全部会话</option>{studio?.conversations.map(conversation => <option key={conversation.id} value={conversation.id}>{conversation.title}</option>)}</select>
-      <select aria-label="按型号筛选" value={modelId} onChange={event => setModelId(event.target.value)}><option value="">全部型号</option><option value="z-image-turbo-mflux-v1">Z-Image Turbo</option></select>
+      <select aria-label="按型号筛选" value={modelId} onChange={event => setModelId(event.target.value)}>
+        <option value="">全部型号</option>
+        <option value={Z_IMAGE_MAC_MODEL_ID}>Z-Image Turbo · macOS MFLUX</option>
+        <option value={Z_IMAGE_WINDOWS_MODEL_ID}>Z-Image Turbo · Windows CUDA NF4</option>
+      </select>
       {(search || conversationId || modelId) && <button className="filter-clear" onClick={clearFilters}>清除条件</button>}
     </div>
 

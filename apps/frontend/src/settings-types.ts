@@ -1,4 +1,5 @@
 import type { CatalogPayload } from './model-catalog';
+import { Z_IMAGE_CAPABILITY_FALLBACK, Z_IMAGE_MODEL_ID, textRecipeForModel } from './model-recipes';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type FontScale = 'small' | 'default' | 'large';
@@ -83,11 +84,14 @@ export const defaultAppearance: AppearancePreferences = {
 };
 
 export const builtInCreationDefaults: CreationDefaults = {
-  modelId: 'z-image-turbo-mflux-v1',
+  modelId: Z_IMAGE_MODEL_ID,
   aspect: '1:1',
   count: 1,
   seed: '',
 };
+
+export const capabilityForTextModel = (modelId: string): string =>
+  textRecipeForModel(modelId)?.capabilityId ?? Z_IMAGE_CAPABILITY_FALLBACK;
 
 export const defaultsEqual = (left: CreationDefaults, right: CreationDefaults): boolean =>
   left.modelId === right.modelId

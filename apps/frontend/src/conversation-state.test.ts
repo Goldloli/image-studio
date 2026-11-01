@@ -11,6 +11,7 @@ import {
 } from './conversation-state';
 import type { ExecutionView, TurnView } from './studio-api';
 import { DEFAULT_MODEL_ID } from './workspace-state';
+import { Z_IMAGE_WINDOWS_CAPABILITY, Z_IMAGE_WINDOWS_MODEL_ID } from './model-recipes';
 
 const turn: TurnView = {
   id: 'turn-1', conversationId: 'conversation-1', sequence: 1, submissionKey: 'send-1', prompt: '湖',
@@ -58,6 +59,8 @@ describe('composer keyboard and parameters', () => {
     expect(supportedDraftParams({ modelId: DEFAULT_MODEL_ID, aspect: '3:4', count: 1, seed: '4294967295' })).toBe(true);
     expect(supportedDraftParams({ modelId: DEFAULT_MODEL_ID, aspect: '16:9', count: 1, seed: '' })).toBe(false);
     expect(supportedDraftParams({ modelId: DEFAULT_MODEL_ID, aspect: '1:1', count: 2, seed: '' })).toBe(false);
+    expect(supportedDraftParams({ modelId: Z_IMAGE_WINDOWS_MODEL_ID, capabilityId: Z_IMAGE_WINDOWS_CAPABILITY, aspect: '1:1', count: 1, seed: '' })).toBe(true);
+    expect(supportedDraftParams({ modelId: Z_IMAGE_WINDOWS_MODEL_ID, capabilityId: Z_IMAGE_WINDOWS_CAPABILITY, aspect: '4:3', count: 1, seed: '' })).toBe(false);
     expect(supportedDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.text-to-image.flux2-klein-4b.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(true);
     expect(supportedDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', sourceAssetId: 'source-1', aspect: '1:1', count: 1, seed: '7' })).toBe(true);
     expect(supportedDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', sourceAssetId: null, aspect: '1:1', count: 1, seed: '' })).toBe(false);
