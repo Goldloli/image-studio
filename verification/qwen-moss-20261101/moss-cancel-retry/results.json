@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "modelId": "moss-image-sft-mflux-v1",
+  "capabilityId": "image.text-to-image.moss-image-sft.v1",
+  "sourceEvidence": {
+    "path": "result.jsonl",
+    "sha256": "30175c9a9b0da39d1e03b05174d61fbddf9ce31638b86bf4de51586ac0c8b98f",
+    "records": 1
+  },
+  "cancel": {
+    "jobId": "job-a84e814ddb3840b89de0c14df58836c4",
+    "turnId": "turn-0b3edadf9ee8488e844a5066fc40ec0f",
+    "attemptId": "attempt-681f6b9455b2422b954c1aa04e33dedb",
+    "state": "Cancelled",
+    "attemptState": "cancelled",
+    "assetAvailable": false,
+    "stage": "sampling",
+    "step": 1,
+    "total": 50,
+    "elapsedMilliseconds": 19115
+  },
+  "retry": {
+    "sameJob": true,
+    "attemptId": "attempt-139c657735d8486cb92a8e3758ad7482",
+    "state": "Succeeded",
+    "attemptState": "succeeded",
+    "assetId": "asset-3637d4f4e09b42f3986d0f88efc61efb",
+    "exportPath": "cancel-retry.png",
+    "exportSha256": "425ad1a6b9bf4456acd9927f1261828fe39d6c2b1b0a050fe85112ad18ed7e01",
+    "manifestChecks": {
+      "modelVariantId": "moss-image-sft-mflux-v1",
+      "steps": 50,
+      "guidance": 3.0,
+      "tokenBudget": 4096,
+      "outputShaMatchesExport": true
+    }
+  },
+  "workerProcessesAfterCompletion": [],
+  "qualityReview": "水彩小猫、窗边秋叶与暖光符合提示词；重试资产完整且与导出一致。"
+}
