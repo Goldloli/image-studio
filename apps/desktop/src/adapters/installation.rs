@@ -256,10 +256,10 @@ const WINDOWS_ZIMAGE_PROFILE: InstallProfile = InstallProfile {
     worker_wheel: WINDOWS_ZIMAGE_WORKER_WHEEL,
     worker_module: WINDOWS_ZIMAGE_WORKER_MODULE,
     worker_build_id: WINDOWS_ZIMAGE_WORKER_BUILD_ID,
-    engine: "Diffusers 0.36.0 / CUDA 12.6",
-    scheduler: "FlowMatchEulerDiscreteScheduler",
+    engine: studio_core::generation::Z_IMAGE_WINDOWS_ENGINE,
+    scheduler: studio_core::generation::Z_IMAGE_WINDOWS_SCHEDULER,
     probe_device: "gpu",
-    precision: "transformer+text_encoder=nf4;compute=bfloat16;vae=bfloat16",
+    precision: studio_core::generation::Z_IMAGE_WINDOWS_PRECISION,
     ready_relative: "installations/models/z-image-turbo-diffusers-cuda-nf4-v1.json",
     installing_relative: "installations/models/z-image-turbo-diffusers-cuda-nf4-v1.installing.json",
     probe_with_model: true,
@@ -822,6 +822,11 @@ impl Installation {
         if install_id != self.inner.profile.install_id {
             return Err("未登记的安装标识。".into());
         }
+        #[cfg(windows)]
+        if install_id != WINDOWS_ZIMAGE_INSTALL_ID {
+            return Err("此 Windows 版本仅开放已认证的 Z-Image 安装。".into());
+        }
+        #[cfg(not(windows))]
         if !cfg!(all(target_os = "macos", target_arch = "aarch64")) {
             return Err("此运行时仅验证 macOS arm64。".into());
         }
@@ -943,7 +948,11 @@ impl Installation {
                 },
             },
             device: DeviceSnapshot {
-                device_id: device.into(),
+                device_id: if self.inner.profile.install_id == WINDOWS_ZIMAGE_INSTALL_ID {
+                    studio_core::generation::Z_IMAGE_WINDOWS_DEVICE.into()
+                } else {
+                    device.into()
+                },
                 precision: self.inner.profile.precision.into(),
             },
             scheduler: self.inner.profile.scheduler.into(),
@@ -1036,7 +1045,11 @@ impl Installation {
                 arguments.push("--model-snapshot-id".into());
                 arguments.push(self.inner.model.id.clone());
             }
-            (self.runtime_dir().join("venv/bin/python3"), arguments)
+            #[cfg(windows)]
+            let program = self.runtime_dir().join("python.exe");
+            #[cfg(not(windows))]
+            let program = self.runtime_dir().join("venv/bin/python3");
+            (program, arguments)
         };
         Ok(ReadyPaths {
             worker_program,
@@ -1216,7 +1229,11 @@ impl Installation {
         // Only this fixed private identity is rebuilt; other activated versions survive.
         fs::remove_dir_all(&runtime).map_err(err)?;
         ensure_child_dir(&self.inner.paths.data, &runtime)?;
-        extract_runtime_archive(&self.cache().join(&interpreter.sha256), &runtime)?;
+        extract_runtime_archive(
+            &self.cache().join(&interpreter.sha256),
+            &runtime,
+            &interpreter.path,
+        )?;
         #[cfg(windows)]
         let python = {
             configure_embeddable_python(&runtime)?;
@@ -2434,8 +2451,8 @@ fn extract(archive: &Path, dest: &Path) -> Result<(), String> {
     Ok(())
 }
 
-fn extract_runtime_archive(archive: &Path, dest: &Path) -> Result<(), String> {
-    if archive
+fn extract_runtime_archive(archive: &Path, dest: &Path, artifact_path: &str) -> Result<(), String> {
+    if Path::new(artifact_path)
         .extension()
         .is_some_and(|extension| extension.eq_ignore_ascii_case("zip"))
     {
@@ -2634,6 +2651,148 @@ fn inventory(root: &Path, path: &Path, out: &mut Vec<InventoryEntry>) -> Result<
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "explicit acceptance: installs the complete Windows product closure from the Gate 0 validation cache"]
+    fn actual_windows_product_installs_from_the_validation_cache() {
+        let root = tempfile::tempdir().unwrap();
+        let paths = AppPaths::resolve(Some(root.path())).unwrap();
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .canonicalize()
+            .unwrap();
+        let runtime_source = repo.join("target/windows-gate0/downloads");
+        let model_source = repo.join("target/windows-gate0/model");
+        let worker_source =
+            repo.join("resources/windows-foundation/z-image-diffusers/studio_zimage_cuda_worker-0.1.0-py3-none-any.whl");
+        let manager = Installations::new(paths.clone()).unwrap();
+        let installer = manager.for_id(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        ensure_child_dir(&installer.inner.paths.cache, &installer.cache()).unwrap();
+
+        for artifact in installer.inner.runtime.downloads() {
+            if artifact.url == "bundled:worker-wheel" {
+                continue;
+            }
+            let source = runtime_source.join(&artifact.path);
+            verify(&source, artifact.bytes, &artifact.sha256).unwrap();
+            fs::hard_link(source, installer.cache().join(&artifact.sha256)).unwrap();
+        }
+        let worker = installer
+            .inner
+            .runtime
+            .wheels
+            .iter()
+            .find(|artifact| artifact.url == "bundled:worker-wheel")
+            .unwrap();
+        verify(&worker_source, worker.bytes, &worker.sha256).unwrap();
+        fs::hard_link(worker_source, installer.cache().join(&worker.sha256)).unwrap();
+        for artifact in installer.inner.model.downloads() {
+            let source = model_source.join(&artifact.path);
+            verify(&source, artifact.bytes, &artifact.sha256).unwrap();
+            fs::hard_link(source, installer.cache().join(&artifact.sha256)).unwrap();
+        }
+
+        let started = std::time::Instant::now();
+        manager.start(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(600);
+        loop {
+            let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+            if !matches!(
+                snapshot.phase.as_str(),
+                "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
+            ) {
+                break;
+            }
+            assert!(
+                std::time::Instant::now() < deadline,
+                "Windows product installation timed out in {}: {}",
+                snapshot.phase,
+                snapshot.error.as_deref().unwrap_or("no error")
+            );
+            std::thread::sleep(std::time::Duration::from_millis(250));
+        }
+        let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        assert_eq!(snapshot.phase, "ready", "{:?}", snapshot.error);
+        assert!(snapshot.runtime_ready && snapshot.model_ready && snapshot.device_verified);
+
+        let ready = installer.ready_paths().unwrap();
+        assert_eq!(ready.worker_module, WINDOWS_ZIMAGE_WORKER_MODULE);
+        assert_eq!(ready.worker_build_id, WINDOWS_ZIMAGE_WORKER_BUILD_ID);
+        assert_eq!(ready.runtime_lock_id, installer.inner.runtime.id);
+        assert_eq!(ready.model_snapshot_id, WINDOWS_ZIMAGE_INSTALL_ID);
+        assert!(ready.worker_program.is_file());
+        assert!(ready.model_path.join("model_index.json").is_file());
+        let environment = installer.plan_environment().unwrap();
+        assert!(!environment.components.is_empty());
+        assert_eq!(
+            environment.device.device_id,
+            studio_core::generation::Z_IMAGE_WINDOWS_DEVICE
+        );
+        assert_eq!(
+            environment.device.precision,
+            "transformer+text_encoder=nf4;compute=bfloat16;vae=bfloat16"
+        );
+
+        let record: ReadyRecord = serde_json::from_slice(
+            &fs::read(paths.data.join(installer.inner.profile.ready_relative)).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(record.probe["device"], "gpu");
+        let protocol_output = repo.join("verification/windows-gate0/product-install-protocol");
+        let protocol_report =
+            repo.join("verification/windows-gate0/product-install-worker-protocol.json");
+        let protocol = Command::new(&ready.worker_program)
+            .arg("-I")
+            .arg(repo.join("tools/zimage-cuda-worker/tests/run_real_protocol.py"))
+            .arg("--python")
+            .arg(&ready.worker_program)
+            .arg("--supervisor")
+            .arg(repo.join("target/debug/inference-supervisor.exe"))
+            .arg("--model")
+            .arg(&ready.model_path)
+            .arg("--output")
+            .arg(&protocol_output)
+            .arg("--report")
+            .arg(&protocol_report)
+            .arg("--prompt")
+            .arg("雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光")
+            .arg("--seed")
+            .arg("20261101")
+            .env("HF_HUB_OFFLINE", "1")
+            .env("TRANSFORMERS_OFFLINE", "1")
+            .env("HF_HUB_DISABLE_TELEMETRY", "1")
+            .env("DO_NOT_TRACK", "1")
+            .status()
+            .unwrap();
+        assert!(
+            protocol.success(),
+            "installed product worker protocol failed"
+        );
+        assert!(protocol_report.is_file());
+        atomic_json(
+            &repo.join("verification/windows-gate0/product-install.json"),
+            &serde_json::json!({
+                "schema_version": 1,
+                "kind": "windows-product-install",
+                "status": "passed",
+                "network_denied": std::env::var("STUDIO_ACCEPTANCE_NETWORK_DENIED").as_deref() == Ok("1"),
+                "elapsed_seconds": started.elapsed().as_secs_f64(),
+                "runtime_lock_id": ready.runtime_lock_id,
+                "worker_build_id": ready.worker_build_id,
+                "worker_wheel_sha256": worker.sha256,
+                "model_snapshot_id": ready.model_snapshot_id,
+                "model_files": installer.inner.model.files.len(),
+                "model_component_bytes": installer.inner.model.component_bytes,
+                "runtime_inventory_entries": record.runtime_files.len(),
+                "generation_components": environment.components.len(),
+                "probe": record.probe,
+                "worker_protocol_report": "verification/windows-gate0/product-install-worker-protocol.json",
+                "worker_protocol_output": "verification/windows-gate0/product-install-protocol",
+            }),
+        )
+        .unwrap();
+    }
+
     #[test]
     #[ignore = "explicit acceptance: requires all fixed runtime artifacts in validation cache"]
     fn actual_private_runtime_installs_offline_without_activating_missing_model() {
