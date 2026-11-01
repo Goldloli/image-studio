@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "app": "Image Studio Qwen Models.app",
+  "dataRoot": "target/qwen-moss-validation-20261101",
+  "platform": "Apple M3 Max / 128 GiB / macOS arm64",
+  "modelPage": {
+    "catalogCount": 7,
+    "implemented": 7,
+    "installed": 2,
+    "executable": 2,
+    "qwenBase": {
+      "status": "当前可执行",
+      "modelComponents": "文件齐备",
+      "runtime": "已就绪",
+      "deviceProbe": "已通过",
+      "verifiedDevice": "Apple M3 Max / 128 GiB / macOS arm64",
+      "screenshot": "models-base-verified.png"
+    },
+    "qwenTurbo": {
+      "status": "当前可执行",
+      "modelComponents": "文件齐备",
+      "runtime": "已就绪",
+      "deviceProbe": "已通过",
+      "verifiedDevice": "Apple M3 Max / 128 GiB / macOS arm64",
+      "screenshot": "models-turbo-verified.png"
+    }
+  },
+  "aspectControl": {
+    "available": ["1:1"],
+    "count": 1,
+    "fourByThreeExposed": false,
+    "screenshot": "base-aspect-1x1-only.png"
+  },
+  "nativeGenerations": [
+    {
+      "modelId": "qwen-image-2.1-turbo-mflux-v1",
+      "prompt": "一只戴红色围巾的小狐狸坐在雪松树下，冬日清晨，剪纸风格插画。",
+      "seed": 44,
+      "turnId": "turn-62bb0f6c99ee419bb5771e917cfee0b4",
+      "attemptId": "attempt-9e2e0963b0e942d1a1dbe26927425685",
+      "assetId": "asset-a51251d962d44f8687e3d07ac19dbbce",
+      "byteCount": 1725469,
+      "assetSha256": "af520df8b257e998306a5d19435f2802c367e2252ae4e056c21d724b960e2b2c",
+      "exportPath": "native-turbo-fox.png",
+      "exportSha256": "af520df8b257e998306a5d19435f2802c367e2252ae4e056c21d724b960e2b2c",
+      "screenshot": "turbo-result.png"
+    },
+    {
+      "modelId": "qwen-image-2.1-mflux-v1",
+      "prompt": "一座海边白色灯塔，黄昏，海鸥飞过，极简矢量海报。",
+      "seed": 44,
+      "turnId": "turn-8481dffb96a14817b54e60d13b8253ca",
+      "attemptId": "attempt-18b5812e19f346c98a637ff753850028",
+      "assetId": "asset-189a22d3828147f59a849ba1246c0c40",
+      "byteCount": 781488,
+      "assetSha256": "bcd5592155fa63bf4e45cd1002cf9c2e5ec4a83c2a6801c6da974cdf831cda55",
+      "exportPath": "native-base-lighthouse.png",
+      "exportSha256": "bcd5592155fa63bf4e45cd1002cf9c2e5ec4a83c2a6801c6da974cdf831cda55",
+      "screenshot": "base-result.png"
+    }
+  ],
+  "reopen": {
+    "passed": true,
+    "persistedTurns": 21,
+    "persistedBothNativeAssets": true,
+    "screenshot": "reopen.png"
+  },
+  "workerProcessesAfterCompletion": [],
+  "exportHashesMatch": true
+}
