@@ -19,7 +19,7 @@
 - **保持可审查**：按依赖顺序提交检查点；提交前运行与该单元相关的最小测试、lint 或构建，任务结束前再跑完整质量门。禁止把已知失败或无关改动伪装成已完成提交。
 - **不混入无关工作**：使用精确路径暂存，提交前检查 `git diff --cached`；其他代理、用户或未确认 OpenSpec change 的改动不得顺手带入。
 - **提交信息**：使用 Conventional Commits，例如 `feat:`、`fix:`、`test:`、`docs:`、`refactor:`、`chore:`；标题写结果，正文在需要时说明原因和验证。
-- **不做远程操作**：本地 commit 可直接执行；push、pull、Dolt 远程同步仍须用户明确授权。当前仓库无 remote。
+- **远程操作须明确授权**：本地 commit 可直接执行；push、pull、Dolt 远程同步仍须用户明确授权。GitHub 私有仓库为 `Goldloli/image-studio`，`origin` 指向 `https://github.com/Goldloli/image-studio.git`。用户于 2026-11-01 授权创建并首次推送源码，供 Windows 端接续开发；该授权不自动扩展为后续任意推送或 Dolt 远程同步。
 
 ---
 

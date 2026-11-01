@@ -8,7 +8,8 @@ context: |
   每次新增或修改功能先完成 proposal、spec delta、design、tasks，并展示后等待用户确认。
   文档齐全、CLI 显示可 apply 或校验通过均不等于用户批准，不得据此自动开始实现。
   Beads 管理实际任务与持久交接；OpenSpec tasks 仅映射该 change 的实现及验收范围。
-  遵守 AGENTS.md 的 Git 权限：未获明确授权不提交或推送；当前无 remote，不做远程同步。
+  遵守 AGENTS.md 的 Git 权限：用户已授权小步本地提交；push、pull 与 Dolt 远程同步仍须明确授权。
+  GitHub 私有 origin 为 Goldloli/image-studio；2026-11-01 的首次源码推送已获授权，不代表后续任意推送或 Dolt 同步均获授权。
 
 rules:
   proposal:
