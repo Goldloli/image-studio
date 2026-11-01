@@ -29,6 +29,7 @@ import {
   ZoomOut,
 } from 'lucide-react';
 import { listen } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import {
   api,
   assetUrl,
@@ -483,6 +484,17 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     if (studio.activeConversationId) setTurnPages({ [studio.activeConversationId]: { turns: studio.turns, hasMore: studio.turnsHasMore, nextCursor: studio.turnsNextCursor } });
     setLoaded(true);
   }, [studio]);
+
+  useEffect(() => {
+    if (!native || !loaded) return;
+    let frame: number | undefined;
+    void getCurrentWindow().setFocus().finally(() => {
+      frame = requestAnimationFrame(() => textarea.current?.focus());
+    });
+    return () => {
+      if (frame !== undefined) cancelAnimationFrame(frame);
+    };
+  }, [loaded]);
 
   useEffect(() => {
     if (!studio) return;
