@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "caseId": "R02",
+  "date": "2026-11-01",
+  "status": "passed",
+  "sourceDataRoot": "target/first-generation-validation",
+  "validationDataRoot": "target/qwen-moss-r02-legacy-20261101",
+  "sourceRecordSha256": "6c6e55f57f5eae6c9c7bf68d508a08f2abedbc7260fedd4abfbdb5d817bb3f3d",
+  "job": {
+    "jobId": "job-de0914daf82245cdb4e1b6e2a8d6cfe6",
+    "oldAttemptId": "attempt-6e8e0b75bb1e43988a2644d0b94bc868",
+    "oldStateBefore": "cancelled",
+    "oldStateAfter": "cancelled",
+    "newAttemptId": "attempt-4a5aac3ba2734287b2e4e6d2497acdfa",
+    "newState": "succeeded",
+    "modelVariantId": "z-image-turbo-q4",
+    "runtimePackageId": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+    "steps": 9,
+    "quantization": 4,
+    "seed": 46,
+    "prompt": "一只橙色小猫在安静窗台上，秋日暖光，简洁水彩插画。"
+  },
+  "immutability": {
+    "requestUnchanged": true,
+    "oldPlanUnchanged": true,
+    "oldManifestUnchanged": true,
+    "newPlanMatchesOld": true,
+    "oldAssetSetChanged": false,
+    "requestSha256": "dee5715f6ccd147de88a40782f09db549fd9e2992c9bc8a69026351368e08b76",
+    "oldPlanSha256": "2b4bff3fc84e46da969c924627198165d5d6d1998d0f04b6483ea6febde0d268",
+    "oldManifestSha256": "ea6b94d5b4d2a59f4ec7d3dc714c8955a0a80303a1b7793e20d171ec2051c0c0"
+  },
+  "retryResult": {
+    "assetId": "asset-82c35ee8fe274e98b92363f5e26d5a41",
+    "relativePath": "assets/asset-0fcaed19d70b48abaf9f4cffa5718b1c.png",
+    "width": 1024,
+    "height": 1024,
+    "byteCount": 1146842,
+    "sha256": "66bffc6738abd099c1cadfdf80a516768f6071e9367596ee6ce720eacd3bef0b",
+    "evidence": "r02/v1-retry-result.png"
+  },
+  "counts": {
+    "before": {
+      "jobs": 17,
+      "attempts": 24,
+      "assets": 16
+    },
+    "after": {
+      "jobs": 17,
+      "attempts": 25,
+      "assets": 17
+    }
+  },
+  "relocationNote": "The copied test root retargeted only the venv/bin/python3 symlink and its activation inventory entry to the copied private runtime so the original root remained unchanged; model, plan, manifest and runtime package identities were preserved.",
+  "evidence": {
+    "preRetry": "r02/pre-retry.json",
+    "postRetry": "r02/post-retry.json",
+    "nativeTask": "r02/task-retry-succeeded.jpg",
+    "historicalExport": "u07-history-export.png"
+  }
+}
