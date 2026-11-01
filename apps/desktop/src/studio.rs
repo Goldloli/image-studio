@@ -431,6 +431,43 @@ impl StudioService {
                 })
             },
         );
+        #[cfg(windows)]
+        let runtime_name = "Diffusers CUDA + private Python";
+        #[cfg(not(windows))]
+        let runtime_name = "MFLUX / MLX + ONNX Runtime CPU + ncnn Vulkan";
+        #[cfg(windows)]
+        let runtime_version = "Diffusers 0.36.0 / PyTorch 2.10.0 / CUDA 12.6";
+        #[cfg(not(windows))]
+        let runtime_version = "0.24.0 / 1.31.1 / 0.2.0";
+        #[cfg(windows)]
+        let python_version = "3.12.10";
+        #[cfg(not(windows))]
+        let python_version = "3.13.12";
+        #[cfg(windows)]
+        let model_sources: Vec<String> = vec![
+            "Z-Image Turbo · ModelScope Tongyi-MAI/Z-Image-Turbo · 逐文件等价核验 · Apache-2.0"
+                .into(),
+            "FLUX.2 Klein 4B distilled · 当前 Windows 版本尚未接入".into(),
+            "BiRefNet general epoch_244 · 当前 Windows 版本尚未接入".into(),
+            "Real-ESRGAN x4plus · 当前 Windows 版本尚未接入".into(),
+            "Qwen-Image 2.1 · 当前 Windows 版本尚未接入".into(),
+            "Qwen-Image 2.1 Turbo · 当前 Windows 版本尚未接入".into(),
+            "MOSS-Image-SFT · 当前 Windows 版本尚未接入".into(),
+        ];
+        #[cfg(not(windows))]
+        let model_sources: Vec<String> = vec![
+            "Z-Image Turbo · Tongyi-MAI/Z-Image-Turbo · Apache-2.0".into(),
+            "FLUX.2 Klein 4B distilled · black-forest-labs/FLUX.2-klein-4B · Apache-2.0".into(),
+            "BiRefNet general epoch_244 · ZhengPeng7/BiRefNet v1 · MIT".into(),
+            "Real-ESRGAN x4plus · official ncnn package v0.2.5.0 · BSD-3-Clause".into(),
+            "Qwen-Image 2.1 · Qwen/Qwen-Image-2.1 · qwen-research".into(),
+            "Qwen-Image 2.1 Turbo · Qwen/Qwen-Image-2.1-Turbo · qwen-research".into(),
+            "MOSS-Image-SFT · OpenMOSS-Team/MOSS-Image-SFT · Apache-2.0".into(),
+        ];
+        #[cfg(windows)]
+        let capability_scope = "Windows 首轮仅接入 Z-Image Turbo Diffusers CUDA NF4 文生图；其余六型号当前不可安装或执行。";
+        #[cfg(not(windows))]
+        let capability_scope = "Z-Image Turbo、FLUX.2 Klein 4B、BiRefNet epoch_244、Real-ESRGAN x4plus、Qwen-Image 2.1 基础版/Turbo 与 MOSS-Image-SFT 已接入本地安装与执行链路。";
         Ok(json!({
             "preferences": preferences,
             "catalog": catalog,
@@ -438,9 +475,9 @@ impl StudioService {
             "environment": {
                 "platform": std::env::consts::OS,
                 "architecture": std::env::consts::ARCH,
-                "runtimeName": "MFLUX / MLX + ONNX Runtime CPU + ncnn Vulkan",
-                "runtimeVersion": "0.24.0 / 1.31.1 / 0.2.0",
-                "pythonVersion": "3.13.12",
+                "runtimeName": runtime_name,
+                "runtimeVersion": runtime_version,
+                "pythonVersion": python_version,
                 "diagnosticsEnabled": diagnostics_enabled,
                 "runtime": runtime
                 ,"runtimes": runtime_list
@@ -454,16 +491,8 @@ impl StudioService {
                 "storageMigrationSupported": false,
                 "examples": "风景、静物、插画为应用内嵌原创示例，不是本机生成结果。",
                 "fontLicense": "Noto Sans CJK SC · SIL Open Font License 1.1",
-                "modelSources": [
-                    "Z-Image Turbo · Tongyi-MAI/Z-Image-Turbo · Apache-2.0",
-                    "FLUX.2 Klein 4B distilled · black-forest-labs/FLUX.2-klein-4B · Apache-2.0",
-                    "BiRefNet general epoch_244 · ZhengPeng7/BiRefNet v1 · MIT",
-                    "Real-ESRGAN x4plus · official ncnn package v0.2.5.0 · BSD-3-Clause",
-                    "Qwen-Image 2.1 · Qwen/Qwen-Image-2.1 · qwen-research",
-                    "Qwen-Image 2.1 Turbo · Qwen/Qwen-Image-2.1-Turbo · qwen-research",
-                    "MOSS-Image-SFT · OpenMOSS-Team/MOSS-Image-SFT · Apache-2.0"
-                ],
-                "capabilityScope": "Z-Image Turbo、FLUX.2 Klein 4B、BiRefNet epoch_244、Real-ESRGAN x4plus、Qwen-Image 2.1 基础版/Turbo 与 MOSS-Image-SFT 已接入本地安装与执行链路。"
+                "modelSources": model_sources,
+                "capabilityScope": capability_scope
             }
         }))
     }
@@ -2161,6 +2190,56 @@ mod tests {
             assert_eq!(planned["canInstall"], true);
         }
         assert_eq!(planned["executable"], false);
+    }
+
+    #[test]
+    fn settings_snapshot_reports_the_current_platform_runtime() {
+        let (_root, service) = fixture();
+        let snapshot = service.settings_snapshot(false).unwrap();
+        assert_eq!(snapshot["catalog"]["counts"]["total"], 7);
+        assert_eq!(
+            snapshot["about"]["modelSources"].as_array().unwrap().len(),
+            7
+        );
+        #[cfg(windows)]
+        {
+            assert_eq!(
+                snapshot["environment"]["runtimeName"],
+                "Diffusers CUDA + private Python"
+            );
+            assert_eq!(snapshot["environment"]["pythonVersion"], "3.12.10");
+            assert_eq!(
+                snapshot["environment"]["runtimes"]
+                    .as_array()
+                    .unwrap()
+                    .len(),
+                1
+            );
+            assert_eq!(
+                snapshot["environment"]["runtimes"][0]["installId"],
+                WINDOWS_ZIMAGE_INSTALL_ID
+            );
+            assert!(
+                snapshot["about"]["capabilityScope"]
+                    .as_str()
+                    .is_some_and(|scope| scope.contains("仅接入 Z-Image"))
+            );
+        }
+        #[cfg(not(windows))]
+        {
+            assert_eq!(
+                snapshot["environment"]["runtimeName"],
+                "MFLUX / MLX + ONNX Runtime CPU + ncnn Vulkan"
+            );
+            assert_eq!(snapshot["environment"]["pythonVersion"], "3.13.12");
+            assert_eq!(
+                snapshot["environment"]["runtimes"]
+                    .as_array()
+                    .unwrap()
+                    .len(),
+                7
+            );
+        }
     }
 
     #[test]
