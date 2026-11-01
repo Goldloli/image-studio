@@ -1,10 +1,10 @@
 # Windows 首轮验收计划
 
-状态：仅计划，**全部未运行**。本轮没有 Windows 构建、安装或模型证据。执行顺序和实现边界见 [tasks.md](tasks.md)、[design.md](design.md)。
+状态：仅计划，**验收用例全部未运行**。2026-11-01 已完成目标机只读环境预检，但没有 Windows 构建、安装或模型证据，预检快照不计为用例通过。执行顺序和实现边界见 [tasks.md](tasks.md)、[design.md](design.md)。
 
 ## 目标与通用记录
 
-主认证设备固定为用户的 Windows 10 x64 / RTX 3080 Ti 12 GB / 32 GB RAM / i7-13700K。本地 NTFS 卷、实际 OS build、驱动和 WebView2 版本在首轮采集；Win11、WSL、Mac、CI 或大显存 GPU 的结果只能作为补充。
+主认证设备固定为用户的 Windows 10 x64 / RTX 3080 Ti 12 GB / 32 GB RAM / i7-13700K。只读预检确认 Windows 10 Pro 22H2 `10.0.19045.6466`、RTX 3080 Ti `12288 MiB`/driver `596.49`/sm86、31.73 GiB 系统可见物理内存、本地 NTFS 和 WebView2 `156.0.4314.58`；系统同时存在 Intel UHD 770。预检值须由批准后的 G01 重新记录并关联证据，Win11、WSL、Mac、CI 或大显存 GPU 的结果只能作为补充。
 
 每项记录 case ID、时间、平台、命令/原生操作、预期/实际、pass/fail/not_run/blocked、证据路径、二进制/依赖锁摘要。涉及推理的项目另存 profile/runtime/snapshot/worker、原 request/plan、Attempt、manifest、PNG/Asset 摘要、采样阶段与资源数据。假 worker 与真实模型分开标识，不互相替代。
 
@@ -14,7 +14,7 @@
 
 | ID | 验证 | 通过条件 |
 |---|---|---|
-| G01 | 采集目标系统、sm86 GPU、驱动、RAM、分页文件、磁盘和工具链 | 精确报告与目标一致，未知项不填推测值 |
+| G01 | 批准后重采目标系统、sm86 CUDA GPU、驱动、RAM、分页文件、磁盘、WebView2和工具链，并区分 RTX 与 Intel UHD 770 | 精确报告与目标一致，记录 NVIDIA 名称/PCI bus/compute capability/显存；未知项不填推测值，空闲预检快照不替代 Gate 0 条件 |
 | G02 | 官方 Windows wheel 闭包、DLL/CUDA/BF16/NF4 小算子 | 来源/版本/摘要完整，本机算子通过；记录不等于整模型通过 |
 | G03 | 同官方 revision 补齐 Diffusers 完整组件 | 所需 pipeline/scheduler/tokenizer/权重均离线可读，逐文件核验，无运行时补件 |
 | G04 | A，必要时 B 的隔离上游同机真实生成 | 只在批准的两候选内实验，固定 1024²/单张/9步/CFG0，选定唯一组合 |
@@ -63,7 +63,7 @@ Gate 0 不通过则不执行模型产品化；保留可重现失败记录并报�
 
 | ID | 验证 | 通过条件 |
 |---|---|---|
-| P01 | 安装目录原生 UI 中英文提示词和连续三次任务 | 真实方图、单张、seed/采样/组件记录准确，对比同配置上游基线审阅质量；连续任务独立释放 |
+| P01 | 安装目录原生 UI 中英文提示词和连续三次任务 | 真实方图、单张、seed/采样/组件记录准确，执行设备明确为 RTX 3080 Ti CUDA 而非 Intel UHD 770，对比同配置上游基线审阅质量；连续任务独立释放 |
 | P02 | 16KiB 字节边界、实际含模板511/512/513 token、非法参数 | 上界内接受、超界拒绝；完整输入保留，非方图/多图/源图不静默调整 |
 | P03 | 双击/IPC重发、跨会话忙碌和生成中编辑下一条 | 唯一 Job、单活动、当前冻结请求不被新草稿改写 |
 | P04 | OOM/超时/坏候选/文件提交失败 | 错误可区分，回收完整；无换模型/精度/尺寸/纯CPU自动重试；无伪 Asset |

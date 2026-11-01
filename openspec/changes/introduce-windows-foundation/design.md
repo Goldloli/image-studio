@@ -1,6 +1,6 @@
 ## Context
 
-动机与范围见 [proposal.md](proposal.md)。目标设备为用户确认的 Win10 x64 / RTX 3080 Ti 12 GB / 32 GB RAM / i7-13700K。仓库已经具备跨后端协议、安装器和事务资产合同，但当前路径、归档、运行时、监督及验收脚本含 macOS/Unix 假设；前端浏览器测试不能覆盖 WebView2 和 Win32 行为。
+动机与范围见 [proposal.md](proposal.md)。目标设备为用户确认的 Win10 x64 / RTX 3080 Ti 12 GB / 32 GB RAM / i7-13700K；2026-11-01 的只读预检已确认这些基础硬件和 Windows 10 22H2 条件，但没有据此证明模型可执行。仓库已经具备跨后端协议、安装器和事务资产合同，但当前路径、归档、运行时、监督及验收脚本含 macOS/Unix 假设；前端浏览器测试不能覆盖 WebView2 和 Win32 行为。
 
 现有 Z-Image 清单约 32.85 GB，transformer 原始 shard 合计约 24.62 GB；不能先构造完整未量化模型副本再认为 32 GB RAM 足够。完整 Windows 组件闭包还需固定 revision 的 `model_index.json`、scheduler 配置及该 pipeline 实际读取的文件。具体事实与一手资料见 [sources.md](sources.md)。
 
@@ -27,7 +27,7 @@
 
 ### 2. Gate 0 先证明 12 GB/32 GB 可行，再做产品接入
 
-Gate 0 在批准后执行，允许隔离实验工具和固定组件下载，不先暴露产品安装/发送按钮。先记录实际 OS build、驱动、sm86、独显可用量、RAM、分页文件、磁盘和依赖闭包；候选依赖以官方 Windows x64 wheel、Python 3.12、CUDA 12.x 兼容路线为起点，最终 patch 版本由同机实验冻结。
+Gate 0 在批准后执行，允许隔离实验工具和固定组件下载，不先暴露产品安装/发送按钮。只读预检已经取得 OS build、驱动、sm86、RAM、分页文件、磁盘和 WebView2 等环境快照；Gate 0 仍须在实际执行条件下重新采集并关联用例证据，不能把快照当资源或兼容结果。候选依赖以官方 Windows x64 wheel、Python 3.12、CUDA 12.x 兼容路线为起点，最终 patch 版本由同机实验冻结。
 
 首选实验配置 A：transformer 与 text encoder 的适用 Linear 使用 bitsandbytes 4-bit NF4，计算 dtype 候选 BF16，保持原始模型组件；通过 Accelerate/Diffusers 的组件级 CPU 卸载按编码、采样、VAE 顺序使用单 GPU，启用固定 VAE tiling。低内存 shard 加载必须覆盖“加载时量化”的 CPU 峰值。VAE 与非 Linear 权重不能标成已经全部 4-bit。
 
@@ -36,6 +36,8 @@ Gate 0 在批准后执行，允许隔离实验工具和固定组件下载，不�
 首轮不要求 FlashAttention、xformers、Triton、`torch.compile` 或本机编译 CUDA 扩展；使用选定 PyTorch 的内置 attention 路线并记录实际 kernel 策略。Windows 产品运行不依赖完整 CUDA Toolkit 或用户系统 Python；开发构建需要的 MSVC 工具与用户运行依赖分开。
 
 资源门槛为本提案的工程选择：CUDA peak reserved ≤10.5 GiB、worker/监督进程树 private commit 峰值 ≤24 GiB、系统可用物理内存最低 ≥2 GiB，且在 12 GB 独显完成真实运算，无 OOM/崩溃。CUDA 指标按进程采集并在阶段边界同步；CPU/系统采样间隔至多 100 ms，明确这是采样观测值。另录 WDDM dedicated/shared 使用量、系统 commit/limit 和换页观测；若 WDDM 无法提供可信 per-process 值，记录限制，以重复实图和 allocator/系统数据共同判断，不伪造精度。
+
+目标机同时枚举到 RTX 3080 Ti 与 Intel UHD 770。Gate 0 与正式 worker 必须按 CUDA 设备名称、PCI bus、compute capability 和显存核对实际执行设备，不能把 Windows 适配器序号、桌面默认适配器或枚举顺序当作执行身份。Intel GPU 不在本轮推理范围，也不得作为 CUDA 不可用时的回退。
 
 一次首次加载和连续三次独立进程生成均须通过；后续三次允许文件系统缓存，不共享已加载模型，不靠人工清理或扩大硬件。沿用现有加载 600 秒、执行 900 秒的有界失败策略，不先承诺交互速度。若达不到预算或时限，需要调整规范而不是提高限额冒充通过。
 
@@ -81,11 +83,11 @@ Windows worker 使用独立 build/capability/runtime 身份及 generation v2 新
 
 ### 8. Win10 本机构建和内部安装包
 
-固定 Rust/Node 工具链与锁文件，在目标 Win10 或匹配的 Windows 构建机执行 MSVC 全工作区构建，打包 host/supervisor/diagnostic `.exe`、字体、图标和前端。NSIS 采用 per-user 安装；通过平台配置移除 Mac 特有窗口参数，使用可工作的原生最小化/最大化/关闭与拖拽区域，不绘制装饰性假控制钮。
+固定 Rust/Node 工具链与锁文件，在目标 Win10 或匹配的 Windows 构建机执行 MSVC 全工作区构建，打包 host/supervisor/diagnostic `.exe`、字体、图标和前端。Rust 由 `rust-toolchain.toml` 固定；Node/npm 当前尚无仓库级版本约束，实施前须在 Windows 预检版本基础上明确可复现范围并加入对应版本声明。NSIS 采用 per-user 安装；通过平台配置移除 Mac 特有窗口参数，使用可工作的原生最小化/最大化/关闭与拖拽区域，不绘制装饰性假控制钮。
 
 采用 offlineInstaller 方式提供缺失 WebView2 时的离线安装依赖；打包时固定依赖版本与内容摘要，实测有/无 WebView2 分支以及权限不足的恢复提示。主程序不捆绑模型权重，首次启动不准备 Python/CUDA。升级覆盖程序而保留数据；卸载只移除程序，保留用户数据、模型与作品。本 change 产物明确标成内部测试包，不宣称已签名发布。
 
-运行验收必须覆盖从 NSIS 安装目录启动，不能只测 `target/debug`。Mac 交叉检查可早做，但目标机 GUI、IME、WDDM 和进程清理必须另有证据。仓库当前无 remote，不新增 push、CI 云账户或远程同步要求。
+运行验收必须覆盖从 NSIS 安装目录启动，不能只测 `target/debug`。Mac 交叉检查可早做，但目标机 GUI、IME、WDDM 和进程清理必须另有证据。仓库已配置 `origin`，历史源码推送不授权本 change 的后续 push、pull、CI 云账户或 Dolt 远程同步；这些远程操作仍须单独授权。
 
 ## Risks / Trade-offs
 
@@ -95,6 +97,7 @@ Windows worker 使用独立 build/capability/runtime 身份及 generation v2 新
 | 低显存方案把压力转移到 32 GB RAM 或加载副本 | 同时量测加载、编码、采样、解码的 GPU/CPU/系统峰值，预算不通过就停止 |
 | CUDA/WDDM 的共享内存或分页导致看似成功但不可用 | 记录系统与 WDDM 观测、三次独立执行和时限，不能只报 Torch allocated |
 | Win10 的实际 build、驱动或 DLL 与 wheel 不匹配 | 先采集并冻结依赖闭包；不可满足时报告条件，不默认要求用户升 Win11 |
+| 双适配器环境把 Intel 核显或错误枚举项当成执行设备 | 按 CUDA 名称、PCI bus、compute capability 与显存记录并绑定 NVIDIA 设备，不依赖系统适配器序号 |
 | 路径重解析、独占文件和替换语义不同 | 原生句柄边界和 NTFS 集成验收，覆盖中文路径/占用/越界/失败原文件保持 |
 | Job 句柄泄漏或继承使强杀留下计算 | 启动竞争、宿主/监督/worker 强杀和 descendant 故障测试，保持租约直至确认清理 |
 | 共用代码破坏 Mac 七型号 | Mac 质量门加真实 Z-Image 生命周期及其他六型号各一条能力回归；Klein含编辑、BiRefNet含mask |
@@ -109,6 +112,6 @@ Windows worker 使用独立 build/capability/runtime 身份及 generation v2 新
 
 ## 实施前提与可延后采集项
 
-当前没有目标 Windows 会话或访问方式。该事实只限制执行 Windows 任务，不限制文档准备；提供会话后才可以进行目标机工作，不假定能从当前 Mac 直接访问。
+2026-11-01 已在目标 Windows 会话完成只读环境预检，但没有用户对本 change 的实施批准，也没有 Windows 构建、原生启动、模型安装或推理证据。当前事实状态只允许继续文档修订和准备；批准后才可建立实施任务并执行 Gate 0。
 
-实际系统 build、驱动、磁盘及所有依赖 patch 版本在 Gate 0 采集并冻结，不是现在承诺的兼容范围。它们若导致更换模型、后端家族、平台、输出或预算，必须修订提案并重新确认。这里没有以“以后再定”为由省略首轮交付范围。
+系统 build、驱动、磁盘和工具链的预检值见 [sources.md](sources.md)，但所有依赖 patch 版本仍须在 Gate 0 冻结，当前预检不是兼容范围。实际条件若导致更换模型、后端家族、平台、输出或预算，必须修订提案并重新确认。这里没有以“以后再定”为由省略首轮交付范围。
