@@ -299,7 +299,10 @@ mod tests {
             .iter()
             .find(|entry| entry["featureId"] == "text-to-image")
             .unwrap();
-        assert_eq!(text["modelId"], studio_core::generation::Z_IMAGE_WINDOWS_MODEL);
+        assert_eq!(
+            text["modelId"],
+            studio_core::generation::Z_IMAGE_WINDOWS_MODEL
+        );
         assert_eq!(text["productStatus"], "implemented");
         assert_eq!(text["state"], "model-missing");
         for entry in result["entries"].as_array().unwrap() {
