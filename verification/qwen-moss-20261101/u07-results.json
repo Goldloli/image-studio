@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "caseId": "U07",
+  "date": "2026-11-01",
+  "status": "passed",
+  "newIncompleteInstall": {
+    "dataRoot": "target/qwen-moss-u07-incomplete-20261101",
+    "selectedModelId": "qwen-image-2.1-mflux-v1",
+    "movedComponent": {
+      "path": "models/qwen-image-2.1-d26bb61231c349cf6b7896fa83353113880e1ba3/model_index.json",
+      "sha256": "cf1ecd104ea090855d60d8cec0895c1e9d6ee41b2f87e231b678beecd1cf7809",
+      "backupPath": "u07-moved-component/model_index.json"
+    },
+    "modelStatus": "安装文件缺失或身份异常",
+    "modelComponents": "尚未齐备",
+    "runtime": "未就绪",
+    "selectedModelPreserved": true,
+    "fellBackToZImage": false,
+    "sendDisabled": true,
+    "submitFeedback": "模型未就绪",
+    "countsBefore": {
+      "jobs": 41,
+      "attempts": 47,
+      "assets": 42
+    },
+    "countsAfter": {
+      "jobs": 41,
+      "attempts": 47,
+      "assets": 42
+    }
+  },
+  "oldIncompleteInstall": {
+    "dataRoot": "target/qwen-moss-u07-old-incomplete-20261101",
+    "sourceDataRoot": "target/first-generation-validation",
+    "selectedModelId": "z-image-turbo-mflux-v1",
+    "modelStatus": "安装文件缺失或身份异常",
+    "executable": false,
+    "selectedModelPreserved": true,
+    "fellBackToAnotherModel": false,
+    "historicalWorksVisible": 16,
+    "historicalAssetsVisible": 16,
+    "schemaMigratedWithoutDroppingHistory": true
+  },
+  "historicalExport": {
+    "assetId": "asset-3b37b423b9614923878b2fbfdd8e9afa",
+    "turnId": "turn-history-1",
+    "path": "u07-history-export.png",
+    "width": 1024,
+    "height": 1024,
+    "sha256": "b43c302c6228190f4458f169123b8a2cc56abc1a5a6c00d1d6aed50925f4796d",
+    "matchesAsset": true,
+    "systemSavePanel": true
+  },
+  "checks": {
+    "newIncompleteInstallKeepsSelectedModel": true,
+    "clearBlockingReasonVisible": true,
+    "blockedSubmitCreatesNoJob": true,
+    "oldIncompleteInstallDoesNotFallback": true,
+    "historicalImagesRemainVisible": true,
+    "historicalImageRemainsExportable": true
+  },
+  "evidence": {
+    "newIncompleteModel": {
+      "path": "u07-incomplete-model.jpg",
+      "sha256": "1689fb65951fc836dae8e50562a5127ea95ab687d9673e405c56cb3de856ec82"
+    },
+    "newIncompleteComposer": {
+      "path": "u07-incomplete-composer.jpg",
+      "sha256": "a188678725a5be9d1973b2ca8a5f67363abcc1f493e214caf6850a5a2304de79"
+    },
+    "oldIncompleteModel": {
+      "path": "u07-old-incomplete-model.jpg",
+      "sha256": "dbb7d6b00040efb27d2e038195ca462ad466b89231c552a17f379caf2d11eadb"
+    },
+    "oldIncompleteComposer": {
+      "path": "u07-old-incomplete-composer.jpg",
+      "sha256": "8db2511f87eb8005a86b7917fde592fa030b2a0ee2e023f3d3240fbf87f00e17"
+    },
+    "oldIncompleteHistory": {
+      "path": "u07-old-incomplete-history.jpg",
+      "sha256": "97c1850373b995ef37258ff57c548dd43583421194f0963ab19d9c372b79191d"
+    },
+    "historicalViewer": {
+      "path": "u07-history-view.jpg",
+      "sha256": "2a2d1c600762c45d0920c5d9acc7eee12da9d21ad6f4c010c79b5d44f3af22de"
+    }
+  }
+}
