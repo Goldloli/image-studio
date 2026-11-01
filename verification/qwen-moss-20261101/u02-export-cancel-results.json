@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "caseId": "U02-cancel-export",
+  "app": "Image Studio MOSS Native",
+  "bundleId": "local.image-studio.moss-native.dev",
+  "dataRoot": "target/qwen-moss-validation-20261101",
+  "asset": {
+    "assetId": "asset-0bc1e976030e47218afc7acf9695e270",
+    "modelId": "qwen-image-2.1-mflux-v1",
+    "prompt": "蓝天下的一座玻璃温室，植物繁茂，清晨薄雾。",
+    "width": 1024,
+    "height": 1024
+  },
+  "operation": {
+    "systemSavePanelOpened": true,
+    "cancelButton": "Cancel",
+    "uiFeedback": "已取消导出，原作品未改变。",
+    "fileWritten": false
+  },
+  "spotCheck": {
+    "before": {
+      "allAssets": 42,
+      "primaryAssets": 41,
+      "maskAssets": 1,
+      "jobs": 41,
+      "attempts": 47
+    },
+    "after": {
+      "allAssets": 42,
+      "primaryAssets": 41,
+      "maskAssets": 1,
+      "jobs": 41,
+      "attempts": 47
+    },
+    "unchanged": true
+  },
+  "evidence": {
+    "systemSavePanel": {
+      "path": "u02-export-save-panel.jpg",
+      "sha256": "e8e9e66f5cb960798d97a5687cbd40ca9d5089737bc516d3e9172b875f28ebf9",
+      "pixelWidth": 740,
+      "pixelHeight": 420
+    },
+    "cancelledState": {
+      "path": "u02-export-cancel.jpg",
+      "sha256": "cc6ccf877b0a89dd2d7d251553c4eea394ba7270ef0098e30d1ce5f5084b1d90",
+      "pixelWidth": 1920,
+      "pixelHeight": 1280
+    }
+  }
+}
