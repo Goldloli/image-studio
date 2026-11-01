@@ -1,6 +1,6 @@
 # 来源、精确变体与研究边界
 
-初次核对：2026-10-30；固定revision/许可元数据复核：2026-10-31；ModelScope逐文件内容身份核验与正式执行：2026-11-01，Asia/Shanghai。最终执行结论见[MOSS/整批阶段报告](../../../verification/qwen-moss-20261101/moss-stage-report.md)。
+初次核对：2026-10-30；固定revision/许可元数据复核：2026-10-31；ModelScope逐文件内容身份核验与正式执行：2026-11-01，Asia/Shanghai。最终执行结论见[MOSS/整批阶段报告](../../../../verification/qwen-moss-20261101/moss-stage-report.md)。
 
 ## 1. 型号身份
 
@@ -53,7 +53,7 @@ Qwen 旧版、其他 Turbo/LoRA、编辑/控制分支不因名称相近而纳入
 
 ## 6. 接入顺序修订
 
-2026-10-31用户明确要求先接通并测试三个计划型号，再到Qwen/MOSS；前置已于2026-11-01认证并归档，用户随后明确恢复本方案实施。最新固定revision及许可元数据见[本次复核](../archive/2026-11-01-integrate-planned-models/references/hf-and-runtime-metadata.json)。
+2026-10-31用户明确要求先接通并测试三个计划型号，再到Qwen/MOSS；前置已于2026-11-01认证并归档，用户随后明确恢复本方案实施。最新固定revision及许可元数据见[本次复核](../2026-11-01-integrate-planned-models/references/hf-and-runtime-metadata.json)。
 
 ## 7. 默认国内分发源
 
