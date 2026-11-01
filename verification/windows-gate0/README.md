@@ -94,6 +94,29 @@ Reports:
 - [Cancellation and supervisor-kill recovery](product-cancel-recovery.json)
 - [Post-recovery asset](product-recovery.png)
 
-This is a cache-seeded installation acceptance, not a measure of empty-cache
-download time. Network denial, clean-user installation, complete IME/DPI
+That product closure used immutable validation-cache bytes. A separate
+empty-cache acceptance exercised the production ModelScope URLs and runtime
+sources without seeding or copying any artifact:
+
+- all `32,848,319,217` declared model download bytes and
+  `2,713,862,823` runtime bytes were fetched into a new root;
+- all 20 model files and 39 runtime artifacts passed their fixed byte counts
+  and SHA-256 identities before installation;
+- private runtime installation, full inventory and the real GPU/NF4 probe
+  reached the same runtime, worker and model identities as the cache-seeded
+  installation;
+- the run took `1047.50` seconds and the model source was exclusively
+  `www.modelscope.cn`; Hugging Face remained provenance metadata only.
+
+ModelScope closed several long-lived CDN responses before a segmented object
+completed. The installer now resumes each incomplete segment from its verified
+prefix with bounded retries instead of failing the whole installation.
+
+Report:
+
+- [Empty-cache ModelScope install](product-empty-cache-install.json)
+
+Empty-cache activation is now evidenced; deliberate interruption and
+resumption, bad digest/missing-file/space failures, installation cancellation,
+network-denied cache installation, clean-user installation, complete IME/DPI
 interaction and Mac regression remain separate pending gates.
