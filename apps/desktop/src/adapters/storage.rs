@@ -125,10 +125,22 @@ pub fn open_location(paths: &AppPaths, id: &str) -> Result<(), String> {
             Err(format!("系统未能打开{}目录", category.label))
         }
     }
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(windows)]
+    {
+        use std::process::{Command, Stdio};
+        Command::new("explorer.exe")
+            .arg(&path)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .map_err(|error| format!("无法打开{}目录：{error}", category.label))?;
+        Ok(())
+    }
+    #[cfg(not(any(target_os = "macos", windows)))]
     {
         let _ = path;
-        Err("本阶段仅验证 macOS 目录定位".into())
+        Err("当前平台目录定位尚未实现".into())
     }
 }
 
