@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "caseId": "U04",
+  "sessionA": {
+    "conversationId": "conv-b6bed077850c42eca034f58acda5c8be",
+    "modelId": "qwen-image-2.1-mflux-v1",
+    "capabilityId": "image.text-to-image.qwen-image-2.1.v1",
+    "prompt": "蓝天下的一座玻璃温室，植物繁茂，清晨薄雾。",
+    "effectiveSeed": 201,
+    "steps": 40,
+    "continuationObserved": [
+      5,
+      7,
+      9
+    ],
+    "attemptState": "succeeded",
+    "turnId": "turn-7b0da1708a15479f9688952b962ac471",
+    "jobId": "job-59a0ce926f6e4882984cdde72ae100a0",
+    "attemptId": "attempt-f90541cf6c624c6fa3b02053f05129d4",
+    "assetId": "asset-0bc1e976030e47218afc7acf9695e270",
+    "width": 1024,
+    "height": 1024,
+    "bytes": 1800282,
+    "sha256": "25b7a9eccdace02b65549317160c0e109e9ea11f5ea8021cd8fe3098eb56c228"
+  },
+  "sessionB": {
+    "conversationId": "conv-9c2681216ae64398b7d4e900acdeab47",
+    "draftId": 4,
+    "prompt": "会话 B 的 MOSS 草稿，不应自动排队。",
+    "modelId": "moss-image-sft-mflux-v1",
+    "capabilityId": "image.text-to-image.moss-image-sft.v1",
+    "draftSaved": true,
+    "turnCountDuringA": 0,
+    "turnCountAfterA": 0,
+    "sendBlockedWhileA": true,
+    "blockedReason": "其他会话正在生成",
+    "implicitlyQueued": false,
+    "sendEnabledAfterA": true
+  },
+  "aWasNotTerminatedOrReplaced": true,
+  "workerProcessesAfterCompletion": [],
+  "evidence": {
+    "state": {
+      "path": "u04-state.json",
+      "sha256": "49e6c0ce6b5d4e4f63ed34469ab2a703deb322f4556fd31ab97ca1ee11817658"
+    },
+    "aRunning": {
+      "path": "dual-task-a-running.jpg",
+      "sha256": "46d06f948ce89e4712cf1ec261492e8b83a11fe6b0cd92472f34f242d14e9f28"
+    },
+    "bBlocked": {
+      "path": "dual-task-b-blocked.jpg",
+      "sha256": "0dcd1578894dedb14f2ffa997060a91c07c4ed8b267694e1a063c37bebc46f38"
+    },
+    "bReadyAfterA": {
+      "path": "dual-task-b-ready.jpg",
+      "sha256": "c3a427bcadc1e66c9fa66f9370d8119921a146ed9f2d46b5db529dc6d0c45e5a"
+    }
+  }
+}
