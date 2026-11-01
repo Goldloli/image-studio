@@ -84,6 +84,8 @@ openspec validate introduce-windows-foundation --strict --no-interactive
 
 宿主还分别用显式隔离根和无参数默认路径启动成功。Windows 默认目录通过 Known Folder API 解析为 `%LOCALAPPDATA%\ImageStudio`，四个子目录正确创建；设置页目录定位使用 Explorer 且不经过 shell。Windows Job Object 原生监督、完整 UI/IME/DPI、NSIS 和所有 P0 仍未完成，Node 版本也未固化。
 
+原生自动化能枚举 `Image Studio` 窗口，但连续两次窗口截图/可访问性捕获超时，因此目前没有可用的 UI 视觉证据。该限制记录为 `image-studio-ba1`；需区分 Computer Use 捕获问题和 Tauri/WebView2 首帧问题，不能据此假定界面通过或失败。
+
 ## Beads 与跨机任务状态
 
 Git 的 `main` 推送只同步源码提交。Mac 的任务库不会因为源码 `git push` 出现在 Windows；`.beads/metadata.json` 或 hooks 的存在也不证明目标机有可用任务记录。

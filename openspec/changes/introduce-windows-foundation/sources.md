@@ -54,9 +54,10 @@
 - Windows 检查发现生成协议测试夹具硬编码 POSIX 绝对路径；已改为由测试按当前平台生成受控绝对路径，生产协议校验和 Mac 路径语义未改写。
 - 首次 `cargo check --workspace --locked` 曾在 `sha2-asm` 的 MSVC 汇编处失败；现已把 `asm` 限定到 macOS。`cargo tree` 确认 Windows 不启用 `sha2-asm`，`aarch64-apple-darwin` 仍启用该特性，Mac 实际构建性能回归仍待执行。
 - 桌面宿主已用显式隔离根和无参数默认路径分别启动成功；Windows Known Folder API 解析到 `%LOCALAPPDATA%\ImageStudio`，创建 `data/cache/logs/work` 后进程稳定运行，未启动 worker 或模型。
+- 原生自动化可枚举标题为 `Image Studio` 的窗口，但 Computer Use 连续两次在截图/可访问性捕获阶段超时。窗口存在不能证明 WebView2 首帧、布局或 IME 可用；该问题保留为 `image-studio-ba1`。
 - Windows 目录 flush、进程内同根互斥、只读候选提交和 Windows 文件选择测试已修正并通过。原生 Job Object 监督、完整 UI/IME/DPI、安装包和模型执行仍未完成。
 
-这些结果证明当前 Windows 构建、常规测试和部分目录/文件基础可重复；Windows 监督器仍有 Unix-only 分支，GUI 仅做了短时启动，原生交互、安装包和模型执行尚未验收。Node/npm 仍未冻结，因此结果不能外推到其他 Node 版本。
+这些结果证明当前 Windows 构建、常规测试和部分目录/文件基础可重复；Windows 监督器仍有 Unix-only 分支，GUI 只证明进程和窗口存在，原生交互/截图、安装包和模型执行尚未验收。Node/npm 仍未冻结，因此结果不能外推到其他 Node 版本。
 
 ## 仓库现状
 
