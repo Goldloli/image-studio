@@ -35,7 +35,7 @@
 | MSVC | Visual Studio Build Tools 2022 `17.14.40`；MSVC `14.44.35207` / compiler `19.44.35228`；Windows SDK 版本 `10.0.22621.0`、`10.0.26100.0` |
 | VC++ Runtime | x64 Redistributable `14.51.36247` 已安装 |
 | Rust | 仓库固定 `1.99.1`；预检发现安装不完整后已修复，`rustc/cargo/rustfmt/clippy` 与 Windows x64 目标均已核实 |
-| Node/npm | Node `24.19.0`、npm `11.17.0`；仓库尚无 `.nvmrc`、`engines` 或 `packageManager` 约束 |
+| Node/npm | Node `24.19.0`、npm `11.17.0`；已由 `.nvmrc`、`engines` 与 `packageManager` 固定，前端门禁在该组合通过 |
 | Python | `3.11`、`3.13`、`3.14` 可用；没有 Python `3.12`，也没有 CUDA Toolkit/`nvcc` |
 | Git | Git `2.55.0.windows.3`；`core.longpaths=true` |
 | 文档工具 | OpenSpec `1.12.0`；Beads `1.2.2` |
@@ -50,21 +50,22 @@
 - `npm ci` 安装 46 个包；`npm test` 的 6 个测试文件、37 项测试全部通过；生产前端构建通过，仅有单个 catalog chunk 超过 500 KiB 的非阻断提示。
 - 固定 Rust `1.99.1` 与 `x86_64-pc-windows-msvc` 目标可用；`cargo check -p studio-core -p worker-protocol --target x86_64-pc-windows-msvc --locked` 通过。
 - `cargo fmt --all -- --check`、`cargo check --workspace --locked`、`cargo build --workspace --locked` 和 `cargo clippy --workspace --all-targets --locked -- -D warnings` 均通过。
-- `cargo test --workspace --locked` 通过：203 项测试和 1 项文档测试通过，4 项需要固定网络/运行时缓存的显式验收测试被忽略，0 失败。
+- `cargo test --workspace --locked` 通过：206 项测试和 1 项文档测试通过，4 项需要固定网络/运行时缓存的显式验收测试被忽略，0 失败。
 - Windows 检查发现生成协议测试夹具硬编码 POSIX 绝对路径；已改为由测试按当前平台生成受控绝对路径，生产协议校验和 Mac 路径语义未改写。
 - 首次 `cargo check --workspace --locked` 曾在 `sha2-asm` 的 MSVC 汇编处失败；现已把 `asm` 限定到 macOS。`cargo tree` 确认 Windows 不启用 `sha2-asm`，`aarch64-apple-darwin` 仍启用该特性，Mac 实际构建性能回归仍待执行。
 - 桌面宿主已用显式隔离根和无参数默认路径分别启动成功；Windows Known Folder API 解析到 `%LOCALAPPDATA%\ImageStudio`，创建 `data/cache/logs/work` 后进程稳定运行，未启动 worker 或模型。
-- 原生自动化可枚举标题为 `Image Studio` 的窗口，但 Computer Use 连续两次在截图/可访问性捕获阶段超时。窗口存在不能证明 WebView2 首帧、布局或 IME 可用；该问题保留为 `image-studio-ba1`。
-- Windows 目录 flush、进程内同根互斥、只读候选提交和 Windows 文件选择测试已修正并通过。原生 Job Object 监督、完整 UI/IME/DPI、安装包和模型执行仍未完成。
+- 原生 Computer Use 可枚举并读取 `Image Studio` 的完整 WebView2 可访问性树：中文创作页、导航、会话、输入、模型状态和原生窗口控件均存在；`set_value` 成功写入并清空中文提示词且草稿保存更新。Graphics Capture 截图仍超时，元素点击缺少几何信息，键盘 Tab 未移动焦点，保留为 `image-studio-ba1`。
+- Windows 已增加完整替换的 `tauri.windows.conf.json`，显式使用原生装饰与控件；release 构建隐藏控制台。
+- Windows 目录 flush、进程内同根互斥、只读候选提交、ADS/reparse 普通文件校验和只读导出替换已实现并通过测试。原生 Job Object 监督、完整 UI/IME/DPI、安装包和模型执行仍未完成。
 
-这些结果证明当前 Windows 构建、常规测试和部分目录/文件基础可重复；Windows 监督器仍有 Unix-only 分支，GUI 只证明进程和窗口存在，原生交互/截图、安装包和模型执行尚未验收。Node/npm 仍未冻结，因此结果不能外推到其他 Node 版本。
+这些结果证明当前 Windows 构建、常规测试、原生窗口渲染和部分目录/文件基础可重复；Windows 监督器仍有 Unix-only 分支，视觉截图/坐标交互、快速键盘导航、IME 组合、DPI、安装包和模型执行尚未验收。前端结果只适用于已固定的 Node/npm 组合。
 
 ## 仓库现状
 
 - [当前产品说明](../../../README.md)：七型号、八能力已在 M3 Max / 128 GiB 验收；当前交付仍以 macOS 开发包为主。
 - [平台路径](../../../apps/desktop/src/adapters/paths.rs)：默认路径只有 macOS 分支，其他系统要求显式数据根。
 - [推理监督](../../../tools/inference-supervisor/src/lib.rs)：实际执行与组回收依赖 Unix，非 Unix 分支返回不支持；Windows 需要真实的平台实现。
-- [桌面配置](../../../apps/desktop/tauri.conf.json)：当前 bundle 未启用，窗口配置含 macOS 标题栏参数；ICO 已存在并不构成 Windows 安装包证据。
+- [桌面配置](../../../apps/desktop/tauri.conf.json)：基础 bundle 仍未启用，macOS 配置保留 Overlay/traffic-light 参数；Windows 平台配置已另行覆盖为原生装饰。ICO 已存在并不构成 Windows 安装包证据。
 - [Z-Image 模型清单](../../../resources/local-generation/model-manifest.json)：固定 `Tongyi-MAI/Z-Image-Turbo` revision `f332072aa78be7aecdf3ee76d5c247082da564a6`，现有组件合计 `32,848,304,893` bytes。现清单不含 `model_index.json` 和 `scheduler/scheduler_config.json`，不能直接当作完整 Diffusers 快照。
 - [型号目录](../../../resources/model-catalog/catalog.json)：现有 Z-Image 行 ID 为 `z-image-turbo-mflux-v1`，其他多条 ID 也包含运行时身份。Windows 不能直接把这些旧身份重命名成 CUDA。
 - [平台主规格](../../specs/platform-foundation/spec.md)：Windows 现有证据仅限核心与协议目标编译，不包含 GUI、进程、安装或模型认证。

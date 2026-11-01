@@ -83,7 +83,7 @@ Windows worker 使用独立 build/capability/runtime 身份及 generation v2 新
 
 ### 8. Win10 本机构建和内部安装包
 
-固定 Rust/Node 工具链与锁文件，在目标 Win10 或匹配的 Windows 构建机执行 MSVC 全工作区构建，打包 host/supervisor/diagnostic `.exe`、字体、图标和前端。Rust 由 `rust-toolchain.toml` 固定；Node/npm 当前尚无仓库级版本约束，实施前须在 Windows 预检版本基础上明确可复现范围并加入对应版本声明。NSIS 采用 per-user 安装；通过平台配置移除 Mac 特有窗口参数，使用可工作的原生最小化/最大化/关闭与拖拽区域，不绘制装饰性假控制钮。
+固定 Rust/Node 工具链与锁文件，在目标 Win10 或匹配的 Windows 构建机执行 MSVC 全工作区构建，打包 host/supervisor/diagnostic `.exe`、字体、图标和前端。Rust 由 `rust-toolchain.toml` 固定；Node/npm 已固定为 `24.19.0`/`11.17.0` 并写入 `.nvmrc`、`engines` 与 `packageManager`。NSIS 采用 per-user 安装；Windows 平台配置已完整覆盖 Mac 特有窗口参数，显式使用原生最小化/最大化/关闭与拖拽区域，不绘制装饰性假控制钮。
 
 Windows 预检曾发现根 workspace 对 `sha2` 启用全局 `asm`，其汇编源无法由当前 MSVC 工具链构建。现已把该优化限定到 macOS；特征解析确认 Windows 不启用 `sha2-asm`，macOS 目标仍启用，完整 workspace 已重新构建通过。Mac 上的实际哈希性能与模型回归仍须在 Mac 执行，不能仅由依赖图代替。
 

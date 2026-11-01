@@ -59,11 +59,11 @@ GitHub 登录凭据由 Windows 自身凭据管理保存，不需要从 Mac 复�
 仓库已有版本事实与 Windows 预检结果需要分开阅读：
 
 - `rust-toolchain.toml` 固定 Rust **1.99.1**；预检发现的组件缺失已修复，`rustc/cargo/rustfmt/clippy` 与 `x86_64-pc-windows-msvc` 目标均已核实。目标机还装有 stable。
-- 前端在 Mac 验证 Node.js **24.12.0** / npm **11.6.2**；Windows 当前为 Node.js **24.19.0** / npm **11.17.0**。仓库尚无 `.nvmrc`、`engines` 或 `packageManager` 约束，实施前须明确可复现版本。
+- 前端在 Mac 曾验证 Node.js **24.12.0** / npm **11.6.2**；仓库现固定 Windows 已通过的 Node.js **24.19.0** / npm **11.17.0**，约束位于 `.nvmrc`、`engines` 和 `packageManager`。
 - Windows 已安装 Visual Studio Build Tools 2022 **17.14.40**、MSVC **19.44.35228**、Windows SDK **10.0.22621.0 / 10.0.26100.0** 和 VC++ Runtime **14.51.36247**。
 - OpenSpec 为 **1.12.0**，Beads 为 **1.2.2**；Windows 未安装 GitHub CLI，也没有 Python 3.12 或完整 CUDA Toolkit/`nvcc`。Python 3.12 与 wheel 闭包应由后续受控 Gate 0 环境解决，不修改系统 Python。
 
-这些不是 Windows 完整认证。固定 Rust 工具链已就绪，但 Node/npm 尚未冻结，因此不能直接宣称 Windows 构建环境已准备完成。
+这些不是 Windows 完整认证。Rust 与 Node/npm 工具链已就绪，但 Windows GUI/IME/DPI、原生监督和模型执行仍未完成。
 
 初步可以检查源码状态、前端与无平台依赖的核心：
 
@@ -80,11 +80,11 @@ openspec validate introduce-windows-foundation --strict --no-interactive
 
 2026-11-01 已执行的非模型检查结果：前端 46 个包安装成功，6 个测试文件/37 项测试通过，生产构建通过；固定 Rust 的 Windows 核心/协议 `cargo check`、fmt、66 项测试、1 项文档测试和 clippy 均通过。检查中发现并修复了生成协议测试夹具硬编码 POSIX 路径的问题。
 
-`sha2` 的 `asm` 已限定到 macOS，Windows 不启用汇编后端，macOS 目标仍保留。随后 `cargo check/build --workspace --locked`、全 workspace 203 项测试 + 1 项文档测试以及 `cargo clippy --workspace --all-targets -- -D warnings` 均通过，4 项固定网络/运行时缓存测试为显式忽略。
+`sha2` 的 `asm` 已限定到 macOS，Windows 不启用汇编后端，macOS 目标仍保留。随后 `cargo check/build --workspace --locked`、全 workspace 206 项测试 + 1 项文档测试以及 `cargo clippy --workspace --all-targets -- -D warnings` 均通过，4 项固定网络/运行时缓存测试为显式忽略。
 
-宿主还分别用显式隔离根和无参数默认路径启动成功。Windows 默认目录通过 Known Folder API 解析为 `%LOCALAPPDATA%\ImageStudio`，四个子目录正确创建；设置页目录定位使用 Explorer 且不经过 shell。Windows Job Object 原生监督、完整 UI/IME/DPI、NSIS 和所有 P0 仍未完成，Node 版本也未固化。
+宿主还分别用显式隔离根和无参数默认路径启动成功。Windows 默认目录通过 Known Folder API 解析为 `%LOCALAPPDATA%\ImageStudio`，四个子目录正确创建；设置页目录定位使用 Explorer 且不经过 shell。Windows 平台配置已覆盖为原生窗口，release 构建隐藏控制台。Windows Job Object 原生监督、完整 UI/IME/DPI、NSIS 和所有 P0 仍未完成。
 
-原生自动化能枚举 `Image Studio` 窗口，但连续两次窗口截图/可访问性捕获超时，因此目前没有可用的 UI 视觉证据。该限制记录为 `image-studio-ba1`；需区分 Computer Use 捕获问题和 Tauri/WebView2 首帧问题，不能据此假定界面通过或失败。
+原生 Computer Use 已完整读取 `Image Studio` 的 WebView2 可访问性树，确认中文创作页、导航、输入框、模型状态与原生窗口控件存在，并成功写入/清空中文提示词。Graphics Capture 截图仍超时、元素点击缺少坐标、Tab 未移动焦点，因此目前没有视觉截图或完整键盘证据；限制记录为 `image-studio-ba1`，不能据此假定 UI 全部通过或失败。
 
 ## Beads 与跨机任务状态
 
