@@ -8,8 +8,8 @@ data root.
 ## Package
 
 - Installer: `target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe`
-- Size: `244,750,015` bytes
-- SHA-256: `d86db18ad8d35741087bc8c517257b4ddd0604daf5479996429ba1d208aaf99f`
+- Size: `244,738,194` bytes
+- SHA-256: `4ff627ede9a0f7a9109cd2f9b8fc155d06325eb9f06e2fcbf115a4054a3d9ae9`
 - Install mode: current user
 - WebView2: embedded offline installer
 - VC runtime: bundled
@@ -26,8 +26,8 @@ in-use error and disabled its mutating controls.
 
 Silent uninstall removed the program directory while leaving the default data
 root and SQLite/WAL bytes intact. Reinstalling restored the existing
-cross-platform warning state. A stale draft whose save failed no longer blocks
-native window close.
+cross-platform warning state and its saved Chinese prompt. A stale draft whose
+save failed no longer blocks native window close.
 
 ## Evidence
 

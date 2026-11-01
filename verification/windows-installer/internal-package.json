@@ -3,8 +3,8 @@
   "kind": "windows-internal-nsis-package",
   "status": "built",
   "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
-  "installer_sha256": "d86db18ad8d35741087bc8c517257b4ddd0604daf5479996429ba1d208aaf99f",
-  "installer_bytes": 244750015,
+  "installer_sha256": "4ff627ede9a0f7a9109cd2f9b8fc155d06325eb9f06e2fcbf115a4054a3d9ae9",
+  "installer_bytes": 244738194,
   "target": "x86_64-pc-windows-msvc",
   "install_mode": "currentUser",
   "webview2_install_mode": "offlineInstaller",
@@ -14,12 +14,12 @@
   "sidecars": [
     {
       "name": "diagnostic-worker-x86_64-pc-windows-msvc.exe",
-      "sha256": "f5229ce44eeeb913987d426367b58ed34f104bbeb339278b388afe5011cd838b",
+      "sha256": "488b55c25e8627287493826d6a56cb790a5d066172149be2c8117f63d3346bfe",
       "bytes": 463360
     },
     {
       "name": "inference-supervisor-x86_64-pc-windows-msvc.exe",
-      "sha256": "d3dd4a806d63c43e62844a8f9a538369f789dd4715ceec9aae27a7c7aaacde21",
+      "sha256": "68a501d643c2a19a9346e1b30f4cc8aa0f18d0bf988686402b98929e415b00c3",
       "bytes": 1008640
     }
   ]
