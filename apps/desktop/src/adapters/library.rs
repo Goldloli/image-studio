@@ -21,6 +21,8 @@ use fs2::FileExt;
 use rusqlite::{Connection, OptionalExtension, TransactionBehavior, params};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+#[cfg(windows)]
+use sha2::{Digest, Sha256};
 use std::{
     collections::HashSet,
     fs::{self, File, OpenOptions},
@@ -37,6 +39,11 @@ use studio_core::{
 };
 use thiserror::Error;
 use uuid::Uuid;
+#[cfg(windows)]
+use windows_sys::Win32::{
+    Foundation::{CloseHandle, ERROR_ALREADY_EXISTS, GetLastError, HANDLE},
+    System::Threading::CreateMutexW,
+};
 
 pub use assets::{CandidateDescriptor, RoleCandidate};
 
@@ -181,11 +188,53 @@ impl Drop for ProcessRootClaim {
 struct HostLock {
     file: File,
     _root_claim: ProcessRootClaim,
+    #[cfg(windows)]
+    _root_mutex: WindowsRootMutex,
 }
 
 impl Drop for HostLock {
     fn drop(&mut self) {
         let _ = FileExt::unlock(&self.file);
+    }
+}
+
+#[cfg(windows)]
+struct WindowsRootMutex(usize);
+
+#[cfg(windows)]
+impl WindowsRootMutex {
+    fn acquire(root: &Path) -> Result<Self> {
+        let mut digest = Sha256::new();
+        digest.update(root.to_string_lossy().to_lowercase().as_bytes());
+        let name = format!("Local\\ImageStudio-{:x}\0", digest.finalize())
+            .encode_utf16()
+            .collect::<Vec<_>>();
+        // SAFETY: The name is a stable, NUL-terminated local session name and
+        // the returned handle is owned by this guard.
+        let handle = unsafe { CreateMutexW(std::ptr::null(), 0, name.as_ptr()) };
+        if handle.is_null() {
+            return Err(LibraryError::Io(std::io::Error::last_os_error()));
+        }
+        // SAFETY: GetLastError has no preconditions and is read immediately
+        // after CreateMutexW.
+        if unsafe { GetLastError() } == ERROR_ALREADY_EXISTS {
+            // SAFETY: This process owns the new handle returned above.
+            unsafe {
+                CloseHandle(handle);
+            }
+            return Err(LibraryError::InUse);
+        }
+        Ok(Self(handle as usize))
+    }
+}
+
+#[cfg(windows)]
+impl Drop for WindowsRootMutex {
+    fn drop(&mut self) {
+        // SAFETY: The handle is owned by this guard and closed exactly once.
+        unsafe {
+            CloseHandle(self.0 as HANDLE);
+        }
     }
 }
 
@@ -224,6 +273,8 @@ impl Library {
         fs::create_dir_all(data_root.as_ref())?;
         let root = data_root.as_ref().canonicalize()?;
         let root_claim = ProcessRootClaim::acquire(&root)?;
+        #[cfg(windows)]
+        let root_mutex = WindowsRootMutex::acquire(&root)?;
         let host_lock = open_regular(&root.join("host.lock"), true)?;
         host_lock.try_lock_exclusive().map_err(|error| {
             if error.kind() == std::io::ErrorKind::WouldBlock {
@@ -235,6 +286,8 @@ impl Library {
         let host_lock = HostLock {
             file: host_lock,
             _root_claim: root_claim,
+            #[cfg(windows)]
+            _root_mutex: root_mutex,
         };
         for name in ["runs", "commits", "assets", "inputs", "quarantine"] {
             managed_directory(&root.join(name))?;

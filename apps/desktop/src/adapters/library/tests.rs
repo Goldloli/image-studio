@@ -382,6 +382,43 @@ fn host_ownership_precedes_recovery_and_default_project_is_not_reset() {
     );
 }
 
+#[cfg(windows)]
+#[test]
+fn windows_second_process_reports_in_use() {
+    let root = TempDir::new().unwrap();
+    let library = open(root.path());
+    let output = Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "adapters::library::tests::windows_second_process_host_lock_child",
+            "--nocapture",
+            "--test-threads=1",
+        ])
+        .env("IMAGE_STUDIO_WINDOWS_HOST_LOCK_ROOT", root.path())
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(String::from_utf8_lossy(&output.stdout).contains("WINDOWS_HOST_LOCK_IN_USE"));
+    drop(library);
+}
+
+#[cfg(windows)]
+#[test]
+fn windows_second_process_host_lock_child() {
+    let Ok(root) = std::env::var("IMAGE_STUDIO_WINDOWS_HOST_LOCK_ROOT") else {
+        return;
+    };
+    match Library::open(root, vec![]) {
+        Err(LibraryError::InUse) => println!("WINDOWS_HOST_LOCK_IN_USE"),
+        Ok(_) => panic!("second process acquired an occupied Windows data root"),
+        Err(error) => panic!("unexpected second-process error: {error:?}"),
+    }
+}
+
 /// A controlled child keeps the inherited open-file-description alive after exec.
 /// The parent changes CLOEXEC only in pre_exec, never on its own descriptor.
 #[cfg(unix)]
@@ -419,7 +456,7 @@ fn retired_host_unlocks_even_while_a_child_keeps_its_inherited_descriptor() {
 
     let root = TempDir::new().unwrap();
     let library = open(root.path());
-    let fd = library._host_lock.0.as_raw_fd();
+    let fd = library._host_lock.file.as_raw_fd();
     // SAFETY: F_GETFD only reads the still-owned host descriptor's flags.
     let original_flags = unsafe { libc::fcntl(fd, libc::F_GETFD) };
     assert!(original_flags >= 0 && original_flags & libc::FD_CLOEXEC != 0);
