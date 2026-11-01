@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "reviewedDate": "2026-11-01",
+  "entries": [
+    {
+      "featureId": "text-to-image",
+      "title": "文生图",
+      "category": "生成",
+      "summary": "在当前 Windows 设备上，把中英文提示词生成一张本地图片。",
+      "description": "Windows 首轮使用独立的 Z-Image Turbo Diffusers CUDA NF4 组合，复用当前会话、统一发送链路、持久化任务与正式资产提交。",
+      "inputs": ["提示词", "Z-Image Turbo", "1024² 固定画幅", "可选种子"],
+      "outputs": ["正式 RGB PNG AssetRef"],
+      "productStatus": "implemented",
+      "scope": "仅 Z-Image Turbo Windows CUDA 组合；单轮一张 1024×1024、9 步、guidance 0.0。",
+      "action": "open-composer",
+      "modelId": "z-image-turbo-diffusers-cuda-nf4-v1",
+      "dependencies": [
+        {
+          "kind": "model",
+          "label": "已安装并通过摘要校验的 Windows Z-Image 模型闭包"
+        },
+        {
+          "kind": "runtime",
+          "label": "私有无系统 Python 依赖并通过设备检查的 CUDA 12.6 运行时"
+        },
+        {
+          "kind": "conversation",
+          "label": "当前 Windows 会话与已保存草稿"
+        }
+      ]
+    },
+    {
+      "featureId": "image-edit",
+      "title": "图片编辑",
+      "category": "编辑",
+      "summary": "当前 Windows 版本尚未接入；仅保留功能说明。",
+      "description": "FLUX.2 Klein 4B distilled 的单参考图编辑分支尚未完成 Windows 适配。",
+      "inputs": ["受控 AssetId", "编辑指令"],
+      "outputs": ["新的 PNG AssetRef"],
+      "productStatus": "planned",
+      "scope": "Windows 首轮不提供图片编辑、模型安装或生成动作。",
+      "action": null,
+      "modelId": "flux2-klein-4b-distilled",
+      "dependencies": [
+        {
+          "kind": "model",
+          "label": "FLUX.2 Klein 需要独立 Windows 组件、运行时和实机验收"
+        }
+      ]
+    },
+    {
+      "featureId": "remove-background",
+      "title": "去背景",
+      "category": "编辑",
+      "summary": "当前 Windows 版本尚未接入；仅保留功能说明。",
+      "description": "BiRefNet general epoch_244 的 Windows ONNX CPU 产品和透明 PNG/mask 验收尚未完成。",
+      "inputs": ["受控源图 AssetId"],
+      "outputs": ["透明 PNG AssetRef", "前景蒙版"],
+      "productStatus": "planned",
+      "scope": "Windows 首轮不提供 ONNX 运行时、模型安装、去背景或 mask 输出。",
+      "action": null,
+      "modelId": "birefnet-general-epoch-244",
+      "dependencies": [
+        {
+          "kind": "model",
+          "label": "BiRefNet 需要独立 Windows ONNX 组件和 CPU 探针"
+        }
+      ]
+    },
+    {
+      "featureId": "upscale",
+      "title": "放大",
+      "category": "增强",
+      "summary": "当前 Windows 版本尚未接入；仅保留功能说明。",
+      "description": "Real-ESRGAN x4plus 的 Windows ncnn Vulkan 产品和分块、取消、强杀回收验收尚未完成。",
+      "inputs": ["受控源图 AssetId"],
+      "outputs": ["放大后的 PNG AssetRef"],
+      "productStatus": "planned",
+      "scope": "Windows 首轮不提供 ncnn Vulkan 运行时、模型安装或 4× 放大动作。",
+      "action": null,
+      "modelId": "realesrgan-x4plus",
+      "dependencies": [
+        {
+          "kind": "model",
+          "label": "Real-ESRGAN 需要 Windows ncnn 程序和 x4plus 权重对验收"
+        }
+      ]
+    }
+  ]
+}

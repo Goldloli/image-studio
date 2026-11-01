@@ -3,7 +3,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::BTreeSet;
 
+#[cfg(not(windows))]
 const CATALOG: &str = include_str!("../../../../resources/feature-catalog/catalog.json");
+#[cfg(windows)]
+const CATALOG: &str = include_str!("../../../../resources/windows-foundation/feature-catalog.json");
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -194,12 +197,19 @@ fn project_entry(entry: &RegisteredFeature, model_catalog: &Value, generation_bu
 mod tests {
     use super::*;
 
+    fn text_model_id() -> &'static str {
+        #[cfg(windows)]
+        return studio_core::generation::Z_IMAGE_WINDOWS_MODEL;
+        #[cfg(not(windows))]
+        "z-image-turbo-mflux-v1"
+    }
+
     #[test]
     fn registry_only_marks_implemented_model_with_real_ready_facts() {
         let catalog = FeatureCatalog::load().unwrap();
         let model_catalog = json!({
             "entries": [{
-                "id": "z-image-turbo-mflux-v1",
+                "id": text_model_id(),
                 "family": "Z-Image",
                 "executable": false,
                 "componentsReady": true,
@@ -229,8 +239,14 @@ mod tests {
             .unwrap();
         assert_eq!(text["state"], "runtime-not-ready");
         assert_eq!(text["canStart"], false);
+        #[cfg(windows)]
+        assert_eq!(edit["state"], "planned");
+        #[cfg(not(windows))]
         assert_eq!(edit["state"], "runtime-not-ready");
         assert_eq!(edit["canStart"], false);
+        #[cfg(windows)]
+        assert_eq!(edit["action"], Value::Null);
+        #[cfg(not(windows))]
         assert_eq!(edit["action"], "open-composer");
     }
 
@@ -239,7 +255,7 @@ mod tests {
         let catalog = FeatureCatalog::load().unwrap();
         let model_catalog = json!({
             "entries": [{
-                "id": "z-image-turbo-mflux-v1",
+                "id": text_model_id(),
                 "family": "unrelated keyword",
                 "executable": true,
                 "componentsReady": true,
@@ -257,5 +273,40 @@ mod tests {
         let result = catalog.query(&model_catalog, false);
         assert_eq!(result["entries"][0]["state"], "available");
         assert_eq!(result["entries"][0]["canStart"], true);
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_projection_keeps_one_certified_feature_and_three_planned() {
+        let catalog = FeatureCatalog::load().unwrap();
+        let result = catalog.query(
+            &json!({
+                "entries": [{
+                    "id": studio_core::generation::Z_IMAGE_WINDOWS_MODEL,
+                    "executable": false,
+                    "componentsReady": false,
+                    "runtimeReady": false,
+                    "error": null
+                }]
+            }),
+            false,
+        );
+        assert_eq!(result["counts"]["total"], 4);
+        assert_eq!(result["counts"]["planned"], 3);
+        let text = result["entries"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entry| entry["featureId"] == "text-to-image")
+            .unwrap();
+        assert_eq!(text["modelId"], studio_core::generation::Z_IMAGE_WINDOWS_MODEL);
+        assert_eq!(text["productStatus"], "implemented");
+        assert_eq!(text["state"], "model-missing");
+        for entry in result["entries"].as_array().unwrap() {
+            if entry["productStatus"] == "planned" {
+                assert_eq!(entry["action"], Value::Null);
+                assert_eq!(entry["canStart"], false);
+            }
+        }
     }
 }

@@ -79,6 +79,7 @@ export function FeatureLibrary({ studio, onBack, onModels, onStart, onError }: P
   const selected = visible.find(entry => entry.featureId === selectedId)
     ?? visible[0]
     ?? null;
+  const implementedCount = catalog?.entries.filter(entry => entry.productStatus === 'implemented').length ?? 0;
 
   const chooseFeature = (entry: FeatureCatalogEntry) => {
     setSelectedId(entry.featureId);
@@ -101,7 +102,9 @@ export function FeatureLibrary({ studio, onBack, onModels, onStart, onError }: P
       <aside className="feature-categories" aria-label="功能分类">
         <div className="library-search"><Search size={14}/><input value={search} onChange={event => setSearch(event.target.value)} aria-label="搜索功能" placeholder="搜索能力"/></div>
         {categories.map(item => <button key={item} className={item === category ? 'active' : ''} aria-pressed={item === category} onClick={() => setCategory(item)}>{item}<span>{item === '全部' ? catalog?.entries.length ?? 0 : catalog?.entries.filter(entry => entry.category === item).length ?? 0}</span></button>)}
-        <div className="feature-category-note"><Sparkles size={14}/><p>文生图、单图编辑、去背景和 4× 放大均在本机执行。请先安装相应模型与运行环境。</p></div>
+        <div className="feature-category-note"><Sparkles size={14}/><p>{implementedCount === 1
+          ? '当前版本首轮只接入文生图；其他功能保留范围说明，不提供启动、安装或生成动作。'
+          : '已接入功能均在本机执行。请先安装相应模型与运行环境。'}</p></div>
       </aside>
 
       <div className="feature-browser">
