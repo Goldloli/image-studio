@@ -2,22 +2,29 @@
 //! All executable paths and configuration originate in the trusted desktop host.
 
 use serde::{Deserialize, Serialize};
+#[cfg(any(unix, test))]
+use std::collections::VecDeque;
+#[cfg(any(unix, test))]
+use std::io::Write;
 use std::{
-    collections::VecDeque,
     ffi::OsString,
     fs::{File, OpenOptions},
-    io::{self, Read, Write},
+    io::{self, Read},
     path::{Path, PathBuf},
-    process::{Child, Command, ExitStatus, Stdio},
+    process::Child,
+};
+#[cfg(unix)]
+use std::{
+    process::{Command, ExitStatus, Stdio},
     time::{Duration, Instant},
 };
-use worker_protocol::generation;
-use worker_protocol::generation::{
-    self as protocol, Envelope, HostSession, Message, ProgressStage, WorkerEvent, WorkerIdentity,
-};
+use worker_protocol::generation::{self as protocol, WorkerIdentity};
+#[cfg(unix)]
+use worker_protocol::generation::{Envelope, HostSession, Message, ProgressStage, WorkerEvent};
 
 pub const MEMORY_LOG_BYTES: usize = 128 * 1024;
 pub const DISK_LOG_BYTES: usize = 8 * 1024 * 1024;
+#[cfg(any(unix, test))]
 const KEY_QUEUE_LIMIT: usize = 8;
 pub const LIFECYCLE_RECORD_NAME: &str = "compute-lifecycle.json";
 
@@ -97,6 +104,7 @@ pub fn read_current_lifecycle(
     Ok(record)
 }
 
+#[cfg(unix)]
 fn publish_lifecycle(working_dir: &Path, compute_pgid: u32) -> io::Result<()> {
     let temporary = working_dir.join("compute-lifecycle.pending");
     let mut options = OpenOptions::new();
@@ -150,10 +158,10 @@ fn worker_args() -> Vec<String> {
     vec!["-I".into(), "-m".into(), "studio_mflux_worker".into()]
 }
 fn generation_protocol_version() -> u16 {
-    generation::PROTOCOL_VERSION
+    protocol::PROTOCOL_VERSION
 }
 fn expected_capabilities() -> Vec<String> {
-    vec![generation::CAPABILITY.into()]
+    vec![protocol::CAPABILITY.into()]
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -179,6 +187,7 @@ impl Default for Timeouts {
 }
 
 impl SupervisorConfig {
+    #[cfg(unix)]
     fn validate(&self) -> io::Result<()> {
         for path in [
             &self.python_program,
@@ -193,7 +202,7 @@ impl SupervisorConfig {
         self.expected_worker.validate().map_err(invalid)?;
         if !matches!(
             self.protocol_version,
-            generation::PROTOCOL_VERSION | generation::PROTOCOL_VERSION_V2
+            protocol::PROTOCOL_VERSION | protocol::PROTOCOL_VERSION_V2
         ) || self.expected_capabilities.is_empty()
             || self.expected_capabilities.len() > 2
             || self
@@ -353,7 +362,7 @@ pub fn run(config: SupervisorConfig) -> io::Result<i32> {
                             let envelope = Envelope::decode_frame(&frame)?;
                             if session.is_none() {
                                 session = Some(
-                                    if config.protocol_version == generation::PROTOCOL_VERSION_V2 {
+                                    if config.protocol_version == protocol::PROTOCOL_VERSION_V2 {
                                         HostSession::new_v2(
                                             envelope.session_id.clone(),
                                             config.expected_worker.clone(),
@@ -650,6 +659,7 @@ pub fn run(config: SupervisorConfig) -> io::Result<i32> {
     }
 }
 
+#[cfg(unix)]
 fn response(execute: &Envelope, message: Message) -> Envelope {
     Envelope {
         family: protocol::FAMILY.into(),
@@ -662,6 +672,7 @@ fn response(execute: &Envelope, message: Message) -> Envelope {
     }
 }
 
+#[cfg(unix)]
 fn queue_host(
     queue: &mut PendingWrites,
     mut envelope: Envelope,
@@ -673,12 +684,16 @@ fn queue_host(
     queue.key(envelope.encode_line().map_err(invalid)?)
 }
 
+#[cfg(any(unix, test))]
 #[derive(Default)]
 struct PendingWrites {
     queue: VecDeque<Vec<u8>>,
+    #[cfg(unix)]
     offset: usize,
+    #[cfg(unix)]
     progress: Option<Envelope>,
 }
+#[cfg(any(unix, test))]
 impl PendingWrites {
     fn key(&mut self, bytes: Vec<u8>) -> io::Result<()> {
         if self.queue.len() >= KEY_QUEUE_LIMIT {
@@ -687,9 +702,11 @@ impl PendingWrites {
         self.queue.push_back(bytes);
         Ok(())
     }
+    #[cfg(unix)]
     fn progress(&mut self, envelope: Envelope) {
         self.progress = Some(envelope);
     }
+    #[cfg(unix)]
     fn promote_progress(&mut self, sequence: &mut u64) -> io::Result<()> {
         if self.queue.is_empty()
             && let Some(progress) = self.progress.take()
@@ -698,9 +715,11 @@ impl PendingWrites {
         }
         Ok(())
     }
+    #[cfg(unix)]
     fn is_empty(&self) -> bool {
         self.queue.is_empty() && self.progress.is_none()
     }
+    #[cfg(unix)]
     fn flush(&mut self, writer: &mut impl Write) -> io::Result<()> {
         while let Some(bytes) = self.queue.front() {
             match writer.write(&bytes[self.offset..]) {
@@ -726,10 +745,12 @@ impl PendingWrites {
     }
 }
 
+#[cfg(any(unix, test))]
 #[derive(Default)]
 struct Frames {
     bytes: Vec<u8>,
 }
+#[cfg(any(unix, test))]
 impl Frames {
     fn read(&mut self, reader: &mut impl Read) -> io::Result<(Vec<Vec<u8>>, bool)> {
         let mut frames = Vec::new();
@@ -762,11 +783,13 @@ impl Frames {
     }
 }
 
+#[cfg(any(unix, test))]
 struct BoundedLog {
     memory: VecDeque<u8>,
     file: File,
     written: usize,
 }
+#[cfg(any(unix, test))]
 impl BoundedLog {
     fn new(path: &Path) -> io::Result<Self> {
         let file = OpenOptions::new().write(true).create_new(true).open(path)?;
@@ -788,11 +811,13 @@ impl BoundedLog {
         }
         Ok(())
     }
+    #[cfg(unix)]
     fn sync(&self) -> io::Result<()> {
         self.file.sync_all()
     }
 }
 
+#[cfg(unix)]
 fn drain_log(reader: &mut impl Read, log: &mut BoundedLog) -> io::Result<bool> {
     let mut bytes = [0; 8192];
     for _ in 0..4 {
