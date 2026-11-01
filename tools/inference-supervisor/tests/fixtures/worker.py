@@ -32,10 +32,17 @@ execute = json.loads(sys.stdin.buffer.readline())
 request = execute["message"]["request"]
 descendant = None
 if mode in ("descendant", "orphan", "lease", "hold-gil"):
-    lease = int(os.environ["STUDIO_EXECUTION_LEASE_FD"])
-    descendant = subprocess.Popen([sys.executable, "-c", "import time;time.sleep(60)"],
-                                  pass_fds=(lease,), stdin=subprocess.DEVNULL,
-                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if os.name == "nt":
+        descendant = subprocess.Popen(
+            [sys.executable, "-c", "import time;time.sleep(60)"],
+            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL)
+    else:
+        lease = int(os.environ["STUDIO_EXECUTION_LEASE_FD"])
+        descendant = subprocess.Popen(
+            [sys.executable, "-c", "import time;time.sleep(60)"],
+            pass_fds=(lease,), stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 with open(pid_file, "w") as file:
     json.dump(dict(worker=os.getpid(), descendant=descendant.pid if descendant else None), file)
 if mode == "malformed":

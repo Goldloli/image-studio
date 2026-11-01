@@ -1,10 +1,13 @@
 //! Native lifetime boundary for one generation Attempt. No model code runs in this process.
 //! All executable paths and configuration originate in the trusted desktop host.
 
+#[cfg(windows)]
+mod windows;
+
 use serde::{Deserialize, Serialize};
-#[cfg(any(unix, test))]
+#[cfg(any(unix, windows, test))]
 use std::collections::VecDeque;
-#[cfg(any(unix, test))]
+#[cfg(any(unix, windows, test))]
 use std::io::Write;
 use std::{
     ffi::OsString,
@@ -24,7 +27,7 @@ use worker_protocol::generation::{Envelope, HostSession, Message, ProgressStage,
 
 pub const MEMORY_LOG_BYTES: usize = 128 * 1024;
 pub const DISK_LOG_BYTES: usize = 8 * 1024 * 1024;
-#[cfg(any(unix, test))]
+#[cfg(any(unix, windows, test))]
 const KEY_QUEUE_LIMIT: usize = 8;
 pub const LIFECYCLE_RECORD_NAME: &str = "compute-lifecycle.json";
 
@@ -45,9 +48,9 @@ impl ProcessLifecycle {
         {
             group_alive(self.compute_pgid as i32)
         }
-        #[cfg(not(unix))]
+        #[cfg(windows)]
         {
-            true
+            windows::process_alive(self.compute_pgid)
         }
     }
     pub fn terminate_group(&self) -> io::Result<()> {
@@ -55,9 +58,13 @@ impl ProcessLifecycle {
         {
             signal_group(self.compute_pgid as i32, libc::SIGKILL)
         }
-        #[cfg(not(unix))]
+        #[cfg(windows)]
         {
-            Err(io::Error::other("native group cleanup is unsupported"))
+            windows::terminate_process(self.compute_pgid)
+        }
+        #[cfg(not(any(unix, windows)))]
+        {
+            Err(io::Error::other("native process cleanup is unsupported"))
         }
     }
 }
@@ -89,12 +96,15 @@ pub fn read_current_lifecycle(
     if record.schema_version != 1
         || record.supervisor_pid != supervisor.id()
         || record.compute_pgid <= 1
-        || record.compute_pgid > i32::MAX as u32
         || record.compute_pgid == record.supervisor_pid
     {
         return Err(invalid(
             "lifecycle record does not belong to the current supervisor",
         ));
+    }
+    #[cfg(unix)]
+    if record.compute_pgid > i32::MAX as u32 {
+        return Err(invalid("lifecycle record has an invalid process group"));
     }
     #[cfg(unix)]
     // SAFETY: getpgrp only reads this process's group identifier.
@@ -104,7 +114,7 @@ pub fn read_current_lifecycle(
     Ok(record)
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, windows))]
 fn publish_lifecycle(working_dir: &Path, compute_pgid: u32) -> io::Result<()> {
     let temporary = working_dir.join("compute-lifecycle.pending");
     let mut options = OpenOptions::new();
@@ -132,7 +142,25 @@ fn publish_lifecycle(working_dir: &Path, compute_pgid: u32) -> io::Result<()> {
     // No-replace publication: a preexisting record can never be reused by another launch.
     std::fs::hard_link(&temporary, working_dir.join(LIFECYCLE_RECORD_NAME))?;
     std::fs::remove_file(temporary)?;
-    File::open(working_dir)?.sync_all()
+    sync_directory(working_dir)
+}
+
+#[cfg(any(unix, windows))]
+fn sync_directory(path: &Path) -> io::Result<()> {
+    #[cfg(unix)]
+    {
+        File::open(path)?.sync_all()
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+        OpenOptions::new()
+            .write(true)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+            .open(path)?
+            .sync_all()
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -187,7 +215,7 @@ impl Default for Timeouts {
 }
 
 impl SupervisorConfig {
-    #[cfg(unix)]
+    #[cfg(any(unix, windows))]
     fn validate(&self) -> io::Result<()> {
         for path in [
             &self.python_program,
@@ -251,11 +279,16 @@ pub fn main_entry(args: impl IntoIterator<Item = OsString>) -> io::Result<i32> {
     run(config)
 }
 
-#[cfg(not(unix))]
+#[cfg(not(any(unix, windows)))]
 pub fn run(_: SupervisorConfig) -> io::Result<i32> {
     Err(io::Error::other(
-        "native generation supervision is currently supported on Unix only",
+        "native generation supervision is unsupported on this platform",
     ))
+}
+
+#[cfg(windows)]
+pub fn run(config: SupervisorConfig) -> io::Result<i32> {
+    windows::run(config)
 }
 
 #[cfg(unix)]
@@ -783,13 +816,13 @@ impl Frames {
     }
 }
 
-#[cfg(any(unix, test))]
+#[cfg(any(unix, windows, test))]
 struct BoundedLog {
     memory: VecDeque<u8>,
     file: File,
     written: usize,
 }
-#[cfg(any(unix, test))]
+#[cfg(any(unix, windows, test))]
 impl BoundedLog {
     fn new(path: &Path) -> io::Result<Self> {
         let file = OpenOptions::new().write(true).create_new(true).open(path)?;
@@ -811,7 +844,7 @@ impl BoundedLog {
         }
         Ok(())
     }
-    #[cfg(unix)]
+    #[cfg(any(unix, windows))]
     fn sync(&self) -> io::Result<()> {
         self.file.sync_all()
     }
@@ -902,6 +935,7 @@ fn signal_group(pgid: i32, signal: i32) -> io::Result<()> {
         Err(error)
     }
 }
+#[cfg(any(unix, windows, test))]
 fn invalid(error: impl std::fmt::Display) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, error.to_string())
 }

@@ -1645,10 +1645,12 @@ dependencies = [
 name = "inference-supervisor"
 version = "0.1.0"
 dependencies = [
+ "fs2",
  "libc",
  "serde",
  "serde_json",
  "tempfile",
+ "windows-sys 0.61.2",
  "worker-protocol",
 ]
 
