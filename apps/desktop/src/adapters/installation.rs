@@ -2738,7 +2738,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(record.probe["device"], "gpu");
-        let protocol_output = repo.join("verification/windows-gate0/product-install-protocol");
+        let protocol_output = repo.join("verification/windows-gate0/product-controller-protocol");
         let protocol_report =
             repo.join("verification/windows-gate0/product-install-worker-protocol.json");
         let protocol = Command::new(&ready.worker_program)
@@ -2769,6 +2769,86 @@ mod tests {
             "installed product worker protocol failed"
         );
         assert!(protocol_report.is_file());
+        let plan_environment = installer.plan_environment().unwrap();
+        let frozen = studio_core::generation::freeze_windows_z_image(
+            studio_core::generation::GenerationInput {
+                request_id: studio_core::domain::RequestId::new("request:windows-product").unwrap(),
+                project_id: studio_core::domain::ProjectId::new("default").unwrap(),
+                idempotency_key: studio_core::domain::IdempotencyKey::new("intent:windows-product")
+                    .unwrap(),
+                plan_id: studio_core::domain::PlanId::new("plan:windows-product").unwrap(),
+                prompt: "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光".into(),
+                width: 1024,
+                height: 1024,
+                count: 1,
+                seed: Some(20261101),
+            },
+            20261101,
+            plan_environment,
+        )
+        .unwrap();
+        let library = Arc::new(Mutex::new(
+            crate::adapters::library::Library::open(
+                &paths.data,
+                vec![paths.cache.clone(), paths.logs.clone(), paths.work.clone()],
+            )
+            .unwrap(),
+        ));
+        let submitted = library
+            .lock()
+            .unwrap()
+            .submit(frozen.request, frozen.plan)
+            .unwrap();
+        let controller = crate::adapters::generation::GenerationController::new(
+            paths.clone(),
+            library.clone(),
+            repo.join("target/debug/inference-supervisor.exe"),
+        );
+        controller
+            .start(submitted.job.clone(), ready.clone())
+            .unwrap();
+        let controller_deadline = std::time::Instant::now() + std::time::Duration::from_secs(900);
+        while controller.is_busy() {
+            assert!(
+                std::time::Instant::now() < controller_deadline,
+                "Windows product controller generation timed out"
+            );
+            std::thread::sleep(std::time::Duration::from_millis(250));
+        }
+        let completed = library.lock().unwrap().job(&submitted.job.job_id).unwrap();
+        assert_eq!(
+            completed.state,
+            studio_core::generation::AttemptState::Succeeded
+        );
+        let manifest = completed.manifest.as_ref().unwrap();
+        assert_eq!(manifest.outputs.len(), 1);
+        assert_eq!(
+            manifest.outputs[0].data_type,
+            studio_core::domain::AssetKind::ImageRgb
+        );
+        let asset_bytes = library
+            .lock()
+            .unwrap()
+            .read_asset_png(&manifest.outputs[0].asset_id)
+            .unwrap();
+        let controller_png = repo.join("verification/windows-gate0/product-controller-primary.png");
+        fs::write(&controller_png, &asset_bytes).unwrap();
+        atomic_json(
+            &repo.join("verification/windows-gate0/product-controller-generation.json"),
+            &serde_json::json!({
+                "schema_version": 1,
+                "kind": "windows-product-controller-generation",
+                "status": "passed",
+                "job_id": submitted.job.job_id,
+                "attempt_id": submitted.job.attempt.attempt_id,
+                "asset_id": manifest.outputs[0].asset_id,
+                "asset_sha256": manifest.outputs[0].content_hash,
+                "asset_bytes": asset_bytes.len(),
+                "output": "verification/windows-gate0/product-controller-primary.png",
+            }),
+        )
+        .unwrap();
+        controller.shutdown();
         atomic_json(
             &repo.join("verification/windows-gate0/product-install.json"),
             &serde_json::json!({
@@ -2787,7 +2867,9 @@ mod tests {
                 "generation_components": environment.components.len(),
                 "probe": record.probe,
                 "worker_protocol_report": "verification/windows-gate0/product-install-worker-protocol.json",
-                "worker_protocol_output": "verification/windows-gate0/product-install-protocol",
+                "worker_protocol_output": "verification/windows-gate0/product-controller-protocol",
+                "controller_generation_report": "verification/windows-gate0/product-controller-generation.json",
+                "controller_generation_output": "verification/windows-gate0/product-controller-primary.png",
             }),
         )
         .unwrap();
