@@ -2738,7 +2738,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(record.probe["device"], "gpu");
-        let protocol_output = repo.join("verification/windows-gate0/product-controller-protocol");
+        let protocol_output = repo.join("verification/windows-gate0/product-lifecycle-protocol");
         let protocol_report =
             repo.join("verification/windows-gate0/product-install-worker-protocol.json");
         let protocol = Command::new(&ready.worker_program)
@@ -2769,24 +2769,6 @@ mod tests {
             "installed product worker protocol failed"
         );
         assert!(protocol_report.is_file());
-        let plan_environment = installer.plan_environment().unwrap();
-        let frozen = studio_core::generation::freeze_windows_z_image(
-            studio_core::generation::GenerationInput {
-                request_id: studio_core::domain::RequestId::new("request:windows-product").unwrap(),
-                project_id: studio_core::domain::ProjectId::new("default").unwrap(),
-                idempotency_key: studio_core::domain::IdempotencyKey::new("intent:windows-product")
-                    .unwrap(),
-                plan_id: studio_core::domain::PlanId::new("plan:windows-product").unwrap(),
-                prompt: "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光".into(),
-                width: 1024,
-                height: 1024,
-                count: 1,
-                seed: Some(20261101),
-            },
-            20261101,
-            plan_environment,
-        )
-        .unwrap();
         let library = Arc::new(Mutex::new(
             crate::adapters::library::Library::open(
                 &paths.data,
@@ -2794,28 +2776,58 @@ mod tests {
             )
             .unwrap(),
         ));
-        let submitted = library
-            .lock()
-            .unwrap()
-            .submit(frozen.request, frozen.plan)
+        let submit_product_job = |suffix: &str| {
+            let frozen = studio_core::generation::freeze_windows_z_image(
+                studio_core::generation::GenerationInput {
+                    request_id: studio_core::domain::RequestId::new(format!(
+                        "request:windows-product:{suffix}"
+                    ))
+                    .unwrap(),
+                    project_id: studio_core::domain::ProjectId::new("default").unwrap(),
+                    idempotency_key: studio_core::domain::IdempotencyKey::new(format!(
+                        "intent:windows-product:{suffix}"
+                    ))
+                    .unwrap(),
+                    plan_id: studio_core::domain::PlanId::new(format!(
+                        "plan:windows-product:{suffix}"
+                    ))
+                    .unwrap(),
+                    prompt: "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光".into(),
+                    width: 1024,
+                    height: 1024,
+                    count: 1,
+                    seed: Some(20261101),
+                },
+                20261101,
+                installer.plan_environment().unwrap(),
+            )
             .unwrap();
+            library
+                .lock()
+                .unwrap()
+                .submit(frozen.request, frozen.plan)
+                .unwrap()
+                .job
+        };
+        let submitted = submit_product_job("primary");
         let controller = crate::adapters::generation::GenerationController::new(
             paths.clone(),
             library.clone(),
             repo.join("target/debug/inference-supervisor.exe"),
         );
-        controller
-            .start(submitted.job.clone(), ready.clone())
-            .unwrap();
-        let controller_deadline = std::time::Instant::now() + std::time::Duration::from_secs(900);
-        while controller.is_busy() {
-            assert!(
-                std::time::Instant::now() < controller_deadline,
-                "Windows product controller generation timed out"
-            );
-            std::thread::sleep(std::time::Duration::from_millis(250));
-        }
-        let completed = library.lock().unwrap().job(&submitted.job.job_id).unwrap();
+        controller.start(submitted.clone(), ready.clone()).unwrap();
+        let wait_controller = || {
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(900);
+            while controller.is_busy() {
+                assert!(
+                    std::time::Instant::now() < deadline,
+                    "Windows product controller generation timed out"
+                );
+                std::thread::sleep(std::time::Duration::from_millis(250));
+            }
+        };
+        wait_controller();
+        let completed = library.lock().unwrap().job(&submitted.job_id).unwrap();
         assert_eq!(
             completed.state,
             studio_core::generation::AttemptState::Succeeded
@@ -2839,12 +2851,168 @@ mod tests {
                 "schema_version": 1,
                 "kind": "windows-product-controller-generation",
                 "status": "passed",
-                "job_id": submitted.job.job_id,
-                "attempt_id": submitted.job.attempt.attempt_id,
+                "job_id": submitted.job_id,
+                "attempt_id": submitted.attempt.attempt_id,
                 "asset_id": manifest.outputs[0].asset_id,
                 "asset_sha256": manifest.outputs[0].content_hash,
                 "asset_bytes": asset_bytes.len(),
                 "output": "verification/windows-gate0/product-controller-primary.png",
+            }),
+        )
+        .unwrap();
+
+        let loading_cancel = submit_product_job("cancel-loading");
+        controller
+            .start(loading_cancel.clone(), ready.clone())
+            .unwrap();
+        let cancel_deadline = std::time::Instant::now() + std::time::Duration::from_secs(300);
+        loop {
+            let view = controller.snapshot();
+            if view.stage == "loading" {
+                controller.cancel(&loading_cancel.job_id).unwrap();
+                break;
+            }
+            assert!(
+                std::time::Instant::now() < cancel_deadline,
+                "did not observe loading before cancel deadline: {}",
+                view.stage
+            );
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
+        wait_controller();
+        let loading_record = library.lock().unwrap().job(&loading_cancel.job_id).unwrap();
+        assert_eq!(
+            loading_record.state,
+            studio_core::generation::AttemptState::Cancelled
+        );
+        assert!(
+            loading_record
+                .manifest
+                .as_ref()
+                .is_some_and(|manifest| manifest.outputs.is_empty())
+        );
+
+        let sampling_cancel = submit_product_job("cancel-sampling");
+        controller
+            .start(sampling_cancel.clone(), ready.clone())
+            .unwrap();
+        let sampling_deadline = std::time::Instant::now() + std::time::Duration::from_secs(900);
+        loop {
+            let view = controller.snapshot();
+            if view.stage == "sampling" && view.step.unwrap_or(0) >= 1 {
+                controller.cancel(&sampling_cancel.job_id).unwrap();
+                break;
+            }
+            assert!(
+                std::time::Instant::now() < sampling_deadline,
+                "did not observe sampling before cancel deadline: {}",
+                view.stage
+            );
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
+        wait_controller();
+        let sampling_record = library
+            .lock()
+            .unwrap()
+            .job(&sampling_cancel.job_id)
+            .unwrap();
+        assert_eq!(
+            sampling_record.state,
+            studio_core::generation::AttemptState::Cancelled
+        );
+        assert!(
+            sampling_record
+                .manifest
+                .as_ref()
+                .is_some_and(|manifest| manifest.outputs.is_empty())
+        );
+
+        let killed = submit_product_job("kill-supervisor");
+        controller.start(killed.clone(), ready.clone()).unwrap();
+        let killed_run = library
+            .lock()
+            .unwrap()
+            .attempt_run_dir(&killed.attempt)
+            .unwrap();
+        let lifecycle = killed_run.join(inference_supervisor::LIFECYCLE_RECORD_NAME);
+        let lifecycle_deadline = std::time::Instant::now() + std::time::Duration::from_secs(300);
+        while !lifecycle.is_file() {
+            assert!(
+                std::time::Instant::now() < lifecycle_deadline,
+                "supervisor lifecycle was not published"
+            );
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        }
+        let lifecycle_record: serde_json::Value =
+            serde_json::from_slice(&fs::read(&lifecycle).unwrap()).unwrap();
+        let supervisor_pid = lifecycle_record["supervisor_pid"].as_u64().unwrap();
+        let supervisor_pid_text = supervisor_pid.to_string();
+        let killed_status = Command::new("taskkill.exe")
+            .args(["/PID", supervisor_pid_text.as_str(), "/F"])
+            .status()
+            .unwrap();
+        assert!(killed_status.success());
+        wait_controller();
+        let killed_record = library.lock().unwrap().job(&killed.job_id).unwrap();
+        assert_eq!(
+            killed_record.state,
+            studio_core::generation::AttemptState::Failed
+        );
+        assert!(
+            killed_record
+                .manifest
+                .as_ref()
+                .is_some_and(|manifest| manifest.outputs.is_empty())
+        );
+
+        let recovery = submit_product_job("recovery");
+        controller.start(recovery.clone(), ready.clone()).unwrap();
+        wait_controller();
+        let recovery_record = library.lock().unwrap().job(&recovery.job_id).unwrap();
+        assert_eq!(
+            recovery_record.state,
+            studio_core::generation::AttemptState::Succeeded
+        );
+        let recovery_manifest = recovery_record.manifest.as_ref().unwrap();
+        let recovery_bytes = library
+            .lock()
+            .unwrap()
+            .read_asset_png(&recovery_manifest.outputs[0].asset_id)
+            .unwrap();
+        fs::write(
+            repo.join("verification/windows-gate0/product-recovery.png"),
+            &recovery_bytes,
+        )
+        .unwrap();
+        atomic_json(
+            &repo.join("verification/windows-gate0/product-cancel-recovery.json"),
+            &serde_json::json!({
+                "schema_version": 1,
+                "kind": "windows-product-cancel-recovery",
+                "status": "passed",
+                "loading_cancel": {
+                    "job_id": loading_cancel.job_id,
+                    "state": loading_record.state,
+                    "outputs": loading_record.manifest.as_ref().map_or(0, |manifest| manifest.outputs.len()),
+                },
+                "sampling_cancel": {
+                    "job_id": sampling_cancel.job_id,
+                    "state": sampling_record.state,
+                    "outputs": sampling_record.manifest.as_ref().map_or(0, |manifest| manifest.outputs.len()),
+                },
+                "supervisor_kill": {
+                    "job_id": killed.job_id,
+                    "state": killed_record.state,
+                    "outputs": killed_record.manifest.as_ref().map_or(0, |manifest| manifest.outputs.len()),
+                    "pid": supervisor_pid,
+                },
+                "recovery": {
+                    "job_id": recovery.job_id,
+                    "state": recovery_record.state,
+                    "asset_id": recovery_manifest.outputs[0].asset_id,
+                    "asset_sha256": recovery_manifest.outputs[0].content_hash,
+                    "output": "verification/windows-gate0/product-recovery.png",
+                }
             }),
         )
         .unwrap();
@@ -2867,9 +3035,11 @@ mod tests {
                 "generation_components": environment.components.len(),
                 "probe": record.probe,
                 "worker_protocol_report": "verification/windows-gate0/product-install-worker-protocol.json",
-                "worker_protocol_output": "verification/windows-gate0/product-controller-protocol",
+                "worker_protocol_output": "verification/windows-gate0/product-lifecycle-protocol",
                 "controller_generation_report": "verification/windows-gate0/product-controller-generation.json",
                 "controller_generation_output": "verification/windows-gate0/product-controller-primary.png",
+                "cancel_recovery_report": "verification/windows-gate0/product-cancel-recovery.json",
+                "recovery_output": "verification/windows-gate0/product-recovery.png",
             }),
         )
         .unwrap();
