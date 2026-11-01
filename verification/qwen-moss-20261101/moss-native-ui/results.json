@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "modelId": "moss-image-sft-mflux-v1",
+  "app": {
+    "name": "Image Studio MOSS Native",
+    "bundleId": "local.image-studio.moss-native.dev",
+    "dataRoot": "target/qwen-moss-offline-install-20261101"
+  },
+  "modelPage": {
+    "catalogCount": 7,
+    "installedCount": 1,
+    "executableCount": 1,
+    "moss": {
+      "modelComponents": "ready",
+      "runtime": "ready",
+      "deviceProbe": "passed",
+      "executable": true,
+      "verifiedDevice": "Apple M3 Max / 128 GiB / macOS arm64"
+    }
+  },
+  "task": {
+    "turnId": "turn-8075dada9cde46449a95dddbbff3e9aa",
+    "jobId": "job-330628630b194bc480ee9db0f3bb6105",
+    "attemptId": "attempt-37bb1239413b46e185be1a9a9e055654",
+    "attemptState": "succeeded",
+    "assetId": "asset-afb56fae71d84268b7cfb99c77676257",
+    "prompt": "一只橙色的小猫坐在窗边，窗外是秋天的树叶，温暖自然光，细腻的水彩插画。",
+    "capabilityId": "image.text-to-image.moss-image-sft.v1",
+    "aspect": "1:1",
+    "count": 1,
+    "effectiveSeed": 3250844244,
+    "steps": 50,
+    "guidance": 3.0,
+    "tokenBudget": 4096,
+    "skipLayers": [
+      22
+    ],
+    "width": 1024,
+    "height": 1024,
+    "dataType": "image_rgb",
+    "elapsedMilliseconds": 663159,
+    "maxSamplingStep": 50,
+    "assetRelativePath": "assets/asset-9568899d71924982a028381cb75f475d.png",
+    "assetBytes": 1624024,
+    "assetSha256": "bc40b20548ac368a37aea819696b857f336481f6e470894bd3f9d20cf05c1f2d"
+  },
+  "export": {
+    "path": "moss-native-export.png",
+    "systemSavePanel": true,
+    "bytes": 1624024,
+    "sha256": "bc40b20548ac368a37aea819696b857f336481f6e470894bd3f9d20cf05c1f2d",
+    "matchesAsset": true
+  },
+  "reopen": {
+    "normalExit": true,
+    "sameDataRoot": true,
+    "conversationRestored": true,
+    "imageRestored": true,
+    "mossSelectionRestored": true
+  },
+  "workerProcessesAfterCompletion": [],
+  "qualityReview": "水彩小猫、窗边秋叶、温暖自然光与细腻水彩质感均符合提示词；原生成图、重开和系统导出完整一致。",
+  "evidence": {
+    "taskRecord": {
+      "path": "task-record.json",
+      "sha256": "4a184567beeecfd99769c32aaee9cc1c5be44145f361c9f269ad005ceb0584a5"
+    },
+    "sampling": {
+      "path": "sampling.jpg",
+      "sha256": "62450b424bfdf88b9fcd5176d1e337743db5af1756c55e0eead4111ff98240c5"
+    },
+    "completed": {
+      "path": "completed.jpg",
+      "sha256": "d6d1768928d4d85953cf70b588b3226befe6d8b0478a98b6b527467fca3b91e8"
+    },
+    "reopen": {
+      "path": "reopen.jpg",
+      "sha256": "d929936f48fadd6557b32e43da255337755a0fe172fd6248748aac565d3f23e8"
+    },
+    "modelsVerified": {
+      "path": "models-verified.jpg",
+      "sha256": "c79fe5f3c035e06e8fee73d24831783c9e95548dd9953941da38864a679a5d2b"
+    }
+  }
+}
