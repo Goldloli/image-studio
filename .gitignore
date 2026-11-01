@@ -17,6 +17,7 @@ target/
 node_modules/
 apps/frontend/dist/
 apps/desktop/gen/
+apps/desktop/binaries/
 
 # Local UI automation artifacts
 .playwright-cli/
