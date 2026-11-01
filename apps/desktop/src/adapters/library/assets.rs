@@ -437,7 +437,7 @@ impl Library {
         destination.sync_all()?;
         drop(destination);
         if overwrite_confirmed {
-            fs::rename(&temporary.0, &target)?;
+            crate::adapters::safe_fs::replace_file(&temporary.0, &target)?;
         } else {
             // link is an atomic no-replace publish on the destination filesystem.
             // A file created after the dialog check cannot be accidentally overwritten.

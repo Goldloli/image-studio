@@ -1,5 +1,5 @@
 use std::{
-    fs::{File, Metadata, OpenOptions},
+    fs::{self, File, Metadata, OpenOptions},
     io,
     path::Path,
 };
@@ -38,6 +38,41 @@ pub(crate) fn open_regular(
     let file = options.open(path)?;
     validate_regular(&file.metadata()?)?;
     Ok(file)
+}
+
+#[cfg_attr(windows, allow(clippy::permissions_set_readonly_false))]
+pub(crate) fn replace_file(from: &Path, to: &Path) -> io::Result<()> {
+    #[cfg(not(windows))]
+    {
+        fs::rename(from, to)
+    }
+    #[cfg(windows)]
+    {
+        let original_permissions = match fs::symlink_metadata(to) {
+            Ok(metadata) if metadata.is_file() => Some(metadata.permissions()),
+            Ok(_) => {
+                return Err(invalid("替换目标不是普通文件"));
+            }
+            Err(error) if error.kind() == io::ErrorKind::NotFound => None,
+            Err(error) => return Err(error),
+        };
+        if let Some(permissions) = original_permissions.as_ref()
+            && permissions.readonly()
+        {
+            let mut writable = permissions.clone();
+            writable.set_readonly(false);
+            fs::set_permissions(to, writable)?;
+        }
+        match fs::rename(from, to) {
+            Ok(()) => Ok(()),
+            Err(error) => {
+                if let Some(permissions) = original_permissions {
+                    let _ = fs::set_permissions(to, permissions);
+                }
+                Err(error)
+            }
+        }
+    }
 }
 
 fn validate_regular(metadata: &Metadata) -> io::Result<()> {
@@ -108,5 +143,20 @@ mod tests {
             open_regular(&root.path().join("fixture:stream"), true, true, true).unwrap_err();
         assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
         assert!(error.to_string().contains("备用数据流"));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn replace_file_handles_a_readonly_target() {
+        let root = tempfile::tempdir().unwrap();
+        let source = root.path().join("source.tmp");
+        let target = root.path().join("target.png");
+        std::fs::write(&source, b"new").unwrap();
+        std::fs::write(&target, b"old").unwrap();
+        let mut permissions = std::fs::metadata(&target).unwrap().permissions();
+        permissions.set_readonly(true);
+        std::fs::set_permissions(&target, permissions).unwrap();
+        replace_file(&source, &target).unwrap();
+        assert_eq!(std::fs::read(&target).unwrap(), b"new");
     }
 }
