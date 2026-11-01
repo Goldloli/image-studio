@@ -1,0 +1,4 @@
+[{"conversationId":"conv-27f42522e6d2474e94ca9c2a630a13b0","title":"新会话","draftId":5,"prompt":"横向构图的海边灯塔与蓝色海面。","modelId":"qwen-image-2.1-mflux-v1","aspect":"1:1","count":1,"turnCount":0},
+{"conversationId":"conv-9c2681216ae64398b7d4e900acdeab47","title":"新会话","draftId":4,"prompt":"会话 B 的 MOSS 草稿，不应自动排队。","modelId":"moss-image-sft-mflux-v1","aspect":"1:1","count":1,"turnCount":0},
+{"conversationId":"conv-b6bed077850c42eca034f58acda5c8be","title":"蓝天下的一座玻璃温室，植物繁茂，清晨薄雾。","draftId":3,"prompt":"","modelId":"qwen-image-2.1-mflux-v1","aspect":"1:1","count":1,"turnCount":1},
+{"conversationId":"conv-578e3e2e494a4256806496dc15cdfbb9","title":"晨光下的白色灯塔，蓝色海面，简洁矢量海报。","draftId":2,"prompt":"","modelId":"z-image-turbo-mflux-v1","aspect":"1:1","count":1,"turnCount":9}]

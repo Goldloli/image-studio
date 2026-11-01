@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "caseId": "U05",
+  "session": {
+    "initialModelId": "z-image-turbo-mflux-v1",
+    "initialAspect": "4:3",
+    "switchedModelId": "qwen-image-2.1-mflux-v1",
+    "promptPreserved": true,
+    "invalidAspectPreserved": "4:3",
+    "sendBlocked": true,
+    "sendBlockedReason": "参数不受当前模型支持",
+    "saveBlockedReason": "保存失败：模型、能力、源图与画幅组合不受支持",
+    "explicitAspect": "1:1",
+    "sendEnabledAfterExplicitChange": true,
+    "savedAfterExplicitChange": true
+  },
+  "defaults": {
+    "initialModelId": "z-image-turbo-mflux-v1",
+    "initialAspect": "4:3",
+    "switchedModelId": "qwen-image-2.1-mflux-v1",
+    "invalidAspectVisible": true,
+    "saveBlocked": true,
+    "explicitAspect": "1:1",
+    "saved": true,
+    "savedModelId": "qwen-image-2.1-mflux-v1",
+    "savedAspect": "1:1"
+  },
+  "oldConversationsUnchanged": [
+    {
+      "conversationId": "conv-b6bed077850c42eca034f58acda5c8be",
+      "turnCount": 1
+    },
+    {
+      "conversationId": "conv-578e3e2e494a4256806496dc15cdfbb9",
+      "turnCount": 9
+    }
+  ],
+  "evidence": {
+    "state": {
+      "path": "u05-state.json",
+      "sha256": "f5a0f96c8af758d5fb0904748bd33a5788f0c13c3798c0853d62ed92804a1007"
+    },
+    "defaultState": {
+      "path": "u05-default-state.json",
+      "sha256": "9298b4678eacfbc13bc3675fe9b85ef61ea61bb9b361de8a912cedd2f2f7eefc"
+    },
+    "sessionInvalid": {
+      "path": "u05-invalid.jpg",
+      "sha256": "ff32419ef303323ce097d9ea903b5051d995f1aa670df993cd18453dfa0e12d4"
+    },
+    "sessionValid": {
+      "path": "u05-valid.jpg",
+      "sha256": "064101f2149ca867a979e3b58a4f7b60f106a6189844c84bc17cab29e9a8f4a7"
+    },
+    "defaultInvalid": {
+      "path": "u05-default-invalid.jpg",
+      "sha256": "35d9fc5a71abbd57645a5f88c3cb08d0a837d2c7b06719842f67469f2fa58ee5"
+    },
+    "defaultValid": {
+      "path": "u05-default-valid.jpg",
+      "sha256": "008fc8afda0b80ea07fbee0f9ed6225b252d7b72248e759159a113d8434636f1"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "appearance": {
+    "theme": "light",
+    "fontScale": "default",
+    "density": "comfortable",
+    "reducedMotion": false,
+    "sidebarCollapsed": false
+  },
+  "creationDefaults": {
+    "modelId": "qwen-image-2.1-mflux-v1",
+    "aspect": "1:1",
+    "count": 1,
+    "seed": ""
+  }
+}
