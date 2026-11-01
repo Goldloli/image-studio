@@ -1,13 +1,13 @@
 # Qwen-Image 2.1 / Turbo 阶段报告
 
 日期：2026-11-01
-状态：终端侧全部核心验收通过；原生 UI 点击验收待解锁 macOS 后继续。
+状态：Qwen 基础版与 Turbo 全部 P0 验收通过。
 
 ## 结论
 
-Qwen-Image 2.1 基础版与官方 Turbo 已从 ModelScope 固定文件 revision 完成隔离安装，并在 Apple M3 Max / 128 GiB 上通过上游基线、正式产品生成、取消重试、强杀恢复、tokenizer 边界和完整断网生成。
+Qwen-Image 2.1 基础版与官方 Turbo 已从 ModelScope 固定文件 revision 完成隔离安装，并在 Apple M3 Max / 128 GiB 上通过上游基线、正式产品生成、取消重试、强杀恢复、tokenizer 边界、完整断网生成和原生 UI 发送/重开/导出。
 
-原生 dev app 已启动在隔离数据根，但 macOS 当前锁屏，CUA 无法自动解锁和点击。因此 U01/U02 不标记通过，Qwen Beads `image-studio-u3q` 保持进行中，MOSS `image-studio-g37` 尚不开始。
+两个型号的 `verifiedDevices` 已更新为这台 M3 Max；Qwen Beads `image-studio-u3q` 可关闭，随后按依赖启动 MOSS `image-studio-g37`。
 
 ## 来源与安装
 
@@ -61,6 +61,17 @@ Qwen-Image 2.1 基础版与官方 Turbo 已从 ModelScope 固定文件 revision 
 - Turbo 中文海报同样完整清晰；8 步版本仍维持可读文字。
 - 两版本的英文产品静物、水彩小猫、主体结构和 COLOR/RGB 1024×1024 输出均正常。
 
+## 原生 UI
+
+- 模型页显示 7 个正式接入型号、2 个已安装、2 个可执行；基础版和 Turbo 均显示组件齐备、运行时就绪、设备探针通过。
+- 两个型号分别显示实机验证：`Apple M3 Max / 128 GiB / macOS arm64`。
+- Turbo 在原生界面发送剪纸狐狸提示词，完成 8/8 步并成功生成；系统导出 PNG 与 Asset SHA-256 同为 `af520df8b257e998306a5d19435f2802c367e2252ae4e056c21d724b960e2b2c`。
+- 基础版在原生界面发送灯塔提示词，完成 40/40 步并成功生成；系统导出 PNG 与 Asset SHA-256 同为 `bcd5592155fa63bf4e45cd1002cf9c2e5ec4a83c2a6801c6da974cdf831cda55`。
+- 关闭并重开同一个数据根后，两个原生任务及 21 轮历史均保留。
+- 原生创作参数只提供 1:1、单张；不支持的非方图画幅由严格契约测试保证不会被静默改写。
+
+证据：[原生 UI 结果](qwen-native-ui/results.json)。
+
 ## 质量门
 
 - `cargo test --workspace`：通过。
@@ -74,13 +85,6 @@ Qwen-Image 2.1 基础版与官方 Turbo 已从 ModelScope 固定文件 revision 
 - 六锁/wheel 源码审计：通过，审计过程不联网。
 - 原生 Tauri 渲染器断网启动：通过。
 
-## 待完成
+## 下一阶段
 
-macOS 解锁后需在已启动的 [Image Studio Qwen Models.app](../../../target/dev/Image%20Studio%20Qwen%20Models.app) 和隔离数据根 `target/qwen-moss-validation-20261101` 上完成：
-
-1. 模型页确认基础版、Turbo 分别显示真实就绪与设备状态。
-2. 会话切换两个型号，确认 1:1 默认、4:3 显式拒绝。
-3. 原生发送、重开与 PNG 导出。
-4. 保存 UI 证据后关闭 `image-studio-u3q`，再领取 `image-studio-g37` 开始 MOSS。
-
-未完成点击验收前不得将 `verifiedDevices` 或 U01/U02 标记为通过。
+Qwen 门禁已经满足。下一步领取 `image-studio-g37`，从 MOSS-SFT 固定源安装开始，完成独立基线、T01–T04 文字/布局、取消恢复、断网、原生 UI 和整批回归。
