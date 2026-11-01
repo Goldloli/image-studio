@@ -115,6 +115,6 @@ Windows 预检曾发现根 workspace 对 `sha2` 启用全局 `asm`，其汇编�
 
 ## 实施前提与可延后采集项
 
-2026-11-01 已在目标 Windows 会话完成只读环境预检，但没有用户对本 change 的实施批准，也没有 Windows 构建、原生启动、模型安装或推理证据。当前事实状态只允许继续文档修订和准备；批准后才可建立实施任务并执行 Gate 0。
+2026-11-01 已确认本 change 并建立 Beads 实施记录；目标机 Windows 构建、原生启动、受控文件、Job Object 和 Gate 0 完整模型执行均已有当前证据。正式 Windows 产品安装、worker、原生生成闭环、NSIS 与 Mac 回归仍未完成。
 
-系统 build、驱动、磁盘和工具链的预检值见 [sources.md](sources.md)，但所有依赖 patch 版本仍须在 Gate 0 冻结，当前预检不是兼容范围。实际条件若导致更换模型、后端家族、平台、输出或预算，必须修订提案并重新确认。这里没有以“以后再定”为由省略首轮交付范围。
+系统 build、驱动、磁盘和工具链的预检值见 [sources.md](sources.md)。Gate 0 已冻结 Python 3.12.10、PyTorch 2.10.0+cu126、Diffusers 0.36.0、Transformers 4.57.3、Accelerate 1.12.0、bitsandbytes 0.48.2，以及固定模型、BF16 VAE、memory-efficient SDPA 和组件 CPU offload。目标机结果见 [Windows Gate 0](../../../verification/windows-gate0/README.md)。实际条件若导致更换模型、后端家族、平台、输出或预算，必须修订提案并重新确认。

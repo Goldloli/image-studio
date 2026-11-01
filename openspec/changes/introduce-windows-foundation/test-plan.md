@@ -1,6 +1,6 @@
 # Windows 首轮验收计划
 
-状态：仅计划，**P0 验收用例全部未运行**。2026-11-01 已完成目标机环境预检、全 workspace 构建/测试及宿主短时启动，但没有完整原生 UI、Windows 进程监督、NSIS、安装或模型证据；开发构建结果不计为 P0 通过。执行顺序和实现边界见 [tasks.md](tasks.md)、[design.md](design.md)。
+状态：Gate 0 的 G01–G06 已于 2026-11-01 在目标机通过，证据见 [Windows Gate 0](../../../verification/windows-gate0/README.md)。Windows 已有全 workspace 构建/测试、宿主启动、受控文件与 Job Object 证据；正式安装、产品 worker、完整原生 UI、NSIS 和其余产品 P0 尚未运行。执行顺序和实现边界见 [tasks.md](tasks.md)、[design.md](design.md)。
 
 ## 目标与通用记录
 

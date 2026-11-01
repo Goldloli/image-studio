@@ -6,7 +6,7 @@
 
 Mac M3 Max / 128 GiB 已完成七型号、八能力验收，相关变更已归档。现有 macOS 数据目录、模型安装、Python/MLX 环境和个人图片不随 Git 克隆迁移。
 
-用户已确认 Windows 开发机为 **Windows 10 x64 / RTX 3080 Ti 12 GB / 32 GB RAM / Intel Core i7-13700K**，并授权将源码推送 GitHub，转到 Windows 端继续开发。当前 `introduce-windows-foundation` 仍是已写好、待用户确认实施的提案；本次上传不把提案自动改成已批准，也没有实现 Windows 推理。
+用户已确认 Windows 开发机为 **Windows 10 x64 / RTX 3080 Ti 12 GB / 32 GB RAM / Intel Core i7-13700K**，明确要求继续开发，并确认了 `introduce-windows-foundation` 的实施范围。Gate 0 已完成；正式产品安装、原生生成闭环、NSIS、完整 UI/IME/DPI 与 Mac 回归仍未完成。
 
 ## 2026-11-01 Windows 目标机预检
 
@@ -19,6 +19,19 @@ Mac M3 Max / 128 GiB 已完成七型号、八能力验收，相关变更已归�
 - 系统盘为 NTFS NVMe，预检时可用约 1576 GiB；分页文件由系统自动管理，当时约 4.75 GiB。
 
 这些信息证明基础机器条件匹配，不证明 Windows 构建、GUI、GPU 算子或 Z-Image Gate 0 通过。详细快照和证据边界见 [Windows sources](../openspec/changes/introduce-windows-foundation/sources.md)。
+
+## 2026-11-01 Gate 0 结果
+
+Gate 0 已在目标机通过：
+
+- 固定 Python 3.12.10、PyTorch 2.10.0+cu126、Diffusers 0.36.0、Transformers 4.57.3、Accelerate 1.12.0、bitsandbytes 0.48.2。
+- RTX 3080 Ti 按 UUID、PCI bus、sm86 与显存绑定；BF16 和 NF4 小算子通过。
+- Z-Image revision `f332072aa78be7aecdf3ee76d5c247082da564a6` 的 20 个文件、19 个推理组件、`32,848,305,533` bytes 全部校验。
+- ModelScope `Tongyi-MAI/Z-Image-Turbo@master` 已对全部 20 个文件做等价性验证。
+- 候选 A 使用双 NF4、BF16 计算、BF16 VAE tiling、组件 CPU offload 与 memory-efficient SDPA，通过三个独立进程的 1024×1024、9 步、guidance 0.0 实图。
+- 三次最大 CUDA reserved 为 `9,523,167,232` bytes，最大进程 private commit 为 `25,440,862,208` bytes，最低可用 RAM 为 `9,417,654,272` bytes；加载低于 25 秒，执行低于 15 秒。
+
+完整报告、资源原始记录与三张样图见 [Windows Gate 0](../verification/windows-gate0/README.md)。Gate 0 通过不等于产品安装已激活，下一步按 change 接入独立 Windows recipe/runtime/worker、正式安装与生成产品闭环。
 
 ## 在 Windows 获取源码
 
@@ -44,15 +57,15 @@ GitHub 登录凭据由 Windows 自身凭据管理保存，不需要从 Mac 复�
 | 顺序 | 文件 | 用途 |
 |---|---|---|
 | 1 | [AGENTS.md](../AGENTS.md) | 中文沟通、OpenSpec 批准、Beads、小步提交与远程授权规则 |
-| 2 | [Windows proposal](../openspec/changes/introduce-windows-foundation/proposal.md) | 首轮交付与待确认选择 |
+| 2 | [Windows proposal](../openspec/changes/introduce-windows-foundation/proposal.md) | 已确认的首轮交付与边界 |
 | 3 | [Windows design](../openspec/changes/introduce-windows-foundation/design.md) | 低内存候选、进程树、平台身份、安装和打包边界 |
-| 4 | [Windows tasks](../openspec/changes/introduce-windows-foundation/tasks.md) | 28 项尚未开始的实施/验收范围 |
-| 5 | [Windows test plan](../openspec/changes/introduce-windows-foundation/test-plan.md) | 44 个尚未运行的 P0 用例 |
+| 4 | [Windows tasks](../openspec/changes/introduce-windows-foundation/tasks.md) | Gate 0 已完成、其余实施/验收范围 |
+| 5 | [Windows test plan](../openspec/changes/introduce-windows-foundation/test-plan.md) | Gate 0 已通过，产品 P0 尚未运行 |
 | 6 | [研究依据](../openspec/changes/introduce-windows-foundation/sources.md) | 用户配置、当前 Mac 假设与上游一手来源 |
 
 用户在 Windows 会话确认提案后，先通过 Gate 0：在这台设备用固定来源 Z-Image Turbo、单张 1024×1024、NF4/CPU 卸载候选验证完整加载、连续生成与资源预算。首轮只接这个 Windows 组合，其余六型号后续分批适配。
 
-12 GB 显存和 32 GB 主存是否达标尚未实测。不要先复制 Mac runtime、删除历史任务、改小分辨率或把 MFLUX q4 身份重命名成 CUDA 来绕过可行性门槛。
+12 GB 显存和 32 GB 主存的 Gate 0 可行性已实测通过。不要复制 Mac runtime、删除历史任务、改小分辨率或把 MFLUX q4 身份重命名成 CUDA 来绕过正式产品边界。
 
 ## 开发工具与最初检查
 
@@ -61,9 +74,9 @@ GitHub 登录凭据由 Windows 自身凭据管理保存，不需要从 Mac 复�
 - `rust-toolchain.toml` 固定 Rust **1.99.1**；预检发现的组件缺失已修复，`rustc/cargo/rustfmt/clippy` 与 `x86_64-pc-windows-msvc` 目标均已核实。目标机还装有 stable。
 - 前端在 Mac 曾验证 Node.js **24.12.0** / npm **11.6.2**；仓库现固定 Windows 已通过的 Node.js **24.19.0** / npm **11.17.0**，约束位于 `.nvmrc`、`engines` 和 `packageManager`。
 - Windows 已安装 Visual Studio Build Tools 2022 **17.14.40**、MSVC **19.44.35228**、Windows SDK **10.0.22621.0 / 10.0.26100.0** 和 VC++ Runtime **14.51.36247**。
-- OpenSpec 为 **1.12.0**，Beads 为 **1.2.2**；Windows 未安装 GitHub CLI，也没有 Python 3.12 或完整 CUDA Toolkit/`nvcc`。Python 3.12 与 wheel 闭包应由后续受控 Gate 0 环境解决，不修改系统 Python。
+- OpenSpec 为 **1.12.0**，Beads 为 **1.2.2**；Windows 未安装 GitHub CLI，也没有系统 Python 3.12 或完整 CUDA Toolkit/`nvcc`。Gate 0 使用 `target/windows-gate0/runtime` 下的受控 Python 3.12.10 与固定 wheel，不修改系统 Python。
 
-这些不是 Windows 完整认证。Rust 与 Node/npm 工具链已就绪，但 Windows GUI/IME/DPI、原生监督和模型执行仍未完成。
+这些不是 Windows 完整认证。Rust、Node/npm、Windows Known Folder、受控文件边界、outer/inner Job Object 与 Gate 0 模型执行已就绪；正式安装、产品 worker、完整 GUI/IME/DPI、NSIS 与 P0 仍未完成。
 
 初步可以检查源码状态、前端与无平台依赖的核心：
 
@@ -76,13 +89,13 @@ cargo check -p studio-core -p worker-protocol --target x86_64-pc-windows-msvc --
 openspec validate introduce-windows-foundation --strict --no-interactive
 ```
 
-这些命令不证明完整 Windows 应用或模型可用。桌面默认目录、监督实现、运行时、原生路径和 NSIS 打包仍需按提案实施；当前不应直接把 Mac 的启动/离线验收脚本用于 Windows。Python/CUDA/模型依赖的最终版本由 Gate 0 冻结，不先在系统 Python 安装浮动最新版。
+这些命令不证明完整 Windows 应用可用。桌面默认目录、受控文件、Job Object 与 Gate 0 运行时已实现；Windows 专用正式 recipe/runtime/worker、安装/生成闭环与 NSIS 仍需实施。Python/CUDA/模型依赖按已冻结版本使用，不在系统 Python 安装浮动最新版。
 
 2026-11-01 已执行的非模型检查结果：前端 46 个包安装成功，6 个测试文件/37 项测试通过，生产构建通过；固定 Rust 的 Windows 核心/协议 `cargo check`、fmt、66 项测试、1 项文档测试和 clippy 均通过。检查中发现并修复了生成协议测试夹具硬编码 POSIX 路径的问题。
 
 `sha2` 的 `asm` 已限定到 macOS，Windows 不启用汇编后端，macOS 目标仍保留。随后 `cargo check/build --workspace --locked`、全 workspace 206 项测试 + 1 项文档测试以及 `cargo clippy --workspace --all-targets -- -D warnings` 均通过，4 项固定网络/运行时缓存测试为显式忽略。
 
-宿主还分别用显式隔离根和无参数默认路径启动成功。Windows 默认目录通过 Known Folder API 解析为 `%LOCALAPPDATA%\ImageStudio`，四个子目录正确创建；设置页目录定位使用 Explorer 且不经过 shell。Windows 平台配置已覆盖为原生窗口，release 构建隐藏控制台。Windows Job Object 原生监督、完整 UI/IME/DPI、NSIS 和所有 P0 仍未完成。
+宿主还分别用显式隔离根和无参数默认路径启动成功。Windows 默认目录通过 Known Folder API 解析为 `%LOCALAPPDATA%\ImageStudio`，四个子目录正确创建；设置页目录定位使用 Explorer 且不经过 shell。Windows 平台配置已覆盖为原生窗口，release 构建隐藏控制台。生成、安装探针与诊断已使用 outer/inner Job Object、suspended launch 和整树回收；完整 UI/IME/DPI、NSIS 和所有产品 P0 仍未完成。
 
 原生 Computer Use 已完整读取 `Image Studio` 的 WebView2 可访问性树，确认中文创作页、导航、输入框、模型状态与原生窗口控件存在，并成功写入/清空中文提示词。Graphics Capture 截图仍超时、元素点击缺少坐标、Tab 未移动焦点，因此目前没有视觉截图或完整键盘证据；限制记录为 `image-studio-ba1`，不能据此假定 UI 全部通过或失败。
 
