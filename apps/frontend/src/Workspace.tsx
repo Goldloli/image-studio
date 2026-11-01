@@ -547,7 +547,10 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   useEffect(() => {
     if (!native) return;
     const registration = listen('studio-close-requested', () => {
-      void flushRef.current().then(() => api('app_close')).catch(() => {});
+      void flushRef.current()
+        .catch(() => {})
+        .then(() => api('app_close'))
+        .catch(error => setActionError(String(error)));
     });
     return () => { void registration.then(unlisten => unlisten()); };
   }, []);
