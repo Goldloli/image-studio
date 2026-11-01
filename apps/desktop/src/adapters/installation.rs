@@ -3519,8 +3519,13 @@ mod tests {
         paths.sort_unstable();
         paths.dedup();
         assert_eq!(paths.len(), manifest.files.len());
-        for artifact in &manifest.files {
-            assert!(artifact.url.starts_with(&format!(
+        let manifest_files = manifest_json["files"].as_array().unwrap();
+        assert_eq!(manifest_files.len(), manifest.files.len());
+        for (artifact, raw) in manifest.files.iter().zip(manifest_files) {
+            assert!(artifact.url.starts_with(
+                "https://www.modelscope.cn/models/Tongyi-MAI/Z-Image-Turbo/resolve/master/"
+            ));
+            assert!(raw["upstream_url"].as_str().unwrap().starts_with(&format!(
                 "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo/resolve/{}/",
                 manifest.revision
             )));
