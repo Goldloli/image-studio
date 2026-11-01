@@ -1,15 +1,53 @@
 use super::*;
 
+fn managed_path(relative: &str) -> String {
+    #[cfg(windows)]
+    {
+        format!(r"C:\managed\{}", relative.replace('/', r"\"))
+    }
+    #[cfg(not(windows))]
+    {
+        format!("/managed/{relative}")
+    }
+}
+
+fn localize_fixture_paths(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::String(path) => {
+            if let Some(relative) = path.strip_prefix("/managed/") {
+                *path = managed_path(relative);
+            }
+        }
+        serde_json::Value::Array(items) => {
+            for item in items {
+                localize_fixture_paths(item);
+            }
+        }
+        serde_json::Value::Object(fields) => {
+            for value in fields.values_mut() {
+                localize_fixture_paths(value);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn decode_fixture(line: &str) -> Envelope {
+    let mut value: serde_json::Value = serde_json::from_str(line).unwrap();
+    localize_fixture_paths(&mut value);
+    Envelope::decode_frame(serde_json::to_string(&value).unwrap().as_bytes()).unwrap()
+}
+
 fn host_frames() -> Vec<Envelope> {
     include_str!("../../fixtures/generation/host.jsonl")
         .lines()
-        .map(|l| Envelope::decode_frame(l.as_bytes()).unwrap())
+        .map(decode_fixture)
         .collect()
 }
 fn worker_frames() -> Vec<Envelope> {
     include_str!("../../fixtures/generation/worker.jsonl")
         .lines()
-        .map(|l| Envelope::decode_frame(l.as_bytes()).unwrap())
+        .map(decode_fixture)
         .collect()
 }
 fn session() -> HostSession {
@@ -218,7 +256,7 @@ fn v2_request() -> ExecuteRequestV2 {
         ]),
         inputs: vec![InputAssetDescriptor {
             role: "source".into(),
-            path: "/managed/runs/v2/input.png".into(),
+            path: managed_path("runs/v2/input.png"),
             width: 10,
             height: 12,
             sha256: "a".repeat(64),
@@ -239,8 +277,8 @@ fn v2_request() -> ExecuteRequestV2 {
                 max_bytes: MAX_OUTPUT_BYTES,
             },
         ],
-        model_path: "/managed/models/birefnet".into(),
-        output_dir: "/managed/runs/v2".into(),
+        model_path: managed_path("models/birefnet"),
+        output_dir: managed_path("runs/v2"),
     }
 }
 
@@ -311,8 +349,8 @@ fn text_v2_request(
             height: 1024,
             max_bytes: MAX_OUTPUT_BYTES,
         }],
-        model_path: format!("/managed/models/{snapshot_id}"),
-        output_dir: "/managed/runs/text-v3".into(),
+        model_path: managed_path(&format!("models/{snapshot_id}")),
+        output_dir: managed_path("runs/text-v3"),
     }
 }
 
@@ -418,7 +456,7 @@ fn v2_rejects_fake_tool_fields_path_escape_and_bad_roles() {
     request.seed = Some(7);
     assert!(request.validate().is_err());
     request = v2_request();
-    request.inputs[0].path = "/managed/runs/other/input.png".into();
+    request.inputs[0].path = managed_path("runs/other/input.png");
     assert!(request.validate().is_err());
     request = v2_request();
     request.outputs[1].width = 11;
@@ -477,7 +515,7 @@ fn qwen_and_moss_v2_payloads_require_exact_recipe_identity_and_parameters() {
     wrong = requests.remove(0);
     wrong.inputs.push(InputAssetDescriptor {
         role: "source".into(),
-        path: "/managed/runs/text-v3/input.png".into(),
+        path: managed_path("runs/text-v3/input.png"),
         width: 1024,
         height: 1024,
         sha256: "a".repeat(64),
