@@ -22,8 +22,10 @@ use rusqlite::{Connection, OptionalExtension, TransactionBehavior, params};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{
+    collections::HashSet,
     fs::{self, File, OpenOptions},
     path::{Path, PathBuf},
+    sync::{Mutex, OnceLock},
     time::{SystemTime, UNIX_EPOCH},
 };
 use studio_core::{
@@ -148,11 +150,42 @@ pub enum Completion {
 /// Closing only the parent File can therefore extend retired host ownership
 /// until a child execs/closes its inherited descriptor. Explicit unlock retires
 /// this ownership even while those copies exist.
-struct HostLock(File);
+static ACTIVE_HOST_ROOTS: OnceLock<Mutex<HashSet<PathBuf>>> = OnceLock::new();
+
+struct ProcessRootClaim(PathBuf);
+
+impl ProcessRootClaim {
+    fn acquire(root: &Path) -> Result<Self> {
+        let mut roots = ACTIVE_HOST_ROOTS
+            .get_or_init(|| Mutex::new(HashSet::new()))
+            .lock()
+            .map_err(|_| LibraryError::Invalid("宿主锁登记不可用".into()))?;
+        if !roots.insert(root.to_path_buf()) {
+            return Err(LibraryError::InUse);
+        }
+        Ok(Self(root.to_path_buf()))
+    }
+}
+
+impl Drop for ProcessRootClaim {
+    fn drop(&mut self) {
+        if let Ok(mut roots) = ACTIVE_HOST_ROOTS
+            .get_or_init(|| Mutex::new(HashSet::new()))
+            .lock()
+        {
+            roots.remove(&self.0);
+        }
+    }
+}
+
+struct HostLock {
+    file: File,
+    _root_claim: ProcessRootClaim,
+}
 
 impl Drop for HostLock {
     fn drop(&mut self) {
-        let _ = FileExt::unlock(&self.0);
+        let _ = FileExt::unlock(&self.file);
     }
 }
 
@@ -161,6 +194,7 @@ pub struct Library {
     db: Connection,
     root: PathBuf,
     protected_roots: Vec<PathBuf>,
+    #[cfg(unix)]
     asset_checks: std::cell::RefCell<assets::AssetCheckCache>,
     _host_lock: HostLock,
 }
@@ -189,6 +223,7 @@ impl Library {
     pub fn open(data_root: impl AsRef<Path>, protected_roots: Vec<PathBuf>) -> Result<Self> {
         fs::create_dir_all(data_root.as_ref())?;
         let root = data_root.as_ref().canonicalize()?;
+        let root_claim = ProcessRootClaim::acquire(&root)?;
         let host_lock = open_regular(&root.join("host.lock"), true)?;
         host_lock.try_lock_exclusive().map_err(|error| {
             if error.kind() == std::io::ErrorKind::WouldBlock {
@@ -197,7 +232,10 @@ impl Library {
                 LibraryError::Io(error)
             }
         })?;
-        let host_lock = HostLock(host_lock);
+        let host_lock = HostLock {
+            file: host_lock,
+            _root_claim: root_claim,
+        };
         for name in ["runs", "commits", "assets", "inputs", "quarantine"] {
             managed_directory(&root.join(name))?;
         }
@@ -255,6 +293,7 @@ impl Library {
             db,
             root,
             protected_roots: protected,
+            #[cfg(unix)]
             asset_checks: Default::default(),
             _host_lock: host_lock,
         };
@@ -880,7 +919,20 @@ fn open_regular(path: &Path, create: bool) -> Result<File> {
     Ok(file)
 }
 fn sync_directory(path: &Path) -> Result<()> {
-    File::open(path)?.sync_all()?;
+    #[cfg(unix)]
+    {
+        File::open(path)?.sync_all()?;
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+        OpenOptions::new()
+            .write(true)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+            .open(path)?
+            .sync_all()?;
+    }
     Ok(())
 }
 

@@ -1118,6 +1118,7 @@ fn committed_asset_corruption_is_availability_not_history_mutation() {
 }
 
 #[test]
+#[cfg_attr(windows, allow(clippy::permissions_set_readonly_false))]
 fn repeated_asset_polling_invalidates_checks_after_same_length_replacement() {
     let root = TempDir::new().unwrap();
     let mut library = open(root.path());
@@ -1135,6 +1136,12 @@ fn repeated_asset_polling_invalidates_checks_after_same_length_replacement() {
     // Atomic replacement also tests inode changes even on coarse timestamps.
     let replacement = root.path().join("replacement.png");
     fs::write(&replacement, &bytes).unwrap();
+    #[cfg(windows)]
+    {
+        let mut permissions = fs::metadata(&path).unwrap().permissions();
+        permissions.set_readonly(false);
+        fs::set_permissions(&path, permissions).unwrap();
+    }
     fs::rename(replacement, &path).unwrap();
     assert!(!library.assets(100, 0).unwrap()[0].available);
     assert!(library.read_asset_png(&asset.asset_id).is_err());

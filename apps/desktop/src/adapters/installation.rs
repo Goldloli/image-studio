@@ -2285,10 +2285,7 @@ fn copy_verified(source: &Path, dest: &Path, a: &Artifact, root: &Path) -> Resul
     drop(output);
     verify(&temporary, a.bytes, &a.sha256)?;
     fs::rename(temporary, dest).map_err(err)?;
-    File::open(dest.parent().ok_or("目标目录缺失。")?)
-        .map_err(err)?
-        .sync_all()
-        .map_err(err)?;
+    sync_directory(dest.parent().ok_or("目标目录缺失。")?)?;
     Ok(())
 }
 fn atomic_json(path: &Path, value: &impl Serialize) -> Result<(), String> {
@@ -2298,10 +2295,22 @@ fn atomic_json(path: &Path, value: &impl Serialize) -> Result<(), String> {
         .map_err(err)?;
     file.sync_all().map_err(err)?;
     fs::rename(&temp, path).map_err(err)?;
-    File::open(path.parent().ok_or("父目录缺失。")?)
-        .map_err(err)?
-        .sync_all()
-        .map_err(err)
+    sync_directory(path.parent().ok_or("父目录缺失。")?)
+}
+fn sync_directory(path: &Path) -> Result<(), String> {
+    #[cfg(unix)]
+    let file = File::open(path).map_err(err)?;
+    #[cfg(windows)]
+    let file = {
+        use std::os::windows::fs::OpenOptionsExt;
+        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+        OpenOptions::new()
+            .write(true)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+            .open(path)
+            .map_err(err)?
+    };
+    file.sync_all().map_err(err)
 }
 fn extract(archive: &Path, dest: &Path) -> Result<(), String> {
     let decoder = flate2::read::GzDecoder::new(File::open(archive).map_err(err)?);

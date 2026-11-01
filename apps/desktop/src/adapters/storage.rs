@@ -4,7 +4,6 @@ use serde_json::{Value, json};
 use std::{
     fs,
     path::{Path, PathBuf},
-    process::Command,
 };
 
 #[derive(Clone, Copy, Debug)]
@@ -115,6 +114,7 @@ pub fn open_location(paths: &AppPaths, id: &str) -> Result<(), String> {
     }
     #[cfg(target_os = "macos")]
     {
+        use std::process::Command;
         let status = Command::new("open")
             .arg(&path)
             .status()

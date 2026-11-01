@@ -1,14 +1,15 @@
 use super::*;
 use sha2::{Digest, Sha256};
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    io::{BufReader, Read, Seek, SeekFrom, Write},
-};
+#[cfg(unix)]
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
+use std::io::{BufReader, Read, Seek, SeekFrom, Write};
 use studio_core::recipes::{OutputRole, Recipe};
 
 const MAX_ASSET_BYTES: u64 = 128 * 1024 * 1024;
 const LEGACY_DECODE_LIMIT: usize = 64 * 1024 * 1024;
 const UPSCALE_DECODE_LIMIT: usize = 256 * 1024 * 1024;
+#[cfg(unix)]
 const MAX_ASSET_CHECKS: usize = 512;
 
 /// A lightweight poll may reuse a verified result only while the same file's
@@ -44,10 +45,12 @@ impl AssetFingerprint {
         }
     }
 }
+#[cfg(unix)]
 pub(super) struct CachedAssetCheck {
     fingerprint: AssetFingerprint,
     error: Option<String>,
 }
+#[cfg(unix)]
 pub(super) type AssetCheckCache = BTreeMap<String, CachedAssetCheck>;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -246,13 +249,16 @@ impl Library {
         }
         hook(CommitStage::Copied)?;
         for output in &mut prepared {
-            let mut file = open_regular(&output.temporary.0, false)?;
+            let mut file = open_regular(&output.temporary.0, true)?;
             validate_png(&mut file, output.width, output.height, recipe, output.role)?;
-            file.sync_all()?;
+            file.sync_all()
+                .map_err(|error| LibraryError::Invalid(format!("同步候选失败：{error}")))?;
             let mut permissions = file.metadata()?.permissions();
             permissions.set_readonly(true);
-            file.set_permissions(permissions)?;
-            file.sync_all()?;
+            file.set_permissions(permissions)
+                .map_err(|error| LibraryError::Invalid(format!("设置只读失败：{error}")))?;
+            file.sync_all()
+                .map_err(|error| LibraryError::Invalid(format!("同步只读候选失败：{error}")))?;
         }
         hook(CommitStage::Synced)?;
         let mut published = PublishedAssets {
@@ -261,11 +267,14 @@ impl Library {
             committed: false,
         };
         for output in &prepared {
-            fs::rename(&output.temporary.0, &output.final_path)?;
+            fs::rename(&output.temporary.0, &output.final_path)
+                .map_err(|error| LibraryError::Invalid(format!("发布候选文件失败：{error}")))?;
             published.paths.push(output.final_path.clone());
         }
-        sync_directory(&self.root.join("assets"))?;
-        sync_directory(&self.root.join("commits"))?;
+        sync_directory(&self.root.join("assets"))
+            .map_err(|error| LibraryError::Invalid(format!("同步资产目录失败：{error}")))?;
+        sync_directory(&self.root.join("commits"))
+            .map_err(|error| LibraryError::Invalid(format!("同步提交目录失败：{error}")))?;
         hook(CommitStage::Renamed)?;
         let tx = self
             .db
@@ -469,17 +478,18 @@ impl Library {
         if fingerprint.length != record.byte_count || record.byte_count > MAX_ASSET_BYTES {
             return Err(LibraryError::Invalid("资产大小已改变".into()));
         }
-        let id = record.asset.asset_id.to_string();
-        // Other platforms lack the Unix inode/ctime combination. Do not reuse
-        // an incomplete identity check there; the first release targets macOS.
         #[cfg(unix)]
-        if let Some(previous) = self.asset_checks.borrow().get(&id)
-            && previous.fingerprint == fingerprint
+        let id = record.asset.asset_id.to_string();
+        #[cfg(unix)]
         {
-            return previous
-                .error
-                .as_ref()
-                .map_or(Ok(()), |error| Err(LibraryError::Invalid(error.clone())));
+            if let Some(previous) = self.asset_checks.borrow().get(&id)
+                && previous.fingerprint == fingerprint
+            {
+                return previous
+                    .error
+                    .as_ref()
+                    .map_or(Ok(()), |error| Err(LibraryError::Invalid(error.clone())));
+            }
         }
         let result = (|| {
             let (bytes, hash) = hash_reader(&mut source, MAX_ASSET_BYTES)?;
@@ -491,17 +501,20 @@ impl Library {
             }
             Ok(())
         })();
-        let mut checks = self.asset_checks.borrow_mut();
-        if !checks.contains_key(&id) && checks.len() >= MAX_ASSET_CHECKS {
-            checks.clear();
+        #[cfg(unix)]
+        {
+            let mut checks = self.asset_checks.borrow_mut();
+            if !checks.contains_key(&id) && checks.len() >= MAX_ASSET_CHECKS {
+                checks.clear();
+            }
+            checks.insert(
+                id,
+                CachedAssetCheck {
+                    fingerprint,
+                    error: result.as_ref().err().map(ToString::to_string),
+                },
+            );
         }
-        checks.insert(
-            id,
-            CachedAssetCheck {
-                fingerprint,
-                error: result.as_ref().err().map(ToString::to_string),
-            },
-        );
         result
     }
 
