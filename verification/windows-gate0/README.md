@@ -81,6 +81,9 @@ input and then exercised the formal installer instead of the Gate 0 helper:
 - all 19 model components were frozen into the Windows generation plan;
 - the direct supervisor protocol and `GenerationController` both produced a
   valid 1024x1024 RGB PNG and matching SHA-256 candidate/asset identity.
+- loading-time and sampling-time cancellation both ended with zero outputs;
+- force-killing the real supervisor ended the job as failed with zero outputs,
+  and a new job in the same installed runtime then generated a committed Asset.
 
 Reports:
 
@@ -88,7 +91,9 @@ Reports:
 - [Installed worker protocol](product-install-worker-protocol.json)
 - [Controller generation](product-controller-generation.json)
 - [Controller asset](product-controller-primary.png)
+- [Cancellation and supervisor-kill recovery](product-cancel-recovery.json)
+- [Post-recovery asset](product-recovery.png)
 
 This is a cache-seeded installation acceptance, not a measure of empty-cache
-download time. Network denial, real-model cancellation/strong-kill recovery,
-clean-user installation and Mac regression remain separate pending gates.
+download time. Network denial, clean-user installation, complete IME/DPI
+interaction and Mac regression remain separate pending gates.

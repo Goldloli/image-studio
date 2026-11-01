@@ -29,6 +29,5 @@ not create the private runtime or model files.
 
 The current test machine already has development tools and WebView2. A clean
 Windows 10 test user, missing/offline WebView2 behavior, permission failure,
-upgrade/uninstall data retention, installed-package real generation, native
-IME/DPI interaction, strong-kill recovery and network-denied generation remain
-pending.
+upgrade/uninstall data retention, installed-package real generation, complete
+native IME/DPI interaction and network-denied generation remain pending.

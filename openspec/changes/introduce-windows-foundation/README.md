@@ -2,7 +2,7 @@
 
 为 Windows 10 x64 / RTX 3080 Ti 12 GB / 32 GB RAM / i7-13700K 建立桌面基础与首个 Z-Image Turbo 本地生成闭环。
 
-**当前状态：已进入 Windows 产品闭环实施。** 2026-11-01 已在目标机完成 Gate 0、独立 Windows 身份、正式私有运行时/模型安装在环、产品 worker 与 `GenerationController` 实图、Windows 目录/功能/设置投影，并生成和安装当前用户级 NSIS 包。安装版 WebView2 已启动；干净用户、缺失 WebView2、IME/DPI、真实模型取消/强杀、禁网和 Mac 回归仍未完成。
+**当前状态：已进入 Windows 产品闭环实施。** 2026-11-01 已在目标机完成 Gate 0、独立 Windows 身份、正式私有运行时/模型安装在环、产品 worker 与 `GenerationController` 实图、加载/采样取消与真实 supervisor 强杀恢复、Windows 目录/功能/设置投影，并生成和安装当前用户级 NSIS 包。安装版 WebView2 已启动；干净用户、缺失 WebView2、完整 IME/DPI、禁网和 Mac 回归仍未完成。
 
 | 文档 | 内容 |
 |---|---|
