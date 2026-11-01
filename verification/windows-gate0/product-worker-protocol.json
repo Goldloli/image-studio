@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "kind": "windows-zimage-real-worker-protocol",
+  "status": "passed",
+  "protocol_version": 2,
+  "identity": {
+    "build_id": "studio-zimage-cuda-worker-0.1.0",
+    "runtime_lock_id": "windows-python31210-torch2100-cu126-bnb0482-v1",
+    "model_snapshot_id": "z-image-turbo-diffusers-cuda-nf4-v1"
+  },
+  "elapsed_seconds": 45.67926859999898,
+  "request": {
+    "prompt": "一只戴着蓝色围巾的柴犬坐在雪地里的木椅上，冬日清晨，写实摄影",
+    "seed": 20261104,
+    "model_path": "target/windows-gate0/models/z-image-turbo-diffusers-cuda-nf4-v1",
+    "output_dir": "target/windows-gate0/product-protocol/run3"
+  },
+  "progress": [
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "encoding",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 0,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 1,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 2,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 3,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 4,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 5,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 6,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 7,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 8,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 9,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "decoding",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "writing",
+      "completed": null,
+      "total": null
+    }
+  ],
+  "candidate": {
+    "role": "primary",
+    "data_type": "image_rgb",
+    "relative_path": "primary.png",
+    "width": 1024,
+    "height": 1024,
+    "size_bytes": 1137447,
+    "sha256": "065ade54563fddb81044ce301a0804697e143fbadfe15b48349d74667014974e"
+  },
+  "worker_stderr": "worker request validated\r\nbackend generation started\r\nselected_cuda=0 name=NVIDIA GeForce RTX 3080 Ti cc=8.6\r\n\rLoading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]\rLoading checkpoint shards:  33%|��������      | 1/3 [00:04<00:08,  4.31s/it]\rLoading checkpoint shards:  67%|��������������   | 2/3 [00:09<00:04,  4.59s/it]\rLoading checkpoint shards: 100%|��������������������| 3/3 [00:11<00:00,  3.60s/it]\rLoading checkpoint shards: 100%|��������������������| 3/3 [00:11<00:00,  3.84s/it]\r\nAttention backends are an experimental feature and the API may be subject to change.\r\n`torch_dtype` is deprecated! Use `dtype` instead!\r\n\rLoading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]\rLoading checkpoint shards:  33%|��������      | 1/3 [00:04<00:08,  4.05s/it]\rLoading checkpoint shards:  67%|��������������   | 2/3 [00:08<00:04,  4.39s/it]\rLoading checkpoint shards: 100%|��������������������| 3/3 [00:08<00:00,  2.43s/it]\rLoading checkpoint shards: 100%|��������������������| 3/3 [00:08<00:00,  2.93s/it]\r\npipeline loaded\r\ntoken_count=31 token_budget=512\r\n\r  0%|          | 0/9 [00:00<?, ?it/s]\r 11%|��         | 1/9 [00:02<00:22,  2.81s/it]\r 22%|������       | 2/9 [00:02<00:08,  1.23s/it]\r 33%|��������      | 3/9 [00:04<00:07,  1.24s/it]\r 44%|����������     | 4/9 [00:05<00:06,  1.24s/it]\r 56%|������������    | 5/9 [00:06<00:04,  1.24s/it]\r 67%|��������������   | 6/9 [00:07<00:03,  1.24s/it]\r 78%|����������������  | 7/9 [00:09<00:02,  1.24s/it]\r 89%|������������������ | 8/9 [00:10<00:01,  1.24s/it]\r100%|��������������������| 9/9 [00:11<00:00,  1.25s/it]\r100%|��������������������| 9/9 [00:11<00:00,  1.30s/it]\r\n"
+}

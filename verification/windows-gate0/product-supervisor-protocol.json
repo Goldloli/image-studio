@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "kind": "windows-zimage-real-worker-protocol",
+  "status": "passed",
+  "supervisor": true,
+  "protocol_version": 2,
+  "identity": {
+    "build_id": "studio-zimage-cuda-worker-0.1.0",
+    "runtime_lock_id": "windows-python31210-torch2100-cu126-bnb0482-v1",
+    "model_snapshot_id": "z-image-turbo-diffusers-cuda-nf4-v1"
+  },
+  "elapsed_seconds": 46.48223800000051,
+  "request": {
+    "prompt": "雨后的上海街道，一位撑透明雨伞的年轻人走过霓虹倒影，电影感构图，中英文招牌细节清晰",
+    "seed": 20261105,
+    "model_path": "target/windows-gate0/models/z-image-turbo-diffusers-cuda-nf4-v1",
+    "output_dir": "target/windows-gate0/supervisor-protocol/run1"
+  },
+  "progress": [
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "encoding",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 0,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 1,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 2,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 3,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 4,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 5,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 6,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 7,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 8,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "decoding",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "writing",
+      "completed": null,
+      "total": null
+    }
+  ],
+  "candidate": {
+    "role": "primary",
+    "data_type": "image_rgb",
+    "relative_path": "primary.png",
+    "width": 1024,
+    "height": 1024,
+    "size_bytes": 1405844,
+    "sha256": "9592c059830c407cac7fa4d9dd32629eea079affabbe41a39f859511a421693d"
+  },
+  "worker_stderr": "",
+  "lifecycle": {
+    "schema_version": 1,
+    "supervisor_pid": 32356,
+    "compute_pgid": 13828
+  },
+  "worker_log_bytes": 1557
+}
