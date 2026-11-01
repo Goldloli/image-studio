@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "reviewedDate": "2026-11-01",
+  "entries": [
+    {
+      "id": "z-image-turbo-diffusers-cuda-nf4-v1",
+      "displayName": "Z-Image Turbo",
+      "variant": "Tongyi-MAI/Z-Image-Turbo · Diffusers CUDA NF4 v1",
+      "family": "Z-Image",
+      "summary": "通过 Windows Gate 0 的目标机本地文生图模型，当前固定单张 1024²、9 步。",
+      "description": "使用独立 Diffusers CUDA 后端，固定 NF4、BF16 计算、memory-efficient SDPA、BF16 VAE tiling 与组件 CPU 卸载；不继承 macOS MFLUX q4 配方。",
+      "capabilities": [
+        {
+          "id": "text_to_image",
+          "label": "文生图"
+        }
+      ],
+      "productStatus": "implemented",
+      "runtime": "Diffusers 0.36.0 / PyTorch 2.10.0 / CUDA 12.6",
+      "license": "Apache-2.0",
+      "source": "https://www.modelscope.cn/models/Tongyi-MAI/Z-Image-Turbo",
+      "revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
+      "modelBytes": 32848305533,
+      "knownArtifactBytes": 32848305533,
+      "requirements": [
+        "ModelScope master 传输内容逐文件匹配固定上游 SHA-256",
+        "RTX 3080 Ti sm86 CUDA 与私有无系统 Python 依赖的运行时",
+        "1024² 单张、9 步、guidance 0.0 与 512 token 实际上限"
+      ],
+      "exclusions": [
+        "Intel UHD 770 或 CPU 生成回退",
+        "macOS MFLUX q4 安装/Ready 事实",
+        "非方图、多张、源图与 LoRA"
+      ],
+      "verifiedDevices": [
+        "NVIDIA GeForce RTX 3080 Ti 12 GiB · driver 596.49 · sm86 · Windows 10 22H2"
+      ],
+      "recipe": "NF4 · 9 步 · guidance 0.0 · 1024 × 1024",
+      "installId": "z-image-turbo-diffusers-cuda-nf4-v1",
+      "installerSupported": true
+    },
+    {
+      "id": "flux2-klein-4b-distilled",
+      "displayName": "FLUX.2 Klein 4B distilled",
+      "variant": "black-forest-labs/FLUX.2-klein-4B · distilled",
+      "family": "FLUX.2",
+      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
+      "description": "固定 distilled 4B 快照，产品配方为 1024²、q4、4 步、guidance 1.0；单图编辑使用参考图条件分支，不包含多参考编辑。",
+      "capabilities": [
+        {
+          "id": "text_to_image",
+          "label": "文生图"
+        },
+        {
+          "id": "image_edit",
+          "label": "图片编辑"
+        }
+      ],
+      "productStatus": "planned",
+      "runtime": "当前 Windows 版本未接入",
+      "license": "Apache-2.0",
+      "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B",
+      "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "modelBytes": 15980131745,
+      "knownArtifactBytes": 15980131745,
+      "requirements": [
+        "独立模型组件清单与完整哈希",
+        "单图编辑输入、取消和资源回收验收",
+        "目标设备实机验证"
+      ],
+      "exclusions": [
+        "Klein Base / 9B / 9B KV",
+        "多参考编辑",
+        "替换小型文本编码器"
+      ],
+      "verifiedDevices": [],
+      "recipe": "q4 · 4 步 · 1024 × 1024",
+      "installId": null,
+      "installerSupported": false
+    },
+    {
+      "id": "birefnet-general-epoch-244",
+      "displayName": "BiRefNet general epoch_244",
+      "variant": "BiRefNet-general-epoch_244.onnx",
+      "family": "BiRefNet",
+      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
+      "description": "固定使用官方 general epoch_244 ONNX 权重，CPUExecutionProvider、float32、1024² 预处理，并按源图规范化尺寸输出 RGBA 与 8-bit mask。",
+      "capabilities": [
+        {
+          "id": "background_removal",
+          "label": "去背景"
+        }
+      ],
+      "productStatus": "planned",
+      "runtime": "当前 Windows 版本未接入",
+      "license": "MIT",
+      "source": "https://github.com/ZhengPeng7/BiRefNet/releases/tag/v1",
+      "revision": "v1 / asset 186740004 / sha256:58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+      "modelBytes": 972666916,
+      "knownArtifactBytes": 972666916,
+      "requirements": [
+        "核对后的 ONNX 图与 CPU 运行时",
+        "透明 PNG 与 mask 同 Job 原子提交",
+        "CPU 路线实机验收"
+      ],
+      "exclusions": [
+        "Core ML / MPS 认证",
+        "Portrait 或其他 checkpoint",
+        "把文件元数据当作已完成哈希"
+      ],
+      "verifiedDevices": [],
+      "recipe": "1024² 网络预处理 · 原尺寸输出 · CPU",
+      "installId": null,
+      "installerSupported": false
+    },
+    {
+      "id": "realesrgan-x4plus",
+      "displayName": "Real-ESRGAN x4plus",
+      "variant": "RealESRGAN_x4plus · ncnn",
+      "family": "Real-ESRGAN",
+      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
+      "description": "固定 realesrgan-x4plus 的 ncnn 权重、官方 macOS 程序、单 GPU、tile 128 和 1:1:1 线程；首轮输出 PNG，不启用 TTA。",
+      "capabilities": [
+        {
+          "id": "upscale",
+          "label": "放大"
+        }
+      ],
+      "productStatus": "planned",
+      "runtime": "当前 Windows 版本未接入",
+      "license": "Real-ESRGAN BSD-3-Clause · ncnn app MIT",
+      "source": "https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.2.5.0",
+      "revision": "v0.2.5.0 ncnn package / x4plus bin sha256:713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+      "modelBytes": 33540549,
+      "knownArtifactBytes": 51817124,
+      "requirements": [
+        "官方 ncnn 程序与 x4plus 模型对分别校验",
+        "显式指定 x4plus、4×、tile 128 与单 GPU",
+        "分块接缝、取消和强杀回收实机验收"
+      ],
+      "exclusions": [
+        "动漫专用模型",
+        "人脸修复",
+        "任意倍率重采样"
+      ],
+      "verifiedDevices": [],
+      "recipe": "ncnn Vulkan · x4plus · tile 128 · 固定 4×",
+      "installId": null,
+      "installerSupported": false
+    },
+    {
+      "id": "qwen-image-2.1-mflux-v1",
+      "displayName": "Qwen-Image 2.1",
+      "variant": "Qwen/Qwen-Image-2.1 · txt2img",
+      "family": "Qwen-Image",
+      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
+      "description": "固定官方模型快照，使用 q8 transformer、bf16 文本编码器、40 步 linear 采样与 guidance 1.0；首轮仅支持 1024² 单张 RGB PNG。",
+      "capabilities": [
+        {
+          "id": "text_to_image",
+          "label": "文生图"
+        }
+      ],
+      "productStatus": "planned",
+      "runtime": "当前 Windows 版本未接入",
+      "license": "qwen-research",
+      "source": "https://huggingface.co/Qwen/Qwen-Image-2.1",
+      "revision": "d26bb61231c349cf6b7896fa83353113880e1ba3",
+      "modelBytes": 33131609424,
+      "knownArtifactBytes": 33131609424,
+      "requirements": [
+        "精确 revision 与逐文件内容 SHA-256",
+        "独立 recipes-v3 worker 与共享隔离 MLX 运行时",
+        "真实 tokenizer 2048 token 预算和离线执行"
+      ],
+      "exclusions": [
+        "Qwen-Image 2.1 编辑与控制分支",
+        "LoRA、低内存配方与小文本编码器",
+        "非 1024² 画幅"
+      ],
+      "verifiedDevices": [],
+      "recipe": "q8 · 40 步 · 1024 × 1024",
+      "installId": null,
+      "installerSupported": false
+    },
+    {
+      "id": "qwen-image-2.1-turbo-mflux-v1",
+      "displayName": "Qwen-Image 2.1 Turbo",
+      "variant": "Qwen/Qwen-Image-2.1-Turbo · txt2img",
+      "family": "Qwen-Image",
+      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
+      "description": "固定官方 Turbo revision，显式加载 Turbo model_config，使用 q8 transformer、bf16 文本编码器、8 步官方 sample_sigmas 与 guidance 1.0；首轮仅支持 1024² 单张 RGB PNG。",
+      "capabilities": [
+        {
+          "id": "text_to_image",
+          "label": "文生图"
+        }
+      ],
+      "productStatus": "planned",
+      "runtime": "当前 Windows 版本未接入",
+      "license": "qwen-research",
+      "source": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo",
+      "revision": "fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+      "modelBytes": 32451607098,
+      "knownArtifactBytes": 32451607098,
+      "requirements": [
+        "Turbo 权重与 model_config 独立核验",
+        "model_index 中的官方 sample_sigmas 完整落盘",
+        "独立取消、恢复和原生日常验收"
+      ],
+      "exclusions": [
+        "仅把基础版步数改为 8 的伪 Turbo 路线",
+        "LoRA、控制分支与非方图",
+        "继承基础版实机认证"
+      ],
+      "verifiedDevices": [],
+      "recipe": "q8 · 8 步官方曲线 · 1024 × 1024",
+      "installId": null,
+      "installerSupported": false
+    },
+    {
+      "id": "moss-image-sft-mflux-v1",
+      "displayName": "MOSS-Image-SFT",
+      "variant": "OpenMOSS-Team/MOSS-Image-SFT · txt2img",
+      "family": "MOSS-Image",
+      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
+      "description": "固定 MOSS-Image-SFT 快照，使用 q8 transformer/text encoder、50 步 moss_image 调度、guidance 3.0、空负提示词和负分支跳层 [22]；首轮仅支持 1024² 单张 RGB PNG。",
+      "capabilities": [
+        {
+          "id": "text_to_image",
+          "label": "文生图"
+        }
+      ],
+      "productStatus": "planned",
+      "runtime": "当前 Windows 版本未接入",
+      "license": "Apache-2.0",
+      "source": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT",
+      "revision": "f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+      "modelBytes": 27219783878,
+      "knownArtifactBytes": 27219783878,
+      "requirements": [
+        "MOSS 专属 tokenizer、chat template 与 4096 token 预算",
+        "50 步 CFG 与 skip layers [22] 独立配方",
+        "中文文字、JSON 布局、取消恢复和原生验收"
+      ],
+      "exclusions": [
+        "MOSS-Image-Base",
+        "社区 4/8 步蒸馏 LoRA",
+        "可视化布局编辑器与像素级排版保证"
+      ],
+      "verifiedDevices": [],
+      "recipe": "q8 · 50 步 · CFG 3.0 · 1024 × 1024",
+      "installId": null,
+      "installerSupported": false
+    }
+  ]
+}

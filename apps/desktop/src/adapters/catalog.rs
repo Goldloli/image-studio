@@ -4,7 +4,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::BTreeSet;
 
+#[cfg(not(windows))]
 const CATALOG: &str = include_str!("../../../../resources/model-catalog/catalog.json");
+#[cfg(windows)]
+const CATALOG: &str = include_str!("../../../../resources/windows-foundation/model-catalog.json");
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -277,14 +280,18 @@ mod tests {
     use super::*;
 
     fn z_snapshot(phase: &str) -> InstallationSnapshot {
+        #[cfg(windows)]
+        let install_id = "z-image-turbo-diffusers-cuda-nf4-v1";
+        #[cfg(not(windows))]
+        let install_id = "z-image-turbo-mflux-v1";
         InstallationSnapshot {
-            install_id: "z-image-turbo-mflux-v1".into(),
+            install_id: install_id.into(),
             phase: phase.into(),
             received_bytes: if phase == "ready" { 100 } else { 20 },
             total_bytes: 100,
-            model_bytes: 80,
-            runtime_bytes: 20,
-            required_bytes: 300,
+            model_bytes: if cfg!(windows) { 32_848_305_533 } else { 80 },
+            runtime_bytes: if cfg!(windows) { 200 } else { 20 },
+            required_bytes: if cfg!(windows) { 1_000 } else { 300 },
             error: None,
             runtime_ready: phase == "ready",
             model_ready: phase == "ready",
@@ -297,14 +304,33 @@ mod tests {
         let catalog = ModelCatalog::load().unwrap();
         let query = catalog.query(&[], Some("安装器不可用")).unwrap();
         assert_eq!(query["counts"]["total"], 7);
-        assert_eq!(query["counts"]["supported"], 7);
-        assert_eq!(query["counts"]["planned"], 0);
+        #[cfg(windows)]
+        {
+            assert_eq!(query["counts"]["supported"], 1);
+            assert_eq!(query["counts"]["planned"], 6);
+            assert_eq!(
+                query["entries"][0]["id"],
+                "z-image-turbo-diffusers-cuda-nf4-v1"
+            );
+            assert_eq!(
+                query["entries"][0]["runtime"],
+                "Diffusers 0.36.0 / PyTorch 2.10.0 / CUDA 12.6"
+            );
+        }
+        #[cfg(not(windows))]
+        {
+            assert_eq!(query["counts"]["supported"], 7);
+            assert_eq!(query["counts"]["planned"], 0);
+        }
         let ids = query["entries"]
             .as_array()
             .unwrap()
             .iter()
             .map(|entry| entry["id"].as_str().unwrap())
             .collect::<Vec<_>>();
+        #[cfg(windows)]
+        assert!(ids.contains(&"z-image-turbo-diffusers-cuda-nf4-v1"));
+        #[cfg(not(windows))]
         assert!(ids.contains(&"z-image-turbo-mflux-v1"));
         assert!(ids.contains(&"birefnet-general-epoch-244"));
         assert!(ids.contains(&"realesrgan-x4plus"));
@@ -323,7 +349,14 @@ mod tests {
         let entries = query["entries"].as_array().unwrap();
         let z = entries
             .iter()
-            .find(|entry| entry["id"] == "z-image-turbo-mflux-v1")
+            .find(|entry| {
+                entry["id"]
+                    == if cfg!(windows) {
+                        "z-image-turbo-diffusers-cuda-nf4-v1"
+                    } else {
+                        "z-image-turbo-mflux-v1"
+                    }
+            })
             .unwrap();
         let klein = entries
             .iter()
@@ -331,7 +364,14 @@ mod tests {
             .unwrap();
         assert_eq!(z["executable"], true);
         assert_eq!(klein["executable"], false);
-        assert_eq!(klein["installPhase"], "not_installed");
+        assert_eq!(
+            klein["installPhase"],
+            if cfg!(windows) {
+                "not_supported"
+            } else {
+                "not_installed"
+            }
+        );
         assert_eq!(query["counts"]["installed"], 1);
     }
 

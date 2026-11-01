@@ -29,6 +29,9 @@ pub const REALESRGAN_WORKER_MODULE: &str = "realesrgan-native-worker";
 pub const QWEN_IMAGE_21_INSTALL_ID: &str = "qwen-image-2.1-mflux-v1";
 pub const QWEN_IMAGE_21_TURBO_INSTALL_ID: &str = "qwen-image-2.1-turbo-mflux-v1";
 pub const MOSS_IMAGE_SFT_INSTALL_ID: &str = "moss-image-sft-mflux-v1";
+pub const WINDOWS_ZIMAGE_INSTALL_ID: &str = "z-image-turbo-diffusers-cuda-nf4-v1";
+pub const WINDOWS_ZIMAGE_WORKER_BUILD_ID: &str = "studio-zimage-cuda-worker-0.1.0";
+pub const WINDOWS_ZIMAGE_WORKER_MODULE: &str = "studio_zimage_cuda_worker";
 pub const RECIPES_V3_WORKER_BUILD_ID: &str = "studio-mflux-worker-0.3.0";
 pub const RECIPES_V3_WORKER_MODULE: &str = "studio_mflux_worker_v3";
 const MODEL_MANIFEST: &str =
@@ -67,6 +70,17 @@ const QWEN_IMAGE_21_TURBO_MODEL_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/qwen21-turbo/model-manifest.json");
 const MOSS_IMAGE_SFT_MODEL_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/moss-image-sft/model-manifest.json");
+const WINDOWS_ZIMAGE_MODEL_MANIFEST: &str = include_str!(
+    "../../../../resources/windows-foundation/z-image-diffusers/product-model-manifest.json"
+);
+const WINDOWS_ZIMAGE_RUNTIME_MANIFEST: &str = include_str!(
+    "../../../../resources/windows-foundation/python-runtime/product-runtime-manifest.json"
+);
+const WINDOWS_ZIMAGE_LOCK: &str =
+    include_str!("../../../../resources/windows-foundation/python-runtime/requirements.lock");
+const WINDOWS_ZIMAGE_WORKER_WHEEL: &[u8] = include_bytes!(
+    "../../../../resources/windows-foundation/z-image-diffusers/studio_zimage_cuda_worker-0.1.0-py3-none-any.whl"
+);
 const RECIPES_V3_RUNTIME_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/qwen21/runtime-manifest.json");
 const RECIPES_V3_LOCK: &str =
@@ -234,6 +248,24 @@ const MOSS_IMAGE_SFT_PROFILE: InstallProfile = InstallProfile {
     worker_model_argument: true,
 };
 
+const WINDOWS_ZIMAGE_PROFILE: InstallProfile = InstallProfile {
+    install_id: WINDOWS_ZIMAGE_INSTALL_ID,
+    model_manifest: WINDOWS_ZIMAGE_MODEL_MANIFEST,
+    runtime_manifest: WINDOWS_ZIMAGE_RUNTIME_MANIFEST,
+    requirements_lock: WINDOWS_ZIMAGE_LOCK,
+    worker_wheel: WINDOWS_ZIMAGE_WORKER_WHEEL,
+    worker_module: WINDOWS_ZIMAGE_WORKER_MODULE,
+    worker_build_id: WINDOWS_ZIMAGE_WORKER_BUILD_ID,
+    engine: "Diffusers 0.36.0 / CUDA 12.6",
+    scheduler: "FlowMatchEulerDiscreteScheduler",
+    probe_device: "gpu",
+    precision: "transformer+text_encoder=nf4;compute=bfloat16;vae=bfloat16",
+    ready_relative: "installations/models/z-image-turbo-diffusers-cuda-nf4-v1.json",
+    installing_relative: "installations/models/z-image-turbo-diffusers-cuda-nf4-v1.installing.json",
+    probe_with_model: true,
+    worker_model_argument: false,
+};
+
 #[derive(Clone, Debug, Deserialize)]
 struct Artifact {
     path: String,
@@ -343,6 +375,8 @@ pub struct Installations {
     qwen_image_21: Installation,
     qwen_image_21_turbo: Installation,
     moss_image_sft: Installation,
+    #[cfg(windows)]
+    windows_zimage: Installation,
 }
 
 impl Installations {
@@ -354,11 +388,18 @@ impl Installations {
             realesrgan: Installation::new_realesrgan(paths.clone())?,
             qwen_image_21: Installation::new_for(paths.clone(), QWEN_IMAGE_21_PROFILE)?,
             qwen_image_21_turbo: Installation::new_for(paths.clone(), QWEN_IMAGE_21_TURBO_PROFILE)?,
-            moss_image_sft: Installation::new_for(paths, MOSS_IMAGE_SFT_PROFILE)?,
+            moss_image_sft: Installation::new_for(paths.clone(), MOSS_IMAGE_SFT_PROFILE)?,
+            #[cfg(windows)]
+            windows_zimage: Installation::new_for(paths, WINDOWS_ZIMAGE_PROFILE)?,
         })
     }
 
     pub fn snapshots(&self) -> Vec<InstallationSnapshot> {
+        #[cfg(windows)]
+        {
+            vec![self.windows_zimage.snapshot()]
+        }
+        #[cfg(not(windows))]
         vec![
             self.legacy.snapshot(),
             self.klein.snapshot(),
@@ -424,9 +465,18 @@ impl Installations {
         self.qwen_image_21.cancel();
         self.qwen_image_21_turbo.cancel();
         self.moss_image_sft.cancel();
+        #[cfg(windows)]
+        self.windows_zimage.cancel();
     }
 
     fn for_id(&self, install_id: &str) -> Option<&Installation> {
+        #[cfg(windows)]
+        if install_id == WINDOWS_ZIMAGE_INSTALL_ID {
+            return Some(&self.windows_zimage);
+        }
+        #[cfg(windows)]
+        return None;
+        #[cfg(not(windows))]
         match install_id {
             INSTALL_ID => Some(&self.legacy),
             KLEIN_INSTALL_ID => Some(&self.klein),
@@ -691,7 +741,15 @@ impl Installation {
                             })
                     })
                 } else {
-                    [
+                    #[cfg(windows)]
+                    let required = [
+                        "python.exe".to_string(),
+                        "python312._pth".to_string(),
+                        format!("Lib/site-packages/{}/__init__.py", profile.worker_module),
+                        format!("Lib/site-packages/{}/__main__.py", profile.worker_module),
+                    ];
+                    #[cfg(not(windows))]
+                    let required = [
                         "python/bin/python3.13".to_string(),
                         "python/bin/python3".to_string(),
                         "venv/bin/python3".to_string(),
@@ -703,9 +761,8 @@ impl Installation {
                             "venv/lib/python3.13/site-packages/{}/__main__.py",
                             profile.worker_module
                         ),
-                    ]
-                    .iter()
-                    .all(|path| {
+                    ];
+                    required.iter().all(|path| {
                         record
                             .runtime_files
                             .iter()
@@ -1159,49 +1216,73 @@ impl Installation {
         // Only this fixed private identity is rebuilt; other activated versions survive.
         fs::remove_dir_all(&runtime).map_err(err)?;
         ensure_child_dir(&self.inner.paths.data, &runtime)?;
-        extract(&self.cache().join(&interpreter.sha256), &runtime)?;
-        let base_python = runtime.join("python/bin/python3");
-        self.check_cancel()?;
-        self.command(
-            Command::new(&base_python)
-                .args(["-I", "-m", "venv", "--clear"])
-                .arg(runtime.join("venv")),
-        )?;
-        let python = runtime.join("venv/bin/python3");
-        let wheelhouse = runtime.join("wheelhouse");
-        ensure_child_dir(&self.inner.paths.data, &wheelhouse)?;
-        for wheel in &self.inner.runtime.wheels {
-            copy_verified(
-                &self.cache().join(&wheel.sha256),
-                &wheelhouse.join(&wheel.path),
-                wheel,
-                &self.inner.paths.data,
+        extract_runtime_archive(&self.cache().join(&interpreter.sha256), &runtime)?;
+        #[cfg(windows)]
+        let python = {
+            configure_embeddable_python(&runtime)?;
+            let site_packages = runtime.join("Lib/site-packages");
+            ensure_child_dir(&self.inner.paths.data, &site_packages)?;
+            for wheel in &self.inner.runtime.wheels {
+                self.check_cancel()?;
+                install_wheel(
+                    &self.cache().join(&wheel.sha256),
+                    &site_packages,
+                    &self.inner.paths.data,
+                )?;
+            }
+            fs::write(
+                runtime.join("requirements.lock"),
+                self.inner.profile.requirements_lock,
+            )
+            .map_err(err)?;
+            runtime.join("python.exe")
+        };
+        #[cfg(not(windows))]
+        let python = {
+            let base_python = runtime.join("python/bin/python3");
+            self.check_cancel()?;
+            self.command(
+                Command::new(&base_python)
+                    .args(["-I", "-m", "venv", "--clear"])
+                    .arg(runtime.join("venv")),
             )?;
-        }
-        fs::write(
-            runtime.join("requirements.lock"),
-            self.inner.profile.requirements_lock,
-        )
-        .map_err(err)?;
-        self.command(
-            Command::new(&python)
-                .args([
-                    "-I",
-                    "-m",
-                    "pip",
-                    "install",
-                    "--no-input",
-                    "--no-index",
-                    "--no-deps",
-                    "--require-hashes",
-                    "--only-binary=:all:",
-                    "--no-compile",
-                    "--find-links",
-                ])
-                .arg(&wheelhouse)
-                .arg("-r")
-                .arg(runtime.join("requirements.lock")),
-        )?;
+            let python = runtime.join("venv/bin/python3");
+            let wheelhouse = runtime.join("wheelhouse");
+            ensure_child_dir(&self.inner.paths.data, &wheelhouse)?;
+            for wheel in &self.inner.runtime.wheels {
+                copy_verified(
+                    &self.cache().join(&wheel.sha256),
+                    &wheelhouse.join(&wheel.path),
+                    wheel,
+                    &self.inner.paths.data,
+                )?;
+            }
+            fs::write(
+                runtime.join("requirements.lock"),
+                self.inner.profile.requirements_lock,
+            )
+            .map_err(err)?;
+            self.command(
+                Command::new(&python)
+                    .args([
+                        "-I",
+                        "-m",
+                        "pip",
+                        "install",
+                        "--no-input",
+                        "--no-index",
+                        "--no-deps",
+                        "--require-hashes",
+                        "--only-binary=:all:",
+                        "--no-compile",
+                        "--find-links",
+                    ])
+                    .arg(&wheelhouse)
+                    .arg("-r")
+                    .arg(runtime.join("requirements.lock")),
+            )?;
+            python
+        };
         self.check_cancel()?;
         self.update(|s| s.phase = "probing".into());
         let mut probe = Command::new(&python);
@@ -2077,6 +2158,9 @@ fn allowed_url(url: &reqwest::Url) -> bool {
                         | "release-assets.githubusercontent.com"
                         | "objects.githubusercontent.com"
                         | "files.pythonhosted.org"
+                        | "www.python.org"
+                        | "download.pytorch.org"
+                        | "download-r2.pytorch.org"
                 )
         })
 }
@@ -2349,6 +2433,146 @@ fn extract(archive: &Path, dest: &Path) -> Result<(), String> {
     }
     Ok(())
 }
+
+fn extract_runtime_archive(archive: &Path, dest: &Path) -> Result<(), String> {
+    if archive
+        .extension()
+        .is_some_and(|extension| extension.eq_ignore_ascii_case("zip"))
+    {
+        extract_python_zip(archive, dest)
+    } else {
+        extract(archive, dest)
+    }
+}
+
+fn extract_python_zip(archive: &Path, dest: &Path) -> Result<(), String> {
+    const MAX_EXTRACTED_BYTES: u64 = 512 * 1024 * 1024;
+    let mut zip = zip::ZipArchive::new(File::open(archive).map_err(err)?).map_err(err)?;
+    if zip.len() > 4096 {
+        return Err("Python 解释器归档条目过多。".into());
+    }
+    let mut extracted = 0u64;
+    for index in 0..zip.len() {
+        let mut entry = zip.by_index(index).map_err(err)?;
+        let name = entry.name().map_err(err)?.into_owned();
+        safe_relative(&name)?;
+        if entry
+            .unix_mode()
+            .is_some_and(|mode| mode & 0o170000 == 0o120000)
+        {
+            return Err("Python 解释器归档包含符号链接。".into());
+        }
+        let target = dest.join(name.replace('/', std::path::MAIN_SEPARATOR_STR));
+        if entry.is_dir() {
+            ensure_child_dir(dest, &target)?;
+            continue;
+        }
+        extracted = extracted
+            .checked_add(entry.size())
+            .ok_or("Python 解释器归档展开大小溢出")?;
+        if extracted > MAX_EXTRACTED_BYTES {
+            return Err("Python 解释器归档展开后超过 512 MiB。".into());
+        }
+        ensure_child_dir(dest, target.parent().ok_or("解释器文件无父目录")?)?;
+        let mut output = open_regular(&target, true, true)?;
+        std::io::copy(&mut entry, &mut output).map_err(err)?;
+        output.sync_all().map_err(err)?;
+    }
+    sync_directory(dest)
+}
+
+#[cfg(windows)]
+fn configure_embeddable_python(runtime: &Path) -> Result<(), String> {
+    let path_file = runtime.join("python312._pth");
+    let mut content = fs::read_to_string(&path_file).map_err(err)?;
+    if !content
+        .lines()
+        .any(|line| line.trim() == "Lib\\site-packages")
+    {
+        if let Some(index) = content.find("\n.\n") {
+            let insert = index + 3;
+            content.insert_str(insert, "Lib\\site-packages\n");
+        } else {
+            content.push_str("\nLib\\site-packages\n");
+        }
+    }
+    content = content.replace("#import site", "import site");
+    if !content.lines().any(|line| line.trim() == "import site") {
+        content.push_str("import site\n");
+    }
+    let mut file = open_regular(&path_file, true, true)?;
+    file.write_all(content.as_bytes()).map_err(err)?;
+    file.sync_all().map_err(err)?;
+    if !runtime.join("python.exe").is_file() {
+        return Err("Windows 私有解释器缺少 python.exe。".into());
+    }
+    Ok(())
+}
+
+#[cfg(windows)]
+fn install_wheel(archive: &Path, site_packages: &Path, data_root: &Path) -> Result<(), String> {
+    const MAX_EXTRACTED_BYTES: u64 = 8 * 1024 * 1024 * 1024;
+    let mut zip = zip::ZipArchive::new(File::open(archive).map_err(err)?).map_err(err)?;
+    if zip.len() > 20_000 {
+        return Err("wheel 归档条目过多。".into());
+    }
+    let mut extracted = 0u64;
+    for index in 0..zip.len() {
+        let mut entry = zip.by_index(index).map_err(err)?;
+        let name = entry.name().map_err(err)?.into_owned();
+        safe_relative(&name)?;
+        if entry
+            .unix_mode()
+            .is_some_and(|mode| mode & 0o170000 == 0o120000)
+        {
+            return Err("wheel 归档包含符号链接。".into());
+        }
+        if entry.is_dir() {
+            continue;
+        }
+        let Some(relative) = wheel_site_path(&name)? else {
+            continue;
+        };
+        extracted = extracted
+            .checked_add(entry.size())
+            .ok_or("wheel 展开大小溢出")?;
+        if extracted > MAX_EXTRACTED_BYTES {
+            return Err("wheel 展开后超过 8 GiB。".into());
+        }
+        let target = site_packages.join(relative);
+        ensure_child_dir(data_root, target.parent().ok_or("wheel 文件无父目录")?)?;
+        let mut output = open_regular(&target, true, true)?;
+        std::io::copy(&mut entry, &mut output).map_err(err)?;
+    }
+    sync_directory(site_packages)
+}
+
+#[cfg(windows)]
+fn wheel_site_path(name: &str) -> Result<Option<PathBuf>, String> {
+    let parts = name.split('/').collect::<Vec<_>>();
+    let Some(first) = parts.first() else {
+        return Err("wheel 条目为空。".into());
+    };
+    if !first.ends_with(".data") {
+        return Ok(Some(PathBuf::from(
+            parts.join(std::path::MAIN_SEPARATOR_STR),
+        )));
+    }
+    let kind = *parts.get(1).ok_or("wheel data 条目缺少类别")?;
+    match kind {
+        "purelib" | "platlib" => {
+            let relative = &parts[2..];
+            if relative.is_empty() {
+                return Err("wheel data 库条目为空。".into());
+            }
+            Ok(Some(PathBuf::from(
+                relative.join(std::path::MAIN_SEPARATOR_STR),
+            )))
+        }
+        "data" | "scripts" | "headers" => Ok(None),
+        _ => Err(format!("未知 wheel data 类别：{kind}")),
+    }
+}
 fn inventory(root: &Path, path: &Path, out: &mut Vec<InventoryEntry>) -> Result<(), String> {
     for e in fs::read_dir(path).map_err(err)? {
         let e = e.map_err(err)?;
@@ -2375,7 +2599,7 @@ fn inventory(root: &Path, path: &Path, out: &mut Vec<InventoryEntry>) -> Result<
                     .strip_prefix(root)
                     .map_err(err)?
                     .to_string_lossy()
-                    .into_owned(),
+                    .replace('\\', "/"),
                 sha256: format!("{:x}", h.finalize()),
                 bytes: metadata.len(),
                 link_target: None,
@@ -2394,7 +2618,7 @@ fn inventory(root: &Path, path: &Path, out: &mut Vec<InventoryEntry>) -> Result<
                     .strip_prefix(root)
                     .map_err(err)?
                     .to_string_lossy()
-                    .into_owned(),
+                    .replace('\\', "/"),
                 sha256: format!("{:x}", Sha256::digest(target.as_bytes())),
                 bytes: metadata.len(),
                 link_target: Some(target),
@@ -3428,6 +3652,7 @@ mod tests {
         assert!(!outside.join("tool").exists());
     }
 
+    #[cfg(not(windows))]
     #[test]
     fn installation_manager_keeps_model_states_and_actions_independent() {
         let temp = tempfile::tempdir().unwrap();
@@ -3468,6 +3693,7 @@ mod tests {
         );
     }
 
+    #[cfg(not(windows))]
     #[test]
     fn native_install_admission_is_exclusive_and_wrong_row_stop_is_isolated() {
         let temp = tempfile::tempdir().unwrap();
@@ -3490,6 +3716,25 @@ mod tests {
         manager.cancel(REALESRGAN_INSTALL_ID).unwrap();
         assert!(manager.realesrgan.inner.cancelled.load(Ordering::SeqCst));
         assert_eq!(manager.snapshot(INSTALL_ID).unwrap().phase, "not_installed");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_installation_manager_exposes_only_the_certified_profile() {
+        let temp = tempfile::tempdir().unwrap();
+        let manager = Installations::new(AppPaths::resolve(Some(temp.path())).unwrap()).unwrap();
+        let snapshots = manager.snapshots();
+        assert_eq!(snapshots.len(), 1);
+        assert_eq!(snapshots[0].install_id, WINDOWS_ZIMAGE_INSTALL_ID);
+        assert_eq!(snapshots[0].model_bytes, 32_848_305_533);
+        assert_eq!(snapshots[0].phase, "not_installed");
+        assert!(manager.snapshot(INSTALL_ID).is_none());
+        assert!(manager.start(INSTALL_ID).is_err());
+        assert!(
+            manager
+                .snapshot(WINDOWS_ZIMAGE_INSTALL_ID)
+                .is_some_and(|snapshot| snapshot.phase == "not_installed")
+        );
     }
     #[test]
     fn range_requires_exact_start_end_and_total() {

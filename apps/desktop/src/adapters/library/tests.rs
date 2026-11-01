@@ -8,6 +8,13 @@ use studio_core::recipes::{
 };
 use tempfile::TempDir;
 
+fn default_capability_id() -> &'static str {
+    #[cfg(windows)]
+    return studio_core::generation::Z_IMAGE_WINDOWS_CAPABILITY;
+    #[cfg(not(windows))]
+    studio_core::generation::Z_IMAGE_CAPABILITY
+}
+
 fn open(root: &Path) -> Library {
     Library::open(root, vec![]).unwrap()
 }
@@ -63,6 +70,48 @@ fn generation_for_turn(key: &str, turn: &TurnRecord) -> studio_core::generation:
         "3:4" => (768, 1024),
         _ => panic!("unsupported test aspect"),
     };
+    #[cfg(windows)]
+    {
+        studio_core::generation::freeze_windows_z_image(
+            GenerationInput {
+                request_id: RequestId::new(format!("request:{key}")).unwrap(),
+                project_id: ProjectId::new("default").unwrap(),
+                idempotency_key: IdempotencyKey::new(turn.submission_key.clone()).unwrap(),
+                plan_id: PlanId::new(format!("plan:{key}")).unwrap(),
+                prompt: turn.prompt.clone(),
+                width,
+                height,
+                count: turn.count,
+                seed: turn.seed.parse::<u32>().ok(),
+            },
+            73,
+            PlanEnvironment {
+                components: vec![ComponentSnapshot {
+                    role: "transformer".into(),
+                    source: SourceRevision {
+                        source: "test-fixture".into(),
+                        revision: "immutable".into(),
+                    },
+                    content_hash: ContentHash::new("a".repeat(64)).unwrap(),
+                }],
+                runtime: RuntimeSnapshot {
+                    package_id: studio_core::generation::Z_IMAGE_WINDOWS_RUNTIME.into(),
+                    engine: studio_core::generation::Z_IMAGE_WINDOWS_ENGINE.into(),
+                    source: SourceRevision {
+                        source: "test-fixture".into(),
+                        revision: "immutable".into(),
+                    },
+                },
+                device: DeviceSnapshot {
+                    device_id: studio_core::generation::Z_IMAGE_WINDOWS_DEVICE.into(),
+                    precision: studio_core::generation::Z_IMAGE_WINDOWS_PRECISION.into(),
+                },
+                scheduler: studio_core::generation::Z_IMAGE_WINDOWS_SCHEDULER.into(),
+            },
+        )
+        .unwrap()
+    }
+    #[cfg(not(windows))]
     freeze_z_image(
         GenerationInput {
             request_id: RequestId::new(format!("request:{key}")).unwrap(),
@@ -275,7 +324,7 @@ fn draft_with_prompt(library: &mut Library, id: u64, prompt: &str) -> DraftRecor
         "aspect": "1:1",
         "count": 1,
         "seed": "",
-        "capabilityId": studio_core::generation::Z_IMAGE_CAPABILITY,
+        "capabilityId": default_capability_id(),
         "sourceAssetId": null
     });
     library.save_draft(draft.clone(), draft.version).unwrap()
@@ -294,7 +343,7 @@ fn accept_prompt(library: &mut Library, prompt: &str, key: &str) -> AcceptedTurn
             submission_key: IdempotencyKey::new(key).unwrap(),
             prompt: prompt.into(),
             model_id: DEFAULT_MODEL_ID.into(),
-            capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+            capability_id: default_capability_id().into(),
             source_asset_id: None,
             aspect: "1:1".into(),
             count: 1,
@@ -1352,7 +1401,7 @@ fn fresh_library_has_one_conversation_and_receive_is_fast_and_idempotent() {
             submission_key: IdempotencyKey::new("conversation:one").unwrap(),
             prompt: "清晨的山湖\n第二行".into(),
             model_id: DEFAULT_MODEL_ID.into(),
-            capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+            capability_id: default_capability_id().into(),
             source_asset_id: None,
             aspect: "1:1".into(),
             count: 1,
@@ -1369,7 +1418,7 @@ fn fresh_library_has_one_conversation_and_receive_is_fast_and_idempotent() {
             submission_key: IdempotencyKey::new("conversation:one").unwrap(),
             prompt: "different".into(),
             model_id: DEFAULT_MODEL_ID.into(),
-            capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+            capability_id: default_capability_id().into(),
             source_asset_id: None,
             aspect: "1:1".into(),
             count: 1,
@@ -1398,44 +1447,7 @@ fn pending_turn_cancel_recovery_and_job_binding_are_explicit() {
 
     let mut library = open(root.path());
     let accepted = accept_prompt(&mut library, "正常绑定", "bind-turn");
-    let frozen = freeze_z_image(
-        GenerationInput {
-            request_id: RequestId::new(format!("request:{}", accepted.turn.id)).unwrap(),
-            project_id: ProjectId::new("default").unwrap(),
-            idempotency_key: IdempotencyKey::new(accepted.turn.submission_key.clone()).unwrap(),
-            plan_id: PlanId::new(format!("plan:{}", accepted.turn.id)).unwrap(),
-            prompt: accepted.turn.prompt.clone(),
-            width: 1024,
-            height: 1024,
-            count: 1,
-            seed: None,
-        },
-        41,
-        PlanEnvironment {
-            components: vec![ComponentSnapshot {
-                role: "transformer".into(),
-                source: SourceRevision {
-                    source: "test".into(),
-                    revision: "immutable".into(),
-                },
-                content_hash: ContentHash::new("b".repeat(64)).unwrap(),
-            }],
-            runtime: RuntimeSnapshot {
-                package_id: "fixture".into(),
-                engine: "mlx".into(),
-                source: SourceRevision {
-                    source: "test".into(),
-                    revision: "immutable".into(),
-                },
-            },
-            device: DeviceSnapshot {
-                device_id: "fixture".into(),
-                precision: "bfloat16".into(),
-            },
-            scheduler: "fixture".into(),
-        },
-    )
-    .unwrap();
+    let frozen = generation_for_turn("pending-cancel-binding", &accepted.turn);
     let binding = library
         .bind_turn_job(&accepted.turn.id, frozen.request, frozen.plan)
         .unwrap();
@@ -1665,7 +1677,7 @@ fn manual_conversation_title_is_stable_and_draft_version_conflicts_do_not_consum
             submission_key: IdempotencyKey::new("stale-source").unwrap(),
             prompt: draft.prompt.clone(),
             model_id: DEFAULT_MODEL_ID.into(),
-            capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+            capability_id: default_capability_id().into(),
             source_asset_id: None,
             aspect: "1:1".into(),
             count: 1,
@@ -1682,7 +1694,7 @@ fn manual_conversation_title_is_stable_and_draft_version_conflicts_do_not_consum
             submission_key: IdempotencyKey::new("manual-title").unwrap(),
             prompt: draft.prompt.clone(),
             model_id: DEFAULT_MODEL_ID.into(),
-            capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+            capability_id: default_capability_id().into(),
             source_asset_id: None,
             aspect: "1:1".into(),
             count: 1,
@@ -1841,7 +1853,7 @@ fn initial_prompt_and_source_are_created_atomically() {
                 "aspect": "1:1",
                 "count": 1,
                 "seed": "",
-                "capabilityId": studio_core::generation::Z_IMAGE_CAPABILITY,
+                "capabilityId": default_capability_id(),
                 "sourceAssetId": null
             }),
             "案例标题",

@@ -256,7 +256,16 @@ impl Library {
             let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
             tx.execute_batch(SCHEMA_V3)?;
             tx.execute("INSERT INTO projects(id) VALUES('default')", [])?;
-            tx.execute("INSERT INTO drafts(project_id,name,prompt,prompt_source,params_json,collapsed,version) VALUES('default','新会话','',NULL,'{\"modelId\":\"z-image-turbo-mflux-v1\",\"aspect\":\"1:1\",\"count\":1,\"seed\":\"\"}',0,1)", [])?;
+            tx.execute(
+                "INSERT INTO drafts(project_id,name,prompt,prompt_source,params_json,collapsed,version) VALUES('default','新会话','',NULL,?1,0,1)",
+                [serde_json::json!({
+                    "modelId": DEFAULT_MODEL_ID,
+                    "aspect": "1:1",
+                    "count": 1,
+                    "seed": ""
+                })
+                .to_string()],
+            )?;
             tx.execute("INSERT INTO conversations(id,project_id,draft_id,title,title_source,created_at,activity_seq) VALUES('conv-default','default',1,'新会话','auto',?,1)", [now()])?;
             tx.execute(
                 "UPDATE projects SET active_draft_id=1,active_conversation_id='conv-default' WHERE id='default'",

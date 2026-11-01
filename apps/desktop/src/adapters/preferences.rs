@@ -46,6 +46,9 @@ pub struct CreationDefaults {
 impl Default for CreationDefaults {
     fn default() -> Self {
         Self {
+            #[cfg(windows)]
+            model_id: "z-image-turbo-diffusers-cuda-nf4-v1".into(),
+            #[cfg(not(windows))]
             model_id: "z-image-turbo-mflux-v1".into(),
             aspect: "1:1".into(),
             count: 1,

@@ -2,7 +2,7 @@
 //! A native candidate is still provisional until process exit, lease release and SQLite commit.
 use super::{
     AppPaths,
-    installation::ReadyPaths,
+    installation::{ReadyPaths, WINDOWS_ZIMAGE_WORKER_MODULE},
     library::{
         CancelOutcome, CandidateDescriptor, Completion, JobRecord, Library, LibraryError,
         RoleCandidate,
@@ -309,6 +309,7 @@ impl GenerationController {
             && ready.worker_module != "studio_mflux_worker_v3"
             && ready.worker_module != "studio_onnx_worker"
             && ready.worker_module != "realesrgan-native-worker"
+            && ready.worker_module != WINDOWS_ZIMAGE_WORKER_MODULE
         {
             return Err("计算模块身份不符".into());
         }
@@ -482,6 +483,13 @@ impl GenerationController {
                     session_id,
                     config.expected_worker.clone(),
                     vec![MOSS_IMAGE_SFT_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::ZImageTurboCudaNf4 {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![job.request.capability.capability_id.clone()],
                 )
                 .map_err(error)
             } else {

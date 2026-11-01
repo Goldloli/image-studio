@@ -7,7 +7,7 @@ use crate::adapters::{
     installation::{
         BIREFNET_INSTALL_ID, INSTALL_ID, InstallationSnapshot, Installations, KLEIN_INSTALL_ID,
         MOSS_IMAGE_SFT_INSTALL_ID, QWEN_IMAGE_21_INSTALL_ID, QWEN_IMAGE_21_TURBO_INSTALL_ID,
-        REALESRGAN_INSTALL_ID,
+        REALESRGAN_INSTALL_ID, WINDOWS_ZIMAGE_INSTALL_ID,
     },
     library::{
         AcceptTurnInput, AssetLibraryQuery, DEFAULT_MODEL_ID, DraftRecord, JobRecord, Library,
@@ -27,7 +27,9 @@ use std::{
 };
 use studio_core::{
     domain::*,
-    generation::{GenerationInput, freeze_z_image},
+    generation::{
+        GenerationInput, Z_IMAGE_WINDOWS_CAPABILITY, freeze_windows_z_image, freeze_z_image,
+    },
     recipes::{
         BiRefNetInput, KleinInput, MOSS_IMAGE_SFT_CAPABILITY, MOSS_IMAGE_SFT_MODEL,
         QWEN_IMAGE_21_CAPABILITY, QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY,
@@ -114,6 +116,9 @@ pub struct CapabilityDraft {
 }
 
 fn default_capability_id() -> String {
+    #[cfg(windows)]
+    return studio_core::generation::Z_IMAGE_WINDOWS_CAPABILITY.into();
+    #[cfg(not(windows))]
     studio_core::generation::Z_IMAGE_CAPABILITY.into()
 }
 
@@ -208,21 +213,31 @@ impl StudioService {
         f(&mut guard).map_err(|error| error.to_string())
     }
     pub fn model_view(&self) -> Value {
+        #[cfg(windows)]
+        return self.model_view_for(WINDOWS_ZIMAGE_INSTALL_ID);
+        #[cfg(not(windows))]
         self.model_view_for(INSTALL_ID)
     }
     pub fn model_views(&self) -> Vec<Value> {
-        [
-            INSTALL_ID,
-            KLEIN_INSTALL_ID,
-            BIREFNET_INSTALL_ID,
-            REALESRGAN_INSTALL_ID,
-            QWEN_IMAGE_21_INSTALL_ID,
-            QWEN_IMAGE_21_TURBO_INSTALL_ID,
-            MOSS_IMAGE_SFT_INSTALL_ID,
-        ]
-        .into_iter()
-        .map(|id| self.model_view_for(id))
-        .collect()
+        #[cfg(windows)]
+        {
+            vec![self.model_view_for(WINDOWS_ZIMAGE_INSTALL_ID)]
+        }
+        #[cfg(not(windows))]
+        {
+            [
+                INSTALL_ID,
+                KLEIN_INSTALL_ID,
+                BIREFNET_INSTALL_ID,
+                REALESRGAN_INSTALL_ID,
+                QWEN_IMAGE_21_INSTALL_ID,
+                QWEN_IMAGE_21_TURBO_INSTALL_ID,
+                MOSS_IMAGE_SFT_INSTALL_ID,
+            ]
+            .into_iter()
+            .map(|id| self.model_view_for(id))
+            .collect()
+        }
     }
     fn model_view_for(&self, install_id: &str) -> Value {
         let name = if install_id == KLEIN_INSTALL_ID {
@@ -240,7 +255,9 @@ impl StudioService {
         } else {
             "Z-Image Turbo"
         };
-        let fallback_model_bytes = if install_id == KLEIN_INSTALL_ID {
+        let fallback_model_bytes = if install_id == WINDOWS_ZIMAGE_INSTALL_ID {
+            32_848_305_533_u64
+        } else if install_id == KLEIN_INSTALL_ID {
             15_980_131_745_u64
         } else if install_id == BIREFNET_INSTALL_ID {
             972_666_916_u64
@@ -355,6 +372,10 @@ impl StudioService {
         let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
         if !catalog.supports(&defaults.model_id, "text_to_image") {
             return Err("默认模型必须支持已接入的文生图能力".into());
+        }
+        #[cfg(windows)]
+        if defaults.aspect != "1:1" {
+            return Err("当前 Windows Z-Image 仅支持 1:1 默认画幅".into());
         }
         if matches!(
             defaults.model_id.as_str(),
@@ -486,7 +507,8 @@ impl StudioService {
                 studio_core::generation::Z_IMAGE_CAPABILITY => {
                     matches!(saved.aspect.as_str(), "1:1" | "4:3" | "3:4")
                 }
-                studio_core::recipes::KLEIN_TEXT_CAPABILITY
+                studio_core::generation::Z_IMAGE_WINDOWS_CAPABILITY
+                | studio_core::recipes::KLEIN_TEXT_CAPABILITY
                 | studio_core::recipes::KLEIN_EDIT_CAPABILITY
                 | studio_core::recipes::BIREFNET_CAPABILITY
                 | studio_core::recipes::REALESRGAN_CAPABILITY
@@ -523,6 +545,12 @@ impl StudioService {
             params.capability_id.as_str(),
             params.source_asset_id.is_some(),
         ) {
+            #[cfg(windows)]
+            (
+                WINDOWS_ZIMAGE_INSTALL_ID,
+                studio_core::generation::Z_IMAGE_WINDOWS_CAPABILITY,
+                false,
+            ) => params.aspect == "1:1",
             (DEFAULT_MODEL_ID, studio_core::generation::Z_IMAGE_CAPABILITY, false) => {
                 matches!(params.aspect.as_str(), "1:1" | "4:3" | "3:4")
             }
@@ -620,6 +648,10 @@ impl StudioService {
                 params.seed = seed.clone();
             }
         }
+        #[cfg(windows)]
+        if params.aspect != "1:1" {
+            return Err("当前 Windows Z-Image 仅支持 1:1；当前输入和默认画幅未被改写".into());
+        }
         if matches!(
             params.model_id.as_str(),
             QWEN_IMAGE_21_MODEL | QWEN_IMAGE_21_TURBO_MODEL | MOSS_IMAGE_SFT_MODEL
@@ -638,6 +670,10 @@ impl StudioService {
         } else if params.model_id == KLEIN_INSTALL_ID {
             params.aspect = "1:1".into();
             params.capability_id = studio_core::recipes::KLEIN_TEXT_CAPABILITY.into();
+            params.source_asset_id = None;
+        } else if params.model_id == WINDOWS_ZIMAGE_INSTALL_ID {
+            params.aspect = "1:1".into();
+            params.capability_id = Z_IMAGE_WINDOWS_CAPABILITY.into();
             params.source_asset_id = None;
         } else {
             params.capability_id = studio_core::generation::Z_IMAGE_CAPABILITY.into();
@@ -957,6 +993,8 @@ impl StudioService {
                 QWEN_IMAGE_21_TURBO_CAPABILITY.into()
             } else if input.model_id == MOSS_IMAGE_SFT_INSTALL_ID {
                 MOSS_IMAGE_SFT_CAPABILITY.into()
+            } else if input.model_id == WINDOWS_ZIMAGE_INSTALL_ID {
+                Z_IMAGE_WINDOWS_CAPABILITY.into()
             } else {
                 studio_core::generation::Z_IMAGE_CAPABILITY.into()
             }
@@ -1161,6 +1199,24 @@ impl StudioService {
             )
             .map_err(|error| error.to_string())?;
             (frozen.request, frozen.plan)
+        } else if turn.model_id == WINDOWS_ZIMAGE_INSTALL_ID {
+            let frozen = freeze_windows_z_image(
+                GenerationInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    prompt: turn.prompt.clone(),
+                    width,
+                    height,
+                    count: turn.count,
+                    seed,
+                },
+                random_seed,
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
         } else {
             let frozen = freeze_z_image(
                 GenerationInput {
@@ -1349,6 +1405,10 @@ impl StudioService {
         let id = JobId::new(id).map_err(|e| e.to_string())?;
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
         let previous = self.with_library(|library| library.job(&id))?;
+        #[cfg(windows)]
+        if previous.request.model_variant_id.as_str() == studio_core::generation::Z_IMAGE_MODEL {
+            return Err("该历史任务使用 macOS MFLUX v1，Windows 不会隐式转换执行身份".into());
+        }
         // Legacy v1 froze the model variant, which predates the product install ID.
         let install_id = if previous.request.model_variant_id.as_str()
             == studio_core::generation::Z_IMAGE_MODEL
@@ -1661,12 +1721,22 @@ mod tests {
         let error = service.retry(submitted.job.job_id.as_str()).unwrap_err();
         assert!(!error.contains("未登记的安装标识"), "{error}");
         let models = service.model_views();
-        assert_eq!(models[0]["phase"], "unavailable");
-        assert!(
-            models[1..]
-                .iter()
-                .all(|model| model["phase"] == "not_installed")
-        );
+        #[cfg(windows)]
+        {
+            assert!(error.contains("Windows 不会隐式转换执行身份"), "{error}");
+            assert_eq!(models.len(), 1);
+            assert_eq!(models[0]["id"], WINDOWS_ZIMAGE_INSTALL_ID);
+            assert_eq!(models[0]["phase"], "not_installed");
+        }
+        #[cfg(not(windows))]
+        {
+            assert_eq!(models[0]["phase"], "unavailable");
+            assert!(
+                models[1..]
+                    .iter()
+                    .all(|model| model["phase"] == "not_installed")
+            );
+        }
     }
     #[test]
     fn empty_library_can_save_and_restore_without_models() {
@@ -1681,7 +1751,12 @@ mod tests {
                     id: 1,
                     name: "草稿 1".into(),
                     prompt: "中文\nA quiet lake".into(),
-                    params: json!({"modelId":"z-image-turbo-mflux-v1","aspect":"4:3","count":1,"seed":"42"}),
+                    params: json!({
+                        "modelId": DEFAULT_MODEL_ID,
+                        "aspect": if cfg!(windows) { "1:1" } else { "4:3" },
+                        "count": 1,
+                        "seed": "42"
+                    }),
                     collapsed: true,
                     prompt_source_id: None,
                 },
@@ -1807,34 +1882,88 @@ mod tests {
     #[test]
     fn new_conversation_uses_persisted_defaults_and_explicit_override() {
         let (_root, service) = fixture();
-        service
-            .save_creation_defaults(CreationDefaults {
-                model_id: DEFAULT_MODEL_ID.into(),
-                aspect: "4:3".into(),
-                count: 1,
-                seed: "42".into(),
-            })
-            .unwrap();
-        let persisted = service.conversation_create(None).unwrap();
-        assert_eq!(persisted["draft"]["params"]["aspect"], "4:3");
-        assert_eq!(persisted["draft"]["params"]["seed"], "42");
+        #[cfg(windows)]
+        {
+            assert!(
+                service
+                    .save_creation_defaults(CreationDefaults {
+                        model_id: DEFAULT_MODEL_ID.into(),
+                        aspect: "4:3".into(),
+                        count: 1,
+                        seed: "42".into(),
+                    })
+                    .is_err()
+            );
+            service
+                .save_creation_defaults(CreationDefaults {
+                    model_id: DEFAULT_MODEL_ID.into(),
+                    aspect: "1:1".into(),
+                    count: 1,
+                    seed: "42".into(),
+                })
+                .unwrap();
+            let persisted = service.conversation_create(None).unwrap();
+            assert_eq!(persisted["draft"]["params"]["aspect"], "1:1");
+            assert_eq!(persisted["draft"]["params"]["seed"], "42");
+            assert!(
+                service
+                    .conversation_create(Some(ConversationCreateInput {
+                        model_id: Some(DEFAULT_MODEL_ID.into()),
+                        aspect: Some("3:4".into()),
+                        count: Some(1),
+                        seed: Some(String::new()),
+                        initial_title: None,
+                        initial_prompt: None,
+                        prompt_source_id: None,
+                    }))
+                    .is_err()
+            );
+            let overridden = service
+                .conversation_create(Some(ConversationCreateInput {
+                    model_id: Some(DEFAULT_MODEL_ID.into()),
+                    aspect: Some("1:1".into()),
+                    count: Some(1),
+                    seed: Some(String::new()),
+                    initial_title: None,
+                    initial_prompt: None,
+                    prompt_source_id: None,
+                }))
+                .unwrap();
+            assert_eq!(overridden["draft"]["params"]["aspect"], "1:1");
+            assert_eq!(overridden["draft"]["params"]["seed"], "");
+        }
+        #[cfg(not(windows))]
+        {
+            service
+                .save_creation_defaults(CreationDefaults {
+                    model_id: DEFAULT_MODEL_ID.into(),
+                    aspect: "4:3".into(),
+                    count: 1,
+                    seed: "42".into(),
+                })
+                .unwrap();
+            let persisted = service.conversation_create(None).unwrap();
+            assert_eq!(persisted["draft"]["params"]["aspect"], "4:3");
+            assert_eq!(persisted["draft"]["params"]["seed"], "42");
 
-        let overridden = service
-            .conversation_create(Some(ConversationCreateInput {
-                model_id: Some(DEFAULT_MODEL_ID.into()),
-                aspect: Some("3:4".into()),
-                count: Some(1),
-                seed: Some(String::new()),
-                initial_title: None,
-                initial_prompt: None,
-                prompt_source_id: None,
-            }))
-            .unwrap();
-        assert_eq!(overridden["draft"]["params"]["aspect"], "3:4");
-        assert_eq!(overridden["draft"]["params"]["seed"], "");
+            let overridden = service
+                .conversation_create(Some(ConversationCreateInput {
+                    model_id: Some(DEFAULT_MODEL_ID.into()),
+                    aspect: Some("3:4".into()),
+                    count: Some(1),
+                    seed: Some(String::new()),
+                    initial_title: None,
+                    initial_prompt: None,
+                    prompt_source_id: None,
+                }))
+                .unwrap();
+            assert_eq!(overridden["draft"]["params"]["aspect"], "3:4");
+            assert_eq!(overridden["draft"]["params"]["seed"], "");
+        }
     }
 
     #[test]
+    #[cfg(not(windows))]
     fn qwen_and_moss_defaults_require_an_explicit_square_aspect() {
         let (_root, service) = fixture();
         for model_id in [
@@ -1969,18 +2098,45 @@ mod tests {
         )
         .unwrap();
         let service = StudioService::new(paths, root.path().join("not-installed-supervisor"));
-        let created = service.conversation_create(None).unwrap();
-        assert_eq!(
-            created["draft"]["params"]["modelId"],
-            "z-image-turbo-mflux-v1"
-        );
-        assert_eq!(created["draft"]["params"]["aspect"], "4:3");
-        assert_eq!(created["draft"]["params"]["seed"], "9");
-        assert!(
-            created["defaultsWarnings"]
-                .as_array()
-                .is_some_and(|warnings| !warnings.is_empty())
-        );
+        #[cfg(windows)]
+        {
+            let error = service.conversation_create(None).unwrap_err();
+            assert!(error.contains("仅支持 1:1"), "{error}");
+            let created = service
+                .conversation_create(Some(ConversationCreateInput {
+                    model_id: Some(DEFAULT_MODEL_ID.into()),
+                    aspect: Some("1:1".into()),
+                    count: None,
+                    seed: None,
+                    initial_title: None,
+                    initial_prompt: None,
+                    prompt_source_id: None,
+                }))
+                .unwrap();
+            assert_eq!(created["draft"]["params"]["modelId"], DEFAULT_MODEL_ID);
+            assert_eq!(created["draft"]["params"]["aspect"], "1:1");
+            assert_eq!(created["draft"]["params"]["seed"], "9");
+            assert!(
+                created["defaultsWarnings"]
+                    .as_array()
+                    .is_some_and(|warnings| !warnings.is_empty())
+            );
+        }
+        #[cfg(not(windows))]
+        {
+            let created = service.conversation_create(None).unwrap();
+            assert_eq!(
+                created["draft"]["params"]["modelId"],
+                "z-image-turbo-mflux-v1"
+            );
+            assert_eq!(created["draft"]["params"]["aspect"], "4:3");
+            assert_eq!(created["draft"]["params"]["seed"], "9");
+            assert!(
+                created["defaultsWarnings"]
+                    .as_array()
+                    .is_some_and(|warnings| !warnings.is_empty())
+            );
+        }
     }
 
     #[test]
@@ -1994,8 +2150,16 @@ mod tests {
             .iter()
             .find(|entry| entry["id"] == "flux2-klein-4b-distilled")
             .unwrap();
-        assert_eq!(planned["productStatus"], "implemented");
-        assert_eq!(planned["canInstall"], true);
+        #[cfg(windows)]
+        {
+            assert_eq!(planned["productStatus"], "planned");
+            assert_eq!(planned["canInstall"], false);
+        }
+        #[cfg(not(windows))]
+        {
+            assert_eq!(planned["productStatus"], "implemented");
+            assert_eq!(planned["canInstall"], true);
+        }
         assert_eq!(planned["executable"], false);
     }
 
@@ -2005,7 +2169,7 @@ mod tests {
         let prompt = "中文原文".repeat(12_000);
         service.save_draft(DraftInput {
             id: 1, name: "能力隔离".into(), prompt: prompt.clone(),
-            params: json!({"modelId": DEFAULT_MODEL_ID, "aspect":"4:3", "count":1,"seed":"73"}),
+            params: json!({"modelId": DEFAULT_MODEL_ID, "aspect":"1:1", "count":1,"seed":"73"}),
             collapsed:false, prompt_source_id:None,
         }, 1).unwrap();
         let conversation = service.snapshot().unwrap()["activeConversationId"]
@@ -2026,7 +2190,7 @@ mod tests {
             .validate_registered_draft_params(&switched.params)
             .unwrap();
         assert_eq!(
-            switched.params["capabilityDrafts"][studio_core::generation::Z_IMAGE_CAPABILITY]["prompt"],
+            switched.params["capabilityDrafts"][default_capability_id()]["prompt"],
             prompt
         );
         drop(service);
@@ -2043,7 +2207,7 @@ mod tests {
             })
             .unwrap();
         assert_eq!(switched_back.prompt, prompt);
-        assert_eq!(switched_back.params["aspect"], "4:3");
+        assert_eq!(switched_back.params["aspect"], "1:1");
         assert_eq!(switched_back.params["seed"], "73");
         assert_eq!(restored.snapshot().unwrap()["jobCounts"], json!([0, 0, 0]));
         let editable = restored
@@ -2068,9 +2232,9 @@ mod tests {
                     submission_key: IdempotencyKey::new("scoped-draft-send").unwrap(),
                     prompt: editable.prompt.clone(),
                     model_id: DEFAULT_MODEL_ID.into(),
-                    capability_id: studio_core::generation::Z_IMAGE_CAPABILITY.into(),
+                    capability_id: default_capability_id(),
                     source_asset_id: None,
-                    aspect: "4:3".into(),
+                    aspect: "1:1".into(),
                     count: 1,
                     seed: "73".into(),
                 })
@@ -2101,7 +2265,7 @@ mod tests {
                     prompt: "保持这段提示词".into(),
                     params: json!({
                         "modelId": DEFAULT_MODEL_ID,
-                        "aspect": "4:3",
+                        "aspect": "1:1",
                         "count": 1,
                         "seed": "17"
                     }),
@@ -2173,6 +2337,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(windows))]
     fn applying_new_text_models_preserves_incompatible_aspect_until_user_edits() {
         let (_root, service) = fixture();
         service

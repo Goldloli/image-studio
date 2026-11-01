@@ -1,7 +1,17 @@
 use super::*;
 use serde::{Deserialize, Serialize};
 
+#[cfg(windows)]
+pub const DEFAULT_MODEL_ID: &str = "z-image-turbo-diffusers-cuda-nf4-v1";
+#[cfg(not(windows))]
 pub const DEFAULT_MODEL_ID: &str = "z-image-turbo-mflux-v1";
+
+fn default_capability_id() -> &'static str {
+    #[cfg(windows)]
+    return studio_core::generation::Z_IMAGE_WINDOWS_CAPABILITY;
+    #[cfg(not(windows))]
+    studio_core::generation::Z_IMAGE_CAPABILITY
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -423,7 +433,7 @@ impl Library {
         let previous_capability = params
             .get("capabilityId")
             .and_then(Value::as_str)
-            .unwrap_or(studio_core::generation::Z_IMAGE_CAPABILITY)
+            .unwrap_or_else(|| default_capability_id())
             .to_owned();
         let previous = serde_json::json!({
             "prompt": draft.prompt, "aspect": params.get("aspect"), "seed": params.get("seed"),
@@ -468,6 +478,12 @@ impl Library {
                     }
                     .into(),
                 ),
+            );
+            params.insert("sourceAssetId".into(), Value::Null);
+        } else if model_id == DEFAULT_MODEL_ID {
+            params.insert(
+                "capabilityId".into(),
+                Value::String(default_capability_id().into()),
             );
             params.insert("sourceAssetId".into(), Value::Null);
         } else {
@@ -864,11 +880,14 @@ impl Library {
             }
             None => request.inputs.is_empty(),
         };
+        #[cfg(not(windows))]
         let expected_model = if turn.model_id == DEFAULT_MODEL_ID {
             studio_core::generation::Z_IMAGE_MODEL
         } else {
             turn.model_id.as_str()
         };
+        #[cfg(windows)]
+        let expected_model = turn.model_id.as_str();
         let tool_output_matches = matches!(
             turn.model_id.as_str(),
             studio_core::recipes::BIREFNET_MODEL | studio_core::recipes::REALESRGAN_MODEL
@@ -1219,6 +1238,11 @@ fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
 
 fn supported_turn_recipe(model: &str, capability: &str, has_source: bool, aspect: &str) -> bool {
     match (model, capability, has_source) {
+        #[cfg(windows)]
+        (DEFAULT_MODEL_ID, studio_core::generation::Z_IMAGE_WINDOWS_CAPABILITY, false) => {
+            aspect == "1:1"
+        }
+        #[cfg(not(windows))]
         (DEFAULT_MODEL_ID, studio_core::generation::Z_IMAGE_CAPABILITY, false) => true,
         (studio_core::recipes::KLEIN_MODEL, studio_core::recipes::KLEIN_TEXT_CAPABILITY, false) => {
             aspect == "1:1"
