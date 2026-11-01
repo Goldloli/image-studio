@@ -905,18 +905,7 @@ fn managed_directory(path: &Path) -> Result<()> {
     }
 }
 fn open_regular(path: &Path, create: bool) -> Result<File> {
-    let mut options = OpenOptions::new();
-    options.read(true).write(create).create(create);
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::OpenOptionsExt;
-        options.custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK | libc::O_CLOEXEC);
-    }
-    let file = options.open(path)?;
-    if !file.metadata()?.is_file() {
-        return Err(LibraryError::Invalid("只允许普通文件".into()));
-    }
-    Ok(file)
+    super::safe_fs::open_regular(path, create, create, false).map_err(Into::into)
 }
 fn sync_directory(path: &Path) -> Result<()> {
     #[cfg(unix)]

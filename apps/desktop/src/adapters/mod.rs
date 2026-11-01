@@ -7,6 +7,7 @@ pub mod library;
 pub mod paths;
 pub mod preferences;
 pub mod prompt_library;
+mod safe_fs;
 pub mod storage;
 
 pub use paths::{AppPaths, PlatformError};

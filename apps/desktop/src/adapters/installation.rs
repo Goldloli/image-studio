@@ -1963,24 +1963,7 @@ fn err(e: impl std::fmt::Display) -> String {
     e.to_string()
 }
 fn open_regular(path: &Path, write: bool, truncate: bool) -> Result<File, String> {
-    let mut options = OpenOptions::new();
-    options
-        .read(true)
-        .write(write)
-        .create(write)
-        .truncate(truncate);
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::OpenOptionsExt;
-        options
-            .custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK)
-            .mode(0o600);
-    }
-    let file = options.open(path).map_err(err)?;
-    if !file.metadata().map_err(err)?.is_file() {
-        return Err("管理文件不是普通文件。".into());
-    }
-    Ok(file)
+    super::safe_fs::open_regular(path, write, write, truncate).map_err(err)
 }
 fn ensure_child_dir(root: &Path, path: &Path) -> Result<(), String> {
     let relative = path.strip_prefix(root).map_err(err)?;
