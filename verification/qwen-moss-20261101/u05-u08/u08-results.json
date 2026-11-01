@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "caseId": "U08",
+  "layouts": [
+    {
+      "logicalSize": "1280x800",
+      "theme": "light",
+      "modelsPagePassed": true,
+      "tasksPagePassed": true,
+      "worksPagePassed": true,
+      "longModelNamesVisible": true,
+      "sourceAndRuntimeVisible": true,
+      "primaryActionsVisible": true
+    },
+    {
+      "logicalSize": "960x640",
+      "theme": "dark",
+      "modelsPagePassed": true,
+      "tasksPagePassed": true,
+      "longModelNamesVisible": true,
+      "primaryActionsVisible": true,
+      "keyboardFocusVisible": true,
+      "modelSpecificUnsupportedControlsPresent": false
+    }
+  ],
+  "evidence": {
+    "light960": {
+      "path": "u08-960-light.jpg",
+      "sha256": "118d1328e1bdb95b191c083100120c9313cad291e84ea968d1d28ca451136e40"
+    },
+    "dark960": {
+      "path": "u08-960-dark.jpg",
+      "sha256": "ef9ad4214b1400be478955d457e14ce23f18fffaeeaa0843e7aaa7c480a40477"
+    },
+    "modelsDark960": {
+      "path": "u08-models-960-dark.jpg",
+      "sha256": "555ad094f05608e19f865c6cf1f167ce2d1f44377b50181f262afd75c0825183"
+    },
+    "tasksDark960": {
+      "path": "u08-tasks-960-dark.jpg",
+      "sha256": "2ffbd32d620b644c7b5b9020e8a26f000c25841a238913975b911d8a0679574d"
+    },
+    "modelsLight1280": {
+      "path": "u06-models-1280-light.jpg",
+      "sha256": "0b8d27d1f030ecdea65079a33bc1cec9f36be6faec1698f8c6f3742081462c7d"
+    },
+    "tasksLight1280": {
+      "path": "u06-tasks-moss-1280-light.jpg",
+      "sha256": "3fa7ed3b57899123c0921963d162d8e5606b66b17d8f2207793fddc3ca44a868"
+    },
+    "worksLight1280": {
+      "path": "u06-works-1280-light.jpg",
+      "sha256": "daa52027f082aac7d07aac5acfac7ef13af36b0a36ed241789d5fdb8634096eb"
+    }
+  }
+}
