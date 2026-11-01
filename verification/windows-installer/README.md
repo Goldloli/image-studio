@@ -8,8 +8,8 @@ data root.
 ## Package
 
 - Installer: `target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe`
-- Size: `244,754,768` bytes
-- SHA-256: `9a65781a1c7bdf1c84289ed8396005339985420a79ff68107710fb1f52e849b0`
+- Size: `244,749,495` bytes
+- SHA-256: `085328ab46aed390f22bbc88487552eaed25356315afdab3096e3765f7b91d8e`
 - Install mode: current user
 - WebView2: embedded offline installer
 - VC runtime: bundled

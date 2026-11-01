@@ -38,7 +38,7 @@ Gate 0 已在目标机通过：
 - Windows 目录仅暴露一个已认证产品 profile：`z-image-turbo-diffusers-cuda-nf4-v1`；另外六个逻辑型号保留说明但不可安装或执行。
 - 产品安装器从 Gate 0 缓存预置 20 个 ModelScope 等价模型文件和完整运行时，重新校验后安装私有 Python/wheel，执行 worker/CUDA 探针并写入 Ready 记录。
 - 产品 worker 与 `GenerationController` 均生成真实 1024×1024 RGB PNG；Controller 路径还验证了 v2 载荷、`primary.png`、PNG 校验、SQLite Job/Asset 提交与资产读取。
-- Tauri 已生成 `244,754,768` 字节的当前用户 NSIS 内部测试包，嵌入离线 WebView2、VC runtime、`inference-supervisor.exe` 和 `diagnostic-worker.exe`。
+- Tauri 已生成 `244,749,495` 字节的当前用户 NSIS 内部测试包，嵌入离线 WebView2、VC runtime、`inference-supervisor.exe` 和 `diagnostic-worker.exe`。
 - 安装包已静默安装到 `%LOCALAPPDATA%\Image Studio`；安装版 WebView2 使用隔离数据根启动，可访问性树确认中文创作页和 Windows `Z-Image Turbo · 未就绪` 状态，首次启动没有创建私有运行时或模型文件。
 
 证据见 [Gate 0/产品闭环](../verification/windows-gate0/README.md) 和 [Windows 安装包](../verification/windows-installer/README.md)。

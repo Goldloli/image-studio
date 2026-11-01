@@ -3,25 +3,25 @@
   "kind": "windows-nsis-install-smoke",
   "status": "passed",
   "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
-  "installerSha256": "9a65781a1c7bdf1c84289ed8396005339985420a79ff68107710fb1f52e849b0",
-  "installerBytes": 244754768,
+  "installerSha256": "085328ab46aed390f22bbc88487552eaed25356315afdab3096e3765f7b91d8e",
+  "installerBytes": 244749495,
   "installExitCode": 0,
   "installLocation": "%LOCALAPPDATA%\\Image Studio",
   "installedFiles": [
     {
       "name": "image-studio-desktop.exe",
-      "bytes": 42027008,
-      "sha256": "3d8bed6d4bedfb0169cb4e113c96f09d54736d4319805df0110ff8a973d0cb68"
+      "bytes": 41990144,
+      "sha256": "8c6cb115e7b32fbc354b431280dae074da4d6197d2cd6eb444a7986ea1f2c31f"
     },
     {
       "name": "inference-supervisor.exe",
       "bytes": 1008640,
-      "sha256": "2c18502b5f63c427da8b803911d1dc4a8098806a24eec565f85510b742b1b416"
+      "sha256": "3cad6319ccb433f8fa844087f43c4d6f04216640af6757020777628a8575b170"
     },
     {
       "name": "diagnostic-worker.exe",
       "bytes": 463360,
-      "sha256": "15b099f77bbd6bf7397649624ae63d8cd323663f07373c3485948f136ffe786b"
+      "sha256": "650ef8d5dea87ae9417c43435a72293bf2938aa90614978484c45d8da1d4a71d"
     }
   ],
   "launch": {
@@ -48,7 +48,12 @@
         "displayedCharacters": 7,
         "draftStatus": "草稿已保存到本机"
       },
-      "tabNavigation": "not observed: focus remained on the WebView root document"
+      "directTypeTextAfterRestore": {
+        "value": "键盘焦点",
+        "displayedCharacters": 4,
+        "draftStatus": "草稿已保存到本机"
+      },
+      "tabNavigation": "not observed: type_text reaches the focused editor, but Tab still leaves the reported focus at the WebView root document"
     },
     "screenshotCapture": "unavailable: FrameArrived timed out"
   }
