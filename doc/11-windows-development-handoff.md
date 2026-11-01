@@ -80,7 +80,9 @@ openspec validate introduce-windows-foundation --strict --no-interactive
 
 2026-11-01 已执行的非模型检查结果：前端 46 个包安装成功，6 个测试文件/37 项测试通过，生产构建通过；固定 Rust 的 Windows 核心/协议 `cargo check`、fmt、66 项测试、1 项文档测试和 clippy 均通过。检查中发现并修复了生成协议测试夹具硬编码 POSIX 路径的问题。
 
-首次 `cargo check --workspace --locked` 当前仍失败：根 workspace 让 `sha2` 使用全局 `asm`，MSVC 无法编译其 `sha512_x64.S`。这是需要按平台收敛 Cargo 特性的构建阻塞，不能通过跳过哈希或改变摘要来绕过。完整 Tauri/工作区构建、Node 版本固化和所有 P0 仍未完成。
+`sha2` 的 `asm` 已限定到 macOS，Windows 不启用汇编后端，macOS 目标仍保留。随后 `cargo check/build --workspace --locked`、全 workspace 203 项测试 + 1 项文档测试以及 `cargo clippy --workspace --all-targets -- -D warnings` 均通过，4 项固定网络/运行时缓存测试为显式忽略。
+
+宿主还分别用显式隔离根和无参数默认路径启动成功。Windows 默认目录通过 Known Folder API 解析为 `%LOCALAPPDATA%\ImageStudio`，四个子目录正确创建；设置页目录定位使用 Explorer 且不经过 shell。Windows Job Object 原生监督、完整 UI/IME/DPI、NSIS 和所有 P0 仍未完成，Node 版本也未固化。
 
 ## Beads 与跨机任务状态
 

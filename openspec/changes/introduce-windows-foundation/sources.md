@@ -1,6 +1,6 @@
 # Windows 首轮适配：依据与证据边界
 
-核对日期：2026-11-01。本文用于提案研究。最初编写提案时没有目标机访问；同日在目标 Windows 机器完成了一次只读环境预检和已有源码的初始检查，但没有执行完整 Windows 桌面构建、下载完整模型、安装模型运行时或执行推理。
+核对日期：2026-11-01。本文用于提案研究。最初编写提案时没有目标机访问；同日在目标 Windows 机器完成了环境预检、已有源码检查和 Windows 基础构建启动，但没有生成 NSIS 安装包、下载完整模型、安装模型运行时或执行推理。
 
 ## 用户确认的目标与目标机预检
 
@@ -49,11 +49,14 @@
 
 - `npm ci` 安装 46 个包；`npm test` 的 6 个测试文件、37 项测试全部通过；生产前端构建通过，仅有单个 catalog chunk 超过 500 KiB 的非阻断提示。
 - 固定 Rust `1.99.1` 与 `x86_64-pc-windows-msvc` 目标可用；`cargo check -p studio-core -p worker-protocol --target x86_64-pc-windows-msvc --locked` 通过。
-- `cargo fmt --all -- --check` 通过；`cargo test -p studio-core -p worker-protocol --locked` 的 66 项测试和 1 项文档测试全部通过；相关 `cargo clippy --all-targets -- -D warnings` 通过。
+- `cargo fmt --all -- --check`、`cargo check --workspace --locked`、`cargo build --workspace --locked` 和 `cargo clippy --workspace --all-targets --locked -- -D warnings` 均通过。
+- `cargo test --workspace --locked` 通过：203 项测试和 1 项文档测试通过，4 项需要固定网络/运行时缓存的显式验收测试被忽略，0 失败。
 - Windows 检查发现生成协议测试夹具硬编码 POSIX 绝对路径；已改为由测试按当前平台生成受控绝对路径，生产协议校验和 Mac 路径语义未改写。
-- 首次 `cargo check --workspace --locked` 在 `sha2-asm 0.6.4` 构建脚本处失败：根 workspace 对 `sha2` 启用全局 `asm`，而当前 MSVC 工具链不能编译其 `sha512_x64.S`。这属于平台构建配置阻塞，尚未修改。
+- 首次 `cargo check --workspace --locked` 曾在 `sha2-asm` 的 MSVC 汇编处失败；现已把 `asm` 限定到 macOS。`cargo tree` 确认 Windows 不启用 `sha2-asm`，`aarch64-apple-darwin` 仍启用该特性，Mac 实际构建性能回归仍待执行。
+- 桌面宿主已用显式隔离根和无参数默认路径分别启动成功；Windows Known Folder API 解析到 `%LOCALAPPDATA%\ImageStudio`，创建 `data/cache/logs/work` 后进程稳定运行，未启动 worker 或模型。
+- Windows 目录 flush、进程内同根互斥、只读候选提交和 Windows 文件选择测试已修正并通过。原生 Job Object 监督、完整 UI/IME/DPI、安装包和模型执行仍未完成。
 
-这些结果只证明前端、核心和协议在本次 Windows 开发环境中可重复检查；完整 workspace 当前被 `sha2` 汇编特性阻塞，不是 W01/R01 全工作区验收，也不证明 Tauri、原生目录、进程监督、安装包或模型执行可用。Node/npm 仍未冻结，因此该结果不能外推到其他 Node 版本。
+这些结果证明当前 Windows 构建、常规测试和部分目录/文件基础可重复；Windows 监督器仍有 Unix-only 分支，GUI 仅做了短时启动，原生交互、安装包和模型执行尚未验收。Node/npm 仍未冻结，因此结果不能外推到其他 Node 版本。
 
 ## 仓库现状
 
@@ -91,4 +94,4 @@
 
 ## 预检证据边界
 
-本次预检覆盖本机系统、硬件、驱动、WebView2、磁盘、开发工具以及前端、核心和协议的初始源码检查。没有执行完整 Windows 桌面构建、Tauri 启动、CUDA/PyTorch/BF16/NF4 探针、模型安装或推理。因此 G02–G06、安装、生命周期、原生 UI、安装包和 Mac 回归仍保持未运行，GPU/内存条件也不能提前标为 Gate 0 通过。
+本次记录覆盖本机系统、硬件、驱动、WebView2、磁盘、开发工具、完整 workspace 构建/测试，以及默认和隔离目录的宿主短时启动。没有生成 NSIS 安装包，没有完成 Windows 原生 UI/IME/DPI，没有实现 Windows Job Object 监督，也没有执行 CUDA/PyTorch/BF16/NF4 探针、模型安装或推理。因此 G02–G06、完整安装/生命周期/P0、安装包和 Mac 回归仍保持未运行。

@@ -85,7 +85,7 @@ Windows worker 使用独立 build/capability/runtime 身份及 generation v2 新
 
 固定 Rust/Node 工具链与锁文件，在目标 Win10 或匹配的 Windows 构建机执行 MSVC 全工作区构建，打包 host/supervisor/diagnostic `.exe`、字体、图标和前端。Rust 由 `rust-toolchain.toml` 固定；Node/npm 当前尚无仓库级版本约束，实施前须在 Windows 预检版本基础上明确可复现范围并加入对应版本声明。NSIS 采用 per-user 安装；通过平台配置移除 Mac 特有窗口参数，使用可工作的原生最小化/最大化/关闭与拖拽区域，不绘制装饰性假控制钮。
 
-Windows 预检还发现根 workspace 对 `sha2` 启用全局 `asm`，其汇编源无法由当前 MSVC 工具链构建。实施时须把该优化限定到实际支持的目标，或采用经校验且不破坏 Mac 哈希性能/内容身份的等价配置；不能用跳过哈希、关闭完整性或更换摘要值来绕过。修复后重新执行全 workspace 检查。
+Windows 预检曾发现根 workspace 对 `sha2` 启用全局 `asm`，其汇编源无法由当前 MSVC 工具链构建。现已把该优化限定到 macOS；特征解析确认 Windows 不启用 `sha2-asm`，macOS 目标仍启用，完整 workspace 已重新构建通过。Mac 上的实际哈希性能与模型回归仍须在 Mac 执行，不能仅由依赖图代替。
 
 采用 offlineInstaller 方式提供缺失 WebView2 时的离线安装依赖；打包时固定依赖版本与内容摘要，实测有/无 WebView2 分支以及权限不足的恢复提示。主程序不捆绑模型权重，首次启动不准备 Python/CUDA。升级覆盖程序而保留数据；卸载只移除程序，保留用户数据、模型与作品。本 change 产物明确标成内部测试包，不宣称已签名发布。
 
