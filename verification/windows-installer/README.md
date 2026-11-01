@@ -1,15 +1,16 @@
 # Windows internal installer
 
 Status: the Windows x64 Tauri application built and produced an NSIS installer
-on the target machine, 2026-11-01. The installer completed a silent current-user
-installation and the installed WebView2 application started with an isolated
-data root.
+on the target machine, 2026-11-01. It was rebuilt on 2026-11-02 after the
+ModelScope URL and segmented-resume fixes, then silently installed over the
+current-user package. The installed WebView2 application started with a new
+isolated data root and closed without forced termination.
 
 ## Package
 
 - Installer: `target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe`
-- Size: `244,738,194` bytes
-- SHA-256: `4ff627ede9a0f7a9109cd2f9b8fc155d06325eb9f06e2fcbf115a4054a3d9ae9`
+- Size: `244,738,598` bytes
+- SHA-256: `466eb3f43c8fb984ec5cf92b369927dd0b58692e629e76df2301ed783a743c29`
 - Install mode: current user
 - WebView2: embedded offline installer
 - VC runtime: bundled
@@ -33,6 +34,7 @@ save failed no longer blocks native window close.
 
 - [Machine-readable package record](internal-package.json)
 - [Install and launch smoke](install-smoke.json)
+- [Latest update and launch smoke](install-update-smoke.json)
 
 ## Remaining gates
 
