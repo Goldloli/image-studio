@@ -1,1 +1,24 @@
-Change 'introduce-qwen21-and-moss-image' is valid
+- Validating...
+✓ spec/application-settings
+✓ spec/asset-library
+✓ spec/conversation-management
+✓ spec/core-contracts
+✓ spec/desktop-workspace
+✓ spec/feature-catalog
+✓ spec/generation-conversation
+✓ spec/generation-worker-protocol
+✓ spec/image-processing
+✓ spec/local-generation
+✓ spec/model-catalog
+✓ spec/model-installation
+  ℹ [INFO] requirements[0]: Requirement text is very long (>500 characters). Consider breaking it down.
+✓ spec/model-validation
+✓ spec/multi-model-recipes
+✓ spec/platform-foundation
+✓ spec/product-identity
+✓ spec/project-storage
+✓ spec/prompt-library
+✓ spec/task-center
+✓ spec/worker-protocol
+✓ spec/workspace-canvas
+Totals: 21 passed, 0 failed (21 items)

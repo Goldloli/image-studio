@@ -59,8 +59,10 @@
       "log": "final-gates/r04-model-locks.log"
     },
     {
-      "command": "openspec validate introduce-qwen21-and-moss-image --strict",
+      "command": "openspec validate --all --strict",
       "exitCode": 0,
+      "passed": 21,
+      "failed": 0,
       "log": "final-gates/r04-openspec-validate.log"
     },
     {
