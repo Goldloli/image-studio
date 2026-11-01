@@ -600,7 +600,24 @@ impl StudioService {
             }
         }
         if !catalog.contains(&params.model_id) {
-            return Err("所选模型未在权威目录中登记".into());
+            ModelVariantId::new(&params.model_id).map_err(|error| error.to_string())?;
+            if params.capability_id.is_empty()
+                || params.capability_id.len() > 128
+                || !params
+                    .capability_id
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || b"-_.:".contains(&byte))
+                || !matches!(params.aspect.as_str(), "1:1" | "4:3" | "3:4")
+                || params.count != 1
+                || !valid_seed(&params.seed)
+            {
+                return Err("历史草稿参数结构或范围无效".into());
+            }
+            if let Some(source) = &params.source_asset_id {
+                let source = AssetId::new(source).map_err(|error| error.to_string())?;
+                self.with_library(|library| library.resolve_source(&source))?;
+            }
+            return Ok(params);
         }
         let supported_combo = match (
             params.model_id.as_str(),
@@ -2199,7 +2216,25 @@ mod tests {
         assert!(
             service
                 .validate_registered_draft_params(&created["draft"]["params"])
-                .is_err()
+                .is_ok()
+        );
+        let saved = service
+            .save_draft(
+                DraftInput {
+                    id: created["draft"]["id"].as_u64().unwrap(),
+                    name: created["draft"]["name"].as_str().unwrap().into(),
+                    prompt: "保留旧模型时仍可保存文字".into(),
+                    params: created["draft"]["params"].clone(),
+                    collapsed: false,
+                    prompt_source_id: None,
+                },
+                created["draft"]["version"].as_u64().unwrap(),
+            )
+            .unwrap();
+        assert_eq!(saved.prompt, "保留旧模型时仍可保存文字");
+        assert_eq!(
+            saved.params["capabilityId"],
+            studio_core::generation::Z_IMAGE_CAPABILITY
         );
     }
 
