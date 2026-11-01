@@ -242,17 +242,43 @@ async fn receive(
     }
 }
 
-struct GroupGuard(u32);
+struct GroupGuard {
+    pid: u32,
+    #[cfg(windows)]
+    job: Option<super::windows_process::WindowsProcessJob>,
+}
 impl GroupGuard {
+    #[cfg(unix)]
+    fn unix(pid: u32) -> Self {
+        Self { pid }
+    }
+    #[cfg(windows)]
+    fn windows(pid: u32, job: super::windows_process::WindowsProcessJob) -> Self {
+        Self {
+            pid,
+            job: Some(job),
+        }
+    }
     fn kill(&self) {
         #[cfg(unix)]
-        if let Ok(pid) = i32::try_from(self.0)
+        if let Ok(pid) = i32::try_from(self.pid)
             && pid > 0
         {
             // SAFETY: the positive PID belongs to the process group just spawned by us.
             unsafe {
                 libc::kill(-pid, libc::SIGKILL);
             }
+        }
+        #[cfg(windows)]
+        if let Some(job) = &self.job {
+            let _ = job.terminate();
+        }
+    }
+    fn disarm(&mut self) {
+        self.pid = 0;
+        #[cfg(windows)]
+        {
+            self.job = None;
         }
     }
 }
@@ -297,16 +323,23 @@ async fn run(
     if let Some(work) = &config.work_dir {
         command.current_dir(work);
     }
+    #[cfg(windows)]
+    let (mut child, job) = super::windows_process::spawn_suspended_tokio(&mut command)
+        .await
+        .map_err(|e| Failure::new("WORKER_START_FAILED", e.to_string()))?;
+    #[cfg(not(windows))]
     let mut child = command
         .spawn()
         .map_err(|e| Failure::new("WORKER_START_FAILED", e.to_string()))?;
-    let mut group = GroupGuard(
-        child
-            .id()
-            .ok_or_else(|| Failure::new("WORKER_START_FAILED", "缺少进程标识"))?,
-    );
+    let pid = child
+        .id()
+        .ok_or_else(|| Failure::new("WORKER_START_FAILED", "缺少进程标识"))?;
+    #[cfg(windows)]
+    let mut group = GroupGuard::windows(pid, job);
+    #[cfg(unix)]
+    let mut group = GroupGuard::unix(pid);
     mutate(&state, wake, |s| {
-        s.pid = Some(group.0);
+        s.pid = Some(group.pid);
         s.phase = DiagnosticPhase::Handshaking;
         s.summary = "正在协商诊断协议".into();
     });
@@ -328,7 +361,7 @@ async fn run(
         .unwrap_or_default()
         .as_nanos();
     let mut session = HostSession::new(
-        format!("diagnostic-{}-{stamp}", group.0),
+        format!("diagnostic-{}-{stamp}", group.pid),
         VersionRange::CURRENT,
     )
     .map_err(|e| Failure::new(e.code(), e.to_string()))?;
@@ -360,7 +393,7 @@ async fn run(
     // Even a graceful parent may leave descendants holding stdout/stderr open.
     group.kill();
     // A reaped PID can be reused. Disarm the guard after the final group signal.
-    group.0 = 0;
+    group.disarm();
     if child.try_wait().ok().flatten().is_none() {
         let _ = child.kill().await;
     }

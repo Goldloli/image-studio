@@ -38,13 +38,36 @@ pub(crate) fn spawn_suspended_in_job(
     command.creation_flags(CREATE_SUSPENDED);
     let mut child = command.spawn()?;
     let startup = (|| -> io::Result<()> {
-        job.assign(&child)?;
+        job.assign(child.as_raw_handle())?;
         resume_suspended(child.id())
     })();
     if let Err(error) = startup {
         let _ = job.terminate();
         let _ = child.kill();
         let _ = child.wait();
+        return Err(error);
+    }
+    Ok((child, job))
+}
+
+pub(crate) async fn spawn_suspended_tokio(
+    command: &mut tokio::process::Command,
+) -> io::Result<(tokio::process::Child, WindowsProcessJob)> {
+    let job = WindowsProcessJob::create()?;
+    command.creation_flags(CREATE_SUSPENDED);
+    let mut child = command.spawn()?;
+    let startup = (|| -> io::Result<()> {
+        job.assign(child.raw_handle().ok_or_else(|| {
+            io::Error::new(io::ErrorKind::NotFound, "supervisor has no process handle")
+        })?)?;
+        resume_suspended(child.id().ok_or_else(|| {
+            io::Error::new(io::ErrorKind::NotFound, "supervisor has no process ID")
+        })?)
+    })();
+    if let Err(error) = startup {
+        let _ = job.terminate();
+        let _ = child.start_kill();
+        let _ = child.wait().await;
         return Err(error);
     }
     Ok((child, job))
@@ -74,9 +97,9 @@ impl WindowsProcessJob {
         Ok(Self { handle })
     }
 
-    fn assign(&self, child: &Child) -> io::Result<()> {
+    fn assign(&self, process: HANDLE) -> io::Result<()> {
         // SAFETY: both handles are live and the process remains suspended for this call.
-        let assigned = unsafe { AssignProcessToJobObject(self.handle.0, child.as_raw_handle()) };
+        let assigned = unsafe { AssignProcessToJobObject(self.handle.0, process) };
         if assigned == 0 {
             Err(io::Error::last_os_error())
         } else {
@@ -106,7 +129,7 @@ impl WindowsProcessJob {
         Ok(accounting.ActiveProcesses)
     }
 
-    fn terminate(&self) -> io::Result<()> {
+    pub(crate) fn terminate(&self) -> io::Result<()> {
         // SAFETY: the handle is owned by this live host generation boundary.
         if unsafe { TerminateJobObject(self.handle.0, 1) } == 0 {
             let error = io::Error::last_os_error();
@@ -216,5 +239,37 @@ mod tests {
             );
             thread::sleep(Duration::from_millis(10));
         }
+    }
+
+    #[test]
+    fn tokio_supervisor_spawn_uses_the_same_outer_job_boundary() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        runtime.block_on(async {
+            let (mut child, job) = spawn_suspended_tokio(
+                tokio::process::Command::new(std::env::var_os("COMSPEC").unwrap())
+                    .args(["/D", "/C", "ping -n 60 127.0.0.1 >NUL"])
+                    .stdin(Stdio::null())
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null()),
+            )
+            .await
+            .unwrap();
+            assert!(job.active_processes().unwrap() >= 1);
+            drop(job);
+            let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+            loop {
+                if child.try_wait().unwrap().is_some() {
+                    break;
+                }
+                assert!(
+                    tokio::time::Instant::now() < deadline,
+                    "async outer Job close did not terminate its process"
+                );
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+        });
     }
 }

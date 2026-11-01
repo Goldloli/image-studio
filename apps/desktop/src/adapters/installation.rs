@@ -1468,6 +1468,10 @@ impl Installation {
             use std::os::unix::process::CommandExt;
             command.process_group(0);
         }
+        #[cfg(windows)]
+        let (mut child, job) =
+            super::windows_process::spawn_suspended_in_job(command).map_err(err)?;
+        #[cfg(not(windows))]
         let mut child = command.spawn().map_err(err)?;
         let mut stdout = child.stdout.take().ok_or("子进程没有输出通道。")?;
         let mut stderr = child.stderr.take().ok_or("子进程没有日志通道。")?;
@@ -1510,6 +1514,12 @@ impl Installation {
         let deadline = std::time::Instant::now() + Duration::from_secs(600);
         loop {
             if let Some(status) = child.try_wait().map_err(err)? {
+                #[cfg(windows)]
+                if let Err(error) = job.terminate() {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    return Err(format!("无法清理安装探针进程树：{error}"));
+                }
                 let output = capture.join().map_err(|_| "探针读取失败。")?.map_err(err)?;
                 logs.join()
                     .map_err(|_| "安装日志读取失败。")?
@@ -1530,6 +1540,12 @@ impl Installation {
                 ));
             }
             if self.check_cancel().is_err() || std::time::Instant::now() > deadline {
+                #[cfg(windows)]
+                if let Err(error) = job.terminate() {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    return Err(format!("无法终止安装探针进程树：{error}"));
+                }
                 #[cfg(unix)]
                 {
                     // SAFETY: this is the process group created for the still-owned child.
@@ -2869,6 +2885,30 @@ mod tests {
             assert!(artifact.sha256.bytes().all(|byte| byte.is_ascii_hexdigit()));
             assert!(artifact.bytes > 0);
         }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_probe_cleanup_reaps_pipe_holding_descendants() {
+        let (temp, installer) = fixture();
+        let script = temp.path().join("probe-with-descendant.cmd");
+        fs::write(
+            &script,
+            concat!(
+                "@start \"\" /B \"%COMSPEC%\" /D /C \"ping -n 60 127.0.0.1 >NUL\"\r\n",
+                "@echo probe-ok\r\n",
+                "@exit /B 0\r\n"
+            ),
+        )
+        .unwrap();
+        let output = installer
+            .command(
+                Command::new(std::env::var_os("COMSPEC").unwrap())
+                    .args(["/D", "/C"])
+                    .arg(script),
+            )
+            .unwrap();
+        assert_eq!(String::from_utf8_lossy(&output).trim(), "probe-ok");
     }
 
     #[test]
