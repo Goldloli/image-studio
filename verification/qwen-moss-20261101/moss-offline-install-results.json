@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "modelId": "moss-image-sft-mflux-v1",
+  "networkDenied": true,
+  "sandboxProfile": "../../deny-network.sb",
+  "targetRoot": "target/qwen-moss-offline-install-20261101",
+  "cacheRoot": {
+    "mode": "symlink",
+    "target": "../qwen-moss-validation-20261101/cache"
+  },
+  "sourceEvidence": {
+    "path": "moss-offline-install.jsonl",
+    "sha256": "04d9baf15d42bd144b03f006ded7bf2fd04a42f6a90e6e300d27322d820227a4",
+    "records": 16
+  },
+  "installation": {
+    "modelSnapshotId": "moss-image-sft-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+    "modelManifestSha256": "44c20e85b3eed9a1247b74dd5414b843aacd74097e12368fa86b7ce5be7584db",
+    "runtimeLockId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+    "runtimeManifestSha256": "d4a861f02268564b14ffcddb9ec8fe682d4bfe9211f0b9f7e330fce6011a3f0c",
+    "receivedBytes": 27568835934,
+    "requiredBytes": 33609063510,
+    "modelBytes": 27219783878,
+    "runtimeBytes": 349052056,
+    "ready": true,
+    "deviceVerified": true
+  },
+  "readyRecord": {
+    "device": "gpu",
+    "deviceName": "Apple M3 Max",
+    "mflux": "0.24.0",
+    "mlx": "0.32.4",
+    "python": "3.13.12",
+    "workerBuildId": "studio-mflux-worker-0.3.0"
+  },
+  "isolation": {
+    "readyInstallationFiles": [
+      "data/installations/models/moss-image-sft-mflux-v1.json"
+    ],
+    "otherModelsRemainNotInstalled": true
+  }
+}
