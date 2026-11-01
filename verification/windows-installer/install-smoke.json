@@ -42,7 +42,13 @@
         "创作",
         "本地图片创作",
         "Z-Image Turbo · 未就绪"
-      ]
+      ],
+      "chineseTextInputViaAccessibility": {
+        "value": "中文输入法测试",
+        "displayedCharacters": 7,
+        "draftStatus": "草稿已保存到本机"
+      },
+      "tabNavigation": "not observed: focus remained on the WebView root document"
     },
     "screenshotCapture": "unavailable: FrameArrived timed out"
   }
