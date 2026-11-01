@@ -232,7 +232,9 @@
         "社区 4/8 步蒸馏 LoRA",
         "可视化布局编辑器与像素级排版保证"
       ],
-      "verifiedDevices": [],
+      "verifiedDevices": [
+        "Apple M3 Max / 128 GiB / macOS arm64"
+      ],
       "recipe": "q8 · 50 步 · CFG 3.0 · 1024 × 1024",
       "installId": "moss-image-sft-mflux-v1",
       "installerSupported": true
