@@ -2841,6 +2841,14 @@ mod tests {
             manifest.revision,
             "f332072aa78be7aecdf3ee76d5c247082da564a6"
         );
+        let manifest_json: serde_json::Value =
+            serde_json::from_str(WINDOWS_GATE_ZERO_MANIFEST).unwrap();
+        assert_eq!(manifest_json["download_source"]["provider"], "modelscope");
+        assert_eq!(
+            manifest_json["download_source"]["repository"],
+            "Tongyi-MAI/Z-Image-Turbo"
+        );
+        assert_eq!(manifest_json["download_source"]["revision"], "master");
         assert_eq!(manifest.component_bytes, 32_848_305_533);
         assert_eq!(manifest.files.len(), 20);
         assert_eq!(
@@ -2988,6 +2996,63 @@ mod tests {
                 .unwrap()
                 .starts_with("target/windows-gate0/")
         );
+    }
+
+    #[test]
+    fn windows_gate_zero_result_records_three_budget_passed_runs() {
+        const RESULT: &str =
+            include_str!("../../../../verification/windows-gate0/gate0-results.json");
+        const MODEL_SCOPE: &str =
+            include_str!("../../../../verification/windows-gate0/modelscope-equivalence.json");
+        let result: serde_json::Value = serde_json::from_str(RESULT).unwrap();
+        assert_eq!(result["status"], "passed");
+        assert_eq!(result["product_activation"], "not_run");
+        assert_eq!(result["selected_candidate"]["id"], "a");
+        assert_eq!(result["model"]["verified_files"], 20);
+        assert_eq!(result["model"]["modelscope_verified_files"], 20);
+        assert_eq!(result["budget"]["passed"], true);
+        assert!(
+            result["budget"]["cuda_peak_reserved_max_bytes"]
+                .as_u64()
+                .unwrap()
+                <= result["budget"]["cuda_peak_reserved_limit_bytes"]
+                    .as_u64()
+                    .unwrap()
+        );
+        assert!(
+            result["budget"]["private_commit_peak_max_bytes"]
+                .as_u64()
+                .unwrap()
+                <= result["budget"]["private_commit_limit_bytes"]
+                    .as_u64()
+                    .unwrap()
+        );
+        assert!(
+            result["budget"]["available_ram_min_bytes"]
+                .as_u64()
+                .unwrap()
+                >= result["budget"]["available_ram_minimum_bytes"]
+                    .as_u64()
+                    .unwrap()
+        );
+        let runs = result["runs"].as_array().unwrap();
+        assert_eq!(runs.len(), 3);
+        for run in runs {
+            assert_eq!(run["callback_total"], 9);
+            assert!(run["load_seconds"].as_f64().unwrap() <= 600.0);
+            assert!(run["generation_seconds"].as_f64().unwrap() <= 900.0);
+            assert_eq!(
+                run["visual_checks"]["size"],
+                serde_json::json!([1024, 1024])
+            );
+            assert_eq!(run["visual_checks"]["mode"], "RGB");
+            assert_eq!(run["visual_checks"]["non_black"], true);
+            assert_eq!(run["image_sha256"].as_str().unwrap().len(), 64);
+        }
+        let modelscope: serde_json::Value = serde_json::from_str(MODEL_SCOPE).unwrap();
+        assert_eq!(modelscope["status"], "passed");
+        assert_eq!(modelscope["source_revision"], "master");
+        assert_eq!(modelscope["verified_file_count"], 20);
     }
 
     #[cfg(windows)]
