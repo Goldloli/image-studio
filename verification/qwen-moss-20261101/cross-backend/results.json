@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "caseId": "U03",
+  "conversationId": "conv-578e3e2e494a4256806496dc15cdfbb9",
+  "nativeComposer": true,
+  "sequenceMatches": true,
+  "steps": [
+    {
+      "sequence": 1,
+      "modelId": "z-image-turbo-mflux-v1",
+      "capabilityId": "image.text-to-image.z-image-turbo.v1",
+      "steps": 9,
+      "runtimePackageId": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+      "assetId": "asset-93b4c8022b06405c893f1c285442e859",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "sequence": 2,
+      "modelId": "flux2-klein-4b-distilled",
+      "capabilityId": "image.text-to-image.flux2-klein-4b.v1",
+      "recipe": "klein4b-text-v1",
+      "steps": 4,
+      "runtimePackageId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+      "assetId": "asset-53a2301fd3c046a9b28fbb91b017aabb",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "sequence": 3,
+      "modelId": "flux2-klein-4b-distilled",
+      "capabilityId": "image.edit.flux2-klein-4b.v1",
+      "recipe": "klein4b-edit-v1",
+      "steps": 4,
+      "runtimePackageId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+      "sourceAssetId": "asset-53a2301fd3c046a9b28fbb91b017aabb",
+      "assetId": "asset-1eff8df4983140d4a95fc5930e52431a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "sequence": 4,
+      "modelId": "birefnet-general-epoch-244",
+      "capabilityId": "image.remove-background.birefnet-general-epoch-244.v1",
+      "recipe": "birefnet-general-cpu-v1",
+      "runtimePackageId": "onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1",
+      "sourceAssetId": "asset-1eff8df4983140d4a95fc5930e52431a",
+      "primaryAssetId": "asset-27a50ad92bee48e19966a629808299cc",
+      "maskAssetId": "asset-c1a24b64248d499d83091862237598aa",
+      "width": 1024,
+      "height": 1024,
+      "outputRoles": [
+        "primary",
+        "mask"
+      ]
+    },
+    {
+      "sequence": 5,
+      "modelId": "realesrgan-x4plus",
+      "capabilityId": "image.upscale.realesrgan-x4plus.v1",
+      "recipe": "realesrgan-x4plus-t128-v1",
+      "runtimePackageId": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+      "sourceAssetId": "asset-1eff8df4983140d4a95fc5930e52431a",
+      "assetId": "asset-2cf8ddb55de643b08a90ef5940ba6098",
+      "width": 4096,
+      "height": 4096,
+      "scale": 4
+    },
+    {
+      "sequence": 6,
+      "modelId": "qwen-image-2.1-mflux-v1",
+      "capabilityId": "image.text-to-image.qwen-image-2.1.v1",
+      "recipe": "qwen21-txt2img-q8-40-v1",
+      "steps": 40,
+      "runtimePackageId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+      "assetId": "asset-54b1f03dea2441cf85394c7418130f0d",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "sequence": 7,
+      "modelId": "qwen-image-2.1-turbo-mflux-v1",
+      "capabilityId": "image.text-to-image.qwen-image-2.1-turbo.v1",
+      "recipe": "qwen21-turbo-txt2img-q8-8-v1",
+      "steps": 8,
+      "runtimePackageId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+      "assetId": "asset-9b8b1b6c1ebd43d98ed3bac3f07ca0d5",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "sequence": 8,
+      "modelId": "moss-image-sft-mflux-v1",
+      "capabilityId": "image.text-to-image.moss-image-sft.v1",
+      "recipe": "moss-image-sft-txt2img-q8-50-v1",
+      "steps": 50,
+      "runtimePackageId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+      "assetId": "asset-2903d55c974347a7980432deb82fe19a",
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "sequence": 9,
+      "modelId": "z-image-turbo-mflux-v1",
+      "capabilityId": "image.text-to-image.z-image-turbo.v1",
+      "steps": 9,
+      "runtimePackageId": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+      "assetId": "asset-d295cc2f115c40ba952936c760b99cc7",
+      "width": 1024,
+      "height": 1024
+    }
+  ],
+  "finalReturnToZImage": true,
+  "workerProcessesAfterCompletion": [],
+  "qualityReview": "九张主输出均成功；灯箱、花瓶文生图/编辑、白底透明主体、4× 花瓶、沙丘、雨夜街景、未来主义图书馆和雪林木屋均符合各步提示词。",
+  "evidence": {
+    "turns": {
+      "path": "turns.json",
+      "sha256": "a5759c9c1ef89b8d3c833ec868c7e8238d2cc572e54b7b49c6346f2b7cd614bc"
+    },
+    "contactSheet": {
+      "path": "contact-sheet.jpg",
+      "sha256": "1c02186683348155bf60666f6e4ae84434e14f055b6b858f87b132844ab884f0"
+    },
+    "nativeCompleted": {
+      "path": "cross-backend-complete.jpg",
+      "sha256": "af101511a06bd2f31a3c1d6472b4c2a81b0d8f5569c00f8253e3026059babe11"
+    }
+  }
+}
