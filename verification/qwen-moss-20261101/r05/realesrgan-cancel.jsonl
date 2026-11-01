@@ -1,0 +1,6 @@
+{"elapsedMilliseconds":98,"stage":"preparing","turnId":"turn-5f6b1590118c429ba0e5c40b6e58f099"}
+{"elapsedMilliseconds":557,"stage":"loading","turnId":"turn-5f6b1590118c429ba0e5c40b6e58f099"}
+{"elapsedMilliseconds":1212,"stage":"inference","turnId":"turn-5f6b1590118c429ba0e5c40b6e58f099"}
+{"elapsedMilliseconds":1280,"stage":"cancel_requested","turnId":"turn-5f6b1590118c429ba0e5c40b6e58f099"}
+{"elapsedMilliseconds":1410,"stage":"cancelled","turnId":"turn-5f6b1590118c429ba0e5c40b6e58f099"}
+{"assetId":null,"attempts":"attempt-136a072891f6406cbfac4d276f7b1e48","elapsedMilliseconds":1410,"execution":{"attemptId":"attempt-136a072891f6406cbfac4d276f7b1e48","busy":false,"cleanupError":null,"jobId":"job-36a989408a7f4a328b94e77123601140","logs":"[0 Apple M3 Max]  queueC=0[1]  queueG=0[1]  queueT=0[1]\n[0 Apple M3 Max]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0\n[0 Apple M3 Max]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\n[0 Apple M3 Max]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\n0.00%\n1.56%\n3.12%\n","stage":"cancelled","step":null,"summary":"生成已取消，资源已回收","total":null},"stageSequence":["preparing","loading","inference","cancel_requested","cancelled"],"status":"cancelled","turnId":"turn-5f6b1590118c429ba0e5c40b6e58f099"}

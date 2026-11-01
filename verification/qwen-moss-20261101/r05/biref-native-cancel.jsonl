@@ -1,0 +1,7 @@
+{"elapsedSeconds":0,"stage":"preparing","turnId":"turn-663847293ca44a3b8a9b63f7f1b401c8"}
+{"elapsedSeconds":1,"stage":"loading","turnId":"turn-663847293ca44a3b8a9b63f7f1b401c8"}
+{"elapsedSeconds":3,"stage":"inference","turnId":"turn-663847293ca44a3b8a9b63f7f1b401c8"}
+{"cancelRequested":true,"turnId":"turn-663847293ca44a3b8a9b63f7f1b401c8"}
+{"elapsedSeconds":3,"stage":"cancel_requested","turnId":"turn-663847293ca44a3b8a9b63f7f1b401c8"}
+{"elapsedSeconds":6,"stage":"cancelled","turnId":"turn-663847293ca44a3b8a9b63f7f1b401c8"}
+{"elapsedMilliseconds":6451,"execution":{"attemptId":"attempt-867a7ef3851244bc91eff6023fae1104","busy":false,"cleanupError":null,"jobId":"job-7d9efcab98d14ac09debe3108359a575","logs":"","stage":"cancelled","step":null,"summary":"生成已取消，资源已回收","total":null},"stageSequence":["preparing","loading","inference","cancel_requested","cancelled"],"status":"cancelled","turnId":"turn-663847293ca44a3b8a9b63f7f1b401c8"}

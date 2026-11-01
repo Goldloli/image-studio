@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "caseId": "R05",
+  "date": "2026-11-01",
+  "status": "passed",
+  "dataRoot": "target/qwen-moss-validation-20261101",
+  "source": {
+    "assetId": "asset-1eff8df4983140d4a95fc5930e52431a",
+    "relativePath": "assets/asset-8651478ab0fc47159f92c2faf7559114.png",
+    "width": 1024,
+    "height": 1024,
+    "sha256": "d39503030c2c51c79065f2c289647c19a237c0f192f3b73a69bcbfead496648b"
+  },
+  "currentProductPaths": {
+    "kleinText": {
+      "jobId": "job-022b879559504a02bbea90fde05bafd1",
+      "attemptId": "attempt-ccfb8fd3bce54030b6d8dbd577104376",
+      "state": "succeeded",
+      "recipe": "klein4b-text-v1",
+      "steps": 4,
+      "runtimePackageId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+      "assetId": "asset-53a2301fd3c046a9b28fbb91b017aabb",
+      "width": 1024,
+      "height": 1024
+    },
+    "kleinEdit": {
+      "jobId": "job-abc2a38854db4ca29d88a694f1a7eb6b",
+      "attemptId": "attempt-91f9e196d1bb46d4b56c13213363edf4",
+      "state": "succeeded",
+      "recipe": "klein4b-edit-v1",
+      "steps": 4,
+      "runtimePackageId": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+      "sourceAssetId": "asset-53a2301fd3c046a9b28fbb91b017aabb",
+      "assetId": "asset-1eff8df4983140d4a95fc5930e52431a",
+      "width": 1024,
+      "height": 1024
+    },
+    "birefnet": {
+      "jobId": "job-0005dcc5b05641d7b2cc1ff5409c6895",
+      "attemptId": "attempt-3d0a011f51a041fcb8f6fe0ebdde95e7",
+      "state": "succeeded",
+      "recipe": "birefnet-general-cpu-v1",
+      "runtimePackageId": "onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1",
+      "primaryAssetId": "asset-27a50ad92bee48e19966a629808299cc",
+      "maskAssetId": "asset-c1a24b64248d499d83091862237598aa",
+      "width": 1024,
+      "height": 1024
+    },
+    "realesrgan": {
+      "jobId": "job-55c052e892f64338b62033c62712a3c6",
+      "attemptId": "attempt-7f338de1c6634dd298c0f6cfce891f40",
+      "state": "succeeded",
+      "recipe": "realesrgan-x4plus-t128-v1",
+      "runtimePackageId": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+      "assetId": "asset-2cf8ddb55de643b08a90ef5940ba6098",
+      "width": 4096,
+      "height": 4096
+    }
+  },
+  "nativeExports": [
+    {
+      "model": "FLUX.2 Klein 4B distilled",
+      "assetId": "asset-0bbc586b854246e5ac31512bd996dac1",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "e7030260bf92c4a1255cd77f01a64e32aae6a2dc987a98bb002f53d477d1aa02",
+      "path": "r05/native-klein-edit.png",
+      "matchesAsset": true
+    },
+    {
+      "model": "BiRefNet general epoch_244",
+      "outputRole": "primary",
+      "assetId": "asset-cad0fd0d74054899a77f8a16a60e48e7",
+      "width": 1024,
+      "height": 1024,
+      "colorType": "RGBA8",
+      "sha256": "0eb0b102e87e344e375d765c7ba6efcb8290a0094e9ada618da3c0c84c36eb5d",
+      "path": "r05/native-biref-primary.png",
+      "matchesAsset": true
+    },
+    {
+      "model": "BiRefNet general epoch_244",
+      "outputRole": "mask",
+      "assetId": "asset-e952dfd4a34f40c29fcc95b44db56c18",
+      "width": 1024,
+      "height": 1024,
+      "colorType": "grayscale8",
+      "sha256": "5a42b008ee1761095d7adc55402334bf1125d47d15a5b82ffc914b0cda994335",
+      "path": "r05/native-biref-mask.png",
+      "matchesAsset": true
+    },
+    {
+      "model": "Real-ESRGAN x4plus",
+      "assetId": "asset-2142f42d3e764a068dd8666da05b843d",
+      "width": 4096,
+      "height": 4096,
+      "colorType": "RGB8",
+      "sha256": "10f004842fe017cc0a55fb0d3fc41fc4d032fa6fcf42de9b03a055844a30a3eb",
+      "path": "r05/native-realesrgan-4x.png",
+      "matchesAsset": true
+    }
+  ],
+  "nativeRetry": [
+    {
+      "model": "FLUX.2 Klein 4B distilled",
+      "jobId": "job-1c87fae07c21459b8e8edad8c8335e16",
+      "cancelledAttemptId": "attempt-c85254881c814a27be09f8a0aa795547",
+      "retryAttemptId": "attempt-449944a621f740d0995a2617d421ee1f",
+      "state": "succeeded",
+      "assetId": "asset-8c2ea9982d0844cdace667935ecbf4d4",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "d1bc57907dac26c9d32191cc687717b1f6062d093c0dffa27896bc6815bb8b42",
+      "evidence": "r05/native-retry-klein.png"
+    },
+    {
+      "model": "BiRefNet general epoch_244",
+      "jobId": "job-7d9efcab98d14ac09debe3108359a575",
+      "cancelledAttemptId": "attempt-867a7ef3851244bc91eff6023fae1104",
+      "retryAttemptId": "attempt-1d3f9bd29eaa4021a6db4cb8e7da2f55",
+      "state": "succeeded",
+      "primaryAssetId": "asset-5f6fc94936e94a11ad3734224940c309",
+      "maskAssetId": "asset-0a101cb6fbd34a05b3aae702918c4caa",
+      "width": 1024,
+      "height": 1024,
+      "primarySha256": "0eb0b102e87e344e375d765c7ba6efcb8290a0094e9ada618da3c0c84c36eb5d",
+      "maskSha256": "5a42b008ee1761095d7adc55402334bf1125d47d15a5b82ffc914b0cda994335",
+      "primaryEvidence": "r05/native-biref-primary.png",
+      "maskEvidence": "r05/native-biref-mask.png"
+    },
+    {
+      "model": "Real-ESRGAN x4plus",
+      "jobId": "job-11f38acd879a4b9ea178f9c105ef29c8",
+      "cancelledAttemptId": "attempt-1b9af9a2a3f04f478d3ead4bfd4c81de",
+      "retryAttemptId": "attempt-590424f37f664679ad1bf9406757a337",
+      "state": "succeeded",
+      "assetId": "asset-fe1fe3fb645e4ad2b9c5689f6b0a4d51",
+      "width": 4096,
+      "height": 4096,
+      "sha256": "10f004842fe017cc0a55fb0d3fc41fc4d032fa6fcf42de9b03a055844a30a3eb",
+      "evidence": "r05/native-realesrgan-4x.png"
+    }
+  ],
+  "cleanup": {
+    "workerProcessesRemaining": 0,
+    "executionLeaseReleased": true
+  },
+  "checks": {
+    "kleinTextAndEditUseDistinctCapabilities": true,
+    "birefnetPrimaryAndMaskCommittedTogether": true,
+    "maskExcludedFromFormalWorkList": true,
+    "realesrganInputRgbAndOutputExactFourTimes": true,
+    "nativeExportsMatchAssets": true,
+    "allThreeCancelledTasksRetriedFromNativeUI": true,
+    "originalRuntimesAndRecipesPreserved": true
+  },
+  "evidence": {
+    "nativeRetryUi": "r05/native-retry-success.jpg",
+    "databaseSnapshot": "r05/native-retry-db-all.json",
+    "crossBackend": "cross-backend/results.json",
+    "cancelLogs": [
+      "r05/klein-edit-native-cancel.jsonl",
+      "r05/biref-native-cancel.jsonl",
+      "r05/realesrgan-native-cancel.jsonl"
+    ]
+  }
+}
