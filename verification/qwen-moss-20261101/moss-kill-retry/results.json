@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "modelId": "moss-image-sft-mflux-v1",
+  "capabilityId": "image.text-to-image.moss-image-sft.v1",
+  "kill": {
+    "jobId": "job-147edb56d7ee4dfbbc8277409b5afae9",
+    "turnId": "turn-756a77c4bcca465f8b69d97fb09027a3",
+    "attemptId": "attempt-0847d039442b46e08286acaf51054601",
+    "attemptStateAfterReopen": "interrupted",
+    "exitCode": 73,
+    "stage": "sampling",
+    "step": 1,
+    "total": 50,
+    "elapsedMilliseconds": 18708,
+    "assetAvailable": false,
+    "sourceEvidence": {
+      "path": "kill.jsonl",
+      "sha256": "519572f1c77dcbf2f938396a37c1f1858ec86338bc7d2a3ab852937dd5a7e115",
+      "records": 1
+    }
+  },
+  "retry": {
+    "sameJob": true,
+    "attemptId": "attempt-0cda3979d3334463a928f65f3c6a02b7",
+    "state": "Succeeded",
+    "attemptState": "succeeded",
+    "assetId": "asset-a9b04628ff6242d2a7ecea39f12d2699",
+    "exportPath": "retry.png",
+    "exportSha256": "f13523cb69ec3b877ffe89a6e9066c7178ee6550f18c42dc2f6eb31f7e986801",
+    "manifestChecks": {
+      "modelVariantId": "moss-image-sft-mflux-v1",
+      "steps": 50,
+      "guidance": 3.0,
+      "tokenBudget": 4096,
+      "outputShaMatchesExport": true
+    },
+    "sourceEvidence": {
+      "path": "retry.jsonl",
+      "sha256": "55b2e81fe24d1a0dcd1658bce9312c0c67dd0f252a0ad48086da7240ebd0a707",
+      "records": 1
+    }
+  },
+  "workerProcessesAfterCompletion": [],
+  "qualityReview": "强杀前无提交资产；重试结果中的水彩小猫、窗边秋叶与暖光完整符合提示词。"
+}

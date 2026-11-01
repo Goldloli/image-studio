@@ -1,0 +1,1 @@
+{"jobId":"job-147edb56d7ee4dfbbc8277409b5afae9","killObservation":{"elapsedMilliseconds":18708,"stage":"sampling","step":1,"total":50},"mode":"kill","note":"process exits 73 without cleanup; reopen and retry the job","turnId":"turn-756a77c4bcca465f8b69d97fb09027a3"}
