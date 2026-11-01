@@ -2815,6 +2815,63 @@ mod tests {
     }
 
     #[test]
+    fn windows_gate_zero_manifest_is_an_independent_complete_closure() {
+        const WINDOWS_GATE_ZERO_MANIFEST: &str = include_str!(
+            "../../../../resources/windows-foundation/z-image-diffusers/model-manifest.json"
+        );
+        let manifest: ModelManifest = serde_json::from_str(WINDOWS_GATE_ZERO_MANIFEST).unwrap();
+        assert_eq!(manifest.id, "z-image-turbo-diffusers-cuda-nf4-v1");
+        assert_eq!(
+            manifest.revision,
+            "f332072aa78be7aecdf3ee76d5c247082da564a6"
+        );
+        assert_eq!(manifest.component_bytes, 32_848_305_533);
+        assert_eq!(manifest.files.len(), 20);
+        assert_eq!(
+            manifest
+                .files
+                .iter()
+                .filter(|artifact| artifact.path != "README.md")
+                .map(|artifact| artifact.bytes)
+                .sum::<u64>(),
+            manifest.component_bytes
+        );
+        assert_eq!(
+            manifest
+                .files
+                .iter()
+                .filter(|artifact| !artifact.path.ends_with("README.md"))
+                .count(),
+            19
+        );
+        for path in [
+            "model_index.json",
+            "scheduler/scheduler_config.json",
+            "transformer/config.json",
+            "vae/config.json",
+        ] {
+            assert!(manifest.files.iter().any(|artifact| artifact.path == path));
+        }
+        let mut paths = manifest
+            .files
+            .iter()
+            .map(|artifact| artifact.path.as_str())
+            .collect::<Vec<_>>();
+        paths.sort_unstable();
+        paths.dedup();
+        assert_eq!(paths.len(), manifest.files.len());
+        for artifact in &manifest.files {
+            assert!(artifact.url.starts_with(&format!(
+                "https://huggingface.co/Tongyi-MAI/Z-Image-Turbo/resolve/{}/",
+                manifest.revision
+            )));
+            assert_eq!(artifact.sha256.len(), 64);
+            assert!(artifact.sha256.bytes().all(|byte| byte.is_ascii_hexdigit()));
+            assert!(artifact.bytes > 0);
+        }
+    }
+
+    #[test]
     fn klein_has_an_independent_manifest_runtime_and_worker() {
         let temp = tempfile::tempdir().unwrap();
         let paths = AppPaths::resolve(Some(temp.path())).unwrap();
