@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "windows-nsis-install-smoke",
+  "status": "passed",
+  "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
+  "installerSha256": "9a65781a1c7bdf1c84289ed8396005339985420a79ff68107710fb1f52e849b0",
+  "installerBytes": 244754768,
+  "installExitCode": 0,
+  "installLocation": "%LOCALAPPDATA%\\Image Studio",
+  "installedFiles": [
+    {
+      "name": "image-studio-desktop.exe",
+      "bytes": 42027008,
+      "sha256": "3d8bed6d4bedfb0169cb4e113c96f09d54736d4319805df0110ff8a973d0cb68"
+    },
+    {
+      "name": "inference-supervisor.exe",
+      "bytes": 1008640,
+      "sha256": "2c18502b5f63c427da8b803911d1dc4a8098806a24eec565f85510b742b1b416"
+    },
+    {
+      "name": "diagnostic-worker.exe",
+      "bytes": 463360,
+      "sha256": "15b099f77bbd6bf7397649624ae63d8cd323663f07373c3485948f136ffe786b"
+    }
+  ],
+  "launch": {
+    "status": "passed",
+    "isolatedDataRoot": "target/windows-installed-smoke-data",
+    "createdDirectories": [
+      "cache",
+      "data",
+      "logs",
+      "work"
+    ],
+    "privateRuntimeCreated": false,
+    "modelFilesCreated": false,
+    "webview2Accessibility": {
+      "windowTitle": "Image Studio",
+      "documentUrl": "http://tauri.localhost/",
+      "observedText": [
+        "创作",
+        "本地图片创作",
+        "Z-Image Turbo · 未就绪"
+      ]
+    },
+    "screenshotCapture": "unavailable: FrameArrived timed out"
+  }
+}
