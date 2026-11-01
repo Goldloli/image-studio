@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-01",
+  "family": "moss",
+  "modelId": "moss-image-sft-mflux-v1",
+  "modelSnapshot": "moss-image-sft-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+  "runtime": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+  "quantization": 8,
+  "steps": 50,
+  "guidance": 3.0,
+  "scheduler": "moss_image",
+  "skipLayers": [
+    22
+  ],
+  "tokenBudget": 4096,
+  "truncation": false,
+  "size": [
+    1024,
+    1024
+  ],
+  "inputs": {
+    "path": "moss-inputs.json",
+    "sha256": "91f49891ef72d6cd838a16b432a197170c22c8fdbb7a422ea127c2cbf36a22a6",
+    "layoutPath": "moss-layout-t04.prompt.json",
+    "layoutSha256": "3f31c9ecd39b0b23300845c5b3d87a6cca926670dbb2452f8f8a11772f226651"
+  },
+  "loadSeconds": 1.7871703749988228,
+  "elapsedSeconds": 2558.0134255000157,
+  "tasks": [
+    {
+      "id": "T01",
+      "seed": 42,
+      "tokenCount": 32,
+      "tokenBudget": 4096,
+      "lastObservedSamplingStep": 50,
+      "elapsedSeconds": 637.4013079999713,
+      "bytes": 1834938,
+      "sha256": "195cfbd361e950023d5936262b78ef7acd5d438f11f2d77987935e53fcc68bb4"
+    },
+    {
+      "id": "T02",
+      "seed": 43,
+      "tokenCount": 36,
+      "tokenBudget": 4096,
+      "lastObservedSamplingStep": 50,
+      "elapsedSeconds": 637.2113280829508,
+      "bytes": 958825,
+      "sha256": "4c8cc3c22c0cf1fffbc50de051af6007eb238cf9121612902f566f38a48abffd"
+    },
+    {
+      "id": "T03",
+      "seed": 44,
+      "tokenCount": 43,
+      "tokenBudget": 4096,
+      "lastObservedSamplingStep": 50,
+      "elapsedSeconds": 631.736663833959,
+      "bytes": 1317196,
+      "sha256": "39df295341bddd220c8b2edbf4d9f1b7965ab3d1492def104d39316264060779"
+    },
+    {
+      "id": "T04",
+      "seed": 45,
+      "tokenCount": 217,
+      "tokenBudget": 4096,
+      "lastObservedSamplingStep": 50,
+      "elapsedSeconds": 649.863427916076,
+      "bytes": 1042582,
+      "sha256": "28417bb3312a3383e5624b6231175599a1ca19427a32d7434496257f32ca7a5a"
+    }
+  ],
+  "qualityReview": {
+    "T01": "橙色小猫、窗边秋叶、温暖自然光和水彩质感均符合提示词，主体完整。",
+    "T02": "白瓷茶壶、蓝杯、木桌和柔和晨光均符合提示词，器物结构正常。",
+    "T03": "标题“秋日咖啡”和副标题“周末限定”均清晰可读，层级和米色咖啡构图符合提示词。",
+    "T04": "原始布局 JSON 保持原样输入；标题“周末市集”和副标题“OPEN”清晰，水果篮在左、面包在右，符合 abs_centralized/yxyx 样例目标。"
+  }
+}
