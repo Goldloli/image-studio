@@ -22,10 +22,44 @@ pub const VERSIONS_V2: VersionRange = VersionRange {
     max: PROTOCOL_VERSION_V2,
 };
 pub const CAPABILITY: &str = "image.text-to-image.z-image-turbo.v1";
+pub const Z_IMAGE_WINDOWS_MODEL_ID: &str = "z-image-turbo-diffusers-cuda-nf4-v1";
+pub const Z_IMAGE_WINDOWS_CAPABILITY_ID: &str =
+    "image.text-to-image.z-image-turbo-diffusers-cuda-nf4.v1";
+pub const Z_IMAGE_WINDOWS_RECIPE_ID: &str = "z-image-turbo-nf4-cuda-v1";
+pub const Z_IMAGE_WINDOWS_RUNTIME_ID: &str = "windows-python31210-torch2100-cu126-bnb0482-v1";
 pub const MAX_FRAME_BYTES: usize = 64 * 1024;
 pub const MAX_PROMPT_BYTES: usize = 16 * 1024;
 pub const MAX_OUTPUT_BYTES: u64 = 32 * 1024 * 1024;
 pub const MAX_UPSCALE_OUTPUT_BYTES: u64 = 128 * 1024 * 1024;
+
+pub fn windows_z_image_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        ("seed".into(), serde_json::json!(seed)),
+        ("steps".into(), serde_json::json!(9)),
+        ("quantization".into(), serde_json::json!("nf4")),
+        ("guidance".into(), serde_json::json!(0.0)),
+        (
+            "scheduler".into(),
+            serde_json::json!("FlowMatchEulerDiscreteScheduler"),
+        ),
+        (
+            "recipe".into(),
+            serde_json::json!(Z_IMAGE_WINDOWS_RECIPE_ID),
+        ),
+        ("recipe_version".into(), serde_json::json!(1)),
+        ("token_budget".into(), serde_json::json!(512)),
+        ("truncation".into(), serde_json::json!(false)),
+        ("thinking".into(), serde_json::json!(true)),
+        (
+            "quantized_components".into(),
+            serde_json::json!(["transformer", "text_encoder"]),
+        ),
+        ("compute_dtype".into(), serde_json::json!("bfloat16")),
+        ("vae_precision".into(), serde_json::json!("bfloat16")),
+        ("attention".into(), serde_json::json!("_native_efficient")),
+        ("offload".into(), serde_json::json!("model_cpu")),
+    ])
+}
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -359,6 +393,33 @@ impl ExecuteRequestV2 {
                 expected.insert("vae_precision".into(), serde_json::json!("bfloat16"));
                 if self.parameters != expected {
                     return Err(Error::Invalid("invalid MOSS-Image-SFT parameters"));
+                }
+            }
+            (Z_IMAGE_WINDOWS_MODEL_ID, Z_IMAGE_WINDOWS_CAPABILITY_ID)
+                if self.recipe_id == Z_IMAGE_WINDOWS_RECIPE_ID =>
+            {
+                let Some(seed) = self.seed else {
+                    return Err(Error::Invalid("Windows Z-Image requires a resolved seed"));
+                };
+                if self.instruction.trim().is_empty()
+                    || self.sampling_steps != Some(9)
+                    || !self.inputs.is_empty()
+                    || self.runtime_lock_id != Z_IMAGE_WINDOWS_RUNTIME_ID
+                    || self.model_snapshot_id != Z_IMAGE_WINDOWS_MODEL_ID
+                {
+                    return Err(Error::Invalid("invalid Windows Z-Image recipe"));
+                }
+                expect_outputs(&self.outputs, &output_roles, &["primary"], "image_rgb")?;
+                if self.outputs.iter().any(|output| {
+                    (output.width, output.height) != (1024, 1024)
+                        || output.max_bytes > MAX_OUTPUT_BYTES
+                }) {
+                    return Err(Error::Invalid(
+                        "Windows Z-Image output must be one bounded 1024 square",
+                    ));
+                }
+                if self.parameters != windows_z_image_parameters(seed) {
+                    return Err(Error::Invalid("invalid Windows Z-Image parameters"));
                 }
             }
             _ => return Err(Error::Invalid("unsupported v2 model recipe")),

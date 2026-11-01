@@ -354,6 +354,31 @@ fn text_v2_request(
     }
 }
 
+fn windows_v2_request() -> ExecuteRequestV2 {
+    ExecuteRequestV2 {
+        model_id: Z_IMAGE_WINDOWS_MODEL_ID.into(),
+        capability_id: Z_IMAGE_WINDOWS_CAPABILITY_ID.into(),
+        recipe_id: Z_IMAGE_WINDOWS_RECIPE_ID.into(),
+        recipe_version: 1,
+        runtime_lock_id: Z_IMAGE_WINDOWS_RUNTIME_ID.into(),
+        model_snapshot_id: Z_IMAGE_WINDOWS_MODEL_ID.into(),
+        instruction: "Windows 中文 prompt".into(),
+        seed: Some(42),
+        sampling_steps: Some(9),
+        parameters: windows_z_image_parameters(42),
+        inputs: vec![],
+        outputs: vec![OutputSpec {
+            role: "primary".into(),
+            data_type: "image_rgb".into(),
+            width: 1024,
+            height: 1024,
+            max_bytes: MAX_OUTPUT_BYTES,
+        }],
+        model_path: managed_path("models/windows-z-image"),
+        output_dir: managed_path("runs/windows-z-image"),
+    }
+}
+
 fn v2_envelope(sequence: u64, request_id: &str, message: Message) -> Envelope {
     Envelope {
         family: FAMILY.into(),
@@ -521,6 +546,30 @@ fn qwen_and_moss_v2_payloads_require_exact_recipe_identity_and_parameters() {
         sha256: "a".repeat(64),
     });
     assert!(wrong.validate().is_err());
+}
+
+#[test]
+fn windows_z_image_v2_payload_requires_frozen_identity_and_parameters() {
+    let valid = windows_v2_request();
+    valid.validate().unwrap();
+
+    for mutation in 0..7 {
+        let mut request = windows_v2_request();
+        match mutation {
+            0 => request.capability_id = CAPABILITY.into(),
+            1 => request.recipe_id = "z-image-turbo-q4-v1".into(),
+            2 => request.runtime_lock_id = "mflux-0.24.0".into(),
+            3 => request.model_snapshot_id = "z-image-turbo-q4".into(),
+            4 => {
+                request
+                    .parameters
+                    .insert("truncation".into(), serde_json::json!(true));
+            }
+            5 => request.outputs[0].width = 768,
+            _ => request.seed = None,
+        }
+        assert!(request.validate().is_err(), "mutation {mutation}");
+    }
 }
 
 #[test]

@@ -5,8 +5,9 @@ use crate::{
     contracts::{ExecutionPlan, InputBinding, UserRequest},
     domain::{AssetKind, AssetRef, IdempotencyKey, ModelVariantId, PlanId, ProjectId, RequestId},
     generation::{
-        MAX_PROMPT_BYTES, Z_IMAGE_CAPABILITY, Z_IMAGE_MODEL, validate_z_image_plan,
-        validate_z_image_request,
+        MAX_PROMPT_BYTES, Z_IMAGE_CAPABILITY, Z_IMAGE_MODEL, Z_IMAGE_WINDOWS_CAPABILITY,
+        Z_IMAGE_WINDOWS_MODEL, validate_windows_z_image_plan, validate_windows_z_image_request,
+        validate_z_image_plan, validate_z_image_request,
     },
     require,
 };
@@ -43,6 +44,7 @@ pub const MAX_UPSCALE_OUTPUT_PIXELS: u64 = 16 * 1024 * 1024;
 #[serde(rename_all = "snake_case")]
 pub enum Recipe {
     ZImageTurbo,
+    ZImageTurboCudaNf4,
     KleinText,
     KleinEdit,
     BiRefNet,
@@ -146,6 +148,7 @@ impl Recipe {
             request.capability.capability_id.as_str(),
         ) {
             (Z_IMAGE_MODEL, Z_IMAGE_CAPABILITY) => Self::ZImageTurbo,
+            (Z_IMAGE_WINDOWS_MODEL, Z_IMAGE_WINDOWS_CAPABILITY) => Self::ZImageTurboCudaNf4,
             (KLEIN_MODEL, KLEIN_TEXT_CAPABILITY) => Self::KleinText,
             (KLEIN_MODEL, KLEIN_EDIT_CAPABILITY) => Self::KleinEdit,
             (BIREFNET_MODEL, BIREFNET_CAPABILITY) => Self::BiRefNet,
@@ -165,6 +168,7 @@ impl Recipe {
     pub fn id(self) -> &'static str {
         match self {
             Self::ZImageTurbo => "z-image-turbo-q4-v1",
+            Self::ZImageTurboCudaNf4 => "z-image-turbo-nf4-cuda-v1",
             Self::KleinText => "klein4b-text-v1",
             Self::KleinEdit => "klein4b-edit-v1",
             Self::BiRefNet => "birefnet-general-cpu-v1",
@@ -189,6 +193,9 @@ impl Recipe {
             (Self::ZImageTurbo, OutputRole::Primary) => {
                 matches!(kind, AssetKind::ImageRgb | AssetKind::ImageRgba)
             }
+            (Self::ZImageTurboCudaNf4, OutputRole::Primary) => {
+                matches!(kind, AssetKind::ImageRgb)
+            }
             (
                 Self::KleinText
                 | Self::KleinEdit
@@ -209,6 +216,7 @@ impl Recipe {
             (Self::RealEsrgan, OutputRole::Primary) => Some(MAX_UPSCALE_OUTPUT_BYTES),
             (
                 Self::ZImageTurbo
+                | Self::ZImageTurboCudaNf4
                 | Self::KleinText
                 | Self::KleinEdit
                 | Self::QwenImage21
@@ -232,6 +240,13 @@ impl Recipe {
             require(source.is_none(), "Z-Image does not accept a source image")?;
             return validate_z_image_request(request);
         }
+        if self == Self::ZImageTurboCudaNf4 {
+            require(
+                source.is_none(),
+                "Windows Z-Image does not accept a source image",
+            )?;
+            return validate_windows_z_image_request(request);
+        }
         request.validate()?;
         let expected_capability = match self {
             Self::KleinText => KLEIN_TEXT_CAPABILITY,
@@ -241,7 +256,7 @@ impl Recipe {
             Self::QwenImage21 => QWEN_IMAGE_21_CAPABILITY,
             Self::QwenImage21Turbo => QWEN_IMAGE_21_TURBO_CAPABILITY,
             Self::MossImageSft => MOSS_IMAGE_SFT_CAPABILITY,
-            Self::ZImageTurbo => unreachable!(),
+            Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
         };
         require(
             request.capability.capability_id == expected_capability,
@@ -342,7 +357,7 @@ impl Recipe {
             Self::QwenImage21 | Self::QwenImage21Turbo | Self::MossImageSft => {
                 validate_text_model_request(request, source)?;
             }
-            Self::ZImageTurbo => unreachable!(),
+            Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
         }
         Ok(())
     }
@@ -355,6 +370,9 @@ impl Recipe {
     ) -> Result<(), ContractError> {
         if self == Self::ZImageTurbo {
             return validate_z_image_plan(request, plan);
+        }
+        if self == Self::ZImageTurboCudaNf4 {
+            return validate_windows_z_image_plan(request, plan);
         }
         self.validate_request(request, source)?;
         plan.validate_against(request)?;
@@ -431,7 +449,7 @@ impl Recipe {
                 let effective_seed = text_model_effective_seed(request, plan)?;
                 text_model_parameters(self, effective_seed)
             }
-            Self::ZImageTurbo => unreachable!(),
+            Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
         };
         require(
             plan.effective_parameters == expected,
@@ -1097,6 +1115,34 @@ mod tests {
             };
             assert!(validate_recipe_request(&request, Some(facts)).is_err());
         }
+    }
+
+    #[test]
+    fn windows_z_image_has_an_independent_recipe_and_square_contract() {
+        let valid = request(
+            Z_IMAGE_WINDOWS_MODEL,
+            Z_IMAGE_WINDOWS_CAPABILITY,
+            true,
+            false,
+        );
+        assert_eq!(
+            validate_recipe_request(&valid, None).unwrap(),
+            Recipe::ZImageTurboCudaNf4
+        );
+        assert_eq!(Recipe::ZImageTurboCudaNf4.id(), "z-image-turbo-nf4-cuda-v1");
+        assert!(
+            Recipe::ZImageTurboCudaNf4.accepts_output(OutputRole::Primary, AssetKind::ImageRgb)
+        );
+        assert!(
+            !Recipe::ZImageTurboCudaNf4.accepts_output(OutputRole::Primary, AssetKind::ImageRgba)
+        );
+
+        let mut non_square = valid;
+        non_square.requested_output.width = 768;
+        assert!(
+            validate_recipe_request(&non_square, None).is_err(),
+            "Windows Z-Image must not silently accept a non-square request"
+        );
     }
 
     #[test]
