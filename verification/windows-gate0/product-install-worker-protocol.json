@@ -9,12 +9,12 @@
     "runtime_lock_id": "windows-python31210-torch2100-cu126-bnb0482-v1",
     "model_snapshot_id": "z-image-turbo-diffusers-cuda-nf4-v1"
   },
-  "elapsed_seconds": 59.17199999999866,
+  "elapsed_seconds": 56.28099999999904,
   "request": {
     "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
     "seed": 20261101,
     "model_path": "z-image-turbo-diffusers-cuda-nf4-v1",
-    "output_dir": "verification/windows-gate0/product-controller-protocol"
+    "output_dir": "verification/windows-gate0/product-lifecycle-protocol"
   },
   "progress": [
     {
@@ -108,8 +108,8 @@
   "worker_stderr": "",
   "lifecycle": {
     "schema_version": 1,
-    "supervisor_pid": 31940,
-    "compute_pgid": 17412
+    "supervisor_pid": 20240,
+    "compute_pgid": 10336
   },
-  "worker_log_bytes": 1640
+  "worker_log_bytes": 1557
 }
