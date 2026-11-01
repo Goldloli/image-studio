@@ -58,12 +58,12 @@ GitHub 登录凭据由 Windows 自身凭据管理保存，不需要从 Mac 复�
 
 仓库已有版本事实与 Windows 预检结果需要分开阅读：
 
-- `rust-toolchain.toml` 固定 Rust **1.99.1**；目标机还装有 stable，但固定的 1.99.1 当前缺少 manifest/rustc，首次构建前必须先修复。
+- `rust-toolchain.toml` 固定 Rust **1.99.1**；预检发现的组件缺失已修复，`rustc/cargo/rustfmt/clippy` 与 `x86_64-pc-windows-msvc` 目标均已核实。目标机还装有 stable。
 - 前端在 Mac 验证 Node.js **24.12.0** / npm **11.6.2**；Windows 当前为 Node.js **24.19.0** / npm **11.17.0**。仓库尚无 `.nvmrc`、`engines` 或 `packageManager` 约束，实施前须明确可复现版本。
 - Windows 已安装 Visual Studio Build Tools 2022 **17.14.40**、MSVC **19.44.35228**、Windows SDK **10.0.22621.0 / 10.0.26100.0** 和 VC++ Runtime **14.51.36247**。
 - OpenSpec 为 **1.12.0**，Beads 为 **1.2.2**；Windows 未安装 GitHub CLI，也没有 Python 3.12 或完整 CUDA Toolkit/`nvcc`。Python 3.12 与 wheel 闭包应由后续受控 Gate 0 环境解决，不修改系统 Python。
 
-这些不是 Windows 完整认证。当前固定 Rust 工具链未就绪，Node/npm 也尚未冻结，因此不能直接宣称 Windows 构建环境已准备完成。
+这些不是 Windows 完整认证。固定 Rust 工具链已就绪，但 Node/npm 尚未冻结，因此不能直接宣称 Windows 构建环境已准备完成。
 
 初步可以检查源码状态、前端与无平台依赖的核心：
 
@@ -77,6 +77,10 @@ openspec validate introduce-windows-foundation --strict --no-interactive
 ```
 
 这些命令不证明完整 Windows 应用或模型可用。桌面默认目录、监督实现、运行时、原生路径和 NSIS 打包仍需按提案实施；当前不应直接把 Mac 的启动/离线验收脚本用于 Windows。Python/CUDA/模型依赖的最终版本由 Gate 0 冻结，不先在系统 Python 安装浮动最新版。
+
+2026-11-01 已执行的非模型检查结果：前端 46 个包安装成功，6 个测试文件/37 项测试通过，生产构建通过；固定 Rust 的 Windows 核心/协议 `cargo check`、fmt、66 项测试、1 项文档测试和 clippy 均通过。检查中发现并修复了生成协议测试夹具硬编码 POSIX 路径的问题。
+
+首次 `cargo check --workspace --locked` 当前仍失败：根 workspace 让 `sha2` 使用全局 `asm`，MSVC 无法编译其 `sha512_x64.S`。这是需要按平台收敛 Cargo 特性的构建阻塞，不能通过跳过哈希或改变摘要来绕过。完整 Tauri/工作区构建、Node 版本固化和所有 P0 仍未完成。
 
 ## Beads 与跨机任务状态
 

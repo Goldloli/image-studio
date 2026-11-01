@@ -85,6 +85,8 @@ Windows worker 使用独立 build/capability/runtime 身份及 generation v2 新
 
 固定 Rust/Node 工具链与锁文件，在目标 Win10 或匹配的 Windows 构建机执行 MSVC 全工作区构建，打包 host/supervisor/diagnostic `.exe`、字体、图标和前端。Rust 由 `rust-toolchain.toml` 固定；Node/npm 当前尚无仓库级版本约束，实施前须在 Windows 预检版本基础上明确可复现范围并加入对应版本声明。NSIS 采用 per-user 安装；通过平台配置移除 Mac 特有窗口参数，使用可工作的原生最小化/最大化/关闭与拖拽区域，不绘制装饰性假控制钮。
 
+Windows 预检还发现根 workspace 对 `sha2` 启用全局 `asm`，其汇编源无法由当前 MSVC 工具链构建。实施时须把该优化限定到实际支持的目标，或采用经校验且不破坏 Mac 哈希性能/内容身份的等价配置；不能用跳过哈希、关闭完整性或更换摘要值来绕过。修复后重新执行全 workspace 检查。
+
 采用 offlineInstaller 方式提供缺失 WebView2 时的离线安装依赖；打包时固定依赖版本与内容摘要，实测有/无 WebView2 分支以及权限不足的恢复提示。主程序不捆绑模型权重，首次启动不准备 Python/CUDA。升级覆盖程序而保留数据；卸载只移除程序，保留用户数据、模型与作品。本 change 产物明确标成内部测试包，不宣称已签名发布。
 
 运行验收必须覆盖从 NSIS 安装目录启动，不能只测 `target/debug`。Mac 交叉检查可早做，但目标机 GUI、IME、WDDM 和进程清理必须另有证据。仓库已配置 `origin`，历史源码推送不授权本 change 的后续 push、pull、CI 云账户或 Dolt 远程同步；这些远程操作仍须单独授权。
@@ -97,6 +99,7 @@ Windows worker 使用独立 build/capability/runtime 身份及 generation v2 新
 | 低显存方案把压力转移到 32 GB RAM 或加载副本 | 同时量测加载、编码、采样、解码的 GPU/CPU/系统峰值，预算不通过就停止 |
 | CUDA/WDDM 的共享内存或分页导致看似成功但不可用 | 记录系统与 WDDM 观测、三次独立执行和时限，不能只报 Torch allocated |
 | Win10 的实际 build、驱动或 DLL 与 wheel 不匹配 | 先采集并冻结依赖闭包；不可满足时报告条件，不默认要求用户升 Win11 |
+| 全局哈希优化引入 MSVC 汇编构建失败 | 将汇编特性限定到支持平台或使用等价受控实现，保持 SHA-256 合约与 Mac 性能回归 |
 | 双适配器环境把 Intel 核显或错误枚举项当成执行设备 | 按 CUDA 名称、PCI bus、compute capability 与显存记录并绑定 NVIDIA 设备，不依赖系统适配器序号 |
 | 路径重解析、独占文件和替换语义不同 | 原生句柄边界和 NTFS 集成验收，覆盖中文路径/占用/越界/失败原文件保持 |
 | Job 句柄泄漏或继承使强杀留下计算 | 启动竞争、宿主/监督/worker 强杀和 descendant 故障测试，保持租约直至确认清理 |

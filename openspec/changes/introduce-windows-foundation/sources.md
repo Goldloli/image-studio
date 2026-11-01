@@ -1,6 +1,6 @@
 # Windows 首轮适配：依据与证据边界
 
-核对日期：2026-11-01。本文用于提案研究。最初编写提案时没有目标机访问；同日在目标 Windows 机器完成了一次只读环境预检，但没有执行 Windows 构建、下载完整模型、安装模型运行时或执行推理。
+核对日期：2026-11-01。本文用于提案研究。最初编写提案时没有目标机访问；同日在目标 Windows 机器完成了一次只读环境预检和已有源码的初始检查，但没有执行完整 Windows 桌面构建、下载完整模型、安装模型运行时或执行推理。
 
 ## 用户确认的目标与目标机预检
 
@@ -34,14 +34,26 @@
 |---|---|
 | MSVC | Visual Studio Build Tools 2022 `17.14.40`；MSVC `14.44.35207` / compiler `19.44.35228`；Windows SDK 版本 `10.0.22621.0`、`10.0.26100.0` |
 | VC++ Runtime | x64 Redistributable `14.51.36247` 已安装 |
-| Rust | 仓库固定 `1.99.1`；stable 已安装，但固定版在预检时缺少 manifest/rustc，不能视为可构建状态 |
+| Rust | 仓库固定 `1.99.1`；预检发现安装不完整后已修复，`rustc/cargo/rustfmt/clippy` 与 Windows x64 目标均已核实 |
 | Node/npm | Node `24.19.0`、npm `11.17.0`；仓库尚无 `.nvmrc`、`engines` 或 `packageManager` 约束 |
 | Python | `3.11`、`3.13`、`3.14` 可用；没有 Python `3.12`，也没有 CUDA Toolkit/`nvcc` |
 | Git | Git `2.55.0.windows.3`；`core.longpaths=true` |
 | 文档工具 | OpenSpec `1.12.0`；Beads `1.2.2` |
 | GitHub CLI | 未安装；当前源码已通过 Git 克隆，不代表后续 push/pull 获授权 |
 
-开发工具存在或版本接近只说明前置条件值得继续验证。固定 Rust 工具链修复、Node/npm 版本冻结、Windows 全工作区构建和 Tauri 原生启动都尚未通过。
+开发工具存在或版本接近只说明前置条件值得继续验证。Node/npm 版本冻结、Windows 全工作区构建和 Tauri 原生启动仍未通过。
+
+### 已有源码初始检查
+
+2026-11-01 在目标 Windows 机器完成了不涉及模型和 Tauri GUI 的源码检查：
+
+- `npm ci` 安装 46 个包；`npm test` 的 6 个测试文件、37 项测试全部通过；生产前端构建通过，仅有单个 catalog chunk 超过 500 KiB 的非阻断提示。
+- 固定 Rust `1.99.1` 与 `x86_64-pc-windows-msvc` 目标可用；`cargo check -p studio-core -p worker-protocol --target x86_64-pc-windows-msvc --locked` 通过。
+- `cargo fmt --all -- --check` 通过；`cargo test -p studio-core -p worker-protocol --locked` 的 66 项测试和 1 项文档测试全部通过；相关 `cargo clippy --all-targets -- -D warnings` 通过。
+- Windows 检查发现生成协议测试夹具硬编码 POSIX 绝对路径；已改为由测试按当前平台生成受控绝对路径，生产协议校验和 Mac 路径语义未改写。
+- 首次 `cargo check --workspace --locked` 在 `sha2-asm 0.6.4` 构建脚本处失败：根 workspace 对 `sha2` 启用全局 `asm`，而当前 MSVC 工具链不能编译其 `sha512_x64.S`。这属于平台构建配置阻塞，尚未修改。
+
+这些结果只证明前端、核心和协议在本次 Windows 开发环境中可重复检查；完整 workspace 当前被 `sha2` 汇编特性阻塞，不是 W01/R01 全工作区验收，也不证明 Tauri、原生目录、进程监督、安装包或模型执行可用。Node/npm 仍未冻结，因此该结果不能外推到其他 Node 版本。
 
 ## 仓库现状
 
@@ -79,4 +91,4 @@
 
 ## 预检证据边界
 
-本次预检只覆盖本机系统、硬件、驱动、WebView2、磁盘和开发工具的只读观察。没有执行 Windows 桌面构建、Tauri 启动、CUDA/PyTorch/BF16/NF4 探针、模型安装或推理。因此 G02–G06、安装、生命周期、原生 UI、安装包和 Mac 回归仍保持未运行，GPU/内存条件也不能提前标为 Gate 0 通过。
+本次预检覆盖本机系统、硬件、驱动、WebView2、磁盘、开发工具以及前端、核心和协议的初始源码检查。没有执行完整 Windows 桌面构建、Tauri 启动、CUDA/PyTorch/BF16/NF4 探针、模型安装或推理。因此 G02–G06、安装、生命周期、原生 UI、安装包和 Mac 回归仍保持未运行，GPU/内存条件也不能提前标为 Gate 0 通过。
