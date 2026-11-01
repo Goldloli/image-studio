@@ -85,6 +85,6 @@ Qwen-Image 2.1 基础版与官方 Turbo 已从 ModelScope 固定文件 revision 
 - 六锁/wheel 源码审计：通过，审计过程不联网。
 - 原生 Tauri 渲染器断网启动：通过。
 
-## 下一阶段
+## 后续验收
 
-Qwen 门禁已经满足。下一步领取 `image-studio-g37`，从 MOSS-SFT 固定源安装开始，完成独立基线、T01–T04 文字/布局、取消恢复、断网、原生 UI 和整批回归。
+Qwen 门禁满足后，`image-studio-g37` 已完成 MOSS-SFT 固定源安装、独立基线、T01–T04 文字/布局、取消恢复、断网、原生 UI 和整批回归。完整后续记录见[MOSS/整批阶段报告](moss-stage-report.md)。

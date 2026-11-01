@@ -1,6 +1,6 @@
 # Image Studio
 
-Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，工作区参考 Cherry Studio 绘图页。已接入 Z-Image Turbo、FLUX.2 Klein 4B distilled 与 BiRefNet general epoch_244 的受控安装、独立推理进程、任务记录和 PNG 资产保存；Z-Image 提供文生图，Klein 提供文生图与单图指令编辑，BiRefNet 提供 CPU 去背景、透明 PNG 与 8-bit mask。创作页以多会话组织多轮提示词和图片，发送后立即显示图片占位与真实阶段进度，正式结果在同一卡片原位出现。功能页按创作目的展示真实能力，作品页跨会话浏览正式 AssetRef，任务中心提供宿主侧状态筛选、检索、稳定分页和可读制作记录。模型页由宿主目录驱动，可检索首批四个目标并分开展示接入、安装、运行时、设备与可执行状态；设置页提供持久外观偏好、显式新会话默认值、真实存储和诊断信息。草稿、会话、未发送输入、界面偏好与新会话默认值可跨重启恢复。M3 Max / 128 GiB 已完成 Z-Image、Klein 与 BiRefNet 的真实执行、禁网、原生导出、取消和恢复；Klein 与 BiRefNet 阶段分别以 50/50、31/31 必需项通过，完整证据见 [计划模型阶段验收](verification/planned-models-20261031/results.md)，Z-Image 基线见 [首个模型验收](verification/first-generation-results.md)、[会话式生成验收](verification/conversation-generation-results.md)、[模型设置验收](verification/model-catalog-settings-results.md) 与 [功能作品任务验收](verification/feature-works-task-results.md)。
+Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，工作区参考 Cherry Studio 绘图页。已接入七个精确型号：Z-Image Turbo、FLUX.2 Klein 4B distilled、BiRefNet general epoch_244、Real-ESRGAN x4plus、Qwen-Image 2.1 基础版、Qwen-Image 2.1 Turbo 与 MOSS-Image-SFT；覆盖文生图、Klein 单图编辑、CPU 去背景/RGBA/mask 和 ncnn 精确 4× 放大。Qwen/MOSS 默认从 ModelScope 固定文件 revision 下载，同时逐文件核对冻结上游快照。创作页以多会话组织多轮提示词和图片，发送后立即显示占位与真实阶段进度，正式结果在同一卡片原位出现。功能页只展示真实可执行能力，作品页跨会话浏览正式 AssetRef，任务中心提供宿主侧状态筛选、检索、稳定分页和可读制作记录。模型页由宿主目录驱动，可检索七个正式目标并分开展示接入、安装、运行时、设备与可执行状态；设置页提供持久外观偏好、显式新会话默认值、真实存储和诊断信息。M3 Max / 128 GiB 已完成七个型号的真实执行、禁网、原生导出、取消和恢复；完整证据见[七型号整批交接](verification/qwen-moss-20261101/moss-stage-report.md)、[Qwen 阶段报告](verification/qwen-moss-20261101/qwen-stage-report.md)与[前置计划模型阶段验收](verification/planned-models-20261031/results.md)。
 
 ## 构建和启动
 
@@ -62,9 +62,35 @@ npm --prefix apps/frontend run dev
 - 一个 Job 原子提交 RGBA primary 和 8-bit mask 两个资产。作品页、计数和 facets 只统计 primary，蒙版仍可从结果卡片查看、选择和独立导出。
 - 同一快照已完成空缓存安装、禁网安装、CPU 图探针、真实 ONNX 推理、加载/推理取消、宿主强杀、系统选图与导出；其他 BiRefNet checkpoint 和 GPU provider 不在当前范围。
 
+### Real-ESRGAN x4plus
+
+固定官方 ncnn 程序与 x4plus 模型对，两个组件共 `33,540,549` bytes，使用独立的 `realesrgan-x4plus-ncnn-macos-v0.2.0-v1` 原生运行时。
+
+- 输入必须是无透明像素的 RGB PNG/JPEG，最长边至多 1024、总像素至多 1 MP；输出为 RGB PNG，每边精确 4 倍，最大 4096×4096。
+- 固定 Metal GPU、tile 128、1:1:1 线程和关闭 TTA；不接受倍率、种子、动漫/人脸模型或任意后端参数。
+- 当前构建已在本机重跑输入、取消、显式重试、4096² 输出和原生导出；导出 SHA-256 与正式 Asset 一致。
+
+### Qwen-Image 2.1 / Turbo
+
+基础版固定 25 个组件、`33,131,609,424` bytes；官方 Turbo 固定 16 个组件、`32,451,607,098` bytes。两者共享 `mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3`，但模型快照、transformer、配置和采样身份分别登记。
+
+- 基础版固定 1024×1024、q8、40 步、guidance 1.0；Turbo 固定 1024×1024、q8、8 步、guidance 1.0，并使用其官方采样曲线，不仅是将基础版步数改成 8。
+- 本地真实 tokenizer 预检预算为 2048 token，计入模型自身模板与特殊 token；超限不截断。
+- 默认下载地址使用 ModelScope 固定逐文件 revision；全部 60 个组件与冻结 HF 内容的路径、字节数和 SHA-256 一致。
+- 两个配方均完成上游基线、产品连续生成、采样取消、宿主强杀恢复、完整禁网执行和原生发送/重开/系统导出。
+
+### MOSS-Image-SFT
+
+固定 `OpenMOSS-Team/MOSS-Image-SFT` revision `f972bd4b4b9e3852133cc5da954d87bc32cd8fb9`，19 个组件共 `27,219,783,878` bytes，与 Qwen 共用已核验的 recipes-v3 运行时但保留独立模型身份。
+
+- 固定 1024×1024、q8、50 步、guidance 3.0、空负提示词与负分支跳层 `[22]`。
+- 真实 tokenizer 预算为 4096 token，计入 chat template 与特殊 token；4095 可接受、4096 为上界，超限不截断。
+- T01–T04 覆盖中英文输入及原始 JSON 布局文本；“周末市集 / OPEN”和左右布局样例在基线与产品链路中均清晰。
+- 已完成 ModelScope 固定源安装、独立数据根禁网缓存安装、产品四连、禁网四连、取消重试、宿主强杀恢复和原生发送/重开/系统导出。
+
 ## 模型目录与应用设置
 
-模型页的权威目录位于 [catalog.json](resources/model-catalog/catalog.json)，当前把 Z-Image Turbo、FLUX.2 Klein 4B distilled 与 BiRefNet general epoch_244 标为已接入并支持受控安装；Real-ESRGAN x4plus 仍是计划型号。列表搜索、一级筛选与能力筛选组合在本地有界目录中完成，不触发下载、散列、设备探针或推理。安装动作按登记 `install_id` 调用对应型号的安装器，不接收前端提供的路径、地址或命令。
+模型页的权威目录位于 [catalog.json](resources/model-catalog/catalog.json)，当前登记七个正式接入、已安装且可执行的型号，计划中为 0。列表搜索、一级筛选与能力筛选组合在本地有界目录中完成，不触发下载、散列、设备探针或推理。安装动作按登记 `install_id` 调用对应型号的安装器，不接收前端提供的路径、地址或命令。
 
 设置页分为“通用与外观、创作默认值、存储、运行环境与诊断、关于”：
 
@@ -78,7 +104,7 @@ npm --prefix apps/frontend run dev
 
 ## 功能、作品与任务
 
-- 功能页只把宿主登记为已接入且依赖真实的能力显示为可开始；当前文生图、Klein 单图编辑和 BiRefNet 去背景可进入统一 composer，放大仅展示计划范围，不创建假任务。
+- 功能页只把宿主登记为已接入且依赖真实的能力显示为可开始；当前七型号的八项能力均可进入统一 composer，不创建无后端支撑的假任务。
 - 作品页只投影正式 AssetRef，可按日期、型号、尺寸与会话组合筛选，支持网格/列表、预览、原生 PNG 导出、制作记录和可靠的来源会话返回。示例、候选与失败 Attempt 不计入作品。
 - 任务中心在宿主持久库执行状态筛选、提示词/会话/型号检索和稳定游标分页，同条件返回计数。详情先显示请求、来源、实际种子、Attempt、阶段、错误与下一步，完整 manifest/日志按需展开。
 - 没有可靠会话归属的旧任务或直接验收任务明确显示“历史生成”，不会按提示词猜测绑定到当前草稿。
@@ -146,7 +172,7 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --locked
 cargo build --workspace --locked
-python3 -m pytest -q tools/mflux-worker/tests tools/mflux-worker-v2/tests tools/onnx-worker/tests scripts/tests
+python3 -m pytest -q scripts/tests tools/mflux-worker/tests tools/mflux-worker-v2/tests tools/mflux-worker-v3/tests tools/onnx-worker/tests
 python3 scripts/verify-planned-model-locks.py
 cargo check -p studio-core -p worker-protocol --target x86_64-pc-windows-msvc --locked
 ```
@@ -168,13 +194,15 @@ BiRefNet epoch_244 随后完成 31 项适用 P0：空缓存与禁网安装、真
 
 2026-10-31 的当前模型复认证覆盖 37 个 P0 用例，结果为 37 通过、0 失败、0 阻塞。空缓存安装经固定 Hugging Face revision 完成组件校验、运行时激活和 M3 Max GPU 探针；原生 SCIM 拼音候选确认与未确认组合门禁通过。快速双击误取消、作品页首次旧计数和图片查看器重开问题也已完成原生回归。完整结果见 [模型复认证报告](verification/model-usability-20261031/results.md)、[机器可读明细](verification/model-usability-20261031/acceptance.json) 与 [质量审阅](verification/model-usability-20261031/quality-review.json)。
 
+2026-11-01 的整批回归完成七型号/八能力统计、41 个正式作品与 1 个 mask、九步跨后端顺序、跨会话互斥、4:3→1:1 恢复、缺件与旧环境保留、1280×800/960×640 原生布局。R01 重跑 Z-Image 三个尺寸、真实取消重试和采样后宿主强杀恢复；R02 对原 v1 cancelled Job 追加新 Attempt 并保持 request/plan/manifest 不变；R05 重跑 Klein 文生图/编辑、BiRefNet 双输出、Real-ESRGAN 4×，并完成三条 cancelled 任务的会话内原生重试。R03/R04 覆盖事务、旧事件、未来版本、非法候选/帧、提交崩溃窗口、前端/Rust/Python、锁审计、禁网启动和隔离源码构建。报告见 [MOSS/整批阶段报告](verification/qwen-moss-20261101/moss-stage-report.md)。
+
 ## 规格与研究
 
 - [正式基础规格](openspec/specs/)
 - [OpenSpec 变更记录](openspec/changes/)
 - [产品与模型研究总览](doc/README.md)
 
-会话式生成已完成实现、实机验收并归档为 [2026-10-30-introduce-generation-conversation](openspec/changes/archive/2026-10-30-introduce-generation-conversation/proposal.md)。模型目录、设置与新会话默认值已完成并通过 [归档 change](openspec/changes/archive/2026-10-30-introduce-model-catalog-and-settings/proposal.md) 更新正式 `model-catalog`、`application-settings` 与 `conversation-management` specs。功能、作品与任务中心已按确认后的 [归档 change](openspec/changes/archive/2026-10-30-improve-feature-works-and-tasks/proposal.md) 完成实现、真实生成验收和主规格更新。发送幂等、作品页激活刷新与查看器返回状态已通过 [交互修复归档](openspec/changes/archive/2026-10-31-fix-daily-generation-interactions/proposal.md) 更新正式规格。当前模型 37 项 P0 认证已通过并归档为 [2026-10-31-certify-current-model-usability](openspec/changes/archive/2026-10-31-certify-current-model-usability/proposal.md)，门禁契约已合并到 [model-validation 主规格](openspec/specs/model-validation/spec.md)。
+会话式生成已完成实现、实机验收并归档为 [2026-10-30-introduce-generation-conversation](openspec/changes/archive/2026-10-30-introduce-generation-conversation/proposal.md)。模型目录、设置与新会话默认值已完成并通过 [归档 change](openspec/changes/archive/2026-10-30-introduce-model-catalog-and-settings/proposal.md) 更新正式 `model-catalog`、`application-settings` 与 `conversation-management` specs。功能、作品与任务中心已按确认后的 [归档 change](openspec/changes/archive/2026-10-30-improve-feature-works-and-tasks/proposal.md) 完成实现、真实生成验收和主规格更新。发送幂等、作品页激活刷新与查看器返回状态已通过 [交互修复归档](openspec/changes/archive/2026-10-31-fix-daily-generation-interactions/proposal.md) 更新正式规格。当前模型 37 项 P0 认证已通过并归档为 [2026-10-31-certify-current-model-usability](openspec/changes/archive/2026-10-31-certify-current-model-usability/proposal.md)，门禁契约已合并到 [model-validation 主规格](openspec/specs/model-validation/spec.md)。Qwen/MOSS 变更完成后另行归档到 `2026-11-01-introduce-qwen21-and-moss-image`，并同步更新正式规格。
 
 用户选定的黑色应用图标已接入 macOS 开发包、左栏和关于页，源图与派生说明见 [品牌资源](resources/brand/README.md)。[应用图标品牌规格](openspec/specs/product-identity/spec.md)已获确认；[验收记录](verification/app-icon-branding-results.md)包含 Finder、浅暗主题、小窗口、回退与离线启动结果。Dock/应用切换器已由用户人工核对确认，change 已完成验收并归档；Windows ICO 已生成但未做 Windows GUI 实测。
 

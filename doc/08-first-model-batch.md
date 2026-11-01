@@ -4,7 +4,7 @@
 
 **2026-10-30 交付更新：** Z-Image Turbo 已按用户批准的 `deliver-first-local-generation` 完成本地安装和实机闭环，支持 q4 / 9 步、三个尺寸、取消、恢复重试与 PNG 导出。验证设备为 M3 Max / 128 GiB，证据见[完整验收报告](../verification/first-generation-results.md)。
 
-**2026-10-31 阶段更新：** FLUX.2 Klein 4B distilled 已通过 50/50 必需项；BiRefNet general epoch_244 已通过 31/31 必需项，支持 CPU 去背景、RGBA 与 mask 双输出。Real-ESRGAN 仍未下载或认证，三型号整批门禁保持关闭。下文保留选型时的来源与取舍，不把历史计划当作当前执行清单，当前状态见[计划模型阶段验收](../verification/planned-models-20261031/results.md)。
+**2026-11-01 阶段更新：** 本批 Z-Image、Klein、BiRefNet、Real-ESRGAN 已完成整批回归；随后 Qwen-Image 2.1 基础版、Turbo 与 MOSS-Image-SFT 也已完成接入和独立验收。当前目录为七型号/八能力，Real-ESRGAN 已不再处于计划中。下文保留选型时的来源与取舍，当前状态见[MOSS/整批报告](../verification/qwen-moss-20261101/moss-stage-report.md)。
 
 现有产品为 Rust core + Tauri 2 + React。首个验证设备沿用当前工作区已记录的 Apple M3 Max / 128 GiB / macOS；不把这台机器的目标外推为所有 Mac 的兼容承诺。
 
@@ -94,7 +94,7 @@
 
 ## 8. 从“入选”到“产品支持”的门槛
 
-选型时四个目标均未实现。当前 Z-Image Turbo、FLUX.2 Klein 4B distilled 与 BiRefNet general epoch_244 已完成实现和本机验证，模型中心反映真实就绪状态；Real-ESRGAN 仍为 product_status=planned、local_hardware_verification=not_run。时间、磁盘占用和质量局限见各阶段验收报告；更高精度画质对照、其他硬件和整批回归留后续步骤。
+选型时四个目标均未实现。当前 Z-Image Turbo、FLUX.2 Klein 4B distilled、BiRefNet general epoch_244 与 Real-ESRGAN x4plus 均已完成实现和本机验证，模型中心反映真实就绪状态。时间、磁盘占用和质量局限见各阶段验收报告；更高精度画质对照与其他硬件仍留后续步骤。
 
 进入正式目录前，每个精确配置需提供完整组件与文件哈希、运行时锁、设备与参数、真实输出、取消/失败/资源回收、结果保存/重启查看/导出证据。4-bit 配置不等于下载字节或峰值内存按比例缩小；普通内存规格 Mac 需另行认证。
 

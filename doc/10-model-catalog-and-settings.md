@@ -1,14 +1,17 @@
 # 10 · 模型目录与应用设置
 
-更新日期：2026-10-31，Asia/Shanghai。当前把 Z-Image Turbo、FLUX.2 Klein 4B distilled 与 BiRefNet general epoch_244 标为已接入；三者的文生图、单图编辑与去背景能力已完成对应阶段验收。Real-ESRGAN 仍为计划中型号，不提供下载或执行动作。
+更新日期：2026-11-01，Asia/Shanghai。当前七个型号均已正式接入，Real-ESRGAN 不再处于计划中。
 
 ## 模型目录
 
 - 宿主从受限的 [模型目录](../resources/model-catalog/catalog.json) 生成列表，前端不另存模型安装状态。
-- 目录当前登记四个目标，统计分别计算正式接入、文件安装、可执行和计划中数量。
-- Z-Image、Klein 与 BiRefNet 的组件、运行时、设备探针和 `ReadyRecord` 分别来自各自安装组合；计划型号不会借用已接入型号的安装状态。
+- 目录当前登记七个目标，统计分别计算正式接入、文件安装、可执行和计划中数量；当前为目录 7、正式接入 7、计划中 0。
+- Z-Image、Klein、BiRefNet、Real-ESRGAN、Qwen 基础版、Qwen Turbo 与 MOSS 的组件、运行时、设备探针和 `ReadyRecord` 分别来自各自安装组合；共享运行时不会使缺件型号自动就绪。
 - Klein 的固定目录项登记两项能力、MFLUX recipes-v2 运行时和验证设备。文生图与单图编辑共用同一已核验快照，但执行认证分别记录。
 - BiRefNet 登记一项去背景能力、独立 ONNX Runtime CPU 运行时和 M3 Max CPU 验证记录；RGBA 与 mask 是两个输出角色，但作品计数只取 primary。
+- Real-ESRGAN 登记独立 ncnn 原生运行时、精确 4× 能力、RGB 输入与 4096² 输出上限。
+- Qwen 基础版和 Turbo 分别登记 40/8 步配方、2048 token 预算和相同 recipes-v3 运行时；Turbo 使用自己的权重、配置和采样曲线。
+- MOSS 登记 50 步、CFG 3.0、负分支跳层 `[22]` 与 4096 token 预算；JSON 布局只是原始文本输入，不形成产品侧布局执行器。
 - 搜索覆盖名称、稳定 ID、变体、家族和运行时；一级筛选可与能力筛选组合。
 - 过滤、详情展开、键盘操作和普通刷新不会启动网络、权重散列、设备探针、下载或推理。
 - 行内详情分开显示产品接入、组件、运行时、设备探针和当前可执行状态；未知阶段不会换算成虚假百分比。
@@ -47,4 +50,8 @@
 
 Klein 随后在默认 macOS 数据目录完成正式安装、GPU probe、真实文生图、单图编辑、禁网执行、取消/恢复和原生日常验收，结构化门禁为 50/50 通过。真实续传先用用户授权的国内镜像补齐传输，再由正式安装器按官方固定 revision、字节数与 SHA-256 完整校验并禁网激活。
 
-BiRefNet 使用真正空缓存完成官方 ONNX asset 下载和隔离 CPU runtime 安装；另一隔离根在禁网下复验同一身份。真实中断后包含安全重下，正式产品链路完成透明图/mask、质量、取消、宿主强杀、双导出和原生日常验收，结构化门禁为 31/31 通过。Real-ESRGAN 没有安装，也没有被声称为本机可执行。证据见 [计划模型阶段验收](../verification/planned-models-20261031/results.md)。
+BiRefNet 使用真正空缓存完成官方 ONNX asset 下载和隔离 CPU runtime 安装；另一隔离根在禁网下复验同一身份。真实中断后包含安全重下，正式产品链路完成透明图/mask、质量、取消、宿主强杀、双导出和原生日常验收，结构化门禁为 31/31 通过。Real-ESRGAN 已完成安装、真实 4× 执行、取消/重试、4096² RGB 输出和原生导出/重试回归。证据见 [计划模型阶段验收](../verification/planned-models-20261031/results.md) 与 [R05 结果](../verification/qwen-moss-20261101/r05/results.json)。
+
+Qwen 基础版、Turbo 与 MOSS 的默认安装来源已切换到 ModelScope 固定文件 revision；全部 60 个组件与冻结上游快照的路径、字节数和 SHA-256 一致。三者均独立完成上游基线、正式产品、禁网、取消、强杀恢复和原生 UI 验收，设备列表只升级有证据的 M3 Max 组合。详细结果见 [Qwen 报告](../verification/qwen-moss-20261101/qwen-stage-report.md) 与 [MOSS/整批报告](../verification/qwen-moss-20261101/moss-stage-report.md)。
+
+目录在缺件或旧环境损坏时保留用户选择并显示明确阻塞；历史图片仍可查看和导出。U07 覆盖新型号缺件、旧 v1 环境缺件、不回退其他型号及 16 张历史作品可读；R02 则证明旧 v1 Job 重试保留 request/plan/manifest，并追加新 Attempt。
