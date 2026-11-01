@@ -9,5 +9,7 @@ pub mod preferences;
 pub mod prompt_library;
 mod safe_fs;
 pub mod storage;
+#[cfg(windows)]
+pub(crate) mod windows_process;
 
 pub use paths::{AppPaths, PlatformError};

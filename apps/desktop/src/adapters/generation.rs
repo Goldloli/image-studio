@@ -223,7 +223,11 @@ impl GenerationController {
             }
         };
         let config_path = run_dir.join("supervisor.json");
-        let spawn_result = (|| {
+        #[cfg(windows)]
+        let spawn_result: Result<
+            (Child, super::windows_process::WindowsProcessJob),
+            String,
+        > = (|| {
             let mut file = OpenOptions::new()
                 .write(true)
                 .create_new(true)
@@ -238,16 +242,37 @@ impl GenerationController {
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped());
-            command.spawn().map_err(error)
+            let (child, job) =
+                super::windows_process::spawn_suspended_in_job(&mut command).map_err(error)?;
+            Ok((child, job))
         })();
-        let child = match spawn_result {
-            Ok(child) => child,
+        #[cfg(not(windows))]
+        let spawn_result: Result<(Child, ()), String> = (|| {
+            let mut file = OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&config_path)
+                .map_err(error)?;
+            serde_json::to_writer(&mut file, &config).map_err(error)?;
+            file.sync_all().map_err(error)?;
+            let mut command = std::process::Command::new(&self.inner.supervisor);
+            command
+                .arg("--config")
+                .arg(config_path)
+                .stdin(Stdio::piped())
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped());
+            command.spawn().map(|child| (child, ())).map_err(error)
+        })();
+        let (child, outer_job) = match spawn_result {
+            Ok(spawned) => spawned,
             Err(detail) => {
                 self.finish_failure(&job, "SUPERVISOR_START", &detail);
                 return;
             }
         };
         let result = self.exchange(child, &job, &ready, &config, &control);
+        drop(outer_job);
         match result {
             Ok(terminal) => {
                 let final_record = self.commit_terminal(&job, terminal);
