@@ -1,9 +1,10 @@
 # Windows Gate 0
 
 Status: Gate 0 passed on the target Windows 10 machine, 2026-11-01.
-Product installation and controller generation were subsequently validated as
-separate evidence linked below; those results do not change the original Gate
-0 measurements.
+Product installation, controller generation, an empty-cache production install
+and an interrupted-then-resumed production install were subsequently validated
+as separate evidence linked below; those results do not change the original
+Gate 0 measurements.
 
 ## Fixed runtime
 
@@ -116,7 +117,42 @@ Report:
 
 - [Empty-cache ModelScope install](product-empty-cache-install.json)
 
-Empty-cache activation is now evidenced; deliberate interruption and
-resumption, bad digest/missing-file/space failures, installation cancellation,
+## Interrupted and resumed install
+
+A second acceptance ran the same production ModelScope closure from an empty
+root, cancelled it after `310,721,780` bytes (about 296 MiB), and then resumed
+in the same root:
+
+- cancellation took effect 9.01 seconds after start: the phase history was
+  `not_installed`, `preparing`, `downloading`, `cancelled`, and the cache kept
+  33 entries including 16 verified segment files totalling `310,080,876` bytes;
+- the same root restarted from the retained prefix and the phase history became
+  `cancelled`, `preparing`, `downloading`, `verifying`, `installing_runtime`,
+  `probing`, `ready`;
+- the resumed run verified the complete `35,562,182,040` bytes, installed the
+  private runtime (19,485 inventory entries) and reached the frozen
+  `windows-python31210-torch2100-cu126-bnb0482-v1` runtime,
+  `studio-zimage-cuda-worker-0.1.0` worker and
+  `z-image-turbo-diffusers-cuda-nf4-v1` model identities with an RTX 3080 Ti
+  sm86 GPU probe;
+- the resumed transfer took `3110.89` seconds because the ModelScope/PyTorch
+  CDN trickled the remaining large wheel; the earlier uninterrupted empty-cache
+  run of the same closure took `1047.50` seconds, so this is a throughput
+  observation, not a functional deviation.
+
+Command:
+
+```powershell
+cargo test -p image-studio-desktop --locked `
+  actual_windows_product_installs_from_an_empty_cache_and_resumes_after_cancel `
+  -- --ignored --nocapture
+```
+
+Report:
+
+- [Interrupted and resumed install](product-interrupted-resume.json)
+
+Empty-cache activation and deliberate interruption/resumption are now
+evidenced; bad digest/missing-file/space failures, installation cancellation,
 network-denied cache installation, clean-user installation, complete IME/DPI
 interaction and Mac regression remain separate pending gates.
