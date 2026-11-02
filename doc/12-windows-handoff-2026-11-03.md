@@ -9,12 +9,13 @@
 
 `introduce-windows-foundation` 的 Windows 可自动化 P0 已基本完成并留有证据；剩余是
 需要管理员/人工配合的门槛（禁网、小卷、干净用户/WebView2、100%/200% DPI、真实 IME）
-和 Mac 回归。`main` 本地领先 `origin/main` 若干提交（以 `git log` 为准），尚未 push。
+和 Mac 回归。`main` 已推送，远程 `origin/main` 与本地一致（以 `git rev-parse origin/main`
+为准），工作区干净。
 
-## 1. 远程与 push 状态（重要）
+## 1. 远程与 push 状态（已解决）
 
 - 仓库：`Goldloli/image-studio`，`origin` = `https://github.com/Goldloli/image-studio.git`，分支 `main`。
-- 用户于 2026-11-03 明确授权本次 push。**但 push 被 GitHub 拒绝**：
+- 用户于 2026-11-03 明确授权本次 push。首次 push 被 GitHub 拒绝：
 
   ```text
   remote: error: GH007: Your push would publish a private email address.
@@ -23,12 +24,12 @@
 
   原因是历史提交作者邮箱 `Kevinforeveryeah@gmail.com` 被 GitHub 的
   “Block command line pushes that expose my email” 保护拦截。
-- 解决（需要用户操作，代理无法代改账户设置）：
-  GitHub → Settings → Emails → 取消勾选
-  “Block command line pushes that expose my email”，或把该邮箱设为公开/验证后重试。
-- 用户允许后再执行：`git push origin main`（非交互，`GIT_TERMINAL_PROMPT=0`）。
-  不要改写历史来换邮箱：大量证据 JSON/文档引用了提交哈希，改写会让证据失效。
-- push/pull/Dolt 远程同步每次都需要明确授权；本次授权只覆盖当前这次源码 push。
+- 用户已在 GitHub → Settings → Emails 取消该保护，随后
+  `bf26b04..0106a2e main -> main` 推送成功。交接时本地与 `origin/main` 一致。
+- 如果以后再次出现 GH007：同样在 GitHub 设置里取消该保护后重试
+  `git push origin main`（非交互，`GIT_TERMINAL_PROMPT=0`）。
+  **不要**改写历史换邮箱：大量证据 JSON/文档引用提交哈希，改写会让证据失效。
+- push/pull/Dolt 远程同步每次都需要明确授权；本次授权只覆盖这次源码 push。
 
 ## 2. 新机器环境要求
 
@@ -208,7 +209,7 @@ target/windows-gate0/runtime/python.exe scripts/windows-ui/extract-installed-rec
 
 ## 11. 交接检查清单
 
-- [ ] `git push origin main` 成功（或记录 GH007 未解决）
+- [x] `git push origin main` 已成功（2026-11-03，`bf26b04..0106a2e`；本交接文档本身也已在后续推送中）
 - [ ] 工具链版本与第 2 节一致
 - [ ] `openspec validate ... --strict` 通过
 - [ ] 质量门基线（第 4 节命令）通过
