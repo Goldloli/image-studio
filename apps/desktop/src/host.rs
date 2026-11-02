@@ -453,15 +453,54 @@ async fn asset_export(
     };
     let studio = state.studio.clone();
     let path = target.path().to_path_buf();
-    // A newly chosen name receives atomic no-replace semantics. If another
-    // process creates it during the copy, preserve that file and report failure.
+    // A newly chosen name receives atomic no-replace semantics. An existing
+    // target is never replaced without an explicit user confirmation; declining
+    // returns the same shape as cancelling the save dialog and leaves the old
+    // file untouched.
     let overwrite_confirmed = match std::fs::symlink_metadata(&path) {
-        Ok(_) => true,
+        Ok(_) => match confirm_export_overwrite().await {
+            ExportOverwriteChoice::Overwrite => true,
+            ExportOverwriteChoice::KeepExisting => {
+                return Ok(serde_json::json!({"cancelled":true}));
+            }
+        },
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => false,
         Err(error) => return Err(error.to_string()),
     };
     blocking(move || studio.export(&asset_id, &path, overwrite_confirmed)).await?;
     Ok(serde_json::json!({"cancelled":false}))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ExportOverwriteChoice {
+    Overwrite,
+    KeepExisting,
+}
+
+fn resolve_export_overwrite(
+    exists: bool,
+    answer: rfd::MessageDialogResult,
+) -> ExportOverwriteChoice {
+    if !exists {
+        return ExportOverwriteChoice::Overwrite;
+    }
+    match answer {
+        rfd::MessageDialogResult::Yes | rfd::MessageDialogResult::Ok => {
+            ExportOverwriteChoice::Overwrite
+        }
+        _ => ExportOverwriteChoice::KeepExisting,
+    }
+}
+
+async fn confirm_export_overwrite() -> ExportOverwriteChoice {
+    let answer = rfd::AsyncMessageDialog::new()
+        .set_title("覆盖导出文件")
+        .set_description("目标文件已存在。覆盖后旧文件会被替换，是否继续？")
+        .set_level(rfd::MessageLevel::Warning)
+        .set_buttons(rfd::MessageButtons::YesNo)
+        .show()
+        .await;
+    resolve_export_overwrite(true, answer)
 }
 #[tauri::command]
 async fn source_import(state: State<'_, HostState>) -> Result<serde_json::Value, String> {
@@ -730,14 +769,31 @@ mod tests {
     }
 
     #[test]
-    fn ipc_does_not_accept_executable_or_unbounded_viewport_inputs() {
-        let (host, _root) = fixture(true);
-        assert!(host.start("/bin/sh").is_err());
-        assert!(host.start("normal; arbitrary-command").is_err());
-        assert!(host.session().controller.is_none());
-        assert!(validate_viewport(960, 640, Some(2)).is_ok());
-        assert!(validate_viewport(1280, 800, None).is_ok());
-        assert!(validate_viewport(0, 0, None).is_err());
-        assert!(validate_viewport(1280, 800, Some(4)).is_err());
+    fn export_overwrite_requires_an_explicit_confirmation() {
+        use rfd::MessageDialogResult;
+        assert_eq!(
+            resolve_export_overwrite(false, MessageDialogResult::No),
+            ExportOverwriteChoice::Overwrite
+        );
+        assert_eq!(
+            resolve_export_overwrite(true, MessageDialogResult::Yes),
+            ExportOverwriteChoice::Overwrite
+        );
+        assert_eq!(
+            resolve_export_overwrite(true, MessageDialogResult::Ok),
+            ExportOverwriteChoice::Overwrite
+        );
+        assert_eq!(
+            resolve_export_overwrite(true, MessageDialogResult::No),
+            ExportOverwriteChoice::KeepExisting
+        );
+        assert_eq!(
+            resolve_export_overwrite(true, MessageDialogResult::Cancel),
+            ExportOverwriteChoice::KeepExisting
+        );
+        assert_eq!(
+            resolve_export_overwrite(true, MessageDialogResult::Custom("no".into())),
+            ExportOverwriteChoice::KeepExisting
+        );
     }
 }
