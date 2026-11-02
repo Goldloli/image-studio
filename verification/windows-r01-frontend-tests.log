@@ -5,15 +5,15 @@
 
  RUN  v5.0.5 C:/Users/XIAOKA-PC/Desktop/image-studio/apps/frontend
 
- ✓ src/library-state.test.ts (5 tests) 6ms
+ ✓ src/library-state.test.ts (5 tests) 5ms
+ ✓ src/workspace-state.test.ts (14 tests) 7ms
  ✓ src/draft-save.test.ts (4 tests) 5ms
  ✓ src/conversation-state.test.ts (8 tests) 4ms
- ✓ src/workspace-state.test.ts (14 tests) 5ms
  ✓ src/prompt-library-state.test.ts (4 tests) 3ms
  ✓ src/model-catalog.test.ts (2 tests) 3ms
 
  Test Files  6 passed (6)
       Tests  37 passed (37)
-   Start at  23:44:56
-   Duration  338ms (transform 66%, import 20%, worker 7%, tests 6%)
+   Start at  00:21:57
+   Duration  321ms (import 39%, transform 30%, worker 16%, tests 14%)
 

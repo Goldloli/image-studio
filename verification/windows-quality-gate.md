@@ -1,6 +1,8 @@
 # Windows quality gate (R01)
 
-Status: passed on the target Windows 10 machine, 2026-11-02, commit `f41b0ce`.
+Status: passed on the target Windows 10 machine, 2026-11-03, commit `9860c6c`.
+This re-run follows the export-overwrite confirmation fix and includes the new
+`host::tests::export_overwrite_requires_an_explicit_confirmation` test.
 
 | Check | Result | Log |
 |---|---|---|
@@ -8,7 +10,7 @@ Status: passed on the target Windows 10 machine, 2026-11-02, commit `f41b0ce`.
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | passed | [clippy](windows-r01-clippy.log) |
 | `cargo test --workspace --locked` | 230 passed, 0 failed, 8 ignored, 1 doc test (17 suites) | [rust tests](windows-r01-rust-tests.log) |
 | `cargo build --workspace --examples --bins --locked` | passed | [build](windows-r01-build.log) |
-| `npm --prefix apps/frontend run build` | passed (2057 modules, 525 ms) | [frontend build](windows-r01-frontend-build.log) |
+| `npm --prefix apps/frontend run build` | passed (2057 modules, 405 ms) | [frontend build](windows-r01-frontend-build.log) |
 | `npm --prefix apps/frontend test` | 37 passed / 6 files | [frontend tests](windows-r01-frontend-tests.log) |
 | `npm --prefix apps/frontend audit --omit=dev --audit-level=moderate` | not applicable: registry mirror lacks the advisory endpoint | [audit](windows-r01-frontend-audit.log) |
 | `scripts/verify-generation-lock.py` | passed without network | [lock audit](windows-r01-lock-audit.log) |

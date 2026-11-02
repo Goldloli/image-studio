@@ -24,4 +24,4 @@ node.exe : [plugin builtin:vite-reporter]
 - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeS
 plitting
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
-✓ built in 525ms
+✓ built in 405ms

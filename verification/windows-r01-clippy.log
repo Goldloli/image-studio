@@ -1,8 +1,9 @@
-cargo :     Checking diagnostic-worker v0.1.0 (C:\Users\XIAOKA-PC\Desktop\image-studio\tools\diagnostic-worker)
-所在位置 行:1 字符: 316
+cargo :     Checking image-studio-desktop v0.1.0 (C:\Users\XIAOKA-PC\Desktop\image-studio\apps\desktop)
+所在位置 行:1 字符: 294
 + ... STEXITCODE; cargo clippy --workspace --all-targets --locked -- -D war ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (    Checking di...gnostic-worker):String) [], RemoteException
+    + CategoryInfo          : NotSpecified: (    Checking im...o\apps\desktop):String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.64s
+    Checking diagnostic-worker v0.1.0 (C:\Users\XIAOKA-PC\Desktop\image-studio\tools\diagnostic-worker)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.07s
