@@ -1,6 +1,6 @@
 # Windows 首轮验收计划
 
-状态：Gate 0 的 G01–G06 已于 2026-11-01 在目标机通过，证据见 [Windows Gate 0](../../../verification/windows-gate0/README.md)。Windows 已有全 workspace 构建/测试、宿主启动、受控文件与 Job Object、正式私有安装在环、产品 worker/Controller 实图、功能/设置投影、NSIS 组包、当前用户安装、正式空缓存安装、主动中断后续传至 Ready、运行准备/探针取消与重试、坏摘要/缺件激活拒绝和安装版 WebView2 启动证据。空间不足、干净用户/缺失 WebView2、完整原生 UI/IME/DPI、禁网和 Mac 回归仍是待执行 P0。执行顺序和实现边界见 [tasks.md](tasks.md)、[design.md](design.md)。
+状态：Gate 0 的 G01–G06 已于 2026-11-01 在目标机通过，证据见 [Windows Gate 0](../../../verification/windows-gate0/README.md)。Windows 已有全 workspace 构建/测试、宿主启动、受控文件与 Job Object、正式私有安装在环、产品 worker/Controller 实图、功能/设置投影、NSIS 组包、当前用户安装、正式空缓存安装、主动中断后续传至 Ready、运行准备/探针取消与重试、坏摘要/缺件激活拒绝、Windows 全量质量门（fmt/clippy/工作区测试与构建/前端/清单审计）和安装版 WebView2 启动证据。空间不足、干净用户/缺失 WebView2、完整原生 UI/IME/DPI、禁网和 Mac 回归仍是待执行 P0。执行顺序和实现边界见 [tasks.md](tasks.md)、[design.md](design.md)。
 
 ## 目标与通用记录
 
