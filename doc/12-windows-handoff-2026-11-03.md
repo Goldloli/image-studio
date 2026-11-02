@@ -59,12 +59,15 @@
 
    ```powershell
    cargo test -p image-studio-desktop --locked `
-     actual_windows_product_installs_from_an_empty_cache `
+     actual_windows_product_installs_from_an_empty_cache_and_resumes_after_cancel `
      -- --ignored --nocapture
    ```
 
-   （约 35.6 GB 下载 + 私有运行时安装 + GPU 探针，本机 2026-11-02 实测 1047.50 s；
-   ModelScope 慢时可能更久。）
+   注意这个测试现在不是“只下载”：它在约 256 MiB 处主动取消、验证分段保留，再同根续传
+   到 Ready（本机实测 3110.89 s；早先只下载版本是 1047.50 s）。如果没有 Gate 0 缓存，
+   也可以直接安装应用后从 UI 触发生产 ModelScope 下载。
+   `actual_windows_product_installs_from_the_validation_cache` 需要
+   `target/windows-gate0` 缓存，新机默认没有，属预期失败环境前提而非产品回归。
 2. 正式 UI 验收用 `--data-dir <隔离根>` 的新目录，应用会自行创建 `cache/data/logs/work`。
    不要复制 Mac 的 runtime/Ready，也不能用 Mac 数据根冒充 Windows 就绪。
 3. 验证板卡与驱动：`nvidia-smi`，确认 RTX 3080 Ti / sm86 / 驱动 596.49 这一档；
