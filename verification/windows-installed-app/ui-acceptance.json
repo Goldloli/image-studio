@@ -241,6 +241,76 @@
     "latency_observation": "The UI stayed at 正在取消 while the background preflight verified the 32.8 GB model closure; the terminal cancelled state was observed within roughly 90 seconds. Exact start/finish timestamps were not instrumented for this manual sequence.",
     "screenshot": "verification/windows-installed-app/screenshots/cancel-settled.png"
   },
+  "settings_page": {
+    "storage": {
+      "data_root": "\\\\?\\<isolated root>\\data",
+      "observed_entries": [
+        { "name": "应用数据", "bytes_human": "37.47 GB", "free_human": "1582.46 GB" },
+        { "name": "模型", "bytes_human": "32.85 GB" },
+        { "name": "运行环境", "bytes_human": "4.61 GB" },
+        { "name": "下载缓存", "bytes_human": "35.56 GB" },
+        { "name": "生成图片", "bytes_human": "4.3 MB" },
+        { "name": "日志", "bytes_human": "0 KB" }
+      ],
+      "locate_opened_explorer": true,
+      "explorer_window_title": "data",
+      "note": "The 定位 button opened a native Explorer window for the isolated data directory; the window was closed with WM_CLOSE.",
+      "screenshot": "verification/windows-installed-app/screenshots/settings-storage.png"
+    },
+    "runtime": {
+      "platform": "windows · x86_64",
+      "runtime": "Diffusers CUDA + private Python; Diffusers 0.36.0 / PyTorch 2.10.0 / CUDA 12.6 / Python 3.12.10",
+      "model_state": "z-image-turbo-diffusers-cuda-nf4-v1 ready · 模型已就绪 · 运行时就绪 · 设备探针已通过",
+      "last_error": "无已知错误",
+      "communication_diagnostic": "尚未主动运行（打开本页不会启动诊断进程）",
+      "screenshot": "verification/windows-installed-app/screenshots/settings-runtime.png"
+    },
+    "about": {
+      "version": "0.1.0 · Preview",
+      "platform": "Image Studio · windows",
+      "capabilities": "Windows first round only wires Z-Image Turbo Diffusers CUDA NF4 text-to-image",
+      "updates": "自动更新：未提供",
+      "online_models": "在线模型服务：未提供",
+      "storage_migration": "存储迁移：未提供",
+      "screenshot": "verification/windows-installed-app/screenshots/settings-about.png"
+    },
+    "general_screenshot": "verification/windows-installed-app/screenshots/settings-general.png"
+  },
+  "preferences_and_draft_persistence": {
+    "theme": {
+      "selected": "dark",
+      "persisted_after_restart": true,
+      "reverted_to": "light"
+    },
+    "draft": {
+      "typed": "草稿持久化验证文本",
+      "status_text": "草稿已保存到本机",
+      "restored_after_restart": true
+    }
+  },
+  "keyboard_navigation": {
+    "tab_order_from_composer": [
+      "TEXTAREA",
+      "BUTTON|1:1 · 1 张",
+      "BUTTON|复制提示词",
+      "BUTTON|当前模型可执行",
+      "BUTTON|发送并生成",
+      "BODY",
+      "BUTTON|创作"
+    ],
+    "shift_enter_inserts_newline": true,
+    "shift_enter_created_job": false,
+    "jobs_after_shift_enter": 3
+  },
+  "export_overwrite_finding": {
+    "status": "failed_pending_fix",
+    "observed": "Exporting PNG to an existing target silently replaced the dummy file; no overwrite confirmation dialog appeared during 3 seconds of 150 ms polling.",
+    "dummy_sha256_before": "602a0439d599b47f31ce67fb3acc28cbe2d9c13d275e1feef97be612d5abe09d",
+    "sha256_after": "ee900070e1c51043cbdd078ea8898c677788ac10ecfb946b88da2c2a4d89a822",
+    "bytes_after": 1809462,
+    "code_location": "apps/desktop/src/host.rs asset_export: existing target sets overwrite_confirmed = true without asking",
+    "required_by": "test-plan P08 (导出覆盖确认/取消) and design decision 5 (覆盖仍需用户确认)"
+  },
   "limitations": [
     "Only the current Windows display scale (150%) was exercised. 100% and 200% OS scaling and a visual review of both themes are still pending; native minimize/maximize/drag were exercised through Win32 calls and SendInput.",
     "Native Chinese IME composition was approximated with synthetic CDP composition events; a real Microsoft IME composition remains pending.",

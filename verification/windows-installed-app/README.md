@@ -85,6 +85,31 @@ DPI 144 (150% scaling) and devicePixelRatio 1.5.
   to finish before settling; this is recorded as a latency observation, not a
   functional pass for a real IME.
 
+## Settings, preferences and keyboard
+
+- 设置 page sections report real values: storage (37.47 GB data / 32.85 GB model /
+  4.61 GB runtime / 35.56 GB cache), runtime (`windows · x86_64`, Diffusers
+  CUDA + private Python, model/runtime/probe ready, no known error, diagnostics
+  not started) and about (0.1.0 Preview, Windows-only Z-Image capability, no
+  auto-update/online model/storage migration). 定位 opened a native Explorer
+  window for the isolated data directory.
+- Dark theme and an unsent draft both survived a full application restart; the
+  theme was reverted to light afterwards.
+- Tab from the composer reaches `1:1 · 1 张`, 复制提示词, 模型选择, 发送并生成 and
+  创作. Shift+Enter inserts a newline without creating a job.
+
+Screenshots: [general](screenshots/settings-general.png),
+[storage](screenshots/settings-storage.png),
+[runtime](screenshots/settings-runtime.png), [about](screenshots/settings-about.png).
+
+## Known defect found during this acceptance
+
+Exporting a PNG to an existing target **silently overwrote** the file: no
+confirmation dialog appeared, and the dummy file was replaced by the PNG. The
+cause is in `asset_export`: an existing target sets `overwrite_confirmed = true`
+without asking. This violates test-plan P08 (导出覆盖确认/取消); the follow-up
+fix must request explicit confirmation and keep the old file on decline.
+
 ## Pending
 
 100%/200% OS scaling and a human visual review of both themes remain pending;
