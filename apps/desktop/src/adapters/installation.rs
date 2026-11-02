@@ -3081,8 +3081,8 @@ mod tests {
 
     #[cfg(windows)]
     #[test]
-    #[ignore = "explicit acceptance: downloads the complete Windows product closure from an empty cache"]
-    fn actual_windows_product_installs_from_an_empty_cache() {
+    #[ignore = "explicit acceptance: cancels an empty-cache ModelScope install and resumes it"]
+    fn actual_windows_product_installs_from_an_empty_cache_and_resumes_after_cancel() {
         let root = tempfile::tempdir().unwrap();
         let paths = AppPaths::resolve(Some(root.path())).unwrap();
         let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -3134,7 +3134,8 @@ mod tests {
             .as_secs();
         let started = std::time::Instant::now();
         let deadline = started + std::time::Duration::from_secs(3 * 60 * 60);
-        let mut next_progress = started + std::time::Duration::from_secs(15);
+        let interruption_threshold = 256 * 1024 * 1024;
+        let mut next_progress = started + std::time::Duration::from_secs(10);
         let mut phase_history = vec![
             manager
                 .snapshot(WINDOWS_ZIMAGE_INSTALL_ID)
@@ -3144,6 +3145,7 @@ mod tests {
         ];
         let mut received_peak = 0;
         let mut timed_out = false;
+        let mut interrupted_received = None;
         manager.start(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
         loop {
             let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
@@ -3155,26 +3157,95 @@ mod tests {
                 snapshot.phase.as_str(),
                 "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
             ) {
+                if interrupted_received.is_none()
+                    && snapshot.received_bytes >= interruption_threshold
+                {
+                    interrupted_received = Some(snapshot.received_bytes);
+                    manager.cancel(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+                }
                 if std::time::Instant::now() >= deadline {
                     timed_out = true;
                     manager.cancel(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
                 } else {
                     if std::time::Instant::now() >= next_progress {
                         eprintln!(
-                            "Windows empty-cache install: phase={} received={}/{} bytes elapsed={}s",
+                            "Windows interrupted install: phase={} received={}/{} bytes elapsed={}s",
                             snapshot.phase,
                             snapshot.received_bytes,
                             snapshot.total_bytes,
                             started.elapsed().as_secs()
                         );
                         next_progress =
-                            std::time::Instant::now() + std::time::Duration::from_secs(15);
+                            std::time::Instant::now() + std::time::Duration::from_secs(10);
                     }
                     std::thread::sleep(std::time::Duration::from_secs(1));
                     continue;
                 }
             }
             break;
+        }
+
+        let interrupted_snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        let interrupted_received = interrupted_received.unwrap_or(received_peak);
+        let cache_entries_after_cancel = fs::read_dir(installer.cache())
+            .map(|entries| entries.count())
+            .unwrap_or(0);
+        let (segment_files_after_cancel, segment_bytes_after_cancel) =
+            fs::read_dir(installer.cache())
+                .map(|entries| {
+                    entries
+                        .filter_map(Result::ok)
+                        .filter_map(|entry| {
+                            let name = entry.file_name().to_string_lossy().into_owned();
+                            (name.contains(".segment-") && !name.ends_with(".json"))
+                                .then(|| entry.metadata().ok())
+                                .flatten()
+                        })
+                        .fold((0_usize, 0_u64), |(count, bytes), metadata| {
+                            (count + 1, bytes + metadata.len())
+                        })
+                })
+                .unwrap_or((0, 0));
+        let interrupted_elapsed_seconds = started.elapsed().as_secs_f64();
+        let resumed = !timed_out
+            && interrupted_snapshot.phase == "cancelled"
+            && segment_files_after_cancel > 0;
+        let mut resume_phase_history = vec![interrupted_snapshot.phase.clone()];
+        let resume_started = std::time::Instant::now();
+        let mut resume_next_progress = resume_started + std::time::Duration::from_secs(10);
+        if resumed {
+            manager.start(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+            loop {
+                let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+                received_peak = received_peak.max(snapshot.received_bytes);
+                if resume_phase_history.last() != Some(&snapshot.phase) {
+                    resume_phase_history.push(snapshot.phase.clone());
+                }
+                if matches!(
+                    snapshot.phase.as_str(),
+                    "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
+                ) {
+                    if std::time::Instant::now() >= deadline {
+                        timed_out = true;
+                        manager.cancel(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+                    } else {
+                        if std::time::Instant::now() >= resume_next_progress {
+                            eprintln!(
+                                "Windows resumed install: phase={} received={}/{} bytes elapsed={}s",
+                                snapshot.phase,
+                                snapshot.received_bytes,
+                                snapshot.total_bytes,
+                                started.elapsed().as_secs()
+                            );
+                            resume_next_progress =
+                                std::time::Instant::now() + std::time::Duration::from_secs(10);
+                        }
+                        std::thread::sleep(std::time::Duration::from_secs(1));
+                        continue;
+                    }
+                }
+                break;
+            }
         }
 
         let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
@@ -3187,10 +3258,10 @@ mod tests {
             .unwrap()
         });
         atomic_json(
-            &repo.join("verification/windows-gate0/product-empty-cache-install.json"),
+            &repo.join("verification/windows-gate0/product-interrupted-resume.json"),
             &serde_json::json!({
                 "schema_version": 1,
-                "kind": "windows-product-empty-cache-install",
+                "kind": "windows-product-interrupted-resume",
                 "status": if passed { "passed" } else { "failed" },
                 "started_at_unix": started_at_unix,
                 "elapsed_seconds": started.elapsed().as_secs_f64(),
@@ -3203,14 +3274,30 @@ mod tests {
                 "model_files": model_downloads.len(),
                 "model_download_bytes": model_download_bytes,
                 "model_component_bytes": installer.inner.model.component_bytes,
-                "runtime_artifacts": installer.inner.runtime.downloads().len(),
+                "runtime_artifacts": runtime_downloads.len(),
                 "runtime_download_bytes": runtime_download_bytes,
                 "runtime_hosts": runtime_hosts,
                 "total_download_bytes": model_download_bytes + runtime_download_bytes,
                 "received_peak_bytes": received_peak,
-                "phase_history": phase_history,
-                "phase": snapshot.phase,
-                "error": snapshot.error,
+                "interruption": {
+                    "status": if resumed { "cancelled_with_resume_state" } else { "failed" },
+                    "threshold_bytes": interruption_threshold,
+                    "observed_received_bytes": interrupted_received,
+                    "elapsed_seconds": interrupted_elapsed_seconds,
+                    "cache_entries_after_cancel": cache_entries_after_cancel,
+                    "segment_files_after_cancel": segment_files_after_cancel,
+                    "segment_bytes_after_cancel": segment_bytes_after_cancel,
+                    "phase_history": phase_history,
+                    "phase": interrupted_snapshot.phase,
+                    "error": interrupted_snapshot.error,
+                },
+                "resume": {
+                    "status": if passed { "passed" } else { "failed" },
+                    "elapsed_seconds": resume_started.elapsed().as_secs_f64(),
+                    "phase_history": resume_phase_history,
+                    "phase": snapshot.phase,
+                    "error": snapshot.error,
+                },
                 "runtime_lock_id": ready.as_ref().map(|ready| ready.runtime_lock_id.clone()),
                 "worker_build_id": ready.as_ref().map(|ready| ready.worker_build_id.clone()),
                 "model_snapshot_id": ready.as_ref().map(|ready| ready.model_snapshot_id.clone()),
