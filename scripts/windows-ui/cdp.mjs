@@ -135,6 +135,74 @@ async function main() {
         nativeVirtualKeyCode: vk,
       });
       console.log(`key ${key}`);
+    } else if (command === "tab") {
+      await cdp.send("Input.dispatchKeyEvent", {
+        type: "rawKeyDown",
+        key: "Tab",
+        code: "Tab",
+        windowsVirtualKeyCode: 9,
+        nativeVirtualKeyCode: 9,
+      });
+      await cdp.send("Input.dispatchKeyEvent", {
+        type: "keyUp",
+        key: "Tab",
+        code: "Tab",
+        windowsVirtualKeyCode: 9,
+        nativeVirtualKeyCode: 9,
+      });
+      console.log("tab");
+    } else if (command === "shiftenter") {
+      await cdp.send("Input.dispatchKeyEvent", {
+        type: "keyDown",
+        key: "Enter",
+        code: "Enter",
+        modifiers: 8,
+        windowsVirtualKeyCode: 13,
+        nativeVirtualKeyCode: 13,
+        text: "\r",
+        unmodifiedText: "\r",
+      });
+      await cdp.send("Input.dispatchKeyEvent", {
+        type: "keyUp",
+        key: "Enter",
+        code: "Enter",
+        modifiers: 8,
+        windowsVirtualKeyCode: 13,
+        nativeVirtualKeyCode: 13,
+      });
+      console.log("shift+enter");
+    } else if (command === "rawkey") {
+      const key = args[0] || "Process";
+      const vk = Number(args[1] || 229);
+      await cdp.send("Input.dispatchKeyEvent", {
+        type: "rawKeyDown",
+        key,
+        code: "Enter",
+        windowsVirtualKeyCode: vk,
+        nativeVirtualKeyCode: vk,
+      });
+      await cdp.send("Input.dispatchKeyEvent", {
+        type: "keyUp",
+        key,
+        code: "Enter",
+        windowsVirtualKeyCode: vk,
+        nativeVirtualKeyCode: vk,
+      });
+      console.log(`rawkey ${key} ${vk}`);
+    } else if (command === "composition") {
+      const text = args[0] || "";
+      const selection = Number(args[1] || text.length);
+      await cdp.send("Input.imeSetComposition", {
+        text,
+        selectionStart: selection,
+        selectionEnd: selection,
+        replacementStart: 0,
+        replacementEnd: 0,
+      });
+      console.log(`composition ${JSON.stringify(text)}`);
+    } else if (command === "inserttext") {
+      await cdp.send("Input.insertText", { text: args.join(" ") });
+      console.log("inserted");
     } else if (command === "wait") {
       await new Promise((r) => setTimeout(r, Number(args[0] || 1000)));
       console.log("waited");

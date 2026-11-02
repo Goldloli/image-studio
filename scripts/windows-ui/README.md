@@ -14,9 +14,10 @@ $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = '--remote-debugging-port=9333'
 
 | Tool | Purpose |
 |---|---|
-| `cdp.mjs` | minimal Chrome DevTools Protocol client: `text`, `eval`, `html`, `shot`, `click`, `type`, `key`, `wait` |
+| `cdp.mjs` | minimal Chrome DevTools Protocol client: `text`, `eval`, `html`, `shot`, `click`, `type`, `key`, `shiftenter`, `tab`, `rawkey`, `composition`, `inserttext`, `wait` |
 | `seed-cache.ps1` | hard-link the verified Gate 0 model/runtime artifacts into `<root>/cache/downloads` by SHA-256, so UI installs need no download |
 | `save-ui-dialog.ps1` | set the native save dialog's file name edit and click 保存 through UI Automation + Win32 handles |
+| `answer-dialog.ps1` | click a Yes/No style native dialog button by regex (`覆盖` confirmations, overwrite prompts) |
 | `resize-window.ps1` | resize the native window so its client area matches a requested logical size |
 | `extract-installed-records.py` | read the installed app's SQLite library and ready record into a JSON summary (run with the Gate 0 Python interpreter) |
 
