@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "kind": "windows-installed-app-ui-acceptance",
+  "status": "partial",
+  "date": "2026-11-03",
+  "app": {
+    "installed_executable": "%LOCALAPPDATA%\\Image Studio\\image-studio-desktop.exe",
+    "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
+    "installer_sha256": "466eb3f43c8fb984ec5cf92b369927dd0b58692e629e76df2301ed783a743c29",
+    "launch_arguments": "--data-dir <isolated root>",
+    "webview2": "156.0.4314.58",
+    "ui_driver": "WebView2 remote debugging (CDP) on 127.0.0.1:9333 plus Win32 window/dialog automation"
+  },
+  "machine": {
+    "os": "Microsoft Windows 10 专业版 10.0.19045 (build 19045)",
+    "display": "3840x2160, Windows scale 150%, window DPI 144",
+    "gpu": "NVIDIA GeForce RTX 3080 Ti 12288 MiB",
+    "gpu_driver": "596.49"
+  },
+  "install_via_ui": {
+    "data_root": "target/windows-ui-probe-data-20261103",
+    "validation_cache_seeded_artifacts": 59,
+    "validation_cache_source": "target/windows-gate0/downloads, target/windows-gate0/model and the bundled worker wheel, hard-linked by SHA-256",
+    "observed_phases": [
+      { "time": "2026-11-02T23:49:27+08:00", "text": "正在下载" },
+      { "time": "2026-11-02T23:49:39+08:00", "text": "安装预算 53.43 GB, 未就绪" },
+      { "time": "2026-11-02T23:50:40+08:00", "text": "已安装 1, 准备隔离运行环境" },
+      { "time": "2026-11-02T23:51:41+08:00", "text": "已安装 1, 安装预算 53.43 GB, 已就绪" }
+    ],
+    "elapsed_seconds_approx": 134,
+    "ready": {
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-bnb0482-v1",
+      "model_snapshot_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+      "worker_build_id": "studio-zimage-cuda-worker-0.1.0",
+      "runtime_inventory_entries": 19485,
+      "model_files": 20,
+      "model_bytes": 32848319217,
+      "runtime_manifest_sha256": "171341067c41523e2853a89c04c0225532439f1199caaabdd55950f1a3a8ffcf",
+      "model_manifest_sha256": "e1c22e08ac97ede3f67275d07b3f3a2377141a3233738129f8f417ba68b393e3",
+      "probe": {
+        "device": "gpu",
+        "device_name": "NVIDIA GeForce RTX 3080 Ti",
+        "compute_capability": "8.6",
+        "python": "3.12.10",
+        "torch": "2.10.0+cu126",
+        "diffusers": "0.36.0",
+        "transformers": "4.57.3",
+        "bitsandbytes": "0.48.2"
+      }
+    }
+  },
+  "frozen_plan": {
+    "recipe": "z-image-turbo-nf4-cuda-v1",
+    "recipe_version": 1,
+    "device_id": "nvidia-cuda-sm86",
+    "precision": "transformer+text_encoder=nf4;compute=bfloat16;vae=bfloat16",
+    "attention": "_native_efficient",
+    "offload": "model_cpu",
+    "quantization": "nf4",
+    "quantized_components": ["transformer", "text_encoder"],
+    "scheduler": "FlowMatchEulerDiscreteScheduler",
+    "steps": 9,
+    "guidance": 0.0,
+    "token_budget": 512,
+    "truncation": false,
+    "vae_precision": "bfloat16",
+    "thinking": true,
+    "components": 19,
+    "effective_output": { "width": 1024, "height": 1024, "count": 1 }
+  },
+  "generations": [
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+      "seed": 3148150817,
+      "job_id": "job-16e84bfa50cd41f5ac8aa6957ff6f001",
+      "attempt_id": "attempt-548820dcd3384e8c86c4b2698e317ff7",
+      "storage_key": "run-3dc5d8a9c3dc44eab075afc16ef39cda",
+      "asset_id": "asset-7704fc20571040daba551daae61cacae",
+      "output": "verification/windows-installed-app/generated/generated-1-rainy-shanghai.png",
+      "bytes": 1809462,
+      "sha256": "ee900070e1c51043cbdd078ea8898c677788ac10ecfb946b88da2c2a4d89a822",
+      "width": 1024,
+      "height": 1024,
+      "ui_stages": ["正在接收提示词", "正在准备本地模型", "正在加载模型", "正在采样 0/9", "正在采样 5/9", "正在解码图片", "图片已生成 100%"],
+      "ui_seed": 3148150817
+    },
+    {
+      "prompt": "An English editorial photograph of a ceramic teapot on a wooden table, soft window light",
+      "seed": 2001858781,
+      "job_id": "job-e4ad1f554429420d9d85a483e6821343",
+      "attempt_id": "attempt-0f7d76a1fdc948c59dd9fcef87ba57db",
+      "storage_key": "run-a4a7f271f29a4b278e134fcf8b96c73a",
+      "asset_id": "asset-454daeba3520443cbb465a1f7033f82e",
+      "output": "verification/windows-installed-app/generated/generated-2-teapot.png",
+      "bytes": 945497,
+      "sha256": "a67d9f5f63a2bf5b1045dce0ef37cf71399da147ed041fefe168017ca23283d6",
+      "width": 1024,
+      "height": 1024,
+      "ui_stages": ["正在接收提示词", "正在准备本地模型", "正在加载模型", "正在编码提示词", "正在采样 2/9", "正在采样 5/9", "正在采样 8/9", "正在保存候选图片", "图片已生成 100%"],
+      "ui_seed": 2001858781
+    },
+    {
+      "prompt": "中国城市夜景中的霓虹招牌与雨后街道，电影感构图",
+      "seed": 3070240146,
+      "job_id": "job-ec1ab10a37a44cc0aa40c3208d8c479d",
+      "attempt_id": "attempt-d9f85425248542cf8487de09a705c981",
+      "storage_key": "run-870d08b2eac644bdb475709cb3dbdeca",
+      "asset_id": "asset-bfff2307f3cb4dc19fd0e87596d1604b",
+      "output": "verification/windows-installed-app/generated/generated-3-neon-street.png",
+      "bytes": 1525897,
+      "sha256": "39c71d750df27fcde115944eb0accff911024b09f0869bc8657f5ff00ca06261",
+      "width": 1024,
+      "height": 1024,
+      "ui_stages": ["正在接收提示词", "正在准备本地模型", "正在加载模型", "正在编码提示词", "正在采样", "图片已生成 100%"],
+      "ui_seed": 3070240146
+    }
+  ],
+  "export": {
+    "method": "clicked 导出 PNG in the installed app; native save dialog driven by UI Automation/Win32",
+    "path": "target/ui-exported-image.png",
+    "bytes": 1809462,
+    "sha256": "ee900070e1c51043cbdd078ea8898c677788ac10ecfb946b88da2c2a4d89a822",
+    "matches_first_generated_asset": true
+  },
+  "restart_persistence": {
+    "close": "graceful native window close (WM_CLOSE) and process exit",
+    "relaunch": "same installed executable and same --data-dir root",
+    "restored_turns": 3,
+    "restored_seeds": [3148150817, 2001858781, 3070240146],
+    "restored_images": 3,
+    "observed_text": "conversation title, all three prompts, seeds and 图片已生成 restored from SQLite state"
+  },
+  "task_center": {
+    "completed_jobs": 3,
+    "observed_job": "job-ec1ab10a37a44cc0aa40c3208d8c479d",
+    "observed_attempt": "attempt-d9f85425248542cf8487de09a705c981",
+    "observed_size": "1024×1024 request · 1024×1024 actual",
+    "observed_seed": 3070240146
+  },
+  "works_library": {
+    "works": 3,
+    "all_available": true,
+    "observed_sizes": ["Z-Image Turbo · 1024×1024"]
+  },
+  "window_layout": {
+    "os_scale": "150%",
+    "window_dpi": 144,
+    "device_pixel_ratio": 1.5,
+    "cases": [
+      {
+        "requested_client": "1280x800",
+        "measured_css_viewport": "1280x800",
+        "screenshot": "verification/windows-installed-app/screenshots/window-1280x800-150dpi.png",
+        "screenshot_pixels": "1920x1200",
+        "horizontal_overflow": false,
+        "textarea_visible": true,
+        "send_visible": true,
+        "model_selector_visible": true,
+        "nav_rail_visible": true
+      },
+      {
+        "requested_client": "960x640",
+        "measured_css_viewport": "961x640",
+        "screenshot": "verification/windows-installed-app/screenshots/window-960x640-150dpi.png",
+        "screenshot_pixels": "1442x960",
+        "horizontal_overflow": false,
+        "textarea_visible": true,
+        "send_visible": true,
+        "model_selector_visible": true,
+        "nav_rail_visible": true
+      }
+    ]
+  },
+  "screenshots": {
+    "install_ready": "verification/windows-installed-app/screenshots/install-ready.png",
+    "generation_conversation": "verification/windows-installed-app/screenshots/generation-conversation.png",
+    "task_center": "verification/windows-installed-app/screenshots/task-center.png",
+    "works_library": "verification/windows-installed-app/screenshots/works-library.png",
+    "provenance_panel": "verification/windows-installed-app/screenshots/provenance-panel.png"
+  },
+  "limitations": [
+    "Only the current Windows display scale (150%) was exercised. 100% and 200% OS scaling, dark theme and native minimize/maximize/drag are still pending; window close was exercised through WM_CLOSE.",
+    "Native Chinese IME composition was not driven; the prompt text was injected through the WebView2 input path.",
+    "No network-denied variant was run; this acceptance used the cached Gate 0 closure.",
+    "Screenshots are device pixels at 150% scaling, so a 1280x800 logical window is a 1920x1200 image.",
+    "This acceptance does not replace the clean-user/WebView2, IME/DPI matrix or Mac regression gates."
+  ]
+}
