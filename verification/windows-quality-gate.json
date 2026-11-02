@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "kind": "windows-quality-gate",
+  "status": "passed",
+  "date": "2026-11-02",
+  "commit": "f41b0ce37f90791707f58c042954b29cfed179b6",
+  "machine": {
+    "os": "Microsoft Windows 10 专业版 10.0.19045 (build 19045)",
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13700K",
+    "physical_memory_gib": 31.73,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti 12288 MiB",
+    "gpu_driver": "596.49",
+    "webview2": "156.0.4314.58"
+  },
+  "toolchain": {
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "1.99.1 (5f94df478 2026-08-27)",
+    "rust_toolchain": {
+      "channel": "1.99.1",
+      "components": ["rustfmt", "clippy"],
+      "targets": ["x86_64-pc-windows-msvc"]
+    },
+    "node": "24.19.0",
+    "npm": "11.17.0",
+    "nvmrc": "24.19.0",
+    "frontend_engines": {
+      "node": "24.19.0",
+      "npm": "11.17.0",
+      "packageManager": "npm@11.17.0"
+    },
+    "openspec": "1.12.0",
+    "bd": "1.2.2"
+  },
+  "locks": {
+    "Cargo.lock_sha256": "640f4460521cf83b6c5853bef4b7a20d0551239ea868e14f50e62350fe8396ce",
+    "apps/frontend/package-lock.json_sha256": "c2a2ddb281e39a14b4a2ed296d3acd5346ba5f0dc74887768b6095d7a23379ff"
+  },
+  "checks": [
+    {
+      "name": "rust-fmt",
+      "command": "cargo fmt --all -- --check",
+      "exit_code": 0,
+      "log": "verification/windows-r01-fmt.log"
+    },
+    {
+      "name": "rust-clippy",
+      "command": "cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "exit_code": 0,
+      "log": "verification/windows-r01-clippy.log"
+    },
+    {
+      "name": "rust-tests",
+      "command": "cargo test --workspace --locked",
+      "exit_code": 0,
+      "totals": {
+        "passed": 230,
+        "failed": 0,
+        "ignored": 8,
+        "suites": 17,
+        "doc_tests_passed": 1
+      },
+      "log": "verification/windows-r01-rust-tests.log"
+    },
+    {
+      "name": "rust-build",
+      "command": "cargo build --workspace --examples --bins --locked",
+      "exit_code": 0,
+      "log": "verification/windows-r01-build.log"
+    },
+    {
+      "name": "frontend-build",
+      "command": "npm --prefix apps/frontend run build",
+      "exit_code": 0,
+      "output": {
+        "modules_transformed": 2057,
+        "largest_chunk_kib": 1502.62,
+        "built_in_seconds": 0.525
+      },
+      "log": "verification/windows-r01-frontend-build.log"
+    },
+    {
+      "name": "frontend-tests",
+      "command": "npm --prefix apps/frontend test",
+      "exit_code": 0,
+      "tests_passed": 37,
+      "test_files": 6,
+      "log": "verification/windows-r01-frontend-tests.log"
+    },
+    {
+      "name": "frontend-audit",
+      "command": "npm --prefix apps/frontend audit --omit=dev --audit-level=moderate",
+      "exit_code": 1,
+      "status": "not_applicable",
+      "reason": "The configured registry mirror (registry.npmmirror.com) does not implement /-/npm/v1/security/*; no vulnerability conclusion is claimed.",
+      "log": "verification/windows-r01-frontend-audit.log"
+    },
+    {
+      "name": "lock-audit-generation",
+      "command": "target/windows-gate0/runtime/python.exe scripts/verify-generation-lock.py",
+      "exit_code": 0,
+      "result": {
+        "model_components": 17,
+        "component_bytes": 32848304893,
+        "runtime_wheels": 59,
+        "worker_source_matches_wheel": true,
+        "runtime_lock": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+        "network_accessed": false
+      },
+      "log": "verification/windows-r01-lock-audit.log"
+    },
+    {
+      "name": "lock-audit-planned-models",
+      "command": "target/windows-gate0/runtime/python.exe scripts/verify-planned-model-locks.py",
+      "exit_code": 0,
+      "result": {
+        "worker_sources_match_wheels": true,
+        "network_accessed": false,
+        "locks": 6
+      },
+      "log": "verification/windows-r01-lock-audit.log"
+    },
+    {
+      "name": "openspec-validate",
+      "command": "openspec validate introduce-windows-foundation --strict --no-interactive",
+      "exit_code": 0,
+      "output": "Change 'introduce-windows-foundation' is valid"
+    }
+  ],
+  "ignored_acceptance_tests": [
+    {
+      "test": "actual_modelscope_fixed_range_probe_returns_partial_content",
+      "reason": "requires ModelScope network access",
+      "evidence": null
+    },
+    {
+      "test": "actual_private_runtime_installs_offline_without_activating_missing_model",
+      "reason": "requires the Mac validation cache that is not present on this Windows checkout",
+      "evidence": null
+    },
+    {
+      "test": "actual_windows_product_cancels_runtime_preparation_and_probe_and_retries",
+      "reason": "explicit acceptance using the Gate 0 validation cache",
+      "evidence": "verification/windows-gate0/product-runtime-cancel-retry.json"
+    },
+    {
+      "test": "actual_windows_product_installs_from_an_empty_cache_and_resumes_after_cancel",
+      "reason": "explicit acceptance requiring the full ModelScope download",
+      "evidence": "verification/windows-gate0/product-interrupted-resume.json"
+    },
+    {
+      "test": "actual_windows_product_installs_from_the_validation_cache",
+      "reason": "explicit acceptance using the Gate 0 validation cache",
+      "evidence": "verification/windows-gate0/product-install.json"
+    },
+    {
+      "test": "actual_windows_product_rejects_corrupt_and_missing_model_components",
+      "reason": "explicit acceptance using the Gate 0 validation cache",
+      "evidence": "verification/windows-gate0/product-activation-failures.json"
+    },
+    {
+      "test": "klein_private_runtime_installs_offline_without_model_weights",
+      "reason": "requires the pinned Mac MFLUX wheel cache",
+      "evidence": null
+    },
+    {
+      "test": "real_image_download_matches_the_catalog",
+      "reason": "requires the fixed GitHub image source and network access",
+      "evidence": null
+    }
+  ],
+  "platform_review": {
+    "sha2_asm_macos_only": true,
+    "note": "apps/desktop and tools/realesrgan-worker gate the sha2 asm feature behind [target.'cfg(target_os = \"macos\")'.dependencies]; the x86_64-pc-windows-msvc target resolves sha2 without asm and the workspace builds with MSVC."
+  },
+  "separately_executed_acceptance": [
+    {
+      "test": "actual_windows_product_installs_from_the_validation_cache",
+      "evidence": "verification/windows-gate0/product-install.json",
+      "variants": "product worker protocol, controller generation, cancellation and supervisor-kill recovery"
+    },
+    {
+      "test": "actual_windows_product_installs_from_an_empty_cache",
+      "evidence": "verification/windows-gate0/product-empty-cache-install.json"
+    },
+    {
+      "test": "actual_windows_product_installs_from_an_empty_cache_and_resumes_after_cancel",
+      "evidence": "verification/windows-gate0/product-interrupted-resume.json"
+    },
+    {
+      "test": "actual_windows_product_cancels_runtime_preparation_and_probe_and_retries",
+      "evidence": "verification/windows-gate0/product-runtime-cancel-retry.json"
+    },
+    {
+      "test": "actual_windows_product_rejects_corrupt_and_missing_model_components",
+      "evidence": "verification/windows-gate0/product-activation-failures.json"
+    }
+  ],
+  "limitations": [
+    "npm audit cannot run because the configured registry mirror does not implement the npm security advisory endpoint; no vulnerability conclusion is claimed.",
+    "The lock-audit scripts are Mac-oriented; they were made Windows-checkout safe here (explicit UTF-8 reads, CRLF-normalized worker source comparison, archived metadata path) and pass without network.",
+    "This gate covers the Windows machine only. Mac regression (R02-R04), complete native UI/IME/DPI, clean-user/WebView2 and network-denied generation remain pending.",
+    "No Git remote operation was performed by this gate."
+  ]
+}

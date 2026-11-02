@@ -1,0 +1,12 @@
+node.exe : npm warn audit 404 Not Found - POST https://registry.npmmirror.com/-/npm/v1/security/advisories/bulk - [NOT_
+IMPLEMENTED] /-/npm/v1/security/* not implemented yet
+所在位置 行:1 字符: 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn audit ...implemented yet:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+{ error: '[NOT_IMPLEMENTED] /-/npm/v1/security/* not implemented yet' }
+npm error audit endpoint returned an error
+npm error A complete log of this run can be found in: C:\Users\XIAOKA-PC\AppData\Local\npm-cache\_logs\2026-11-02T15_44
+_57_629Z-debug-0.log

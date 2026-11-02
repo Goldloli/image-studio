@@ -1,0 +1,9 @@
+cargo :    Compiling realesrgan-worker v0.1.0 (C:\Users\XIAOKA-PC\Desktop\image-studio\tools\realesrgan-worker)
+所在位置 行:1 字符: 570
++ ... STEXITCODE; cargo build --workspace --examples --bins --locked *>&1 | ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (   Compiling re...lesrgan-worker):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+   Compiling image-studio-desktop v0.1.0 (C:\Users\XIAOKA-PC\Desktop\image-studio\apps\desktop)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.04s

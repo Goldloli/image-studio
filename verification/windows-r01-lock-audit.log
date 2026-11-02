@@ -1,0 +1,77 @@
+=== generation lock ===
+{
+  "model_components": 17,
+  "component_bytes": 32848304893,
+  "runtime_wheels": 59,
+  "worker_source_matches_wheel": true,
+  "runtime_lock": "mflux-0.24.0-py3.13.12-macos-arm64-v1",
+  "network_accessed": false
+}
+generation exit=0
+=== planned model locks ===
+python.exe : Traceback (most recent call last):
+所在位置 行:1 字符: 504
++ ... log -Append; & $py scripts/verify-planned-model-locks.py *>&1 | Tee-O ...
++                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\XIAOKA-PC\Desktop\image-studio\scripts\verify-planned-model-locks.py", line 236, in <module>
+    qwen_runtime, qwen_worker, text_locks = verify_text_models(
+                                            ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\XIAOKA-PC\Desktop\image-studio\scripts\verify-planned-model-locks.py", line 162, in verify_text_models
+    ).read_text(encoding="utf-8")
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pathlib.py", line 1027, in read_text
+  File "pathlib.py", line 1013, in open
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\openspec\\changes
+\\introduce-qwen21-and-moss-image\\references\\model-source-metadata.json'
+planned exit=1
+=== planned model locks retry ===
+{
+  "locks": [
+    {
+      "model_components": 18,
+      "component_bytes": 15980131745,
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v2",
+      "worker_sha256": "9f4c9c8000f695d7cb4d1dab686772bf2bbdbcdf8786cae988b9e7785224765f"
+    },
+    {
+      "model_components": 1,
+      "component_bytes": 972666916,
+      "runtime_lock_id": "onnxruntime-1.31.1-py3.13.12-macos-arm64-cpu-v1",
+      "worker_sha256": "59d709c7705569602d01eeffebeca6b2cbc4d02fda181ecb157f937ea91c66c3"
+    },
+    {
+      "model_components": 2,
+      "component_bytes": 33540549,
+      "runtime_lock_id": "realesrgan-x4plus-ncnn-macos-v0.2.0-v1",
+      "worker_build_id": "studio-realesrgan-worker-0.1.0",
+      "archive_count": 2
+    },
+    {
+      "repository": "Qwen/Qwen-Image-2.1",
+      "model_components": 25,
+      "component_bytes": 33131609424,
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+      "worker_sha256": "87f32600a2ef316cca061c68f1d1e90808e997da2cedae8bdfe77e3e05bdc55d"
+    },
+    {
+      "repository": "Qwen/Qwen-Image-2.1-Turbo",
+      "model_components": 16,
+      "component_bytes": 32451607098,
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+      "worker_sha256": "87f32600a2ef316cca061c68f1d1e90808e997da2cedae8bdfe77e3e05bdc55d"
+    },
+    {
+      "repository": "OpenMOSS-Team/MOSS-Image-SFT",
+      "model_components": 19,
+      "component_bytes": 27219783878,
+      "runtime_lock_id": "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3",
+      "worker_sha256": "87f32600a2ef316cca061c68f1d1e90808e997da2cedae8bdfe77e3e05bdc55d"
+    }
+  ],
+  "worker_sources_match_wheels": true,
+  "network_accessed": false
+}
+planned exit=0
