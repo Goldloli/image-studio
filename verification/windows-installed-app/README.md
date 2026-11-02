@@ -62,12 +62,37 @@ Screenshots: [1280x800](screenshots/window-1280x800-150dpi.png),
 [960x640](screenshots/window-960x640-150dpi.png). The machine reports window
 DPI 144 (150% scaling) and devicePixelRatio 1.5.
 
+## Native window controls and themes
+
+| Control | Observed |
+|---|---|
+| Native caption | present (`WS_CAPTION`) |
+| Maximize | `IsZoomed` true, client `2560x1377`, standard 7-px frame overscan, [screenshot](screenshots/window-maximized-150dpi.png) |
+| Restore | window rectangle exactly equals the pre-maximize rectangle |
+| Minimize | `IsIconic` true and restore works |
+| Drag by caption | requested +120/+80 px, observed +120/+80 px |
+| Light theme | `data-theme=light`, body `rgb(244,244,244)`, [screenshot](screenshots/theme-light.png) |
+| Dark theme | `data-theme=dark`, body `rgb(32,32,32)`, composer/send visible, [screenshot](screenshots/theme-dark.png) |
+
+## IME guard and UI cancel
+
+- With a CDP composition active (`nihao`), an Enter key at code 229 did not
+  create a generation job; after the composition ended, an explicit Enter
+  created the next turn.
+- Clicking 停止 at 8% moved the turn to `cancelled` with no job, attempt or
+  asset created (`本次生成已取消`, [screenshot](screenshots/cancel-settled.png)).
+  The cancellation waited for the background preflight's 32.8 GB verification
+  to finish before settling; this is recorded as a latency observation, not a
+  functional pass for a real IME.
+
 ## Pending
 
-100%/200% OS scaling, dark theme, native minimize/maximize/drag, real Microsoft
-IME composition, a network-denied variant and the clean-user/WebView2 gates are
-not covered by this evidence. The generated samples are real model output but
-the visual quality review is still a human step.
+100%/200% OS scaling and a human visual review of both themes remain pending;
+the dark/light switch and native window controls were verified programmatically.
+Real Microsoft Chinese IME composition, a network-denied variant and the
+clean-user/WebView2 gates are not covered by this evidence. The generated
+samples are real model output but the visual quality review is still a human
+step.
 
 Machine-readable record: [ui-acceptance.json](ui-acceptance.json).
 Screenshots: [install ready](screenshots/install-ready.png),

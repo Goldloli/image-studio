@@ -178,9 +178,73 @@
     "works_library": "verification/windows-installed-app/screenshots/works-library.png",
     "provenance_panel": "verification/windows-installed-app/screenshots/provenance-panel.png"
   },
+  "themes": {
+    "light": {
+      "data_theme": "light",
+      "body_background": "rgb(244, 244, 244)",
+      "screenshot": "verification/windows-installed-app/screenshots/theme-light.png"
+    },
+    "dark": {
+      "data_theme": "dark",
+      "body_background": "rgb(32, 32, 32)",
+      "screenshot": "verification/windows-installed-app/screenshots/theme-dark.png",
+      "composer_and_send_visible": true
+    }
+  },
+  "native_window_controls": {
+    "method": "Win32 ShowWindow/SetWindowPos plus SendInput drag on the native caption while the installed app owned an isolated root",
+    "has_native_caption": true,
+    "work_area": { "left": 0, "top": 0, "width": 2560, "height": 1400 },
+    "maximize": {
+      "is_zoomed": true,
+      "window_rect": { "left": -7, "top": -7, "width": 2575, "height": 1415 },
+      "client_size": "2560x1377",
+      "note": "A maximized native window keeps the standard 7-logical-pixel frame overscan; the client area covers the work area width.",
+      "screenshot": "verification/windows-installed-app/screenshots/window-maximized-150dpi.png"
+    },
+    "restore": {
+      "restored_matches_initial": true,
+      "initial_rect": { "left": 633, "top": 285, "width": 1295, "height": 837 },
+      "restored_rect": { "left": 633, "top": 285, "width": 1295, "height": 837 }
+    },
+    "minimize": {
+      "is_iconic_after_minimize": true
+    },
+    "drag": {
+      "requested_delta": { "dx": 120, "dy": 80 },
+      "observed_delta": { "dx": 120, "dy": 80 }
+    }
+  },
+  "ime_composition": {
+    "method": "CDP Input.imeSetComposition plus raw key code 229 while composition was active; this is a synthetic composition, not the real Microsoft Chinese IME",
+    "composition_text": "nihao",
+    "enter_during_composition_created_job": false,
+    "jobs_after_composition_enter": 3,
+    "committed_text_after_composition_end": "输入法组合结束后的显式发送",
+    "explicit_send_after_composition_end": true,
+    "result_turn": {
+      "sequence": 4,
+      "turn_id": "turn-2ac2f70ccb7543808b59438642a88437",
+      "status": "cancelled",
+      "job_id": null
+    }
+  },
+  "ui_cancel": {
+    "trigger": "clicked 停止 at 8% during 正在接收提示词",
+    "observed_transition": "正在取消 8% → 本次生成已取消",
+    "turn_status": "cancelled",
+    "job_id": null,
+    "jobs_after": 3,
+    "attempts_after": 3,
+    "assets_after": 3,
+    "no_fake_asset": true,
+    "latency_observation": "The UI stayed at 正在取消 while the background preflight verified the 32.8 GB model closure; the terminal cancelled state was observed within roughly 90 seconds. Exact start/finish timestamps were not instrumented for this manual sequence.",
+    "screenshot": "verification/windows-installed-app/screenshots/cancel-settled.png"
+  },
   "limitations": [
-    "Only the current Windows display scale (150%) was exercised. 100% and 200% OS scaling, dark theme and native minimize/maximize/drag are still pending; window close was exercised through WM_CLOSE.",
-    "Native Chinese IME composition was not driven; the prompt text was injected through the WebView2 input path.",
+    "Only the current Windows display scale (150%) was exercised. 100% and 200% OS scaling and a visual review of both themes are still pending; native minimize/maximize/drag were exercised through Win32 calls and SendInput.",
+    "Native Chinese IME composition was approximated with synthetic CDP composition events; a real Microsoft IME composition remains pending.",
+    "Cancel during preflight can take tens of seconds because the host verifies the 32.8 GB model closure before applying the cancel; no fake asset or job was created.",
     "No network-denied variant was run; this acceptance used the cached Gate 0 closure.",
     "Screenshots are device pixels at 150% scaling, so a 1280x800 logical window is a 1920x1200 image.",
     "This acceptance does not replace the clean-user/WebView2, IME/DPI matrix or Mac regression gates."
