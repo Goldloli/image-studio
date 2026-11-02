@@ -2,6 +2,9 @@
 
 交接日期：2026-11-01。私有源码仓库：[Goldloli/image-studio](https://github.com/Goldloli/image-studio)，默认分支 `main`。
 
+> 更新：2026-11-03 的接续进度与下一台 Windows 机器的交接见
+> [doc/12-windows-handoff-2026-11-03.md](12-windows-handoff-2026-11-03.md)。
+
 ## 已完成与当前授权
 
 Mac M3 Max / 128 GiB 已完成七型号、八能力验收，相关变更已归档。现有 macOS 数据目录、模型安装、Python/MLX 环境和个人图片不随 Git 克隆迁移。
