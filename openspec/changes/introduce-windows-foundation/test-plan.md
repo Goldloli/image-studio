@@ -1,6 +1,6 @@
 # Windows 首轮验收计划
 
-状态：Gate 0 的 G01–G06 已于 2026-11-01 在目标机通过，证据见 [Windows Gate 0](../../../verification/windows-gate0/README.md)。Windows 已有全 workspace 构建/测试、宿主启动、受控文件与 Job Object、正式私有安装在环、产品 worker/Controller 实图、功能/设置投影、NSIS 组包、当前用户安装、正式空缓存安装、主动中断后续传至 Ready、运行准备/探针取消与重试、坏摘要/缺件激活拒绝、Windows 全量质量门和安装版 WebView2 完整原生 UI 路径（UI 安装到 Ready、中英文三次连续生成、PNG 导出、重启恢复、任务/作品查询；当前 150% 缩放下 1280×800 与 960×640 布局通过）证据。空间不足、干净用户/缺失 WebView2、100%/200% DPI 与主题/原生窗口操作、真实中文 IME、禁网和 Mac 回归仍是待执行 P0。执行顺序和实现边界见 [tasks.md](tasks.md)、[design.md](design.md)。
+状态：Gate 0 的 G01–G06 已于 2026-11-01 在目标机通过，证据见 [Windows Gate 0](../../../verification/windows-gate0/README.md)。Windows 已有全 workspace 构建/测试、宿主启动、受控文件与 Job Object、正式私有安装在环、产品 worker/Controller 实图、功能/设置投影、NSIS 组包、当前用户安装、正式空缓存安装、主动中断后续传至 Ready、运行准备/探针取消与重试、坏摘要/缺件激活拒绝、Windows 全量质量门和安装版 WebView2 完整原生 UI 路径（UI 安装到 Ready、中英文三次连续生成、PNG 导出、重启恢复、任务/作品查询、明暗主题、原生标题栏最大化/还原/最小化/拖拽、合成 IME 组合不误发；当前 150% 缩放下 1280×800 与 960×640 布局通过）证据。空间不足、干净用户/缺失 WebView2、100%/200% DPI、真实中文 IME、禁网和 Mac 回归仍是待执行 P0。执行顺序和实现边界见 [tasks.md](tasks.md)、[design.md](design.md)。
 
 ## 目标与通用记录
 

@@ -2,7 +2,7 @@
 
 为 Windows 10 x64 / RTX 3080 Ti 12 GB / 32 GB RAM / i7-13700K 建立桌面基础与首个 Z-Image Turbo 本地生成闭环。
 
-**当前状态：已进入 Windows 产品闭环实施。** 2026-11-01 已在目标机完成 Gate 0、独立 Windows 身份、正式私有运行时/模型安装在环、产品 worker 与 `GenerationController` 实图、加载/采样取消与真实 supervisor 强杀恢复、Windows 目录/功能/设置投影，并生成和安装当前用户级 NSIS 包。2026-11-02 完成正式空缓存 ModelScope 安装、长连接分段续传、主动取消后同一根续传至 Ready、运行准备/探针取消与重试、坏摘要/缺件激活拒绝、Windows 全量质量门及安装版原生 UI 完整路径（UI 安装到 Ready、中英文连续三次生成、PNG 导出、重启恢复、任务/作品查询）。安装版 WebView2 已启动；空间不足、100%/200% DPI 与主题/原生窗口操作、真实中文 IME、干净用户、缺失 WebView2、禁网和 Mac 回归仍未完成。
+**当前状态：已进入 Windows 产品闭环实施。** 2026-11-01 已在目标机完成 Gate 0、独立 Windows 身份、正式私有运行时/模型安装在环、产品 worker 与 `GenerationController` 实图、加载/采样取消与真实 supervisor 强杀恢复、Windows 目录/功能/设置投影，并生成和安装当前用户级 NSIS 包。2026-11-02 完成正式空缓存 ModelScope 安装、长连接分段续传、主动取消后同一根续传至 Ready、运行准备/探针取消与重试、坏摘要/缺件激活拒绝、Windows 全量质量门及安装版原生 UI 完整路径（UI 安装到 Ready、中英文连续三次生成、PNG 导出、重启恢复、任务/作品查询、明暗主题、原生标题栏最大化/还原/最小化/拖拽及合成 IME 组合不误发）。安装版 WebView2 已启动；空间不足、100%/200% DPI、真实中文 IME、干净用户、缺失 WebView2、禁网和 Mac 回归仍未完成。
 
 | 文档 | 内容 |
 |---|---|
