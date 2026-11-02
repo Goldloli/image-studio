@@ -14,7 +14,7 @@ $tauriTools = Join-Path $repo "target/.tauri"
 $nsisRoot = Join-Path $tauriTools "NSIS"
 $nsisUtils = Join-Path $nsisRoot "Plugins/x86-unicode/additional/nsis_tauri_utils.dll"
 
-if (-not $IsWindows) {
+if ($env:OS -ne "Windows_NT") {
     throw "Windows internal packaging must run on Windows."
 }
 
@@ -28,9 +28,17 @@ function Invoke-Checked {
         [Parameter(Mandatory = $true)][string]$Program,
         [string[]]$Arguments = @()
     )
-    & $Program @Arguments
-    if ($LASTEXITCODE -ne 0) {
-        throw "$Program failed with exit code $LASTEXITCODE."
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & $Program @Arguments
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    if ($exitCode -ne 0) {
+        throw "$Program failed with exit code $exitCode."
     }
 }
 
