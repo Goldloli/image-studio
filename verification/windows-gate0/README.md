@@ -1,10 +1,11 @@
 # Windows Gate 0
 
 Status: Gate 0 passed on the target Windows 10 machine, 2026-11-01.
-Product installation, controller generation, an empty-cache production install
-and an interrupted-then-resumed production install were subsequently validated
-as separate evidence linked below; those results do not change the original
-Gate 0 measurements.
+Product installation, controller generation, an empty-cache production install,
+an interrupted-then-resumed production install, cancellation during runtime
+preparation/probe and activation rejection were subsequently validated as
+separate evidence linked below; those results do not change the original Gate
+0 measurements.
 
 ## Fixed runtime
 
@@ -152,7 +153,51 @@ Report:
 
 - [Interrupted and resumed install](product-interrupted-resume.json)
 
-Empty-cache activation and deliberate interruption/resumption are now
-evidenced; bad digest/missing-file/space failures, installation cancellation,
-network-denied cache installation, clean-user installation, complete IME/DPI
-interaction and Mac regression remain separate pending gates.
+## Runtime cancellation and retry
+
+A cache-seeded acceptance started the formal install without any download and
+cancelled it twice before activation:
+
+- during `installing_runtime` (99.33 seconds after start) the phase history
+  ended `cancelled`; no Ready record was written and the manager reported idle
+  99.94 seconds after start;
+- a retry then cancelled during the real GPU/NF4 probe (261.16 seconds): the
+  probe child process tree was terminated through the Windows Job, the phase
+  history ended `cancelled`, and the partial runtime stayed inactive;
+- the third start re-verified the seeded closure and reached `ready` in
+  199.48 seconds with the frozen runtime/worker/model identities and the
+  RTX 3080 Ti sm86 probe;
+- all 59 validation-cache entries came from the Gate 0 artifacts, so this
+  proves cancellation and retry behaviour rather than network behaviour.
+
+Report:
+
+- [Runtime cancellation and retry](product-runtime-cancel-retry.json)
+
+## Activation failures
+
+The cache-seeded product install then exercised the activation gate against two
+deliberately damaged components:
+
+- a same-length corruption of `scheduler/scheduler_config.json` returned
+  `SHA-256 校验失败`, moved the installation to `unavailable`, left the damaged
+  file in place (no silent overwrite), and kept the 59-entry cache unchanged;
+  restoring the exact bytes recovered readiness without reinstalling or
+  downloading;
+- deleting `model_index.json` returned `文件缺失`, kept the installation
+  `unavailable`, left the other 19 model files and all cache entries intact, and
+  no activation path re-fetched the missing component.
+
+Real insufficient-disk-space acceptance still requires a small test volume and
+remains pending; the space calculation itself is covered by
+`installation_space_accounts_for_separate_and_shared_volumes`.
+
+Report:
+
+- [Activation failures](product-activation-failures.json)
+
+Empty-cache activation, deliberate interruption/resumption, runtime/probe
+cancellation with retry, and corrupt/missing-component activation rejection are
+now evidenced; space-failure acceptance, network-denied cache installation,
+clean-user installation, complete IME/DPI interaction and Mac regression remain
+separate pending gates.
