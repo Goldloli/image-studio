@@ -102,13 +102,26 @@ Screenshots: [general](screenshots/settings-general.png),
 [storage](screenshots/settings-storage.png),
 [runtime](screenshots/settings-runtime.png), [about](screenshots/settings-about.png).
 
-## Known defect found during this acceptance
+## Export overwrite confirmation (P08)
 
-Exporting a PNG to an existing target **silently overwrote** the file: no
-confirmation dialog appeared, and the dummy file was replaced by the PNG. The
-cause is in `asset_export`: an existing target sets `overwrite_confirmed = true`
-without asking. This violates test-plan P08 (导出覆盖确认/取消); the follow-up
-fix must request explicit confirmation and keep the old file on decline.
+Before the fix, exporting a PNG to an existing target silently overwrote it.
+`asset_export` now shows a native Yes/No confirmation before replacing an
+existing target: declining returns the same cancelled shape and leaves the old
+file untouched, confirming goes through the existing atomic overwrite path.
+The rebuilt package
+(`Image Studio_0.1.0_x64-setup.exe`, SHA-256 `56837792…f047`) shows the dialog;
+the manually declined run left both dummy targets byte-identical. Confirmed
+overwrite remains covered by the existing library unit test and the decision
+unit test in `host::tests`.
+
+## Known open question
+
+While re-installing the rebuilt package, a **second simultaneous instance with
+a different `--data-dir` exited with code 101**, while the same instance alone
+launches and runs normally. This is unrelated to the export change and needs a
+focused look (likely WebView2 user-data-folder contention); the earlier
+independent-root smoke used a previous package. Same-root rejection remains the
+expected single-instance behaviour.
 
 ## Pending
 

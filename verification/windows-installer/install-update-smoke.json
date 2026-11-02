@@ -2,17 +2,17 @@
   "schemaVersion": 1,
   "kind": "windows-nsis-update-smoke",
   "status": "passed",
-  "date": "2026-11-02",
+  "date": "2026-11-03",
   "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
-  "installerSha256": "466eb3f43c8fb984ec5cf92b369927dd0b58692e629e76df2301ed783a743c29",
-  "installerBytes": 244738598,
+  "installerSha256": "56837792e2110a963fcf003ef591f7b45c3aad6544aeaabf0418eec7c4c5f047",
+  "installerBytes": 244745354,
   "installExitCode": 0,
   "installLocation": "%LOCALAPPDATA%\\Image Studio",
   "installedFiles": [
     {
       "name": "image-studio-desktop.exe",
-      "bytes": 41969664,
-      "sha256": "2bb76e6e0f7ebfa1248e6584d1241b730a891291a9256a62e21aaac51baeeaa7"
+      "bytes": 41994240,
+      "sha256": "2ccbadbfa048ea3bca6290f268e0bc781d2202a738609e3c371fae4362ef1e37"
     },
     {
       "name": "inference-supervisor.exe",
@@ -26,22 +26,17 @@
     }
   ],
   "installedBinaryChecks": {
-    "containsModelScopeRuntimeUrl": true,
-    "containsSegmentRetryDiagnostic": true
+    "containsOverwriteConfirmationDialogText": true,
+    "containsModelScopeRuntimeUrl": true
   },
   "launch": {
     "status": "passed",
-    "mainWindowTitle": "Image Studio",
-    "isolatedDataRoot": "target/windows-installed-modelscope-smoke-data-20261102",
-    "createdDirectories": [
-      "cache",
-      "data",
-      "logs",
-      "work"
-    ],
-    "privateRuntimeCreated": false,
-    "modelFilesCreated": false,
+    "isolatedDataRoot": "target/windows-ui-probe-data-20261103",
+    "webview2PageTitle": "Image Studio",
     "gracefulCloseExitCode": 0,
-    "forcedTermination": false
-  }
+    "note": "The rebuilt package ran the installed-app UI acceptance with the ready isolated root and also launched a clean new root, creating only cache/data/logs/work before a graceful close."
+  },
+  "changedInThisBuild": [
+    "asset_export asks for an explicit native confirmation before overwriting an existing export target"
+  ]
 }

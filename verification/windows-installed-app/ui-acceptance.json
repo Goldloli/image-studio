@@ -302,13 +302,23 @@
     "shift_enter_created_job": false,
     "jobs_after_shift_enter": 3
   },
-  "export_overwrite_finding": {
-    "status": "failed_pending_fix",
-    "observed": "Exporting PNG to an existing target silently replaced the dummy file; no overwrite confirmation dialog appeared during 3 seconds of 150 ms polling.",
-    "dummy_sha256_before": "602a0439d599b47f31ce67fb3acc28cbe2d9c13d275e1feef97be612d5abe09d",
-    "sha256_after": "ee900070e1c51043cbdd078ea8898c677788ac10ecfb946b88da2c2a4d89a822",
-    "bytes_after": 1809462,
-    "code_location": "apps/desktop/src/host.rs asset_export: existing target sets overwrite_confirmed = true without asking",
+  "export_overwrite": {
+    "status": "passed_after_fix",
+    "defect_found": "Exporting PNG to an existing target silently replaced the dummy file before the fix (host.rs set overwrite_confirmed=true for existing targets without asking).",
+    "fix": "asset_export now shows a native Yes/No confirmation (覆盖导出文件 / 目标文件已存在...) before replacing an existing target; No returns cancelled and leaves the old file untouched; Yes calls the existing atomic overwrite path.",
+    "fix_unit_tests": [
+      "host::tests::export_overwrite_requires_an_explicit_confirmation (Yes/Ok => overwrite, No/Cancel/Custom => keep existing, new file => overwrite)",
+      "adapters::library::tests::exports_are_atomic_external_copies_and_require_overwrite_confirmation (existing atomic export contract)"
+    ],
+    "rebuilt_package": {
+      "installer_sha256": "56837792e2110a963fcf003ef591f7b45c3aad6544aeaabf0418eec7c4c5f047",
+      "installer_bytes": 244745354,
+      "installed_executable_sha256": "2ccbadbfa048ea3bca6290f268e0bc781d2202a738609e3c371fae4362ef1e37",
+      "installed_executable_bytes": 41994240,
+      "contains_overwrite_dialog_strings": true
+    },
+    "observed_after_fix": "After selecting an existing target, the overwrite confirmation dialog appeared (the user manually declined it). Both dummy targets remained byte-identical: overwrite-acceptance.png 19 bytes / eafabaa1…1210 and overwrite-acceptance2.png 21 bytes / 6ae230c5…d419.",
+    "automated_yes_path": "not rerun after the fix; confirmed-overwrite semantics remain covered by the library unit test and the shared export path. A later UI pass may exercise Yes explicitly.",
     "required_by": "test-plan P08 (导出覆盖确认/取消) and design decision 5 (覆盖仍需用户确认)"
   },
   "limitations": [

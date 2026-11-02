@@ -1,26 +1,26 @@
 {
-  "schema_version": 1,
-  "kind": "windows-internal-nsis-package",
-  "status": "built",
-  "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
-  "installer_sha256": "466eb3f43c8fb984ec5cf92b369927dd0b58692e629e76df2301ed783a743c29",
-  "installer_bytes": 244738598,
-  "target": "x86_64-pc-windows-msvc",
-  "install_mode": "currentUser",
-  "webview2_install_mode": "offlineInstaller",
-  "signed": false,
-  "model_weights_bundled": false,
-  "private_python_bundled": false,
-  "sidecars": [
-    {
-      "name": "diagnostic-worker-x86_64-pc-windows-msvc.exe",
-      "sha256": "bfe1943debf59d496b49352c25fdba0e8f8bccd3f9afc254487b942225e217ae",
-      "bytes": 463360
-    },
-    {
-      "name": "inference-supervisor-x86_64-pc-windows-msvc.exe",
-      "sha256": "e157e7c086bd6b4ec0d0e3f876f886228f284bcf3f5097ef6af4783585ff3680",
-      "bytes": 1008640
-    }
-  ]
+    "schema_version":  1,
+    "kind":  "windows-internal-nsis-package",
+    "status":  "built",
+    "installer":  "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
+    "installer_sha256":  "56837792e2110a963fcf003ef591f7b45c3aad6544aeaabf0418eec7c4c5f047",
+    "installer_bytes":  244745354,
+    "target":  "x86_64-pc-windows-msvc",
+    "install_mode":  "currentUser",
+    "webview2_install_mode":  "offlineInstaller",
+    "signed":  false,
+    "model_weights_bundled":  false,
+    "private_python_bundled":  false,
+    "sidecars":  [
+                     {
+                         "name":  "diagnostic-worker-x86_64-pc-windows-msvc.exe",
+                         "sha256":  "bfe1943debf59d496b49352c25fdba0e8f8bccd3f9afc254487b942225e217ae",
+                         "bytes":  463360
+                     },
+                     {
+                         "name":  "inference-supervisor-x86_64-pc-windows-msvc.exe",
+                         "sha256":  "e157e7c086bd6b4ec0d0e3f876f886228f284bcf3f5097ef6af4783585ff3680",
+                         "bytes":  1008640
+                     }
+                 ]
 }
