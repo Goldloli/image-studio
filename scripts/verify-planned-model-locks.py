@@ -9,8 +9,8 @@ import zipfile
 
 
 def verify_lock(directory, source_directory, worker_module, worker_package, worker_version):
-    model = json.loads((directory / "model-manifest.json").read_text())
-    runtime = json.loads((directory / "runtime-manifest.json").read_text())
+    model = json.loads((directory / "model-manifest.json").read_text(encoding="utf-8"))
+    runtime = json.loads((directory / "runtime-manifest.json").read_text(encoding="utf-8"))
 
     assert model["schema_version"] == 1
     assert sum(file["bytes"] for file in model["files"]) == model["component_bytes"]
@@ -32,7 +32,7 @@ def verify_lock(directory, source_directory, worker_module, worker_package, work
 
     lines = [
         line
-        for line in (directory / "requirements.lock").read_text().splitlines()
+        for line in (directory / "requirements.lock").read_text(encoding="utf-8").splitlines()
         if line and not line.startswith("#")
     ]
     assert lines == [
@@ -46,15 +46,15 @@ def verify_lock(directory, source_directory, worker_module, worker_package, work
     with zipfile.ZipFile(wheel_path) as archive:
         for source in (root / "tools" / source_directory / worker_module).glob("*.py"):
             assert (
-                source.read_bytes()
-                == archive.read(f"{worker_module}/{source.name}")
+                source.read_bytes().replace(b"\r\n", b"\n")
+                == archive.read(f"{worker_module}/{source.name}").replace(b"\r\n", b"\n")
             )
     return model, runtime, worker
 
 
 def verify_native_lock(directory):
-    model = json.loads((directory / "model-manifest.json").read_text())
-    runtime = json.loads((directory / "runtime-manifest.json").read_text())
+    model = json.loads((directory / "model-manifest.json").read_text(encoding="utf-8"))
+    runtime = json.loads((directory / "runtime-manifest.json").read_text(encoding="utf-8"))
     assert model["schema_version"] == 1
     assert model["files"] == []
     assert (
@@ -89,7 +89,7 @@ def verify_native_lock(directory):
 
 def verify_text_models(shared_directory, model_directories):
     runtime = json.loads(
-        (shared_directory / "runtime-manifest.json").read_text()
+        (shared_directory / "runtime-manifest.json").read_text(encoding="utf-8")
     )
     assert runtime["schema_version"] == 1
     assert runtime["id"] == "mflux-0.24.0-py3.13.12-macos-arm64-recipes-v3"
@@ -111,7 +111,7 @@ def verify_text_models(shared_directory, model_directories):
     lines = [
         line
         for line in (shared_directory / "requirements.lock")
-        .read_text()
+        .read_text(encoding="utf-8")
         .splitlines()
         if line and not line.startswith("#")
     ]
@@ -127,8 +127,8 @@ def verify_text_models(shared_directory, model_directories):
             "*.py"
         ):
             assert (
-                source.read_bytes()
-                == archive.read(f"studio_mflux_worker_v3/{source.name}")
+                source.read_bytes().replace(b"\r\n", b"\n")
+                == archive.read(f"studio_mflux_worker_v3/{source.name}").replace(b"\r\n", b"\n")
             )
 
     expected = {
@@ -157,16 +157,16 @@ def verify_text_models(shared_directory, model_directories):
     source_metadata = json.loads(
         (
             root
-            / "openspec/changes/introduce-qwen21-and-moss-image"
+            / "openspec/changes/archive/2026-11-01-introduce-qwen21-and-moss-image"
             / "references/model-source-metadata.json"
-        ).read_text()
+        ).read_text(encoding="utf-8")
     )
     source_by_repository = {
         item["repository"]: item for item in source_metadata["models"]
     }
     verified = []
     for directory in model_directories:
-        model = json.loads((directory / "model-manifest.json").read_text())
+        model = json.loads((directory / "model-manifest.json").read_text(encoding="utf-8"))
         repository, download_repository, revision, component_bytes, file_count = expected[
             directory.name
         ]

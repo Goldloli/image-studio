@@ -8,8 +8,8 @@ import zipfile
 
 root = Path(__file__).resolve().parent.parent
 directory = root / 'resources/local-generation'
-model = json.loads((directory / 'model-manifest.json').read_text())
-runtime = json.loads((directory / 'runtime-manifest.json').read_text())
+model = json.loads((directory / 'model-manifest.json').read_text(encoding="utf-8"))
+runtime = json.loads((directory / 'runtime-manifest.json').read_text(encoding="utf-8"))
 assert model['repository'] == 'Tongyi-MAI/Z-Image-Turbo'
 assert model['revision'] == 'f332072aa78be7aecdf3ee76d5c247082da564a6'
 components = [file for file in model['files'] if file['path'] != 'README.md']
@@ -25,7 +25,7 @@ for file in [*model['files'], runtime['interpreter'], *runtime['wheels']]:
 for wheel in runtime['wheels']:
     assert wheel['path'].endswith('.whl') and 'license' in wheel
     assert runtime['packages'][wheel['package']] == wheel['version']
-lines = [line for line in (directory / 'requirements.lock').read_text().splitlines() if line and not line.startswith('#')]
+lines = [line for line in (directory / 'requirements.lock').read_text(encoding="utf-8").splitlines() if line and not line.startswith('#')]
 assert lines == [f"{wheel['package']}=={wheel['version']} --hash=sha256:{wheel['sha256']}" for wheel in runtime['wheels']]
 worker = next(wheel for wheel in runtime['wheels'] if wheel['package'] == 'studio-mflux-worker')
 wheel_path = directory / worker['path']
@@ -33,5 +33,5 @@ assert wheel_path.stat().st_size == worker['bytes']
 assert hashlib.sha256(wheel_path.read_bytes()).hexdigest() == worker['sha256']
 with zipfile.ZipFile(wheel_path) as archive:
     for source in (root / 'tools/mflux-worker/studio_mflux_worker').glob('*.py'):
-        assert source.read_bytes() == archive.read('studio_mflux_worker/' + source.name), source
+        assert source.read_bytes().replace(b'\r\n', b'\n') == archive.read('studio_mflux_worker/' + source.name).replace(b'\r\n', b'\n'), source
 print(json.dumps({'model_components': len(components), 'component_bytes': model['component_bytes'], 'runtime_wheels': len(runtime['wheels']), 'worker_source_matches_wheel': True, 'runtime_lock': runtime['id'], 'network_accessed': False}, indent=2))
