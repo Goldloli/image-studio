@@ -2686,6 +2686,34 @@ fn inventory(root: &Path, path: &Path, out: &mut Vec<InventoryEntry>) -> Result<
 mod tests {
     use super::*;
     #[cfg(windows)]
+    fn seed_windows_validation_cache(installer: &Installation) {
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .canonicalize()
+            .unwrap();
+        let runtime_source = repo.join("target/windows-gate0/downloads");
+        let model_source = repo.join("target/windows-gate0/model");
+        let worker_source = repo.join(
+            "resources/windows-foundation/z-image-diffusers/studio_zimage_cuda_worker-0.1.0-py3-none-any.whl",
+        );
+        ensure_child_dir(&installer.inner.paths.cache, &installer.cache()).unwrap();
+        for artifact in installer.inner.runtime.downloads() {
+            if artifact.url == "bundled:worker-wheel" {
+                verify(&worker_source, artifact.bytes, &artifact.sha256).unwrap();
+                fs::hard_link(&worker_source, installer.cache().join(&artifact.sha256)).unwrap();
+                continue;
+            }
+            let source = runtime_source.join(&artifact.path);
+            verify(&source, artifact.bytes, &artifact.sha256).unwrap();
+            fs::hard_link(source, installer.cache().join(&artifact.sha256)).unwrap();
+        }
+        for artifact in installer.inner.model.downloads() {
+            let source = model_source.join(&artifact.path);
+            verify(&source, artifact.bytes, &artifact.sha256).unwrap();
+            fs::hard_link(source, installer.cache().join(&artifact.sha256)).unwrap();
+        }
+    }
+    #[cfg(windows)]
     #[test]
     #[ignore = "explicit acceptance: installs the complete Windows product closure from the Gate 0 validation cache"]
     fn actual_windows_product_installs_from_the_validation_cache() {
@@ -2695,36 +2723,9 @@ mod tests {
             .join("../..")
             .canonicalize()
             .unwrap();
-        let runtime_source = repo.join("target/windows-gate0/downloads");
-        let model_source = repo.join("target/windows-gate0/model");
-        let worker_source =
-            repo.join("resources/windows-foundation/z-image-diffusers/studio_zimage_cuda_worker-0.1.0-py3-none-any.whl");
         let manager = Installations::new(paths.clone()).unwrap();
         let installer = manager.for_id(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
-        ensure_child_dir(&installer.inner.paths.cache, &installer.cache()).unwrap();
-
-        for artifact in installer.inner.runtime.downloads() {
-            if artifact.url == "bundled:worker-wheel" {
-                continue;
-            }
-            let source = runtime_source.join(&artifact.path);
-            verify(&source, artifact.bytes, &artifact.sha256).unwrap();
-            fs::hard_link(source, installer.cache().join(&artifact.sha256)).unwrap();
-        }
-        let worker = installer
-            .inner
-            .runtime
-            .wheels
-            .iter()
-            .find(|artifact| artifact.url == "bundled:worker-wheel")
-            .unwrap();
-        verify(&worker_source, worker.bytes, &worker.sha256).unwrap();
-        fs::hard_link(worker_source, installer.cache().join(&worker.sha256)).unwrap();
-        for artifact in installer.inner.model.downloads() {
-            let source = model_source.join(&artifact.path);
-            verify(&source, artifact.bytes, &artifact.sha256).unwrap();
-            fs::hard_link(source, installer.cache().join(&artifact.sha256)).unwrap();
-        }
+        seed_windows_validation_cache(installer);
 
         let started = std::time::Instant::now();
         manager.start(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
@@ -3051,6 +3052,15 @@ mod tests {
         )
         .unwrap();
         controller.shutdown();
+        let worker_wheel_sha256 = installer
+            .inner
+            .runtime
+            .wheels
+            .iter()
+            .find(|artifact| artifact.url == "bundled:worker-wheel")
+            .unwrap()
+            .sha256
+            .clone();
         atomic_json(
             &repo.join("verification/windows-gate0/product-install.json"),
             &serde_json::json!({
@@ -3061,7 +3071,7 @@ mod tests {
                 "elapsed_seconds": started.elapsed().as_secs_f64(),
                 "runtime_lock_id": ready.runtime_lock_id,
                 "worker_build_id": ready.worker_build_id,
-                "worker_wheel_sha256": worker.sha256,
+                "worker_wheel_sha256": worker_wheel_sha256,
                 "model_snapshot_id": ready.model_snapshot_id,
                 "model_files": installer.inner.model.files.len(),
                 "model_component_bytes": installer.inner.model.component_bytes,
@@ -3316,6 +3326,361 @@ mod tests {
         assert_eq!(ready.model_snapshot_id, WINDOWS_ZIMAGE_INSTALL_ID);
         assert!(ready.worker_program.is_file());
         assert!(ready.model_path.join("model_index.json").is_file());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "explicit acceptance: cancels runtime preparation and the probe, then retries from the verified cache"]
+    fn actual_windows_product_cancels_runtime_preparation_and_probe_and_retries() {
+        fn wait_for_phase(
+            manager: &Installations,
+            target: &str,
+            deadline: std::time::Instant,
+            history: &mut Vec<String>,
+        ) -> std::time::Instant {
+            loop {
+                let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+                if history.last() != Some(&snapshot.phase) {
+                    history.push(snapshot.phase.clone());
+                }
+                if snapshot.phase == target {
+                    return std::time::Instant::now();
+                }
+                assert!(
+                    std::time::Instant::now() < deadline,
+                    "installation did not reach {target}: phase={} error={:?}",
+                    snapshot.phase,
+                    snapshot.error
+                );
+                std::thread::sleep(std::time::Duration::from_millis(100));
+            }
+        }
+        fn wait_terminal(
+            manager: &Installations,
+            deadline: std::time::Instant,
+            history: &mut Vec<String>,
+        ) -> InstallationSnapshot {
+            loop {
+                let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+                if history.last() != Some(&snapshot.phase) {
+                    history.push(snapshot.phase.clone());
+                }
+                if !matches!(
+                    snapshot.phase.as_str(),
+                    "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
+                ) {
+                    return snapshot;
+                }
+                assert!(
+                    std::time::Instant::now() < deadline,
+                    "installation did not stop: phase={} error={:?}",
+                    snapshot.phase,
+                    snapshot.error
+                );
+                std::thread::sleep(std::time::Duration::from_millis(100));
+            }
+        }
+
+        let root = tempfile::tempdir().unwrap();
+        let paths = AppPaths::resolve(Some(root.path())).unwrap();
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .canonicalize()
+            .unwrap();
+        let manager = Installations::new(paths.clone()).unwrap();
+        let installer = manager.for_id(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        seed_windows_validation_cache(installer);
+        let ready_record = paths.data.join(installer.inner.profile.ready_relative);
+        let started_at_unix = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let started = std::time::Instant::now();
+
+        // Cancel while the private interpreter and wheels are being prepared.
+        let mut runtime_phases = vec![
+            manager
+                .snapshot(WINDOWS_ZIMAGE_INSTALL_ID)
+                .unwrap()
+                .phase
+                .clone(),
+        ];
+        manager.start(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        let runtime_reached = wait_for_phase(
+            &manager,
+            "installing_runtime",
+            std::time::Instant::now() + std::time::Duration::from_secs(900),
+            &mut runtime_phases,
+        );
+        let runtime_cancel_requested_seconds =
+            runtime_reached.duration_since(started).as_secs_f64();
+        manager.cancel(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        let cancelled_runtime = wait_terminal(
+            &manager,
+            std::time::Instant::now() + std::time::Duration::from_secs(60),
+            &mut runtime_phases,
+        );
+        let runtime_cancel_seconds = started.elapsed().as_secs_f64();
+        let activated_after_runtime_cancel = ready_record.exists();
+        let busy_after_runtime_cancel = manager.is_busy();
+
+        // Cancel again while the real GPU/NF4 probe is running.
+        let mut probe_phases = vec![cancelled_runtime.phase.clone()];
+        manager.start(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        let probe_reached = wait_for_phase(
+            &manager,
+            "probing",
+            std::time::Instant::now() + std::time::Duration::from_secs(900),
+            &mut probe_phases,
+        );
+        let probe_cancel_requested_seconds = probe_reached.duration_since(started).as_secs_f64();
+        manager.cancel(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        let cancelled_probe = wait_terminal(
+            &manager,
+            std::time::Instant::now() + std::time::Duration::from_secs(120),
+            &mut probe_phases,
+        );
+        let probe_cancel_seconds = started.elapsed().as_secs_f64();
+        let activated_after_probe_cancel = ready_record.exists();
+        let busy_after_probe_cancel = manager.is_busy();
+
+        // A third start must activate only after the complete runtime is verified again.
+        let mut retry_phases = vec![cancelled_probe.phase.clone()];
+        manager.start(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        let retry_started = std::time::Instant::now();
+        let final_snapshot = loop {
+            let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+            if retry_phases.last() != Some(&snapshot.phase) {
+                retry_phases.push(snapshot.phase.clone());
+            }
+            if !matches!(
+                snapshot.phase.as_str(),
+                "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
+            ) {
+                break snapshot;
+            }
+            assert!(
+                retry_started.elapsed() < std::time::Duration::from_secs(900),
+                "retried installation did not finish: phase={} error={:?}",
+                snapshot.phase,
+                snapshot.error
+            );
+            std::thread::sleep(std::time::Duration::from_millis(250));
+        };
+        let retry_elapsed_seconds = retry_started.elapsed().as_secs_f64();
+        let passed = final_snapshot.phase == "ready";
+        let ready = passed.then(|| installer.ready_paths().unwrap());
+        let record = passed.then(|| {
+            serde_json::from_slice::<ReadyRecord>(&fs::read(ready_record.clone()).unwrap()).unwrap()
+        });
+        atomic_json(
+            &repo.join("verification/windows-gate0/product-runtime-cancel-retry.json"),
+            &serde_json::json!({
+                "schema_version": 1,
+                "kind": "windows-product-runtime-cancel-retry",
+                "status": if passed { "passed" } else { "failed" },
+                "started_at_unix": started_at_unix,
+                "elapsed_seconds": started.elapsed().as_secs_f64(),
+                "validation_cache_seeded": true,
+                "cache_entries_at_start": fs::read_dir(installer.cache())
+                    .map(|entries| entries.count())
+                    .unwrap_or(0),
+                "runtime_cancel": {
+                    "phase_history": runtime_phases,
+                    "cancel_requested_seconds": runtime_cancel_requested_seconds,
+                    "cancelled_seconds": runtime_cancel_seconds,
+                    "phase": cancelled_runtime.phase,
+                    "error": cancelled_runtime.error,
+                    "activated": activated_after_runtime_cancel,
+                    "busy_after_cancel": busy_after_runtime_cancel,
+                },
+                "probe_cancel": {
+                    "phase_history": probe_phases,
+                    "cancel_requested_seconds": probe_cancel_requested_seconds,
+                    "cancelled_seconds": probe_cancel_seconds,
+                    "phase": cancelled_probe.phase,
+                    "error": cancelled_probe.error,
+                    "activated": activated_after_probe_cancel,
+                    "busy_after_cancel": busy_after_probe_cancel,
+                },
+                "retry": {
+                    "phase_history": retry_phases,
+                    "elapsed_seconds": retry_elapsed_seconds,
+                    "phase": final_snapshot.phase,
+                    "error": final_snapshot.error,
+                },
+                "runtime_lock_id": ready.as_ref().map(|ready| ready.runtime_lock_id.clone()),
+                "worker_build_id": ready.as_ref().map(|ready| ready.worker_build_id.clone()),
+                "model_snapshot_id": ready.as_ref().map(|ready| ready.model_snapshot_id.clone()),
+                "runtime_inventory_entries": record.as_ref().map(|record| record.runtime_files.len()),
+                "probe": record.as_ref().map(|record| record.probe.clone()),
+            }),
+        )
+        .unwrap();
+
+        assert_eq!(
+            cancelled_runtime.phase, "cancelled",
+            "{:?}",
+            cancelled_runtime.error
+        );
+        assert_eq!(
+            cancelled_probe.phase, "cancelled",
+            "{:?}",
+            cancelled_probe.error
+        );
+        assert!(!activated_after_runtime_cancel);
+        assert!(!activated_after_probe_cancel);
+        assert!(!busy_after_runtime_cancel);
+        assert!(!busy_after_probe_cancel);
+        assert!(passed, "{:?}", final_snapshot.error);
+        let ready = ready.unwrap();
+        assert_eq!(ready.worker_build_id, WINDOWS_ZIMAGE_WORKER_BUILD_ID);
+        assert_eq!(ready.runtime_lock_id, installer.inner.runtime.id);
+        assert_eq!(ready.model_snapshot_id, WINDOWS_ZIMAGE_INSTALL_ID);
+        assert!(ready.worker_program.is_file());
+        assert!(ready.model_path.join("model_index.json").is_file());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "explicit acceptance: activation rejects corrupt and missing model components"]
+    fn actual_windows_product_rejects_corrupt_and_missing_model_components() {
+        let root = tempfile::tempdir().unwrap();
+        let paths = AppPaths::resolve(Some(root.path())).unwrap();
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .canonicalize()
+            .unwrap();
+        let manager = Installations::new(paths.clone()).unwrap();
+        let installer = manager.for_id(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        seed_windows_validation_cache(installer);
+        let ready_record = paths.data.join(installer.inner.profile.ready_relative);
+        let started_at_unix = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let started = std::time::Instant::now();
+        let mut install_phase_history = vec![
+            manager
+                .snapshot(WINDOWS_ZIMAGE_INSTALL_ID)
+                .unwrap()
+                .phase
+                .clone(),
+        ];
+        manager.start(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(900);
+        loop {
+            let snapshot = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+            if install_phase_history.last() != Some(&snapshot.phase) {
+                install_phase_history.push(snapshot.phase.clone());
+            }
+            if !matches!(
+                snapshot.phase.as_str(),
+                "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
+            ) {
+                break;
+            }
+            assert!(
+                std::time::Instant::now() < deadline,
+                "installation timed out in {}: {}",
+                snapshot.phase,
+                snapshot.error.as_deref().unwrap_or("no error")
+            );
+            std::thread::sleep(std::time::Duration::from_millis(250));
+        }
+        let installed = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap();
+        assert_eq!(installed.phase, "ready", "{:?}", installed.error);
+        assert!(installer.ready_paths().is_ok());
+        let install_elapsed_seconds = started.elapsed().as_secs_f64();
+        let cache_entries_before = fs::read_dir(installer.cache())
+            .map(|entries| entries.count())
+            .unwrap_or(0);
+        let scheduler = installer
+            .model_dir()
+            .join("scheduler/scheduler_config.json");
+        let model_index = installer.model_dir().join("model_index.json");
+        let original_scheduler = fs::read(&scheduler).unwrap();
+        assert!(!original_scheduler.is_empty());
+
+        // Same-length corruption is reported as a digest failure and never silently replaced.
+        fs::write(&scheduler, vec![b'x'; original_scheduler.len()]).unwrap();
+        let corrupt_error = installer.ready_paths().unwrap_err();
+        let corrupt_phase = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap().phase;
+        let cache_entries_after_corrupt = fs::read_dir(installer.cache())
+            .map(|entries| entries.count())
+            .unwrap_or(0);
+        let corrupt_file_still_present = scheduler.is_file();
+
+        // Restoring the exact bytes recovers readiness without reinstalling or downloading.
+        fs::write(&scheduler, &original_scheduler).unwrap();
+        let recovered = installer.ready_paths().is_ok();
+
+        // A missing component keeps the installation unavailable and planning never re-fetches it.
+        fs::remove_file(&model_index).unwrap();
+        let missing_error = installer.ready_paths().unwrap_err();
+        let missing_phase = manager.snapshot(WINDOWS_ZIMAGE_INSTALL_ID).unwrap().phase;
+        let cache_entries_after_missing = fs::read_dir(installer.cache())
+            .map(|entries| entries.count())
+            .unwrap_or(0);
+        let model_files_present = installer
+            .inner
+            .model
+            .files
+            .iter()
+            .filter(|file| installer.model_dir().join(&file.path).is_file())
+            .count();
+        let missing_still_absent = !model_index.exists();
+
+        atomic_json(
+            &repo.join("verification/windows-gate0/product-activation-failures.json"),
+            &serde_json::json!({
+                "schema_version": 1,
+                "kind": "windows-product-activation-failures",
+                "status": "passed",
+                "started_at_unix": started_at_unix,
+                "install_elapsed_seconds": install_elapsed_seconds,
+                "validation_cache_seeded": true,
+                "install_phase_history": install_phase_history,
+                "model_files": installer.inner.model.files.len(),
+                "cache_entries_before_checks": cache_entries_before,
+                "corrupt_component": {
+                    "component": "scheduler/scheduler_config.json",
+                    "same_length_corruption": true,
+                    "error": corrupt_error,
+                    "phase": corrupt_phase,
+                    "cache_entries": cache_entries_after_corrupt,
+                    "file_still_present": corrupt_file_still_present,
+                    "recovered_after_exact_restore": recovered,
+                },
+                "missing_component": {
+                    "component": "model_index.json",
+                    "error": missing_error,
+                    "phase": missing_phase,
+                    "cache_entries": cache_entries_after_missing,
+                    "model_files_present": model_files_present,
+                    "still_absent": missing_still_absent,
+                },
+            }),
+        )
+        .unwrap();
+
+        assert!(
+            corrupt_error.contains("SHA-256 校验失败"),
+            "unexpected corrupt error: {corrupt_error}"
+        );
+        assert_eq!(corrupt_phase, "unavailable");
+        assert_eq!(cache_entries_after_corrupt, cache_entries_before);
+        assert!(corrupt_file_still_present);
+        assert!(recovered);
+        assert!(
+            missing_error.contains("文件缺失"),
+            "unexpected missing error: {missing_error}"
+        );
+        assert_eq!(missing_phase, "unavailable");
+        assert_eq!(cache_entries_after_missing, cache_entries_before);
+        assert_eq!(model_files_present, installer.inner.model.files.len() - 1);
+        assert!(missing_still_absent);
+        assert!(ready_record.is_file());
     }
 
     #[test]
