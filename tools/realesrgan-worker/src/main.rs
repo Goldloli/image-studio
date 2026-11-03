@@ -4,7 +4,7 @@ use png::{BitDepth, ColorType};
 use sha2::{Digest, Sha256};
 use std::{
     collections::BTreeMap,
-    ffi::OsString,
+    ffi::{OsStr, OsString},
     fs::{self, File},
     io::{BufReader, Read, Write},
     path::{Path, PathBuf},
@@ -17,15 +17,45 @@ use worker_protocol::generation::{
     VERSIONS_V2, WorkerIdentity,
 };
 
-const BUILD_ID: &str = "studio-realesrgan-worker-0.1.0";
-const RUNTIME_LOCK_ID: &str = "realesrgan-x4plus-ncnn-macos-v0.2.0-v1";
-const MODEL_SNAPSHOT_ID: &str = "realesrgan-x4plus-ncnn";
-const MODEL_ID: &str = "realesrgan-x4plus";
-const CAPABILITY: &str = "image.upscale.realesrgan-x4plus.v1";
-const RECIPE_ID: &str = "realesrgan-x4plus-t128-v1";
+/// Frozen worker identity per operating system. macOS keeps the initial native
+/// worker identity; Windows registers the independent identities frozen in
+/// design.md section 11 for the official Windows ncnn build.
+#[cfg(windows)]
+mod platform {
+    pub const BUILD_ID: &str = "studio-realesrgan-worker-windows-0.1.0";
+    pub const RUNTIME_LOCK_ID: &str = "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1";
+    pub const MODEL_SNAPSHOT_ID: &str = "realesrgan-x4plus-ncnn-windows-v1";
+    pub const MODEL_ID: &str = "realesrgan-x4plus-windows-v1";
+    pub const CAPABILITY: &str = "image.upscale.realesrgan-x4plus.windows-v1";
+    pub const RECIPE_ID: &str = "realesrgan-x4plus-windows-t128-v1";
+    pub const NCNN_SHA256: &str =
+        "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c";
+    pub const NCNN_BYTES: u64 = 6_161_408;
+    pub const NCNN_FILE_NAME: &str = "realesrgan-ncnn-vulkan.exe";
+}
+#[cfg(not(windows))]
+mod platform {
+    pub const BUILD_ID: &str = "studio-realesrgan-worker-0.1.0";
+    pub const RUNTIME_LOCK_ID: &str = "realesrgan-x4plus-ncnn-macos-v0.2.0-v1";
+    pub const MODEL_SNAPSHOT_ID: &str = "realesrgan-x4plus-ncnn";
+    pub const MODEL_ID: &str = "realesrgan-x4plus";
+    pub const CAPABILITY: &str = "image.upscale.realesrgan-x4plus.v1";
+    pub const RECIPE_ID: &str = "realesrgan-x4plus-t128-v1";
+    pub const NCNN_SHA256: &str =
+        "c1c35d92079085de96b9d547fd7e4464bc8a2e9ccf28d7b8c712d72ade91b7cc";
+    pub const NCNN_BYTES: u64 = 26_787_080;
+    pub const NCNN_FILE_NAME: &str = "realesrgan-ncnn-vulkan";
+}
+use platform::{
+    BUILD_ID, CAPABILITY, MODEL_ID, MODEL_SNAPSHOT_ID, NCNN_BYTES, NCNN_FILE_NAME, NCNN_SHA256,
+    RECIPE_ID, RUNTIME_LOCK_ID,
+};
+
+/// Upstream ncnn model name; identical on both frozen platforms.
+const MODEL_NAME: &str = "realesrgan-x4plus";
+const MODEL_WEIGHT_FILES: [&str; 2] = ["realesrgan-x4plus.bin", "realesrgan-x4plus.param"];
 const MODEL_BIN_SHA256: &str = "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf";
 const MODEL_PARAM_SHA256: &str = "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86";
-const NCNN_SHA256: &str = "c1c35d92079085de96b9d547fd7e4464bc8a2e9ccf28d7b8c712d72ade91b7cc";
 const MAX_OUTPUT_BYTES: u64 = 128 * 1024 * 1024;
 
 fn identity() -> WorkerIdentity {
@@ -137,9 +167,13 @@ impl Writer {
     }
 }
 
+fn trusted_binary_name(name: Option<&OsStr>) -> bool {
+    name == Some(OsStr::new(NCNN_FILE_NAME))
+}
+
 fn parse_binary(args: impl IntoIterator<Item = OsString>) -> Result<PathBuf, String> {
     let mut args = args.into_iter();
-    if args.next().as_deref() != Some(std::ffi::OsStr::new("--ncnn-binary")) {
+    if args.next().as_deref() != Some(OsStr::new("--ncnn-binary")) {
         return Err("expected --ncnn-binary <path>".into());
     }
     let path = PathBuf::from(args.next().ok_or("missing ncnn binary")?);
@@ -150,9 +184,11 @@ fn parse_binary(args: impl IntoIterator<Item = OsString>) -> Result<PathBuf, Str
         || path.is_symlink()
         || !path.is_file()
         || path.canonicalize().map_err(|error| error.to_string())? != path
-        || path.file_name().and_then(|value| value.to_str()) != Some("realesrgan-ncnn-vulkan")
+        || !trusted_binary_name(path.file_name())
     {
-        return Err("ncnn binary is not a trusted absolute regular file".into());
+        return Err(format!(
+            "ncnn binary must be an absolute regular file named {NCNN_FILE_NAME}"
+        ));
     }
     #[cfg(unix)]
     {
@@ -168,8 +204,28 @@ fn parse_binary(args: impl IntoIterator<Item = OsString>) -> Result<PathBuf, Str
             return Err("ncnn binary is not executable".into());
         }
     }
-    verify_file(&path, NCNN_SHA256, Some(26_787_080))?;
+    verify_file(&path, NCNN_SHA256, Some(NCNN_BYTES))?;
     Ok(path)
+}
+
+/// The frozen weight pair may sit at the install root (the existing macOS
+/// layout) or in the archive's `models/` directory. Exactly one layout must
+/// exist, and the bytes are still verified by hash afterwards.
+fn model_weights_dir(model: &Path) -> Result<PathBuf, String> {
+    let candidates = [model.to_path_buf(), model.join("models")];
+    let matches = candidates
+        .iter()
+        .filter(|candidate| {
+            MODEL_WEIGHT_FILES
+                .iter()
+                .all(|name| candidate.join(name).is_file())
+        })
+        .collect::<Vec<_>>();
+    match matches.as_slice() {
+        [only] => Ok((*only).clone()),
+        [] => Err("model directory is missing the fixed realesrgan-x4plus weight pair".into()),
+        _ => Err("model directory contains an ambiguous realesrgan-x4plus weight layout".into()),
+    }
 }
 
 fn validate_request(request: &ExecuteRequestV2) -> Result<(), String> {
@@ -179,7 +235,7 @@ fn validate_request(request: &ExecuteRequestV2) -> Result<(), String> {
     let expected = BTreeMap::from([
         ("recipe".into(), serde_json::json!(RECIPE_ID)),
         ("recipe_version".into(), serde_json::json!(1)),
-        ("model".into(), serde_json::json!("realesrgan-x4plus")),
+        ("model".into(), serde_json::json!(MODEL_NAME)),
         ("scale".into(), serde_json::json!(4)),
         ("tile".into(), serde_json::json!(128)),
         ("threads".into(), serde_json::json!("1:1:1")),
@@ -237,13 +293,14 @@ fn validate_request(request: &ExecuteRequestV2) -> Result<(), String> {
     {
         return Err("model and output paths are not normalized local directories".into());
     }
+    let weights = model_weights_dir(model)?;
     verify_file(
-        &model.join("realesrgan-x4plus.bin"),
+        &weights.join(MODEL_WEIGHT_FILES[0]),
         MODEL_BIN_SHA256,
         Some(33_424_520),
     )?;
     verify_file(
-        &model.join("realesrgan-x4plus.param"),
+        &weights.join(MODEL_WEIGHT_FILES[1]),
         MODEL_PARAM_SHA256,
         Some(116_029),
     )?;
@@ -383,6 +440,8 @@ fn run_ncnn(
         return Err("attempt output already exists".into());
     }
     let source = &request.inputs[0];
+    let weights = model_weights_dir(Path::new(&request.model_path))?;
+    let weights = weights.to_str().ok_or("model path is not UTF-8")?;
     let mut child = NativeChild(
         Command::new(binary)
             .args([
@@ -395,9 +454,9 @@ fn run_ncnn(
                 "-t",
                 "128",
                 "-m",
-                &request.model_path,
+                weights,
                 "-n",
-                "realesrgan-x4plus",
+                MODEL_NAME,
                 "-g",
                 "0",
                 "-j",
@@ -670,5 +729,85 @@ mod tests {
         assert!(!is_expected_cancel(
             &value, "session", "execute", &execution
         ));
+    }
+
+    #[test]
+    fn worker_identity_is_frozen_per_operating_system() {
+        #[cfg(windows)]
+        {
+            assert_eq!(BUILD_ID, "studio-realesrgan-worker-windows-0.1.0");
+            assert_eq!(
+                RUNTIME_LOCK_ID,
+                "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1"
+            );
+            assert_eq!(MODEL_SNAPSHOT_ID, "realesrgan-x4plus-ncnn-windows-v1");
+            assert_eq!(MODEL_ID, "realesrgan-x4plus-windows-v1");
+            assert_eq!(CAPABILITY, "image.upscale.realesrgan-x4plus.windows-v1");
+            assert_eq!(RECIPE_ID, "realesrgan-x4plus-windows-t128-v1");
+            assert_eq!(NCNN_BYTES, 6_161_408);
+            assert_eq!(NCNN_FILE_NAME, "realesrgan-ncnn-vulkan.exe");
+            assert!(trusted_binary_name(Some(OsStr::new(
+                "realesrgan-ncnn-vulkan.exe"
+            ))));
+            assert!(!trusted_binary_name(Some(OsStr::new(
+                "realesrgan-ncnn-vulkan"
+            ))));
+        }
+        #[cfg(not(windows))]
+        {
+            assert_eq!(BUILD_ID, "studio-realesrgan-worker-0.1.0");
+            assert_eq!(RUNTIME_LOCK_ID, "realesrgan-x4plus-ncnn-macos-v0.2.0-v1");
+            assert_eq!(MODEL_SNAPSHOT_ID, "realesrgan-x4plus-ncnn");
+            assert_eq!(MODEL_ID, "realesrgan-x4plus");
+            assert_eq!(CAPABILITY, "image.upscale.realesrgan-x4plus.v1");
+            assert_eq!(RECIPE_ID, "realesrgan-x4plus-t128-v1");
+            assert_eq!(NCNN_BYTES, 26_787_080);
+            assert_eq!(NCNN_FILE_NAME, "realesrgan-ncnn-vulkan");
+            assert!(trusted_binary_name(Some(OsStr::new(
+                "realesrgan-ncnn-vulkan"
+            ))));
+            assert!(!trusted_binary_name(Some(OsStr::new(
+                "realesrgan-ncnn-vulkan.exe"
+            ))));
+        }
+        assert_eq!(
+            identity(),
+            WorkerIdentity {
+                build_id: BUILD_ID.into(),
+                runtime_lock_id: RUNTIME_LOCK_ID.into(),
+                model_snapshot_id: MODEL_SNAPSHOT_ID.into(),
+            }
+        );
+        assert_eq!(NCNN_SHA256.len(), 64);
+        assert!(NCNN_SHA256.bytes().all(|byte| byte.is_ascii_hexdigit()));
+        assert_eq!(MODEL_NAME, "realesrgan-x4plus");
+    }
+
+    #[test]
+    fn weights_resolve_to_exactly_one_frozen_layout() {
+        let root = std::env::temp_dir().join(format!(
+            "realesrgan-worker-layout-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let write_pair = |dir: &Path| {
+            fs::create_dir_all(dir).unwrap();
+            for name in MODEL_WEIGHT_FILES {
+                fs::write(dir.join(name), b"fixture").unwrap();
+            }
+        };
+        let flat = root.join("flat");
+        write_pair(&flat);
+        assert_eq!(model_weights_dir(&flat).unwrap(), flat);
+        let nested = root.join("nested");
+        write_pair(&nested.join("models"));
+        assert_eq!(model_weights_dir(&nested).unwrap(), nested.join("models"));
+        assert!(model_weights_dir(&root).is_err());
+        write_pair(&flat.join("models"));
+        assert!(model_weights_dir(&flat).is_err());
+        fs::remove_dir_all(&root).unwrap();
     }
 }
