@@ -1,8 +1,62 @@
 # Image Studio
 
-源码仓库：[Goldloli/image-studio](https://github.com/Goldloli/image-studio)（私有）。准备在 Windows 端继续开发时，先看 [Windows 开发交接](doc/11-windows-development-handoff.md)；Windows Gate 0 已在目标机通过，证据见 [Windows Gate 0](verification/windows-gate0/README.md)，正式安装、产品 worker 与原生生成闭环仍在实施中。
+源码仓库：[Goldloli/image-studio](https://github.com/Goldloli/image-studio)（私有）。Windows 目标机已完成 Gate 0、产品安装与生成闭环、安装版 UI 验收和 NSIS 内部测试包；剩余 P0 都是管理员/人工门槛与 Mac 回归，明细和接力步骤见 [Windows 进度与接力](#windows-进度与接力)，完整交接见 [doc/12](doc/12-windows-handoff-2026-11-03.md)。
 
 Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，工作区参考 Cherry Studio 绘图页。已接入七个精确型号：Z-Image Turbo、FLUX.2 Klein 4B distilled、BiRefNet general epoch_244、Real-ESRGAN x4plus、Qwen-Image 2.1 基础版、Qwen-Image 2.1 Turbo 与 MOSS-Image-SFT；覆盖文生图、Klein 单图编辑、CPU 去背景/RGBA/mask 和 ncnn 精确 4× 放大。Qwen/MOSS 默认从 ModelScope 固定文件 revision 下载，同时逐文件核对冻结上游快照。创作页以多会话组织多轮提示词和图片，发送后立即显示占位与真实阶段进度，正式结果在同一卡片原位出现。功能页只展示真实可执行能力，作品页跨会话浏览正式 AssetRef，任务中心提供宿主侧状态筛选、检索、稳定分页和可读制作记录。模型页由宿主目录驱动，可检索七个正式目标并分开展示接入、安装、运行时、设备与可执行状态；设置页提供持久外观偏好、显式新会话默认值、真实存储和诊断信息。M3 Max / 128 GiB 已完成七个型号的真实执行、禁网、原生导出、取消和恢复；完整证据见[七型号整批交接](verification/qwen-moss-20261101/moss-stage-report.md)、[Qwen 阶段报告](verification/qwen-moss-20261101/qwen-stage-report.md)与[前置计划模型阶段验收](verification/planned-models-20261031/results.md)。
+
+## Windows 进度与接力
+
+当前 Windows 目标机为 **Windows 10 22H2 / RTX 3080 Ti 12 GB / 32 GB RAM / i7-13700K**，已完成：
+
+- Gate 0：三个独立进程、1024×1024、9 步、guidance 0.0，CUDA reserved 峰值 8.87 GiB、进程树 private commit 峰值 23.69 GiB，证据见 [Windows Gate 0](verification/windows-gate0/README.md)。
+- 独立 Z-Image CUDA NF4 配方与私有 Python/wheel 运行时、空缓存 ModelScope 安装与中断续传、坏摘要/缺件拒绝、运行准备与探针取消。
+- 产品 worker 与 `GenerationController` 实图、加载/采样取消、宿主/监督强杀恢复、跨实例执行租约。
+- Windows 目录/功能/设置投影（只投影一个已认证 Z-Image profile）、NSIS 当前用户安装包、安装版 UI 全路径（中英文三次生成、PNG 导出、重启恢复、任务/作品、明暗主题、原生窗口控件、合成 IME 保护）。
+- 2026-11-03 新增：启动失败诊断（`logs/startup-failure.log` + 原生对话框 + 退出码 3）与每数据根独立 WebView2 用户数据目录。
+
+剩余 P0 全部依赖环境或人工操作：
+
+| 类别 | 项目 | 说明 |
+|---|---|---|
+| 管理员 | 整树禁网 I07/P06、40 GB 小卷空间不足 I03 | 脚本在 `scripts/windows-admin/`，见其 README |
+| 人工 | 100%/200% 显示缩放、真实微软拼音 IME、干净 Win10 用户 D02、缺失/离线 WebView2 D03 | 需在目标机原生环境操作 |
+| 目标机 | W07 复验、2026-11-03 记录的「不同数据根第二实例 101」复测 | bd `image-studio-b65`；若复现附 `logs/startup-failure.log` |
+| Mac | R02–R04：完整质量门、隔离源码/禁网启动、七型号回归 | 必须在 Mac 上执行 |
+
+### 在新 Windows 机器上接力
+
+```powershell
+git clone --config core.longpaths=true --config core.autocrlf=false https://github.com/Goldloli/image-studio.git
+cd image-studio
+npm --prefix apps/frontend ci
+cargo build --locked -p inference-supervisor -p diagnostic-worker
+New-Item -ItemType Directory -Force apps/desktop/binaries | Out-Null
+Copy-Item target/debug/inference-supervisor.exe apps/desktop/binaries/inference-supervisor-x86_64-pc-windows-msvc.exe
+Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-worker-x86_64-pc-windows-msvc.exe
+openspec validate introduce-windows-foundation --strict --no-interactive
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo test --workspace --locked
+npm --prefix apps/frontend test
+npm --prefix apps/frontend run build
+bd prime
+```
+
+注意事项：
+
+- Rust 由 `rust-toolchain.toml` 固定为 **1.99.1**，Node/npm 为 **24.19.0 / 11.17.0**。国内网络下 `rustup` 与 `crates.io` 直连会反复卡住：rustup 可先并发下载组件到本地目录，再用 `RUSTUP_DIST_SERVER` 指向本地 HTTP 镜像；cargo 可用 `--config` 临时把 `crates-io` 指向 sparse 镜像（如 rsproxy），不要改全局配置。
+- `apps/desktop/build.rs` 要求 `apps/desktop/binaries/` 已有 sidecar，否则 `cargo clippy/test` 会直接 panic。
+- 不要复制 Mac 的 runtime/Ready 记录；验收一律用 `--data-dir` 隔离根，正式下载走生产 ModelScope 固定源。
+- 启动失败时写入 `<数据根>/logs/startup-failure.log`，显示「Image Studio 启动失败」对话框，退出码 **3**；独立数据根各自使用 `<数据根>/cache/webview2` 的 WebView2 profile。
+
+### 两套验证环境
+
+| 环境 | 用途 | 已复核内容 |
+|---|---|---|
+| Windows 10 22H2 / RTX 3080 Ti 12 GB / i7-13700K | 目标机 | 230 项 Rust 测试、fmt/clippy/构建、前端 37 项、安装版 UI 全路径、真实 Z-Image 生成、禁网与强杀恢复、NSIS 安装包 |
+| Windows 11 22631 / RTX 2060 SUPER 8 GB / i9-9900K | 补充环境 | 234 项 Rust 测试、fmt/clippy/构建、前端 37 项、启动失败诊断、双隔离根 WebView2、主题跨重启 |
+
+模型安装、真实生成与资源预算只在 3080 Ti 目标机认证。2060 SUPER 为 sm75 / 8 GiB：低于配方实测 8.87 GiB 的 CUDA reserved 峰值，且不具备配方使用的 BF16 计算，不在支持范围；Windows 11 结果按 [Windows 规格](openspec/changes/introduce-windows-foundation/specs/windows-desktop/spec.md) 只作补充。记录见 [平台一致性](verification/windows-platform-parity/README.md)。
 
 ## 构建和启动
 
@@ -197,17 +251,6 @@ BiRefNet epoch_244 随后完成 31 项适用 P0：空缓存与禁网安装、真
 2026-10-31 的当前模型复认证覆盖 37 个 P0 用例，结果为 37 通过、0 失败、0 阻塞。空缓存安装经固定 Hugging Face revision 完成组件校验、运行时激活和 M3 Max GPU 探针；原生 SCIM 拼音候选确认与未确认组合门禁通过。快速双击误取消、作品页首次旧计数和图片查看器重开问题也已完成原生回归。完整结果见 [模型复认证报告](verification/model-usability-20261031/results.md)、[机器可读明细](verification/model-usability-20261031/acceptance.json) 与 [质量审阅](verification/model-usability-20261031/quality-review.json)。
 
 2026-11-01 的整批回归完成七型号/八能力统计、41 个正式作品与 1 个 mask、九步跨后端顺序、跨会话互斥、4:3→1:1 恢复、缺件与旧环境保留、1280×800/960×640 原生布局。R01 重跑 Z-Image 三个尺寸、真实取消重试和采样后宿主强杀恢复；R02 对原 v1 cancelled Job 追加新 Attempt 并保持 request/plan/manifest 不变；R05 重跑 Klein 文生图/编辑、BiRefNet 双输出、Real-ESRGAN 4×，并完成三条 cancelled 任务的会话内原生重试。R03/R04 覆盖事务、旧事件、未来版本、非法候选/帧、提交崩溃窗口、前端/Rust/Python、锁审计、禁网启动和隔离源码构建。报告见 [MOSS/整批阶段报告](verification/qwen-moss-20261101/moss-stage-report.md)。
-
-### 验证环境
-
-质量门与桌面宿主行为已在两套环境复核，记录见 [Windows 平台一致性](verification/windows-platform-parity/README.md)：
-
-| 环境 | 用途 | 已复核内容 |
-|---|---|---|
-| Windows 10 22H2 / RTX 3080 Ti 12 GB / i7-13700K | 目标机 | 230 项 Rust 测试（8 项显式忽略）、fmt/clippy/构建、前端 37 项、安装版 UI 全路径、真实 Z-Image 生成、禁网与强杀恢复 |
-| Windows 11 22631 / RTX 2060 SUPER 8 GB / i9-9900K | 补充环境 | 234 项 Rust 测试、fmt/clippy/构建、前端 37 项、启动失败诊断（日志/对话框/退出码 3）、双隔离根 WebView2 目录、主题跨重启 |
-
-模型安装、真实生成和资源预算仍只在 3080 Ti 目标机认证。2060 SUPER 为 sm75 / 8 GiB：低于该配方实测 8.87 GiB 的 CUDA reserved 峰值，且不具备配方使用的 BF16 计算，不在当前支持范围。Windows 11 结果按 [Windows 规格](openspec/changes/introduce-windows-foundation/specs/windows-desktop/spec.md) 只作补充，不替代目标机验收。
 
 ## 规格与研究
 
