@@ -12,7 +12,7 @@ Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，�
 - 独立 Z-Image CUDA NF4 配方与私有 Python/wheel 运行时、空缓存 ModelScope 安装与中断续传、坏摘要/缺件拒绝、运行准备与探针取消。
 - 产品 worker 与 `GenerationController` 实图、加载/采样取消、宿主/监督强杀恢复、跨实例执行租约。
 - Windows 目录/功能/设置投影（只投影一个已认证 Z-Image profile）、NSIS 当前用户安装包、安装版 UI 全路径（中英文三次生成、PNG 导出、重启恢复、任务/作品、明暗主题、原生窗口控件、合成 IME 保护）。
-- 2026-11-03 新增：启动失败诊断（`logs/startup-failure.log` + 原生对话框 + 退出码 3）与每数据根独立 WebView2 用户数据目录。
+- 2026-11-03 新增：启动失败诊断（`logs/startup-failure.log` + 原生对话框 + 退出码 3）与每数据根独立 WebView2 用户数据目录，已在 Windows 10 目标机以重建的 `9e5ecc40…a8ba2` 安装包复验通过（W07-a/a2/b）。
 
 剩余 P0 全部依赖环境或人工操作：
 
@@ -20,7 +20,6 @@ Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，�
 |---|---|---|
 | 管理员 | 整树禁网 I07/P06、40 GB 小卷空间不足 I03 | 脚本在 `scripts/windows-admin/`，见其 README |
 | 人工 | 100%/200% 显示缩放、真实微软拼音 IME、干净 Win10 用户 D02、缺失/离线 WebView2 D03 | 需在目标机原生环境操作 |
-| 目标机 | W07 复验、2026-11-03 记录的「不同数据根第二实例 101」复测 | bd `image-studio-b65`；若复现附 `logs/startup-failure.log` |
 | Mac | R02–R04：完整质量门、隔离源码/禁网启动、七型号回归 | 必须在 Mac 上执行 |
 
 ### 在新 Windows 机器上接力
@@ -53,7 +52,7 @@ bd prime
 
 | 环境 | 用途 | 已复核内容 |
 |---|---|---|
-| Windows 10 22H2 / RTX 3080 Ti 12 GB / i7-13700K | 目标机 | 230 项 Rust 测试、fmt/clippy/构建、前端 37 项、安装版 UI 全路径、真实 Z-Image 生成、禁网与强杀恢复、NSIS 安装包 |
+| Windows 10 22H2 / RTX 3080 Ti 12 GB / i7-13700K | 目标机 | 234 项 Rust 测试、fmt/clippy/构建、前端 37 项、安装版 UI 全路径、真实 Z-Image 生成、禁网与强杀恢复、NSIS 安装包、W07 启动失败诊断与双根 WebView2 隔离 |
 | Windows 11 22631 / RTX 2060 SUPER 8 GB / i9-9900K | 补充环境 | 234 项 Rust 测试、fmt/clippy/构建、前端 37 项、启动失败诊断、双隔离根 WebView2、主题跨重启 |
 
 模型安装、真实生成与资源预算只在 3080 Ti 目标机认证。2060 SUPER 为 sm75 / 8 GiB：低于配方实测 8.87 GiB 的 CUDA reserved 峰值，且不具备配方使用的 BF16 计算，不在支持范围；Windows 11 结果按 [Windows 规格](openspec/changes/introduce-windows-foundation/specs/windows-desktop/spec.md) 只作补充。记录见 [平台一致性](verification/windows-platform-parity/README.md)。

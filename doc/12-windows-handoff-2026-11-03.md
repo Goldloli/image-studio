@@ -121,8 +121,9 @@ Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-wo
 | Windows 全量质量门（fmt/clippy/测试/构建/前端/清单审计） | passed | `verification/windows-quality-gate.json` / `.md` / `windows-r01-*.log` |
 | 安装版原生 UI：UI 安装→Ready、中英文三次真实生成、原生对话框导出 PNG、重启恢复、任务/作品、设置/存储/关于、明暗主题、原生最大化/还原/最小化/拖拽、Tab/Shift+Enter、合成 IME 组合保护、UI 停止落 cancelled | passed（部分项有明确限制） | `verification/windows-installed-app/README.md` + `ui-acceptance.json` |
 | 覆盖导出确认（P08 缺陷修复） | 代码/单元测试/安装包已就绪，确认对话框已出现；拒绝覆盖时旧文件保持不变；Yes 路径未再自动重跑 | `ui-acceptance.json` 的 `export_overwrite`、`apps/desktop/src/host.rs` |
-| 安装包与更新烟测 | passed，包 244,745,354 bytes / `56837792…f047` | `verification/windows-installer/README.md`、`internal-package.json`、`install-update-smoke.json` |
+| 安装包与更新烟测 | passed；2026-11-03 因启动诊断重建为 244,754,133 bytes / `9e5ecc40…a8ba2` | `verification/windows-installer/README.md`、`internal-package.json`、`install-update-smoke.json` |
 | 平台一致性（Win11 / RTX 2060 SUPER 8 GB，补充） | passed（质量门、启动/页面/主题持久化、双根隔离、启动失败退出码 3；不含模型与生成） | `verification/windows-platform-parity/README.md` |
+| 启动失败诊断（W07，目标机重建包） | passed：故障注入下写 `logs/startup-failure.log`、原生「Image Studio 启动失败」对话框、退出码 3；profile 目录不可建时直接走同一路径；双根 WebView2 目录分离且旧共享 profile 未被触碰；不同数据根第二实例 101 在修复前/后包均未复现 | `verification/windows-startup-diagnosis/target-machine.json` |
 
 ## 6. 明天优先事项（按建议顺序）
 
@@ -130,13 +131,15 @@ Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-wo
    若新机是重新 clone，注意它可能落后于本地会话；以用户/本机最新提交为准。
 2. **可选**：把 P08 的 Yes 分支也自动跑一遍（当前“确认覆盖”只有单元测试 + 代码路径证据）。
    用隔离数据根导出到已存在文件，确认对话框点“是”，校验文件变为 PNG 且 SHA-256 正确。
-3. **~~调查 second-instance 异常~~（2026-11-03 已处理一半）**：本次重建包中，第二个实例用**不同**
+3. **~~调查 second-instance 异常~~（2026-11-03 已闭环）**：本次重建包中，第二个实例用**不同**
    `--data-dir` 启动时退出码 101；单实例（无其他实例）正常。已在 Windows 11 开发机上尝试复现
    （不同根 0 ms/500 ms/25 s 错开、同根、强杀首实例并残留 12 个 `msedgewebview2.exe`）均未重现；
-   但确认了机制：Tauri 在 `setup` 失败时于 `tauri-2.12.5/src/app.rs:1444` 直接 panic，任何 WebView2
-   初始化失败都会变成静默 101。现已实现启动失败诊断（`logs/startup-failure.log` + 原生对话框 + 退出码 3）
-   与每数据根独立 WebView2 用户数据目录，证据见 `verification/windows-startup-diagnosis/README.md`。
-   目标机仍需重跑 W07 并复测该 101；未重现前不要当已通过。
+   2026-11-03 又在 Windows 10 目标机上用**修复前安装包**与**重建包**分别以 0/2/25 秒偏移复测，
+   两个实例每次都保持运行，仍未复现。机制已确认：Tauri 在 `setup` 失败时于
+   `tauri-2.12.5/src/app.rs:1444` 直接 panic，任何 WebView2 初始化失败都会变成静默 101；现已实现
+   启动失败诊断（`logs/startup-failure.log` + 原生对话框 + 退出码 3）与每数据根独立 WebView2
+   用户数据目录，目标机 W07 复验通过，证据见 `verification/windows-startup-diagnosis/`。
+   原始触发条件仍未解释，但可观测缺陷（静默 101）已修复；W03 独立根共存由 W07-b 覆盖。
 4. 管理员配合项（脚本已准备，见 `scripts/windows-admin/README.md`）：
    - 整树禁网 I07/P06：`enable-network-denial.ps1` → 我/Copy 的 CDP 流程跑缓存安装 + 三次生成 → `remove-network-denial.ps1`；
    - 空间不足：`create-small-volume.ps1` 建 40 GB VHD → 安装版 `--data-dir V:\acceptance-root` 触发错误 → `remove-small-volume.ps1 -DeleteVhd`。
@@ -145,8 +148,8 @@ Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-wo
 6. Mac 回归 R02–R04（必须回 Mac）：完整质量门、隔离源码/禁网启动、原 Z-Image 三画幅/取消/强杀恢复、
    其余六型号各一条真实能力。Windows 端无法替代。
 7. 全部适用 P0 通过后再：更新 test-plan 汇总、同步五份主规格、OpenSpec archive、
-   重跑最终 R01（当前 `windows-quality-gate.json` 绑定的是加入导出修复前的提交）、
-   关闭 bd issues、最后小步提交。
+   关闭 bd issues、最后小步提交。R01 已在 2026-11-03 于 `376a3c3` 复跑（234 项 Rust 测试、前端 37 项、
+   锁审计与 openspec 严格校验通过），`verification/windows-quality-gate.json` 已更新到该提交。
 
 ## 7. 构建与安装（Windows 内部测试包）
 
