@@ -22,6 +22,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import zipfile
 from pathlib import Path
 
@@ -378,12 +379,45 @@ def main() -> int:
             if packages.get(name) != version:
                 package_errors.append({"package": name, "expected": version, "actual": packages.get(name)})
         extra = sorted(set(packages) - set(lock_pins))
+        probe_check: dict = {"status": "not_run"}
+        frozen_python = ROOT / "target/parity-runtime/runtime/python.exe"
+        if frozen_python.is_file():
+            probe_source = (
+                "import importlib.metadata,json;"
+                "print(json.dumps({d.metadata['Name'].lower().replace('_','-'):d.version "
+                "for d in importlib.metadata.distributions()}))"
+            )
+            result = subprocess.run(
+                [str(frozen_python), "-I", "-c", probe_source],
+                capture_output=True,
+                text=True,
+                timeout=300,
+            )
+            if result.returncode != 0:
+                probe_check = {"status": "fail", "error": result.stderr.strip()[:1000]}
+            else:
+                probed = json.loads(result.stdout)
+                mismatched = {
+                    name: {"manifest": version, "probe": probed.get(name)}
+                    for name, version in packages.items()
+                    if probed.get(name) != version
+                }
+                probe_check = {
+                    "status": "pass" if not mismatched else "fail",
+                    "command": f"{frozen_python} -I -c \"{probe_source}\"",
+                    "probed_distributions": len(probed),
+                    "manifest_packages": len(packages),
+                    "mismatched": mismatched,
+                }
+                if mismatched:
+                    package_errors.append({"installer_probe_mismatch": mismatched})
         entry["packages_check"] = {
             "lock_pins": len(lock_pins),
             "manifest_packages": len(packages),
             "missing_or_mismatched": package_errors,
             "extra_packages": extra,
-            "status": "pass" if not package_errors else "fail",
+            "installer_probe": probe_check,
+            "status": "pass" if not package_errors and probe_check.get("status") != "fail" else "fail",
         }
         wheel_failures = [item for item in entry["file_checks"] if item["status"] != "pass"]
         entry["status"] = (
