@@ -16,6 +16,77 @@ pub const Z_IMAGE_WINDOWS_DEVICE: &str = "nvidia-cuda-sm86";
 pub const Z_IMAGE_WINDOWS_PRECISION: &str =
     "transformer+text_encoder=nf4;compute=bfloat16;vae=bfloat16";
 pub const Z_IMAGE_WINDOWS_SCHEDULER: &str = "FlowMatchEulerDiscreteScheduler";
+
+// Windows model-parity identities, frozen by design.md section 11. These are additive: the
+// historical macOS and Z-Image identities above (and below) must never be rewritten.
+/// Shared v2 Python runtime serving Klein, BiRefNet, Qwen-Image 2.1 and MOSS-Image-SFT.
+pub const WINDOWS_V2_RUNTIME: &str =
+    "windows-python31210-torch2100-cu126-diff041-transformers53-v2";
+pub const WINDOWS_DIFFUSERS_WORKER: &str = "studio-diffusers-worker-windows-0.1.0";
+pub const WINDOWS_ONNX_WORKER: &str = "studio-onnx-worker-windows-0.1.0";
+pub const WINDOWS_REALESRGAN_WORKER: &str = "studio-realesrgan-worker-windows-0.1.0";
+/// Plan-environment identities (RuntimeSnapshot.engine / DeviceSnapshot.device_id) for the
+/// Windows workers. Section 11 freezes the runtimes and parameter maps; the engine and device
+/// classes are the conservative continuation of the Z-Image Windows precedent.
+pub const WINDOWS_DIFFUSERS_ENGINE: &str = "diffusers-cuda";
+pub const WINDOWS_ONNX_ENGINE: &str = "onnxruntime";
+pub const WINDOWS_NCNN_ENGINE: &str = "ncnn";
+pub const WINDOWS_CUDA_DEVICE: &str = "nvidia-cuda-sm86";
+pub const WINDOWS_CPU_DEVICE: &str = "windows-cpu";
+pub const WINDOWS_VULKAN_DEVICE: &str = "windows-vulkan";
+
+/// FLUX.2 Klein 4B distilled (text-to-image and single-image edit share one model variant).
+pub const KLEIN_WINDOWS_MODEL: &str = "flux2-klein-4b-distilled-windows-v1";
+pub const KLEIN_WINDOWS_TEXT_CAPABILITY: &str = "image.text-to-image.flux2-klein-4b.windows-v1";
+pub const KLEIN_WINDOWS_EDIT_CAPABILITY: &str = "image.edit.flux2-klein-4b.windows-v1";
+pub const KLEIN_WINDOWS_TEXT_RECIPE: &str = "klein4b-text-windows-v1";
+pub const KLEIN_WINDOWS_EDIT_RECIPE: &str = "klein4b-edit-windows-v1";
+pub const KLEIN_WINDOWS_SNAPSHOT: &str =
+    "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294";
+
+/// BiRefNet epoch_244 on the shared v2 runtime with the ONNX Runtime CPU provider.
+pub const BIREFNET_WINDOWS_MODEL: &str = "birefnet-general-epoch-244-windows-v1";
+pub const BIREFNET_WINDOWS_CAPABILITY: &str =
+    "image.remove-background.birefnet-general-epoch-244.windows-v1";
+pub const BIREFNET_WINDOWS_RECIPE: &str = "birefnet-general-cpu-windows-v1";
+pub const BIREFNET_WINDOWS_SNAPSHOT: &str = "birefnet-general-epoch-244-onnx-windows-v1";
+
+/// Real-ESRGAN x4plus with its own fixed ncnn Vulkan Windows runtime.
+pub const REALESRGAN_WINDOWS_MODEL: &str = "realesrgan-x4plus-windows-v1";
+pub const REALESRGAN_WINDOWS_CAPABILITY: &str = "image.upscale.realesrgan-x4plus.windows-v1";
+pub const REALESRGAN_WINDOWS_RECIPE: &str = "realesrgan-x4plus-windows-t128-v1";
+pub const REALESRGAN_WINDOWS_SNAPSHOT: &str = "realesrgan-x4plus-ncnn-windows-v1";
+pub const REALESRGAN_WINDOWS_RUNTIME: &str = "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1";
+
+/// Qwen-Image 2.1 base/Turbo: staged NF4 on the shared v2 runtime.
+pub const QWEN_IMAGE_21_WINDOWS_MODEL: &str = "qwen-image-2.1-windows-v1";
+pub const QWEN_IMAGE_21_WINDOWS_CAPABILITY: &str = "image.text-to-image.qwen-image-2.1.windows-v1";
+pub const QWEN_IMAGE_21_WINDOWS_RECIPE: &str = "qwen21-windows-txt2img-nf4-40-v1";
+pub const QWEN_IMAGE_21_WINDOWS_SNAPSHOT: &str =
+    "qwen-image-2.1-windows-staged-d26bb61231c349cf6b7896fa83353113880e1ba3";
+
+pub const QWEN_IMAGE_21_TURBO_WINDOWS_MODEL: &str = "qwen-image-2.1-turbo-windows-v1";
+pub const QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY: &str =
+    "image.text-to-image.qwen-image-2.1-turbo.windows-v1";
+pub const QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE: &str = "qwen21-turbo-windows-txt2img-nf4-8-v1";
+pub const QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT: &str =
+    "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b";
+
+/// MOSS-Image-SFT: vendored custom pipeline, staged NF4 on the shared v2 runtime.
+pub const MOSS_IMAGE_SFT_WINDOWS_MODEL: &str = "moss-image-sft-windows-v1";
+pub const MOSS_IMAGE_SFT_WINDOWS_CAPABILITY: &str = "image.text-to-image.moss-image-sft.windows-v1";
+pub const MOSS_IMAGE_SFT_WINDOWS_RECIPE: &str = "moss-image-sft-windows-txt2img-nf4-50-v1";
+pub const MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT: &str =
+    "moss-image-sft-windows-staged-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9";
+
+/// Runtime identities that may only serve Windows recipes (design.md section 11).
+pub fn is_windows_runtime(package_id: &str) -> bool {
+    matches!(
+        package_id,
+        Z_IMAGE_WINDOWS_RUNTIME | WINDOWS_V2_RUNTIME | REALESRGAN_WINDOWS_RUNTIME
+    )
+}
+
 pub const MAX_PROMPT_BYTES: usize = 16 * 1024;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
