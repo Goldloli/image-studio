@@ -88,13 +88,13 @@
 | Qwen-Image 2.1 | staged NF4 + prepared cache，40 步 | 6.00 GiB | 13.96 GiB | 16.08 GiB | 通过，staged |
 | Qwen-Image 2.1-Turbo | staged NF4 + prepared cache，8 步 | 6.00 GiB | 13.95 GiB | 17.32 GiB | 通过，staged |
 | MOSS-Image-SFT | staged NF4 text encoder + NF4 DiT（shim）+ fp32 VAE，50 步/CFG3/skip22 | 5.84 GiB | 9.20 GiB | 21.47 GiB | 通过，staged |
-| FLUX.2 Klein | NF4 + 组件 CPU offload（每生成独立新进程），4 步 | 9.21 GiB | 19.45 GiB | 15.30 GiB | 通过，NF4+offload（同进程叠加 bf16+NF4 的 combined 结果 31.75/39.11 GiB 作为失败证据保留） |
+| FLUX.2 Klein | NF4 + 组件 CPU offload（每生成独立新进程），4 步 | 9.21 GiB | 19.13 GiB | 14.93 GiB | 通过，NF4+offload（同进程叠加 bf16+NF4 的 combined 结果 31.75/39.11 GiB 作为失败证据保留） |
 
 证据：`verification/windows-parity-gate0/`（各 staged-loader-*.md、klein-gate0.json、birefnet-gate0.json）、`verification/windows-parity-realesrgan/`、`verification/windows-parity-runtime/`。
 
 ### 10.2 决定
 
-1. **Qwen 基础/Turbo 与 MOSS 采用分阶段装载 + 本地 prepared 量化缓存**：install 的 prepare 步骤在 CPU 上把固定上游快照量化并持久化（Qwen：text encoder 6.38 GB + transformer 3.67 GB；MOSS：text encoder 5.85 GB + DiT 2.62 GB），generation 逐阶段加载 prepared 组件，文本编码 → 释放 → DiT 采样 → 释放 → VAE 解码，只有一个大组件驻留 GPU。**Klein 采用 NF4 + 组件 CPU offload**：每次生成在独立 worker 进程中装载一次（`enable_model_cpu_offload`），实测 CUDA 9.21 GiB / commit 19.45 GiB / 可用 RAM 15.30 GiB 全部达标；必须在专用新进程中运行，禁止在同一进程里叠加装载第二种策略（combined 实验因此失败：bf16 commit 31.75 GiB、NF4 commit 39.11 GiB/可用 RAM 0.19 GiB，该失败证据保留在 `verification/windows-parity-gate0/klein-gate0-combined-process-bf16-nf4.json`）。
+1. **Qwen 基础/Turbo 与 MOSS 采用分阶段装载 + 本地 prepared 量化缓存**：install 的 prepare 步骤在 CPU 上把固定上游快照量化并持久化（Qwen：text encoder 6.38 GB + transformer 3.67 GB；MOSS：text encoder 5.85 GB + DiT 2.62 GB），generation 逐阶段加载 prepared 组件，文本编码 → 释放 → DiT 采样 → 释放 → VAE 解码，只有一个大组件驻留 GPU。**Klein 采用 NF4 + 组件 CPU offload**：每次生成在独立 worker 进程中装载一次（`enable_model_cpu_offload`），实测 CUDA 9.21 GiB / commit 19.13 GiB / 可用 RAM 14.93 GiB 全部达标；必须在专用新进程中运行，禁止在同一进程里叠加装载第二种策略（combined 实验因此失败：bf16 commit 31.75 GiB、NF4 commit 39.11 GiB/可用 RAM 0.19 GiB，该失败证据保留在 `verification/windows-parity-gate0/klein-gate0-combined-process-bf16-nf4.json`；fresh-process 证据在 `klein-gate0-fresh-process-nf4.json`，输出确定性已由三次独立进程复核）。
 2. **量化与失败证据**：Qwen 基础/Turbo 用 NF4 text encoder + NF4 transformer；Klein 用 NF4 text encoder + NF4 transformer + bf16 VAE；MOSS 用 NF4 text encoder + NF4 DiT；MOSS DiT 的 INT8 与 NF4 都因上游 custom pipeline 从 `weight.dtype` 取计算精度而失败（int8/uint8），因此产品 worker 必须携带 `tools/windows-parity-staged/moss_bnb_shim.py` 记录的 bf16 计算精度兼容补丁（固定上游 revision，审阅记录见 `verification/windows-parity-gate0/moss-pipeline-review.md`）。
 3. **prepare 属于安装阶段**：量化 transient（Qwen text encoder commit 23.38 GiB / RAM 0.58 GiB；MOSS text encoder 23.00 GiB / 0.83 GiB；Klein 类似）不计入 generation 预算，但安装器必须先做 RAM 预检（建议要求可用物理内存 ≥ 28 GiB 或 commit 余量 ≥ 26 GiB，不足时给出可行动错误而不是冒险 prepare）；prepared cache 体积计入安装空间（Qwen 10.05 GB、MOSS 8.47 GB），且必须由固定上游文件确定性重建、按组件摘要复用。
 4. **硬件门槛元数据**：所有 staged 大模型只认证当前目标机（RTX 3080 Ti 12 GB + 32 GB RAM）；模型页登记 `min_vram_gb=12`、`min_ram_gb=32`（prepare 需要）与 `quantization`、`license`；BiRefNet 为 CPU 路线（`min_vram_gb=0`、`min_ram_gb=16`），Real-ESRGAN 为 ncnn Vulkan（`min_vram_gb=4`、`min_ram_gb=8`）。低于门槛时禁用安装/生成并显示原因。
@@ -103,7 +103,7 @@
 
 ### 10.3 未决与后续
 
-- Klein 的 fresh-process NF4+offload 证据（独立 JSON/输出图）待 gate0-transfer 落库；在证据落库前不得声称 Klein Gate 0 通过。
+- Klein fresh-process NF4+offload 证据由 `verification/windows-parity-gate0/klein-gate0-fresh-process-nf4.json` 与两张输出图记录；combined-process 失败记录保留为反例。
 - prepared cache 的确定性重建、摘要复用与空间预算细节在 tasks 3.2/3.4 落地。
 - Real-ESRGAN 未采峰值 VRAM（进程 2–5 秒，只有前后快照），按 ncnn 固定合同记录为局限。
 
