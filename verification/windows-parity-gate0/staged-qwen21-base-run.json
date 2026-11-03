@@ -1,0 +1,116 @@
+{
+  "kind": "qwen-image-2.1-staged-windows-gate0",
+  "started_at_utc": "2026-11-03T16:21:30Z",
+  "machine": {
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "gpu_total_mib": 12288,
+    "physical_total_gib": 31.73
+  },
+  "model_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1",
+  "parameters": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "steps": 40,
+    "width": 1024,
+    "height": 1024,
+    "seed": 3148150817,
+    "vae_tiling": true
+  },
+  "quantization": {
+    "backend": "bitsandbytes_4bit",
+    "quant_type": "nf4",
+    "compute_dtype": "bfloat16",
+    "double_quant": true
+  },
+  "budget": {
+    "cuda_reserved_limit_gib": 10.5,
+    "private_commit_limit_gib": 24,
+    "available_ram_minimum_gib": 2,
+    "load_limit_seconds": 600,
+    "generation_limit_seconds": 900
+  },
+  "stages": {
+    "text": {
+      "load_seconds": 11.58,
+      "encode_seconds": 0.87,
+      "prompt_tokens": 27,
+      "prompt_embeds_shape": [
+        1,
+        27,
+        4096
+      ],
+      "prompt_embeds_dtype": "torch.bfloat16",
+      "image_pad_tokens": 0,
+      "resources": {
+        "process_tree_private_commit_peak_gib": 13.955,
+        "system_available_ram_min_gib": 16.082,
+        "system_physical_total_gib": 31.727,
+        "cuda_reserved_peak_gib": 6.002,
+        "cuda_allocated_peak_gib": 5.985,
+        "nvidia_used_peak_mib": 7176
+      },
+      "reserved_after_release_gib": 0.02,
+      "allocated_after_release_gib": 0.008
+    },
+    "transformer": {
+      "load_seconds": 6.59,
+      "sample_seconds": 53.08,
+      "steps": 40,
+      "sigmas": null,
+      "latent_tokens": 4096,
+      "resources": {
+        "process_tree_private_commit_peak_gib": 10.204,
+        "system_available_ram_min_gib": 17.928,
+        "system_physical_total_gib": 31.727,
+        "cuda_reserved_peak_gib": 4.574,
+        "cuda_allocated_peak_gib": 3.831,
+        "nvidia_used_peak_mib": 5764
+      },
+      "reserved_after_release_gib": 0.027,
+      "allocated_after_release_gib": 0.009
+    },
+    "vae": {
+      "load_seconds": 0.85,
+      "decode_seconds": 1.55,
+      "resources": {
+        "process_tree_private_commit_peak_gib": 5.377,
+        "system_available_ram_min_gib": 20.143,
+        "system_physical_total_gib": 31.727,
+        "cuda_reserved_peak_gib": 1.18,
+        "cuda_allocated_peak_gib": 0.994,
+        "nvidia_used_peak_mib": 2248
+      },
+      "image": {
+        "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\staged\\qwen21-base-staged.png",
+        "bytes": 2169666,
+        "sha256": "831478553551632b7652fbc49b02d116860285f4c38449a6fc4aa780f11719d4",
+        "width": 1024,
+        "height": 1024
+      },
+      "reserved_after_release_gib": 0.021,
+      "allocated_after_release_gib": 0.008
+    }
+  },
+  "mode": "run",
+  "prepared_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\staged\\prepared-qwen21-base",
+  "versions": {
+    "diffusers": "0.41.0",
+    "transformers": "5.3.0",
+    "torch": "2.10.0+cu126",
+    "cuda": "12.6",
+    "python": "3.12.10"
+  },
+  "prepared_cache_bytes": 10049397583,
+  "prepared_components": [
+    "text_encoder",
+    "transformer"
+  ],
+  "total": {
+    "cuda_reserved_peak_gib": 6.002,
+    "process_tree_private_commit_peak_gib": 13.955,
+    "system_available_ram_min_gib": 16.082,
+    "nvidia_used_peak_mib": 7176
+  },
+  "failures": [],
+  "status": "passed",
+  "finished_at_utc": "2026-11-03T16:22:50Z"
+}
