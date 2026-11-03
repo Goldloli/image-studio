@@ -345,6 +345,7 @@ def run_strategy(
     width: int,
     height: int,
     budget: dict,
+    output_tag: str | None = None,
 ) -> dict:
     from PIL import Image
 
@@ -443,7 +444,8 @@ def run_strategy(
             torch.cuda.synchronize()
             seconds = time.perf_counter() - started
             image = output.images[0]
-            image_path = output_dir / f"klein-gate0-{task}-{strategy}.png"
+            suffix = output_tag if output_tag else strategy
+            image_path = output_dir / f"klein-gate0-{task}-{suffix}.png"
             image.save(image_path)
             task_record = {
                 "task": task,
@@ -520,6 +522,10 @@ def main() -> int:
         help="auto (bf16 first, nf4 if bf16 fails), all, or comma separated names",
     )
     parser.add_argument("--preflight-only", action="store_true")
+    parser.add_argument(
+        "--output-tag",
+        help="optional file tag for the generated PNG names (default: strategy)",
+    )
     parser.add_argument("--load-limit-seconds", type=float, default=600)
     parser.add_argument("--generation-limit-seconds", type=float, default=900)
     parser.add_argument("--cuda-reserved-limit-gib", type=float, default=10.5)
@@ -641,6 +647,7 @@ def main() -> int:
                 args.width,
                 args.height,
                 budget,
+                args.output_tag,
             )
         except BaseException as error:  # noqa: BLE001 - keep other strategies
             result = {
