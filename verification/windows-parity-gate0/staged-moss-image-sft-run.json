@@ -1,0 +1,104 @@
+{
+  "kind": "moss-image-sft-staged-windows-gate0",
+  "started_at_utc": "2026-11-03T16:16:49Z",
+  "machine": {
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "gpu_total_mib": 12288,
+    "physical_total_gib": 31.73
+  },
+  "model_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft",
+  "prepared_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\staged\\prepared-moss",
+  "mode": "run",
+  "parameters": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "negative_prompt": "",
+    "steps": 50,
+    "guidance_scale": 3.0,
+    "uncond_skip_layers": [
+      22
+    ],
+    "width": 1024,
+    "height": 1024,
+    "seed": 3148150817,
+    "max_sequence_length": 4096
+  },
+  "budget": {
+    "cuda_reserved_limit_gib": 10.5,
+    "private_commit_limit_gib": 24,
+    "available_ram_minimum_gib": 2,
+    "load_limit_seconds": 600,
+    "generation_limit_seconds": 900
+  },
+  "stages": {
+    "text": {
+      "load_seconds": 12.07,
+      "encode_seconds": 1.18,
+      "positive_tokens": 28,
+      "negative_tokens": 10,
+      "padded_tokens": 28,
+      "resources": {
+        "process_tree_private_commit_peak_gib": 8.68,
+        "system_available_ram_min_gib": 21.64,
+        "system_physical_total_gib": 31.727,
+        "cuda_reserved_peak_gib": 5.574,
+        "cuda_allocated_peak_gib": 5.469,
+        "nvidia_used_peak_mib": 6753
+      },
+      "reserved_after_release_gib": 0.02,
+      "allocated_after_release_gib": 0.008
+    },
+    "dit": {
+      "load_seconds": 3.96,
+      "sample_seconds": 102.58,
+      "steps": 50,
+      "resources": {
+        "process_tree_private_commit_peak_gib": 6.376,
+        "system_available_ram_min_gib": 21.473,
+        "system_physical_total_gib": 31.727,
+        "cuda_reserved_peak_gib": 3.162,
+        "cuda_allocated_peak_gib": 2.916,
+        "nvidia_used_peak_mib": 4277
+      },
+      "reserved_after_release_gib": 2.393,
+      "allocated_after_release_gib": 0.015
+    },
+    "vae": {
+      "load_seconds": 0.37,
+      "decode_seconds": 0.52,
+      "resources": {
+        "process_tree_private_commit_peak_gib": 9.195,
+        "system_available_ram_min_gib": 21.631,
+        "system_physical_total_gib": 31.727,
+        "cuda_reserved_peak_gib": 5.838,
+        "cuda_allocated_peak_gib": 3.251,
+        "nvidia_used_peak_mib": 7008
+      },
+      "image": {
+        "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\staged\\moss-staged.png",
+        "bytes": 1842307,
+        "sha256": "4cd42c8f351e4ff49e7b41ef3996cc5cdbb7c530f1d796ef9d533535b7d01b3a",
+        "width": 1024,
+        "height": 1024
+      },
+      "reserved_after_release_gib": 0.021,
+      "allocated_after_release_gib": 0.009
+    }
+  },
+  "versions": {
+    "diffusers": "0.41.0",
+    "transformers": "5.3.0",
+    "torch": "2.10.0+cu126",
+    "cuda": "12.6",
+    "python": "3.12.10"
+  },
+  "prepared_cache_bytes": 8471497242,
+  "total": {
+    "cuda_reserved_peak_gib": 5.838,
+    "process_tree_private_commit_peak_gib": 9.195,
+    "system_available_ram_min_gib": 21.473,
+    "nvidia_used_peak_mib": 7008
+  },
+  "failures": [],
+  "status": "passed",
+  "finished_at_utc": "2026-11-03T16:18:54Z"
+}

@@ -1,0 +1,76 @@
+{
+  "kind": "moss-image-sft-staged-windows-gate0",
+  "started_at_utc": "2026-11-03T16:14:14Z",
+  "machine": {
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "gpu_total_mib": 12288,
+    "physical_total_gib": 31.73
+  },
+  "model_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft",
+  "prepared_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\staged\\prepared-moss",
+  "mode": "prepare",
+  "parameters": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "negative_prompt": "",
+    "steps": 50,
+    "guidance_scale": 3.0,
+    "uncond_skip_layers": [
+      22
+    ],
+    "width": 1024,
+    "height": 1024,
+    "seed": 3148150817,
+    "max_sequence_length": 4096
+  },
+  "budget": {
+    "cuda_reserved_limit_gib": 10.5,
+    "private_commit_limit_gib": 24,
+    "available_ram_minimum_gib": 2,
+    "load_limit_seconds": 600,
+    "generation_limit_seconds": 900
+  },
+  "stages": {
+    "prepare": {
+      "text_encoder": {
+        "quantization": "nf4",
+        "load_seconds": 22.21,
+        "save_seconds": 5.65,
+        "prepared_bytes": 5848588210,
+        "resources": {
+          "process_tree_private_commit_peak_gib": 23.001,
+          "system_available_ram_min_gib": 0.834,
+          "system_physical_total_gib": 31.727,
+          "cuda_reserved_peak_gib": 0.0,
+          "cuda_allocated_peak_gib": 0.0,
+          "nvidia_used_peak_mib": 790
+        }
+      },
+      "transformer": {
+        "nf4": {
+          "status": "prepared",
+          "load_seconds": 14.11,
+          "save_seconds": 1.16,
+          "prepared_bytes": 2622909032,
+          "resources": {
+            "process_tree_private_commit_peak_gib": 16.665,
+            "system_available_ram_min_gib": 7.397,
+            "system_physical_total_gib": 31.727,
+            "cuda_reserved_peak_gib": 0.0,
+            "cuda_allocated_peak_gib": 0.0,
+            "nvidia_used_peak_mib": 781
+          }
+        }
+      },
+      "total_prepared_bytes": 8471497242
+    }
+  },
+  "versions": {
+    "diffusers": "0.41.0",
+    "transformers": "5.3.0",
+    "torch": "2.10.0+cu126",
+    "cuda": "12.6",
+    "python": "3.12.10"
+  },
+  "status": "prepared",
+  "finished_at_utc": "2026-11-03T16:15:06Z"
+}
