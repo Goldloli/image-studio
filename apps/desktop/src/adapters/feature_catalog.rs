@@ -145,7 +145,10 @@ fn project_entry(entry: &RegisteredFeature, model_catalog: &Value, generation_bu
                 Some("所需模型未出现在权威模型目录中".to_string()),
                 false,
             ),
-            Some(model) if model["executable"].as_bool() == Some(true) => {
+            Some(model)
+                if model["executable"].as_bool() == Some(true)
+                    && model["hardwareEligible"].as_bool() != Some(false) =>
+            {
                 ("available", "可开始", None, true)
             }
             Some(model) if model["componentsReady"].as_bool() != Some(true) => (
@@ -163,6 +166,17 @@ fn project_entry(entry: &RegisteredFeature, model_catalog: &Value, generation_bu
                 "runtime-not-ready",
                 "运行环境未就绪",
                 Some("本地运行环境尚未通过检查".to_string()),
+                false,
+            ),
+            Some(model) if model["hardwareEligible"].as_bool() == Some(false) => (
+                "hardware-ineligible",
+                "设备不满足门槛",
+                Some(
+                    model["hardwareReason"]
+                        .as_str()
+                        .unwrap_or("当前设备不满足该型号的显存或内存门槛")
+                        .to_string(),
+                ),
                 false,
             ),
             Some(_) => (
@@ -204,6 +218,13 @@ mod tests {
         "z-image-turbo-mflux-v1"
     }
 
+    fn klein_model_id() -> &'static str {
+        #[cfg(windows)]
+        return studio_core::generation::KLEIN_WINDOWS_MODEL;
+        #[cfg(not(windows))]
+        "flux2-klein-4b-distilled"
+    }
+
     #[test]
     fn registry_only_marks_implemented_model_with_real_ready_facts() {
         let catalog = FeatureCatalog::load().unwrap();
@@ -214,13 +235,15 @@ mod tests {
                 "executable": false,
                 "componentsReady": true,
                 "runtimeReady": false,
+                "hardwareEligible": true,
                 "error": null
             }, {
-                "id": "flux2-klein-4b-distilled",
+                "id": klein_model_id(),
                 "family": "FLUX.2",
                 "executable": false,
                 "componentsReady": true,
                 "runtimeReady": false,
+                "hardwareEligible": true,
                 "error": null
             }]
         });
@@ -239,14 +262,8 @@ mod tests {
             .unwrap();
         assert_eq!(text["state"], "runtime-not-ready");
         assert_eq!(text["canStart"], false);
-        #[cfg(windows)]
-        assert_eq!(edit["state"], "planned");
-        #[cfg(not(windows))]
         assert_eq!(edit["state"], "runtime-not-ready");
         assert_eq!(edit["canStart"], false);
-        #[cfg(windows)]
-        assert_eq!(edit["action"], Value::Null);
-        #[cfg(not(windows))]
         assert_eq!(edit["action"], "open-composer");
     }
 
@@ -260,13 +277,15 @@ mod tests {
                 "executable": true,
                 "componentsReady": true,
                 "runtimeReady": true,
+                "hardwareEligible": true,
                 "error": null
             }, {
-                "id": "flux2-klein-4b-distilled",
+                "id": klein_model_id(),
                 "family": "FLUX.2",
                 "executable": true,
                 "componentsReady": true,
                 "runtimeReady": true,
+                "hardwareEligible": true,
                 "error": null
             }]
         });
@@ -275,41 +294,117 @@ mod tests {
         assert_eq!(result["entries"][0]["canStart"], true);
     }
 
+    #[test]
+    fn hardware_ineligible_model_blocks_the_feature_with_reason() {
+        let catalog = FeatureCatalog::load().unwrap();
+        let model_catalog = json!({
+            "entries": [{
+                "id": klein_model_id(),
+                "family": "FLUX.2",
+                "executable": true,
+                "componentsReady": true,
+                "runtimeReady": true,
+                "hardwareEligible": false,
+                "hardwareReason": "当前设备不满足硬件门槛：显存 ≥ 12 GB（当前 8 GB）。安装与生成入口已禁用。",
+                "error": null
+            }]
+        });
+        let result = catalog.query(&model_catalog, false);
+        let edit = result["entries"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entry| entry["featureId"] == "image-edit")
+            .unwrap();
+        assert_eq!(edit["state"], "hardware-ineligible");
+        assert_eq!(edit["stateLabel"], "设备不满足门槛");
+        assert_eq!(edit["canStart"], false);
+        assert!(
+            edit["blockingReason"]
+                .as_str()
+                .unwrap()
+                .contains("硬件门槛")
+        );
+    }
+
     #[cfg(windows)]
     #[test]
-    fn windows_projection_keeps_one_certified_feature_and_three_planned() {
+    fn windows_projection_exposes_four_implemented_features() {
         let catalog = FeatureCatalog::load().unwrap();
         let result = catalog.query(
             &json!({
                 "entries": [{
                     "id": studio_core::generation::Z_IMAGE_WINDOWS_MODEL,
+                    "executable": true,
+                    "componentsReady": true,
+                    "runtimeReady": true,
+                    "hardwareEligible": true,
+                    "error": null
+                }, {
+                    "id": studio_core::generation::KLEIN_WINDOWS_MODEL,
                     "executable": false,
                     "componentsReady": false,
                     "runtimeReady": false,
+                    "hardwareEligible": true,
+                    "error": null
+                }, {
+                    "id": studio_core::generation::BIREFNET_WINDOWS_MODEL,
+                    "executable": false,
+                    "componentsReady": false,
+                    "runtimeReady": false,
+                    "hardwareEligible": true,
+                    "error": null
+                }, {
+                    "id": studio_core::generation::REALESRGAN_WINDOWS_MODEL,
+                    "executable": false,
+                    "componentsReady": false,
+                    "runtimeReady": false,
+                    "hardwareEligible": true,
                     "error": null
                 }]
             }),
             false,
         );
         assert_eq!(result["counts"]["total"], 4);
-        assert_eq!(result["counts"]["planned"], 3);
-        let text = result["entries"]
-            .as_array()
-            .unwrap()
+        assert_eq!(result["counts"]["planned"], 0);
+        let features = result["entries"].as_array().unwrap();
+        let expected = [
+            (
+                "text-to-image",
+                studio_core::generation::Z_IMAGE_WINDOWS_MODEL,
+            ),
+            ("image-edit", studio_core::generation::KLEIN_WINDOWS_MODEL),
+            (
+                "remove-background",
+                studio_core::generation::BIREFNET_WINDOWS_MODEL,
+            ),
+            ("upscale", studio_core::generation::REALESRGAN_WINDOWS_MODEL),
+        ];
+        for (feature_id, model_id) in expected {
+            let feature = features
+                .iter()
+                .find(|entry| entry["featureId"] == feature_id)
+                .unwrap();
+            assert_eq!(feature["productStatus"], "implemented", "{feature_id}");
+            assert_eq!(feature["action"], "open-composer", "{feature_id}");
+            assert_eq!(feature["modelId"], model_id, "{feature_id}");
+            assert_eq!(
+                feature["canStart"],
+                feature["state"] == "available",
+                "{feature_id}"
+            );
+        }
+        let text = features
             .iter()
             .find(|entry| entry["featureId"] == "text-to-image")
             .unwrap();
-        assert_eq!(
-            text["modelId"],
-            studio_core::generation::Z_IMAGE_WINDOWS_MODEL
-        );
-        assert_eq!(text["productStatus"], "implemented");
-        assert_eq!(text["state"], "model-missing");
-        for entry in result["entries"].as_array().unwrap() {
-            if entry["productStatus"] == "planned" {
-                assert_eq!(entry["action"], Value::Null);
-                assert_eq!(entry["canStart"], false);
-            }
-        }
+        assert_eq!(text["state"], "available");
+        assert_eq!(text["canStart"], true);
+        let edit = features
+            .iter()
+            .find(|entry| entry["featureId"] == "image-edit")
+            .unwrap();
+        assert_eq!(edit["state"], "model-missing");
+        assert_eq!(edit["canStart"], false);
     }
 }

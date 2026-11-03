@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "reviewedDate": "2026-11-01",
+  "reviewedDate": "2026-11-04",
   "entries": [
     {
       "featureId": "text-to-image",
       "title": "文生图",
       "category": "生成",
       "summary": "在当前 Windows 设备上，把中英文提示词生成一张本地图片。",
-      "description": "Windows 首轮使用独立的 Z-Image Turbo Diffusers CUDA NF4 组合，复用当前会话、统一发送链路、持久化任务与正式资产提交。",
-      "inputs": ["提示词", "Z-Image Turbo", "1024² 固定画幅", "可选种子"],
+      "description": "Windows 使用 Z-Image Turbo Diffusers CUDA NF4 组合作为默认文生图型号，并在模型菜单中提供 FLUX.2 Klein、Qwen-Image 2.1（基础/Turbo）与 MOSS-Image-SFT；复用当前会话、统一发送链路、持久化任务与正式资产提交。",
+      "inputs": ["提示词", "Z-Image Turbo（默认）", "1024² 固定画幅", "可选种子"],
       "outputs": ["正式 RGB PNG AssetRef"],
       "productStatus": "implemented",
-      "scope": "仅 Z-Image Turbo Windows CUDA 组合；单轮一张 1024×1024、9 步、guidance 0.0。",
+      "scope": "Z-Image Turbo Windows CUDA 组合：单轮一张 1024×1024、9 步、guidance 0.0；另有 Klein、Qwen 基础/Turbo 与 MOSS 四个 Windows 文生图型号，均固定 1024×1024。",
       "action": "open-composer",
       "modelId": "z-image-turbo-diffusers-cuda-nf4-v1",
       "dependencies": [
@@ -33,18 +33,22 @@
       "featureId": "image-edit",
       "title": "图片编辑",
       "category": "编辑",
-      "summary": "当前 Windows 版本尚未接入；仅保留功能说明。",
-      "description": "FLUX.2 Klein 4B distilled 的单参考图编辑分支尚未完成 Windows 适配。",
-      "inputs": ["受控 AssetId", "编辑指令"],
+      "summary": "用一张受控源图和一条编辑指令生成一张 1024² 新图片。",
+      "description": "使用 FLUX.2 Klein 4B distilled 的单参考图编辑分支：Windows 在独立 worker 进程内以 NF4 + 组件 CPU offload 装载，4 步、guidance 1.0，不把文生图参数伪造成图片编辑。",
+      "inputs": ["受控 AssetId", "编辑指令", "FLUX.2 Klein 4B distilled"],
       "outputs": ["新的 PNG AssetRef"],
-      "productStatus": "planned",
-      "scope": "Windows 首轮不提供图片编辑、模型安装或生成动作。",
-      "action": null,
-      "modelId": "flux2-klein-4b-distilled",
+      "productStatus": "implemented",
+      "scope": "单张、必须有非空编辑指令；源图作为 role=\"source\" 条件输入。不包含多参考编辑、img2img 伪装或非 1024² 画幅。",
+      "action": "open-composer",
+      "modelId": "flux2-klein-4b-distilled-windows-v1",
       "dependencies": [
         {
           "kind": "model",
-          "label": "FLUX.2 Klein 需要独立 Windows 组件、运行时和实机验收"
+          "label": "已安装并通过摘要校验的 FLUX.2 Klein Windows 模型闭包"
+        },
+        {
+          "kind": "runtime",
+          "label": "v2 共享运行时（NF4 + 组件 CPU offload，独立 worker 进程）"
         }
       ]
     },
@@ -52,18 +56,22 @@
       "featureId": "remove-background",
       "title": "去背景",
       "category": "编辑",
-      "summary": "当前 Windows 版本尚未接入；仅保留功能说明。",
-      "description": "BiRefNet general epoch_244 的 Windows ONNX CPU 产品和透明 PNG/mask 验收尚未完成。",
-      "inputs": ["受控源图 AssetId"],
-      "outputs": ["透明 PNG AssetRef", "前景蒙版"],
-      "productStatus": "planned",
-      "scope": "Windows 首轮不提供 ONNX 运行时、模型安装、去背景或 mask 输出。",
-      "action": null,
-      "modelId": "birefnet-general-epoch-244",
+      "summary": "从一张受控源图提取主体，输出透明 RGBA PNG 与逐像素蒙版。",
+      "description": "使用 BiRefNet general epoch_244 ONNX 权重，Windows 走共享 v2 运行时的 ONNX Runtime CPUExecutionProvider、float32、1024² 预处理，透明 PNG 与 mask 在同一 Job 内原子提交。",
+      "inputs": ["受控源图 AssetId", "BiRefNet general epoch_244"],
+      "outputs": ["透明 PNG AssetRef", "前景蒙版 AssetRef"],
+      "productStatus": "implemented",
+      "scope": "CPU 路线（无 GPU 常驻）；单张源图，输出按源图规范化尺寸。不包含 Portrait 或其他 checkpoint。",
+      "action": "open-composer",
+      "modelId": "birefnet-general-epoch-244-windows-v1",
       "dependencies": [
         {
           "kind": "model",
-          "label": "BiRefNet 需要独立 Windows ONNX 组件和 CPU 探针"
+          "label": "已安装并通过摘要校验的 BiRefNet ONNX 权重"
+        },
+        {
+          "kind": "runtime",
+          "label": "共享 v2 运行时的 ONNX Runtime CPU 提供程序"
         }
       ]
     },
@@ -71,18 +79,22 @@
       "featureId": "upscale",
       "title": "放大",
       "category": "增强",
-      "summary": "当前 Windows 版本尚未接入；仅保留功能说明。",
-      "description": "Real-ESRGAN x4plus 的 Windows ncnn Vulkan 产品和分块、取消、强杀回收验收尚未完成。",
-      "inputs": ["受控源图 AssetId"],
+      "summary": "将一张 RGB 图片精确放大 4 倍。",
+      "description": "使用官方 Real-ESRGAN v0.2.5.0 Windows ncnn 便携包与固定 x4plus 权重，单 GPU、tile 128、1:1:1 线程，固定 4× 输出 PNG，不启用 TTA。",
+      "inputs": ["受控源图 AssetId", "Real-ESRGAN x4plus"],
       "outputs": ["放大后的 PNG AssetRef"],
-      "productStatus": "planned",
-      "scope": "Windows 首轮不提供 ncnn Vulkan 运行时、模型安装或 4× 放大动作。",
-      "action": null,
-      "modelId": "realesrgan-x4plus",
+      "productStatus": "implemented",
+      "scope": "固定 4×；不包含动漫专用模型、人脸修复或任意倍率重采样。",
+      "action": "open-composer",
+      "modelId": "realesrgan-x4plus-windows-v1",
       "dependencies": [
         {
           "kind": "model",
-          "label": "Real-ESRGAN 需要 Windows ncnn 程序和 x4plus 权重对验收"
+          "label": "已安装并通过摘要校验的 Real-ESRGAN Windows ncnn 包与 x4plus 权重"
+        },
+        {
+          "kind": "runtime",
+          "label": "ncnn Vulkan 运行时与单 GPU 0"
         }
       ]
     }
