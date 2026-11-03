@@ -59,11 +59,13 @@ App content is 39,886,520 bytes; with the licenses the installed total is
 
 ## Gate 0
 
-Case **G2-R1** (real ncnn Vulkan 4x on the Windows target machine) passed:
-880x880 output from a 220x220 input with wall time 4.863 s, and 388x244 from a
-97x61 controlled input in 2.207 s, on `[0 NVIDIA GeForce RTX 3080 Ti]` (Vulkan
-device 1, Intel UHD 770, was enumerated but not selected). Full evidence is in
-`verification/windows-parity-realesrgan/`.
+Case **G2-R1** (real ncnn Vulkan 4x on the Windows target machine) passed in
+three runs: 880x880 from a 220x220 input in 4.863 s, 388x244 from a 97x61
+controlled input in 2.207 s, and 1536x1152 from a 384x288 public-domain NASA
+real photograph in 2.337 s — all exactly 4x, all on `[0 NVIDIA GeForce RTX
+3080 Ti]` (Vulkan device 1, Intel UHD 770, was enumerated but not selected).
+Full evidence is in `verification/windows-parity-realesrgan/`, including an
+independent archive/member/license hash re-verification.
 
 ## Limitations
 

@@ -178,10 +178,16 @@
         "input_dims": [97, 61],
         "output_dims": [388, 244],
         "exact_4x": true
+      },
+      {
+        "label": "NASA public-domain real photograph (Apollo 17 view of Africa, 384x288)",
+        "wall_seconds": 2.337,
+        "input_dims": [384, 288],
+        "output_dims": [1536, 1152],
+        "exact_4x": true
       }
     ],
     "device": "NVIDIA GeForce RTX 3080 Ti via Vulkan device 0 (Intel UHD 770 enumerated but not selected)",
-    "supplement_pending": "A public-domain real-photograph run is prepared (verification/windows-parity-realesrgan/real-photo-input-source.json) and will be recorded when a separate GPU window is granted.",
     "required_checks": [
       "exact 4x output dimensions",
       "output bytes and sha256",
