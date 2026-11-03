@@ -57,6 +57,19 @@
       "result": "passed"
     }
   ],
+  "quality_gate": {
+    "date": "2026-11-03",
+    "machine": "development",
+    "checks": [
+      { "name": "rust-fmt", "command": "cargo fmt --all -- --check", "exit_code": 0 },
+      { "name": "rust-clippy", "command": "cargo clippy --workspace --all-targets --locked -- -D warnings", "exit_code": 0 },
+      { "name": "rust-tests", "command": "cargo test --workspace --locked", "exit_code": 0, "totals": { "suites": 17, "passed": 234, "failed": 0, "ignored": 8 } },
+      { "name": "rust-build", "command": "cargo build --workspace --examples --bins --locked", "exit_code": 0 },
+      { "name": "frontend-tests", "command": "npm --prefix apps/frontend test", "exit_code": 0, "totals": { "files": 6, "passed": 37 } },
+      { "name": "frontend-build", "command": "npm --prefix apps/frontend run build", "exit_code": 0 }
+    ],
+    "note": "Development machine only; verification/windows-quality-gate.json stays bound to the Win10 target machine and was not rewritten."
+  },
   "reproduction_attempts": {
     "question": "Does a second instance with a different --data-dir exit with code 101 as recorded on 2026-11-03?",
     "attempts": [
