@@ -94,6 +94,19 @@ bd prime
 （Windows 产品验收测试都在 ignored 列表里）；前端 37 tests。忽略测试含义见
 [windows-quality-gate.json](../verification/windows-quality-gate.json)。
 
+如果这是全新克隆、还没跑过打包脚本，`apps/desktop/build.rs` 会因为缺少 sidecar 而
+直接 panic（`resource path binaries\inference-supervisor-x86_64-pc-windows-msvc.exe
+doesn't exist`）。先执行：
+
+```powershell
+cargo build --locked -p inference-supervisor -p diagnostic-worker
+New-Item -ItemType Directory -Force apps/desktop/binaries | Out-Null
+Copy-Item target/debug/inference-supervisor.exe apps/desktop/binaries/inference-supervisor-x86_64-pc-windows-msvc.exe
+Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-worker-x86_64-pc-windows-msvc.exe
+```
+
+`apps/desktop/binaries/` 已被 .gitignore 覆盖，不进仓库。
+
 ## 5. 已完成（Windows 侧，证据都在 verification/）
 
 | 范围 | 结论 | 证据 |
