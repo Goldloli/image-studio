@@ -7,10 +7,9 @@ real transferred artifacts and the installer rules implemented in
 component-byte/validation rules, 2194-2217 URL allowlist, 2342-2371 artifact
 validation).
 
-Status of the current run: **pass** for the six model manifests. The
-Real-ESRGAN native runtime manifest and the v2 product runtime manifest are
-verified in the same report once present (this file is updated by their
-commits).
+Status of the current run: **pass** for all eight manifests (six model
+manifests + Real-ESRGAN native runtime + Windows v2 product runtime):
+8/8 manifests, 131 per-file/member checks, 0 failures.
 
 ## What is checked
 
@@ -51,12 +50,52 @@ For every manifest:
 | `qwen-image-2.1-turbo-windows-v1` | model | www.modelscope.cn | 16/16 | 32,451,607,098 | pass |
 | `moss-image-sft-windows-v1` | model | www.modelscope.cn | 19/19 | 27,219,783,878 | pass |
 | `realesrgan-x4plus-windows-v1` | model (archive) | github.com | 1 archive + 2 members | 33,540,549 | pass |
-| `realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1` | native runtime | github.com | pending build | n/a | pending |
-| `windows-python31210-…-v2` | product runtime | pypi/pytorch/python.org | pending build | n/a | pending |
+| `realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1` | native runtime | github.com | 1 archive + 3 members + 2 licenses | n/a | pass |
+| `windows-python31210-torch2100-cu126-diff041-transformers53-v2` | product runtime | pypi/pytorch/python.org | 50/50 | n/a | pass |
 
 The generated JSON (`installer-manifests-verification.json`) contains the
 per-file bytes/SHA-256 comparison, schema errors (none), allowlist hosts and
 component-byte computations.
+
+### Product runtime manifest
+
+`resources/windows-parity/runtime-v2/product-runtime-manifest.json` is the
+installer `RuntimeManifest` view of task 1.2:
+
+- `kind: python-embeddable-windows`, `id:
+  windows-python31210-torch2100-cu126-diff041-transformers53-v2`,
+  `python: 3.12.10`, `platform: windows-amd64`
+- `interpreter`: Python 3.12.10 embeddable archive (11,133,606 bytes)
+- `wheels`: 49 artifacts (torch/torchvision from the PyTorch cu126 index, the
+  rest from PyPI, all allowlisted)
+- `packages`: 49 name→version pairs, read from the installed runtime's
+  `.dist-info/METADATA` and normalized exactly like the installer probe; every
+  value equals its `requirements.lock` pin (verified here)
+- `archives: []`, `install_layout:
+  {interpreter_root: python.exe, site_packages: Lib/site-packages,
+  path_file: python312._pth}`
+- `worker_wheels_pending`: the manifest is explicitly incomplete on the
+  Windows worker wheels until `studio-diffusers-worker` / `studio-onnx-worker`
+  are appended to `wheels`
+
+### Real-ESRGAN native runtime manifest
+
+`resources/windows-parity/realesrgan-ncnn-vulkan/runtime-manifest.json`:
+
+- `kind: native`, `id: realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1`,
+  `platform: windows-amd64` (the planned platform-gate change must accept this)
+- `executable: realesrgan-ncnn-vulkan.exe`
+- one archive: the official `realesrgan-ncnn-vulkan-20220424-windows.zip`
+  (45,474,481 bytes, SHA-256 `abc02804…`), members exactly the files that exist
+  in the zip: `realesrgan-ncnn-vulkan.exe`, `vcomp140.dll`,
+  `README_windows.md`
+- the same archive is referenced by the Real-ESRGAN model manifest; the
+  installer's SHA-256-keyed download cache stores it once, so any space math
+  counting it twice is a conservative upper bound
+- two bundled license resources (`LICENSE-RealESRGAN.txt` BSD-3-Clause,
+  `LICENSE-ncnn-app.txt` MIT) recorded in the non-breaking `licenses` field
+  with exact bytes/SHA-256; the installer copies those texts into
+  `<data>/licenses/<install_id>/` and records the hashes in the ready record
 
 ## Local content sources
 
@@ -76,20 +115,28 @@ component-byte computations.
   text (GitHub raw redirects to `raw.githubusercontent.com`; the `v1` release
   has no license asset). The license ships as an application resource
   (`resources/windows-parity/models/birefnet-general-epoch-244-windows-v1/LICENSE-BiRefNet.txt`)
-  and is recorded in the manifest's non-breaking `licenses` field.
+  and is recorded in the manifest's non-breaking `licenses` field. Accepted
+  approach: the installer writes license texts from `resources/windows-parity`
+  into `<data>/licenses/<install_id>/` and records their SHA-256 in the ready
+  record instead of downloading from a non-allowlisted host.
 - **Real-ESRGAN licenses**: the official Windows zip contains no license files.
   The two texts are committed resources and recorded in the native runtime
   manifest's `licenses` field; archive members only cover files that really
-  exist in the zip.
+  exist in the zip. Same install-time copy rule as above.
+- **Real-ESRGAN shared archive**: the model manifest and the native runtime
+  manifest reference the same official zip, so the installer download cache
+  (keyed by SHA-256) stores it once; counting it per manifest is a conservative
+  space upper bound.
 - `worker_wheels_pending` in the product runtime manifest: Windows worker
   wheels are produced by the worker streams and will be appended to `wheels`
-  later; the file is explicitly marked incomplete on that field.
+  later; the file is explicitly marked incomplete on that field and must not
+  activate an installation until then.
 
 ## Reproduction
 
 ```powershell
 python tools/windows-parity/manifests/build_model_manifests.py
-python tools/windows-parity/manifests/build_product_runtime_manifest.py
+python tools/windows-parity/manifests/build_runtime_manifests.py
 python tools/windows-parity/manifests/verify_installer_manifests.py
 ```
 
