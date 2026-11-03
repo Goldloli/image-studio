@@ -5,10 +5,10 @@
 ## 1. Gate 0 与运行时
 
 - [ ] 1.1 为 Klein、BiRefNet、Real-ESRGAN、Qwen-Image 2.1、Qwen-Image 2.1-Turbo、MOSS-Image-SFT 分别执行隔离 Gate 0：冻结来源 revision/逐文件 SHA-256，记录加载/单次真实执行、独占显存、进程 commit、可用 RAM、质量样图与耗时。
-- [ ] 1.2 冻结 Windows v2 运行时（Python 3.12.10 / torch 2.10.0+cu126 / torchvision 0.25.0 / diffusers 0.41 / transformers（Qwen/MOSS 兼容版本）/ accelerate / bitsandbytes / onnxruntime），登记 wheel 与运行时清单 SHA-256，证明离线可安装。
-- [ ] 1.3 冻结 Real-ESRGAN Windows ncnn Vulkan 构建与 x4plus 权重，记录 SHA-256 与 Vulkan 设备身份。
+- [x] 1.2 冻结 Windows v2 运行时（Python 3.12.10 / torch 2.10.0+cu126 / torchvision 0.25.0 / diffusers 0.41 / transformers（Qwen/MOSS 兼容版本）/ accelerate / bitsandbytes / onnxruntime），登记 wheel 与运行时清单 SHA-256，证明离线可安装。证据：`resources/windows-parity/runtime-v2/`、`verification/windows-parity-runtime/`（51 artifacts，冻结解释器离线安装 exit 0，49/49 pin 命中）。
+- [x] 1.3 冻结 Real-ESRGAN Windows ncnn Vulkan 构建与 x4plus 权重，记录 SHA-256 与 Vulkan 设备身份。证据：`resources/windows-parity/realesrgan-ncnn-vulkan/`、`verification/windows-parity-realesrgan/`（官方 v0.2.5.0 Windows zip 45,474,481 B / sha256 abc02804…，两次真实 4× 运行 pass，RTX 3080 Ti Vulkan 设备身份已记录）。
 - [ ] 1.4 决定每个大模型在 12 GB/32 GB 上的执行策略：分阶段量化装载（NF4/INT8/GGUF）或硬件门槛；把决定、预算与失败证据写入 design 补充与目录元数据。
-- [ ] 1.5 对 MOSS 的 custom pipeline 做固定 revision 的代码审阅与安全边界记录（不联网取代码、不执行未审阅内容）。
+- [x] 1.5 对 MOSS 的 custom pipeline 做固定 revision 的代码审阅与安全边界记录（不联网取代码、不执行未审阅内容）。证据：`verification/windows-parity-gate0/moss-pipeline-review.md`（固定 25,060 B / sha256 1dac1aca…，ModelScope 上游 API 哈希一致；仅 torch/diffusers/transformers，无网络/进程/eval；Windows 采用 worker vendored 代码 + 离线运行）。
 
 ## 2. 执行器与 worker
 
