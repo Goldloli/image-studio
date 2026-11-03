@@ -1,0 +1,18 @@
+[0 NVIDIA GeForce RTX 3080 Ti]  queueC=2[8]  queueG=0[16]  queueT=1[2]
+[0 NVIDIA GeForce RTX 3080 Ti]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0
+[0 NVIDIA GeForce RTX 3080 Ti]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1
+[0 NVIDIA GeForce RTX 3080 Ti]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1
+[1 Intel(R) UHD Graphics 770]  queueC=0[1]  queueG=0[1]  queueT=0[1]
+[1 Intel(R) UHD Graphics 770]  bugsbn1=0  bugbilz=68  bugcopc=0  bugihfa=0
+[1 Intel(R) UHD Graphics 770]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1
+[1 Intel(R) UHD Graphics 770]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1
+0.00%
+11.11%
+22.22%
+33.33%
+44.44%
+55.56%
+66.67%
+77.78%
+88.89%
+C:\Users\XIAOKA-PC\Desktop\image-studio\verification\windows-parity-realesrgan\input-nasa-real-photo-384x288.png -> C:\Users\XIAOKA-PC\Desktop\image-studio\verification\windows-parity-realesrgan\g2-r1-real-photo-4x.png done

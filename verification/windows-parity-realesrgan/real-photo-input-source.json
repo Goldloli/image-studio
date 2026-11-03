@@ -25,6 +25,21 @@
     "output_sha256": "93cb8295836a0a050954e1ba07b24099724f0c68f935a33605545ec17d89f4ac",
     "output_dims": [384, 288]
   },
-  "run_status": "not_run",
-  "note": "Prepared only; the real 4x run is deferred until the Lead grants a short GPU window while the MOSS staged experiments are paused."
+  "run_status": "pass",
+  "run": {
+    "evidence": "verification/windows-parity-realesrgan/g2-r1-real-photo.json",
+    "command": "realesrgan-ncnn-vulkan.exe -i input-nasa-real-photo-384x288.png -o g2-r1-real-photo-4x.png -n realesrgan-x4plus -s 4 -t 128 -g 0 -j 1:1:1 -f png -v",
+    "started_at": "2026-11-03T16:24:13.764474+00:00",
+    "wall_seconds": 2.337,
+    "input_dims": [384, 288],
+    "output_dims": [1536, 1152],
+    "output_path": "verification/windows-parity-realesrgan/g2-r1-real-photo-4x.png",
+    "output_bytes": 3413801,
+    "output_sha256": "73e2d464097fa538c925c3fca9d4c9c5adaf0e1512316d070445bd0f7b1bb394",
+    "exact_4x": true,
+    "status": "pass",
+    "device": "Vulkan device 0: NVIDIA GeForce RTX 3080 Ti (Intel UHD 770 enumerated, not selected)",
+    "gpu_window": "granted by the Lead explicitly; nvidia-smi checked before/after; GPU released after ~2.3 s"
+  },
+  "note": "Real photograph run recorded as a supplement to the two G2-R1 runs; the frozen contract (model/scale/tile/single GPU/no TTA) is identical."
 }

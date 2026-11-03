@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-realesrgan-gate0-run",
+  "case_id": "G2-R1",
+  "label": "NASA public-domain real photograph (Apollo 17 view of Africa, as17-148-22717), center-cropped and resized to 384x288",
+  "status": "pass",
+  "failure": null,
+  "started_at": "2026-11-03T16:24:13.764474+00:00",
+  "finished_at": "2026-11-03T16:24:16.101946+00:00",
+  "wall_seconds": 2.337,
+  "host": {
+    "platform": "win32",
+    "system": "Windows_NT",
+    "python": "3.14.7",
+    "machine": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel"
+  },
+  "command": [
+    "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\app\\realesrgan-ncnn-vulkan.exe",
+    "-i",
+    "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-realesrgan\\input-nasa-real-photo-384x288.png",
+    "-o",
+    "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-realesrgan\\g2-r1-real-photo-4x.png",
+    "-n",
+    "realesrgan-x4plus",
+    "-s",
+    "4",
+    "-t",
+    "128",
+    "-g",
+    "0",
+    "-j",
+    "1:1:1",
+    "-f",
+    "png",
+    "-v"
+  ],
+  "cwd": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\app",
+  "exit_code": 0,
+  "fixed_parameters": {
+    "model": "realesrgan-x4plus",
+    "scale": 4,
+    "tile": 128,
+    "gpu_ids": [
+      0
+    ],
+    "single_gpu": true,
+    "threads": "1:1:1",
+    "tta": false,
+    "format": "png",
+    "executable_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c"
+  },
+  "input": {
+    "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-realesrgan\\input-nasa-real-photo-384x288.png",
+    "dims": [
+      384,
+      288
+    ],
+    "bytes": 330926,
+    "sha256": "93cb8295836a0a050954e1ba07b24099724f0c68f935a33605545ec17d89f4ac"
+  },
+  "output": {
+    "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-realesrgan\\g2-r1-real-photo-4x.png",
+    "dims": [
+      1536,
+      1152
+    ],
+    "bytes": 3413801,
+    "sha256": "73e2d464097fa538c925c3fca9d4c9c5adaf0e1512316d070445bd0f7b1bb394"
+  },
+  "exact_4x": true,
+  "device_identity": {
+    "ncnn_verbose_devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "source": "ncnn verbose log"
+      },
+      {
+        "index": 1,
+        "name": "Intel(R) UHD Graphics 770",
+        "source": "ncnn verbose log"
+      }
+    ],
+    "ncnn_verbose_device_lines": [
+      "[0 NVIDIA GeForce RTX 3080 Ti]  queueC=2[8]  queueG=0[16]  queueT=1[2]",
+      "[0 NVIDIA GeForce RTX 3080 Ti]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0",
+      "[0 NVIDIA GeForce RTX 3080 Ti]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1",
+      "[0 NVIDIA GeForce RTX 3080 Ti]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1",
+      "[1 Intel(R) UHD Graphics 770]  queueC=0[1]  queueG=0[1]  queueT=0[1]",
+      "[1 Intel(R) UHD Graphics 770]  bugsbn1=0  bugbilz=68  bugcopc=0  bugihfa=0",
+      "[1 Intel(R) UHD Graphics 770]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1",
+      "[1 Intel(R) UHD Graphics 770]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1"
+    ],
+    "nvidia_smi_before": {
+      "available": true,
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=name,uuid,driver_version,memory.total,memory.used,utilization.gpu",
+        "--format=csv,noheader"
+      ],
+      "rows": [
+        "NVIDIA GeForce RTX 3080 Ti, GPU-78b715aa-ec51-31af-8813-eac9653458a7, 596.49, 12288 MiB, 782 MiB, 34 %"
+      ],
+      "raw": "NVIDIA GeForce RTX 3080 Ti, GPU-78b715aa-ec51-31af-8813-eac9653458a7, 596.49, 12288 MiB, 782 MiB, 34 %"
+    },
+    "nvidia_smi_after": {
+      "available": true,
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=name,uuid,driver_version,memory.total,memory.used,utilization.gpu",
+        "--format=csv,noheader"
+      ],
+      "rows": [
+        "NVIDIA GeForce RTX 3080 Ti, GPU-78b715aa-ec51-31af-8813-eac9653458a7, 596.49, 12288 MiB, 821 MiB, 3 %"
+      ],
+      "raw": "NVIDIA GeForce RTX 3080 Ti, GPU-78b715aa-ec51-31af-8813-eac9653458a7, 596.49, 12288 MiB, 821 MiB, 3 %"
+    },
+    "device_index_check": 0
+  },
+  "log_files": {
+    "stdout": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-realesrgan\\g2-r1-real-photo.stdout.log",
+    "stderr": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-realesrgan\\g2-r1-real-photo.stderr.log"
+  },
+  "limitations": [
+    "Gate 0 single-run evidence for one input; not a throughput benchmark.",
+    "ncnn tiling may produce block-boundary differences from the PyTorch implementation."
+  ]
+}
