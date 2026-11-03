@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "kind": "windows-installation-space-shortage",
+  "status": "passed",
+  "date": "2026-11-03",
+  "case": "I03 remaining failure path: insufficient disk space",
+  "machine": {
+    "os": "Microsoft Windows 10 专业版 10.0.19045 (build 19045.6466)",
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13700K",
+    "gpu": "NVIDIA GeForce RTX 3080 Ti 12288 MiB",
+    "gpu_driver": "596.49",
+    "webview2": "156.0.4314.58"
+  },
+  "application": {
+    "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
+    "installer_sha256": "9e5ecc402aff21046612c056be28efbb4863bb11a6464549759ef2d9b69a8ba2",
+    "installer_bytes": 244754133,
+    "installed_executable": "%LOCALAPPDATA%/Image Studio/image-studio-desktop.exe",
+    "installed_executable_sha256": "7270ba22979d1a8c37ebb2073c113e0feaf97d30ec70b087ad0ec406b49842c7",
+    "launch_arguments": "--data-dir <removable-volume>/ImageStudioAcceptance-20261103"
+  },
+  "volume": {
+    "device": "F:",
+    "kind": "removable USB 3.0 stick (SanDisk Ultra), verified to be an existing macOS boot/install volume",
+    "filesystem": "FAT32",
+    "total_gib": 28.62,
+    "free_gib": 27.74,
+    "data_root": "F:\\ImageStudioAcceptance-20261103",
+    "created_empty": true,
+    "removed_after_acceptance": true,
+    "existing_volume_content_untouched": true
+  },
+  "expected": "A formal install is rejected before any download with the explicit disk-space error; nothing is activated, no Job/Attempt/Asset is created, and pre-existing data is preserved.",
+  "steps": [
+    "Create an empty isolated root on the removable volume and launch the installed application with --data-dir.",
+    "Open 模型, select Z-Image Turbo, click 安装模型与运行环境.",
+    "Record the UI state, elapsed time, cache downloads, SQLite counts and the installation directory.",
+    "Add pre-existing marker files, click 继续安装, and verify the failure repeats while the markers survive.",
+    "Close the application, remove the isolated root, and confirm the volume's existing content is untouched."
+  ],
+  "required_space": {
+    "installation_budget_gib": 88.99,
+    "model_download_gib": 32.85,
+    "runtime_download_gib": 2.71,
+    "note": "安装预算 reported by the model page for this empty-cache root (missing download bytes plus target copy, runtime expansion and reserve). The check runs on both data and cache volumes before the downloading phase."
+  },
+  "observed": {
+    "elapsed_until_failure_seconds_approx": 4,
+    "ui_state": "安装失败，可修复重试",
+    "ui_budget": "安装预算 88.99 GB",
+    "error": "磁盘空间不足；请释放安装计划所需空间后继续。",
+    "retry_action": "继续安装",
+    "cache_downloads_files": 0,
+    "jobs": 0,
+    "attempts": 0,
+    "assets": 0,
+    "installations": 0,
+    "activation_records": "none; only an empty data/installations/models directory exists, no Ready/activation record was written",
+    "pre_existing_markers": [
+      { "path": "data/assets/keep-me.txt", "bytes": 28, "survived_retry": true },
+      { "path": "work/keep-me-work.txt", "bytes": 22, "survived_retry": true }
+    ],
+    "second_attempt_via_retry": "Same error after the retry; no download, no activation, markers intact."
+  },
+  "result": "passed",
+  "artifacts": {
+    "screenshot": "verification/windows-gate0/product-space-shortage.png"
+  },
+  "limitations": [
+    "The volume is a removable FAT32 USB stick with 27.74 GiB free instead of the prepared 40 GB NTFS VHD. The checked condition (free space below the 88.99 GiB installation budget on both data and cache volumes) is equivalent and strictly tighter; FAT32's 4 GiB per-file limit was never reached because the space check fails before any download.",
+    "The failure happens before downloads, so no network denial was involved in this case.",
+    "The isolated root was created empty and removed with the whole test folder afterwards; the marker files were added only to prove that a failed install and failed retry do not delete existing data."
+  ],
+  "related": {
+    "test_plan": "I03",
+    "bead": "image-studio-neo.7",
+    "unit_test": "installation_space_accounts_for_separate_and_shared_volumes"
+  }
+}

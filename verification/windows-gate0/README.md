@@ -188,16 +188,27 @@ deliberately damaged components:
   `unavailable`, left the other 19 model files and all cache entries intact, and
   no activation path re-fetched the missing component.
 
-Real insufficient-disk-space acceptance still requires a small test volume and
-remains pending; the space calculation itself is covered by
-`installation_space_accounts_for_separate_and_shared_volumes`.
+Real insufficient-disk-space acceptance was run on 2026-11-03 against the
+installed application on an empty isolated root placed on a removable volume
+with 27.74 GiB free (FAT32, below the 88.99 GiB installation budget reported by
+the model page). Clicking 安装模型与运行环境 failed in about 4 seconds with
+`磁盘空间不足；请释放安装计划所需空间后继续。`, before the downloading phase:
+no cache download entries were written, and the fresh SQLite library held 0
+jobs, 0 attempts, 0 assets and 0 installations with no Ready/activation record.
+Pre-existing marker files under `data/assets` and `work` survived the failed
+attempt and a subsequent 继续安装 retry, which reproduced the same error. The
+isolated root was removed afterwards and the removable volume's existing
+content was not touched. See the test-plan note that a 40 GB VHD was not
+available in this non-elevated session; the removable volume provides the same
+free-space condition and is strictly smaller.
 
 Report:
 
+- [Space shortage](product-space-shortage.json) and [screenshot](product-space-shortage.png)
 - [Activation failures](product-activation-failures.json)
 
 Empty-cache activation, deliberate interruption/resumption, runtime/probe
-cancellation with retry, and corrupt/missing-component activation rejection are
-now evidenced; space-failure acceptance, network-denied cache installation,
-clean-user installation, complete IME/DPI interaction and Mac regression remain
-separate pending gates.
+cancellation with retry, corrupt/missing-component activation rejection and
+insufficient-disk-space rejection are now evidenced; network-denied cache
+installation, clean-user installation, complete IME/DPI interaction and Mac
+regression remain separate pending gates.
