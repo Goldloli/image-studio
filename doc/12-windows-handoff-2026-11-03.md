@@ -122,6 +122,7 @@ Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-wo
 | 安装版原生 UI：UI 安装→Ready、中英文三次真实生成、原生对话框导出 PNG、重启恢复、任务/作品、设置/存储/关于、明暗主题、原生最大化/还原/最小化/拖拽、Tab/Shift+Enter、合成 IME 组合保护、UI 停止落 cancelled | passed（部分项有明确限制） | `verification/windows-installed-app/README.md` + `ui-acceptance.json` |
 | 覆盖导出确认（P08 缺陷修复） | 代码/单元测试/安装包已就绪，确认对话框已出现；拒绝覆盖时旧文件保持不变；Yes 路径未再自动重跑 | `ui-acceptance.json` 的 `export_overwrite`、`apps/desktop/src/host.rs` |
 | 安装包与更新烟测 | passed，包 244,745,354 bytes / `56837792…f047` | `verification/windows-installer/README.md`、`internal-package.json`、`install-update-smoke.json` |
+| 平台一致性（Win11 / RTX 2060 SUPER 8 GB，补充） | passed（质量门、启动/页面/主题持久化、双根隔离、启动失败退出码 3；不含模型与生成） | `verification/windows-platform-parity/README.md` |
 
 ## 6. 明天优先事项（按建议顺序）
 

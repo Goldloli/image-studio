@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "kind": "windows-platform-parity",
+  "status": "passed_on_supplementary_machine",
+  "date": "2026-11-03",
+  "scope": "Quality gates and desktop host behaviour were re-run on a second machine with a different OS build and GPU. Model installation, real generation, resource budget and network-denied runs stay on the target machine; this record does not extend the supported model hardware.",
+  "environments": [
+    {
+      "id": "target",
+      "role": "target",
+      "os": "Windows 10 Pro 22H2 10.0.19045",
+      "cpu": "Intel Core i7-13700K",
+      "gpu": "NVIDIA GeForce RTX 3080 Ti 12288 MiB, compute capability 8.6",
+      "evidence": [
+        "verification/windows-quality-gate.json",
+        "verification/windows-gate0/README.md",
+        "verification/windows-installed-app/README.md"
+      ]
+    },
+    {
+      "id": "supplementary",
+      "role": "supplementary",
+      "os": "Windows 11 Enterprise 22631",
+      "cpu": "Intel Core i9-9900K",
+      "gpu": "NVIDIA GeForce RTX 2060 SUPER 8192 MiB, compute capability 7.5, driver 560.94",
+      "webview2": "156.0.4314.58",
+      "toolchain": {
+        "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+        "cargo": "1.99.1 (5f94df478 2026-08-27)",
+        "node": "24.19.0",
+        "npm": "11.17.0"
+      },
+      "binary": {
+        "path": "target/release/image-studio-desktop.exe",
+        "sha256": "7b50d65da9b1f4efd44bdef8b7d20d755e9d6d964112668fb237e0c8c088709a"
+      },
+      "evidence": ["verification/windows-platform-parity/README.md"]
+    }
+  ],
+  "comparison": {
+    "rust_tests": {
+      "target": { "suites": 17, "passed": 230, "failed": 0, "ignored": 8 },
+      "supplementary": { "suites": 17, "passed": 234, "failed": 0, "ignored": 8 },
+      "consistent": true,
+      "note": "The four additional tests belong to the new startup diagnostics module; no previously passing test regressed."
+    },
+    "rust_fmt_clippy_build": {
+      "target": "passed",
+      "supplementary": "passed"
+    },
+    "frontend": {
+      "target": { "test_files": 6, "tests": 37, "build": "passed" },
+      "supplementary": { "test_files": 6, "tests": 37, "build": "passed" }
+    }
+  },
+  "cases": [
+    {
+      "id": "startup-and-pages",
+      "expected": "native window, creation page, tasks/works empty states, model page and settings render on the release build",
+      "actual": {
+        "page_ready": true,
+        "create_page_shows_z_image": true,
+        "create_page_shows_not_ready": true,
+        "tasks_empty_state": "这里还没有任务",
+        "works_empty_state": "尚无正式作品",
+        "model_page_connected_models": 1,
+        "settings_appearance_group": true,
+        "roots_created": ["cache", "data", "logs", "work"],
+        "preferences_file_at_startup": false
+      },
+      "result": "passed"
+    },
+    {
+      "id": "appearance-persistence",
+      "expected": "theme change persists across a restart",
+      "actual": {
+        "dark_saved_in_preferences": true,
+        "reopened": true,
+        "theme_toggle_after_restart": "切换为浅色主题",
+        "dark_restored": true
+      },
+      "result": "passed"
+    },
+    {
+      "id": "two-roots",
+      "expected": "two instances with different --data-dir roots coexist, each with its own WebView2 profile",
+      "actual": {
+        "both_running": true,
+        "profile_a_created": true,
+        "profile_b_created": true,
+        "profiles_distinct": true,
+        "legacy_shared_profile_untouched": true
+      },
+      "result": "passed"
+    },
+    {
+      "id": "startup-failure-release",
+      "expected": "release build writes logs/startup-failure.log, shows the Chinese dialog and exits 3 instead of 101",
+      "actual": {
+        "webview2_own_error_dialog_first": true,
+        "log_created": true,
+        "dialog_title": "Image Studio 启动失败",
+        "dialog_dismissed_by": "scripts/windows-ui/answer-dialog.ps1",
+        "exit_code": 3
+      },
+      "result": "passed"
+    }
+  ],
+  "not_verified_on_supplementary": [
+    "model installation and empty-cache download",
+    "real Z-Image generation and image quality",
+    "CUDA reserved / private commit / RAM budget",
+    "network-denied install and generation",
+    "host and supervisor kill recovery during sampling",
+    "macOS regression"
+  ],
+  "model_scope": {
+    "supported_gpu": "RTX 3080 Ti 12288 MiB, sm86",
+    "supplementary_gpu": "RTX 2060 SUPER 8192 MiB, sm75",
+    "reason": "The frozen recipe measured a 8.87 GiB CUDA reserved peak (budget 10.5 GiB) and uses BF16 compute on sm86. An 8 GiB Turing card cannot hold that peak and does not provide the recipe BF16 path, so it is outside the registered support scope. Shrinking resolution, steps or quantization to fit is not allowed by the change."
+  }
+}
