@@ -1033,6 +1033,13 @@
         "import site"
       ]
     },
+    "packaged_runtime": {
+      "bootstrap_pip_in_verified_tree": true,
+      "bootstrap_pip_is_part_of_runtime_closure": false,
+      "bootstrap_pip_unpacked_bytes": 16801036,
+      "recommendation": "The verified install tree keeps pip only because the frozen interpreter installed its own wheel closure offline. The packaged product runtime may prune Lib/site-packages/pip, pip-26.3.dist-info and Scripts entry points; that saves bootstrap_pip_unpacked_bytes and does not affect the locked closure. If pip is kept for in-product repair/diagnostics, budget it in.",
+      "packaged_bytes_if_pip_pruned": 4762060945
+    },
     "environment_hints": {
       "PYTHONNOUSERSITE": "1 (keeps the frozen closure isolated from user site-packages)",
       "PYTHONUTF8": "1 (UTF-8 mode for worker logs and prompts)"
@@ -1043,8 +1050,27 @@
     "compressed_closure_bytes": 2725306561,
     "installed_runtime_bytes": 4778861981,
     "installed_runtime_files": 32580,
+    "installed_site_packages_bytes": 4753861130,
+    "interpreter_core_bytes": 25000851,
+    "unpacked_top_packages_bytes": {
+      "torch": 4160943973,
+      "bitsandbytes": 123603634,
+      "transformers": 92593734,
+      "sympy": 69502211,
+      "diffusers": 53394245,
+      "onnxruntime": 47814544,
+      "numpy": 32791392,
+      "torchvision": 26612700,
+      "numpy.libs": 21164112,
+      "networkx": 16279711,
+      "pil": 16165124,
+      "hf_xet": 9823184
+    },
+    "bootstrap_pip_unpacked_bytes": 16801036,
+    "steady_state_packaged_bytes_if_pip_pruned": 4762060945,
+    "install_peak_estimate_bytes": 7504168542,
     "installed_runtime_path": "target/parity-runtime/runtime",
-    "note": "The installer space pre-check should budget installed_runtime_bytes plus model weights."
+    "note": "Install-space budget: count installed_runtime_bytes (or steady_state_packaged_bytes_if_pip_pruned) as persistent space; during install the wheelhouse plus the Python zip also exist, which is the install_peak_estimate_bytes peak. The wheelhouse is a download/install cache and may be deleted afterwards. Model weights are additional."
   },
   "dependency_resolution": {
     "resolved_with": "pip 26.2.1 on the host Python, cross-target resolution for cp312-win_amd64",

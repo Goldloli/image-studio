@@ -83,6 +83,28 @@ version; `torch`, `torchvision`, `diffusers`, `transformers`, `accelerate`,
 (capability 8.6). The probe does not create a CUDA context, so no VRAM is
 reserved while another experiment owns the GPU.
 
+## Install-space budget
+
+The installer space pre-check should budget the **unpacked** runtime, not the
+wheel sizes. The manifest records the full breakdown in `space`:
+
+| Item | Bytes | Notes |
+|---|---|---|
+| Wheelhouse (compressed wheels + pip bootstrap) | 2,714,172,955 (50 files) | download/install cache; may be deleted after install |
+| Python embeddable archive | 11,133,606 | source for the interpreter tree |
+| Installed runtime (`installed_runtime_bytes`) | 4,778,861,981 (32,580 files) | persistent space |
+| — incl. `torch` unpacked | 4,160,943,973 | 87% of the closure |
+| — incl. `bitsandbytes` / `transformers` / `diffusers` / `onnxruntime` | 123.6 MB / 92.6 MB / 53.4 MB / 47.8 MB | |
+| — incl. bootstrap `pip` unpacked | 16,801,036 | not part of the locked closure |
+| Steady state if `pip` is pruned | 4,762,060,945 | recommended packaged size |
+| Install peak (`install_peak_estimate_bytes`) | 7,504,168,542 | wheelhouse + runtime + Python zip coexisting during install |
+
+`pip` is present in the verified tree only because the frozen interpreter ran
+its own offline install. The packaged product runtime may prune
+`Lib\site-packages\pip`, `pip-26.3.dist-info` and `Scripts` entry points: that
+saves ~16.8 MB and does not affect the locked closure. If `pip` is kept for
+in-product repair/diagnostics, budget it in. Model weights are additional.
+
 ## onnxruntime choice
 
 `onnxruntime==1.31.1` is the latest stable release with an official
