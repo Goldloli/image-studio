@@ -344,7 +344,7 @@ fn observe_tiles(mut stderr: impl Read + Send + 'static) -> mpsc::Receiver<()> {
             }
             for byte in &buffer[..count] {
                 if matches!(byte, b'\n' | b'\r') {
-                    if !oversized && completed_tile(&line) {
+                    if !observed && !oversized && completed_tile(&line) {
                         let _ = sender.try_send(());
                         observed = true;
                     }
