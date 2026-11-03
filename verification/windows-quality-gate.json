@@ -3,7 +3,7 @@
   "kind": "windows-quality-gate",
   "status": "passed",
   "date": "2026-11-03",
-  "commit": "9860c6c9792fd8d649922a998b64ea87bd03046b",
+  "commit": "376a3c3408e5490b94f1703a102d2af8850763e1",
   "machine": {
     "os": "Microsoft Windows 10 专业版 10.0.19045 (build 19045)",
     "cpu": "13th Gen Intel(R) Core(TM) i7-13700K",
@@ -35,7 +35,7 @@
     "Cargo.lock_sha256": "640f4460521cf83b6c5853bef4b7a20d0551239ea868e14f50e62350fe8396ce",
     "apps/frontend/package-lock.json_sha256": "c2a2ddb281e39a14b4a2ed296d3acd5346ba5f0dc74887768b6095d7a23379ff"
   },
-  "gate_rerun_note": "Re-run 2026-11-03 after the export-overwrite confirmation fix; adds host::tests::export_overwrite_requires_an_explicit_confirmation.",
+  "gate_rerun_note": "Re-run 2026-11-03 at 376a3c3 after the WebView2 startup-diagnosis change (startup.rs panic hook and per-data-root WebView2 profile); adds the four startup.rs unit tests, so the workspace suite is 234 tests.",
   "checks": [
     {
       "name": "rust-fmt",
@@ -54,7 +54,7 @@
       "command": "cargo test --workspace --locked",
       "exit_code": 0,
       "totals": {
-        "passed": 230,
+        "passed": 234,
         "failed": 0,
         "ignored": 8,
         "suites": 17,
@@ -75,7 +75,7 @@
       "output": {
         "modules_transformed": 2057,
         "largest_chunk_kib": 1502.62,
-        "built_in_seconds": 0.405
+        "built_in_seconds": 0.503
       },
       "log": "verification/windows-r01-frontend-build.log"
     },
@@ -124,7 +124,8 @@
       "name": "openspec-validate",
       "command": "openspec validate introduce-windows-foundation --strict --no-interactive",
       "exit_code": 0,
-      "output": "Change 'introduce-windows-foundation' is valid"
+      "output": "Change 'introduce-windows-foundation' is valid",
+      "log": "verification/windows-r01-openspec.log"
     }
   ],
   "ignored_acceptance_tests": [
