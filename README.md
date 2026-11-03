@@ -198,6 +198,17 @@ BiRefNet epoch_244 随后完成 31 项适用 P0：空缓存与禁网安装、真
 
 2026-11-01 的整批回归完成七型号/八能力统计、41 个正式作品与 1 个 mask、九步跨后端顺序、跨会话互斥、4:3→1:1 恢复、缺件与旧环境保留、1280×800/960×640 原生布局。R01 重跑 Z-Image 三个尺寸、真实取消重试和采样后宿主强杀恢复；R02 对原 v1 cancelled Job 追加新 Attempt 并保持 request/plan/manifest 不变；R05 重跑 Klein 文生图/编辑、BiRefNet 双输出、Real-ESRGAN 4×，并完成三条 cancelled 任务的会话内原生重试。R03/R04 覆盖事务、旧事件、未来版本、非法候选/帧、提交崩溃窗口、前端/Rust/Python、锁审计、禁网启动和隔离源码构建。报告见 [MOSS/整批阶段报告](verification/qwen-moss-20261101/moss-stage-report.md)。
 
+### 验证环境
+
+质量门与桌面宿主行为已在两套环境复核，记录见 [Windows 平台一致性](verification/windows-platform-parity/README.md)：
+
+| 环境 | 用途 | 已复核内容 |
+|---|---|---|
+| Windows 10 22H2 / RTX 3080 Ti 12 GB / i7-13700K | 目标机 | 230 项 Rust 测试（8 项显式忽略）、fmt/clippy/构建、前端 37 项、安装版 UI 全路径、真实 Z-Image 生成、禁网与强杀恢复 |
+| Windows 11 22631 / RTX 2060 SUPER 8 GB / i9-9900K | 补充环境 | 234 项 Rust 测试、fmt/clippy/构建、前端 37 项、启动失败诊断（日志/对话框/退出码 3）、双隔离根 WebView2 目录、主题跨重启 |
+
+模型安装、真实生成和资源预算仍只在 3080 Ti 目标机认证。2060 SUPER 为 sm75 / 8 GiB：低于该配方实测 8.87 GiB 的 CUDA reserved 峰值，且不具备配方使用的 BF16 计算，不在当前支持范围。Windows 11 结果按 [Windows 规格](openspec/changes/introduce-windows-foundation/specs/windows-desktop/spec.md) 只作补充，不替代目标机验收。
+
 ## 规格与研究
 
 - [正式基础规格](openspec/specs/)
