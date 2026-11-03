@@ -88,8 +88,8 @@
     },
     "disk": {
       "total": 2048167010304,
-      "used": 619740721152,
-      "free": 1428426289152
+      "used": 641685663744,
+      "free": 1406481346560
     }
   },
   "locked_packages": 49,
@@ -150,7 +150,7 @@
   "artifacts": {
     "runtime_manifest": {
       "path": "resources/windows-parity/runtime-v2/runtime-manifest.json",
-      "sha256": "09453f503a42492a59c726ff958cd3e0c59f1d78ae55a07d3da4997f26a5dc49"
+      "sha256": "b4d1687570e4b40ab630154b46dd8595223365d1f860195204ea7b1dfedc71a8"
     },
     "requirements_lock": {
       "path": "resources/windows-parity/runtime-v2/requirements.lock",
@@ -164,7 +164,7 @@
     "provider_used": "CPUExecutionProvider (planned BiRefNet worker)",
     "wheel_sha256": "ae8a9a351efda685cc59a66226cdefaa37a126c1d66872ca23a2de9425326130"
   },
-  "generated_at": "2026-11-03T16:17:51.088722+00:00",
+  "generated_at": "2026-11-03T16:24:08.330389+00:00",
   "limitations": [
     "The probe imports libraries and queries CUDA at driver level; it does not run model inference.",
     "The offline proof covers the install step: pip ran with --no-index and only the local wheelhouse.",

@@ -65,14 +65,23 @@ proven). Model inference is explicitly out of scope for this case.
 
 Space measured for the installer budget:
 
-- wheelhouse: 2,714,172,955 bytes (50 files)
+- wheelhouse: 2,714,172,955 bytes (50 files) — download/install cache, deletable after install
 - Python embeddable archive: 11,133,606 bytes
-- installed runtime: 4,778,861,981 bytes (32,580 files)
+- installed runtime: 4,778,861,981 bytes (32,580 files); `torch` alone is
+  4,160,943,973 bytes and bootstrap `pip` is 16,801,036 bytes
+- packaged steady state if bootstrap `pip` is pruned: 4,762,060,945 bytes
+- install peak while wheelhouse + runtime + Python zip coexist: 7,504,168,542 bytes
 - install time: 123.955 s
 
 The probe deliberately does **not** create a CUDA context (no tensor
 allocation), so it is safe while another experiment owns the GPU. The frozen
 runtime's own pip version is 26.3; dependency resolution used host pip 26.2.1.
+
+`pip` is kept in the verified tree only because the frozen interpreter installed
+its own wheel closure offline. `runtime-manifest.json.installer_contract.packaged_runtime`
+records the recommendation (prune `Lib\site-packages\pip`, `pip-26.3.dist-info`
+and entry-point scripts from the packaged product runtime, or budget the
+16,801,036 bytes if kept for repair/diagnostics).
 
 ## Evidence files
 
