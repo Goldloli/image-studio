@@ -2,6 +2,7 @@
 use crate::adapters::{
     AppPaths,
     catalog::ModelCatalog,
+    device::DeviceFacts,
     feature_catalog::FeatureCatalog,
     generation::GenerationController,
     installation::{
@@ -35,9 +36,21 @@ use studio_core::{
         QWEN_IMAGE_21_CAPABILITY, QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY,
         QWEN_IMAGE_21_TURBO_MODEL, RealEsrganInput, Recipe, SourceAsset, SourceFacts,
         TextModelInput, freeze_birefnet, freeze_klein, freeze_realesrgan, freeze_text_model,
+        freeze_windows_birefnet, freeze_windows_klein, freeze_windows_realesrgan,
+        freeze_windows_text_model,
     },
 };
 use uuid::Uuid;
+
+/// Windows parity model ids from design.md section 11. Each id is also its install id. These are
+/// plain frozen strings: `prepare_turn` references them on every host (they are unreachable on
+/// macOS, which keeps its own recipe ids), while the UI/validation projections are cfg-gated.
+const WINDOWS_KLEIN_MODEL: &str = studio_core::generation::KLEIN_WINDOWS_MODEL;
+const WINDOWS_BIREFNET_MODEL: &str = studio_core::generation::BIREFNET_WINDOWS_MODEL;
+const WINDOWS_REALESRGAN_MODEL: &str = studio_core::generation::REALESRGAN_WINDOWS_MODEL;
+const WINDOWS_QWEN_MODEL: &str = studio_core::generation::QWEN_IMAGE_21_WINDOWS_MODEL;
+const WINDOWS_QWEN_TURBO_MODEL: &str = studio_core::generation::QWEN_IMAGE_21_TURBO_WINDOWS_MODEL;
+const WINDOWS_MOSS_MODEL: &str = studio_core::generation::MOSS_IMAGE_SFT_WINDOWS_MODEL;
 
 pub struct StudioService {
     pub paths: AppPaths,
@@ -123,6 +136,18 @@ fn default_capability_id() -> String {
 }
 
 fn capability_for_model(model_id: &str) -> &'static str {
+    #[cfg(windows)]
+    match model_id {
+        WINDOWS_KLEIN_MODEL => return studio_core::generation::KLEIN_WINDOWS_TEXT_CAPABILITY,
+        WINDOWS_BIREFNET_MODEL => return studio_core::generation::BIREFNET_WINDOWS_CAPABILITY,
+        WINDOWS_REALESRGAN_MODEL => return studio_core::generation::REALESRGAN_WINDOWS_CAPABILITY,
+        WINDOWS_QWEN_MODEL => return studio_core::generation::QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+        WINDOWS_QWEN_TURBO_MODEL => {
+            return studio_core::generation::QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY;
+        }
+        WINDOWS_MOSS_MODEL => return studio_core::generation::MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+        _ => {}
+    }
     match model_id {
         WINDOWS_ZIMAGE_INSTALL_ID => Z_IMAGE_WINDOWS_CAPABILITY,
         INSTALL_ID => studio_core::generation::Z_IMAGE_CAPABILITY,
@@ -141,6 +166,52 @@ fn capability_for_model(model_id: &str) -> &'static str {
     }
 }
 
+/// The single-image edit capability when the model has one; used to keep the composer's
+/// capability consistent with an attached source image.
+fn klein_edit_capability(model_id: &str) -> Option<&'static str> {
+    if model_id == KLEIN_INSTALL_ID {
+        return Some(studio_core::recipes::KLEIN_EDIT_CAPABILITY);
+    }
+    #[cfg(windows)]
+    if model_id == WINDOWS_KLEIN_MODEL {
+        return Some(studio_core::generation::KLEIN_WINDOWS_EDIT_CAPABILITY);
+    }
+    None
+}
+
+/// Tool capabilities consume a source image only: no instruction and no seed.
+fn is_source_only_tool_capability(capability: &str) -> bool {
+    if matches!(
+        capability,
+        studio_core::recipes::BIREFNET_CAPABILITY | studio_core::recipes::REALESRGAN_CAPABILITY
+    ) {
+        return true;
+    }
+    #[cfg(windows)]
+    if matches!(
+        capability,
+        studio_core::generation::BIREFNET_WINDOWS_CAPABILITY
+            | studio_core::generation::REALESRGAN_WINDOWS_CAPABILITY
+    ) {
+        return true;
+    }
+    false
+}
+
+fn is_source_only_tool_model(model_id: &str) -> bool {
+    if matches!(
+        model_id,
+        studio_core::recipes::BIREFNET_MODEL | studio_core::recipes::REALESRGAN_MODEL
+    ) {
+        return true;
+    }
+    #[cfg(windows)]
+    if matches!(model_id, WINDOWS_BIREFNET_MODEL | WINDOWS_REALESRGAN_MODEL) {
+        return true;
+    }
+    false
+}
+
 fn model_accepts_aspect(model_id: &str, aspect: &str) -> bool {
     match model_id {
         INSTALL_ID => matches!(aspect, "1:1" | "4:3" | "3:4"),
@@ -151,8 +222,83 @@ fn model_accepts_aspect(model_id: &str, aspect: &str) -> bool {
         | QWEN_IMAGE_21_INSTALL_ID
         | QWEN_IMAGE_21_TURBO_INSTALL_ID
         | MOSS_IMAGE_SFT_INSTALL_ID => aspect == "1:1",
+        #[cfg(windows)]
+        WINDOWS_KLEIN_MODEL
+        | WINDOWS_BIREFNET_MODEL
+        | WINDOWS_REALESRGAN_MODEL
+        | WINDOWS_QWEN_MODEL
+        | WINDOWS_QWEN_TURBO_MODEL
+        | WINDOWS_MOSS_MODEL => aspect == "1:1",
         _ => false,
     }
+}
+
+fn install_display_name(install_id: &str) -> &'static str {
+    #[cfg(windows)]
+    match install_id {
+        WINDOWS_KLEIN_MODEL => return "FLUX.2 Klein 4B distilled",
+        WINDOWS_BIREFNET_MODEL => return "BiRefNet general epoch_244",
+        WINDOWS_REALESRGAN_MODEL => return "Real-ESRGAN x4plus",
+        WINDOWS_QWEN_MODEL => return "Qwen-Image 2.1",
+        WINDOWS_QWEN_TURBO_MODEL => return "Qwen-Image 2.1 Turbo",
+        WINDOWS_MOSS_MODEL => return "MOSS-Image-SFT",
+        _ => {}
+    }
+    match install_id {
+        KLEIN_INSTALL_ID => "FLUX.2 Klein 4B distilled",
+        BIREFNET_INSTALL_ID => "BiRefNet general epoch_244",
+        REALESRGAN_INSTALL_ID => "Real-ESRGAN x4plus",
+        QWEN_IMAGE_21_INSTALL_ID => "Qwen-Image 2.1",
+        QWEN_IMAGE_21_TURBO_INSTALL_ID => "Qwen-Image 2.1 Turbo",
+        MOSS_IMAGE_SFT_INSTALL_ID => "MOSS-Image-SFT",
+        _ => "Z-Image Turbo",
+    }
+}
+
+fn fallback_model_bytes(install_id: &str) -> u64 {
+    #[cfg(windows)]
+    match install_id {
+        WINDOWS_KLEIN_MODEL => return 15_980_131_745,
+        WINDOWS_BIREFNET_MODEL => return 972_666_916,
+        WINDOWS_REALESRGAN_MODEL => return 33_540_549,
+        WINDOWS_QWEN_MODEL => return 33_131_609_424,
+        WINDOWS_QWEN_TURBO_MODEL => return 32_451_607_098,
+        WINDOWS_MOSS_MODEL => return 27_219_783_878,
+        _ => {}
+    }
+    match install_id {
+        WINDOWS_ZIMAGE_INSTALL_ID => 32_848_305_533,
+        KLEIN_INSTALL_ID => 15_980_131_745,
+        BIREFNET_INSTALL_ID => 972_666_916,
+        REALESRGAN_INSTALL_ID => 33_540_549,
+        QWEN_IMAGE_21_INSTALL_ID => 33_131_609_424,
+        QWEN_IMAGE_21_TURBO_INSTALL_ID => 32_451_607_098,
+        MOSS_IMAGE_SFT_INSTALL_ID => 27_219_783_878,
+        _ => 32_848_304_893,
+    }
+}
+
+/// The registered runtime lock id for an install profile. Windows shows the v1 and v2 runtime
+/// rows separately in the settings page; macOS keeps its per-profile runtime.
+fn runtime_lock_id(install_id: &str) -> Option<&'static str> {
+    #[cfg(windows)]
+    match install_id {
+        WINDOWS_ZIMAGE_INSTALL_ID => {
+            return Some(studio_core::generation::Z_IMAGE_WINDOWS_RUNTIME);
+        }
+        WINDOWS_REALESRGAN_MODEL => {
+            return Some(studio_core::generation::REALESRGAN_WINDOWS_RUNTIME);
+        }
+        WINDOWS_KLEIN_MODEL
+        | WINDOWS_BIREFNET_MODEL
+        | WINDOWS_QWEN_MODEL
+        | WINDOWS_QWEN_TURBO_MODEL
+        | WINDOWS_MOSS_MODEL => return Some(studio_core::generation::WINDOWS_V2_RUNTIME),
+        _ => {}
+    }
+    #[cfg(not(windows))]
+    let _ = install_id;
+    None
 }
 
 impl Default for DraftParams {
@@ -254,7 +400,18 @@ impl StudioService {
     pub fn model_views(&self) -> Vec<Value> {
         #[cfg(windows)]
         {
-            vec![self.model_view_for(WINDOWS_ZIMAGE_INSTALL_ID)]
+            [
+                WINDOWS_ZIMAGE_INSTALL_ID,
+                WINDOWS_KLEIN_MODEL,
+                WINDOWS_BIREFNET_MODEL,
+                WINDOWS_REALESRGAN_MODEL,
+                WINDOWS_QWEN_MODEL,
+                WINDOWS_QWEN_TURBO_MODEL,
+                WINDOWS_MOSS_MODEL,
+            ]
+            .into_iter()
+            .map(|id| self.model_view_for(id))
+            .collect()
         }
         #[cfg(not(windows))]
         {
@@ -273,44 +430,39 @@ impl StudioService {
         }
     }
     fn model_view_for(&self, install_id: &str) -> Value {
-        let name = if install_id == KLEIN_INSTALL_ID {
-            "FLUX.2 Klein 4B distilled"
-        } else if install_id == BIREFNET_INSTALL_ID {
-            "BiRefNet general epoch_244"
-        } else if install_id == REALESRGAN_INSTALL_ID {
-            "Real-ESRGAN x4plus"
-        } else if install_id == QWEN_IMAGE_21_INSTALL_ID {
-            "Qwen-Image 2.1"
-        } else if install_id == QWEN_IMAGE_21_TURBO_INSTALL_ID {
-            "Qwen-Image 2.1 Turbo"
-        } else if install_id == MOSS_IMAGE_SFT_INSTALL_ID {
-            "MOSS-Image-SFT"
-        } else {
-            "Z-Image Turbo"
-        };
-        let fallback_model_bytes = if install_id == WINDOWS_ZIMAGE_INSTALL_ID {
-            32_848_305_533_u64
-        } else if install_id == KLEIN_INSTALL_ID {
-            15_980_131_745_u64
-        } else if install_id == BIREFNET_INSTALL_ID {
-            972_666_916_u64
-        } else if install_id == REALESRGAN_INSTALL_ID {
-            33_540_549_u64
-        } else if install_id == QWEN_IMAGE_21_INSTALL_ID {
-            33_131_609_424_u64
-        } else if install_id == QWEN_IMAGE_21_TURBO_INSTALL_ID {
-            32_451_607_098_u64
-        } else if install_id == MOSS_IMAGE_SFT_INSTALL_ID {
-            27_219_783_878_u64
-        } else {
-            32_848_304_893_u64
-        };
+        let name = install_display_name(install_id);
+        let fallback_model_bytes = fallback_model_bytes(install_id);
+        let device = DeviceFacts::cached();
+        let facts = self
+            .catalog
+            .as_ref()
+            .ok()
+            .and_then(|catalog| catalog.model_facts(install_id, &device));
+        let hardware_eligible = facts.as_ref().is_none_or(|facts| facts.hardware.eligible);
+        let hardware_reason = facts
+            .as_ref()
+            .and_then(|facts| facts.hardware.reason.clone());
+        let metadata = facts
+            .as_ref()
+            .map(|facts| facts.metadata.clone())
+            .unwrap_or_default();
+        let static_facts = json!({
+            "hardwareEligible": hardware_eligible,
+            "hardwareReason": hardware_reason,
+            "minVramGb": metadata.min_vram_gb,
+            "minRamGb": metadata.min_ram_gb,
+            "quantization": metadata.quantization,
+            "licenseNotice": metadata.license_notice,
+            "windowsStatus": metadata.windows_status,
+            "runtimeLockId": runtime_lock_id(install_id),
+            "deviceFacts": device.label()
+        });
         let Some(s) = self
             .installation
             .as_ref()
             .and_then(|installation| installation.snapshot(install_id))
         else {
-            return json!({"id":install_id,"name":name,"phase":"failed","summary":"安装清单不可用","ready":false,"runtimeReady":false,"modelReady":false,"deviceVerified":false,"receivedBytes":0,"totalBytes":0,"modelBytes":fallback_model_bytes,"runtimeBytes":0,"requiredBytes":0,"error":self.startup_error,"busy":false});
+            return json!({"id":install_id,"name":name,"phase":"failed","summary":"安装清单不可用","ready":false,"runtimeReady":false,"modelReady":false,"deviceVerified":false,"receivedBytes":0,"totalBytes":0,"modelBytes":fallback_model_bytes,"runtimeBytes":0,"requiredBytes":0,"error":self.startup_error,"busy":false,"staticFacts":static_facts});
         };
         let busy = matches!(
             s.phase.as_str(),
@@ -330,7 +482,8 @@ impl StudioService {
             "failed" => "安装失败，可重试",
             _ => "检查安装状态",
         };
-        json!({"id":s.install_id,"name":name,"phase":s.phase,"summary":summary,"ready":s.phase=="ready"&&s.runtime_ready&&s.model_ready&&s.device_verified,"runtimeReady":s.runtime_ready,"modelReady":s.model_ready,"deviceVerified":s.device_verified,"receivedBytes":s.received_bytes,"totalBytes":s.total_bytes,"modelBytes":s.model_bytes,"runtimeBytes":s.runtime_bytes,"requiredBytes":s.required_bytes,"error":s.error,"busy":busy})
+        let ready = s.phase == "ready" && s.runtime_ready && s.model_ready && s.device_verified;
+        json!({"id":s.install_id,"name":name,"phase":s.phase,"summary":summary,"ready":ready,"available":ready&&hardware_eligible,"runtimeReady":s.runtime_ready,"modelReady":s.model_ready,"deviceVerified":s.device_verified,"receivedBytes":s.received_bytes,"totalBytes":s.total_bytes,"modelBytes":s.model_bytes,"runtimeBytes":s.runtime_bytes,"requiredBytes":s.required_bytes,"error":s.error,"busy":busy,"staticFacts":static_facts})
     }
     pub fn model_catalog(&self) -> Result<Value, String> {
         let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
@@ -344,7 +497,11 @@ impl StudioService {
                 .clone()
                 .unwrap_or_else(|| "安装器不可用".into())
         });
-        catalog.query(&installations, installation_error.as_deref())
+        catalog.query(
+            &installations,
+            installation_error.as_deref(),
+            &DeviceFacts::cached(),
+        )
     }
     pub fn feature_catalog(&self) -> Result<Value, String> {
         let catalog = self.features.as_ref().map_err(|error| error.clone())?;
@@ -406,13 +563,27 @@ impl StudioService {
         if !catalog.supports(&defaults.model_id, "text_to_image") {
             return Err("默认模型必须支持已接入的文生图能力".into());
         }
+        let facts = catalog.model_facts(&defaults.model_id, &DeviceFacts::cached());
+        if let Some(facts) = facts
+            && !facts.hardware.eligible
+        {
+            return Err(facts
+                .hardware
+                .reason
+                .unwrap_or_else(|| "当前设备不满足该模型的硬件门槛".into()));
+        }
         #[cfg(windows)]
         if defaults.aspect != "1:1" {
-            return Err("当前 Windows Z-Image 仅支持 1:1 默认画幅".into());
+            return Err("当前 Windows 型号仅支持 1:1 默认画幅".into());
         }
         if matches!(
             defaults.model_id.as_str(),
-            QWEN_IMAGE_21_MODEL | QWEN_IMAGE_21_TURBO_MODEL | MOSS_IMAGE_SFT_MODEL
+            QWEN_IMAGE_21_MODEL
+                | QWEN_IMAGE_21_TURBO_MODEL
+                | MOSS_IMAGE_SFT_MODEL
+                | studio_core::generation::QWEN_IMAGE_21_WINDOWS_MODEL
+                | studio_core::generation::QWEN_IMAGE_21_TURBO_WINDOWS_MODEL
+                | studio_core::generation::MOSS_IMAGE_SFT_WINDOWS_MODEL
         ) && defaults.aspect != "1:1"
         {
             return Err("所选模型仅支持 1:1；请明确修改默认画幅后再保存".into());
@@ -430,16 +601,36 @@ impl StudioService {
             .map(Installations::snapshots)
             .unwrap_or_default();
         let model = self.model_view();
+        let device = DeviceFacts::cached();
         let runtime_list = installations
             .iter()
             .map(|snapshot| {
+                let facts = self
+                    .catalog
+                    .as_ref()
+                    .ok()
+                    .and_then(|catalog| catalog.model_facts(&snapshot.install_id, &device));
+                let hardware_eligible = facts.as_ref().is_none_or(|facts| facts.hardware.eligible);
+                let hardware_reason = facts
+                    .as_ref()
+                    .and_then(|facts| facts.hardware.reason.clone());
+                let metadata = facts
+                    .as_ref()
+                    .map(|facts| facts.metadata.clone())
+                    .unwrap_or_default();
                 json!({
                     "installId": snapshot.install_id.clone(),
+                    "label": install_display_name(&snapshot.install_id),
+                    "runtimeLockId": runtime_lock_id(&snapshot.install_id),
                     "phase": snapshot.phase.clone(),
                     "runtimeReady": snapshot.runtime_ready,
                     "modelReady": snapshot.model_ready,
                     "deviceVerified": snapshot.device_verified,
-                    "lastError": snapshot.error.clone()
+                    "lastError": snapshot.error.clone(),
+                    "hardwareEligible": hardware_eligible,
+                    "hardwareReason": hardware_reason,
+                    "minVramGb": metadata.min_vram_gb,
+                    "minRamGb": metadata.min_ram_gb
                 })
             })
             .collect::<Vec<_>>();
@@ -465,11 +656,11 @@ impl StudioService {
             },
         );
         #[cfg(windows)]
-        let runtime_name = "Diffusers CUDA + private Python";
+        let runtime_name = "Diffusers CUDA v1 + v2 共享运行时";
         #[cfg(not(windows))]
         let runtime_name = "MFLUX / MLX + ONNX Runtime CPU + ncnn Vulkan";
         #[cfg(windows)]
-        let runtime_version = "Diffusers 0.36.0 / PyTorch 2.10.0 / CUDA 12.6";
+        let runtime_version = "v1: Diffusers 0.36.0 / PyTorch 2.10.0 / CUDA 12.6 · v2: diffusers 0.41 / transformers 5.3 / torch 2.10.0+cu126 · ncnn Vulkan v0.2.0";
         #[cfg(not(windows))]
         let runtime_version = "0.24.0 / 1.31.1 / 0.2.0";
         #[cfg(windows)]
@@ -480,12 +671,13 @@ impl StudioService {
         let model_sources: Vec<String> = vec![
             "Z-Image Turbo · ModelScope Tongyi-MAI/Z-Image-Turbo · 逐文件等价核验 · Apache-2.0"
                 .into(),
-            "FLUX.2 Klein 4B distilled · 当前 Windows 版本尚未接入".into(),
-            "BiRefNet general epoch_244 · 当前 Windows 版本尚未接入".into(),
-            "Real-ESRGAN x4plus · 当前 Windows 版本尚未接入".into(),
-            "Qwen-Image 2.1 · 当前 Windows 版本尚未接入".into(),
-            "Qwen-Image 2.1 Turbo · 当前 Windows 版本尚未接入".into(),
-            "MOSS-Image-SFT · 当前 Windows 版本尚未接入".into(),
+            "FLUX.2 Klein 4B distilled · black-forest-labs/FLUX.2-klein-4B · Apache-2.0".into(),
+            "BiRefNet general epoch_244 · ZhengPeng7/BiRefNet v1 · MIT".into(),
+            "Real-ESRGAN x4plus · 官方 Windows ncnn 包 v0.2.5.0 · BSD-3-Clause / MIT".into(),
+            "Qwen-Image 2.1 · Qwen/Qwen-Image-2.1 · Qwen Research License（非商用）".into(),
+            "Qwen-Image 2.1 Turbo · Qwen/Qwen-Image-2.1-Turbo · Qwen Research License（非商用）"
+                .into(),
+            "MOSS-Image-SFT · OpenMOSS-Team/MOSS-Image-SFT · Apache-2.0".into(),
         ];
         #[cfg(not(windows))]
         let model_sources: Vec<String> = vec![
@@ -498,7 +690,7 @@ impl StudioService {
             "MOSS-Image-SFT · OpenMOSS-Team/MOSS-Image-SFT · Apache-2.0".into(),
         ];
         #[cfg(windows)]
-        let capability_scope = "Windows 首轮仅接入 Z-Image Turbo Diffusers CUDA NF4 文生图；其余六型号当前不可安装或执行。";
+        let capability_scope = "Windows 已接入七个型号与八项能力：Z-Image Turbo（v1 运行时）、FLUX.2 Klein（文生图/单图编辑）、BiRefNet 去背景、Real-ESRGAN 4× 放大、Qwen-Image 2.1 基础版/Turbo（非商用）与 MOSS-Image-SFT；低于硬件门槛时禁用安装与生成入口。";
         #[cfg(not(windows))]
         let capability_scope = "Z-Image Turbo、FLUX.2 Klein 4B、BiRefNet epoch_244、Real-ESRGAN x4plus、Qwen-Image 2.1 基础版/Turbo 与 MOSS-Image-SFT 已接入本地安装与执行链路。";
         Ok(json!({
@@ -512,8 +704,11 @@ impl StudioService {
                 "runtimeVersion": runtime_version,
                 "pythonVersion": python_version,
                 "diagnosticsEnabled": diagnostics_enabled,
-                "runtime": runtime
-                ,"runtimes": runtime_list
+                "runtime": runtime,
+                "runtimes": runtime_list,
+                "deviceFacts": device.label(),
+                "deviceVramGb": device.vram_gb,
+                "deviceRamGb": device.ram_gb
             },
             "about": {
                 "version": env!("CARGO_PKG_VERSION"),
@@ -540,6 +735,14 @@ impl StudioService {
         let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
         if !catalog.executable(model_id) {
             return Err("该模型当前不可执行，不能用于会话".into());
+        }
+        if let Some(facts) = catalog.model_facts(model_id, &DeviceFacts::cached())
+            && !facts.hardware.eligible
+        {
+            return Err(facts
+                .hardware
+                .reason
+                .unwrap_or_else(|| "当前设备不满足该模型的硬件门槛".into()));
         }
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
         let snapshot = installation
@@ -577,13 +780,19 @@ impl StudioService {
                 | QWEN_IMAGE_21_CAPABILITY
                 | QWEN_IMAGE_21_TURBO_CAPABILITY
                 | MOSS_IMAGE_SFT_CAPABILITY => saved.aspect == "1:1",
+                #[cfg(windows)]
+                studio_core::generation::KLEIN_WINDOWS_TEXT_CAPABILITY
+                | studio_core::generation::KLEIN_WINDOWS_EDIT_CAPABILITY
+                | studio_core::generation::BIREFNET_WINDOWS_CAPABILITY
+                | studio_core::generation::REALESRGAN_WINDOWS_CAPABILITY
+                | studio_core::generation::QWEN_IMAGE_21_WINDOWS_CAPABILITY
+                | studio_core::generation::QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY
+                | studio_core::generation::MOSS_IMAGE_SFT_WINDOWS_CAPABILITY => {
+                    saved.aspect == "1:1"
+                }
                 _ => false,
             };
-            let tool = matches!(
-                capability.as_str(),
-                studio_core::recipes::BIREFNET_CAPABILITY
-                    | studio_core::recipes::REALESRGAN_CAPABILITY
-            );
+            let tool = is_source_only_tool_capability(capability);
             if !aspect_valid
                 || saved.prompt.len() > 1024 * 1024
                 || !valid_seed(&saved.seed)
@@ -654,16 +863,41 @@ impl StudioService {
             (QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_CAPABILITY, false)
             | (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY, false)
             | (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY, false) => params.aspect == "1:1",
+            #[cfg(windows)]
+            (
+                WINDOWS_KLEIN_MODEL,
+                studio_core::generation::KLEIN_WINDOWS_TEXT_CAPABILITY,
+                false,
+            )
+            | (WINDOWS_KLEIN_MODEL, studio_core::generation::KLEIN_WINDOWS_EDIT_CAPABILITY, _)
+            | (WINDOWS_BIREFNET_MODEL, studio_core::generation::BIREFNET_WINDOWS_CAPABILITY, _)
+            | (
+                WINDOWS_REALESRGAN_MODEL,
+                studio_core::generation::REALESRGAN_WINDOWS_CAPABILITY,
+                _,
+            ) => params.aspect == "1:1",
+            #[cfg(windows)]
+            (
+                WINDOWS_QWEN_MODEL,
+                studio_core::generation::QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+                false,
+            )
+            | (
+                WINDOWS_QWEN_TURBO_MODEL,
+                studio_core::generation::QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+                false,
+            )
+            | (
+                WINDOWS_MOSS_MODEL,
+                studio_core::generation::MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+                false,
+            ) => params.aspect == "1:1",
             _ => false,
         };
         if !supported_combo {
             return Err("模型、能力、源图与画幅组合不受支持".into());
         }
-        if matches!(
-            params.model_id.as_str(),
-            studio_core::recipes::BIREFNET_MODEL | studio_core::recipes::REALESRGAN_MODEL
-        ) && !params.seed.is_empty()
-        {
+        if is_source_only_tool_model(&params.model_id) && !params.seed.is_empty() {
             return Err("当前工具能力不接受种子".into());
         }
         if let Some(source) = &params.source_asset_id {
@@ -1042,25 +1276,12 @@ impl StudioService {
             self.with_library(|library| library.resolve_source(source))?;
         }
         let capability_id = input.capability_id.unwrap_or_else(|| {
-            if input.model_id == KLEIN_INSTALL_ID && source_asset_id.is_some() {
-                studio_core::recipes::KLEIN_EDIT_CAPABILITY.into()
-            } else if input.model_id == KLEIN_INSTALL_ID {
-                studio_core::recipes::KLEIN_TEXT_CAPABILITY.into()
-            } else if input.model_id == BIREFNET_INSTALL_ID {
-                studio_core::recipes::BIREFNET_CAPABILITY.into()
-            } else if input.model_id == REALESRGAN_INSTALL_ID {
-                studio_core::recipes::REALESRGAN_CAPABILITY.into()
-            } else if input.model_id == QWEN_IMAGE_21_INSTALL_ID {
-                QWEN_IMAGE_21_CAPABILITY.into()
-            } else if input.model_id == QWEN_IMAGE_21_TURBO_INSTALL_ID {
-                QWEN_IMAGE_21_TURBO_CAPABILITY.into()
-            } else if input.model_id == MOSS_IMAGE_SFT_INSTALL_ID {
-                MOSS_IMAGE_SFT_CAPABILITY.into()
-            } else if input.model_id == WINDOWS_ZIMAGE_INSTALL_ID {
-                Z_IMAGE_WINDOWS_CAPABILITY.into()
-            } else {
-                studio_core::generation::Z_IMAGE_CAPABILITY.into()
+            if source_asset_id.is_some()
+                && let Some(edit) = klein_edit_capability(&input.model_id)
+            {
+                return edit.into();
             }
+            capability_for_model(&input.model_id).into()
         });
         let accepted = self.with_library(|library| {
             library.accept_turn(AcceptTurnInput {
@@ -1248,6 +1469,112 @@ impl StudioService {
                 })
                 .transpose()?;
             let frozen = freeze_klein(
+                KleinInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    prompt: turn.prompt.clone(),
+                    seed,
+                    source,
+                },
+                random_seed,
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
+        } else if turn.model_id == WINDOWS_BIREFNET_MODEL {
+            let source_id = turn
+                .source_asset_id
+                .as_ref()
+                .ok_or("BiRefNet 去背景需要一张源图")?;
+            let resolved = self.with_library(|library| library.resolve_source(source_id))?;
+            let frozen = freeze_windows_birefnet(
+                BiRefNetInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    source: SourceAsset {
+                        asset: resolved.asset,
+                        facts: SourceFacts {
+                            width: resolved.width,
+                            height: resolved.height,
+                            has_transparent_pixels: resolved.has_transparent_pixels,
+                        },
+                    },
+                },
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
+        } else if turn.model_id == WINDOWS_REALESRGAN_MODEL {
+            let source_id = turn
+                .source_asset_id
+                .as_ref()
+                .ok_or("Real-ESRGAN 放大需要一张源图")?;
+            let resolved = self.with_library(|library| library.resolve_source(source_id))?;
+            let frozen = freeze_windows_realesrgan(
+                RealEsrganInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    source: SourceAsset {
+                        asset: resolved.asset,
+                        facts: SourceFacts {
+                            width: resolved.width,
+                            height: resolved.height,
+                            has_transparent_pixels: resolved.has_transparent_pixels,
+                        },
+                    },
+                },
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
+        } else if matches!(
+            turn.model_id.as_str(),
+            WINDOWS_QWEN_MODEL | WINDOWS_QWEN_TURBO_MODEL | WINDOWS_MOSS_MODEL
+        ) {
+            let recipe = match turn.model_id.as_str() {
+                WINDOWS_QWEN_MODEL => Recipe::QwenImage21Windows,
+                WINDOWS_QWEN_TURBO_MODEL => Recipe::QwenImage21TurboWindows,
+                WINDOWS_MOSS_MODEL => Recipe::MossImageSftWindows,
+                _ => unreachable!(),
+            };
+            let frozen = freeze_windows_text_model(
+                recipe,
+                TextModelInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    prompt: turn.prompt.clone(),
+                    seed,
+                },
+                random_seed,
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
+        } else if turn.model_id == WINDOWS_KLEIN_MODEL {
+            let source = turn
+                .source_asset_id
+                .as_ref()
+                .map(|id| {
+                    let resolved = self.with_library(|library| library.resolve_source(id))?;
+                    Ok::<_, String>(SourceAsset {
+                        asset: resolved.asset,
+                        facts: SourceFacts {
+                            width: resolved.width,
+                            height: resolved.height,
+                            has_transparent_pixels: resolved.has_transparent_pixels,
+                        },
+                    })
+                })
+                .transpose()?;
+            let frozen = freeze_windows_klein(
                 KleinInput {
                     request_id,
                     project_id,
@@ -1484,12 +1811,17 @@ impl StudioService {
         let environment = installation.plan_environment(install_id)?;
         let scheduler_matches = studio_core::recipes::Recipe::from_request(&previous.request)
             .is_ok_and(|recipe| {
-                matches!(
-                    recipe,
-                    studio_core::recipes::Recipe::BiRefNet
-                        | studio_core::recipes::Recipe::RealEsrgan
-                ) || previous.plan.effective_parameters.get("scheduler")
-                    == Some(&json!(environment.scheduler))
+                // Windows recipes freeze their own scheduler/sampling parameters and are checked
+                // against the plan environment at freeze time; the legacy macOS comparison below
+                // only applies to the v1/v2 macOS recipes.
+                recipe.is_windows()
+                    || matches!(
+                        recipe,
+                        studio_core::recipes::Recipe::BiRefNet
+                            | studio_core::recipes::Recipe::RealEsrgan
+                    )
+                    || previous.plan.effective_parameters.get("scheduler")
+                        == Some(&json!(environment.scheduler))
             });
         if !retry_components_match(
             &previous.plan.components,
@@ -1787,9 +2119,21 @@ mod tests {
         #[cfg(windows)]
         {
             assert!(error.contains("Windows 不会隐式转换执行身份"), "{error}");
-            assert_eq!(models.len(), 1);
+            assert_eq!(models.len(), 7);
             assert_eq!(models[0]["id"], WINDOWS_ZIMAGE_INSTALL_ID);
-            assert_eq!(models[0]["phase"], "not_installed");
+            // The profile may be reported as not_installed (registered profile) or failed
+            // (installer unavailable in the fixture); both are honest "not ready" states.
+            assert!(
+                matches!(
+                    models[0]["phase"].as_str(),
+                    Some("not_installed" | "failed")
+                ),
+                "{}",
+                models[0]["phase"]
+            );
+            for model in &models {
+                assert_eq!(model["ready"], false, "{}", model["id"]);
+            }
         }
         #[cfg(not(windows))]
         {
@@ -2243,23 +2587,21 @@ mod tests {
         let (_root, service) = fixture();
         let catalog = service.model_catalog().unwrap();
         assert_eq!(catalog["counts"]["total"], 7);
-        let planned = catalog["entries"]
+        let klein_id = if cfg!(windows) {
+            WINDOWS_KLEIN_MODEL
+        } else {
+            "flux2-klein-4b-distilled"
+        };
+        let klein = catalog["entries"]
             .as_array()
             .unwrap()
             .iter()
-            .find(|entry| entry["id"] == "flux2-klein-4b-distilled")
+            .find(|entry| entry["id"] == klein_id)
             .unwrap();
-        #[cfg(windows)]
-        {
-            assert_eq!(planned["productStatus"], "planned");
-            assert_eq!(planned["canInstall"], false);
-        }
-        #[cfg(not(windows))]
-        {
-            assert_eq!(planned["productStatus"], "implemented");
-            assert_eq!(planned["canInstall"], true);
-        }
-        assert_eq!(planned["executable"], false);
+        assert_eq!(klein["productStatus"], "implemented");
+        assert_eq!(klein["executable"], false);
+        // Install/use entry points also require the device to satisfy the registered thresholds.
+        assert_eq!(klein["canInstall"], klein["hardwareEligible"]);
     }
 
     #[test]
@@ -2271,29 +2613,41 @@ mod tests {
             snapshot["about"]["modelSources"].as_array().unwrap().len(),
             7
         );
+        let runtimes = snapshot["environment"]["runtimes"].as_array().unwrap();
+        let snapshots = service.installation.as_ref().unwrap().snapshots();
+        assert_eq!(runtimes.len(), snapshots.len());
+        for (row, install) in runtimes.iter().zip(&snapshots) {
+            assert_eq!(row["installId"], install.install_id);
+            assert!(row["label"].is_string());
+        }
         #[cfg(windows)]
         {
             assert_eq!(
                 snapshot["environment"]["runtimeName"],
-                "Diffusers CUDA + private Python"
+                "Diffusers CUDA v1 + v2 共享运行时"
             );
             assert_eq!(snapshot["environment"]["pythonVersion"], "3.12.10");
+            assert_eq!(runtimes[0]["installId"], WINDOWS_ZIMAGE_INSTALL_ID);
             assert_eq!(
-                snapshot["environment"]["runtimes"]
-                    .as_array()
-                    .unwrap()
-                    .len(),
-                1
+                runtimes[0]["runtimeLockId"],
+                studio_core::generation::Z_IMAGE_WINDOWS_RUNTIME
             );
-            assert_eq!(
-                snapshot["environment"]["runtimes"][0]["installId"],
-                WINDOWS_ZIMAGE_INSTALL_ID
-            );
+            if let Some(klein) = runtimes
+                .iter()
+                .find(|row| row["installId"] == WINDOWS_KLEIN_MODEL)
+            {
+                assert_eq!(
+                    klein["runtimeLockId"],
+                    studio_core::generation::WINDOWS_V2_RUNTIME
+                );
+                assert!(klein["hardwareEligible"].is_boolean());
+            }
             assert!(
                 snapshot["about"]["capabilityScope"]
                     .as_str()
-                    .is_some_and(|scope| scope.contains("仅接入 Z-Image"))
+                    .is_some_and(|scope| scope.contains("七个型号"))
             );
+            assert!(snapshot["environment"]["deviceFacts"].is_string());
         }
         #[cfg(not(windows))]
         {
@@ -2302,13 +2656,10 @@ mod tests {
                 "MFLUX / MLX + ONNX Runtime CPU + ncnn Vulkan"
             );
             assert_eq!(snapshot["environment"]["pythonVersion"], "3.13.12");
-            assert_eq!(
-                snapshot["environment"]["runtimes"]
-                    .as_array()
-                    .unwrap()
-                    .len(),
-                7
-            );
+            assert_eq!(runtimes.len(), 7);
+            for row in runtimes {
+                assert_eq!(row["runtimeLockId"], Value::Null);
+            }
         }
     }
 
@@ -2535,5 +2886,145 @@ mod tests {
             assert_eq!(changed.params["aspect"], "4:3");
             assert_eq!(changed.params["seed"], "17");
         }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_model_views_project_the_seven_models_with_hardware_facts() {
+        let (_root, service) = fixture();
+        let models = service.model_views();
+        let expected = [
+            WINDOWS_ZIMAGE_INSTALL_ID,
+            WINDOWS_KLEIN_MODEL,
+            WINDOWS_BIREFNET_MODEL,
+            WINDOWS_REALESRGAN_MODEL,
+            WINDOWS_QWEN_MODEL,
+            WINDOWS_QWEN_TURBO_MODEL,
+            WINDOWS_MOSS_MODEL,
+        ];
+        assert_eq!(
+            models
+                .iter()
+                .map(|model| model["id"].as_str().unwrap())
+                .collect::<Vec<_>>(),
+            expected
+        );
+        for model in &models {
+            let facts = &model["staticFacts"];
+            assert!(facts["hardwareEligible"].is_boolean(), "{}", model["id"]);
+            assert!(facts["deviceFacts"].is_string(), "{}", model["id"]);
+            assert!(facts["runtimeLockId"].is_string(), "{}", model["id"]);
+        }
+        assert_eq!(
+            models[0]["staticFacts"]["runtimeLockId"],
+            studio_core::generation::Z_IMAGE_WINDOWS_RUNTIME
+        );
+        assert_eq!(
+            models[3]["staticFacts"]["runtimeLockId"],
+            studio_core::generation::REALESRGAN_WINDOWS_RUNTIME
+        );
+        assert_eq!(
+            models[1]["staticFacts"]["runtimeLockId"],
+            studio_core::generation::WINDOWS_V2_RUNTIME
+        );
+        let klein = &models[1]["staticFacts"];
+        assert_eq!(klein["minVramGb"], 12);
+        assert_eq!(klein["minRamGb"], 32);
+        assert!(klein["licenseNotice"].as_str().unwrap().contains("Apache"));
+        let qwen = &models[4]["staticFacts"];
+        assert!(qwen["licenseNotice"].as_str().unwrap().contains("非商业"));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_capability_mapping_uses_the_frozen_identities() {
+        use studio_core::generation as windows;
+        for (model, capability) in [
+            (WINDOWS_KLEIN_MODEL, windows::KLEIN_WINDOWS_TEXT_CAPABILITY),
+            (WINDOWS_BIREFNET_MODEL, windows::BIREFNET_WINDOWS_CAPABILITY),
+            (
+                WINDOWS_REALESRGAN_MODEL,
+                windows::REALESRGAN_WINDOWS_CAPABILITY,
+            ),
+            (
+                WINDOWS_QWEN_MODEL,
+                windows::QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+            ),
+            (
+                WINDOWS_QWEN_TURBO_MODEL,
+                windows::QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+            ),
+            (
+                WINDOWS_MOSS_MODEL,
+                windows::MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+            ),
+        ] {
+            assert_eq!(capability_for_model(model), capability, "{model}");
+            assert!(model_accepts_aspect(model, "1:1"), "{model}");
+            assert!(!model_accepts_aspect(model, "4:3"), "{model}");
+        }
+        assert_eq!(
+            klein_edit_capability(WINDOWS_KLEIN_MODEL),
+            Some(windows::KLEIN_WINDOWS_EDIT_CAPABILITY)
+        );
+        assert_eq!(klein_edit_capability(WINDOWS_QWEN_MODEL), None);
+        assert!(is_source_only_tool_model(WINDOWS_BIREFNET_MODEL));
+        assert!(is_source_only_tool_model(WINDOWS_REALESRGAN_MODEL));
+        assert!(!is_source_only_tool_model(WINDOWS_KLEIN_MODEL));
+        assert!(is_source_only_tool_capability(
+            windows::BIREFNET_WINDOWS_CAPABILITY
+        ));
+        assert!(!is_source_only_tool_capability(
+            windows::KLEIN_WINDOWS_TEXT_CAPABILITY
+        ));
+        // Every registered Windows draft combination is structurally accepted with a 1:1 aspect;
+        // a source-only tool draft may not carry a seed.
+        let (_root, service) = fixture();
+        for (model, capability) in [
+            (WINDOWS_KLEIN_MODEL, windows::KLEIN_WINDOWS_TEXT_CAPABILITY),
+            (WINDOWS_BIREFNET_MODEL, windows::BIREFNET_WINDOWS_CAPABILITY),
+            (
+                WINDOWS_REALESRGAN_MODEL,
+                windows::REALESRGAN_WINDOWS_CAPABILITY,
+            ),
+            (
+                WINDOWS_QWEN_MODEL,
+                windows::QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+            ),
+            (
+                WINDOWS_QWEN_TURBO_MODEL,
+                windows::QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+            ),
+            (
+                WINDOWS_MOSS_MODEL,
+                windows::MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+            ),
+        ] {
+            let params = json!({
+                "modelId": model,
+                "aspect": "1:1",
+                "count": 1,
+                "seed": "",
+                "capabilityId": capability,
+                "sourceAssetId": null
+            });
+            service
+                .validate_registered_draft_params(&params)
+                .unwrap_or_else(|error| panic!("{model} draft rejected: {error}"));
+        }
+        let tool_with_seed = json!({
+            "modelId": WINDOWS_BIREFNET_MODEL,
+            "aspect": "1:1",
+            "count": 1,
+            "seed": "42",
+            "capabilityId": windows::BIREFNET_WINDOWS_CAPABILITY,
+            "sourceAssetId": null
+        });
+        assert!(
+            service
+                .validate_registered_draft_params(&tool_with_seed)
+                .unwrap_err()
+                .contains("不接受种子")
+        );
     }
 }

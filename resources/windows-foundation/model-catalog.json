@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedDate": "2026-11-01",
+  "reviewedDate": "2026-11-04",
   "entries": [
     {
       "id": "z-image-turbo-diffusers-cuda-nf4-v1",
@@ -16,7 +16,7 @@
         }
       ],
       "productStatus": "implemented",
-      "runtime": "Diffusers 0.36.0 / PyTorch 2.10.0 / CUDA 12.6",
+      "runtime": "Diffusers CUDA NF4 v1 · Python 3.12.10 / PyTorch 2.10.0 / CUDA 12.6",
       "license": "Apache-2.0",
       "source": "https://www.modelscope.cn/models/Tongyi-MAI/Z-Image-Turbo",
       "revision": "f332072aa78be7aecdf3ee76d5c247082da564a6",
@@ -37,15 +37,20 @@
       ],
       "recipe": "NF4 · 9 步 · guidance 0.0 · 1024 × 1024",
       "installId": "z-image-turbo-diffusers-cuda-nf4-v1",
-      "installerSupported": true
+      "installerSupported": true,
+      "minVramGb": 12,
+      "minRamGb": 32,
+      "quantization": "nf4",
+      "licenseNotice": "Apache-2.0 · 可商用（保留版权与许可声明）",
+      "windowsStatus": "已接入 · 独立 v1 运行时 NF4+组件卸载（Gate 0 实测 CUDA 8.87 GiB / commit 23.69 GiB）"
     },
     {
-      "id": "flux2-klein-4b-distilled",
+      "id": "flux2-klein-4b-distilled-windows-v1",
       "displayName": "FLUX.2 Klein 4B distilled",
       "variant": "black-forest-labs/FLUX.2-klein-4B · distilled",
       "family": "FLUX.2",
-      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
-      "description": "固定 distilled 4B 快照，产品配方为 1024²、q4、4 步、guidance 1.0；单图编辑使用参考图条件分支，不包含多参考编辑。",
+      "summary": "Windows 版文生图与单图指令编辑模型，固定 4 步、guidance 1.0 与 1024²。",
+      "description": "固定 distilled 4B 快照，Windows 使用 NF4 文本编码器与 NF4 transformer，并在独立 worker 进程中启用组件 CPU offload；单图编辑使用参考图条件分支，不包含多参考编辑。",
       "capabilities": [
         {
           "id": "text_to_image",
@@ -56,43 +61,50 @@
           "label": "图片编辑"
         }
       ],
-      "productStatus": "planned",
-      "runtime": "当前 Windows 版本未接入",
+      "productStatus": "implemented",
+      "runtime": "v2 共享运行时 · Python 3.12.10 / PyTorch 2.10.0 / CUDA 12.6 / diffusers 0.41",
       "license": "Apache-2.0",
       "source": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B",
       "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
       "modelBytes": 15980131745,
       "knownArtifactBytes": 15980131745,
       "requirements": [
-        "独立模型组件清单与完整哈希",
-        "单图编辑输入、取消和资源回收验收",
-        "目标设备实机验证"
+        "冻结快照逐文件 SHA-256（HF 声明与 ModelScope 传输内容一致）",
+        "独立 worker 进程内 NF4 + 组件 CPU offload，禁止同进程叠加其他装载策略",
+        "单图编辑输入、取消和资源回收实机验收"
       ],
       "exclusions": [
         "Klein Base / 9B / 9B KV",
         "多参考编辑",
-        "替换小型文本编码器"
+        "把文生图参数伪造成图片编辑"
       ],
-      "verifiedDevices": [],
-      "recipe": "q4 · 4 步 · 1024 × 1024",
-      "installId": null,
-      "installerSupported": false
+      "verifiedDevices": [
+        "NVIDIA GeForce RTX 3080 Ti 12 GiB · Windows 10 22H2 · Gate 0 CUDA 9.21 GiB / commit 19.13 GiB"
+      ],
+      "recipe": "NF4 + 组件卸载 · 4 步 · guidance 1.0 · 1024 × 1024",
+      "installId": "flux2-klein-4b-distilled-windows-v1",
+      "installerSupported": true,
+      "minVramGb": 12,
+      "minRamGb": 32,
+      "quantization": "nf4",
+      "licenseNotice": "Apache-2.0 · 可商用（保留版权与许可声明）",
+      "windowsStatus": "已接入 · NF4+组件 CPU offload fresh-process（Gate 0 实测 CUDA 9.21 GiB / commit 19.13 GiB）"
     },
     {
-      "id": "birefnet-general-epoch-244",
+      "id": "birefnet-general-epoch-244-windows-v1",
       "displayName": "BiRefNet general epoch_244",
       "variant": "BiRefNet-general-epoch_244.onnx",
       "family": "BiRefNet",
-      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
-      "description": "固定使用官方 general epoch_244 ONNX 权重，CPUExecutionProvider、float32、1024² 预处理，并按源图规范化尺寸输出 RGBA 与 8-bit mask。",
+      "summary": "Windows 版去背景模型，输出透明 RGBA PNG 与逐像素蒙版。",
+      "description": "固定官方 general epoch_244 ONNX 权重，Windows 使用共享 v2 运行时的 ONNX Runtime CPUExecutionProvider、float32、1024² 预处理，并按源图规范化尺寸输出 RGBA 与 8-bit mask。",
       "capabilities": [
         {
           "id": "background_removal",
           "label": "去背景"
         }
       ],
-      "productStatus": "planned",
-      "runtime": "当前 Windows 版本未接入",
+      "productStatus": "implemented",
+      "runtime": "v2 共享运行时 · ONNX Runtime 1.31.1 CPU",
       "license": "MIT",
       "source": "https://github.com/ZhengPeng7/BiRefNet/releases/tag/v1",
       "revision": "v1 / asset 186740004 / sha256:58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
@@ -108,34 +120,41 @@
         "Portrait 或其他 checkpoint",
         "把文件元数据当作已完成哈希"
       ],
-      "verifiedDevices": [],
-      "recipe": "1024² 网络预处理 · 原尺寸输出 · CPU",
-      "installId": null,
-      "installerSupported": false
+      "verifiedDevices": [
+        "NVIDIA GeForce RTX 3080 Ti 12 GiB · Windows 10 22H2 · ONNX Runtime CPU · Gate 0 commit 10.14 GiB / 可用 RAM 15.52 GiB"
+      ],
+      "recipe": "1024² 网络预处理 · 原尺寸输出 · CPU（无 GPU 常驻）",
+      "installId": "birefnet-general-epoch-244-windows-v1",
+      "installerSupported": true,
+      "minVramGb": 0,
+      "minRamGb": 16,
+      "quantization": "float32",
+      "licenseNotice": "MIT",
+      "windowsStatus": "已接入 · ONNX Runtime CPU 无 GPU 常驻（Gate 0 实测 commit 10.14 GiB / 可用 RAM 15.52 GiB）"
     },
     {
-      "id": "realesrgan-x4plus",
+      "id": "realesrgan-x4plus-windows-v1",
       "displayName": "Real-ESRGAN x4plus",
-      "variant": "RealESRGAN_x4plus · ncnn",
+      "variant": "RealESRGAN_x4plus · ncnn Vulkan (Windows)",
       "family": "Real-ESRGAN",
-      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
-      "description": "固定 realesrgan-x4plus 的 ncnn 权重、官方 macOS 程序、单 GPU、tile 128 和 1:1:1 线程；首轮输出 PNG，不启用 TTA。",
+      "summary": "Windows 版 4× 放大模型，使用官方 ncnn Vulkan 便携包与固定 x4plus 权重。",
+      "description": "固定官方 v0.2.5.0 Windows ncnn 包、x4plus 权重、单 GPU、tile 128 与 1:1:1 线程；输出 PNG，不启用 TTA。",
       "capabilities": [
         {
           "id": "upscale",
           "label": "放大"
         }
       ],
-      "productStatus": "planned",
-      "runtime": "当前 Windows 版本未接入",
+      "productStatus": "implemented",
+      "runtime": "ncnn Vulkan v0.2.0 · 官方 Windows 便携包",
       "license": "Real-ESRGAN BSD-3-Clause · ncnn app MIT",
       "source": "https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.2.5.0",
-      "revision": "v0.2.5.0 ncnn package / x4plus bin sha256:713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+      "revision": "v0.2.5.0 Windows ncnn package / x4plus bin sha256:713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
       "modelBytes": 33540549,
-      "knownArtifactBytes": 51817124,
+      "knownArtifactBytes": 45474481,
       "requirements": [
-        "官方 ncnn 程序与 x4plus 模型对分别校验",
-        "显式指定 x4plus、4×、tile 128 与单 GPU",
+        "官方 Windows ncnn 便携包（45,474,481 B / sha256 abc02804…）与 x4plus 权重分别校验",
+        "显式指定 x4plus、4×、tile 128 与单 GPU 0",
         "分块接缝、取消和强杀回收实机验收"
       ],
       "exclusions": [
@@ -143,69 +162,83 @@
         "人脸修复",
         "任意倍率重采样"
       ],
-      "verifiedDevices": [],
+      "verifiedDevices": [
+        "NVIDIA GeForce RTX 3080 Ti via Vulkan device 0 · Windows 10 22H2 · Gate 0 真实 4× 运行通过"
+      ],
       "recipe": "ncnn Vulkan · x4plus · tile 128 · 固定 4×",
-      "installId": null,
-      "installerSupported": false
+      "installId": "realesrgan-x4plus-windows-v1",
+      "installerSupported": true,
+      "minVramGb": 4,
+      "minRamGb": 8,
+      "quantization": "fp32",
+      "licenseNotice": "BSD-3-Clause（Real-ESRGAN）/ MIT（ncnn 应用）",
+      "windowsStatus": "已接入 · ncnn Vulkan 固定 4×/tile 128/单 GPU（Gate 0 真实 4× 运行通过）"
     },
     {
-      "id": "qwen-image-2.1-mflux-v1",
+      "id": "qwen-image-2.1-windows-v1",
       "displayName": "Qwen-Image 2.1",
-      "variant": "Qwen/Qwen-Image-2.1 · txt2img",
+      "variant": "Qwen/Qwen-Image-2.1 · Windows staged NF4",
       "family": "Qwen-Image",
-      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
-      "description": "固定官方模型快照，使用 q8 transformer、bf16 文本编码器、40 步 linear 采样与 guidance 1.0；首轮仅支持 1024² 单张 RGB PNG。",
+      "summary": "Windows 版 Qwen-Image 2.1 文生图模型，采用分阶段 NF4 装载与安装期 prepared 量化缓存。",
+      "description": "固定官方模型快照，安装期在 CPU 上把文本编码器与 transformer 量化为 NF4 并持久化；生成时按文本编码 → DiT 采样 → VAE 解码分阶段装载，只有一个大组件驻留 GPU。40 步 linear 采样、guidance 1.0、2048 token 预算。",
       "capabilities": [
         {
           "id": "text_to_image",
           "label": "文生图"
         }
       ],
-      "productStatus": "planned",
-      "runtime": "当前 Windows 版本未接入",
+      "productStatus": "implemented",
+      "runtime": "v2 共享运行时 · Python 3.12.10 / PyTorch 2.10.0 / CUDA 12.6 / diffusers 0.41 · staged NF4",
       "license": "qwen-research",
       "source": "https://huggingface.co/Qwen/Qwen-Image-2.1",
       "revision": "d26bb61231c349cf6b7896fa83353113880e1ba3",
       "modelBytes": 33131609424,
       "knownArtifactBytes": 33131609424,
       "requirements": [
-        "精确 revision 与逐文件内容 SHA-256",
-        "独立 recipes-v3 worker 与共享隔离 MLX 运行时",
-        "真实 tokenizer 2048 token 预算和离线执行"
+        "ModelScope 官方源逐文件 revision 与 SHA-256 校验",
+        "安装期 CPU NF4 prepare（可用内存预检 ≥28 GiB）与 prepared 缓存复用",
+        "分阶段装载实测独占显存、进程 commit 与取消恢复"
       ],
       "exclusions": [
         "Qwen-Image 2.1 编辑与控制分支",
         "LoRA、低内存配方与小文本编码器",
         "非 1024² 画幅"
       ],
-      "verifiedDevices": [],
-      "recipe": "q8 · 40 步 · 1024 × 1024",
-      "installId": null,
-      "installerSupported": false
+      "verifiedDevices": [
+        "NVIDIA GeForce RTX 3080 Ti 12 GiB · Windows 10 22H2 · Gate 0 staged CUDA 6.00 GiB / commit 13.96 GiB"
+      ],
+      "recipe": "staged NF4 · 40 步 · guidance 1.0 · 1024 × 1024",
+      "installId": "qwen-image-2.1-windows-v1",
+      "installerSupported": true,
+      "minVramGb": 12,
+      "minRamGb": 32,
+      "quantization": "nf4",
+      "licenseNotice": "Qwen Research License：仅限非商业用途；商用需另行取得授权。",
+      "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 6.00 GiB / commit 13.96 GiB）"
     },
     {
-      "id": "qwen-image-2.1-turbo-mflux-v1",
+      "id": "qwen-image-2.1-turbo-windows-v1",
       "displayName": "Qwen-Image 2.1 Turbo",
-      "variant": "Qwen/Qwen-Image-2.1-Turbo · txt2img",
+      "variant": "Qwen/Qwen-Image-2.1-Turbo · Windows staged NF4",
       "family": "Qwen-Image",
-      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
-      "description": "固定官方 Turbo revision，显式加载 Turbo model_config，使用 q8 transformer、bf16 文本编码器、8 步官方 sample_sigmas 与 guidance 1.0；首轮仅支持 1024² 单张 RGB PNG。",
+      "summary": "Windows 版 Qwen-Image 2.1 Turbo，官方 8 步采样曲线与分阶段 NF4 装载。",
+      "description": "固定官方 Turbo revision 与 model_config，安装期在 CPU 上量化 prepared 缓存；生成时按文本编码 → DiT 采样（8 步官方 sample_sigmas）→ VAE 解码分阶段装载，只有一个大组件驻留 GPU。guidance 1.0、2048 token 预算。",
       "capabilities": [
         {
           "id": "text_to_image",
           "label": "文生图"
         }
       ],
-      "productStatus": "planned",
-      "runtime": "当前 Windows 版本未接入",
+      "productStatus": "implemented",
+      "runtime": "v2 共享运行时 · Python 3.12.10 / PyTorch 2.10.0 / CUDA 12.6 / diffusers 0.41 · staged NF4",
       "license": "qwen-research",
       "source": "https://huggingface.co/Qwen/Qwen-Image-2.1-Turbo",
       "revision": "fc13ba1986fcb905854dc8de2f52eee395f49b5b",
       "modelBytes": 32451607098,
       "knownArtifactBytes": 32451607098,
       "requirements": [
-        "Turbo 权重与 model_config 独立核验",
-        "model_index 中的官方 sample_sigmas 完整落盘",
+        "Turbo 权重与 model_config 独立核验，sample_sigmas 完整落盘",
+        "安装期 CPU NF4 prepare（可用内存预检 ≥28 GiB）与 prepared 缓存复用",
         "独立取消、恢复和原生日常验收"
       ],
       "exclusions": [
@@ -213,34 +246,41 @@
         "LoRA、控制分支与非方图",
         "继承基础版实机认证"
       ],
-      "verifiedDevices": [],
-      "recipe": "q8 · 8 步官方曲线 · 1024 × 1024",
-      "installId": null,
-      "installerSupported": false
+      "verifiedDevices": [
+        "NVIDIA GeForce RTX 3080 Ti 12 GiB · Windows 10 22H2 · Gate 0 staged CUDA 6.00 GiB / commit 13.95 GiB"
+      ],
+      "recipe": "staged NF4 · 8 步官方曲线 · 1024 × 1024",
+      "installId": "qwen-image-2.1-turbo-windows-v1",
+      "installerSupported": true,
+      "minVramGb": 12,
+      "minRamGb": 32,
+      "quantization": "nf4",
+      "licenseNotice": "Qwen Research License：仅限非商业用途；商用需另行取得授权。",
+      "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 6.00 GiB / commit 13.95 GiB）"
     },
     {
-      "id": "moss-image-sft-mflux-v1",
+      "id": "moss-image-sft-windows-v1",
       "displayName": "MOSS-Image-SFT",
-      "variant": "OpenMOSS-Team/MOSS-Image-SFT · txt2img",
+      "variant": "OpenMOSS-Team/MOSS-Image-SFT · Windows staged NF4",
       "family": "MOSS-Image",
-      "summary": "当前 Windows 版本尚未接入；仅保留型号说明，不能安装或执行。",
-      "description": "固定 MOSS-Image-SFT 快照，使用 q8 transformer/text encoder、50 步 moss_image 调度、guidance 3.0、空负提示词和负分支跳层 [22]；首轮仅支持 1024² 单张 RGB PNG。",
+      "summary": "Windows 版 MOSS-Image-SFT 文生图模型，采用分阶段 NF4 装载与安装期 prepared 量化缓存。",
+      "description": "固定 MOSS-Image-SFT 快照并使用 worker 内置的已审阅 custom pipeline；安装期在 CPU 上把文本编码器与 DiT 量化为 NF4，生成时 50 步 moss_image 调度、guidance 3.0、空负提示词与负分支跳层 [22]，VAE 以 float32 分块解码。",
       "capabilities": [
         {
           "id": "text_to_image",
           "label": "文生图"
         }
       ],
-      "productStatus": "planned",
-      "runtime": "当前 Windows 版本未接入",
+      "productStatus": "implemented",
+      "runtime": "v2 共享运行时 · Python 3.12.10 / PyTorch 2.10.0 / CUDA 12.6 / diffusers 0.41 · staged NF4",
       "license": "Apache-2.0",
       "source": "https://huggingface.co/OpenMOSS-Team/MOSS-Image-SFT",
       "revision": "f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
       "modelBytes": 27219783878,
       "knownArtifactBytes": 27219783878,
       "requirements": [
-        "MOSS 专属 tokenizer、chat template 与 4096 token 预算",
-        "50 步 CFG 与 skip layers [22] 独立配方",
+        "ModelScope 官方源逐文件 revision 与 SHA-256 校验（含 custom pipeline 审阅）",
+        "安装期 CPU NF4 prepare（可用内存预检 ≥28 GiB）与 prepared 缓存复用",
         "中文文字、JSON 布局、取消恢复和原生验收"
       ],
       "exclusions": [
@@ -248,10 +288,17 @@
         "社区 4/8 步蒸馏 LoRA",
         "可视化布局编辑器与像素级排版保证"
       ],
-      "verifiedDevices": [],
-      "recipe": "q8 · 50 步 · CFG 3.0 · 1024 × 1024",
-      "installId": null,
-      "installerSupported": false
+      "verifiedDevices": [
+        "NVIDIA GeForce RTX 3080 Ti 12 GiB · Windows 10 22H2 · Gate 0 staged CUDA 5.84 GiB / commit 9.20 GiB"
+      ],
+      "recipe": "staged NF4 · 50 步 · CFG 3.0 · 1024 × 1024",
+      "installId": "moss-image-sft-windows-v1",
+      "installerSupported": true,
+      "minVramGb": 12,
+      "minRamGb": 32,
+      "quantization": "nf4",
+      "licenseNotice": "Apache-2.0 · 可商用（保留版权与许可声明）",
+      "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 5.84 GiB / commit 9.20 GiB）"
     }
   ]
 }
