@@ -2,6 +2,7 @@
 pub mod adapters;
 pub mod host;
 pub mod options;
+pub mod startup;
 pub mod studio;
 
 pub const DIAGNOSTIC_MODES: &[&str] = &[

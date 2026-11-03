@@ -638,6 +638,13 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
     let paths = AppPaths::resolve(options.data_dir.as_deref())?;
+    crate::startup::install_panic_hook(paths.logs.clone());
+    if let Err(error) = crate::startup::configure_webview_profile(&paths.cache) {
+        crate::startup::fail_startup(
+            &paths.logs,
+            &format!("无法创建 WebView2 用户数据目录：{error}"),
+        );
+    }
     let worker = options.worker.clone().unwrap_or_else(|| {
         std::env::current_exe()
             .unwrap_or_else(|_| PathBuf::from("image-studio-desktop"))

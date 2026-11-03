@@ -27,7 +27,7 @@ impl Default for LaunchOptions {
 }
 
 impl LaunchOptions {
-    pub const HELP: &str = "Image Studio\n\n用法：image-studio-desktop [选项]\n\n  --diagnostics                 显式启用开发诊断界面\n  --data-dir PATH               使用隔离应用数据根\n  --diagnostic-worker PATH      指定已构建诊断程序（需 --diagnostics）\n  --diagnostic-mode MODE        诊断故障模式，默认 normal（需 --diagnostics）\n  --diagnostic-size WIDTHxHEIGHT 开发窗口尺寸（需 --diagnostics）\n  --diagnostic-scale 1|2        开发渲染比例 px/pt（需 --diagnostics）\n  --help                        显示帮助\n\n诊断不执行图片生成。";
+    pub const HELP: &str = "Image Studio\n\n用法：image-studio-desktop [选项]\n\n  --diagnostics                 显式启用开发诊断界面\n  --data-dir PATH               使用隔离应用数据根\n  --diagnostic-worker PATH      指定已构建诊断程序（需 --diagnostics）\n  --diagnostic-mode MODE        诊断故障模式，默认 normal（需 --diagnostics）\n  --diagnostic-size WIDTHxHEIGHT 开发窗口尺寸（需 --diagnostics）\n  --diagnostic-scale 1|2        开发渲染比例 px/pt（需 --diagnostics）\n  --help                        显示帮助\n\n诊断不执行图片生成。\nWebView2 不可用导致无法显示界面时，以退出码 3 结束，原因写入 <数据根>/logs/startup-failure.log。";
 
     pub fn parse_from(args: impl IntoIterator<Item = OsString>) -> Result<Self, String> {
         let mut options = Self::default();
