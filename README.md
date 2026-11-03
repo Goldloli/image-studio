@@ -1,6 +1,6 @@
 # Image Studio
 
-源码仓库：[Goldloli/image-studio](https://github.com/Goldloli/image-studio)（私有）。Windows 目标机已完成 Gate 0、产品安装与生成闭环、安装版 UI 验收和 NSIS 内部测试包；剩余 P0 都是管理员/人工门槛与 Mac 回归，明细和接力步骤见 [Windows 进度与接力](#windows-进度与接力)，完整交接见 [doc/12](doc/12-windows-handoff-2026-11-03.md)。
+源码仓库：[Goldloli/image-studio](https://github.com/Goldloli/image-studio)（私有）。Windows 目标机已完成 Gate 0、产品安装与生成闭环、安装版 UI 验收和 NSIS 内部测试包；剩余 P0 是人工/独立环境门槛（DPI、IME、干净用户、WebView2）与 Mac 回归；整树禁网 I07/P06 经用户决定本轮跳过（waived/not_run），明细和接力步骤见 [Windows 进度与接力](#windows-进度与接力)，完整交接见 [doc/12](doc/12-windows-handoff-2026-11-03.md)。
 
 Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，工作区参考 Cherry Studio 绘图页。已接入七个精确型号：Z-Image Turbo、FLUX.2 Klein 4B distilled、BiRefNet general epoch_244、Real-ESRGAN x4plus、Qwen-Image 2.1 基础版、Qwen-Image 2.1 Turbo 与 MOSS-Image-SFT；覆盖文生图、Klein 单图编辑、CPU 去背景/RGBA/mask 和 ncnn 精确 4× 放大。Qwen/MOSS 默认从 ModelScope 固定文件 revision 下载，同时逐文件核对冻结上游快照。创作页以多会话组织多轮提示词和图片，发送后立即显示占位与真实阶段进度，正式结果在同一卡片原位出现。功能页只展示真实可执行能力，作品页跨会话浏览正式 AssetRef，任务中心提供宿主侧状态筛选、检索、稳定分页和可读制作记录。模型页由宿主目录驱动，可检索七个正式目标并分开展示接入、安装、运行时、设备与可执行状态；设置页提供持久外观偏好、显式新会话默认值、真实存储和诊断信息。M3 Max / 128 GiB 已完成七个型号的真实执行、禁网、原生导出、取消和恢复；完整证据见[七型号整批交接](verification/qwen-moss-20261101/moss-stage-report.md)、[Qwen 阶段报告](verification/qwen-moss-20261101/qwen-stage-report.md)与[前置计划模型阶段验收](verification/planned-models-20261031/results.md)。
 
@@ -20,7 +20,7 @@ Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，�
 
 | 类别 | 项目 | 说明 |
 |---|---|---|
-| 管理员 | 整树禁网 I07/P06 | 脚本在 `scripts/windows-admin/`，见其 README |
+| 用户决定 | 整树禁网 I07/P06 | 2026-11-03 用户决定本轮不运行（waived/not_run，见 `verification/windows-network-denial-decision.json`）；不视为通过 |
 | 人工 | 100%/200% 显示缩放、真实微软拼音 IME、干净 Win10 用户 D02、缺失/离线 WebView2 D03 | 需在目标机原生环境操作 |
 | Mac | R02–R04：完整质量门、隔离源码/禁网启动、七型号回归 | 必须在 Mac 上执行 |
 

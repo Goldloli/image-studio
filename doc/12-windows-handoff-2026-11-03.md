@@ -8,9 +8,10 @@
 ## 0. 一句话现状
 
 `introduce-windows-foundation` 的 Windows 可自动化 P0 已基本完成并留有证据；剩余是
-需要管理员/人工配合的门槛（禁网、小卷、干净用户/WebView2、100%/200% DPI、真实 IME）
-和 Mac 回归。`main` 已推送，远程 `origin/main` 与本地一致（以 `git rev-parse origin/main`
-为准），工作区干净。
+需要人工/独立环境的门槛（干净用户/WebView2、100%/200% DPI、真实 IME）和 Mac 回归。
+小卷空间不足（I03）已于 2026-11-03 完成；整树禁网 I07/P06 由用户 2026-11-03 决定本轮
+跳过（waived/not_run，见 `verification/windows-network-denial-decision.json`）。`main`
+本地领先 `origin/main`（尚未 push），工作区仅有 CRLF 伪脏标记。
 
 ## 1. 远程与 push 状态（已解决）
 
@@ -145,7 +146,8 @@ Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-wo
    用户数据目录，目标机 W07 复验通过，证据见 `verification/windows-startup-diagnosis/`。
    原始触发条件仍未解释，但可观测缺陷（静默 101）已修复；W03 独立根共存由 W07-b 覆盖。
 4. 管理员配合项（脚本已准备，见 `scripts/windows-admin/README.md`）：
-   - 整树禁网 I07/P06：`enable-network-denial.ps1` → 我/Copy 的 CDP 流程跑缓存安装 + 三次生成 → `remove-network-denial.ps1`；
+   - 整树禁网 I07/P06 由用户 2026-11-03 决定本轮跳过，记为 waived/not_run（不视为通过）；
+     若将来需要，按 `enable-network-denial.ps1` → CDP 跑缓存安装 + 三次生成 → `remove-network-denial.ps1`；
    - 空间不足 I03 已于 2026-11-03 用 27.74 GiB 可移动卷验证通过，无需再建 40 GB VHD；
      `create-small-volume.ps1` 仅保留给将来需要 NTFS 小卷的复验。
 5. 人工项：100%/200% 显示缩放（当前机器是 150%/DPI 144，两逻辑尺寸已过）、

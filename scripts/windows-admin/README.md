@@ -4,6 +4,10 @@
 
 ## 1. 整树禁网（I07 / P06，需管理员）
 
+**2026-11-03：用户决定本轮不运行该 Windows 禁网验收（记为 waived/not_run，不是通过）。**
+理由：同链路本地生成已在 macOS 验收，且未配置任何云端 API key；代码审计见
+`verification/windows-network-denial-decision.json`。脚本保留供将来需要时使用。
+
 1. 以**管理员** PowerShell 运行：
 
    ```powershell
@@ -81,7 +85,7 @@
 
 | 验收项 | 状态 | 依赖 |
 |---|---|---|
-| 整树禁网 I07 / P06 | 待运行 | 管理员 + 本 README 第 1 节 |
+| 整树禁网 I07 / P06 | 用户 2026-11-03 决定本轮跳过（waived/not_run，不视为通过） | 需要时按第 1 节执行 |
 | 空间不足 I03 | 已通过（2026-11-03，27.74 GiB FAT32 可移动卷；证据 `verification/windows-gate0/product-space-shortage.json`） | 无需管理员 |
 | 干净用户 D02 | 待运行 | 人工登录新用户 |
 | 缺失/离线 WebView2 D03 | 待运行 | 沙盒/VM 或一次性移除 |
