@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-realesrgan-manifest-reverify",
+  "case_id": "G2-R1",
+  "status": "pass",
+  "bundle_id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+  "archive": {
+    "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\downloads\\realesrgan-ncnn-vulkan-20220424-windows.zip",
+    "expected_bytes": 45474481,
+    "expected_sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+    "actual_bytes": 45474481,
+    "actual_sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+    "independent_downloads": 2,
+    "status": "pass"
+  },
+  "archive_member_checks": [
+    {
+      "archive_path": "realesrgan-ncnn-vulkan.exe",
+      "in_archive": true,
+      "expected_bytes": 6161408,
+      "actual_bytes": 6161408,
+      "expected_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+      "actual_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+      "status": "pass"
+    },
+    {
+      "archive_path": "vcomp140.dll",
+      "in_archive": true,
+      "expected_bytes": 182704,
+      "actual_bytes": 182704,
+      "expected_sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
+      "actual_sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
+      "status": "pass"
+    },
+    {
+      "archive_path": "vcomp140d.dll",
+      "in_archive": true,
+      "expected_bytes": 207736,
+      "actual_bytes": 207736,
+      "expected_sha256": "34980f5a28002967d4f2659b10a417b1b9a242e240195947c89195083d146c53",
+      "actual_sha256": "34980f5a28002967d4f2659b10a417b1b9a242e240195947c89195083d146c53",
+      "status": "pass"
+    },
+    {
+      "archive_path": "models/realesrgan-x4plus.bin",
+      "in_archive": true,
+      "expected_bytes": 33424520,
+      "actual_bytes": 33424520,
+      "expected_sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+      "actual_sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+      "status": "pass"
+    },
+    {
+      "archive_path": "models/realesrgan-x4plus.param",
+      "in_archive": true,
+      "expected_bytes": 116029,
+      "actual_bytes": 116029,
+      "expected_sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86",
+      "actual_sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86",
+      "status": "pass"
+    },
+    {
+      "archive_path": "models/realesrgan-x4plus-anime.bin",
+      "in_archive": true,
+      "expected_bytes": 8943500,
+      "actual_bytes": 8943500,
+      "expected_sha256": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc",
+      "actual_sha256": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc",
+      "status": "pass"
+    },
+    {
+      "archive_path": "models/realesrgan-x4plus-anime.param",
+      "in_archive": true,
+      "expected_bytes": 30290,
+      "actual_bytes": 30290,
+      "expected_sha256": "2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4",
+      "actual_sha256": "2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4",
+      "status": "pass"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x2.bin",
+      "in_archive": true,
+      "expected_bytes": 1247368,
+      "actual_bytes": 1247368,
+      "expected_sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+      "actual_sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+      "status": "pass"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x2.param",
+      "in_archive": true,
+      "expected_bytes": 3173,
+      "actual_bytes": 3173,
+      "expected_sha256": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04",
+      "actual_sha256": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04",
+      "status": "pass"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x3.bin",
+      "in_archive": true,
+      "expected_bytes": 1247368,
+      "actual_bytes": 1247368,
+      "expected_sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+      "actual_sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+      "status": "pass"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x3.param",
+      "in_archive": true,
+      "expected_bytes": 3173,
+      "actual_bytes": 3173,
+      "expected_sha256": "d1a5755008791d09b57e3425fc9dd0bd26b00fdf79c606210bc0e693f8230881",
+      "actual_sha256": "d1a5755008791d09b57e3425fc9dd0bd26b00fdf79c606210bc0e693f8230881",
+      "status": "pass"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x4.bin",
+      "in_archive": true,
+      "expected_bytes": 1247368,
+      "actual_bytes": 1247368,
+      "expected_sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+      "actual_sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d",
+      "status": "pass"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x4.param",
+      "in_archive": true,
+      "expected_bytes": 3077,
+      "actual_bytes": 3077,
+      "expected_sha256": "850a248e7c14c27e5bd8cf7265113a9441036a7db63963bb8aa5169d788a435e",
+      "actual_sha256": "850a248e7c14c27e5bd8cf7265113a9441036a7db63963bb8aa5169d788a435e",
+      "status": "pass"
+    },
+    {
+      "archive_path": "README_windows.md",
+      "in_archive": true,
+      "expected_bytes": 1859,
+      "actual_bytes": 1859,
+      "expected_sha256": "2b882314a0c7a9f17a347b9b04f909939f6274aa96cf5b2ebba2f7ab75987480",
+      "actual_sha256": "2b882314a0c7a9f17a347b9b04f909939f6274aa96cf5b2ebba2f7ab75987480",
+      "status": "pass"
+    },
+    {
+      "archive_path": "input.jpg",
+      "in_archive": true,
+      "expected_bytes": 11985,
+      "actual_bytes": 11985,
+      "expected_sha256": "2f49c8cf6249940408fff736f394a4f8a228a6488bcc2fe9f92bdfb90b54a504",
+      "actual_sha256": "2f49c8cf6249940408fff736f394a4f8a228a6488bcc2fe9f92bdfb90b54a504",
+      "status": "pass"
+    },
+    {
+      "archive_path": "input2.jpg",
+      "in_archive": true,
+      "expected_bytes": 10286,
+      "actual_bytes": 10286,
+      "expected_sha256": "ebf8662783a1a5f5d97c893f7257e46f59738a5f3848c7a1d05cd16d5670dc6b",
+      "actual_sha256": "ebf8662783a1a5f5d97c893f7257e46f59738a5f3848c7a1d05cd16d5670dc6b",
+      "status": "pass"
+    },
+    {
+      "archive_path": "onepiece_demo.mp4",
+      "in_archive": true,
+      "expected_bytes": 592566,
+      "actual_bytes": 592566,
+      "expected_sha256": "2f2084db2ca6b363b0857758ac99084775c7f40cd074bf7e23c35e2ce0477778",
+      "actual_sha256": "2f2084db2ca6b363b0857758ac99084775c7f40cd074bf7e23c35e2ce0477778",
+      "status": "pass"
+    }
+  ],
+  "installed_file_checks": [
+    {
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\app\\realesrgan-ncnn-vulkan.exe",
+      "expected_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+      "actual_bytes": 6161408,
+      "actual_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+      "status": "pass"
+    },
+    {
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\app\\vcomp140.dll",
+      "expected_sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
+      "actual_bytes": 182704,
+      "actual_sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
+      "status": "pass"
+    },
+    {
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\app\\models\\realesrgan-x4plus.bin",
+      "expected_sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+      "actual_bytes": 33424520,
+      "actual_sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+      "status": "pass"
+    },
+    {
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\app\\models\\realesrgan-x4plus.param",
+      "expected_sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86",
+      "actual_bytes": 116029,
+      "actual_sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86",
+      "status": "pass"
+    },
+    {
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\app\\README_windows.md",
+      "expected_sha256": "2b882314a0c7a9f17a347b9b04f909939f6274aa96cf5b2ebba2f7ab75987480",
+      "actual_bytes": 1859,
+      "actual_sha256": "2b882314a0c7a9f17a347b9b04f909939f6274aa96cf5b2ebba2f7ab75987480",
+      "status": "pass"
+    }
+  ],
+  "license_checks": [
+    {
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\resources\\windows-parity\\realesrgan-ncnn-vulkan\\LICENSE-RealESRGAN.txt",
+      "expected_sha256": "4a699ec4863d96a91fc265948a0c90033f7e8735d515524dcf3444736406e0c2",
+      "url": "https://raw.githubusercontent.com/xinntao/Real-ESRGAN/v0.2.5.0/LICENSE",
+      "actual_bytes": 1519,
+      "actual_sha256": "4a699ec4863d96a91fc265948a0c90033f7e8735d515524dcf3444736406e0c2",
+      "status": "pass"
+    },
+    {
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\resources\\windows-parity\\realesrgan-ncnn-vulkan\\LICENSE-ncnn-app.txt",
+      "expected_sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937",
+      "url": "https://raw.githubusercontent.com/xinntao/Real-ESRGAN-ncnn-vulkan/v0.2.0/LICENSE",
+      "actual_bytes": 2228,
+      "actual_sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937",
+      "status": "pass"
+    }
+  ],
+  "failures": [],
+  "method": "Re-hashed the local official archive, all listed archive members, the extracted install files and the pinned license files; compared every value with the checked-in asset manifest."
+}
