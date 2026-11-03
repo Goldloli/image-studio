@@ -1,0 +1,557 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-runtime-license-records",
+  "runtime_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+  "source": "License fields extracted from each wheel's own .dist-info/METADATA in the frozen wheelhouse.",
+  "packages": [
+    {
+      "package": "accelerate",
+      "version": "1.12.0",
+      "wheel": "accelerate-1.12.0-py3-none-any.whl",
+      "wheel_sha256": "3e2091cd341423207e2f084a6654b1efcd250dc326f2a37d6dde446e07cabb11",
+      "license_expression": "",
+      "license_field": "Apache",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "annotated-doc",
+      "version": "0.0.5",
+      "wheel": "annotated_doc-0.0.5-py3-none-any.whl",
+      "wheel_sha256": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101",
+      "license_expression": "MIT",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "anyio",
+      "version": "4.16.0",
+      "wheel": "anyio-4.16.0-py3-none-any.whl",
+      "wheel_sha256": "c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026",
+      "license_expression": "MIT",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "bitsandbytes",
+      "version": "0.50.2",
+      "wheel": "bitsandbytes-0.50.2-py3-none-win_amd64.whl",
+      "wheel_sha256": "c697963c8fda3dcd0d7ebd9b5211ae4067feef7cd06e0350d4e816a434fe683d",
+      "license_expression": "MIT",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "certifi",
+      "version": "2026.10.23",
+      "wheel": "certifi-2026.10.23-py3-none-any.whl",
+      "wheel_sha256": "e9b54de76e530bb6cf0ccd036787103acb58fd42ba930ea8bf948ddbaa2f61d1",
+      "license_expression": "",
+      "license_field": "MPL-2.0",
+      "license_classifiers": [
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "charset-normalizer",
+      "version": "3.5.2",
+      "wheel": "charset_normalizer-3.5.2-cp312-cp312-win_amd64.whl",
+      "wheel_sha256": "780fbe7cab297b81dad9fb8dc5eb003c0468ffb0d9e5f65068c53a34661a96bc",
+      "license_expression": "",
+      "license_field": "MIT",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "click",
+      "version": "8.5.0",
+      "wheel": "click-8.5.0-py3-none-any.whl",
+      "wheel_sha256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360",
+      "license_expression": "BSD-3-Clause",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "colorama",
+      "version": "0.4.6",
+      "wheel": "colorama-0.4.6-py2.py3-none-any.whl",
+      "wheel_sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
+      "license_expression": "",
+      "license_field": "",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "diffusers",
+      "version": "0.41.0",
+      "wheel": "diffusers-0.41.0-py3-none-any.whl",
+      "wheel_sha256": "ea8918b7dfd92ce793b6db689a551b8cd25d52c6c0fcd3ade0706a5fd2a25990",
+      "license_expression": "",
+      "license_field": "Apache 2.0 License",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "filelock",
+      "version": "4.2.7",
+      "wheel": "filelock-4.2.7-py3-none-any.whl",
+      "wheel_sha256": "d08972bbca2b8767ee552aff877b091dd111ffb1d22de7de885766ea7d719d5e",
+      "license_expression": "MIT",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "flatbuffers",
+      "version": "25.12.19",
+      "wheel": "flatbuffers-25.12.19-py2.py3-none-any.whl",
+      "wheel_sha256": "7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4",
+      "license_expression": "",
+      "license_field": "Apache 2.0",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "fsspec",
+      "version": "2026.9.0",
+      "wheel": "fsspec-2026.9.0-py3-none-any.whl",
+      "wheel_sha256": "8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f",
+      "license_expression": "BSD-3-Clause",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "h11",
+      "version": "0.16.0",
+      "wheel": "h11-0.16.0-py3-none-any.whl",
+      "wheel_sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86",
+      "license_expression": "",
+      "license_field": "MIT",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "hf-xet",
+      "version": "1.8.0",
+      "wheel": "hf_xet-1.8.0-cp38-abi3-win_amd64.whl",
+      "wheel_sha256": "92188598dedc1e1f5609bd718d4db8687a6c89915553912571e2f587892eecec",
+      "license_expression": "Apache-2.0",
+      "license_field": "",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "httpcore",
+      "version": "1.0.9",
+      "wheel": "httpcore-1.0.9-py3-none-any.whl",
+      "wheel_sha256": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55",
+      "license_expression": "BSD-3-Clause",
+      "license_field": "",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "httpx",
+      "version": "0.28.1",
+      "wheel": "httpx-0.28.1-py3-none-any.whl",
+      "wheel_sha256": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad",
+      "license_expression": "",
+      "license_field": "BSD-3-Clause",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "huggingface-hub",
+      "version": "1.33.0",
+      "wheel": "huggingface_hub-1.33.0-py3-none-any.whl",
+      "wheel_sha256": "04e434b06e100eddbce9a6e817d72693a7884b10a79bd67ab48080d5c07eb899",
+      "license_expression": "",
+      "license_field": "Apache-2.0",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "idna",
+      "version": "3.20",
+      "wheel": "idna-3.20-py3-none-any.whl",
+      "wheel_sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c",
+      "license_expression": "BSD-3-Clause",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "importlib-metadata",
+      "version": "10.1.0",
+      "wheel": "importlib_metadata-10.1.0-py3-none-any.whl",
+      "wheel_sha256": "cf45ce66a929c64e994185a809c04840d0501db17e663810d993d0f4829265c7",
+      "license_expression": "Apache-2.0",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "jinja2",
+      "version": "3.1.6",
+      "wheel": "jinja2-3.1.6-py3-none-any.whl",
+      "wheel_sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67",
+      "license_expression": "",
+      "license_field": "",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "markdown-it-py",
+      "version": "4.2.0",
+      "wheel": "markdown_it_py-4.2.0-py3-none-any.whl",
+      "wheel_sha256": "9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a",
+      "license_expression": "",
+      "license_field": "",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "markupsafe",
+      "version": "3.0.4",
+      "wheel": "markupsafe-3.0.4-cp312-cp312-win_amd64.whl",
+      "wheel_sha256": "11935df9bf455ed0c04eb87bcd720f02b1fe5e02128a9430f23aed6f93336fc7",
+      "license_expression": "BSD-3-Clause",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "mdurl",
+      "version": "0.1.2",
+      "wheel": "mdurl-0.1.2-py3-none-any.whl",
+      "wheel_sha256": "84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8",
+      "license_expression": "",
+      "license_field": "",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files_in_wheel": [
+        "LICENSE"
+      ]
+    },
+    {
+      "package": "mpmath",
+      "version": "1.3.0",
+      "wheel": "mpmath-1.3.0-py3-none-any.whl",
+      "wheel_sha256": "a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c",
+      "license_expression": "",
+      "license_field": "BSD",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files_in_wheel": [
+        "LICENSE"
+      ]
+    },
+    {
+      "package": "networkx",
+      "version": "3.7",
+      "wheel": "networkx-3.7-py3-none-any.whl",
+      "wheel_sha256": "e3fd2c13a7814cee3746340d8d7f8598a67f16a58bf47fb7f8793fab6efca1b0",
+      "license_expression": "BSD-3-Clause",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "numpy",
+      "version": "2.5.4",
+      "wheel": "numpy-2.5.4-cp312-cp312-win_amd64.whl",
+      "wheel_sha256": "a7b1b6353e36a7e50de2973a38d705c88ee93adcf120673cee7f45a4a3fa223a",
+      "license_expression": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "onnxruntime",
+      "version": "1.31.1",
+      "wheel": "onnxruntime-1.31.1-cp312-cp312-win_amd64.whl",
+      "wheel_sha256": "ae8a9a351efda685cc59a66226cdefaa37a126c1d66872ca23a2de9425326130",
+      "license_expression": "",
+      "license_field": "MIT License",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "packaging",
+      "version": "26.3",
+      "wheel": "packaging-26.3-py3-none-any.whl",
+      "wheel_sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c",
+      "license_expression": "Apache-2.0 OR BSD-2-Clause",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "pillow",
+      "version": "13.0.0",
+      "wheel": "pillow-13.0.0-cp312-cp312-win_amd64.whl",
+      "wheel_sha256": "ff3fe9eb621fbb9db4c4be33ab946f6bac5f98ab50ca8d3260503653656c961b",
+      "license_expression": "MIT-CMU",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "protobuf",
+      "version": "7.36.2",
+      "wheel": "protobuf-7.36.2-cp310-abi3-win_amd64.whl",
+      "wheel_sha256": "a300819d441e078a5608c0d3c709796bb548136058fda017ae51d425b44fd353",
+      "license_expression": "",
+      "license_field": "3-Clause BSD License",
+      "license_classifiers": [],
+      "license_files_in_wheel": [
+        "LICENSE"
+      ]
+    },
+    {
+      "package": "psutil",
+      "version": "7.1.3",
+      "wheel": "psutil-7.1.3-cp37-abi3-win_amd64.whl",
+      "wheel_sha256": "f39c2c19fe824b47484b96f9692932248a54c43799a84282cfe58d05a6449efd",
+      "license_expression": "",
+      "license_field": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files_in_wheel": [
+        "LICENSE"
+      ]
+    },
+    {
+      "package": "pygments",
+      "version": "2.21.0",
+      "wheel": "pygments-2.21.0-py3-none-any.whl",
+      "wheel_sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9",
+      "license_expression": "BSD-2-Clause",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "pyyaml",
+      "version": "6.0.3",
+      "wheel": "pyyaml-6.0.3-cp312-cp312-win_amd64.whl",
+      "wheel_sha256": "5fcd34e47f6e0b794d17de1b4ff496c00986e1c83f7ab2fb8fcfe9616ff7477b",
+      "license_expression": "",
+      "license_field": "MIT",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "regex",
+      "version": "2026.9.29",
+      "wheel": "regex-2026.9.29-cp312-cp312-win_amd64.whl",
+      "wheel_sha256": "fdd88ed5e20b1bcdd234421e454962c971aa44b653bdb7f1ea9ef683e90fb649",
+      "license_expression": "Apache-2.0 AND CNRI-Python",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "requests",
+      "version": "2.34.2",
+      "wheel": "requests-2.34.2-py3-none-any.whl",
+      "wheel_sha256": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0",
+      "license_expression": "",
+      "license_field": "Apache-2.0",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "rich",
+      "version": "15.0.0",
+      "wheel": "rich-15.0.0-py3-none-any.whl",
+      "wheel_sha256": "33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb",
+      "license_expression": "",
+      "license_field": "MIT",
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "safetensors",
+      "version": "0.8.0",
+      "wheel": "safetensors-0.8.0-cp310-abi3-win_amd64.whl",
+      "wheel_sha256": "096ec1a98435df7beb08853bb5aa9081a84f23d0adc67ed1a0a10550f608373f",
+      "license_expression": "",
+      "license_field": "",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "setuptools",
+      "version": "84.2.1",
+      "wheel": "setuptools-84.2.1-py3-none-any.whl",
+      "wheel_sha256": "ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2",
+      "license_expression": "MIT",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "shellingham",
+      "version": "1.5.4",
+      "wheel": "shellingham-1.5.4-py2.py3-none-any.whl",
+      "wheel_sha256": "7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686",
+      "license_expression": "",
+      "license_field": "ISC License",
+      "license_classifiers": [
+        "License :: OSI Approved :: ISC License (ISCL)"
+      ],
+      "license_files_in_wheel": [
+        "LICENSE"
+      ]
+    },
+    {
+      "package": "sympy",
+      "version": "1.14.0",
+      "wheel": "sympy-1.14.0-py3-none-any.whl",
+      "wheel_sha256": "e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5",
+      "license_expression": "",
+      "license_field": "BSD",
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "tokenizers",
+      "version": "0.22.2",
+      "wheel": "tokenizers-0.22.2-cp39-abi3-win_amd64.whl",
+      "wheel_sha256": "c9ea31edff2968b44a88f97d784c2f16dc0729b8b143ed004699ebca91f05c48",
+      "license_expression": "",
+      "license_field": "",
+      "license_classifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "torch",
+      "version": "2.10.0+cu126",
+      "wheel": "torch-2.10.0+cu126-cp312-cp312-win_amd64.whl",
+      "wheel_sha256": "95d8409b8a15191de4c2958e86ca47f3ea8f9739b994ee4ca0e7586f37336413",
+      "license_expression": "",
+      "license_field": "BSD-3-Clause",
+      "license_classifiers": [],
+      "license_files_in_wheel": [
+        "LICENSE",
+        "NOTICE"
+      ]
+    },
+    {
+      "package": "torchvision",
+      "version": "0.25.0+cu126",
+      "wheel": "torchvision-0.25.0+cu126-cp312-cp312-win_amd64.whl",
+      "wheel_sha256": "57a8a103814c344d91c32425ba38a53daac4bf4aab074aaaea7b6bab4c22fb7b",
+      "license_expression": "",
+      "license_field": "BSD",
+      "license_classifiers": [],
+      "license_files_in_wheel": [
+        "LICENSE"
+      ]
+    },
+    {
+      "package": "tqdm",
+      "version": "4.70.1",
+      "wheel": "tqdm-4.70.1-py3-none-any.whl",
+      "wheel_sha256": "c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73",
+      "license_expression": "",
+      "license_field": "MPL-2.0 AND MIT",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "transformers",
+      "version": "5.3.0",
+      "wheel": "transformers-5.3.0-py3-none-any.whl",
+      "wheel_sha256": "50ac8c89c3c7033444fb3f9f53138096b997ebb70d4b5e50a2e810bf12d3d29a",
+      "license_expression": "",
+      "license_field": "Apache 2.0 License",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "typer",
+      "version": "0.27.3",
+      "wheel": "typer-0.27.3-py3-none-any.whl",
+      "wheel_sha256": "e50022f28b82a86313e54501317a1db64bf8f8d036ff8cfe5ca7e47675454aff",
+      "license_expression": "MIT",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "typing-extensions",
+      "version": "4.16.0",
+      "wheel": "typing_extensions-4.16.0-py3-none-any.whl",
+      "wheel_sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+      "license_expression": "PSF-2.0",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "urllib3",
+      "version": "2.8.0",
+      "wheel": "urllib3-2.8.0-py3-none-any.whl",
+      "wheel_sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3",
+      "license_expression": "MIT",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    },
+    {
+      "package": "zipp",
+      "version": "4.1.2",
+      "wheel": "zipp-4.1.2-py3-none-any.whl",
+      "wheel_sha256": "b30cb6cd253122169c47de245ca24a86bac2a5d3802ba15bf7ba6414eb9e144d",
+      "license_expression": "MIT",
+      "license_field": "",
+      "license_classifiers": [],
+      "license_files_in_wheel": []
+    }
+  ]
+}
