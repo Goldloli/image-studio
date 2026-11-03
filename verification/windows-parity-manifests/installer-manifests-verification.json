@@ -1384,6 +1384,13 @@
         "manifest_packages": 49,
         "missing_or_mismatched": [],
         "extra_packages": [],
+        "installer_probe": {
+          "status": "pass",
+          "command": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\runtime\\python.exe -I -c \"import importlib.metadata,json;print(json.dumps({d.metadata['Name'].lower().replace('_','-'):d.version for d in importlib.metadata.distributions()}))\"",
+          "probed_distributions": 50,
+          "manifest_packages": 49,
+          "mismatched": {}
+        },
         "status": "pass"
       },
       "status": "pass"

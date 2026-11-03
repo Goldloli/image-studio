@@ -37,8 +37,11 @@ For every manifest:
    package from the downloaded official zip. Missing local files are reported
    as `missing` rather than treated as passing.
 6. **Runtime packages**: `packages` must cover every `requirements.lock` pin
-   with the exact version (the installer probes
-   `importlib.metadata.distributions()` and compares each entry).
+   with the exact version. The verifier additionally replays the installer's
+   own probe command against the frozen interpreter
+   (`python.exe -I -c "import importlib.metadata,json; print(...)"`) and
+   compares the resulting normalized name→version map with the manifest:
+   50 distributions probed, 49/49 manifest entries match.
 
 ## Result
 
