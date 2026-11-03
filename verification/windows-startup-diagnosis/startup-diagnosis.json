@@ -3,7 +3,7 @@
   "kind": "windows-startup-diagnosis",
   "status": "passed_on_development_machine",
   "date": "2026-11-03",
-  "scope": "Covers W07 (startup failure reporting and per-data-root WebView2 profile) on a Windows 11 development machine. It does not replace the Windows 10 target-machine acceptance and does not close the unexplained 101 from 2026-11-03.",
+  "scope": "Covers W07 (startup failure reporting and per-data-root WebView2 profile) on a Windows 11 development machine. The Windows 10 target-machine acceptance is recorded in target-machine.json; the unexplained 101 from 2026-11-03 was not reproduced on either machine.",
   "machine": {
     "os": "Microsoft Windows 11 Enterprise 22631",
     "cpu": "Intel(R) Core(TM) i9-9900K",

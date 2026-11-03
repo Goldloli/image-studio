@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "kind": "windows-startup-diagnosis-target-machine",
+  "status": "passed",
+  "date": "2026-11-03",
+  "scope": "W07 target-machine acceptance (startup failure reporting and per-data-root WebView2 profile) on Windows 10 22H2 / RTX 3080 Ti / i7-13700K, using the NSIS package rebuilt from 376a3c3. The Windows 11 development-machine record stays in startup-diagnosis.json. This record also documents the target-machine retest of the 2026-11-03 second-instance exit code 101.",
+  "machine": {
+    "os": "Microsoft Windows 10 专业版 10.0.19045 (build 19045.6466)",
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13700K",
+    "physical_memory_gib": 31.73,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti 12288 MiB (sm86, driver 596.49)",
+    "webview2": "156.0.4314.58"
+  },
+  "toolchain": {
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "1.99.1 (5f94df478 2026-08-27)",
+    "node": "24.19.0",
+    "npm": "11.17.0",
+    "openspec": "1.12.0",
+    "bd": "1.2.2"
+  },
+  "package": {
+    "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
+    "installer_sha256": "9e5ecc402aff21046612c056be28efbb4863bb11a6464549759ef2d9b69a8ba2",
+    "installer_bytes": 244754133,
+    "install_mode": "currentUser",
+    "webview2_install_mode": "offlineInstaller",
+    "signed": false,
+    "installed_executable": "%LOCALAPPDATA%/Image Studio/image-studio-desktop.exe",
+    "installed_executable_sha256": "7270ba22979d1a8c37ebb2073c113e0feaf97d30ec70b087ad0ec406b49842c7",
+    "installed_executable_bytes": 42022912,
+    "installed_executable_last_write_utc": "2026-11-03T11:50:48Z",
+    "note": "The installed executable is the Tauri bundle-type-patched copy of target/release/image-studio-desktop.exe, so its SHA-256 differs from the intermediate release binary."
+  },
+  "cases": [
+    {
+      "id": "W07-a",
+      "name": "webview2-runtime-unavailable",
+      "setup": "WEBVIEW2_BROWSER_EXECUTABLE_FOLDER points at an empty directory; isolated --data-dir",
+      "expected": "logs/startup-failure.log, a dismissible native error dialog, exit code 3",
+      "actual": {
+        "loader_dialog": {
+          "title": "Error",
+          "class": "#32770",
+          "buttons": ["确定", "关闭"],
+          "text": "Could not find the WebView2 Runtime.\n\nMake sure it is installed or download it from https://developer.microsoft.com/en-us/microsoft-edge/webview2\n\nYou may have it installed on another user account, but it is not available for this one.",
+          "text_capture": "UI Automation Pane text read after a 6 s settle in a separate probe; the verification run itself detected the dialog shell, dismissed it and continued."
+        },
+        "loader_dialog_dismissed": true,
+        "application_dialog": {
+          "title": "Image Studio 启动失败",
+          "class": "#32770",
+          "buttons": ["确定", "关闭"],
+          "text": "Image Studio 启动失败\n时间（UTC）：2026-11-03T12:01:09Z\n原因：Failed to setup app: runtime error: Could not find the webview runtime, make sure it is installed\n日志：\\\\?\\<data-root>\\logs\\startup-failure.log\n建议：确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。"
+        },
+        "application_dialog_dismissed": true,
+        "data_root": "<repo>/target/w07-target/a-failed-root",
+        "log_created": true,
+        "log_text": "Image Studio 启动失败\n时间（UTC）：2026-11-03T12:01:09Z\n原因：Failed to setup app: runtime error: Could not find the webview runtime, make sure it is installed\n日志：\\\\?\\<data-root>\\logs\\startup-failure.log\n建议：确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。",
+        "exit_code": 3
+      },
+      "observations": "On the target machine the WebView2 runtime raises its own TaskDialog ('Error', with a download link) before the setup panic. After that dialog is dismissed, the application writes logs/startup-failure.log, shows its own 'Image Studio 启动失败' dialog and exits with the documented code 3. The Windows 11 development-machine record observed the application dialog directly; the target machine has this one extra runtime-provided dialog first.",
+      "result": "passed"
+    },
+    {
+      "id": "W07-a2",
+      "name": "webview2-profile-directory-unavailable",
+      "setup": "a regular file is placed at <data root>/cache/webview2 so the profile directory cannot be created; isolated --data-dir",
+      "expected": "startup-failure.log naming the profile failure, a dismissible native error dialog, exit code 3",
+      "actual": {
+        "application_dialog": {
+          "title": "Image Studio 启动失败",
+          "class": "#32770",
+          "buttons": ["确定", "关闭"],
+          "text": "Image Studio 启动失败\n时间（UTC）：2026-11-03T12:01:10Z\n原因：无法创建 WebView2 用户数据目录：当文件已存在时，无法创建该文件。 (os error 183)\n日志：\\\\?\\<data-root>\\logs\\startup-failure.log\n建议：确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。"
+        },
+        "application_dialog_dismissed": true,
+        "data_root": "<repo>/target/w07-target/a2-unwritable-profile-root",
+        "log_created": true,
+        "log_text": "Image Studio 启动失败\n时间（UTC）：2026-11-03T12:01:10Z\n原因：无法创建 WebView2 用户数据目录：当文件已存在时，无法创建该文件。 (os error 183)\n日志：\\\\?\\<data-root>\\logs\\startup-failure.log\n建议：确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。",
+        "exit_code": 3
+      },
+      "observations": "This variant reaches the application's own startup path directly (no WebView2 loader dialog), so it proves the panic hook, the log writer, the native dialog and exit code 3 independently of the WebView2 runtime dialogue.",
+      "result": "passed"
+    },
+    {
+      "id": "W07-b",
+      "name": "two-roots-separate-webview-profiles",
+      "setup": "two simultaneous instances with different --data-dir roots",
+      "expected": "both instances run; each root owns its WebView2 profile; the legacy shared profile is not used",
+      "actual": {
+        "a_running": true,
+        "b_running": true,
+        "b_exit_code": null,
+        "profile_a": "<repo>/target/w07-target/b-root-one/cache/webview2/EBWebView",
+        "profile_a_created": true,
+        "profile_b": "<repo>/target/w07-target/b-root-two/cache/webview2/EBWebView",
+        "profile_b_created": true,
+        "shared_profile": "%LOCALAPPDATA%/local.image-studio.foundation.dev/EBWebView",
+        "shared_profile_before_utc": "2026-11-03T11:50:09.6213040Z",
+        "shared_profile_after_utc": "2026-11-03T11:50:09.6213040Z",
+        "shared_profile_untouched": true
+      },
+      "result": "passed"
+    }
+  ],
+  "second_instance_101": {
+    "question": "Does a second simultaneous instance with a different --data-dir exit with code 101 as recorded on 2026-11-03?",
+    "pre_fix_control": {
+      "executable_sha256": "2ccbadbfa048ea3bca6290f268e0bc781d2202a738609e3c371fae4362ef1e37",
+      "executable_bytes": 41994240,
+      "executable_last_write_utc": "2026-11-02T16:11:52Z",
+      "description": "The previously installed package, built before the per-data-root WebView2 profile existed.",
+      "attempts": [
+        { "offset": "0s", "second_exited": false, "second_exit_code": null, "first_still_running_after": true, "reproduced": false },
+        { "offset": "2s", "second_exited": false, "second_exit_code": null, "first_still_running_after": true, "reproduced": false },
+        { "offset": "25s", "second_exited": false, "second_exit_code": null, "first_still_running_after": true, "reproduced": false }
+      ],
+      "result": "not_reproduced"
+    },
+    "post_fix": {
+      "executable_sha256": "7270ba22979d1a8c37ebb2073c113e0feaf97d30ec70b087ad0ec406b49842c7",
+      "attempts": [
+        { "offset": "0s", "second_exited": false, "second_exit_code": null, "first_still_running_after": true, "reproduced": false },
+        { "offset": "2s", "second_exited": false, "second_exit_code": null, "first_still_running_after": true, "reproduced": false },
+        { "offset": "25s", "second_exited": false, "second_exit_code": null, "first_still_running_after": true, "reproduced": false }
+      ],
+      "result": "not_reproduced"
+    },
+    "limitation": "Both automated runs start the first instance with an isolated --data-dir root. The original 2026-11-03 record was made during a manual package rebuild with the default product root as the first instance; the handoff forbids automating the user's real data root, so that exact setup was not replayed.",
+    "conclusion": "not_reproduced_on_target_machine; the silent exit-101 class is now reported by the startup diagnostics instead of disappearing without a log or dialog. Independent-root coexistence (W03) is verified on the target machine with the current package."
+  },
+  "artifacts": {
+    "raw_result": "target/w07-target/result.json (machine-local, not committed)",
+    "loader_dialog_text": "target/w07-target/loader-dialog.txt (machine-local, not committed)",
+    "pre_fix_control_result": "target/w07-target/repro-101-before-fix.json (machine-local, not committed)",
+    "quality_gate": "verification/windows-quality-gate.json (commit 376a3c3408e5490b94f1703a102d2af8850763e1)"
+  }
+}
