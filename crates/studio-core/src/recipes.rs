@@ -847,6 +847,275 @@ pub fn freeze_text_model(
     Ok(FrozenRecipe { request, plan })
 }
 
+/// Freezes a Windows Klein request; a source image selects the single-image edit capability.
+pub fn freeze_windows_klein(
+    input: KleinInput,
+    resolved_seed: u32,
+    env: crate::generation::PlanEnvironment,
+) -> Result<FrozenRecipe, ContractError> {
+    let (capability_id, recipe, inputs, source) = match input.source {
+        Some(source) => (
+            KLEIN_WINDOWS_EDIT_CAPABILITY,
+            Recipe::KleinEditWindows,
+            vec![InputBinding {
+                asset: source.asset,
+                role: SOURCE_ROLE.into(),
+                order: 0,
+            }],
+            Some(source.facts),
+        ),
+        None => (
+            KLEIN_WINDOWS_TEXT_CAPABILITY,
+            Recipe::KleinTextWindows,
+            vec![],
+            None,
+        ),
+    };
+    let request = UserRequest {
+        schema_version: crate::contracts::REQUEST_SCHEMA_VERSION,
+        request_id: input.request_id,
+        project_id: input.project_id,
+        capability: crate::contracts::CapabilityDescriptor {
+            capability_id: capability_id.into(),
+            instruction_required: true,
+            input_roles: inputs
+                .iter()
+                .map(|_| crate::contracts::RoleRule {
+                    role: SOURCE_ROLE.into(),
+                    minimum: 1,
+                    maximum: 1,
+                })
+                .collect(),
+        },
+        instruction: input.prompt,
+        inputs,
+        model_variant_id: ModelVariantId::new(KLEIN_WINDOWS_MODEL)?,
+        requested_output: crate::contracts::ImageOutput {
+            width: 1024,
+            height: 1024,
+            count: 1,
+        },
+        policy: crate::contracts::AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: false,
+        },
+        parameters: BTreeMap::from([(
+            "seed".into(),
+            input
+                .seed
+                .map_or(serde_json::Value::Null, |seed| json!(seed)),
+        )]),
+        idempotency_key: input.idempotency_key,
+    };
+    let effective_seed = input.seed.unwrap_or(resolved_seed);
+    let plan = ExecutionPlan {
+        schema_version: crate::contracts::PLAN_SCHEMA_VERSION,
+        plan_id: input.plan_id,
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: env.components,
+        runtime: env.runtime,
+        device: env.device,
+        effective_output: request.requested_output.clone(),
+        effective_parameters: windows_klein_parameters(recipe, effective_seed),
+        adjustments: vec![],
+    };
+    recipe.validate_plan(&request, &plan, source)?;
+    Ok(FrozenRecipe { request, plan })
+}
+
+/// Freezes the Windows BiRefNet CPU recipe, preserving normalized source dimensions.
+pub fn freeze_windows_birefnet(
+    input: BiRefNetInput,
+    env: crate::generation::PlanEnvironment,
+) -> Result<FrozenRecipe, ContractError> {
+    let source = input.source;
+    let request = UserRequest {
+        schema_version: crate::contracts::REQUEST_SCHEMA_VERSION,
+        request_id: input.request_id,
+        project_id: input.project_id,
+        capability: crate::contracts::CapabilityDescriptor {
+            capability_id: BIREFNET_WINDOWS_CAPABILITY.into(),
+            instruction_required: false,
+            input_roles: vec![crate::contracts::RoleRule {
+                role: SOURCE_ROLE.into(),
+                minimum: 1,
+                maximum: 1,
+            }],
+        },
+        instruction: String::new(),
+        inputs: vec![InputBinding {
+            asset: source.asset,
+            role: SOURCE_ROLE.into(),
+            order: 0,
+        }],
+        model_variant_id: ModelVariantId::new(BIREFNET_WINDOWS_MODEL)?,
+        requested_output: crate::contracts::ImageOutput {
+            width: source.facts.width,
+            height: source.facts.height,
+            count: 1,
+        },
+        policy: crate::contracts::AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: true,
+        },
+        parameters: BTreeMap::new(),
+        idempotency_key: input.idempotency_key,
+    };
+    let plan = ExecutionPlan {
+        schema_version: crate::contracts::PLAN_SCHEMA_VERSION,
+        plan_id: input.plan_id,
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: env.components,
+        runtime: env.runtime,
+        device: env.device,
+        effective_output: request.requested_output.clone(),
+        effective_parameters: windows_birefnet_parameters(),
+        adjustments: vec![],
+    };
+    Recipe::BiRefNetWindows.validate_plan(&request, &plan, Some(source.facts))?;
+    Ok(FrozenRecipe { request, plan })
+}
+
+/// Freezes the Windows Real-ESRGAN recipe; output is exactly four times the source.
+pub fn freeze_windows_realesrgan(
+    input: RealEsrganInput,
+    env: crate::generation::PlanEnvironment,
+) -> Result<FrozenRecipe, ContractError> {
+    let source = input.source;
+    let width =
+        source.facts.width.checked_mul(4).ok_or_else(|| {
+            ContractError::InvalidValue("Windows Real-ESRGAN width overflow".into())
+        })?;
+    let height =
+        source.facts.height.checked_mul(4).ok_or_else(|| {
+            ContractError::InvalidValue("Windows Real-ESRGAN height overflow".into())
+        })?;
+    let request = UserRequest {
+        schema_version: crate::contracts::REQUEST_SCHEMA_VERSION,
+        request_id: input.request_id,
+        project_id: input.project_id,
+        capability: crate::contracts::CapabilityDescriptor {
+            capability_id: REALESRGAN_WINDOWS_CAPABILITY.into(),
+            instruction_required: false,
+            input_roles: vec![crate::contracts::RoleRule {
+                role: SOURCE_ROLE.into(),
+                minimum: 1,
+                maximum: 1,
+            }],
+        },
+        instruction: String::new(),
+        inputs: vec![InputBinding {
+            asset: source.asset,
+            role: SOURCE_ROLE.into(),
+            order: 0,
+        }],
+        model_variant_id: ModelVariantId::new(REALESRGAN_WINDOWS_MODEL)?,
+        requested_output: crate::contracts::ImageOutput {
+            width,
+            height,
+            count: 1,
+        },
+        policy: crate::contracts::AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: false,
+        },
+        parameters: BTreeMap::new(),
+        idempotency_key: input.idempotency_key,
+    };
+    let plan = ExecutionPlan {
+        schema_version: crate::contracts::PLAN_SCHEMA_VERSION,
+        plan_id: input.plan_id,
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: env.components,
+        runtime: env.runtime,
+        device: env.device,
+        effective_output: request.requested_output.clone(),
+        effective_parameters: windows_realesrgan_parameters(),
+        adjustments: vec![],
+    };
+    Recipe::RealEsrganWindows.validate_plan(&request, &plan, Some(source.facts))?;
+    Ok(FrozenRecipe { request, plan })
+}
+
+/// Freezes a Windows staged text-to-image request (Qwen base/Turbo or MOSS-Image-SFT).
+pub fn freeze_windows_text_model(
+    recipe: Recipe,
+    input: TextModelInput,
+    resolved_seed: u32,
+    env: crate::generation::PlanEnvironment,
+) -> Result<FrozenRecipe, ContractError> {
+    let (model, capability) = match recipe {
+        Recipe::QwenImage21Windows => (
+            QWEN_IMAGE_21_WINDOWS_MODEL,
+            QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+        ),
+        Recipe::QwenImage21TurboWindows => (
+            QWEN_IMAGE_21_TURBO_WINDOWS_MODEL,
+            QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+        ),
+        Recipe::MossImageSftWindows => (
+            MOSS_IMAGE_SFT_WINDOWS_MODEL,
+            MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+        ),
+        _ => {
+            return Err(ContractError::InvalidValue(
+                "Windows text model freezer received a non-Windows text recipe".into(),
+            ));
+        }
+    };
+    let request = UserRequest {
+        schema_version: crate::contracts::REQUEST_SCHEMA_VERSION,
+        request_id: input.request_id,
+        project_id: input.project_id,
+        capability: crate::contracts::CapabilityDescriptor {
+            capability_id: capability.into(),
+            instruction_required: true,
+            input_roles: vec![],
+        },
+        instruction: input.prompt,
+        inputs: vec![],
+        model_variant_id: ModelVariantId::new(model)?,
+        requested_output: crate::contracts::ImageOutput {
+            width: 1024,
+            height: 1024,
+            count: 1,
+        },
+        policy: crate::contracts::AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: false,
+        },
+        parameters: BTreeMap::from([(
+            "seed".into(),
+            input
+                .seed
+                .map_or(serde_json::Value::Null, |seed| json!(seed)),
+        )]),
+        idempotency_key: input.idempotency_key,
+    };
+    let effective_seed = input.seed.unwrap_or(resolved_seed);
+    let plan = ExecutionPlan {
+        schema_version: crate::contracts::PLAN_SCHEMA_VERSION,
+        plan_id: input.plan_id,
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: env.components,
+        runtime: env.runtime,
+        device: env.device,
+        effective_output: request.requested_output.clone(),
+        effective_parameters: windows_text_model_parameters(recipe, effective_seed),
+        adjustments: vec![],
+    };
+    recipe.validate_plan(&request, &plan, None)?;
+    Ok(FrozenRecipe { request, plan })
+}
+
 fn validate_text_model_request(
     request: &UserRequest,
     source: Option<SourceFacts>,
@@ -1769,6 +2038,672 @@ mod tests {
         assert_eq!(
             moss.plan.effective_parameters["quantized_components"],
             json!(["transformer", "text_encoder"])
+        );
+    }
+
+    fn value_map(entries: &[(&str, serde_json::Value)]) -> BTreeMap<String, serde_json::Value> {
+        entries
+            .iter()
+            .map(|(key, value)| ((*key).into(), value.clone()))
+            .collect()
+    }
+
+    fn windows_environment(runtime: &str, engine: &str, device_id: &str) -> PlanEnvironment {
+        PlanEnvironment {
+            components: vec![ComponentSnapshot {
+                role: "transformer".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+                content_hash: ContentHash::new("9".repeat(64)).unwrap(),
+            }],
+            runtime: RuntimeSnapshot {
+                package_id: runtime.into(),
+                engine: engine.into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+            },
+            device: DeviceSnapshot {
+                device_id: device_id.into(),
+                precision: "nf4".into(),
+            },
+            scheduler: "flow_match_euler_discrete".into(),
+        }
+    }
+
+    fn windows_v2_environment() -> PlanEnvironment {
+        windows_environment(
+            crate::generation::WINDOWS_V2_RUNTIME,
+            crate::generation::WINDOWS_DIFFUSERS_ENGINE,
+            crate::generation::WINDOWS_CUDA_DEVICE,
+        )
+    }
+
+    fn windows_onnx_environment() -> PlanEnvironment {
+        windows_environment(
+            crate::generation::WINDOWS_V2_RUNTIME,
+            crate::generation::WINDOWS_ONNX_ENGINE,
+            crate::generation::WINDOWS_CPU_DEVICE,
+        )
+    }
+
+    fn windows_vulkan_environment() -> PlanEnvironment {
+        windows_environment(
+            crate::generation::REALESRGAN_WINDOWS_RUNTIME,
+            crate::generation::WINDOWS_NCNN_ENGINE,
+            crate::generation::WINDOWS_VULKAN_DEVICE,
+        )
+    }
+
+    fn klein_input(source: Option<SourceAsset>) -> KleinInput {
+        KleinInput {
+            request_id: RequestId::new("request:windows-klein").unwrap(),
+            project_id: ProjectId::new("default").unwrap(),
+            idempotency_key: IdempotencyKey::new("submit:windows-klein").unwrap(),
+            plan_id: PlanId::new("plan:windows-klein").unwrap(),
+            prompt: "a cobalt cube".into(),
+            seed: None,
+            source,
+        }
+    }
+
+    fn source_asset(kind: AssetKind, width: u32, height: u32, transparent: bool) -> SourceAsset {
+        SourceAsset {
+            asset: asset(kind),
+            facts: SourceFacts {
+                width,
+                height,
+                has_transparent_pixels: transparent,
+            },
+        }
+    }
+
+    fn birefnet_input(source: SourceAsset) -> BiRefNetInput {
+        BiRefNetInput {
+            request_id: RequestId::new("request:windows-birefnet").unwrap(),
+            project_id: ProjectId::new("default").unwrap(),
+            idempotency_key: IdempotencyKey::new("submit:windows-birefnet").unwrap(),
+            plan_id: PlanId::new("plan:windows-birefnet").unwrap(),
+            source,
+        }
+    }
+
+    fn realesrgan_input(source: SourceAsset) -> RealEsrganInput {
+        RealEsrganInput {
+            request_id: RequestId::new("request:windows-realesrgan").unwrap(),
+            project_id: ProjectId::new("default").unwrap(),
+            idempotency_key: IdempotencyKey::new("submit:windows-realesrgan").unwrap(),
+            plan_id: PlanId::new("plan:windows-realesrgan").unwrap(),
+            source,
+        }
+    }
+
+    fn text_model_input() -> TextModelInput {
+        TextModelInput {
+            request_id: RequestId::new("request:windows-text").unwrap(),
+            project_id: ProjectId::new("default").unwrap(),
+            idempotency_key: IdempotencyKey::new("submit:windows-text").unwrap(),
+            plan_id: PlanId::new("plan:windows-text").unwrap(),
+            prompt: "a cobalt cube".into(),
+            seed: None,
+        }
+    }
+
+    fn macos_environment() -> PlanEnvironment {
+        PlanEnvironment {
+            components: vec![ComponentSnapshot {
+                role: "transformer".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+                content_hash: ContentHash::new("8".repeat(64)).unwrap(),
+            }],
+            runtime: RuntimeSnapshot {
+                package_id: "recipes-v2".into(),
+                engine: "mlx".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+            },
+            device: DeviceSnapshot {
+                device_id: "gpu".into(),
+                precision: "bfloat16".into(),
+            },
+            scheduler: "flow_match_euler_discrete".into(),
+        }
+    }
+
+    #[test]
+    fn windows_recipe_identities_match_the_frozen_registry() {
+        for (model, capability, instruction_required, source, recipe) in [
+            (
+                KLEIN_WINDOWS_MODEL,
+                KLEIN_WINDOWS_TEXT_CAPABILITY,
+                true,
+                false,
+                Recipe::KleinTextWindows,
+            ),
+            (
+                KLEIN_WINDOWS_MODEL,
+                KLEIN_WINDOWS_EDIT_CAPABILITY,
+                true,
+                true,
+                Recipe::KleinEditWindows,
+            ),
+            (
+                BIREFNET_WINDOWS_MODEL,
+                BIREFNET_WINDOWS_CAPABILITY,
+                false,
+                true,
+                Recipe::BiRefNetWindows,
+            ),
+            (
+                REALESRGAN_WINDOWS_MODEL,
+                REALESRGAN_WINDOWS_CAPABILITY,
+                false,
+                true,
+                Recipe::RealEsrganWindows,
+            ),
+            (
+                QWEN_IMAGE_21_WINDOWS_MODEL,
+                QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+                true,
+                false,
+                Recipe::QwenImage21Windows,
+            ),
+            (
+                QWEN_IMAGE_21_TURBO_WINDOWS_MODEL,
+                QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+                true,
+                false,
+                Recipe::QwenImage21TurboWindows,
+            ),
+            (
+                MOSS_IMAGE_SFT_WINDOWS_MODEL,
+                MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+                true,
+                false,
+                Recipe::MossImageSftWindows,
+            ),
+        ] {
+            let request = request(model, capability, instruction_required, source);
+            assert_eq!(Recipe::from_request(&request).unwrap(), recipe);
+            assert!(recipe.is_windows(), "{model} must be a Windows recipe");
+        }
+        assert_eq!(Recipe::KleinTextWindows.id(), KLEIN_WINDOWS_TEXT_RECIPE);
+        assert_eq!(Recipe::KleinEditWindows.id(), KLEIN_WINDOWS_EDIT_RECIPE);
+        assert_eq!(Recipe::BiRefNetWindows.id(), BIREFNET_WINDOWS_RECIPE);
+        assert_eq!(Recipe::RealEsrganWindows.id(), REALESRGAN_WINDOWS_RECIPE);
+        assert_eq!(
+            Recipe::QwenImage21Windows.id(),
+            QWEN_IMAGE_21_WINDOWS_RECIPE
+        );
+        assert_eq!(
+            Recipe::QwenImage21TurboWindows.id(),
+            QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE
+        );
+        assert_eq!(
+            Recipe::MossImageSftWindows.id(),
+            MOSS_IMAGE_SFT_WINDOWS_RECIPE
+        );
+        assert!(!Recipe::KleinText.is_windows());
+        assert!(!Recipe::QwenImage21.is_windows());
+        assert!(Recipe::ZImageTurboCudaNf4.is_windows());
+    }
+
+    #[test]
+    fn windows_klein_freezes_exact_nf4_component_offload_map() {
+        let env = windows_v2_environment();
+        let text = freeze_windows_klein(klein_input(None), 17, env.clone()).unwrap();
+        assert_eq!(
+            text.request.capability.capability_id,
+            KLEIN_WINDOWS_TEXT_CAPABILITY
+        );
+        assert_eq!(text.request.model_variant_id.as_str(), KLEIN_WINDOWS_MODEL);
+        assert!(text.request.parameters["seed"].is_null());
+        assert_eq!(
+            text.request.requested_output,
+            ImageOutput {
+                width: 1024,
+                height: 1024,
+                count: 1,
+            }
+        );
+        assert_eq!(
+            text.plan.effective_parameters,
+            value_map(&[
+                ("recipe", json!(KLEIN_WINDOWS_TEXT_RECIPE)),
+                ("recipe_version", json!(1)),
+                ("seed", json!(17)),
+                ("steps", json!(4)),
+                ("guidance", json!(1.0)),
+                ("scheduler", json!("flow_match_euler_discrete")),
+                ("token_budget", json!(512)),
+                ("thinking", json!(false)),
+                ("truncation", json!(false)),
+                ("quantization", json!("nf4")),
+                ("load_strategy", json!("nf4-component-offload-v1")),
+            ])
+        );
+
+        let edit = freeze_windows_klein(
+            klein_input(Some(source_asset(AssetKind::ImageRgb, 512, 512, false))),
+            17,
+            env,
+        )
+        .unwrap();
+        assert_eq!(
+            edit.request.capability.capability_id,
+            KLEIN_WINDOWS_EDIT_CAPABILITY
+        );
+        assert_eq!(edit.request.inputs.len(), 1);
+        assert_eq!(edit.request.inputs[0].role, SOURCE_ROLE);
+        assert_eq!(
+            edit.plan.effective_parameters,
+            value_map(&[
+                ("recipe", json!(KLEIN_WINDOWS_EDIT_RECIPE)),
+                ("recipe_version", json!(1)),
+                ("seed", json!(17)),
+                ("steps", json!(4)),
+                ("guidance", json!(1.0)),
+                ("scheduler", json!("flow_match_euler_discrete")),
+                ("token_budget", json!(512)),
+                ("thinking", json!(false)),
+                ("truncation", json!(false)),
+                ("quantization", json!("nf4")),
+                ("load_strategy", json!("nf4-component-offload-v1")),
+            ])
+        );
+        assert!(
+            freeze_windows_klein(klein_input(None), 17, windows_vulkan_environment()).is_err(),
+            "Windows Klein must bind the shared v2 diffusers runtime"
+        );
+    }
+
+    #[test]
+    fn windows_birefnet_freezes_dual_output_cpu_map() {
+        let frozen = freeze_windows_birefnet(
+            birefnet_input(source_asset(AssetKind::ImageRgba, 768, 1024, true)),
+            windows_onnx_environment(),
+        )
+        .unwrap();
+        assert_eq!(frozen.request.instruction, "");
+        assert!(frozen.request.parameters.is_empty());
+        assert_eq!(
+            frozen.plan.effective_output,
+            ImageOutput {
+                width: 768,
+                height: 1024,
+                count: 1,
+            }
+        );
+        assert_eq!(
+            frozen.plan.effective_parameters,
+            value_map(&[
+                ("recipe", json!(BIREFNET_WINDOWS_RECIPE)),
+                ("recipe_version", json!(1)),
+                ("provider", json!("CPUExecutionProvider")),
+                ("precision", json!("float32")),
+                ("preprocessing", json!("birefnet-1024-rgb-v1")),
+                ("postprocessing", json!("birefnet-logits-sigmoid-v1")),
+                ("intra_op_threads", json!(4)),
+                ("inter_op_threads", json!(1)),
+                ("execution_mode", json!("sequential")),
+            ])
+        );
+        assert_eq!(
+            Recipe::BiRefNetWindows.outputs(),
+            &[OutputRole::Primary, OutputRole::Mask]
+        );
+        assert!(Recipe::BiRefNetWindows.accepts_output(OutputRole::Primary, AssetKind::ImageRgba));
+        assert!(Recipe::BiRefNetWindows.accepts_output(OutputRole::Mask, AssetKind::Mask));
+        assert!(!Recipe::BiRefNetWindows.accepts_output(OutputRole::Primary, AssetKind::ImageRgb));
+        let wrong_runtime = freeze_windows_birefnet(
+            birefnet_input(source_asset(AssetKind::ImageRgba, 768, 1024, true)),
+            windows_v2_environment(),
+        );
+        assert!(
+            wrong_runtime.is_err(),
+            "BiRefNet must bind the ONNX CPU engine"
+        );
+    }
+
+    #[test]
+    fn windows_realesrgan_freezes_exact_four_times_output() {
+        let frozen = freeze_windows_realesrgan(
+            realesrgan_input(source_asset(AssetKind::ImageRgb, 640, 360, false)),
+            windows_vulkan_environment(),
+        )
+        .unwrap();
+        assert_eq!(
+            frozen.plan.effective_output,
+            ImageOutput {
+                width: 2560,
+                height: 1440,
+                count: 1,
+            }
+        );
+        assert_eq!(
+            frozen.plan.effective_parameters,
+            value_map(&[
+                ("recipe", json!(REALESRGAN_WINDOWS_RECIPE)),
+                ("recipe_version", json!(1)),
+                ("model", json!("realesrgan-x4plus")),
+                ("scale", json!(4)),
+                ("tile", json!(128)),
+                ("threads", json!("1:1:1")),
+                ("tta", json!(false)),
+            ])
+        );
+        assert_eq!(Recipe::RealEsrganWindows.outputs(), &[OutputRole::Primary]);
+        assert_eq!(
+            Recipe::RealEsrganWindows.max_output_bytes(OutputRole::Primary),
+            Some(MAX_UPSCALE_OUTPUT_BYTES)
+        );
+        assert!(
+            freeze_windows_realesrgan(
+                realesrgan_input(source_asset(AssetKind::ImageRgb, 640, 360, false)),
+                windows_v2_environment(),
+            )
+            .is_err(),
+            "Real-ESRGAN must bind the ncnn Vulkan runtime"
+        );
+    }
+
+    #[test]
+    fn windows_staged_text_models_freeze_exact_maps() {
+        let env = windows_v2_environment();
+        let qwen = freeze_windows_text_model(
+            Recipe::QwenImage21Windows,
+            text_model_input(),
+            17,
+            env.clone(),
+        )
+        .unwrap();
+        assert_eq!(
+            qwen.request.capability.capability_id,
+            QWEN_IMAGE_21_WINDOWS_CAPABILITY
+        );
+        assert_eq!(
+            qwen.request.model_variant_id.as_str(),
+            QWEN_IMAGE_21_WINDOWS_MODEL
+        );
+        assert_eq!(
+            qwen.plan.effective_parameters,
+            value_map(&[
+                ("recipe", json!(QWEN_IMAGE_21_WINDOWS_RECIPE)),
+                ("recipe_version", json!(1)),
+                ("seed", json!(17)),
+                ("steps", json!(40)),
+                ("guidance", json!(1.0)),
+                ("sampling", json!("linear")),
+                ("token_budget", json!(2048)),
+                ("quantization", json!("nf4")),
+                ("load_strategy", json!("staged-nf4-v1")),
+            ])
+        );
+
+        let turbo = freeze_windows_text_model(
+            Recipe::QwenImage21TurboWindows,
+            text_model_input(),
+            18,
+            env.clone(),
+        )
+        .unwrap();
+        assert_eq!(
+            turbo.plan.effective_parameters,
+            value_map(&[
+                ("recipe", json!(QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE)),
+                ("recipe_version", json!(1)),
+                ("seed", json!(18)),
+                ("steps", json!(8)),
+                ("guidance", json!(1.0)),
+                ("sampling", json!("linear")),
+                ("token_budget", json!(2048)),
+                ("quantization", json!("nf4")),
+                ("sampling_schedule", json!("qwen-turbo-model-index-v1"),),
+                ("load_strategy", json!("staged-nf4-v1")),
+            ])
+        );
+
+        let moss = freeze_windows_text_model(
+            Recipe::MossImageSftWindows,
+            text_model_input(),
+            19,
+            env.clone(),
+        )
+        .unwrap();
+        assert_eq!(
+            moss.plan.effective_parameters,
+            value_map(&[
+                ("recipe", json!(MOSS_IMAGE_SFT_WINDOWS_RECIPE)),
+                ("recipe_version", json!(1)),
+                ("seed", json!(19)),
+                ("steps", json!(50)),
+                ("guidance", json!(3.0)),
+                ("sampling", json!("moss_image")),
+                ("token_budget", json!(4096)),
+                ("thinking", json!(true)),
+                ("negative_prompt", json!("")),
+                ("uncond_skip_layers", json!([22])),
+                (
+                    "quantized_components",
+                    json!(["transformer", "text_encoder"]),
+                ),
+                ("text_encoder_precision", json!("nf4")),
+                ("vae_precision", json!("float32")),
+                ("load_strategy", json!("staged-nf4-v1")),
+            ])
+        );
+
+        assert!(
+            freeze_windows_text_model(Recipe::QwenImage21, text_model_input(), 17, env).is_err(),
+            "the Windows freezer must reject macOS recipes"
+        );
+    }
+
+    #[test]
+    fn windows_plans_reject_parameter_and_identity_drift() {
+        let env = windows_v2_environment();
+        let frozen = [
+            (
+                freeze_windows_klein(klein_input(None), 17, env.clone()).unwrap(),
+                None,
+            ),
+            (
+                freeze_windows_birefnet(
+                    birefnet_input(source_asset(AssetKind::ImageRgba, 512, 512, true)),
+                    windows_onnx_environment(),
+                )
+                .unwrap(),
+                Some(SourceFacts {
+                    width: 512,
+                    height: 512,
+                    has_transparent_pixels: true,
+                }),
+            ),
+            (
+                freeze_windows_realesrgan(
+                    realesrgan_input(source_asset(AssetKind::ImageRgb, 512, 512, false)),
+                    windows_vulkan_environment(),
+                )
+                .unwrap(),
+                Some(SourceFacts {
+                    width: 512,
+                    height: 512,
+                    has_transparent_pixels: false,
+                }),
+            ),
+            (
+                freeze_windows_text_model(Recipe::QwenImage21Windows, text_model_input(), 17, env)
+                    .unwrap(),
+                None,
+            ),
+        ];
+        for (frozen, source) in frozen {
+            let mutations: [fn(&mut ExecutionPlan); 8] = [
+                |plan| {
+                    plan.effective_parameters.insert("steps".into(), json!(5));
+                },
+                |plan| {
+                    plan.effective_parameters
+                        .insert("quantization".into(), json!(4));
+                },
+                |plan| {
+                    plan.effective_parameters.remove("recipe_version");
+                },
+                |plan| {
+                    plan.effective_parameters.remove("recipe");
+                },
+                |plan| {
+                    plan.runtime.package_id = "mflux-0.24.0".into();
+                },
+                |plan| {
+                    plan.runtime.engine = "mlx".into();
+                },
+                |plan| {
+                    plan.device.device_id = "metal".into();
+                },
+                |plan| {
+                    plan.effective_output.count = 2;
+                },
+            ];
+            validate_recipe_plan(&frozen.request, &frozen.plan, source).unwrap();
+            for mutate in mutations {
+                let mut plan = frozen.plan.clone();
+                mutate(&mut plan);
+                assert!(
+                    validate_recipe_plan(&frozen.request, &plan, source).is_err(),
+                    "frozen Windows plan accepted a mutated field"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn macos_recipes_reject_windows_runtime_plans() {
+        let env = macos_environment();
+        let frozen = freeze_klein(klein_input(None), 17, env.clone()).unwrap();
+        let mut tampered = frozen.plan.clone();
+        tampered.runtime.package_id = crate::generation::WINDOWS_V2_RUNTIME.into();
+        assert!(validate_recipe_plan(&frozen.request, &tampered, None).is_err());
+
+        let frozen = freeze_text_model(Recipe::QwenImage21, text_model_input(), 17, env).unwrap();
+        let mut tampered = frozen.plan.clone();
+        tampered.runtime.package_id = crate::generation::WINDOWS_V2_RUNTIME.into();
+        assert!(validate_recipe_plan(&frozen.request, &tampered, None).is_err());
+
+        assert!(
+            Recipe::from_request(&request(
+                KLEIN_MODEL,
+                KLEIN_WINDOWS_TEXT_CAPABILITY,
+                true,
+                false
+            ))
+            .is_err()
+        );
+        assert!(
+            Recipe::from_request(&request(
+                KLEIN_WINDOWS_MODEL,
+                KLEIN_TEXT_CAPABILITY,
+                true,
+                false
+            ))
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn windows_recipe_registry_keeps_z_image_behaviour() {
+        assert_eq!(
+            Recipe::from_request(&request(
+                Z_IMAGE_WINDOWS_MODEL,
+                Z_IMAGE_WINDOWS_CAPABILITY,
+                true,
+                false
+            ))
+            .unwrap(),
+            Recipe::ZImageTurboCudaNf4
+        );
+        assert_eq!(Recipe::ZImageTurboCudaNf4.id(), "z-image-turbo-nf4-cuda-v1");
+        assert_eq!(Recipe::ZImageTurboCudaNf4.outputs(), &[OutputRole::Primary]);
+        assert_ne!(
+            crate::generation::WINDOWS_V2_RUNTIME,
+            crate::generation::Z_IMAGE_WINDOWS_RUNTIME
+        );
+        assert_eq!(
+            Recipe::ZImageTurbo.id(),
+            "z-image-turbo-q4-v1",
+            "the macOS Z-Image identity must not change"
+        );
+    }
+
+    #[test]
+    fn windows_outputs_and_klein_edit_source_requirements_are_exact() {
+        let facts = SourceFacts {
+            width: 512,
+            height: 512,
+            has_transparent_pixels: false,
+        };
+        let mut edit = request(
+            KLEIN_WINDOWS_MODEL,
+            KLEIN_WINDOWS_EDIT_CAPABILITY,
+            true,
+            true,
+        );
+        assert!(validate_recipe_request(&edit, Some(facts)).is_ok());
+        edit.inputs.clear();
+        assert!(validate_recipe_request(&edit, Some(facts)).is_err());
+
+        let mut two_sources = request(
+            KLEIN_WINDOWS_MODEL,
+            KLEIN_WINDOWS_EDIT_CAPABILITY,
+            true,
+            true,
+        );
+        two_sources.inputs.push(two_sources.inputs[0].clone());
+        assert!(validate_recipe_request(&two_sources, Some(facts)).is_err());
+
+        let text = request(
+            KLEIN_WINDOWS_MODEL,
+            KLEIN_WINDOWS_TEXT_CAPABILITY,
+            true,
+            false,
+        );
+        assert!(validate_recipe_request(&text, None).is_ok());
+
+        for recipe in [
+            Recipe::KleinTextWindows,
+            Recipe::KleinEditWindows,
+            Recipe::RealEsrganWindows,
+            Recipe::QwenImage21Windows,
+            Recipe::QwenImage21TurboWindows,
+            Recipe::MossImageSftWindows,
+        ] {
+            assert_eq!(recipe.outputs(), &[OutputRole::Primary]);
+            assert!(recipe.accepts_output(OutputRole::Primary, AssetKind::ImageRgb));
+            assert!(!recipe.accepts_output(OutputRole::Primary, AssetKind::ImageRgba));
+        }
+        assert_eq!(
+            Recipe::KleinTextWindows.max_output_bytes(OutputRole::Mask),
+            None
+        );
+        assert_eq!(
+            Recipe::BiRefNetWindows.max_output_bytes(OutputRole::Mask),
+            Some(MAX_TOOL_OUTPUT_BYTES)
+        );
+        assert_eq!(
+            Recipe::BiRefNetWindows.max_output_bytes(OutputRole::Primary),
+            Some(MAX_TOOL_OUTPUT_BYTES)
+        );
+        assert_eq!(
+            Recipe::KleinTextWindows.max_output_bytes(OutputRole::Primary),
+            Some(MAX_TOOL_OUTPUT_BYTES)
         );
     }
 }
