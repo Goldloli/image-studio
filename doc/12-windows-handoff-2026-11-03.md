@@ -116,10 +116,13 @@ bd prime
    若新机是重新 clone，注意它可能落后于本地会话；以用户/本机最新提交为准。
 2. **可选**：把 P08 的 Yes 分支也自动跑一遍（当前“确认覆盖”只有单元测试 + 代码路径证据）。
    用隔离数据根导出到已存在文件，确认对话框点“是”，校验文件变为 PNG 且 SHA-256 正确。
-3. **调查 second-instance 异常**：本次重建包中，第二个实例用**不同** `--data-dir` 启动时
-   退出码 101；单实例（无其他实例）正常。先前旧包 evidence 声称独立根可同时运行，
-   这与当前观察不一致，已记录在 `verification/windows-installer/README.md`，需定位
-   （怀疑 WebView2 user data folder 争用）。这是 W03 的验收风险，不要当已通过。
+3. **~~调查 second-instance 异常~~（2026-11-03 已处理一半）**：本次重建包中，第二个实例用**不同**
+   `--data-dir` 启动时退出码 101；单实例（无其他实例）正常。已在 Windows 11 开发机上尝试复现
+   （不同根 0 ms/500 ms/25 s 错开、同根、强杀首实例并残留 12 个 `msedgewebview2.exe`）均未重现；
+   但确认了机制：Tauri 在 `setup` 失败时于 `tauri-2.12.5/src/app.rs:1444` 直接 panic，任何 WebView2
+   初始化失败都会变成静默 101。现已实现启动失败诊断（`logs/startup-failure.log` + 原生对话框 + 退出码 3）
+   与每数据根独立 WebView2 用户数据目录，证据见 `verification/windows-startup-diagnosis/README.md`。
+   目标机仍需重跑 W07 并复测该 101；未重现前不要当已通过。
 4. 管理员配合项（脚本已准备，见 `scripts/windows-admin/README.md`）：
    - 整树禁网 I07/P06：`enable-network-denial.ps1` → 我/Copy 的 CDP 流程跑缓存安装 + 三次生成 → `remove-network-denial.ps1`；
    - 空间不足：`create-small-volume.ps1` 建 40 GB VHD → 安装版 `--data-dir V:\acceptance-root` 触发错误 → `remove-small-volume.ps1 -DeleteVhd`。
