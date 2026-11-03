@@ -1,0 +1,73 @@
+{
+  "kind": "qwen-image-2.1-staged-windows-gate0",
+  "started_at_utc": "2026-11-03T16:08:18Z",
+  "machine": {
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "gpu_total_mib": 12288,
+    "physical_total_gib": 31.73
+  },
+  "model_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo",
+  "parameters": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "steps": 8,
+    "width": 1024,
+    "height": 1024,
+    "seed": 3148150817,
+    "vae_tiling": true
+  },
+  "quantization": {
+    "backend": "bitsandbytes_4bit",
+    "quant_type": "nf4",
+    "compute_dtype": "bfloat16",
+    "double_quant": true
+  },
+  "budget": {
+    "cuda_reserved_limit_gib": 10.5,
+    "private_commit_limit_gib": 24,
+    "available_ram_minimum_gib": 2,
+    "load_limit_seconds": 600,
+    "generation_limit_seconds": 900
+  },
+  "stages": {
+    "prepare": {
+      "text_encoder": {
+        "load_seconds": 22.23,
+        "save_seconds": 6.94,
+        "prepared_bytes": 6378436043,
+        "resources": {
+          "process_tree_private_commit_peak_gib": 23.383,
+          "system_available_ram_min_gib": 0.58,
+          "system_physical_total_gib": 31.727,
+          "cuda_reserved_peak_gib": 0.0,
+          "cuda_allocated_peak_gib": 0.0,
+          "nvidia_used_peak_mib": 737
+        }
+      },
+      "transformer": {
+        "load_seconds": 23.22,
+        "save_seconds": 1.64,
+        "prepared_bytes": 3670961576,
+        "resources": {
+          "process_tree_private_commit_peak_gib": 20.092,
+          "system_available_ram_min_gib": 4.361,
+          "system_physical_total_gib": 31.727,
+          "cuda_reserved_peak_gib": 0.0,
+          "cuda_allocated_peak_gib": 0.0,
+          "nvidia_used_peak_mib": 761
+        }
+      },
+      "total_prepared_bytes": 10049397619
+    }
+  },
+  "mode": "prepare",
+  "prepared_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\staged\\prepared-qwen21-turbo",
+  "versions": {
+    "diffusers": "0.41.0",
+    "transformers": "5.3.0",
+    "torch": "2.10.0+cu126",
+    "cuda": "12.6",
+    "python": "3.12.10"
+  },
+  "status": "prepared",
+  "finished_at_utc": "2026-11-03T16:09:20Z"
+}
