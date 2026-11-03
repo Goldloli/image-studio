@@ -7,11 +7,10 @@
 
 ## 0. 一句话现状
 
-`introduce-windows-foundation` 的 Windows 可自动化 P0 已基本完成并留有证据；剩余是
-需要人工/独立环境的门槛（干净用户/WebView2、100%/200% DPI、真实 IME）和 Mac 回归。
-小卷空间不足（I03）已于 2026-11-03 完成；整树禁网 I07/P06 由用户 2026-11-03 决定本轮
-跳过（waived/not_run，见 `verification/windows-network-denial-decision.json`）。`main`
-本地领先 `origin/main`（尚未 push），工作区仅有 CRLF 伪脏标记。
+`introduce-windows-foundation` 已于 2026-11-03 由用户验收收口：Windows 首轮交付完成，
+OpenSpec change 已归档、源码已推送（此后若仍有本地提交以 `git status` 为准）。收口记录
+见 `verification/windows-final-acceptance.json`，其中区分机器已验证项、用户 waive 的
+I07/P06，以及按用户验收接受的 W05/W06/D02/D03 与 Mac R02–R04（后者不得读作代理实测通过）。
 
 ## 1. 远程与 push 状态（已解决）
 
@@ -127,7 +126,12 @@ Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-wo
 | 平台一致性（Win11 / RTX 2060 SUPER 8 GB，补充） | passed（质量门、启动/页面/主题持久化、双根隔离、启动失败退出码 3；不含模型与生成） | `verification/windows-platform-parity/README.md` |
 | 启动失败诊断（W07，目标机重建包） | passed：故障注入下写 `logs/startup-failure.log`、原生「Image Studio 启动失败」对话框、退出码 3；profile 目录不可建时直接走同一路径；双根 WebView2 目录分离且旧共享 profile 未被触碰；不同数据根第二实例 101 在修复前/后包均未复现 | `verification/windows-startup-diagnosis/target-machine.json` |
 
-## 6. 明天优先事项（按建议顺序）
+## 6. 收口时的优先事项（2026-11-03 已全部处理）
+
+以下为收口前的建议顺序，2026-11-03 已处理完毕：1 push 完成；2 P08 双分支完成；3 101 复测
+未复现且静默 101 缺陷已修复；4 空间不足完成、禁网由用户 waive；5 人工项按用户验收接受；
+6 Mac 按用户验收接受；7 OpenSpec 归档与源码推送完成。记录见
+`verification/windows-final-acceptance.json`。
 
 1. **先解决 push**：按第 1 节关闭 GitHub 邮箱保护，然后 `git push origin main`。
    若新机是重新 clone，注意它可能落后于本地会话；以用户/本机最新提交为准。

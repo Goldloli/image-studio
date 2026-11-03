@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "kind": "windows-final-acceptance",
+  "date": "2026-11-03",
+  "change": "introduce-windows-foundation",
+  "decided_by": "user (project owner)",
+  "decision": "The user confirmed that the Windows-side work is finished and instructed: archive the OpenSpec change and push the source repository (2026-11-03).",
+  "machine_verified": [
+    { "case": "Gate 0 G01-G06", "evidence": "verification/windows-gate0/README.md and candidate JSON/PNG records" },
+    { "case": "W01-W03, W07, L01-L08, P01-P05, P07, D01, D04", "evidence": "verification/windows-gate0/product-*.json, verification/windows-installed-app/, verification/windows-startup-diagnosis/target-machine.json" },
+    { "case": "R01 Windows quality gate", "evidence": "verification/windows-quality-gate.json and windows-r01-*.log (commit 376a3c3; 234 Rust tests, frontend 37, lock audits, openspec strict)" },
+    { "case": "I01, I02, I04, I05, I06 and the corrupt/missing-component activation paths", "evidence": "verification/windows-gate0/product-*.json" },
+    { "case": "I03 insufficient disk space", "evidence": "verification/windows-gate0/product-space-shortage.json and screenshot" },
+    { "case": "W07 startup failure reporting and per-data-root WebView2 profile on the target machine", "evidence": "verification/windows-startup-diagnosis/target-machine.json" },
+    { "case": "P08 export overwrite, both the declined and the confirmed branches", "evidence": "verification/windows-installed-app/ui-acceptance.json" },
+    { "case": "Second-instance exit 101 retest with the pre-fix and the rebuilt package", "evidence": "verification/windows-startup-diagnosis/target-machine.json" },
+    { "case": "Internal NSIS package rebuild and silent install", "evidence": "verification/windows-installer/internal-package.json and README" }
+  ],
+  "user_waived": [
+    { "case": "I07 cache-complete install under whole-tree network denial", "status": "waived_not_run", "reason": "User decision 2026-11-03: the same local generation path was accepted on macOS and no cloud generation API key is configured.", "record": "verification/windows-network-denial-decision.json" },
+    { "case": "P06 three real generations under whole-tree network denial with a control probe", "status": "waived_not_run", "reason": "Same user decision as I07.", "record": "verification/windows-network-denial-decision.json" }
+  ],
+  "user_accepted_without_local_evidence": [
+    { "case": "W05 100% and 200% display scaling", "status": "user_accepted", "note": "Only 150% scaling has machine evidence (1280x800 and 960x640). The user closed the Windows work on 2026-11-03 without adding local evidence for 100%/200%." },
+    { "case": "W06 real Microsoft Chinese IME", "status": "user_accepted", "note": "Only synthetic CDP composition protection has machine evidence; a real IME run was not recorded locally." },
+    { "case": "D02 clean Windows 10 test user", "status": "user_accepted", "note": "No clean-user install record was added in this round." },
+    { "case": "D03 missing/offline WebView2 and dependency-permission failure", "status": "user_accepted", "note": "No missing/offline WebView2 record was added in this round; the W07 runtime-unavailable fault injection is separate evidence." },
+    { "case": "R02-R04 macOS regression for this round", "status": "user_accepted", "note": "The user stated that macOS testing was done; no new macOS quality-gate or seven-model regression record was added to this repository in this round. Existing macOS evidence from 2026-10-31/11-01 remains available but is not a substitute for R02-R04." }
+  ],
+  "integrity_note": "Items under user_accepted_without_local_evidence are recorded as the owner's acceptance decision, not as agent-measured passes. They must not be cited as independently verified evidence, and I07/P06 remain waived/not_run rather than passed.",
+  "consequence": "The OpenSpec change was archived on the owner's explicit instruction. The waived and user-accepted items stay documented so the archive is not misread as a complete machine-verified P0 pass.",
+  "related": {
+    "network_denial_decision": "verification/windows-network-denial-decision.json",
+    "quality_gate": "verification/windows-quality-gate.json",
+    "startup_diagnosis": "verification/windows-startup-diagnosis/target-machine.json",
+    "installed_app": "verification/windows-installed-app/ui-acceptance.json",
+    "installer": "verification/windows-installer/internal-package.json"
+  }
+}
