@@ -114,7 +114,7 @@ the manually declined run left both dummy targets byte-identical. Confirmed
 overwrite remains covered by the existing library unit test and the decision
 unit test in `host::tests`.
 
-## Known open question
+## Known open question (retested and closed)
 
 While re-installing the rebuilt package, a **second simultaneous instance with
 a different `--data-dir` exited with code 101**, while the same instance alone
@@ -123,14 +123,15 @@ focused look (likely WebView2 user-data-folder contention); the earlier
 independent-root smoke used a previous package. Same-root rejection remains the
 expected single-instance behaviour.
 
-The current source no longer reproduces it on a Windows 11 development machine
-(different roots at 0 ms/500 ms/25 s offsets, the same root, and a launch after
-force-killing the first instance all kept both hosts running), but the panic
-path is proven: any WebView2 setup failure ends in
-`tauri-2.12.5/src/app.rs:1444` with exit code `101`. The application now
-reports that class of failure explicitly — see
-[windows-startup-diagnosis](../windows-startup-diagnosis/README.md) — and the
-target machine still has to re-run W07 with the installed NSIS build.
+On 2026-11-03 the target machine retested the scenario with both the pre-fix
+package and the rebuilt package (offsets 0 s, 2 s and 25 s): both instances
+stayed running in every attempt, so the 101 was not reproduced. The panic path
+is proven: any WebView2 setup failure ends in `tauri-2.12.5/src/app.rs:1444`
+with exit code `101`. The application now reports that class of failure
+explicitly, and the rebuilt package passed the target-machine W07 acceptance —
+see [windows-startup-diagnosis/target-machine.json](../windows-startup-diagnosis/target-machine.json).
+The original trigger remains unexplained, but the observable defect (silent
+101) is addressed.
 
 ## Pending
 
@@ -139,7 +140,8 @@ the dark/light switch and native window controls were verified programmatically.
 Real Microsoft Chinese IME composition, a network-denied variant and the
 clean-user/WebView2 gates are not covered by this evidence. The generated
 samples are real model output but the visual quality review is still a human
-step.
+step. The confirmed-overwrite (Yes) branch of P08 remains covered only by unit
+tests and the code path, not by a native run.
 
 Machine-readable record: [ui-acceptance.json](ui-acceptance.json).
 Screenshots: [install ready](screenshots/install-ready.png),
