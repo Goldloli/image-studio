@@ -1,0 +1,57 @@
+{
+  "kind": "moss-image-sft-windows-gate0",
+  "started_at_utc": "2026-11-03T15:50:22Z",
+  "machine": {
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "gpu_total_mib": 12288,
+    "physical_total_gib": 31.73
+  },
+  "versions": {
+    "diffusers": "0.41.0",
+    "transformers": "5.3.0",
+    "torch": "2.10.0+cu126",
+    "cuda": "12.6",
+    "python": "3.12.10"
+  },
+  "model_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft",
+  "mode": "offload",
+  "parameters": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "steps": 8,
+    "width": 1024,
+    "height": 1024,
+    "guidance": 3.0,
+    "seed": 3148150817
+  },
+  "phases": {
+    "load": {
+      "seconds": 2.32,
+      "cuda_reserved_gib": 0.0
+    },
+    "generation": {
+      "seconds": 68.45,
+      "cuda_reserved_peak_gib": 0.049
+    }
+  },
+  "placement": "enable_model_cpu_offload",
+  "image": {
+    "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\results\\moss-image-sft-gate0-1793721017.png",
+    "bytes": 1789049,
+    "sha256": "a5dcc293c0f91258b1c0270d69703238a4b3d4ef7027e0274dd4c85e1123c11a",
+    "width": 1024,
+    "height": 1024
+  },
+  "resources": {
+    "process_tree_private_commit_peak_gib": 50.193,
+    "system_available_ram_min_gib": 0.059,
+    "system_physical_total_gib": 31.727,
+    "cuda_reserved_peak_gib": 15.729,
+    "nvidia_used_peak_mib": 11790
+  },
+  "failures": [
+    "cuda reserved exceeds limit",
+    "private commit exceeds limit"
+  ],
+  "status": "budget_failed",
+  "finished_at_utc": "2026-11-03T15:51:34Z"
+}
