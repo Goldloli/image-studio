@@ -118,6 +118,9 @@ struct InstallProfile {
     installing_relative: &'static str,
     probe_with_model: bool,
     worker_model_argument: bool,
+    /// Fixed license texts that cannot be downloaded from an allowlisted URL and
+    /// are archived under `<data>/licenses/<install_id>/` at install time.
+    bundle_licenses: &'static [(&'static str, &'static [u8])],
 }
 
 struct SegmentDownload<'a> {
@@ -148,6 +151,7 @@ const Z_PROFILE: InstallProfile = InstallProfile {
     installing_relative: "installation-installing.json",
     probe_with_model: false,
     worker_model_argument: false,
+    bundle_licenses: &[],
 };
 
 const KLEIN_PROFILE: InstallProfile = InstallProfile {
@@ -166,6 +170,7 @@ const KLEIN_PROFILE: InstallProfile = InstallProfile {
     installing_relative: "installations/models/flux2-klein-4b-distilled.installing.json",
     probe_with_model: false,
     worker_model_argument: false,
+    bundle_licenses: &[],
 };
 
 const BIREFNET_PROFILE: InstallProfile = InstallProfile {
@@ -184,6 +189,7 @@ const BIREFNET_PROFILE: InstallProfile = InstallProfile {
     installing_relative: "installations/models/birefnet-general-epoch-244.installing.json",
     probe_with_model: true,
     worker_model_argument: false,
+    bundle_licenses: &[],
 };
 
 const REALESRGAN_PROFILE: InstallProfile = InstallProfile {
@@ -202,6 +208,7 @@ const REALESRGAN_PROFILE: InstallProfile = InstallProfile {
     installing_relative: "installations/models/realesrgan-x4plus.installing.json",
     probe_with_model: true,
     worker_model_argument: false,
+    bundle_licenses: &[],
 };
 
 #[cfg(not(windows))]
@@ -221,6 +228,7 @@ const QWEN_IMAGE_21_PROFILE: InstallProfile = InstallProfile {
     installing_relative: "installations/models/qwen-image-2.1-mflux-v1.installing.json",
     probe_with_model: false,
     worker_model_argument: true,
+    bundle_licenses: &[],
 };
 
 #[cfg(not(windows))]
@@ -240,6 +248,7 @@ const QWEN_IMAGE_21_TURBO_PROFILE: InstallProfile = InstallProfile {
     installing_relative: "installations/models/qwen-image-2.1-turbo-mflux-v1.installing.json",
     probe_with_model: false,
     worker_model_argument: true,
+    bundle_licenses: &[],
 };
 
 #[cfg(not(windows))]
@@ -259,6 +268,7 @@ const MOSS_IMAGE_SFT_PROFILE: InstallProfile = InstallProfile {
     installing_relative: "installations/models/moss-image-sft-mflux-v1.installing.json",
     probe_with_model: false,
     worker_model_argument: true,
+    bundle_licenses: &[],
 };
 
 const WINDOWS_ZIMAGE_PROFILE: InstallProfile = InstallProfile {
@@ -277,6 +287,7 @@ const WINDOWS_ZIMAGE_PROFILE: InstallProfile = InstallProfile {
     installing_relative: "installations/models/z-image-turbo-diffusers-cuda-nf4-v1.installing.json",
     probe_with_model: true,
     worker_model_argument: false,
+    bundle_licenses: &[],
 };
 
 #[derive(Clone, Debug, Deserialize)]
@@ -523,6 +534,12 @@ impl Installations {
         }
     }
 }
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+struct LicenseFileRecord {
+    path: String,
+    bytes: u64,
+    sha256: String,
+}
 #[derive(Serialize, Deserialize)]
 struct ReadyRecord {
     runtime_lock_id: String,
@@ -531,6 +548,8 @@ struct ReadyRecord {
     runtime_manifest_sha256: String,
     #[serde(default)]
     model_manifest_sha256: String,
+    #[serde(default)]
+    licenses: Vec<LicenseFileRecord>,
     runtime_files: Vec<InventoryEntry>,
     probe: serde_json::Value,
 }
@@ -538,7 +557,52 @@ impl ReadyRecord {
     fn matches_profile(&self, profile: InstallProfile) -> bool {
         self.runtime_manifest_sha256 == manifest_digest(profile.runtime_manifest)
             && self.model_manifest_sha256 == manifest_digest(profile.model_manifest)
+            && licenses_match_profile(profile, &self.licenses)
     }
+}
+fn license_root(data: &Path, profile: InstallProfile) -> PathBuf {
+    data.join("licenses").join(profile.install_id)
+}
+fn license_records(profile: InstallProfile) -> Vec<LicenseFileRecord> {
+    profile
+        .bundle_licenses
+        .iter()
+        .map(|(path, bytes)| LicenseFileRecord {
+            path: (*path).into(),
+            bytes: bytes.len() as u64,
+            sha256: format!("{:x}", Sha256::digest(bytes)),
+        })
+        .collect()
+}
+fn bundle_license_bytes(profile: InstallProfile) -> u64 {
+    profile
+        .bundle_licenses
+        .iter()
+        .map(|(_, bytes)| bytes.len() as u64)
+        .sum()
+}
+fn licenses_match_profile(profile: InstallProfile, recorded: &[LicenseFileRecord]) -> bool {
+    let expected = license_records(profile);
+    expected.len() == recorded.len()
+        && expected.iter().zip(recorded).all(|(expected, recorded)| {
+            expected.path == recorded.path
+                && expected.bytes == recorded.bytes
+                && expected.sha256 == recorded.sha256
+        })
+}
+/// Startup/activation check: the archived license bytes are present at their
+/// recorded identity. Full hashing still runs in `verify_ready`.
+fn licenses_healthy(data: &Path, profile: InstallProfile) -> Result<(), String> {
+    let root = license_root(data, profile);
+    for license in license_records(profile) {
+        safe_relative(&license.path)?;
+        let metadata = fs::symlink_metadata(root.join(&license.path))
+            .map_err(|_| format!("许可证文件缺失：{}", license.path))?;
+        if !metadata.is_file() || metadata.len() != license.bytes {
+            return Err(format!("许可证文件类型或大小不符：{}", license.path));
+        }
+    }
+    Ok(())
 }
 fn ready_record_matches(
     record: &ReadyRecord,
@@ -754,10 +818,12 @@ impl Installation {
         }
         let runtime_bytes = runtime_downloads.iter().map(|file| file.bytes).sum::<u64>();
         let model_file_bytes = model_downloads.iter().map(|file| file.bytes).sum::<u64>();
+        let license_bytes = bundle_license_bytes(profile);
         // Initial upper bound is available before any network or large hashing:
         // full download cache + target model copy + runtime expansion + reserve.
         // start() refines missing cache bytes and checks both volumes separately.
-        let initial_required_bytes = model_file_bytes * 2 + runtime_bytes * 7 + RESERVE;
+        let initial_required_bytes =
+            model_file_bytes * 2 + runtime_bytes * 7 + license_bytes + RESERVE;
         let mut state = InstallationSnapshot {
             install_id: profile.install_id.into(),
             phase: "not_installed".into(),
@@ -835,7 +901,8 @@ impl Installation {
                             metadata.is_file() && metadata.len() == file.bytes
                         })
                     })
-                    && runtime_critical_ok;
+                    && runtime_critical_ok
+                    && licenses_healthy(&paths.data, profile).is_ok();
                 if healthy {
                     state.phase = "ready".into();
                     state.runtime_ready = true;
@@ -1070,6 +1137,14 @@ impl Installation {
                 verify(&self.runtime_dir().join(f.path), f.bytes, &f.sha256)?;
             }
         }
+        let license_root = license_root(&self.inner.paths.data, self.inner.profile);
+        for license in license_records(self.inner.profile) {
+            verify(
+                &license_root.join(&license.path),
+                license.bytes,
+                &license.sha256,
+            )?;
+        }
         let (worker_program, worker_args) = if self.inner.runtime.is_native() {
             let executable = self
                 .inner
@@ -1148,7 +1223,8 @@ impl Installation {
             .sum::<u64>();
         let runtime_budget =
             runtime_download_bytes * if self.inner.runtime.is_native() { 3 } else { 6 };
-        let required = missing + target + runtime_budget + RESERVE;
+        let license_bytes = bundle_license_bytes(self.inner.profile);
+        let required = missing + target + license_bytes + runtime_budget + RESERVE;
         self.update(|s| s.required_bytes = required);
         // Check both volumes independently; never rely on cross-volume rename.
         let data_free = fs2::available_space(&self.inner.paths.data).map_err(err)?;
@@ -1157,7 +1233,7 @@ impl Installation {
             data_free,
             cache_free,
             missing,
-            target,
+            target.saturating_add(license_bytes),
             runtime_budget,
             RESERVE,
             same_volume(&self.inner.paths.data, &self.inner.paths.cache)?,
@@ -1226,7 +1302,10 @@ impl Installation {
             s.model_ready = true;
             s.phase = "installing_runtime".into();
         });
-        let record = self.prepare_runtime()?;
+        let mut record = self.prepare_runtime()?;
+        // Fixed license texts are archived only after the runtime/probe succeeded,
+        // and before the activation record so a failed write never activates.
+        record.licenses = self.install_licenses()?;
         ensure_child_dir(
             &self.inner.paths.data,
             self.inner
@@ -1259,6 +1338,38 @@ impl Installation {
             s.received_bytes = s.total_bytes;
         });
         Ok(())
+    }
+    /// Archive the fixed, allowlist-external license texts under
+    /// `<data>/licenses/<install_id>/`. The identity is the embedded bytes, so a
+    /// reinstall is idempotent and never touches another model's directory.
+    fn install_licenses(&self) -> Result<Vec<LicenseFileRecord>, String> {
+        let root = license_root(&self.inner.paths.data, self.inner.profile);
+        for &(relative, bytes) in self.inner.profile.bundle_licenses {
+            self.check_cancel()?;
+            safe_relative(relative)?;
+            let target = root.join(relative);
+            ensure_child_dir(
+                &self.inner.paths.data,
+                target.parent().ok_or("许可证路径无父目录")?,
+            )?;
+            if fs::read(&target).is_ok_and(|existing| existing.as_slice() == bytes) {
+                continue;
+            }
+            let temporary = target.with_extension("install-tmp");
+            let mut file = open_regular(&temporary, true, true)?;
+            file.write_all(bytes).map_err(err)?;
+            file.sync_all().map_err(err)?;
+            drop(file);
+            let record = LicenseFileRecord {
+                path: relative.into(),
+                bytes: bytes.len() as u64,
+                sha256: format!("{:x}", Sha256::digest(bytes)),
+            };
+            verify(&temporary, record.bytes, &record.sha256)?;
+            fs::rename(&temporary, &target).map_err(err)?;
+            sync_directory(target.parent().ok_or("许可证路径无父目录")?)?;
+        }
+        Ok(license_records(self.inner.profile))
     }
     fn prepare_runtime(&self) -> Result<ReadyRecord, String> {
         if self.inner.runtime.is_native() {
@@ -1388,6 +1499,7 @@ impl Installation {
             model_snapshot_id: self.inner.model.id.clone(),
             runtime_manifest_sha256: manifest_digest(self.inner.profile.runtime_manifest),
             model_manifest_sha256: manifest_digest(self.inner.profile.model_manifest),
+            licenses: Vec::new(),
             runtime_files,
             probe,
         };
@@ -1498,6 +1610,7 @@ impl Installation {
             model_snapshot_id: self.inner.model.id.clone(),
             runtime_manifest_sha256: manifest_digest(self.inner.profile.runtime_manifest),
             model_manifest_sha256: manifest_digest(self.inner.profile.model_manifest),
+            licenses: Vec::new(),
             runtime_files,
             probe: serde_json::json!({
                 "identity": {
@@ -3810,6 +3923,85 @@ mod tests {
         ensure_child_dir(&installer.inner.paths.cache, &installer.cache()).unwrap();
         (temp, installer)
     }
+    const TEST_LICENSES: &[(&str, &[u8])] = &[
+        ("LICENSE-A.txt", b"license A text\n"),
+        ("nested/LICENSE-B.txt", b"license B text\n"),
+    ];
+    fn license_profile() -> InstallProfile {
+        InstallProfile {
+            install_id: "license-test-install-v1",
+            bundle_licenses: TEST_LICENSES,
+            ..Z_PROFILE
+        }
+    }
+    #[test]
+    fn bundled_license_texts_are_archived_at_their_fixed_identity() {
+        let profile = license_profile();
+        let (_temp, install) = fixture_for(|paths| Installation::new_for(paths, profile));
+        let model_bytes = install
+            .inner
+            .model
+            .downloads()
+            .iter()
+            .map(|artifact| artifact.bytes)
+            .sum::<u64>();
+        let runtime_bytes = install
+            .inner
+            .runtime
+            .downloads()
+            .iter()
+            .map(|artifact| artifact.bytes)
+            .sum::<u64>();
+        let license_bytes = TEST_LICENSES
+            .iter()
+            .map(|(_, bytes)| bytes.len() as u64)
+            .sum::<u64>();
+        assert_eq!(
+            install.snapshot().required_bytes,
+            model_bytes * 2 + runtime_bytes * 7 + license_bytes + RESERVE
+        );
+        let records = install.install_licenses().unwrap();
+        assert_eq!(records, license_records(profile));
+        let root = install
+            .inner
+            .paths
+            .data
+            .join("licenses")
+            .join(profile.install_id);
+        assert_eq!(
+            fs::read(root.join("LICENSE-A.txt")).unwrap(),
+            b"license A text\n"
+        );
+        assert_eq!(
+            fs::read(root.join("nested/LICENSE-B.txt")).unwrap(),
+            b"license B text\n"
+        );
+        for record in &records {
+            verify(&root.join(&record.path), record.bytes, &record.sha256).unwrap();
+        }
+        assert_eq!(install.install_licenses().unwrap(), records);
+        licenses_healthy(&install.inner.paths.data, profile).unwrap();
+        fs::write(root.join("LICENSE-A.txt"), b"tampered").unwrap();
+        assert!(licenses_healthy(&install.inner.paths.data, profile).is_err());
+        assert!(
+            verify(
+                &root.join("LICENSE-A.txt"),
+                records[0].bytes,
+                &records[0].sha256
+            )
+            .is_err()
+        );
+        assert!(licenses_match_profile(profile, &records));
+    }
+    #[test]
+    fn license_archive_failure_cannot_activate_silently() {
+        let profile = license_profile();
+        let (_temp, install) = fixture_for(|paths| Installation::new_for(paths, profile));
+        let licenses = install.inner.paths.data.join("licenses");
+        fs::write(&licenses, b"blocked by a file").unwrap();
+        let error = install.install_licenses().unwrap_err();
+        assert!(error.contains("管理目录"), "{error}");
+    }
     fn server(
         response: Vec<u8>,
     ) -> (
@@ -4095,6 +4287,7 @@ mod tests {
                 model_snapshot_id: i.inner.model.id.clone(),
                 runtime_manifest_sha256: manifest_digest(RUNTIME_MANIFEST),
                 model_manifest_sha256: manifest_digest(MODEL_MANIFEST),
+                licenses: vec![],
                 runtime_files: vec![],
                 probe: serde_json::json!({"device":"gpu","device_name":"fixture-device"}),
             },
@@ -4941,6 +5134,7 @@ mod tests {
             model_snapshot_id: i.inner.model.id.clone(),
             runtime_manifest_sha256: manifest_digest(RUNTIME_MANIFEST),
             model_manifest_sha256: manifest_digest(MODEL_MANIFEST),
+            licenses: vec![],
             runtime_files: vec![],
             probe: serde_json::json!({"device":"gpu","device_name":"fixture-device"}),
         };
