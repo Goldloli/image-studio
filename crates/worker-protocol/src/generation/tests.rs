@@ -588,3 +588,507 @@ fn v1_and_v2_messages_cannot_cross_protocol_boundaries() {
     v2.version = Some(PROTOCOL_VERSION);
     assert!(v2.validate().is_err());
 }
+
+fn windows_map(entries: &[(&str, serde_json::Value)]) -> BTreeMap<String, serde_json::Value> {
+    entries
+        .iter()
+        .map(|(key, value)| ((*key).into(), value.clone()))
+        .collect()
+}
+
+fn windows_klein_v2_request(edit: bool) -> ExecuteRequestV2 {
+    let seed = 42;
+    let (capability_id, recipe_id, parameters) = if edit {
+        (
+            KLEIN_WINDOWS_EDIT_CAPABILITY_ID,
+            KLEIN_WINDOWS_EDIT_RECIPE_ID,
+            windows_klein_edit_parameters(seed),
+        )
+    } else {
+        (
+            KLEIN_WINDOWS_TEXT_CAPABILITY_ID,
+            KLEIN_WINDOWS_TEXT_RECIPE_ID,
+            windows_klein_parameters(seed),
+        )
+    };
+    ExecuteRequestV2 {
+        model_id: KLEIN_WINDOWS_MODEL_ID.into(),
+        capability_id: capability_id.into(),
+        recipe_id: recipe_id.into(),
+        recipe_version: 1,
+        runtime_lock_id: WINDOWS_V2_RUNTIME_ID.into(),
+        model_snapshot_id: KLEIN_WINDOWS_SNAPSHOT_ID.into(),
+        instruction: "a cobalt cube".into(),
+        seed: Some(seed),
+        sampling_steps: Some(4),
+        parameters,
+        inputs: if edit {
+            vec![InputAssetDescriptor {
+                role: "source".into(),
+                path: managed_path("runs/windows-klein/input.png"),
+                width: 512,
+                height: 512,
+                sha256: "a".repeat(64),
+            }]
+        } else {
+            vec![]
+        },
+        outputs: vec![OutputSpec {
+            role: "primary".into(),
+            data_type: "image_rgb".into(),
+            width: 1024,
+            height: 1024,
+            max_bytes: MAX_OUTPUT_BYTES,
+        }],
+        model_path: managed_path("models/windows-klein"),
+        output_dir: managed_path("runs/windows-klein"),
+    }
+}
+
+fn windows_birefnet_v2_request() -> ExecuteRequestV2 {
+    ExecuteRequestV2 {
+        model_id: BIREFNET_WINDOWS_MODEL_ID.into(),
+        capability_id: BIREFNET_WINDOWS_CAPABILITY_ID.into(),
+        recipe_id: BIREFNET_WINDOWS_RECIPE_ID.into(),
+        recipe_version: 1,
+        runtime_lock_id: WINDOWS_V2_RUNTIME_ID.into(),
+        model_snapshot_id: BIREFNET_WINDOWS_SNAPSHOT_ID.into(),
+        instruction: String::new(),
+        seed: None,
+        sampling_steps: None,
+        parameters: windows_birefnet_parameters(),
+        inputs: vec![InputAssetDescriptor {
+            role: "source".into(),
+            path: managed_path("runs/windows-birefnet/input.png"),
+            width: 10,
+            height: 12,
+            sha256: "a".repeat(64),
+        }],
+        outputs: vec![
+            OutputSpec {
+                role: "primary".into(),
+                data_type: "image_rgba".into(),
+                width: 10,
+                height: 12,
+                max_bytes: MAX_OUTPUT_BYTES,
+            },
+            OutputSpec {
+                role: "mask".into(),
+                data_type: "mask".into(),
+                width: 10,
+                height: 12,
+                max_bytes: MAX_OUTPUT_BYTES,
+            },
+        ],
+        model_path: managed_path("models/windows-birefnet"),
+        output_dir: managed_path("runs/windows-birefnet"),
+    }
+}
+
+fn windows_realesrgan_v2_request() -> ExecuteRequestV2 {
+    ExecuteRequestV2 {
+        model_id: REALESRGAN_WINDOWS_MODEL_ID.into(),
+        capability_id: REALESRGAN_WINDOWS_CAPABILITY_ID.into(),
+        recipe_id: REALESRGAN_WINDOWS_RECIPE_ID.into(),
+        recipe_version: 1,
+        runtime_lock_id: REALESRGAN_WINDOWS_RUNTIME_ID.into(),
+        model_snapshot_id: REALESRGAN_WINDOWS_SNAPSHOT_ID.into(),
+        instruction: String::new(),
+        seed: None,
+        sampling_steps: None,
+        parameters: windows_realesrgan_parameters(),
+        inputs: vec![InputAssetDescriptor {
+            role: "source".into(),
+            path: managed_path("runs/windows-realesrgan/input.png"),
+            width: 10,
+            height: 12,
+            sha256: "a".repeat(64),
+        }],
+        outputs: vec![OutputSpec {
+            role: "primary".into(),
+            data_type: "image_rgb".into(),
+            width: 40,
+            height: 48,
+            max_bytes: MAX_UPSCALE_OUTPUT_BYTES,
+        }],
+        model_path: managed_path("models/windows-realesrgan"),
+        output_dir: managed_path("runs/windows-realesrgan"),
+    }
+}
+
+fn windows_text_v2_request(
+    model_id: &str,
+    capability_id: &str,
+    recipe_id: &str,
+    snapshot_id: &str,
+    parameters: BTreeMap<String, serde_json::Value>,
+) -> ExecuteRequestV2 {
+    let steps = parameters["steps"].as_u64().map(|value| value as u32);
+    ExecuteRequestV2 {
+        model_id: model_id.into(),
+        capability_id: capability_id.into(),
+        recipe_id: recipe_id.into(),
+        recipe_version: 1,
+        runtime_lock_id: WINDOWS_V2_RUNTIME_ID.into(),
+        model_snapshot_id: snapshot_id.into(),
+        instruction: "a cobalt cube".into(),
+        seed: Some(42),
+        sampling_steps: steps,
+        parameters,
+        inputs: vec![],
+        outputs: vec![OutputSpec {
+            role: "primary".into(),
+            data_type: "image_rgb".into(),
+            width: 1024,
+            height: 1024,
+            max_bytes: MAX_OUTPUT_BYTES,
+        }],
+        model_path: managed_path(&format!("models/{snapshot_id}")),
+        output_dir: managed_path("runs/windows-text"),
+    }
+}
+
+#[test]
+fn windows_recipe_parameter_helpers_match_the_frozen_maps() {
+    let seed = 42;
+    assert_eq!(
+        windows_klein_parameters(seed),
+        windows_map(&[
+            ("recipe", serde_json::json!("klein4b-text-windows-v1")),
+            ("recipe_version", serde_json::json!(1)),
+            ("seed", serde_json::json!(seed)),
+            ("steps", serde_json::json!(4)),
+            ("guidance", serde_json::json!(1.0)),
+            ("scheduler", serde_json::json!("flow_match_euler_discrete")),
+            ("token_budget", serde_json::json!(512)),
+            ("thinking", serde_json::json!(false)),
+            ("truncation", serde_json::json!(false)),
+            ("quantization", serde_json::json!("nf4")),
+            (
+                "load_strategy",
+                serde_json::json!("nf4-component-offload-v1")
+            ),
+        ])
+    );
+    assert_eq!(
+        windows_klein_edit_parameters(seed)["recipe"],
+        serde_json::json!("klein4b-edit-windows-v1")
+    );
+    assert_eq!(
+        windows_birefnet_parameters()["postprocessing"],
+        serde_json::json!("birefnet-logits-sigmoid-v1")
+    );
+    assert_eq!(
+        windows_realesrgan_parameters(),
+        windows_map(&[
+            (
+                "recipe",
+                serde_json::json!("realesrgan-x4plus-windows-t128-v1")
+            ),
+            ("recipe_version", serde_json::json!(1)),
+            ("model", serde_json::json!("realesrgan-x4plus")),
+            ("scale", serde_json::json!(4)),
+            ("tile", serde_json::json!(128)),
+            ("threads", serde_json::json!("1:1:1")),
+            ("tta", serde_json::json!(false)),
+        ])
+    );
+    assert_eq!(
+        windows_qwen21_parameters(seed),
+        windows_map(&[
+            (
+                "recipe",
+                serde_json::json!("qwen21-windows-txt2img-nf4-40-v1")
+            ),
+            ("recipe_version", serde_json::json!(1)),
+            ("seed", serde_json::json!(seed)),
+            ("steps", serde_json::json!(40)),
+            ("guidance", serde_json::json!(1.0)),
+            ("sampling", serde_json::json!("linear")),
+            ("token_budget", serde_json::json!(2048)),
+            ("quantization", serde_json::json!("nf4")),
+            ("load_strategy", serde_json::json!("staged-nf4-v1")),
+        ])
+    );
+    assert_eq!(
+        windows_qwen21_turbo_parameters(seed)["sampling_schedule"],
+        serde_json::json!("qwen-turbo-model-index-v1")
+    );
+    assert_eq!(windows_qwen21_turbo_parameters(seed)["steps"], 8);
+    assert_eq!(
+        windows_moss_parameters(seed),
+        windows_map(&[
+            (
+                "recipe",
+                serde_json::json!("moss-image-sft-windows-txt2img-nf4-50-v1")
+            ),
+            ("recipe_version", serde_json::json!(1)),
+            ("seed", serde_json::json!(seed)),
+            ("steps", serde_json::json!(50)),
+            ("guidance", serde_json::json!(3.0)),
+            ("sampling", serde_json::json!("moss_image")),
+            ("token_budget", serde_json::json!(4096)),
+            ("thinking", serde_json::json!(true)),
+            ("negative_prompt", serde_json::json!("")),
+            ("uncond_skip_layers", serde_json::json!([22])),
+            (
+                "quantized_components",
+                serde_json::json!(["transformer", "text_encoder"])
+            ),
+            ("text_encoder_precision", serde_json::json!("nf4")),
+            ("vae_precision", serde_json::json!("float32")),
+            ("load_strategy", serde_json::json!("staged-nf4-v1")),
+        ])
+    );
+}
+
+#[test]
+fn windows_v2_payloads_accept_the_frozen_identities() {
+    for request in [
+        windows_klein_v2_request(false),
+        windows_klein_v2_request(true),
+        windows_birefnet_v2_request(),
+        windows_realesrgan_v2_request(),
+        windows_text_v2_request(
+            QWEN_IMAGE_21_WINDOWS_MODEL_ID,
+            QWEN_IMAGE_21_WINDOWS_CAPABILITY_ID,
+            QWEN_IMAGE_21_WINDOWS_RECIPE_ID,
+            QWEN_IMAGE_21_WINDOWS_SNAPSHOT_ID,
+            windows_qwen21_parameters(42),
+        ),
+        windows_text_v2_request(
+            QWEN_IMAGE_21_TURBO_WINDOWS_MODEL_ID,
+            QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY_ID,
+            QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE_ID,
+            QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT_ID,
+            windows_qwen21_turbo_parameters(42),
+        ),
+        windows_text_v2_request(
+            MOSS_IMAGE_SFT_WINDOWS_MODEL_ID,
+            MOSS_IMAGE_SFT_WINDOWS_CAPABILITY_ID,
+            MOSS_IMAGE_SFT_WINDOWS_RECIPE_ID,
+            MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID,
+            windows_moss_parameters(42),
+        ),
+    ] {
+        request.validate().unwrap();
+    }
+}
+
+#[test]
+fn windows_klein_payloads_reject_identity_parameter_and_shape_drift() {
+    for edit in [false, true] {
+        for mutation in 0..12 {
+            let mut request = windows_klein_v2_request(edit);
+            match mutation {
+                0 => request.capability_id = "image.text-to-image.flux2-klein-4b.v1".into(),
+                1 => request.recipe_id = "klein4b-text-v1".into(),
+                2 => request.runtime_lock_id = "mflux-0.24.0".into(),
+                3 => request.model_snapshot_id = "flux2-klein-4b-windows-v1".into(),
+                4 => request.seed = None,
+                5 => request.sampling_steps = Some(5),
+                6 => request.instruction.clear(),
+                7 => {
+                    request
+                        .parameters
+                        .insert("truncation".into(), serde_json::json!(true));
+                }
+                8 => {
+                    request
+                        .parameters
+                        .insert("quantization".into(), serde_json::json!("q8"));
+                }
+                9 => request.outputs[0].width = 768,
+                10 => request.outputs[0].data_type = "image_rgba".into(),
+                _ => {
+                    if edit {
+                        request.inputs.clear();
+                    } else {
+                        request.inputs.push(InputAssetDescriptor {
+                            role: "source".into(),
+                            path: managed_path("runs/windows-klein/input.png"),
+                            width: 512,
+                            height: 512,
+                            sha256: "a".repeat(64),
+                        });
+                    }
+                }
+            }
+            assert!(
+                request.validate().is_err(),
+                "klein edit={edit} mutation {mutation}"
+            );
+        }
+    }
+}
+
+#[test]
+fn windows_tool_payloads_reject_identity_parameter_and_shape_drift() {
+    for mutation in 0..10 {
+        let mut request = windows_birefnet_v2_request();
+        match mutation {
+            0 => request.instruction = "remove background".into(),
+            1 => request.seed = Some(7),
+            2 => request.sampling_steps = Some(1),
+            3 => request.runtime_lock_id = "onnxruntime-1.31.1-cpu".into(),
+            4 => request.model_snapshot_id = "birefnet-epoch-244".into(),
+            5 => request.inputs.clear(),
+            6 => {
+                request.outputs.pop();
+            }
+            7 => request.outputs[1].width = 11,
+            8 => request.outputs[0].data_type = "image_rgb".into(),
+            _ => {
+                request.parameters.insert(
+                    "provider".into(),
+                    serde_json::json!("CUDAExecutionProvider"),
+                );
+            }
+        }
+        assert!(request.validate().is_err(), "birefnet mutation {mutation}");
+    }
+
+    for mutation in 0..9 {
+        let mut request = windows_realesrgan_v2_request();
+        match mutation {
+            0 => request.instruction = "upscale".into(),
+            1 => request.seed = Some(7),
+            2 => request.sampling_steps = Some(1),
+            3 => request.runtime_lock_id = "realesrgan-x4plus-ncnn-macos-v0.2.0-v1".into(),
+            4 => request.model_snapshot_id = "realesrgan-x4plus".into(),
+            5 => request.inputs.clear(),
+            6 => request.outputs[0].width = 39,
+            7 => request.outputs[0].data_type = "image_rgba".into(),
+            _ => {
+                request
+                    .parameters
+                    .insert("tile".into(), serde_json::json!(64));
+            }
+        }
+        assert!(
+            request.validate().is_err(),
+            "realesrgan mutation {mutation}"
+        );
+    }
+}
+
+#[test]
+fn windows_staged_text_payloads_require_exact_identities_and_parameter_maps() {
+    let cases = [
+        (
+            QWEN_IMAGE_21_WINDOWS_MODEL_ID,
+            QWEN_IMAGE_21_WINDOWS_CAPABILITY_ID,
+            QWEN_IMAGE_21_WINDOWS_RECIPE_ID,
+            QWEN_IMAGE_21_WINDOWS_SNAPSHOT_ID,
+            windows_qwen21_parameters(42),
+        ),
+        (
+            QWEN_IMAGE_21_TURBO_WINDOWS_MODEL_ID,
+            QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY_ID,
+            QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE_ID,
+            QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT_ID,
+            windows_qwen21_turbo_parameters(42),
+        ),
+        (
+            MOSS_IMAGE_SFT_WINDOWS_MODEL_ID,
+            MOSS_IMAGE_SFT_WINDOWS_CAPABILITY_ID,
+            MOSS_IMAGE_SFT_WINDOWS_RECIPE_ID,
+            MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID,
+            windows_moss_parameters(42),
+        ),
+    ];
+    for (model_id, capability_id, recipe_id, snapshot_id, parameters) in cases {
+        for mutation in 0..9 {
+            let mut request = windows_text_v2_request(
+                model_id,
+                capability_id,
+                recipe_id,
+                snapshot_id,
+                parameters.clone(),
+            );
+            match mutation {
+                0 => request.instruction.clear(),
+                1 => request.seed = None,
+                2 => request.sampling_steps = Some(3),
+                3 => request.runtime_lock_id = "recipes-v3".into(),
+                4 => request.model_snapshot_id = "other-snapshot".into(),
+                5 => request.inputs.push(InputAssetDescriptor {
+                    role: "source".into(),
+                    path: managed_path("runs/windows-text/input.png"),
+                    width: 1024,
+                    height: 1024,
+                    sha256: "a".repeat(64),
+                }),
+                6 => request.outputs[0].width = 768,
+                7 => {
+                    request
+                        .parameters
+                        .insert("truncation".into(), serde_json::json!(false));
+                }
+                _ => {
+                    request
+                        .parameters
+                        .insert("steps".into(), serde_json::json!(9));
+                }
+            }
+            assert!(
+                request.validate().is_err(),
+                "{model_id} mutation {mutation}"
+            );
+        }
+    }
+}
+
+#[test]
+fn macos_identities_with_windows_runtime_are_rejected() {
+    let mut request = text_v2_request(
+        "qwen-image-2.1-mflux-v1",
+        "image.text-to-image.qwen-image-2.1.v1",
+        "qwen21-txt2img-q8-40-v1",
+        "qwen-image-2.1-d26bb61231c349cf6b7896fa83353113880e1ba3",
+        40,
+        1.0,
+        "linear",
+        2048,
+    );
+    request.runtime_lock_id = WINDOWS_V2_RUNTIME_ID.into();
+    assert!(matches!(
+        request.validate(),
+        Err(Error::Invalid(
+            "Windows runtime cannot serve a macOS recipe"
+        ))
+    ));
+
+    let mut request = windows_klein_v2_request(false);
+    request.model_id = "flux2-klein-4b-distilled".into();
+    request.capability_id = "image.text-to-image.flux2-klein-4b.v1".into();
+    request.recipe_id = "klein4b-text-v1".into();
+    request.runtime_lock_id = WINDOWS_V2_RUNTIME_ID.into();
+    assert!(request.validate().is_err());
+
+    let mut unknown = windows_klein_v2_request(false);
+    unknown.model_id = "unknown-model-v1".into();
+    assert!(matches!(
+        unknown.validate(),
+        Err(Error::Invalid("unsupported v2 model recipe"))
+    ));
+    let mut unknown = windows_birefnet_v2_request();
+    unknown.capability_id = "image.remove-background.unknown.v1".into();
+    assert!(matches!(
+        unknown.validate(),
+        Err(Error::Invalid("unsupported v2 model recipe"))
+    ));
+}
+
+#[test]
+fn windows_z_image_payload_behaviour_is_unchanged() {
+    assert!(windows_v2_request().validate().is_ok());
+    assert_ne!(WINDOWS_V2_RUNTIME_ID, Z_IMAGE_WINDOWS_RUNTIME_ID);
+    assert_ne!(KLEIN_WINDOWS_MODEL_ID, Z_IMAGE_WINDOWS_MODEL_ID);
+    assert_ne!(KLEIN_WINDOWS_TEXT_RECIPE_ID, Z_IMAGE_WINDOWS_RECIPE_ID);
+    assert!(is_windows_runtime_id(Z_IMAGE_WINDOWS_RUNTIME_ID));
+    assert!(is_windows_runtime_id(WINDOWS_V2_RUNTIME_ID));
+    assert!(!is_windows_runtime_id(
+        "mflux-0.24.0-py3.13.12-macos-arm64-v1"
+    ));
+}
