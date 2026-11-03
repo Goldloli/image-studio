@@ -120,7 +120,7 @@ Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-wo
 | 坏摘要/缺件激活拒绝 | passed | `product-activation-failures.json` |
 | Windows 全量质量门（fmt/clippy/测试/构建/前端/清单审计） | passed | `verification/windows-quality-gate.json` / `.md` / `windows-r01-*.log` |
 | 安装版原生 UI：UI 安装→Ready、中英文三次真实生成、原生对话框导出 PNG、重启恢复、任务/作品、设置/存储/关于、明暗主题、原生最大化/还原/最小化/拖拽、Tab/Shift+Enter、合成 IME 组合保护、UI 停止落 cancelled | passed（部分项有明确限制） | `verification/windows-installed-app/README.md` + `ui-acceptance.json` |
-| 覆盖导出确认（P08 缺陷修复） | 代码/单元测试/安装包已就绪，确认对话框已出现；拒绝覆盖时旧文件保持不变；Yes 路径未再自动重跑 | `ui-acceptance.json` 的 `export_overwrite`、`apps/desktop/src/host.rs` |
+| 覆盖导出确认（P08 缺陷修复） | passed：拒绝覆盖时旧文件保持不变；2026-11-03 在安装版上自动跑通 Yes 路径（系统「确认另存为」+ 应用「覆盖导出文件」双确认，22 字节 dummy 被替换为 1,525,897 字节 PNG，SHA-256 与作品资产一致） | `ui-acceptance.json` 的 `export_overwrite`、`apps/desktop/src/host.rs` |
 | 安装包与更新烟测 | passed；2026-11-03 因启动诊断重建为 244,754,133 bytes / `9e5ecc40…a8ba2` | `verification/windows-installer/README.md`、`internal-package.json`、`install-update-smoke.json` |
 | 平台一致性（Win11 / RTX 2060 SUPER 8 GB，补充） | passed（质量门、启动/页面/主题持久化、双根隔离、启动失败退出码 3；不含模型与生成） | `verification/windows-platform-parity/README.md` |
 | 启动失败诊断（W07，目标机重建包） | passed：故障注入下写 `logs/startup-failure.log`、原生「Image Studio 启动失败」对话框、退出码 3；profile 目录不可建时直接走同一路径；双根 WebView2 目录分离且旧共享 profile 未被触碰；不同数据根第二实例 101 在修复前/后包均未复现 | `verification/windows-startup-diagnosis/target-machine.json` |
@@ -129,7 +129,10 @@ Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-wo
 
 1. **先解决 push**：按第 1 节关闭 GitHub 邮箱保护，然后 `git push origin main`。
    若新机是重新 clone，注意它可能落后于本地会话；以用户/本机最新提交为准。
-2. **可选**：把 P08 的 Yes 分支也自动跑一遍（当前“确认覆盖”只有单元测试 + 代码路径证据）。
+2. **~~可选：P08 Yes 分支~~（2026-11-03 已完成）**：在安装版上用隔离数据根把导出去向指向已存在文件，
+   系统「确认另存为」与应用「覆盖导出文件」都点“是”，目标被替换为与作品资产 SHA-256 一致的 PNG；
+   拒绝路径此前已验证，P08 两个分支都有原生证据。注意 9333 端口可能被 Hyper-V 保留区间占用，
+   本次改用 9222；`确认另存为` 是系统 SaveFileDialog 的提示，其后才是应用自己的覆盖确认。
    用隔离数据根导出到已存在文件，确认对话框点“是”，校验文件变为 PNG 且 SHA-256 正确。
 3. **~~调查 second-instance 异常~~（2026-11-03 已闭环）**：本次重建包中，第二个实例用**不同**
    `--data-dir` 启动时退出码 101；单实例（无其他实例）正常。已在 Windows 11 开发机上尝试复现
