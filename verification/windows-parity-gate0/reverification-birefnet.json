@@ -1,0 +1,19 @@
+﻿{
+    "schema_version":  1,
+    "kind":  "independent-transfer-reverification",
+    "tool":  "PowerShell Get-FileHash -Algorithm SHA256 (Windows CNG)",
+    "manifest":  "resources/planned-models/birefnet/model-manifest.json",
+    "model_directory":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\birefnet",
+    "captured_at_utc":  "2026-11-03T16:22:40Z",
+    "file_count":  1,
+    "all_bytes_match":  true,
+    "all_sha256_match":  true,
+    "files":  {
+                  "path":  "BiRefNet-general-epoch_244.onnx",
+                  "expected_bytes":  972666916,
+                  "actual_bytes":  972666916,
+                  "expected_sha256":  "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+                  "actual_sha256":  "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+                  "sha256_match":  true
+              }
+}

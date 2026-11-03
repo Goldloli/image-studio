@@ -1,0 +1,239 @@
+﻿{
+    "schema_version":  1,
+    "kind":  "independent-transfer-reverification",
+    "tool":  "PowerShell Get-FileHash -Algorithm SHA256 (Windows CNG)",
+    "manifest":  "resources/planned-models/qwen21/model-manifest.json",
+    "model_directory":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1",
+    "captured_at_utc":  "2026-11-03T16:17:08Z",
+    "elapsed_seconds":  45.299,
+    "file_count":  25,
+    "all_bytes_match":  true,
+    "all_sha256_match":  true,
+    "files":  [
+                  {
+                      "path":  "model_index.json",
+                      "expected_bytes":  447,
+                      "actual_bytes":  447,
+                      "expected_sha256":  "cf1ecd104ea090855d60d8cec0895c1e9d6ee41b2f87e231b678beecd1cf7809",
+                      "actual_sha256":  "cf1ecd104ea090855d60d8cec0895c1e9d6ee41b2f87e231b678beecd1cf7809",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "processor/added_tokens.json",
+                      "expected_bytes":  707,
+                      "actual_bytes":  707,
+                      "expected_sha256":  "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680",
+                      "actual_sha256":  "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "processor/chat_template.jinja",
+                      "expected_bytes":  5292,
+                      "actual_bytes":  5292,
+                      "expected_sha256":  "3636d0f0bd6bef02654cdffdc447b79cb2cef8ab02cc75267345946291a489e4",
+                      "actual_sha256":  "3636d0f0bd6bef02654cdffdc447b79cb2cef8ab02cc75267345946291a489e4",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "processor/merges.txt",
+                      "expected_bytes":  1671853,
+                      "actual_bytes":  1671853,
+                      "expected_sha256":  "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+                      "actual_sha256":  "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "processor/preprocessor_config.json",
+                      "expected_bytes":  782,
+                      "actual_bytes":  782,
+                      "expected_sha256":  "93585062a80db5e8ca038efc7726a3e6411d9db948472d81d63c6303993be8c5",
+                      "actual_sha256":  "93585062a80db5e8ca038efc7726a3e6411d9db948472d81d63c6303993be8c5",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "processor/special_tokens_map.json",
+                      "expected_bytes":  613,
+                      "actual_bytes":  613,
+                      "expected_sha256":  "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd",
+                      "actual_sha256":  "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "processor/tokenizer.json",
+                      "expected_bytes":  11422654,
+                      "actual_bytes":  11422654,
+                      "expected_sha256":  "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+                      "actual_sha256":  "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "processor/tokenizer_config.json",
+                      "expected_bytes":  5445,
+                      "actual_bytes":  5445,
+                      "expected_sha256":  "81ec7bb9530159b326c0bef1d0b6c33d392090524014ea3f0123a3c1eb9c2af5",
+                      "actual_sha256":  "81ec7bb9530159b326c0bef1d0b6c33d392090524014ea3f0123a3c1eb9c2af5",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "processor/video_preprocessor_config.json",
+                      "expected_bytes":  817,
+                      "actual_bytes":  817,
+                      "expected_sha256":  "59c5c9eb52182eb14c06ffb10ca9effd29adce5f238a95de23ca14a38dbd2cb1",
+                      "actual_sha256":  "59c5c9eb52182eb14c06ffb10ca9effd29adce5f238a95de23ca14a38dbd2cb1",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "processor/vocab.json",
+                      "expected_bytes":  2776833,
+                      "actual_bytes":  2776833,
+                      "expected_sha256":  "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+                      "actual_sha256":  "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "scheduler/scheduler_config.json",
+                      "expected_bytes":  485,
+                      "actual_bytes":  485,
+                      "expected_sha256":  "5895f3a167c14a967fe9ac70c64924ae5acc79799e0679fd12907e594a713cd1",
+                      "actual_sha256":  "5895f3a167c14a967fe9ac70c64924ae5acc79799e0679fd12907e594a713cd1",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "text_encoder/config.json",
+                      "expected_bytes":  1517,
+                      "actual_bytes":  1517,
+                      "expected_sha256":  "6001331949f7f86ab6d791a80b12246d4f8da5159fa08c3e62368a39f36d63a9",
+                      "actual_sha256":  "6001331949f7f86ab6d791a80b12246d4f8da5159fa08c3e62368a39f36d63a9",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "text_encoder/generation_config.json",
+                      "expected_bytes":  213,
+                      "actual_bytes":  213,
+                      "expected_sha256":  "4d9818c3d27895c0058828a5f68bc7a4de80c3ae1bcdac90936ce24178063f59",
+                      "actual_sha256":  "4d9818c3d27895c0058828a5f68bc7a4de80c3ae1bcdac90936ce24178063f59",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "text_encoder/model-00001-of-00004.safetensors",
+                      "expected_bytes":  4998056552,
+                      "actual_bytes":  4998056552,
+                      "expected_sha256":  "dde00291b5f7fb92013895310a3da0ddba78674df9f10d505d375243dc01fc6f",
+                      "actual_sha256":  "dde00291b5f7fb92013895310a3da0ddba78674df9f10d505d375243dc01fc6f",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "text_encoder/model-00002-of-00004.safetensors",
+                      "expected_bytes":  4915962464,
+                      "actual_bytes":  4915962464,
+                      "expected_sha256":  "9047faccc0a6d98496a52d55f27be1c94a9c259d1e283fbea0128d054a948d42",
+                      "actual_sha256":  "9047faccc0a6d98496a52d55f27be1c94a9c259d1e283fbea0128d054a948d42",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "text_encoder/model-00003-of-00004.safetensors",
+                      "expected_bytes":  4915962496,
+                      "actual_bytes":  4915962496,
+                      "expected_sha256":  "8c54187654c0176b73ae73785bf791dc9a14c9df7fb4310083a09d42048cb57e",
+                      "actual_sha256":  "8c54187654c0176b73ae73785bf791dc9a14c9df7fb4310083a09d42048cb57e",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "text_encoder/model-00004-of-00004.safetensors",
+                      "expected_bytes":  2704357976,
+                      "actual_bytes":  2704357976,
+                      "expected_sha256":  "5311532aaaeae3259eb6a7b2c600636be1159adf7ded35f53579f7d0e7d43cdd",
+                      "actual_sha256":  "5311532aaaeae3259eb6a7b2c600636be1159adf7ded35f53579f7d0e7d43cdd",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "text_encoder/model.safetensors.index.json",
+                      "expected_bytes":  67795,
+                      "actual_bytes":  67795,
+                      "expected_sha256":  "859146bff8db1d617fca8b457a5223edff963bb70076b3645f2189fe0540a147",
+                      "actual_sha256":  "859146bff8db1d617fca8b457a5223edff963bb70076b3645f2189fe0540a147",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "transformer/config.json",
+                      "expected_bytes":  370,
+                      "actual_bytes":  370,
+                      "expected_sha256":  "56ae3281c4e6c2d1aa3658252d187488071815fd79bef15808bb0205fc1a2241",
+                      "actual_sha256":  "56ae3281c4e6c2d1aa3658252d187488071815fd79bef15808bb0205fc1a2241",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "transformer/diffusion_pytorch_model-00001-of-00002.safetensors",
+                      "expected_bytes":  9968332504,
+                      "actual_bytes":  9968332504,
+                      "expected_sha256":  "9e6bc2d641e67bf277895ea8777141044a38f3edb7101bc469b2961dd7c36b4b",
+                      "actual_sha256":  "9e6bc2d641e67bf277895ea8777141044a38f3edb7101bc469b2961dd7c36b4b",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "transformer/diffusion_pytorch_model-00002-of-00002.safetensors",
+                      "expected_bytes":  4261951904,
+                      "actual_bytes":  4261951904,
+                      "expected_sha256":  "3aaf234dcbe128530479735854a346b5e3e66283b7c11db56f836bbd1c13ebaa",
+                      "actual_sha256":  "3aaf234dcbe128530479735854a346b5e3e66283b7c11db56f836bbd1c13ebaa",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "transformer/diffusion_pytorch_model.safetensors.index.json",
+                      "expected_bytes":  30283,
+                      "actual_bytes":  30283,
+                      "expected_sha256":  "17987f6623b1c814d0ef55a137d99142b7b3b040eb1bf241b5575dd35af803a2",
+                      "actual_sha256":  "17987f6623b1c814d0ef55a137d99142b7b3b040eb1bf241b5575dd35af803a2",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "vae/config.json",
+                      "expected_bytes":  2079,
+                      "actual_bytes":  2079,
+                      "expected_sha256":  "9785d527b278cb8b210e9f48a8028d92a4190968ce7e24c8fc85d9d1b82f6ba2",
+                      "actual_sha256":  "9785d527b278cb8b210e9f48a8028d92a4190968ce7e24c8fc85d9d1b82f6ba2",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "vae/diffusion_pytorch_model.safetensors",
+                      "expected_bytes":  1350989512,
+                      "actual_bytes":  1350989512,
+                      "expected_sha256":  "a07a1b7c4ee2966a1b3bdc37de9b4f983d56937e46619f709a80b6e490675417",
+                      "actual_sha256":  "a07a1b7c4ee2966a1b3bdc37de9b4f983d56937e46619f709a80b6e490675417",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  },
+                  {
+                      "path":  "LICENSE",
+                      "expected_bytes":  7831,
+                      "actual_bytes":  7831,
+                      "expected_sha256":  "8dc973f024ff95966bea25866efa443fd16776dcb1001e681e3d467ea572b28d",
+                      "actual_sha256":  "8dc973f024ff95966bea25866efa443fd16776dcb1001e681e3d467ea572b28d",
+                      "bytes_match":  true,
+                      "sha256_match":  true
+                  }
+              ]
+}
