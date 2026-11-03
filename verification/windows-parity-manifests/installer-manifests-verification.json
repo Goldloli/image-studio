@@ -1,0 +1,939 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-installer-manifest-verification",
+  "status": "pass",
+  "method": "Re-implements the installer's manifest validation rules in Python, then re-hashes every manifest artifact against the local transferred/downloaded files.",
+  "allowlist": {
+    "exact_hosts": [
+      "download-r2.pytorch.org",
+      "download.pytorch.org",
+      "files.pythonhosted.org",
+      "github.com",
+      "huggingface.co",
+      "modelscope.cn",
+      "objects.githubusercontent.com",
+      "release-assets.githubusercontent.com",
+      "www.python.org"
+    ],
+    "host_suffixes": [
+      ".cdn.hf.co",
+      ".xethub.hf.co",
+      ".modelscope.cn"
+    ],
+    "scheme": "https",
+    "port": 443
+  },
+  "manifests": [
+    {
+      "kind": "model-manifest",
+      "path": "resources\\windows-parity\\models\\birefnet-general-epoch-244-windows-v1\\model-manifest.json",
+      "id": "birefnet-general-epoch-244-windows-v1",
+      "revision": "v1 / release asset 186740004",
+      "schema_errors": [],
+      "url_hosts": [
+        "github.com"
+      ],
+      "file_checks": [
+        {
+          "path": "BiRefNet-general-epoch_244.onnx",
+          "expected_bytes": 972666916,
+          "expected_sha256": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\birefnet\\BiRefNet-general-epoch_244.onnx",
+          "actual_bytes": 972666916,
+          "actual_sha256": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+          "status": "pass"
+        }
+      ],
+      "license_checks": [
+        {
+          "path": "LICENSE-BiRefNet.txt",
+          "expected_bytes": 1087,
+          "expected_sha256": "d7f5aa6ca5087c02da51a178073fe13df4480dfc2171e0c014bf39a7a57dd6a4",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\resources\\planned-models\\birefnet\\LICENSE-BiRefNet.txt",
+          "actual_bytes": 1087,
+          "actual_sha256": "d7f5aa6ca5087c02da51a178073fe13df4480dfc2171e0c014bf39a7a57dd6a4",
+          "status": "pass"
+        }
+      ],
+      "component_bytes": {
+        "declared": 972666916,
+        "computed_installed_bytes": 972666916,
+        "status": "pass"
+      },
+      "status": "pass",
+      "archive_member_checks": []
+    },
+    {
+      "kind": "model-manifest",
+      "path": "resources\\windows-parity\\models\\flux2-klein-4b-distilled-windows-v1\\model-manifest.json",
+      "id": "flux2-klein-4b-distilled-windows-v1",
+      "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "schema_errors": [],
+      "url_hosts": [
+        "www.modelscope.cn"
+      ],
+      "file_checks": [
+        {
+          "path": "model_index.json",
+          "expected_bytes": 446,
+          "expected_sha256": "51a76cb1cf3ed37423a1128c79c22faee8e6fbe7f5aaeb737f0a258930dbaac0",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\model_index.json",
+          "actual_bytes": 446,
+          "actual_sha256": "51a76cb1cf3ed37423a1128c79c22faee8e6fbe7f5aaeb737f0a258930dbaac0",
+          "status": "pass"
+        },
+        {
+          "path": "scheduler/scheduler_config.json",
+          "expected_bytes": 486,
+          "expected_sha256": "067afb012cef64553a763447d1efd93daeffcc0123ca7e25b09f8de20b90762e",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\scheduler\\scheduler_config.json",
+          "actual_bytes": 486,
+          "actual_sha256": "067afb012cef64553a763447d1efd93daeffcc0123ca7e25b09f8de20b90762e",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/config.json",
+          "expected_bytes": 1536,
+          "expected_sha256": "214b4c29a0d975e9fddf9994a5673f22cb2c4c5750352f9227c2c3251ebeab40",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\text_encoder\\config.json",
+          "actual_bytes": 1536,
+          "actual_sha256": "214b4c29a0d975e9fddf9994a5673f22cb2c4c5750352f9227c2c3251ebeab40",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/generation_config.json",
+          "expected_bytes": 214,
+          "expected_sha256": "4347b1aeed2b2b78bc059920a0b7f5fec71482e1344952b76d7665d638d71f13",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\text_encoder\\generation_config.json",
+          "actual_bytes": 214,
+          "actual_sha256": "4347b1aeed2b2b78bc059920a0b7f5fec71482e1344952b76d7665d638d71f13",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model-00001-of-00002.safetensors",
+          "expected_bytes": 4967215360,
+          "expected_sha256": "8c0506e7f4936fa7e26183a4fd8da4e2bdbc5990ba64ae441f965d51228f36ea",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\text_encoder\\model-00001-of-00002.safetensors",
+          "actual_bytes": 4967215360,
+          "actual_sha256": "8c0506e7f4936fa7e26183a4fd8da4e2bdbc5990ba64ae441f965d51228f36ea",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model-00002-of-00002.safetensors",
+          "expected_bytes": 3077766632,
+          "expected_sha256": "82f2bd839378541b0557bfabaf37c7d3d637071fdcb73302dedd7cf61162ce07",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\text_encoder\\model-00002-of-00002.safetensors",
+          "actual_bytes": 3077766632,
+          "actual_sha256": "82f2bd839378541b0557bfabaf37c7d3d637071fdcb73302dedd7cf61162ce07",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model.safetensors.index.json",
+          "expected_bytes": 32855,
+          "expected_sha256": "06b3d5319b6d76d1a4a2433419180016cfd54ed62d086a5e6567a809f8c82634",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\text_encoder\\model.safetensors.index.json",
+          "actual_bytes": 32855,
+          "actual_sha256": "06b3d5319b6d76d1a4a2433419180016cfd54ed62d086a5e6567a809f8c82634",
+          "status": "pass"
+        },
+        {
+          "path": "tokenizer/added_tokens.json",
+          "expected_bytes": 707,
+          "expected_sha256": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\tokenizer\\added_tokens.json",
+          "actual_bytes": 707,
+          "actual_sha256": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680",
+          "status": "pass"
+        },
+        {
+          "path": "tokenizer/chat_template.jinja",
+          "expected_bytes": 4168,
+          "expected_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\tokenizer\\chat_template.jinja",
+          "actual_bytes": 4168,
+          "actual_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+          "status": "pass"
+        },
+        {
+          "path": "tokenizer/merges.txt",
+          "expected_bytes": 1671853,
+          "expected_sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\tokenizer\\merges.txt",
+          "actual_bytes": 1671853,
+          "actual_sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+          "status": "pass"
+        },
+        {
+          "path": "tokenizer/special_tokens_map.json",
+          "expected_bytes": 613,
+          "expected_sha256": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\tokenizer\\special_tokens_map.json",
+          "actual_bytes": 613,
+          "actual_sha256": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd",
+          "status": "pass"
+        },
+        {
+          "path": "tokenizer/tokenizer.json",
+          "expected_bytes": 11422654,
+          "expected_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\tokenizer\\tokenizer.json",
+          "actual_bytes": 11422654,
+          "actual_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+          "status": "pass"
+        },
+        {
+          "path": "tokenizer/tokenizer_config.json",
+          "expected_bytes": 5404,
+          "expected_sha256": "443bfa629eb16387a12edbf92a76f6a6f10b2af3b53d87ba1550adfcf45f7fa0",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\tokenizer\\tokenizer_config.json",
+          "actual_bytes": 5404,
+          "actual_sha256": "443bfa629eb16387a12edbf92a76f6a6f10b2af3b53d87ba1550adfcf45f7fa0",
+          "status": "pass"
+        },
+        {
+          "path": "tokenizer/vocab.json",
+          "expected_bytes": 2776833,
+          "expected_sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\tokenizer\\vocab.json",
+          "actual_bytes": 2776833,
+          "actual_sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/config.json",
+          "expected_bytes": 541,
+          "expected_sha256": "09733c74a3da6d17dd0a0472a091a8950c7c6935889c32c16cc800ede05029de",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\transformer\\config.json",
+          "actual_bytes": 541,
+          "actual_sha256": "09733c74a3da6d17dd0a0472a091a8950c7c6935889c32c16cc800ede05029de",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model.safetensors",
+          "expected_bytes": 7751109744,
+          "expected_sha256": "9f29f9edcfdae452a653ffb51a534ca4decd389952c225724ff3b94042612a6e",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\transformer\\diffusion_pytorch_model.safetensors",
+          "actual_bytes": 7751109744,
+          "actual_sha256": "9f29f9edcfdae452a653ffb51a534ca4decd389952c225724ff3b94042612a6e",
+          "status": "pass"
+        },
+        {
+          "path": "vae/config.json",
+          "expected_bytes": 821,
+          "expected_sha256": "0d6dfb69ae95a5e2ac9836284bbb63d8b38ce67b25ba2dff380752b2a10ab948",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\vae\\config.json",
+          "actual_bytes": 821,
+          "actual_sha256": "0d6dfb69ae95a5e2ac9836284bbb63d8b38ce67b25ba2dff380752b2a10ab948",
+          "status": "pass"
+        },
+        {
+          "path": "vae/diffusion_pytorch_model.safetensors",
+          "expected_bytes": 168120878,
+          "expected_sha256": "ca70d2202afe6415bdbcb8793ba8cd99fd159cfe6192381504d6c4d3036e0f04",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein\\vae\\diffusion_pytorch_model.safetensors",
+          "actual_bytes": 168120878,
+          "actual_sha256": "ca70d2202afe6415bdbcb8793ba8cd99fd159cfe6192381504d6c4d3036e0f04",
+          "status": "pass"
+        },
+        {
+          "path": "LICENSE.md",
+          "expected_bytes": 9584,
+          "expected_sha256": "ca02bc51900ab07789d1b70283329e7137f5af98f5161c23a1c81fc38a4af1fe",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\manifests-aux\\klein-LICENSE.md",
+          "actual_bytes": 9584,
+          "actual_sha256": "ca02bc51900ab07789d1b70283329e7137f5af98f5161c23a1c81fc38a4af1fe",
+          "status": "pass"
+        }
+      ],
+      "license_checks": [],
+      "component_bytes": {
+        "declared": 15980141329,
+        "computed_installed_bytes": 15980141329,
+        "status": "pass"
+      },
+      "status": "pass",
+      "archive_member_checks": []
+    },
+    {
+      "kind": "model-manifest",
+      "path": "resources\\windows-parity\\models\\moss-image-sft-windows-v1\\model-manifest.json",
+      "id": "moss-image-sft-windows-v1",
+      "revision": "f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+      "schema_errors": [],
+      "url_hosts": [
+        "www.modelscope.cn"
+      ],
+      "file_checks": [
+        {
+          "path": "model_index.json",
+          "expected_bytes": 412,
+          "expected_sha256": "ca80b1f562a506e0eb24afb1acb464fb583163e3c240c04e4bc69fea090db173",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\model_index.json",
+          "actual_bytes": 412,
+          "actual_sha256": "ca80b1f562a506e0eb24afb1acb464fb583163e3c240c04e4bc69fea090db173",
+          "status": "pass"
+        },
+        {
+          "path": "scheduler/scheduler_config.json",
+          "expected_bytes": 494,
+          "expected_sha256": "707322832cc507dfb8c51c0e0cd04d44ee2d30a9b036b6f3c47d6c17aa71adf0",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\scheduler\\scheduler_config.json",
+          "actual_bytes": 494,
+          "actual_sha256": "707322832cc507dfb8c51c0e0cd04d44ee2d30a9b036b6f3c47d6c17aa71adf0",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/config.json",
+          "expected_bytes": 2813,
+          "expected_sha256": "b31ee18a242bcfcccbe740f825f6b1d3ae231b0655eeecb5de3e98d504b7d68c",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\text_encoder\\config.json",
+          "actual_bytes": 2813,
+          "actual_sha256": "b31ee18a242bcfcccbe740f825f6b1d3ae231b0655eeecb5de3e98d504b7d68c",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model-00001-of-00004.safetensors",
+          "expected_bytes": 4973910744,
+          "expected_sha256": "abfaa3d3a8612508c85ee8f6da9c734b862f10298b903765c4ad384177c32b0b",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\text_encoder\\model-00001-of-00004.safetensors",
+          "actual_bytes": 4973910744,
+          "actual_sha256": "abfaa3d3a8612508c85ee8f6da9c734b862f10298b903765c4ad384177c32b0b",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model-00002-of-00004.safetensors",
+          "expected_bytes": 4988364288,
+          "expected_sha256": "9112637fa6bf4d07bafd6ae268852b18d3d0c1242f4ee901c5579006e5bd4894",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\text_encoder\\model-00002-of-00004.safetensors",
+          "actual_bytes": 4988364288,
+          "actual_sha256": "9112637fa6bf4d07bafd6ae268852b18d3d0c1242f4ee901c5579006e5bd4894",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model-00003-of-00004.safetensors",
+          "expected_bytes": 4954202112,
+          "expected_sha256": "956f1ef51d0cfe610b0d22987c0b7821c36e3ce228abceccef523518bcf079dc",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\text_encoder\\model-00003-of-00004.safetensors",
+          "actual_bytes": 4954202112,
+          "actual_sha256": "956f1ef51d0cfe610b0d22987c0b7821c36e3ce228abceccef523518bcf079dc",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model-00004-of-00004.safetensors",
+          "expected_bytes": 1869001848,
+          "expected_sha256": "9e21d20e8adde88c3e0b65d4a0d251f143d98ee9d52db36b4348361091e4e208",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\text_encoder\\model-00004-of-00004.safetensors",
+          "actual_bytes": 1869001848,
+          "actual_sha256": "9e21d20e8adde88c3e0b65d4a0d251f143d98ee9d52db36b4348361091e4e208",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model.safetensors.index.json",
+          "expected_bytes": 64641,
+          "expected_sha256": "0af6fa3fa36ba8dcbb6b7ad0325a36c5b1b69862a9a1f1486b1b80385bd8f5ee",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\text_encoder\\model.safetensors.index.json",
+          "actual_bytes": 64641,
+          "actual_sha256": "0af6fa3fa36ba8dcbb6b7ad0325a36c5b1b69862a9a1f1486b1b80385bd8f5ee",
+          "status": "pass"
+        },
+        {
+          "path": "tokenizer/chat_template.jinja",
+          "expected_bytes": 7756,
+          "expected_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\tokenizer\\chat_template.jinja",
+          "actual_bytes": 7756,
+          "actual_sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715",
+          "status": "pass"
+        },
+        {
+          "path": "tokenizer/tokenizer.json",
+          "expected_bytes": 19989325,
+          "expected_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\tokenizer\\tokenizer.json",
+          "actual_bytes": 19989325,
+          "actual_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+          "status": "pass"
+        },
+        {
+          "path": "tokenizer/tokenizer_config.json",
+          "expected_bytes": 1123,
+          "expected_sha256": "bee8eba30f0eb4af73c0fe2cd06d0f89b657d7819941c438157ec42f7c80ea87",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\tokenizer\\tokenizer_config.json",
+          "actual_bytes": 1123,
+          "actual_sha256": "bee8eba30f0eb4af73c0fe2cd06d0f89b657d7819941c438157ec42f7c80ea87",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/config.json",
+          "expected_bytes": 240,
+          "expected_sha256": "3291c3a1c7adc22b8182a0de25ca8ec97474d72715ce84adbab09cc0be24f666",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\transformer\\config.json",
+          "actual_bytes": 240,
+          "actual_sha256": "3291c3a1c7adc22b8182a0de25ca8ec97474d72715ce84adbab09cc0be24f666",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00001-of-00003.safetensors",
+          "expected_bytes": 4991978016,
+          "expected_sha256": "e40d3444940a0b0fd7cd45ba7959a5bd3d5efd7ddf87aae5ce4d87ce8aa03d01",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\transformer\\diffusion_pytorch_model-00001-of-00003.safetensors",
+          "actual_bytes": 4991978016,
+          "actual_sha256": "e40d3444940a0b0fd7cd45ba7959a5bd3d5efd7ddf87aae5ce4d87ce8aa03d01",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00002-of-00003.safetensors",
+          "expected_bytes": 4983137016,
+          "expected_sha256": "d106da790ec2924ffd8af04b4ffa8f8de281a974b58e55649c3ec596dc8ef033",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\transformer\\diffusion_pytorch_model-00002-of-00003.safetensors",
+          "actual_bytes": 4983137016,
+          "actual_sha256": "d106da790ec2924ffd8af04b4ffa8f8de281a974b58e55649c3ec596dc8ef033",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00003-of-00003.safetensors",
+          "expected_bytes": 189549184,
+          "expected_sha256": "11f637ab17c7093344a6110a1e87ffda8e56558dc55183d8e790222cfcdcf52d",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\transformer\\diffusion_pytorch_model-00003-of-00003.safetensors",
+          "actual_bytes": 189549184,
+          "actual_sha256": "11f637ab17c7093344a6110a1e87ffda8e56558dc55183d8e790222cfcdcf52d",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model.safetensors.index.json",
+          "expected_bytes": 40298,
+          "expected_sha256": "b609327fc75dbe5080e7e095d8b727d74d728b4f98e8b047133b0082cfa2fb03",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\transformer\\diffusion_pytorch_model.safetensors.index.json",
+          "actual_bytes": 40298,
+          "actual_sha256": "b609327fc75dbe5080e7e095d8b727d74d728b4f98e8b047133b0082cfa2fb03",
+          "status": "pass"
+        },
+        {
+          "path": "vae/config.json",
+          "expected_bytes": 838,
+          "expected_sha256": "cc77f3f0ce0357039c71018dc19edaa4fcceb0c2f7488fdc2b9c0580d6baafa1",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\vae\\config.json",
+          "actual_bytes": 838,
+          "actual_sha256": "cc77f3f0ce0357039c71018dc19edaa4fcceb0c2f7488fdc2b9c0580d6baafa1",
+          "status": "pass"
+        },
+        {
+          "path": "vae/diffusion_pytorch_model.safetensors",
+          "expected_bytes": 249521372,
+          "expected_sha256": "c3bdf94dc67ec69b30ea9fe1fa8340085679cae64d019f7c7e4a9921f1a7f17a",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\vae\\diffusion_pytorch_model.safetensors",
+          "actual_bytes": 249521372,
+          "actual_sha256": "c3bdf94dc67ec69b30ea9fe1fa8340085679cae64d019f7c7e4a9921f1a7f17a",
+          "status": "pass"
+        },
+        {
+          "path": "LICENSE",
+          "expected_bytes": 11358,
+          "expected_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\moss-image-sft\\LICENSE",
+          "actual_bytes": 11358,
+          "actual_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "status": "pass"
+        }
+      ],
+      "license_checks": [],
+      "component_bytes": {
+        "declared": 27219783878,
+        "computed_installed_bytes": 27219783878,
+        "status": "pass"
+      },
+      "status": "pass",
+      "archive_member_checks": []
+    },
+    {
+      "kind": "model-manifest",
+      "path": "resources\\windows-parity\\models\\qwen-image-2.1-turbo-windows-v1\\model-manifest.json",
+      "id": "qwen-image-2.1-turbo-windows-v1",
+      "revision": "fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+      "schema_errors": [],
+      "url_hosts": [
+        "www.modelscope.cn"
+      ],
+      "file_checks": [
+        {
+          "path": "model_index.json",
+          "expected_bytes": 578,
+          "expected_sha256": "97e2febeb19d93cb41fa44807cde8bd42757950b5dffeacdb0331fb2d390cf20",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\model_index.json",
+          "actual_bytes": 578,
+          "actual_sha256": "97e2febeb19d93cb41fa44807cde8bd42757950b5dffeacdb0331fb2d390cf20",
+          "status": "pass"
+        },
+        {
+          "path": "processor/chat_template.jinja",
+          "expected_bytes": 5292,
+          "expected_sha256": "3636d0f0bd6bef02654cdffdc447b79cb2cef8ab02cc75267345946291a489e4",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\processor\\chat_template.jinja",
+          "actual_bytes": 5292,
+          "actual_sha256": "3636d0f0bd6bef02654cdffdc447b79cb2cef8ab02cc75267345946291a489e4",
+          "status": "pass"
+        },
+        {
+          "path": "processor/processor_config.json",
+          "expected_bytes": 1300,
+          "expected_sha256": "14932921ca485d458a04dafd8069fbb0a4505622a48208d19ed247115801385b",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\processor\\processor_config.json",
+          "actual_bytes": 1300,
+          "actual_sha256": "14932921ca485d458a04dafd8069fbb0a4505622a48208d19ed247115801385b",
+          "status": "pass"
+        },
+        {
+          "path": "processor/tokenizer.json",
+          "expected_bytes": 11422650,
+          "expected_sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\processor\\tokenizer.json",
+          "actual_bytes": 11422650,
+          "actual_sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "status": "pass"
+        },
+        {
+          "path": "processor/tokenizer_config.json",
+          "expected_bytes": 705,
+          "expected_sha256": "fd42a0b35a8d13cd473e88e310b50cbf1bccaa9eb60ed0fd873af5f8f0c59307",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\processor\\tokenizer_config.json",
+          "actual_bytes": 705,
+          "actual_sha256": "fd42a0b35a8d13cd473e88e310b50cbf1bccaa9eb60ed0fd873af5f8f0c59307",
+          "status": "pass"
+        },
+        {
+          "path": "scheduler/scheduler_config.json",
+          "expected_bytes": 486,
+          "expected_sha256": "16c948c71f9152a34cce6e3a2f309e97ad2dca32beecbe5e2fd3a7925b7eb4bb",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\scheduler\\scheduler_config.json",
+          "actual_bytes": 486,
+          "actual_sha256": "16c948c71f9152a34cce6e3a2f309e97ad2dca32beecbe5e2fd3a7925b7eb4bb",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/config.json",
+          "expected_bytes": 1542,
+          "expected_sha256": "89050cba6b66c4f68f52305b54fc37efe28d95232246b94aa8dc0cfa36f3b734",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\text_encoder\\config.json",
+          "actual_bytes": 1542,
+          "actual_sha256": "89050cba6b66c4f68f52305b54fc37efe28d95232246b94aa8dc0cfa36f3b734",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/generation_config.json",
+          "expected_bytes": 241,
+          "expected_sha256": "d04d0c6fdd1dc056cf68178425a3ecf17a0b9e848cf1a8378ad31c623263472c",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\text_encoder\\generation_config.json",
+          "actual_bytes": 241,
+          "actual_sha256": "d04d0c6fdd1dc056cf68178425a3ecf17a0b9e848cf1a8378ad31c623263472c",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model.safetensors",
+          "expected_bytes": 17534340584,
+          "expected_sha256": "a1eee8233f3063466dd3b06e857b0a2cf13a77c543908374771d51a546beb2e0",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\text_encoder\\model.safetensors",
+          "actual_bytes": 17534340584,
+          "actual_sha256": "a1eee8233f3063466dd3b06e857b0a2cf13a77c543908374771d51a546beb2e0",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/config.json",
+          "expected_bytes": 370,
+          "expected_sha256": "2c567038ca190824728844b8d06d94ae02360e668707afd9734e789a7eb58ce3",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\transformer\\config.json",
+          "actual_bytes": 370,
+          "actual_sha256": "2c567038ca190824728844b8d06d94ae02360e668707afd9734e789a7eb58ce3",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00001-of-00002.safetensors",
+          "expected_bytes": 9968332504,
+          "expected_sha256": "6cccd922767f01694461bdcf1f34ea7b771f3442e4d5e338ea9aa55277431cc0",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\transformer\\diffusion_pytorch_model-00001-of-00002.safetensors",
+          "actual_bytes": 9968332504,
+          "actual_sha256": "6cccd922767f01694461bdcf1f34ea7b771f3442e4d5e338ea9aa55277431cc0",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00002-of-00002.safetensors",
+          "expected_bytes": 4261951904,
+          "expected_sha256": "69f53ebb063d2f606bdaff7e22e0e2144f28d978d73dc75e6e4293fc5982eab5",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\transformer\\diffusion_pytorch_model-00002-of-00002.safetensors",
+          "actual_bytes": 4261951904,
+          "actual_sha256": "69f53ebb063d2f606bdaff7e22e0e2144f28d978d73dc75e6e4293fc5982eab5",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model.safetensors.index.json",
+          "expected_bytes": 30283,
+          "expected_sha256": "17987f6623b1c814d0ef55a137d99142b7b3b040eb1bf241b5575dd35af803a2",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\transformer\\diffusion_pytorch_model.safetensors.index.json",
+          "actual_bytes": 30283,
+          "actual_sha256": "17987f6623b1c814d0ef55a137d99142b7b3b040eb1bf241b5575dd35af803a2",
+          "status": "pass"
+        },
+        {
+          "path": "vae/config.json",
+          "expected_bytes": 2172,
+          "expected_sha256": "42bfdec412459bbb7bc38a0617ab70edcfc873f84ec47e0c7d01c53ba09885a5",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\vae\\config.json",
+          "actual_bytes": 2172,
+          "actual_sha256": "42bfdec412459bbb7bc38a0617ab70edcfc873f84ec47e0c7d01c53ba09885a5",
+          "status": "pass"
+        },
+        {
+          "path": "vae/diffusion_pytorch_model.safetensors",
+          "expected_bytes": 675508656,
+          "expected_sha256": "71879ffd5321e6d10c3c87513e2b474b1252efa7f3dec2969214a9bf06a6dd5c",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\vae\\diffusion_pytorch_model.safetensors",
+          "actual_bytes": 675508656,
+          "actual_sha256": "71879ffd5321e6d10c3c87513e2b474b1252efa7f3dec2969214a9bf06a6dd5c",
+          "status": "pass"
+        },
+        {
+          "path": "LICENSE",
+          "expected_bytes": 7831,
+          "expected_sha256": "8dc973f024ff95966bea25866efa443fd16776dcb1001e681e3d467ea572b28d",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo\\LICENSE",
+          "actual_bytes": 7831,
+          "actual_sha256": "8dc973f024ff95966bea25866efa443fd16776dcb1001e681e3d467ea572b28d",
+          "status": "pass"
+        }
+      ],
+      "license_checks": [],
+      "component_bytes": {
+        "declared": 32451607098,
+        "computed_installed_bytes": 32451607098,
+        "status": "pass"
+      },
+      "status": "pass",
+      "archive_member_checks": []
+    },
+    {
+      "kind": "model-manifest",
+      "path": "resources\\windows-parity\\models\\qwen-image-2.1-windows-v1\\model-manifest.json",
+      "id": "qwen-image-2.1-windows-v1",
+      "revision": "d26bb61231c349cf6b7896fa83353113880e1ba3",
+      "schema_errors": [],
+      "url_hosts": [
+        "www.modelscope.cn"
+      ],
+      "file_checks": [
+        {
+          "path": "model_index.json",
+          "expected_bytes": 447,
+          "expected_sha256": "cf1ecd104ea090855d60d8cec0895c1e9d6ee41b2f87e231b678beecd1cf7809",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\model_index.json",
+          "actual_bytes": 447,
+          "actual_sha256": "cf1ecd104ea090855d60d8cec0895c1e9d6ee41b2f87e231b678beecd1cf7809",
+          "status": "pass"
+        },
+        {
+          "path": "processor/added_tokens.json",
+          "expected_bytes": 707,
+          "expected_sha256": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\processor\\added_tokens.json",
+          "actual_bytes": 707,
+          "actual_sha256": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680",
+          "status": "pass"
+        },
+        {
+          "path": "processor/chat_template.jinja",
+          "expected_bytes": 5292,
+          "expected_sha256": "3636d0f0bd6bef02654cdffdc447b79cb2cef8ab02cc75267345946291a489e4",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\processor\\chat_template.jinja",
+          "actual_bytes": 5292,
+          "actual_sha256": "3636d0f0bd6bef02654cdffdc447b79cb2cef8ab02cc75267345946291a489e4",
+          "status": "pass"
+        },
+        {
+          "path": "processor/merges.txt",
+          "expected_bytes": 1671853,
+          "expected_sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\processor\\merges.txt",
+          "actual_bytes": 1671853,
+          "actual_sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+          "status": "pass"
+        },
+        {
+          "path": "processor/preprocessor_config.json",
+          "expected_bytes": 782,
+          "expected_sha256": "93585062a80db5e8ca038efc7726a3e6411d9db948472d81d63c6303993be8c5",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\processor\\preprocessor_config.json",
+          "actual_bytes": 782,
+          "actual_sha256": "93585062a80db5e8ca038efc7726a3e6411d9db948472d81d63c6303993be8c5",
+          "status": "pass"
+        },
+        {
+          "path": "processor/special_tokens_map.json",
+          "expected_bytes": 613,
+          "expected_sha256": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\processor\\special_tokens_map.json",
+          "actual_bytes": 613,
+          "actual_sha256": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd",
+          "status": "pass"
+        },
+        {
+          "path": "processor/tokenizer.json",
+          "expected_bytes": 11422654,
+          "expected_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\processor\\tokenizer.json",
+          "actual_bytes": 11422654,
+          "actual_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+          "status": "pass"
+        },
+        {
+          "path": "processor/tokenizer_config.json",
+          "expected_bytes": 5445,
+          "expected_sha256": "81ec7bb9530159b326c0bef1d0b6c33d392090524014ea3f0123a3c1eb9c2af5",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\processor\\tokenizer_config.json",
+          "actual_bytes": 5445,
+          "actual_sha256": "81ec7bb9530159b326c0bef1d0b6c33d392090524014ea3f0123a3c1eb9c2af5",
+          "status": "pass"
+        },
+        {
+          "path": "processor/video_preprocessor_config.json",
+          "expected_bytes": 817,
+          "expected_sha256": "59c5c9eb52182eb14c06ffb10ca9effd29adce5f238a95de23ca14a38dbd2cb1",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\processor\\video_preprocessor_config.json",
+          "actual_bytes": 817,
+          "actual_sha256": "59c5c9eb52182eb14c06ffb10ca9effd29adce5f238a95de23ca14a38dbd2cb1",
+          "status": "pass"
+        },
+        {
+          "path": "processor/vocab.json",
+          "expected_bytes": 2776833,
+          "expected_sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\processor\\vocab.json",
+          "actual_bytes": 2776833,
+          "actual_sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+          "status": "pass"
+        },
+        {
+          "path": "scheduler/scheduler_config.json",
+          "expected_bytes": 485,
+          "expected_sha256": "5895f3a167c14a967fe9ac70c64924ae5acc79799e0679fd12907e594a713cd1",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\scheduler\\scheduler_config.json",
+          "actual_bytes": 485,
+          "actual_sha256": "5895f3a167c14a967fe9ac70c64924ae5acc79799e0679fd12907e594a713cd1",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/config.json",
+          "expected_bytes": 1517,
+          "expected_sha256": "6001331949f7f86ab6d791a80b12246d4f8da5159fa08c3e62368a39f36d63a9",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\text_encoder\\config.json",
+          "actual_bytes": 1517,
+          "actual_sha256": "6001331949f7f86ab6d791a80b12246d4f8da5159fa08c3e62368a39f36d63a9",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/generation_config.json",
+          "expected_bytes": 213,
+          "expected_sha256": "4d9818c3d27895c0058828a5f68bc7a4de80c3ae1bcdac90936ce24178063f59",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\text_encoder\\generation_config.json",
+          "actual_bytes": 213,
+          "actual_sha256": "4d9818c3d27895c0058828a5f68bc7a4de80c3ae1bcdac90936ce24178063f59",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model-00001-of-00004.safetensors",
+          "expected_bytes": 4998056552,
+          "expected_sha256": "dde00291b5f7fb92013895310a3da0ddba78674df9f10d505d375243dc01fc6f",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\text_encoder\\model-00001-of-00004.safetensors",
+          "actual_bytes": 4998056552,
+          "actual_sha256": "dde00291b5f7fb92013895310a3da0ddba78674df9f10d505d375243dc01fc6f",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model-00002-of-00004.safetensors",
+          "expected_bytes": 4915962464,
+          "expected_sha256": "9047faccc0a6d98496a52d55f27be1c94a9c259d1e283fbea0128d054a948d42",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\text_encoder\\model-00002-of-00004.safetensors",
+          "actual_bytes": 4915962464,
+          "actual_sha256": "9047faccc0a6d98496a52d55f27be1c94a9c259d1e283fbea0128d054a948d42",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model-00003-of-00004.safetensors",
+          "expected_bytes": 4915962496,
+          "expected_sha256": "8c54187654c0176b73ae73785bf791dc9a14c9df7fb4310083a09d42048cb57e",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\text_encoder\\model-00003-of-00004.safetensors",
+          "actual_bytes": 4915962496,
+          "actual_sha256": "8c54187654c0176b73ae73785bf791dc9a14c9df7fb4310083a09d42048cb57e",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model-00004-of-00004.safetensors",
+          "expected_bytes": 2704357976,
+          "expected_sha256": "5311532aaaeae3259eb6a7b2c600636be1159adf7ded35f53579f7d0e7d43cdd",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\text_encoder\\model-00004-of-00004.safetensors",
+          "actual_bytes": 2704357976,
+          "actual_sha256": "5311532aaaeae3259eb6a7b2c600636be1159adf7ded35f53579f7d0e7d43cdd",
+          "status": "pass"
+        },
+        {
+          "path": "text_encoder/model.safetensors.index.json",
+          "expected_bytes": 67795,
+          "expected_sha256": "859146bff8db1d617fca8b457a5223edff963bb70076b3645f2189fe0540a147",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\text_encoder\\model.safetensors.index.json",
+          "actual_bytes": 67795,
+          "actual_sha256": "859146bff8db1d617fca8b457a5223edff963bb70076b3645f2189fe0540a147",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/config.json",
+          "expected_bytes": 370,
+          "expected_sha256": "56ae3281c4e6c2d1aa3658252d187488071815fd79bef15808bb0205fc1a2241",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\transformer\\config.json",
+          "actual_bytes": 370,
+          "actual_sha256": "56ae3281c4e6c2d1aa3658252d187488071815fd79bef15808bb0205fc1a2241",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00001-of-00002.safetensors",
+          "expected_bytes": 9968332504,
+          "expected_sha256": "9e6bc2d641e67bf277895ea8777141044a38f3edb7101bc469b2961dd7c36b4b",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\transformer\\diffusion_pytorch_model-00001-of-00002.safetensors",
+          "actual_bytes": 9968332504,
+          "actual_sha256": "9e6bc2d641e67bf277895ea8777141044a38f3edb7101bc469b2961dd7c36b4b",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00002-of-00002.safetensors",
+          "expected_bytes": 4261951904,
+          "expected_sha256": "3aaf234dcbe128530479735854a346b5e3e66283b7c11db56f836bbd1c13ebaa",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\transformer\\diffusion_pytorch_model-00002-of-00002.safetensors",
+          "actual_bytes": 4261951904,
+          "actual_sha256": "3aaf234dcbe128530479735854a346b5e3e66283b7c11db56f836bbd1c13ebaa",
+          "status": "pass"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model.safetensors.index.json",
+          "expected_bytes": 30283,
+          "expected_sha256": "17987f6623b1c814d0ef55a137d99142b7b3b040eb1bf241b5575dd35af803a2",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\transformer\\diffusion_pytorch_model.safetensors.index.json",
+          "actual_bytes": 30283,
+          "actual_sha256": "17987f6623b1c814d0ef55a137d99142b7b3b040eb1bf241b5575dd35af803a2",
+          "status": "pass"
+        },
+        {
+          "path": "vae/config.json",
+          "expected_bytes": 2079,
+          "expected_sha256": "9785d527b278cb8b210e9f48a8028d92a4190968ce7e24c8fc85d9d1b82f6ba2",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\vae\\config.json",
+          "actual_bytes": 2079,
+          "actual_sha256": "9785d527b278cb8b210e9f48a8028d92a4190968ce7e24c8fc85d9d1b82f6ba2",
+          "status": "pass"
+        },
+        {
+          "path": "vae/diffusion_pytorch_model.safetensors",
+          "expected_bytes": 1350989512,
+          "expected_sha256": "a07a1b7c4ee2966a1b3bdc37de9b4f983d56937e46619f709a80b6e490675417",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\vae\\diffusion_pytorch_model.safetensors",
+          "actual_bytes": 1350989512,
+          "actual_sha256": "a07a1b7c4ee2966a1b3bdc37de9b4f983d56937e46619f709a80b6e490675417",
+          "status": "pass"
+        },
+        {
+          "path": "LICENSE",
+          "expected_bytes": 7831,
+          "expected_sha256": "8dc973f024ff95966bea25866efa443fd16776dcb1001e681e3d467ea572b28d",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1\\LICENSE",
+          "actual_bytes": 7831,
+          "actual_sha256": "8dc973f024ff95966bea25866efa443fd16776dcb1001e681e3d467ea572b28d",
+          "status": "pass"
+        }
+      ],
+      "license_checks": [],
+      "component_bytes": {
+        "declared": 33131609424,
+        "computed_installed_bytes": 33131609424,
+        "status": "pass"
+      },
+      "status": "pass",
+      "archive_member_checks": []
+    },
+    {
+      "kind": "model-manifest",
+      "path": "resources\\windows-parity\\models\\realesrgan-x4plus-windows-v1\\model-manifest.json",
+      "id": "realesrgan-x4plus-windows-v1",
+      "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus",
+      "schema_errors": [],
+      "url_hosts": [],
+      "file_checks": [
+        {
+          "path": "realesrgan-ncnn-vulkan-20220424-windows.zip",
+          "expected_bytes": 45474481,
+          "expected_sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\downloads\\realesrgan-ncnn-vulkan-20220424-windows.zip",
+          "actual_bytes": 45474481,
+          "actual_sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+          "status": "pass",
+          "archive_path": "realesrgan-ncnn-vulkan-20220424-windows.zip"
+        }
+      ],
+      "license_checks": [
+        {
+          "path": "LICENSE-RealESRGAN.txt",
+          "expected_bytes": 1519,
+          "expected_sha256": "4a699ec4863d96a91fc265948a0c90033f7e8735d515524dcf3444736406e0c2",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\resources\\windows-parity\\realesrgan-ncnn-vulkan\\LICENSE-RealESRGAN.txt",
+          "actual_bytes": 1519,
+          "actual_sha256": "4a699ec4863d96a91fc265948a0c90033f7e8735d515524dcf3444736406e0c2",
+          "status": "pass"
+        },
+        {
+          "path": "LICENSE-ncnn-app.txt",
+          "expected_bytes": 2228,
+          "expected_sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937",
+          "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\resources\\windows-parity\\realesrgan-ncnn-vulkan\\LICENSE-ncnn-app.txt",
+          "actual_bytes": 2228,
+          "actual_sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937",
+          "status": "pass"
+        }
+      ],
+      "component_bytes": {
+        "declared": 33540549,
+        "computed_installed_bytes": 33540549,
+        "status": "pass"
+      },
+      "status": "pass",
+      "archive_member_checks": [
+        {
+          "archive_path": "models/realesrgan-x4plus.bin",
+          "path": "realesrgan-x4plus.bin",
+          "expected_bytes": 33424520,
+          "expected_sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+          "in_archive": true,
+          "actual_bytes": 33424520,
+          "actual_sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+          "status": "pass"
+        },
+        {
+          "archive_path": "models/realesrgan-x4plus.param",
+          "path": "realesrgan-x4plus.param",
+          "expected_bytes": 116029,
+          "expected_sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86",
+          "in_archive": true,
+          "actual_bytes": 116029,
+          "actual_sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86",
+          "status": "pass"
+        }
+      ]
+    }
+  ],
+  "failures": [],
+  "notes": [
+    "product-runtime-manifest.json not present yet; runtime manifest checks skipped.",
+    "realesrgan native runtime-manifest.json not present yet; native runtime checks skipped."
+  ],
+  "summary": {
+    "manifests_checked": 6,
+    "model_manifests": 6,
+    "product_runtime": false,
+    "native_runtime": false,
+    "file_checks": 81,
+    "failures": 0
+  }
+}
