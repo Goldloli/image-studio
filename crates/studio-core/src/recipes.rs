@@ -5,9 +5,20 @@ use crate::{
     contracts::{ExecutionPlan, InputBinding, UserRequest},
     domain::{AssetKind, AssetRef, IdempotencyKey, ModelVariantId, PlanId, ProjectId, RequestId},
     generation::{
-        MAX_PROMPT_BYTES, Z_IMAGE_CAPABILITY, Z_IMAGE_MODEL, Z_IMAGE_WINDOWS_CAPABILITY,
-        Z_IMAGE_WINDOWS_MODEL, validate_windows_z_image_plan, validate_windows_z_image_request,
-        validate_z_image_plan, validate_z_image_request,
+        BIREFNET_WINDOWS_CAPABILITY, BIREFNET_WINDOWS_MODEL, BIREFNET_WINDOWS_RECIPE,
+        KLEIN_WINDOWS_EDIT_CAPABILITY, KLEIN_WINDOWS_EDIT_RECIPE, KLEIN_WINDOWS_MODEL,
+        KLEIN_WINDOWS_TEXT_CAPABILITY, KLEIN_WINDOWS_TEXT_RECIPE, MAX_PROMPT_BYTES,
+        MOSS_IMAGE_SFT_WINDOWS_CAPABILITY, MOSS_IMAGE_SFT_WINDOWS_MODEL,
+        MOSS_IMAGE_SFT_WINDOWS_RECIPE, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+        QWEN_IMAGE_21_TURBO_WINDOWS_MODEL, QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE,
+        QWEN_IMAGE_21_WINDOWS_CAPABILITY, QWEN_IMAGE_21_WINDOWS_MODEL,
+        QWEN_IMAGE_21_WINDOWS_RECIPE, REALESRGAN_WINDOWS_CAPABILITY, REALESRGAN_WINDOWS_MODEL,
+        REALESRGAN_WINDOWS_RECIPE, REALESRGAN_WINDOWS_RUNTIME, WINDOWS_CPU_DEVICE,
+        WINDOWS_CUDA_DEVICE, WINDOWS_DIFFUSERS_ENGINE, WINDOWS_NCNN_ENGINE, WINDOWS_ONNX_ENGINE,
+        WINDOWS_V2_RUNTIME, WINDOWS_VULKAN_DEVICE, Z_IMAGE_CAPABILITY, Z_IMAGE_MODEL,
+        Z_IMAGE_WINDOWS_CAPABILITY, Z_IMAGE_WINDOWS_MODEL, is_windows_runtime,
+        validate_windows_z_image_plan, validate_windows_z_image_request, validate_z_image_plan,
+        validate_z_image_request,
     },
     require,
 };
@@ -52,6 +63,13 @@ pub enum Recipe {
     QwenImage21,
     QwenImage21Turbo,
     MossImageSft,
+    KleinTextWindows,
+    KleinEditWindows,
+    BiRefNetWindows,
+    RealEsrganWindows,
+    QwenImage21Windows,
+    QwenImage21TurboWindows,
+    MossImageSftWindows,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -156,6 +174,19 @@ impl Recipe {
             (QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_CAPABILITY) => Self::QwenImage21,
             (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY) => Self::QwenImage21Turbo,
             (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY) => Self::MossImageSft,
+            (KLEIN_WINDOWS_MODEL, KLEIN_WINDOWS_TEXT_CAPABILITY) => Self::KleinTextWindows,
+            (KLEIN_WINDOWS_MODEL, KLEIN_WINDOWS_EDIT_CAPABILITY) => Self::KleinEditWindows,
+            (BIREFNET_WINDOWS_MODEL, BIREFNET_WINDOWS_CAPABILITY) => Self::BiRefNetWindows,
+            (REALESRGAN_WINDOWS_MODEL, REALESRGAN_WINDOWS_CAPABILITY) => Self::RealEsrganWindows,
+            (QWEN_IMAGE_21_WINDOWS_MODEL, QWEN_IMAGE_21_WINDOWS_CAPABILITY) => {
+                Self::QwenImage21Windows
+            }
+            (QWEN_IMAGE_21_TURBO_WINDOWS_MODEL, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY) => {
+                Self::QwenImage21TurboWindows
+            }
+            (MOSS_IMAGE_SFT_WINDOWS_MODEL, MOSS_IMAGE_SFT_WINDOWS_CAPABILITY) => {
+                Self::MossImageSftWindows
+            }
             _ => {
                 return Err(ContractError::InvalidValue(
                     "unsupported model and capability combination".into(),
@@ -176,14 +207,36 @@ impl Recipe {
             Self::QwenImage21 => "qwen21-txt2img-q8-40-v1",
             Self::QwenImage21Turbo => "qwen21-turbo-txt2img-q8-8-v1",
             Self::MossImageSft => "moss-image-sft-txt2img-q8-50-v1",
+            Self::KleinTextWindows => KLEIN_WINDOWS_TEXT_RECIPE,
+            Self::KleinEditWindows => KLEIN_WINDOWS_EDIT_RECIPE,
+            Self::BiRefNetWindows => BIREFNET_WINDOWS_RECIPE,
+            Self::RealEsrganWindows => REALESRGAN_WINDOWS_RECIPE,
+            Self::QwenImage21Windows => QWEN_IMAGE_21_WINDOWS_RECIPE,
+            Self::QwenImage21TurboWindows => QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE,
+            Self::MossImageSftWindows => MOSS_IMAGE_SFT_WINDOWS_RECIPE,
         }
+    }
+
+    /// Windows recipes use independent identities and never inherit the macOS parameter maps.
+    pub fn is_windows(self) -> bool {
+        matches!(
+            self,
+            Self::ZImageTurboCudaNf4
+                | Self::KleinTextWindows
+                | Self::KleinEditWindows
+                | Self::BiRefNetWindows
+                | Self::RealEsrganWindows
+                | Self::QwenImage21Windows
+                | Self::QwenImage21TurboWindows
+                | Self::MossImageSftWindows
+        )
     }
 
     pub fn outputs(self) -> &'static [OutputRole] {
         const PRIMARY: &[OutputRole] = &[OutputRole::Primary];
         const PRIMARY_AND_MASK: &[OutputRole] = &[OutputRole::Primary, OutputRole::Mask];
         match self {
-            Self::BiRefNet => PRIMARY_AND_MASK,
+            Self::BiRefNet | Self::BiRefNetWindows => PRIMARY_AND_MASK,
             _ => PRIMARY,
         }
     }
@@ -193,27 +246,37 @@ impl Recipe {
             (Self::ZImageTurbo, OutputRole::Primary) => {
                 matches!(kind, AssetKind::ImageRgb | AssetKind::ImageRgba)
             }
-            (Self::ZImageTurboCudaNf4, OutputRole::Primary) => {
-                matches!(kind, AssetKind::ImageRgb)
-            }
+            (Self::ZImageTurboCudaNf4, OutputRole::Primary) => matches!(kind, AssetKind::ImageRgb),
             (
                 Self::KleinText
                 | Self::KleinEdit
                 | Self::RealEsrgan
                 | Self::QwenImage21
                 | Self::QwenImage21Turbo
-                | Self::MossImageSft,
+                | Self::MossImageSft
+                | Self::KleinTextWindows
+                | Self::KleinEditWindows
+                | Self::RealEsrganWindows
+                | Self::QwenImage21Windows
+                | Self::QwenImage21TurboWindows
+                | Self::MossImageSftWindows,
                 OutputRole::Primary,
             ) => matches!(kind, AssetKind::ImageRgb),
-            (Self::BiRefNet, OutputRole::Primary) => matches!(kind, AssetKind::ImageRgba),
-            (Self::BiRefNet, OutputRole::Mask) => matches!(kind, AssetKind::Mask),
+            (Self::BiRefNet | Self::BiRefNetWindows, OutputRole::Primary) => {
+                matches!(kind, AssetKind::ImageRgba)
+            }
+            (Self::BiRefNet | Self::BiRefNetWindows, OutputRole::Mask) => {
+                matches!(kind, AssetKind::Mask)
+            }
             _ => false,
         }
     }
 
     pub fn max_output_bytes(self, role: OutputRole) -> Option<u64> {
         match (self, role) {
-            (Self::RealEsrgan, OutputRole::Primary) => Some(MAX_UPSCALE_OUTPUT_BYTES),
+            (Self::RealEsrgan | Self::RealEsrganWindows, OutputRole::Primary) => {
+                Some(MAX_UPSCALE_OUTPUT_BYTES)
+            }
             (
                 Self::ZImageTurbo
                 | Self::ZImageTurboCudaNf4
@@ -221,10 +284,15 @@ impl Recipe {
                 | Self::KleinEdit
                 | Self::QwenImage21
                 | Self::QwenImage21Turbo
-                | Self::MossImageSft,
+                | Self::MossImageSft
+                | Self::KleinTextWindows
+                | Self::KleinEditWindows
+                | Self::QwenImage21Windows
+                | Self::QwenImage21TurboWindows
+                | Self::MossImageSftWindows,
                 OutputRole::Primary,
             )
-            | (Self::BiRefNet, OutputRole::Primary | OutputRole::Mask) => {
+            | (Self::BiRefNet | Self::BiRefNetWindows, OutputRole::Primary | OutputRole::Mask) => {
                 Some(MAX_TOOL_OUTPUT_BYTES)
             }
             _ => None,
@@ -256,6 +324,13 @@ impl Recipe {
             Self::QwenImage21 => QWEN_IMAGE_21_CAPABILITY,
             Self::QwenImage21Turbo => QWEN_IMAGE_21_TURBO_CAPABILITY,
             Self::MossImageSft => MOSS_IMAGE_SFT_CAPABILITY,
+            Self::KleinTextWindows => KLEIN_WINDOWS_TEXT_CAPABILITY,
+            Self::KleinEditWindows => KLEIN_WINDOWS_EDIT_CAPABILITY,
+            Self::BiRefNetWindows => BIREFNET_WINDOWS_CAPABILITY,
+            Self::RealEsrganWindows => REALESRGAN_WINDOWS_CAPABILITY,
+            Self::QwenImage21Windows => QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+            Self::QwenImage21TurboWindows => QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+            Self::MossImageSftWindows => MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
             Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
         };
         require(
@@ -263,7 +338,7 @@ impl Recipe {
             "capability does not match recipe",
         )?;
         match self {
-            Self::KleinText => {
+            Self::KleinText | Self::KleinTextWindows => {
                 require(
                     request.capability.instruction_required
                         && request.capability.input_roles.is_empty()
@@ -280,7 +355,7 @@ impl Recipe {
                 )?;
                 validate_seed_parameters(request)?;
             }
-            Self::KleinEdit => {
+            Self::KleinEdit | Self::KleinEditWindows => {
                 validate_single_source(request, source)?;
                 let source = source.expect("validated above");
                 require(
@@ -300,7 +375,7 @@ impl Recipe {
                 )?;
                 validate_seed_parameters(request)?;
             }
-            Self::BiRefNet => {
+            Self::BiRefNet | Self::BiRefNetWindows => {
                 validate_single_source(request, source)?;
                 let source = source.expect("validated above");
                 require(
@@ -318,7 +393,7 @@ impl Recipe {
                     "BiRefNet output must preserve normalized source dimensions",
                 )?;
             }
-            Self::RealEsrgan => {
+            Self::RealEsrgan | Self::RealEsrganWindows => {
                 validate_single_source(request, source)?;
                 let source = source.expect("validated above");
                 require(
@@ -354,7 +429,12 @@ impl Recipe {
                     "Real-ESRGAN output must be exactly four times the source dimensions",
                 )?;
             }
-            Self::QwenImage21 | Self::QwenImage21Turbo | Self::MossImageSft => {
+            Self::QwenImage21
+            | Self::QwenImage21Turbo
+            | Self::MossImageSft
+            | Self::QwenImage21Windows
+            | Self::QwenImage21TurboWindows
+            | Self::MossImageSftWindows => {
                 validate_text_model_request(request, source)?;
             }
             Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
@@ -382,6 +462,7 @@ impl Recipe {
                 && plan.adjustments.is_empty(),
             "recipe cannot substitute model, output, or apply implicit adjustments",
         )?;
+        validate_plan_platform_identity(self, plan)?;
         let expected = match self {
             Self::KleinText | Self::KleinEdit => {
                 let seed = request
@@ -448,6 +529,16 @@ impl Recipe {
             Self::QwenImage21 | Self::QwenImage21Turbo | Self::MossImageSft => {
                 let effective_seed = text_model_effective_seed(request, plan)?;
                 text_model_parameters(self, effective_seed)
+            }
+            Self::KleinTextWindows | Self::KleinEditWindows => {
+                windows_klein_parameters(self, windows_klein_effective_seed(request, plan)?)
+            }
+            Self::BiRefNetWindows => windows_birefnet_parameters(),
+            Self::RealEsrganWindows => windows_realesrgan_parameters(),
+            Self::QwenImage21Windows
+            | Self::QwenImage21TurboWindows
+            | Self::MossImageSftWindows => {
+                windows_text_model_parameters(self, text_model_effective_seed(request, plan)?)
             }
             Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
         };
@@ -961,6 +1052,177 @@ fn validate_single_source(
         ContractError::InvalidValue("processing recipe requires source image facts".into())
     })?;
     source.validate()
+}
+
+/// Runtime, engine and device classes frozen for a Windows recipe (design.md section 11).
+fn windows_plan_identity(recipe: Recipe) -> (&'static str, &'static str, &'static str) {
+    match recipe {
+        Recipe::KleinTextWindows
+        | Recipe::KleinEditWindows
+        | Recipe::QwenImage21Windows
+        | Recipe::QwenImage21TurboWindows
+        | Recipe::MossImageSftWindows => (
+            WINDOWS_V2_RUNTIME,
+            WINDOWS_DIFFUSERS_ENGINE,
+            WINDOWS_CUDA_DEVICE,
+        ),
+        Recipe::BiRefNetWindows => (WINDOWS_V2_RUNTIME, WINDOWS_ONNX_ENGINE, WINDOWS_CPU_DEVICE),
+        Recipe::RealEsrganWindows => (
+            REALESRGAN_WINDOWS_RUNTIME,
+            WINDOWS_NCNN_ENGINE,
+            WINDOWS_VULKAN_DEVICE,
+        ),
+        _ => unreachable!("only Windows recipes have a Windows plan identity"),
+    }
+}
+
+/// A Windows plan must bind its exact frozen runtime; a macOS plan must never bind a Windows one.
+fn validate_plan_platform_identity(
+    recipe: Recipe,
+    plan: &ExecutionPlan,
+) -> Result<(), ContractError> {
+    if recipe.is_windows() {
+        let (runtime, engine, device) = windows_plan_identity(recipe);
+        require(
+            plan.runtime.package_id == runtime
+                && plan.runtime.engine == engine
+                && plan.device.device_id == device,
+            "Windows runtime or device identity does not match the frozen profile",
+        )
+    } else {
+        require(
+            !is_windows_runtime(&plan.runtime.package_id),
+            "Windows runtime cannot serve a macOS recipe",
+        )
+    }
+}
+
+fn windows_klein_effective_seed(
+    request: &UserRequest,
+    plan: &ExecutionPlan,
+) -> Result<u32, ContractError> {
+    let requested = request
+        .parameters
+        .get("seed")
+        .and_then(serde_json::Value::as_u64)
+        .and_then(|value| u32::try_from(value).ok());
+    let effective = plan
+        .effective_parameters
+        .get("seed")
+        .and_then(serde_json::Value::as_u64)
+        .and_then(|value| u32::try_from(value).ok())
+        .ok_or_else(|| {
+            ContractError::InvalidValue("Windows Klein effective seed must be u32".into())
+        })?;
+    if let Some(requested) = requested {
+        require(
+            effective == requested,
+            "effective seed must preserve the explicit Windows Klein seed",
+        )?;
+    }
+    Ok(effective)
+}
+
+/// Klein text-to-image and edit share one frozen NF4 + component-offload map (design.md section 11).
+fn windows_klein_parameters(recipe: Recipe, seed: u32) -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        ("recipe".into(), json!(recipe.id())),
+        ("recipe_version".into(), json!(1)),
+        ("seed".into(), json!(seed)),
+        ("steps".into(), json!(4)),
+        ("guidance".into(), json!(1.0)),
+        ("scheduler".into(), json!("flow_match_euler_discrete")),
+        ("token_budget".into(), json!(512)),
+        ("thinking".into(), json!(false)),
+        ("truncation".into(), json!(false)),
+        ("quantization".into(), json!("nf4")),
+        ("load_strategy".into(), json!("nf4-component-offload-v1")),
+    ])
+}
+
+/// BiRefNet keeps the macOS ONNX Runtime CPU contract on the Windows v2 runtime.
+fn windows_birefnet_parameters() -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        ("recipe".into(), json!(Recipe::BiRefNetWindows.id())),
+        ("recipe_version".into(), json!(1)),
+        ("provider".into(), json!("CPUExecutionProvider")),
+        ("precision".into(), json!("float32")),
+        ("preprocessing".into(), json!("birefnet-1024-rgb-v1")),
+        ("postprocessing".into(), json!("birefnet-logits-sigmoid-v1")),
+        ("intra_op_threads".into(), json!(4)),
+        ("inter_op_threads".into(), json!(1)),
+        ("execution_mode".into(), json!("sequential")),
+    ])
+}
+
+/// Real-ESRGAN Windows fixes 4x, tile 128, single GPU and 1:1:1 threads with TTA disabled.
+fn windows_realesrgan_parameters() -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        ("recipe".into(), json!(Recipe::RealEsrganWindows.id())),
+        ("recipe_version".into(), json!(1)),
+        ("model".into(), json!("realesrgan-x4plus")),
+        ("scale".into(), json!(4)),
+        ("tile".into(), json!(128)),
+        ("threads".into(), json!("1:1:1")),
+        ("tta".into(), json!(false)),
+    ])
+}
+
+fn windows_qwen21_parameters(recipe: Recipe, seed: u32) -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        ("recipe".into(), json!(recipe.id())),
+        ("recipe_version".into(), json!(1)),
+        ("seed".into(), json!(seed)),
+        (
+            "steps".into(),
+            json!(if recipe == Recipe::QwenImage21TurboWindows {
+                8
+            } else {
+                40
+            }),
+        ),
+        ("guidance".into(), json!(1.0)),
+        ("sampling".into(), json!("linear")),
+        ("token_budget".into(), json!(2048)),
+        ("quantization".into(), json!("nf4")),
+        ("load_strategy".into(), json!("staged-nf4-v1")),
+    ])
+}
+
+/// Qwen base/Turbo and MOSS use the staged NF4 maps frozen in design.md section 11.
+fn windows_text_model_parameters(recipe: Recipe, seed: u32) -> BTreeMap<String, serde_json::Value> {
+    match recipe {
+        Recipe::QwenImage21Windows | Recipe::QwenImage21TurboWindows => {
+            let mut parameters = windows_qwen21_parameters(recipe, seed);
+            if recipe == Recipe::QwenImage21TurboWindows {
+                parameters.insert(
+                    "sampling_schedule".into(),
+                    json!("qwen-turbo-model-index-v1"),
+                );
+            }
+            parameters
+        }
+        Recipe::MossImageSftWindows => BTreeMap::from([
+            ("recipe".into(), json!(recipe.id())),
+            ("recipe_version".into(), json!(1)),
+            ("seed".into(), json!(seed)),
+            ("steps".into(), json!(50)),
+            ("guidance".into(), json!(3.0)),
+            ("sampling".into(), json!("moss_image")),
+            ("token_budget".into(), json!(4096)),
+            ("thinking".into(), json!(true)),
+            ("negative_prompt".into(), json!("")),
+            ("uncond_skip_layers".into(), json!([22])),
+            (
+                "quantized_components".into(),
+                json!(["transformer", "text_encoder"]),
+            ),
+            ("text_encoder_precision".into(), json!("nf4")),
+            ("vae_precision".into(), json!("float32")),
+            ("load_strategy".into(), json!("staged-nf4-v1")),
+        ]),
+        _ => unreachable!("only Windows staged text models have a frozen parameter map"),
+    }
 }
 
 #[cfg(test)]
