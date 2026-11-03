@@ -91,6 +91,15 @@ Windows 预检曾发现根 workspace 对 `sha2` 启用全局 `asm`，其汇编�
 
 运行验收必须覆盖从 NSIS 安装目录启动，不能只测 `target/debug`。Mac 交叉检查可早做，但目标机 GUI、IME、WDDM 和进程清理必须另有证据。仓库已配置 `origin`，历史源码推送不授权本 change 的后续 push、pull、CI 云账户或 Dolt 远程同步；这些远程操作仍须单独授权。
 
+### 9. 启动失败可诊断，每个数据根使用独立 WebView2 用户数据目录
+
+Tauri 2.12.5 在 `setup` 失败时于依赖内 `app.rs:1444` 直接 `panic!("Failed to setup app: {e}")`；release 构建是 windows subsystem，没有控制台，用户只能看到进程以 101 消失。2026-11-03 重建包中“不同数据根的第二实例退出码 101”与这一机制一致，但在 Windows 11 / i9-9900K / RTX 2060 SUPER 开发机上用当前源码未能复现：不同数据根同时启动（0 ms）、交错启动（500 ms）、同根启动、以及强杀首实例后残留 12 个 `msedgewebview2.exe` 时再启动，两种场景都保持运行。因此本轮不宣称已定位那次外部故障的触发条件，只修可验证、可复现的失败路径。
+
+- 在 `host::run()` 解析数据根后安装 panic hook：识别 `Failed to setup app`，把底层消息写入 `<数据根>/logs/startup-failure.log`，显示原生中文对话框说明原因、日志位置与建议（确认 WebView2 安装、改用可写数据根），以登记退出码 3 结束。其他 panic 交回默认 hook，不改变既有崩溃语义。
+- WebView2 默认用户数据目录是 `%LOCALAPPDATA%\<identifier>\EBWebView`，与 `--data-dir` 无关，所有实例共享浏览器 profile 与缓存。启动时设置 WebView2 官方环境变量 `WEBVIEW2_USER_DATA_FOLDER` 指向 `<数据根>/cache/webview2`，使独立根互不共享；默认根一并迁移，旧目录保留不删除。WebView2 的浏览器进程可能继承该变量，故只在宿主创建 webview 前设置，且不把路径交给前端。
+- 备选：Tauri 窗口配置的 `dataDirectory` 只能给出相对 app local data 的路径，无法表达 `--data-dir` 隔离根，不采用。
+- 启动失败路径只写日志、显示对话框并以固定码退出，不写数据库、不改模型与资产；故障注入测试通过把 `WEBVIEW2_BROWSER_EXECUTABLE_FOLDER` 指向空目录触发，不得为测试在生产代码里加开关。
+
 ## Risks / Trade-offs
 
 | 风险/取舍 | 处理 |
@@ -104,6 +113,8 @@ Windows 预检曾发现根 workspace 对 `sha2` 启用全局 `asm`，其汇编�
 | 路径重解析、独占文件和替换语义不同 | 原生句柄边界和 NTFS 集成验收，覆盖中文路径/占用/越界/失败原文件保持 |
 | Job 句柄泄漏或继承使强杀留下计算 | 启动竞争、宿主/监督/worker 强杀和 descendant 故障测试，保持租约直至确认清理 |
 | 共用代码破坏 Mac 七型号 | Mac 质量门加真实 Z-Image 生命周期及其他六型号各一条能力回归；Klein含编辑、BiRefNet含mask |
+| 启动失败只留下 101，用户无法判断原因 | panic hook 捕获 `Failed to setup app`，写日志、弹对话框、退出码 3；用 WebView2 不可用注入验证 |
+| 独立数据根仍共享 WebView2 profile/缓存 | 每个数据根设置独立 `WEBVIEW2_USER_DATA_FOLDER`，双实例运行后检查两个目录分离 |
 
 ## Migration Plan
 
