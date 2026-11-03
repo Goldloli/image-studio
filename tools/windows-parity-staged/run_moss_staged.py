@@ -125,6 +125,9 @@ def stage_text(args, sampler: Sampler, work: Path) -> dict:
 
     positive, positive_mask = pad(positive)
     negative, negative_mask = pad(negative)
+    # The MOSS DiT requires [B, S, text_dim]; the encoder produced [S, text_dim].
+    positive, positive_mask = positive.unsqueeze(0), positive_mask.unsqueeze(0)
+    negative, negative_mask = negative.unsqueeze(0), negative_mask.unsqueeze(0)
     torch.save(
         {
             "positive": positive,
@@ -155,10 +158,11 @@ def stage_text(args, sampler: Sampler, work: Path) -> dict:
 
 def load_transformer(module, model_dir: Path, prepared_dir: Path | None):
     source = prepared_dir if prepared_dir is not None and (prepared_dir / "config.json").is_file() else model_dir
-    kwargs = dict(torch_dtype=torch.bfloat16, device_map="cpu", low_cpu_mem_usage=True)
+    kwargs = dict(torch_dtype=torch.bfloat16, low_cpu_mem_usage=True)
     if source is model_dir:
         kwargs["subfolder"] = "transformer"
         kwargs["quantization_config"] = bnb_config("int8")
+        kwargs["device_map"] = "cpu"
     transformer = module.MOSSImageTransformer.from_pretrained(str(source), **kwargs)
     transformer = transformer.to("cuda:0")
     transformer.eval()
@@ -168,7 +172,10 @@ def load_transformer(module, model_dir: Path, prepared_dir: Path | None):
 def stage_dit(args, sampler: Sampler, work: Path) -> dict:
     from diffusers.utils.torch_utils import randn_tensor
 
+    import moss_bnb_shim
+
     module = load_pipeline_module(args.model_dir)
+    moss_bnb_shim.install(module)
     prompt = torch.load(work / "prompt.pt", map_location="cpu", weights_only=False)
     positive = prompt["positive"].to("cuda:0")
     positive_mask = prompt["positive_mask"].to("cuda:0")
@@ -326,7 +333,8 @@ def prepare_components(args, sampler: Sampler) -> dict:
     gc.collect()
 
     dit_records = {}
-    for quant in ("int8", "nf4"):
+    candidates = [args.dit_quant] if args.dit_quant in ("int8", "nf4") else ["int8", "nf4"]
+    for quant in candidates:
         target = prepared / "transformer"
         if (target / "config.json").is_file():
             dit_records[quant] = {"status": "already_prepared", "prepared_bytes": dir_bytes(target)}
@@ -376,6 +384,12 @@ def main() -> int:
     parser.add_argument("--output", default="target/parity-gate0/results/moss-staged.png", type=Path)
     parser.add_argument("--report", default="verification/windows-parity-gate0/staged-moss.json", type=Path)
     parser.add_argument("--mode", choices=["run", "prepare"], default="run")
+    parser.add_argument(
+        "--dit-quant",
+        choices=["auto", "int8", "nf4"],
+        default="auto",
+        help="DiT quantization for prepare; auto tries int8 then nf4",
+    )
     parser.add_argument("--stage", choices=["text", "dit", "vae", "all"], default="all")
     parser.add_argument("--prompt", default="雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光")
     parser.add_argument("--negative-prompt", default="")
