@@ -123,6 +123,15 @@ focused look (likely WebView2 user-data-folder contention); the earlier
 independent-root smoke used a previous package. Same-root rejection remains the
 expected single-instance behaviour.
 
+The current source no longer reproduces it on a Windows 11 development machine
+(different roots at 0 ms/500 ms/25 s offsets, the same root, and a launch after
+force-killing the first instance all kept both hosts running), but the panic
+path is proven: any WebView2 setup failure ends in
+`tauri-2.12.5/src/app.rs:1444` with exit code `101`. The application now
+reports that class of failure explicitly — see
+[windows-startup-diagnosis](../windows-startup-diagnosis/README.md) — and the
+target machine still has to re-run W07 with the installed NSIS build.
+
 ## Pending
 
 100%/200% OS scaling and a human visual review of both themes remain pending;
