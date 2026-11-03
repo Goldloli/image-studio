@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "kind": "acceptance-scope-decision",
+  "date": "2026-11-03",
+  "cases": ["I07", "P06"],
+  "status": "waived_not_run",
+  "decided_by": "user (project owner)",
+  "decision": "The user explicitly decided not to run the whole-process-tree network-denial acceptance on the Windows target machine for this round.",
+  "user_rationale": "The user tested the same local generation path on macOS and confirmed generation is local; no cloud generation API key is configured.",
+  "supporting_code_audit": {
+    "date": "2026-11-03",
+    "result": "The only HTTP client in the repository is the reqwest client in apps/desktop/src/adapters/installation.rs; it serves model/runtime downloads and checks download URLs against an allowlist. The generation pipeline (mflux/onnx workers, inference-supervisor, diagnostic-worker, studio-core) has no HTTP client; the frontend has no fetch/XHR/WebSocket and uses Tauri IPC only; no updater or telemetry client exists.",
+    "sources": [
+      "apps/desktop/src/adapters/installation.rs (http_client, allowed_url, RANGE/ETag resume downloads)",
+      "apps/desktop/src/studio.rs (source URLs are model-download identities, not generation calls)",
+      "apps/frontend/src (no fetch/XMLHttpRequest/WebSocket matches)"
+    ],
+    "limitation": "A code audit is supporting evidence only. It is not a runtime network-denial result and must not be recorded as I07/P06 passing."
+  },
+  "windows_status": "not_run",
+  "not_counted_as_pass": true,
+  "consequence": "Windows P0 I07/P06 remain not_run for this round. The change cannot claim complete P0 acceptance and must not be archived as a full pass without a later explicit scope decision by the user.",
+  "next_options": [
+    "Run scripts/windows-admin/enable-network-denial.ps1 from an elevated PowerShell, drive the cache installation and three real generations, then run remove-network-denial.ps1.",
+    "The user explicitly confirms a scope reduction, and the OpenSpec change is updated before any archive."
+  ],
+  "related": {
+    "test_plan": ["I07", "P06"],
+    "bead": "image-studio-76x",
+    "scripts": "scripts/windows-admin/enable-network-denial.ps1"
+  }
+}
