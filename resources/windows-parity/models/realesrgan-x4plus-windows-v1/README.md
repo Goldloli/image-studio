@@ -44,6 +44,9 @@ all exactly 4x). Hardware floor: `min_vram_gb=4`, `min_ram_gb=8`.
 - installed weights (`component_bytes`): 33,540,549 bytes (~32 MiB)
 - archive download/cache: 45,474,481 bytes
 - no GPU-side prepared cache; ncnn runs directly from the installed files
+- the native runtime manifest references the same official zip, so the
+  installer's SHA-256-keyed download cache stores it **once**; install-space
+  math that counts the archive in both manifests is a conservative upper bound
 
 ## Evidence
 

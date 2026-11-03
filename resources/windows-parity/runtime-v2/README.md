@@ -114,6 +114,34 @@ in-product repair/diagnostics, budget it in. Model weights are additional.
 CPU execution provider is part of the contract for BiRefNet, so the CPU package
 is pinned; GPU execution providers are intentionally out of this closure.
 
+## Installer manifest (`product-runtime-manifest.json`)
+
+`runtime-manifest.json` is the frozen evidence closure (per-file index metadata,
+licenses, interpreter member details). `product-runtime-manifest.json` is the
+installer-facing `RuntimeManifest` view built from it and the verified installed
+runtime:
+
+- `kind: "python-embeddable-windows"`, `id`
+  `windows-python31210-torch2100-cu126-diff041-transformers53-v2`,
+  `python: "3.12.10"`, `platform: "windows-amd64"`
+- `interpreter`: the Python 3.12.10 embeddable archive artifact
+- `wheels`: the 49 frozen wheel artifacts, one-to-one with `requirements.lock`
+- `packages`: 49 name→version pairs read from the installed runtime's
+  `.dist-info/METADATA`, normalized exactly like the installer probe
+  (`Name.lower().replace('_','-')`); every value equals the locked pin
+- `archives: []`
+- `install_layout`: `{"interpreter_root": "python.exe", "site_packages":
+  "Lib/site-packages", "path_file": "python312._pth"}`
+- `worker_wheels_pending`: explicitly marks the manifest incomplete on the
+  Windows worker wheels (`studio-diffusers-worker`, `studio-onnx-worker`); they
+  are appended to `wheels` when the worker streams build them, and the field is
+  removed then. Until then the manifest must not be used to activate an
+  installation.
+
+`verification/windows-parity-manifests/` re-validates the manifest against the
+installer schema rules, the URL allowlist, every local wheel hash and the lock
+pins.
+
 ## Limitations
 
 - Content + offline-install/import proof only; no model inference is certified

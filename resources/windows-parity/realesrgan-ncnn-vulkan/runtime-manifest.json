@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "kind": "native",
+  "id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+  "platform": "windows-amd64",
+  "executable": "realesrgan-ncnn-vulkan.exe",
+  "archives": [
+    {
+      "path": "realesrgan-ncnn-vulkan-20220424-windows.zip",
+      "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-windows.zip",
+      "bytes": 45474481,
+      "sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+      "members": [
+        {
+          "archive_path": "realesrgan-ncnn-vulkan.exe",
+          "path": "realesrgan-ncnn-vulkan.exe",
+          "bytes": 6161408,
+          "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+          "executable": true
+        },
+        {
+          "archive_path": "vcomp140.dll",
+          "path": "vcomp140.dll",
+          "bytes": 182704,
+          "sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
+          "executable": false
+        },
+        {
+          "archive_path": "README_windows.md",
+          "path": "README_windows.md",
+          "bytes": 1859,
+          "sha256": "2b882314a0c7a9f17a347b9b04f909939f6274aa96cf5b2ebba2f7ab75987480",
+          "executable": false
+        }
+      ]
+    }
+  ],
+  "licenses": [
+    {
+      "path": "LICENSE-RealESRGAN.txt",
+      "bytes": 1519,
+      "sha256": "4a699ec4863d96a91fc265948a0c90033f7e8735d515524dcf3444736406e0c2",
+      "source": "resources/windows-parity/realesrgan-ncnn-vulkan/LICENSE-RealESRGAN.txt",
+      "source_url": "https://raw.githubusercontent.com/xinntao/Real-ESRGAN/v0.2.5.0/LICENSE",
+      "note": "The official Windows zip does not contain license files; the text is bundled as an application resource."
+    },
+    {
+      "path": "LICENSE-ncnn-app.txt",
+      "bytes": 2228,
+      "sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937",
+      "source": "resources/windows-parity/realesrgan-ncnn-vulkan/LICENSE-ncnn-app.txt",
+      "source_url": "https://raw.githubusercontent.com/xinntao/Real-ESRGAN-ncnn-vulkan/v0.2.0/LICENSE",
+      "note": "MIT license of the ncnn application, bundled as an application resource."
+    }
+  ],
+  "install_layout": {
+    "root": ".",
+    "executable": "realesrgan-ncnn-vulkan.exe",
+    "models_dir": "models"
+  },
+  "fixed_parameters": {
+    "model": "realesrgan-x4plus",
+    "scale": 4,
+    "tile": 128,
+    "gpu_ids": [
+      0
+    ],
+    "threads": "1:1:1",
+    "tta": false
+  },
+  "notes": [
+    "The official Windows zip contains the executable, vcomp140.dll, the model weights, README_windows.md and sample assets, but no license files; the two license texts are bundled application resources recorded in `licenses` and must ship with the installed files.",
+    "The same archive is referenced by the Real-ESRGAN model manifest; the installer download cache is keyed by SHA-256, so the 45,474,481-byte zip is stored once. Install-space math that counts both manifest downloads is a conservative upper bound.",
+    "The platform gate requires platform == 'windows-amd64' after the planned native-platform change."
+  ]
+}
