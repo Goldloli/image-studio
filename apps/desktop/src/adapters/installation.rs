@@ -604,6 +604,54 @@ fn licenses_healthy(data: &Path, profile: InstallProfile) -> Result<(), String> 
     }
     Ok(())
 }
+const RUNTIME_ACTIVATION_RECORD: &str = "runtime-activation.json";
+#[derive(Serialize, Deserialize)]
+struct RuntimeActivation {
+    runtime_lock_id: String,
+    manifest_sha256: String,
+    files: Vec<InventoryEntry>,
+}
+/// A completed shared runtime is reusable only for the exact manifest identity and
+/// while every recorded file still exists at its recorded size. This is what makes
+/// installing the second model on a shared runtime cheap and non-destructive.
+fn runtime_activation_matches(root: &Path, runtime_id: &str, manifest_sha256: &str) -> bool {
+    fs::read(root.join(RUNTIME_ACTIVATION_RECORD))
+        .ok()
+        .and_then(|bytes| serde_json::from_slice::<RuntimeActivation>(&bytes).ok())
+        .is_some_and(|activation| {
+            activation.runtime_lock_id == runtime_id
+                && activation.manifest_sha256 == manifest_sha256
+                && !activation.files.is_empty()
+                && activation
+                    .files
+                    .iter()
+                    .all(|entry| inventory_metadata_matches(root, entry).is_ok())
+        })
+}
+fn write_runtime_activation(
+    root: &Path,
+    runtime_id: &str,
+    manifest_sha256: &str,
+) -> Result<(), String> {
+    let mut files = Vec::new();
+    inventory(root, root, &mut files)?;
+    atomic_json(
+        &root.join(RUNTIME_ACTIVATION_RECORD),
+        &RuntimeActivation {
+            runtime_lock_id: runtime_id.into(),
+            manifest_sha256: manifest_sha256.into(),
+            files,
+        },
+    )
+}
+#[cfg(any(windows, test))]
+fn activate_staged_runtime(staging: &Path, runtime: &Path) -> Result<(), String> {
+    if runtime.exists() {
+        fs::remove_dir_all(runtime).map_err(err)?;
+    }
+    fs::rename(staging, runtime).map_err(err)?;
+    sync_directory(runtime.parent().ok_or("运行时路径无父目录")?)
+}
 fn ready_record_matches(
     record: &ReadyRecord,
     profile: InstallProfile,
@@ -1386,81 +1434,111 @@ impl Installation {
         )?;
         let runtime = self.runtime_dir();
         ensure_child_dir(&self.inner.paths.data, &runtime)?;
-        // Never execute a leftover, unverified interpreter from an interrupted install.
-        // Only this fixed private identity is rebuilt; other activated versions survive.
-        fs::remove_dir_all(&runtime).map_err(err)?;
-        ensure_child_dir(&self.inner.paths.data, &runtime)?;
-        extract_runtime_archive(
-            &self.cache().join(&interpreter.sha256),
-            &runtime,
-            &interpreter.path,
-        )?;
+        let runtime_manifest_sha256 = manifest_digest(self.inner.profile.runtime_manifest);
+        // Shared runtimes (several Windows v2 models, several macOS v3 models) must
+        // never be torn down by another model's install. A completed runtime with the
+        // same manifest identity is reused as-is.
+        let reuse =
+            runtime_activation_matches(&runtime, &self.inner.runtime.id, &runtime_manifest_sha256);
+        // On Windows the interpreter is a self-contained embeddable tree, so a rebuild
+        // can be prepared in a staging directory and swapped in only after the wheels
+        // and the probe succeed. A cancelled rebuild therefore cannot strand a model
+        // that already uses the shared runtime.
         #[cfg(windows)]
-        let python = {
-            configure_embeddable_python(&runtime)?;
-            let site_packages = runtime.join("Lib/site-packages");
-            ensure_child_dir(&self.inner.paths.data, &site_packages)?;
-            for wheel in &self.inner.runtime.wheels {
-                self.check_cancel()?;
-                install_wheel(
-                    &self.cache().join(&wheel.sha256),
-                    &site_packages,
-                    &self.inner.paths.data,
-                )?;
+        let (work, staged) = if reuse {
+            (runtime.clone(), false)
+        } else {
+            let staging = self.staging_runtime_dir();
+            if staging.exists() {
+                fs::remove_dir_all(&staging).map_err(err)?;
             }
-            fs::write(
-                runtime.join("requirements.lock"),
-                canonical_requirements_lock(self.inner.profile.requirements_lock),
-            )
-            .map_err(err)?;
-            runtime.join("python.exe")
+            ensure_child_dir(&self.inner.paths.data, &staging)?;
+            (staging, true)
         };
         #[cfg(not(windows))]
-        let python = {
-            let base_python = runtime.join("python/bin/python3");
-            self.check_cancel()?;
-            self.command(
-                Command::new(&base_python)
-                    .args(["-I", "-m", "venv", "--clear"])
-                    .arg(runtime.join("venv")),
+        let work = {
+            // A macOS venv cannot be renamed safely, so a manifest change rebuilds in
+            // place; the activation record still makes the steady state reusable.
+            if !reuse {
+                fs::remove_dir_all(&runtime).map_err(err)?;
+                ensure_child_dir(&self.inner.paths.data, &runtime)?;
+            }
+            runtime.clone()
+        };
+        if !reuse {
+            extract_runtime_archive(
+                &self.cache().join(&interpreter.sha256),
+                &work,
+                &interpreter.path,
             )?;
-            let python = runtime.join("venv/bin/python3");
-            let wheelhouse = runtime.join("wheelhouse");
-            ensure_child_dir(&self.inner.paths.data, &wheelhouse)?;
-            for wheel in &self.inner.runtime.wheels {
-                copy_verified(
-                    &self.cache().join(&wheel.sha256),
-                    &wheelhouse.join(&wheel.path),
-                    wheel,
-                    &self.inner.paths.data,
+            #[cfg(windows)]
+            {
+                configure_embeddable_python(&work)?;
+                let site_packages = work.join("Lib/site-packages");
+                ensure_child_dir(&self.inner.paths.data, &site_packages)?;
+                for wheel in &self.inner.runtime.wheels {
+                    self.check_cancel()?;
+                    install_wheel(
+                        &self.cache().join(&wheel.sha256),
+                        &site_packages,
+                        &self.inner.paths.data,
+                    )?;
+                }
+                fs::write(
+                    work.join("requirements.lock"),
+                    canonical_requirements_lock(self.inner.profile.requirements_lock),
+                )
+                .map_err(err)?;
+            }
+            #[cfg(not(windows))]
+            {
+                let base_python = work.join("python/bin/python3");
+                self.check_cancel()?;
+                self.command(
+                    Command::new(&base_python)
+                        .args(["-I", "-m", "venv", "--clear"])
+                        .arg(work.join("venv")),
+                )?;
+                let wheelhouse = work.join("wheelhouse");
+                ensure_child_dir(&self.inner.paths.data, &wheelhouse)?;
+                for wheel in &self.inner.runtime.wheels {
+                    copy_verified(
+                        &self.cache().join(&wheel.sha256),
+                        &wheelhouse.join(&wheel.path),
+                        wheel,
+                        &self.inner.paths.data,
+                    )?;
+                }
+                fs::write(
+                    work.join("requirements.lock"),
+                    canonical_requirements_lock(self.inner.profile.requirements_lock),
+                )
+                .map_err(err)?;
+                self.command(
+                    Command::new(work.join("venv/bin/python3"))
+                        .args([
+                            "-I",
+                            "-m",
+                            "pip",
+                            "install",
+                            "--no-input",
+                            "--no-index",
+                            "--no-deps",
+                            "--require-hashes",
+                            "--only-binary=:all:",
+                            "--no-compile",
+                            "--find-links",
+                        ])
+                        .arg(&wheelhouse)
+                        .arg("-r")
+                        .arg(work.join("requirements.lock")),
                 )?;
             }
-            fs::write(
-                runtime.join("requirements.lock"),
-                canonical_requirements_lock(self.inner.profile.requirements_lock),
-            )
-            .map_err(err)?;
-            self.command(
-                Command::new(&python)
-                    .args([
-                        "-I",
-                        "-m",
-                        "pip",
-                        "install",
-                        "--no-input",
-                        "--no-index",
-                        "--no-deps",
-                        "--require-hashes",
-                        "--only-binary=:all:",
-                        "--no-compile",
-                        "--find-links",
-                    ])
-                    .arg(&wheelhouse)
-                    .arg("-r")
-                    .arg(runtime.join("requirements.lock")),
-            )?;
-            python
-        };
+        }
+        #[cfg(windows)]
+        let python = work.join("python.exe");
+        #[cfg(not(windows))]
+        let python = work.join("venv/bin/python3");
         self.check_cancel()?;
         self.update(|s| s.phase = "probing".into());
         let mut probe = Command::new(&python);
@@ -1491,19 +1569,40 @@ impl Installation {
                 return Err(format!("依赖版本不符：{name}"));
             }
         }
+        self.check_cancel()?;
+        if !reuse {
+            write_runtime_activation(&work, &self.inner.runtime.id, &runtime_manifest_sha256)?;
+        }
+        #[cfg(windows)]
+        if staged {
+            activate_staged_runtime(&work, &runtime)?;
+        }
+        self.check_cancel()?;
         let mut runtime_files = Vec::new();
         inventory(&runtime, &runtime, &mut runtime_files)?;
         self.check_cancel()?;
         let record = ReadyRecord {
             runtime_lock_id: self.inner.runtime.id.clone(),
             model_snapshot_id: self.inner.model.id.clone(),
-            runtime_manifest_sha256: manifest_digest(self.inner.profile.runtime_manifest),
+            runtime_manifest_sha256,
             model_manifest_sha256: manifest_digest(self.inner.profile.model_manifest),
             licenses: Vec::new(),
             runtime_files,
             probe,
         };
         Ok(record)
+    }
+    #[cfg(windows)]
+    fn staging_runtime_dir(&self) -> PathBuf {
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|elapsed| elapsed.as_nanos())
+            .unwrap_or(0);
+        self.inner.paths.data.join("runtimes").join(format!(
+            ".{}.staging-{}-{nonce}",
+            self.inner.runtime.id,
+            std::process::id()
+        ))
     }
     fn prepare_native_runtime(&self) -> Result<ReadyRecord, String> {
         for archive in &self.inner.runtime.archives {
@@ -4001,6 +4100,59 @@ mod tests {
         fs::write(&licenses, b"blocked by a file").unwrap();
         let error = install.install_licenses().unwrap_err();
         assert!(error.contains("管理目录"), "{error}");
+    }
+    #[test]
+    fn runtime_activation_reuse_requires_identity_and_unchanged_metadata() {
+        let temp = tempfile::tempdir().unwrap();
+        let runtime = temp.path().join("runtimes/windows-v2");
+        fs::create_dir_all(runtime.join("Lib/site-packages/worker")).unwrap();
+        fs::write(runtime.join("python.exe"), b"interpreter").unwrap();
+        fs::write(runtime.join("Lib/site-packages/worker/__init__.py"), b"").unwrap();
+        // The installer canonicalizes its data root, so the activation checks compare
+        // against canonical paths exactly like production does.
+        let runtime = runtime.canonicalize().unwrap();
+        let manifest = "a".repeat(64);
+        assert!(!runtime_activation_matches(
+            &runtime,
+            "windows-v2",
+            &manifest
+        ));
+        write_runtime_activation(&runtime, "windows-v2", &manifest).unwrap();
+        assert!(runtime_activation_matches(
+            &runtime,
+            "windows-v2",
+            &manifest
+        ));
+        assert!(!runtime_activation_matches(
+            &runtime,
+            "other-runtime",
+            &manifest
+        ));
+        assert!(!runtime_activation_matches(
+            &runtime,
+            "windows-v2",
+            &"b".repeat(64)
+        ));
+        fs::write(runtime.join("python.exe"), b"interpreter-changed").unwrap();
+        assert!(!runtime_activation_matches(
+            &runtime,
+            "windows-v2",
+            &manifest
+        ));
+    }
+    #[test]
+    fn staged_runtime_activation_swaps_the_complete_tree() {
+        let temp = tempfile::tempdir().unwrap();
+        let runtime = temp.path().join("runtimes/v2");
+        let staging = temp.path().join("runtimes/.v2.staging-1");
+        fs::create_dir_all(runtime.join("Lib")).unwrap();
+        fs::write(runtime.join("stale.txt"), b"stale").unwrap();
+        fs::create_dir_all(staging.join("Lib")).unwrap();
+        fs::write(staging.join("python.exe"), b"new").unwrap();
+        activate_staged_runtime(&staging, &runtime).unwrap();
+        assert!(!runtime.join("stale.txt").exists());
+        assert_eq!(fs::read(runtime.join("python.exe")).unwrap(), b"new");
+        assert!(!staging.exists());
     }
     fn server(
         response: Vec<u8>,
