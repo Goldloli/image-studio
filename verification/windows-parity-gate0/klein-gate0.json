@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "kind": "flux2-klein-4b-distilled-windows-gate0",
+  "case_id": "G2-K1",
+  "started_at_utc": "2026-11-03T16:24:25Z",
+  "machine": {
+    "os": "Windows",
+    "os_version": "10.0.19045",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "logical_cores": 24,
+    "physical_total_gib": 31.727,
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3080 Ti",
+      "driver": "596.49",
+      "memory_total_mib": 12288
+    }
+  },
+  "versions": {
+    "python": "3.12.10",
+    "torch": "2.10.0+cu126",
+    "cuda": "12.6",
+    "diffusers": "0.41.0",
+    "transformers": "5.3.0"
+  },
+  "model": {
+    "manifest": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\resources\\planned-models\\klein\\model-manifest.json",
+    "manifest_sha256": "a775f683829f26de74f8518e7361855ab6bc06c1a163bee8e3d68bfb34f4c3e5",
+    "repository": "black-forest-labs/FLUX.2-klein-4B",
+    "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "declared_component_bytes": 15980131745,
+    "verified_file_bytes": 15980131745,
+    "file_count": 18,
+    "missing": [],
+    "bad_size": [],
+    "model_index_class": "Flux2KleinPipeline",
+    "model_index_is_distilled": true,
+    "component_classes": {
+      "scheduler": [
+        "diffusers",
+        "FlowMatchEulerDiscreteScheduler"
+      ],
+      "text_encoder": [
+        "transformers",
+        "Qwen3ForCausalLM"
+      ],
+      "tokenizer": [
+        "transformers",
+        "Qwen2TokenizerFast"
+      ],
+      "transformer": [
+        "diffusers",
+        "Flux2Transformer2DModel"
+      ],
+      "vae": [
+        "diffusers",
+        "AutoencoderKLFlux2"
+      ]
+    }
+  },
+  "budget": {
+    "load_limit_seconds": 600,
+    "generation_limit_seconds": 900,
+    "cuda_reserved_limit_gib": 10.5,
+    "private_commit_limit_gib": 24,
+    "available_ram_minimum_gib": 2,
+    "wddm_shared_memory_fallback_is_failure": true
+  },
+  "parameters": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "edit_prompt": "把背景换成雨后的上海夜景街道，保留人物的面部和发型，写实摄影",
+    "steps": 4,
+    "width": 1024,
+    "height": 1024,
+    "seed_txt2img": 3148150817,
+    "seed_edit": 3148150818,
+    "guidance_scale": 1.0,
+    "resolution_note": "4 steps and guidance 1.0 follow the FLUX.2 klein 4B model card for the distilled checkpoint."
+  },
+  "preflight": {
+    "model_ready": true,
+    "cuda_available": true
+  },
+  "strategies": [
+    {
+      "strategy": "bf16-model-offload",
+      "definition": {
+        "name": "bf16-model-offload",
+        "dtype": "bfloat16",
+        "quantization": null,
+        "offload": "enable_model_cpu_offload",
+        "tasks": [
+          "txt2img",
+          "edit"
+        ]
+      },
+      "edit_source": {
+        "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\planned-models-20261031\\fixtures\\original\\portrait-hair.png",
+        "bytes": 2598783,
+        "sha256": "63d07fbf4beabb99cfa48fca25b69d5e41c00f9f7d5fe5e02a6c0dec4d9de8d6",
+        "width": 1122,
+        "height": 1402,
+        "mode": "RGB"
+      },
+      "phases": {
+        "load": {
+          "seconds": 3.89,
+          "cuda_reserved_peak_gib": 0.0,
+          "cuda_allocated_peak_gib": 0.0
+        },
+        "txt2img": {
+          "seconds": 22.84,
+          "cuda_reserved_peak_gib": 8.451,
+          "cuda_allocated_peak_gib": 7.808
+        },
+        "edit": {
+          "seconds": 17.8,
+          "cuda_reserved_peak_gib": 9.719,
+          "cuda_allocated_peak_gib": 9.213
+        }
+      },
+      "tasks": {
+        "txt2img": {
+          "task": "txt2img",
+          "parameters": {
+            "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+            "height": 1024,
+            "width": 1024,
+            "num_inference_steps": 4,
+            "guidance_scale": 1.0,
+            "seed": 3148150817,
+            "reference_image": null
+          },
+          "seconds": 22.84,
+          "cuda_reserved_peak_gib": 8.451,
+          "cuda_allocated_peak_gib": 7.808,
+          "output": {
+            "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-gate0\\klein-gate0-txt2img-bf16-model-offload.png",
+            "bytes": 1959701,
+            "sha256": "7ebbd32a2a172f7650a0b051093d4ddefecb42d1eaaa333388db33819de228fd",
+            "width": 1024,
+            "height": 1024
+          }
+        },
+        "edit": {
+          "task": "edit",
+          "parameters": {
+            "prompt": "把背景换成雨后的上海夜景街道，保留人物的面部和发型，写实摄影",
+            "height": null,
+            "width": null,
+            "num_inference_steps": 4,
+            "guidance_scale": 1.0,
+            "seed": 3148150818,
+            "reference_image": {
+              "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\planned-models-20261031\\fixtures\\original\\portrait-hair.png",
+              "bytes": 2598783,
+              "sha256": "63d07fbf4beabb99cfa48fca25b69d5e41c00f9f7d5fe5e02a6c0dec4d9de8d6",
+              "width": 1122,
+              "height": 1402,
+              "mode": "RGB"
+            }
+          },
+          "seconds": 17.8,
+          "cuda_reserved_peak_gib": 9.719,
+          "cuda_allocated_peak_gib": 9.213,
+          "output": {
+            "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-gate0\\klein-gate0-edit-bf16-model-offload.png",
+            "bytes": 1770681,
+            "sha256": "0c86a37e4447d988bb3274b8a4e9b2de341145b9924ca1534d0504f674d76db8",
+            "width": 912,
+            "height": 1136
+          }
+        }
+      },
+      "status": "budget_failed",
+      "failures": [
+        "private commit exceeds limit"
+      ],
+      "resources": {
+        "process_tree_private_commit_peak_gib": 31.745,
+        "system_available_ram_min_gib": 6.412,
+        "system_physical_total_gib": 31.727,
+        "cuda_reserved_peak_gib": 9.719,
+        "cuda_allocated_peak_gib": 8.41,
+        "nvidia_used_peak_mib": 11081,
+        "sample_interval_seconds": 0.2,
+        "sample_count": 192
+      }
+    },
+    {
+      "strategy": "nf4-model-offload",
+      "definition": {
+        "name": "nf4-model-offload",
+        "dtype": "bfloat16 compute",
+        "quantization": {
+          "backend": "bitsandbytes_4bit",
+          "quant_type": "nf4",
+          "compute_dtype": "bfloat16",
+          "double_quant": true,
+          "components": [
+            "transformer",
+            "text_encoder"
+          ]
+        },
+        "offload": "enable_model_cpu_offload",
+        "tasks": [
+          "txt2img",
+          "edit"
+        ]
+      },
+      "edit_source": {
+        "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\planned-models-20261031\\fixtures\\original\\portrait-hair.png",
+        "bytes": 2598783,
+        "sha256": "63d07fbf4beabb99cfa48fca25b69d5e41c00f9f7d5fe5e02a6c0dec4d9de8d6",
+        "width": 1122,
+        "height": 1402,
+        "mode": "RGB"
+      },
+      "phases": {
+        "load": {
+          "seconds": 19.92,
+          "cuda_reserved_peak_gib": 9.186,
+          "cuda_allocated_peak_gib": 7.278
+        },
+        "txt2img": {
+          "seconds": 6.61,
+          "cuda_reserved_peak_gib": 4.373,
+          "cuda_allocated_peak_gib": 2.749
+        },
+        "edit": {
+          "seconds": 9.78,
+          "cuda_reserved_peak_gib": 4.6,
+          "cuda_allocated_peak_gib": 4.157
+        }
+      },
+      "tasks": {
+        "txt2img": {
+          "task": "txt2img",
+          "parameters": {
+            "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+            "height": 1024,
+            "width": 1024,
+            "num_inference_steps": 4,
+            "guidance_scale": 1.0,
+            "seed": 3148150817,
+            "reference_image": null
+          },
+          "seconds": 6.61,
+          "cuda_reserved_peak_gib": 4.373,
+          "cuda_allocated_peak_gib": 2.749,
+          "output": {
+            "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-gate0\\klein-gate0-txt2img-nf4-model-offload.png",
+            "bytes": 2074705,
+            "sha256": "2802c2008753c72a0f7b94ea861c35d28f5bc20a4484b41c77d40f910d0ff404",
+            "width": 1024,
+            "height": 1024
+          }
+        },
+        "edit": {
+          "task": "edit",
+          "parameters": {
+            "prompt": "把背景换成雨后的上海夜景街道，保留人物的面部和发型，写实摄影",
+            "height": null,
+            "width": null,
+            "num_inference_steps": 4,
+            "guidance_scale": 1.0,
+            "seed": 3148150818,
+            "reference_image": {
+              "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\planned-models-20261031\\fixtures\\original\\portrait-hair.png",
+              "bytes": 2598783,
+              "sha256": "63d07fbf4beabb99cfa48fca25b69d5e41c00f9f7d5fe5e02a6c0dec4d9de8d6",
+              "width": 1122,
+              "height": 1402,
+              "mode": "RGB"
+            }
+          },
+          "seconds": 9.78,
+          "cuda_reserved_peak_gib": 4.6,
+          "cuda_allocated_peak_gib": 4.157,
+          "output": {
+            "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-gate0\\klein-gate0-edit-nf4-model-offload.png",
+            "bytes": 1809872,
+            "sha256": "c65f9616c11aaf10781ec55d891c3c6fefa6ac3ce3796812052003de6c3acb61",
+            "width": 912,
+            "height": 1136
+          }
+        }
+      },
+      "status": "budget_failed",
+      "failures": [
+        "private commit exceeds limit",
+        "available RAM below minimum"
+      ],
+      "resources": {
+        "process_tree_private_commit_peak_gib": 39.107,
+        "system_available_ram_min_gib": 0.19,
+        "system_physical_total_gib": 31.727,
+        "cuda_reserved_peak_gib": 9.184,
+        "cuda_allocated_peak_gib": 7.219,
+        "nvidia_used_peak_mib": 10424,
+        "sample_interval_seconds": 0.2,
+        "sample_count": 153
+      }
+    }
+  ],
+  "status": "budget_failed",
+  "chosen_strategy": null,
+  "decision": "No measured strategy stayed inside the Gate 0 budgets; the model needs a hardware threshold or a different loader.",
+  "failures": [
+    "bf16-model-offload: private commit exceeds limit",
+    "nf4-model-offload: private commit exceeds limit",
+    "nf4-model-offload: available RAM below minimum"
+  ],
+  "finished_at_utc": "2026-11-03T16:25:47Z",
+  "record_kind": "combined-process-failure",
+  "record_note": "This record preserves a single-process experiment that ran bf16-model-offload and then nf4-model-offload sequentially in the same Python process. The second strategy resources are inflated because the first pipeline/allocator had not fully returned memory; the worker lifecycle loads one strategy per fresh process. See klein-gate0-fresh-process-nf4.json for the chosen fresh-process NF4 strategy that passes every Gate 0 budget, and tools/windows-parity-gate0/README.md for the interpretation.",
+  "source_report": {
+    "path": "target/parity-gate0/results/klein-gate0-combined-bf16-nf4.json",
+    "sha256": "63deb1f90031d4fce2bf4629f1d93ab46ca69670316ce7550f0b52adcd39d3c1",
+    "annotation": "Only record_kind/record_note/source_report/chosen_strategy_evidence fields were added after the measurement; measured data is unchanged."
+  },
+  "chosen_strategy_evidence": "klein-gate0-fresh-process-nf4.json"
+}
