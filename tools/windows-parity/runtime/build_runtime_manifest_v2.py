@@ -315,6 +315,31 @@ def main() -> int:
             if item.is_file():
                 runtime_dir_bytes += item.stat().st_size
                 runtime_file_count += 1
+    site_packages = args.runtime_dir / "Lib" / "site-packages"
+    unpacked_by_package: dict[str, int] = {}
+    if site_packages.is_dir():
+        for entry in site_packages.iterdir():
+            if not entry.is_dir():
+                continue
+            size = sum(item.stat().st_size for item in entry.rglob("*") if item.is_file())
+            name = re.sub(r"-\d.*$", "", entry.name).lower()
+            unpacked_by_package[name] = unpacked_by_package.get(name, 0) + size
+    pip_unpacked = unpacked_by_package.get("pip", 0)
+    top_packages = dict(
+        sorted(
+            ((name, size) for name, size in unpacked_by_package.items() if not name.startswith("pip")),
+            key=lambda item: item[1],
+            reverse=True,
+        )[:12]
+    )
+    interpreter_core_bytes = sum(
+        item.stat().st_size
+        for item in args.runtime_dir.rglob("*")
+        if item.is_file() and "site-packages" not in item.parts
+    ) if args.runtime_dir.is_dir() else 0
+    install_peak_bytes = runtime_dir_bytes + sum(item["bytes"] for item in wheels) + sum(
+        item["bytes"] for item in bootstrap
+    ) + interpreter["bytes"]
     all_artifacts = [interpreter, *wheels, *bootstrap]
     manifest = {
         "schema_version": 1,
@@ -375,6 +400,18 @@ def main() -> int:
                 "Scripts/ (console entry points; not required by workers and not added to PATH)",
             ],
             "pth_file": pth_record,
+            "packaged_runtime": {
+                "bootstrap_pip_in_verified_tree": True,
+                "bootstrap_pip_is_part_of_runtime_closure": False,
+                "bootstrap_pip_unpacked_bytes": pip_unpacked,
+                "recommendation": (
+                    "The verified install tree keeps pip only because the frozen interpreter installed its own "
+                    "wheel closure offline. The packaged product runtime may prune Lib/site-packages/pip, "
+                    "pip-26.3.dist-info and Scripts entry points; that saves bootstrap_pip_unpacked_bytes and does "
+                    "not affect the locked closure. If pip is kept for in-product repair/diagnostics, budget it in."
+                ),
+                "packaged_bytes_if_pip_pruned": runtime_dir_bytes - pip_unpacked,
+            },
             "environment_hints": {
                 "PYTHONNOUSERSITE": "1 (keeps the frozen closure isolated from user site-packages)",
                 "PYTHONUTF8": "1 (UTF-8 mode for worker logs and prompts)",
@@ -385,8 +422,19 @@ def main() -> int:
             "compressed_closure_bytes": sum(item["bytes"] for item in all_artifacts),
             "installed_runtime_bytes": runtime_dir_bytes,
             "installed_runtime_files": runtime_file_count,
+            "installed_site_packages_bytes": runtime_dir_bytes - interpreter_core_bytes,
+            "interpreter_core_bytes": interpreter_core_bytes,
+            "unpacked_top_packages_bytes": top_packages,
+            "bootstrap_pip_unpacked_bytes": pip_unpacked,
+            "steady_state_packaged_bytes_if_pip_pruned": runtime_dir_bytes - pip_unpacked,
+            "install_peak_estimate_bytes": install_peak_bytes,
             "installed_runtime_path": "target/parity-runtime/runtime",
-            "note": "The installer space pre-check should budget installed_runtime_bytes plus model weights.",
+            "note": (
+                "Install-space budget: count installed_runtime_bytes (or "
+                "steady_state_packaged_bytes_if_pip_pruned) as persistent space; during install the wheelhouse plus "
+                "the Python zip also exist, which is the install_peak_estimate_bytes peak. The wheelhouse is a "
+                "download/install cache and may be deleted afterwards. Model weights are additional."
+            ),
         },
         "dependency_resolution": {
             "resolved_with": "pip 26.2.1 on the host Python, cross-target resolution for cp312-win_amd64",
