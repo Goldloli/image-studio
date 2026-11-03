@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-gate0-model-transfer",
+  "manifest": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\resources\\planned-models\\birefnet\\model-manifest.json",
+  "manifest_id": "birefnet-general-epoch-244-onnx",
+  "repository": "ZhengPeng7/BiRefNet",
+  "revision": "v1 / release asset 186740004 / sha256:58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+  "output_root": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\birefnet",
+  "component_bytes": 972666916,
+  "component_manifest_sha256": "90889c4bc576b46164f4f4cd54848aaa431105ab487191ce5fae5efb314e3b03",
+  "declared_file_count": 1,
+  "transfer": {
+    "source": "manifest_url",
+    "modelscope_mirror_repository": null,
+    "modelscope_mirror_listing_revision": null,
+    "official_manifest_urls_preserved": true,
+    "integrity_basis": "fixed manifest bytes and SHA-256 verified per file"
+  },
+  "machine": {
+    "hostname": "XIAOKA-PC",
+    "os": "nt",
+    "platform": "win32",
+    "python": "3.14.7"
+  },
+  "started_at_utc": "2026-11-03T16:03:04Z",
+  "files": [
+    {
+      "path": "BiRefNet-general-epoch_244.onnx",
+      "bytes": 972666916,
+      "sha256": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+      "status": "downloaded",
+      "elapsed_seconds": 64.625,
+      "bytes_per_second": 15050998.5,
+      "declared_url": "https://github.com/ZhengPeng7/BiRefNet/releases/download/v1/BiRefNet-general-epoch_244.onnx",
+      "source_url": "https://github.com/ZhengPeng7/BiRefNet/releases/download/v1/BiRefNet-general-epoch_244.onnx",
+      "source_kind": "github_release",
+      "source_revision": null
+    }
+  ],
+  "disk_free_bytes_before": 1503158509568,
+  "elapsed_seconds": 64.626,
+  "disk_free_bytes_after": 1496619757568,
+  "status": "passed",
+  "verified_files": 1,
+  "verified_bytes": 972666916,
+  "all_files_size_and_sha256_match_manifest": true,
+  "reused_files": 0,
+  "finished_at_utc": "2026-11-03T16:04:08Z"
+}

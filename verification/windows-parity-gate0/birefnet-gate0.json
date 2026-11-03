@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "kind": "birefnet-general-epoch-244-windows-gate0",
+  "case_id": "G2-B1",
+  "started_at_utc": "2026-11-03T16:06:49Z",
+  "machine": {
+    "os": "Windows",
+    "os_version": "10.0.19045",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "logical_cores": 24,
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3080 Ti",
+      "driver": "596.49",
+      "memory_total_mib": 12288
+    }
+  },
+  "budget": {
+    "load_limit_seconds": 600,
+    "inference_limit_seconds": 900,
+    "private_commit_limit_gib": 24,
+    "available_ram_minimum_gib": 2,
+    "cuda_reserved_limit_gib": 10.5,
+    "cuda_in_use": false
+  },
+  "model_manifest": {
+    "manifest": "resources/planned-models/birefnet/model-manifest.json",
+    "id": "birefnet-general-epoch-244-onnx",
+    "repository": "ZhengPeng7/BiRefNet",
+    "revision": "v1 / release asset 186740004",
+    "expected_bytes": 972666916,
+    "expected_sha256": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c"
+  },
+  "versions": {
+    "python": "3.12.10",
+    "onnxruntime": "1.31.1",
+    "numpy": "2.5.4",
+    "pillow": "13.0.0",
+    "worker_wheel": "studio-onnx-worker-0.1.0"
+  },
+  "worker": {
+    "wheel": "resources/planned-models/birefnet/studio_onnx_worker-0.1.0-py3-none-any.whl",
+    "wheel_sha256": "59d709c7705569602d01eeffebeca6b2cbc4d02fda181ecb157f937ea91c66c3",
+    "expected_wheel_sha256": "59d709c7705569602d01eeffebeca6b2cbc4d02fda181ecb157f937ea91c66c3",
+    "module": "studio_onnx_worker.backend",
+    "imported_functions": [
+      "preprocess",
+      "sigmoid_logits",
+      "resize_align_corners",
+      "compose_mask"
+    ],
+    "install_mode": "extracted into isolated py-aux site-packages (wheel pins Requires-Python ==3.13.*, code used verbatim)"
+  },
+  "model": {
+    "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\birefnet\\BiRefNet-general-epoch_244.onnx",
+    "bytes": 972666916,
+    "sha256": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+    "size_matches_manifest": true,
+    "sha256_matches_manifest": true
+  },
+  "input": {
+    "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\planned-models-20261031\\fixtures\\original\\portrait-hair.png",
+    "bytes": 2598783,
+    "sha256": "63d07fbf4beabb99cfa48fca25b69d5e41c00f9f7d5fe5e02a6c0dec4d9de8d6",
+    "width": 1122,
+    "height": 1402,
+    "mode": "RGB"
+  },
+  "graph": {
+    "inputs": [
+      {
+        "name": "input_image",
+        "type": "tensor(float)",
+        "shape": [
+          1,
+          3,
+          1024,
+          1024
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "output_image",
+        "type": "tensor(float)",
+        "shape": [
+          1,
+          1,
+          1024,
+          1024
+        ]
+      }
+    ],
+    "expected_input": {
+      "name": "input_image",
+      "type": "tensor(float)",
+      "shape": [
+        1,
+        3,
+        1024,
+        1024
+      ]
+    },
+    "expected_output": {
+      "name": "output_image",
+      "type": "tensor(float)",
+      "shape": [
+        1,
+        1,
+        1024,
+        1024
+      ]
+    }
+  },
+  "session": {
+    "providers": [
+      "CPUExecutionProvider"
+    ],
+    "intra_op_num_threads": 4,
+    "inter_op_num_threads": 1,
+    "execution_mode": "ORT_SEQUENTIAL"
+  },
+  "phases": {
+    "load": {
+      "seconds": 8.146
+    },
+    "inference": {
+      "seconds": 13.329
+    },
+    "postprocess": {
+      "seconds": 0.072
+    },
+    "total": {
+      "seconds": 21.698
+    }
+  },
+  "preprocessing": {
+    "contract": "birefnet-1024-rgb-v1",
+    "seconds": 0.15,
+    "tensor_shape": [
+      1,
+      3,
+      1024,
+      1024
+    ],
+    "tensor_dtype": "float32",
+    "tensor_min": -2.03228,
+    "tensor_max": 2.622571
+  },
+  "raw_logits": {
+    "shape": [
+      1,
+      1,
+      1024,
+      1024
+    ],
+    "dtype": "float32",
+    "min": -72.41495513916016,
+    "max": 20.49848747253418,
+    "contains_values_outside_probability_range": true
+  },
+  "outputs": {
+    "rgba": {
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-gate0\\birefnet-gate0-rgba.png",
+      "bytes": 2797794,
+      "sha256": "9d1800cfaab8cc346c9fdd29385fa0fd405985c6ec1aa8fe02a02d052a479309",
+      "width": 1122,
+      "height": 1402,
+      "mode": "RGBA"
+    },
+    "mask": {
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-gate0\\birefnet-gate0-mask.png",
+      "bytes": 35198,
+      "sha256": "4433c05c9af567ee5455d8f9176f01cc81d8e9ab764bbb37de0b82f95522684e",
+      "width": 1122,
+      "height": 1402,
+      "mode": "L (8-bit)"
+    }
+  },
+  "checks": {
+    "primary_alpha_equals_mask": true,
+    "primary_rgb_equals_source_rgb_straight_alpha": true,
+    "output_dimensions_equal_source": true,
+    "single_sigmoid_probability_range": true,
+    "mask_matches_rounded_probability": true
+  },
+  "quality": {
+    "min": 0,
+    "max": 255,
+    "mean": 104.779,
+    "std": 125.014,
+    "distinct_values": 256,
+    "fully_transparent_pixels": 912381,
+    "fully_opaque_pixels": 630334,
+    "partial_alpha_pixels": 30329,
+    "partial_alpha_fraction": 0.01928,
+    "nonempty_mask": true,
+    "spatial_variation": true,
+    "source_alpha_uniform_255": true,
+    "coverage_ge_128": 0.410938
+  },
+  "resources": {
+    "process_tree_private_commit_peak_gib": 10.139,
+    "system_available_ram_min_gib": 15.522,
+    "system_physical_total_gib": 31.727,
+    "sample_interval_seconds": 0.1,
+    "sample_count": 193
+  },
+  "failures": [],
+  "status": "passed",
+  "finished_at_utc": "2026-11-03T16:07:12Z"
+}
