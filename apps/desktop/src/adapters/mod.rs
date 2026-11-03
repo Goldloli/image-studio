@@ -1,4 +1,5 @@
 pub mod catalog;
+pub mod device;
 pub mod diagnostics;
 pub mod feature_catalog;
 pub mod generation;
