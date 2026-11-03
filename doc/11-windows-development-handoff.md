@@ -21,7 +21,7 @@ Mac M3 Max / 128 GiB 已完成七型号、八能力验收，相关变更已归�
 - WebView2 Runtime `156.0.4314.58`；Dell U2723QE 当前 3840×2160 / 100% 缩放；中文和英文键盘布局均已启用。
 - 系统盘为 NTFS NVMe，预检时可用约 1576 GiB；分页文件由系统自动管理，当时约 4.75 GiB。
 
-这些信息证明基础机器条件匹配，不证明 Windows 构建、GUI、GPU 算子或 Z-Image Gate 0 通过。详细快照和证据边界见 [Windows sources](../openspec/changes/introduce-windows-foundation/sources.md)。
+这些信息证明基础机器条件匹配，不证明 Windows 构建、GUI、GPU 算子或 Z-Image Gate 0 通过。详细快照和证据边界见 [Windows sources](../openspec/changes/archive/2026-11-03-introduce-windows-foundation/sources.md)。
 
 ## 2026-11-01 Gate 0 结果
 
@@ -70,11 +70,11 @@ GitHub 登录凭据由 Windows 自身凭据管理保存，不需要从 Mac 复�
 | 顺序 | 文件 | 用途 |
 |---|---|---|
 | 1 | [AGENTS.md](../AGENTS.md) | 中文沟通、OpenSpec 批准、Beads、小步提交与远程授权规则 |
-| 2 | [Windows proposal](../openspec/changes/introduce-windows-foundation/proposal.md) | 已确认的首轮交付与边界 |
-| 3 | [Windows design](../openspec/changes/introduce-windows-foundation/design.md) | 低内存候选、进程树、平台身份、安装和打包边界 |
-| 4 | [Windows tasks](../openspec/changes/introduce-windows-foundation/tasks.md) | Gate 0 已完成、其余实施/验收范围 |
-| 5 | [Windows test plan](../openspec/changes/introduce-windows-foundation/test-plan.md) | Gate 0 已通过，产品 P0 尚未运行 |
-| 6 | [研究依据](../openspec/changes/introduce-windows-foundation/sources.md) | 用户配置、当前 Mac 假设与上游一手来源 |
+| 2 | [Windows proposal](../openspec/changes/archive/2026-11-03-introduce-windows-foundation/proposal.md) | 已确认的首轮交付与边界 |
+| 3 | [Windows design](../openspec/changes/archive/2026-11-03-introduce-windows-foundation/design.md) | 低内存候选、进程树、平台身份、安装和打包边界 |
+| 4 | [Windows tasks](../openspec/changes/archive/2026-11-03-introduce-windows-foundation/tasks.md) | Gate 0 已完成、其余实施/验收范围 |
+| 5 | [Windows test plan](../openspec/changes/archive/2026-11-03-introduce-windows-foundation/test-plan.md) | Gate 0 已通过，产品 P0 尚未运行 |
+| 6 | [研究依据](../openspec/changes/archive/2026-11-03-introduce-windows-foundation/sources.md) | 用户配置、当前 Mac 假设与上游一手来源 |
 
 用户在 Windows 会话确认提案后，先通过 Gate 0：在这台设备用固定来源 Z-Image Turbo、单张 1024×1024、NF4/CPU 卸载候选验证完整加载、连续生成与资源预算。首轮只接这个 Windows 组合，其余六型号后续分批适配。
 

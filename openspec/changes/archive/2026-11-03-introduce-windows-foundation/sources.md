@@ -62,13 +62,13 @@
 
 ## 仓库现状
 
-- [当前产品说明](../../../README.md)：七型号、八能力已在 M3 Max / 128 GiB 验收；当前交付仍以 macOS 开发包为主。
-- [平台路径](../../../apps/desktop/src/adapters/paths.rs)：默认路径只有 macOS 分支，其他系统要求显式数据根。
-- [推理监督](../../../tools/inference-supervisor/src/lib.rs)：实际执行与组回收依赖 Unix，非 Unix 分支返回不支持；Windows 需要真实的平台实现。
-- [桌面配置](../../../apps/desktop/tauri.conf.json)：基础 bundle 仍未启用，macOS 配置保留 Overlay/traffic-light 参数；Windows 平台配置已另行覆盖为原生装饰。ICO 已存在并不构成 Windows 安装包证据。
-- [Z-Image 模型清单](../../../resources/local-generation/model-manifest.json)：固定 `Tongyi-MAI/Z-Image-Turbo` revision `f332072aa78be7aecdf3ee76d5c247082da564a6`，现有组件合计 `32,848,304,893` bytes。现清单不含 `model_index.json` 和 `scheduler/scheduler_config.json`，不能直接当作完整 Diffusers 快照。
-- [型号目录](../../../resources/model-catalog/catalog.json)：现有 Z-Image 行 ID 为 `z-image-turbo-mflux-v1`，其他多条 ID 也包含运行时身份。Windows 不能直接把这些旧身份重命名成 CUDA。
-- [平台主规格](../../specs/platform-foundation/spec.md)：Windows 现有证据仅限核心与协议目标编译，不包含 GUI、进程、安装或模型认证。
+- [当前产品说明](../../../../README.md)：七型号、八能力已在 M3 Max / 128 GiB 验收；当前交付仍以 macOS 开发包为主。
+- [平台路径](../../../../apps/desktop/src/adapters/paths.rs)：默认路径只有 macOS 分支，其他系统要求显式数据根。
+- [推理监督](../../../../tools/inference-supervisor/src/lib.rs)：实际执行与组回收依赖 Unix，非 Unix 分支返回不支持；Windows 需要真实的平台实现。
+- [桌面配置](../../../../apps/desktop/tauri.conf.json)：基础 bundle 仍未启用，macOS 配置保留 Overlay/traffic-light 参数；Windows 平台配置已另行覆盖为原生装饰。ICO 已存在并不构成 Windows 安装包证据。
+- [Z-Image 模型清单](../../../../resources/local-generation/model-manifest.json)：固定 `Tongyi-MAI/Z-Image-Turbo` revision `f332072aa78be7aecdf3ee76d5c247082da564a6`，现有组件合计 `32,848,304,893` bytes。现清单不含 `model_index.json` 和 `scheduler/scheduler_config.json`，不能直接当作完整 Diffusers 快照。
+- [型号目录](../../../../resources/model-catalog/catalog.json)：现有 Z-Image 行 ID 为 `z-image-turbo-mflux-v1`，其他多条 ID 也包含运行时身份。Windows 不能直接把这些旧身份重命名成 CUDA。
+- [平台主规格](../../../specs/platform-foundation/spec.md)：Windows 现有证据仅限核心与协议目标编译，不包含 GUI、进程、安装或模型认证。
 
 ## 上游一手依据
 

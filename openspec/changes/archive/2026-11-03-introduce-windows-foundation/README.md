@@ -13,4 +13,4 @@
 | [test-plan.md](test-plan.md) | Gate 0、平台、安装、生命周期、产品、安装包和 Mac 回归 |
 | [sources.md](sources.md) | 设备事实、仓库现状与上游一手依据 |
 
-本轮先完成目标机的单模型路线，不承诺七型号全部迁移。预检确认基础硬件与目标一致，并发现 NVIDIA RTX 与 Intel 核显并存；Gate 0 已验证 NVIDIA CUDA 执行身份、完整加载、连续生成和资源预算。实现与当前证据由 Beads 和 [Windows 证据](../../../verification/windows-gate0/README.md) 跟踪；不能以缩图、换模型、更大硬件或仅壳可启动替代尚未执行的 P0。
+本轮先完成目标机的单模型路线，不承诺七型号全部迁移。预检确认基础硬件与目标一致，并发现 NVIDIA RTX 与 Intel 核显并存；Gate 0 已验证 NVIDIA CUDA 执行身份、完整加载、连续生成和资源预算。实现与当前证据由 Beads 和 [Windows 证据](../../../../verification/windows-gate0/README.md) 跟踪；不能以缩图、换模型、更大硬件或仅壳可启动替代尚未执行的 P0。

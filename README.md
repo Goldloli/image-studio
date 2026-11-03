@@ -57,7 +57,7 @@ bd prime
 | Windows 10 22H2 / RTX 3080 Ti 12 GB / i7-13700K | 目标机 | 234 项 Rust 测试、fmt/clippy/构建、前端 37 项、安装版 UI 全路径、真实 Z-Image 生成、禁网与强杀恢复、NSIS 安装包、W07 启动失败诊断与双根 WebView2 隔离 |
 | Windows 11 22631 / RTX 2060 SUPER 8 GB / i9-9900K | 补充环境 | 234 项 Rust 测试、fmt/clippy/构建、前端 37 项、启动失败诊断、双隔离根 WebView2、主题跨重启 |
 
-模型安装、真实生成与资源预算只在 3080 Ti 目标机认证。2060 SUPER 为 sm75 / 8 GiB：低于配方实测 8.87 GiB 的 CUDA reserved 峰值，且不具备配方使用的 BF16 计算，不在支持范围；Windows 11 结果按 [Windows 规格](openspec/changes/introduce-windows-foundation/specs/windows-desktop/spec.md) 只作补充。记录见 [平台一致性](verification/windows-platform-parity/README.md)。
+模型安装、真实生成与资源预算只在 3080 Ti 目标机认证。2060 SUPER 为 sm75 / 8 GiB：低于配方实测 8.87 GiB 的 CUDA reserved 峰值，且不具备配方使用的 BF16 计算，不在支持范围；Windows 11 结果按 [Windows 规格](openspec/specs/windows-desktop/spec.md) 只作补充。记录见 [平台一致性](verification/windows-platform-parity/README.md)。
 
 ## 构建和启动
 
@@ -259,7 +259,7 @@ BiRefNet epoch_244 随后完成 31 项适用 P0：空缓存与禁网安装、真
 - [OpenSpec 变更记录](openspec/changes/)
 - [产品与模型研究总览](doc/README.md)
 
-会话式生成已完成实现、实机验收并归档为 [2026-10-30-introduce-generation-conversation](openspec/changes/archive/2026-10-30-introduce-generation-conversation/proposal.md)。模型目录、设置与新会话默认值已完成并通过 [归档 change](openspec/changes/archive/2026-10-30-introduce-model-catalog-and-settings/proposal.md) 更新正式 `model-catalog`、`application-settings` 与 `conversation-management` specs。功能、作品与任务中心已按确认后的 [归档 change](openspec/changes/archive/2026-10-30-improve-feature-works-and-tasks/proposal.md) 完成实现、真实生成验收和主规格更新。发送幂等、作品页激活刷新与查看器返回状态已通过 [交互修复归档](openspec/changes/archive/2026-10-31-fix-daily-generation-interactions/proposal.md) 更新正式规格。当前模型 37 项 P0 认证已通过并归档为 [2026-10-31-certify-current-model-usability](openspec/changes/archive/2026-10-31-certify-current-model-usability/proposal.md)，门禁契约已合并到 [model-validation 主规格](openspec/specs/model-validation/spec.md)。Qwen/MOSS 变更已归档为 [2026-11-01-introduce-qwen21-and-moss-image](openspec/changes/archive/2026-11-01-introduce-qwen21-and-moss-image/proposal.md)，七个正式型号与 `multi-model-recipes` 主规格已同步。
+会话式生成已完成实现、实机验收并归档为 [2026-10-30-introduce-generation-conversation](openspec/changes/archive/2026-10-30-introduce-generation-conversation/proposal.md)。模型目录、设置与新会话默认值已完成并通过 [归档 change](openspec/changes/archive/2026-10-30-introduce-model-catalog-and-settings/proposal.md) 更新正式 `model-catalog`、`application-settings` 与 `conversation-management` specs。功能、作品与任务中心已按确认后的 [归档 change](openspec/changes/archive/2026-10-30-improve-feature-works-and-tasks/proposal.md) 完成实现、真实生成验收和主规格更新。发送幂等、作品页激活刷新与查看器返回状态已通过 [交互修复归档](openspec/changes/archive/2026-10-31-fix-daily-generation-interactions/proposal.md) 更新正式规格。当前模型 37 项 P0 认证已通过并归档为 [2026-10-31-certify-current-model-usability](openspec/changes/archive/2026-10-31-certify-current-model-usability/proposal.md)，门禁契约已合并到 [model-validation 主规格](openspec/specs/model-validation/spec.md)。Qwen/MOSS 变更已归档为 [2026-11-01-introduce-qwen21-and-moss-image](openspec/changes/archive/2026-11-01-introduce-qwen21-and-moss-image/proposal.md)，七个正式型号与 `multi-model-recipes` 主规格已同步。 Windows 首轮交付已归档为 [2026-11-03-introduce-windows-foundation](openspec/changes/archive/2026-11-03-introduce-windows-foundation/README.md)，`windows-desktop` 与 `windows-local-generation` 主规格已同步；收口记录见 [windows-final-acceptance.json](verification/windows-final-acceptance.json)。
 
 用户选定的黑色应用图标已接入 macOS 开发包、左栏和关于页，源图与派生说明见 [品牌资源](resources/brand/README.md)。[应用图标品牌规格](openspec/specs/product-identity/spec.md)已获确认；[验收记录](verification/app-icon-branding-results.md)包含 Finder、浅暗主题、小窗口、回退与离线启动结果。Dock/应用切换器已由用户人工核对确认，change 已完成验收并归档；Windows ICO 已生成但未做 Windows GUI 实测。
 

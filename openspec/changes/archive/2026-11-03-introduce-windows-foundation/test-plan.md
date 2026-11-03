@@ -1,6 +1,6 @@
 # Windows 首轮验收计划
 
-状态（2026-11-03 收口）：Gate 0 的 G01–G06 与 Windows 平台、安装、生命周期、产品 UI、安装包及质量门均已按本计划执行并留有机器证据，见 [Windows Gate 0](../../../verification/windows-gate0/README.md)、[安装版 UI 验收](../../../verification/windows-installed-app/README.md)、[R01 质量门](../../../verification/windows-quality-gate.json) 与 [W07 目标机验收](../../../verification/windows-startup-diagnosis/target-machine.json)。禁网 I07/P06 由用户 2026-11-03 决定本轮跳过（waived/not_run，见 [决定记录](../../../verification/windows-network-denial-decision.json)）；100%/200% DPI、真实中文 IME、干净用户/缺失 WebView2 与 Mac R02–R04 未附本轮独立机器证据，按用户验收收口记为 user-accepted（见 [收口记录](../../../verification/windows-final-acceptance.json)，不得读作代理实测通过）。执行顺序和实现边界见 [tasks.md](tasks.md)、[design.md](design.md)。
+状态（2026-11-03 收口）：Gate 0 的 G01–G06 与 Windows 平台、安装、生命周期、产品 UI、安装包及质量门均已按本计划执行并留有机器证据，见 [Windows Gate 0](../../../../verification/windows-gate0/README.md)、[安装版 UI 验收](../../../../verification/windows-installed-app/README.md)、[R01 质量门](../../../../verification/windows-quality-gate.json) 与 [W07 目标机验收](../../../../verification/windows-startup-diagnosis/target-machine.json)。禁网 I07/P06 由用户 2026-11-03 决定本轮跳过（waived/not_run，见 [决定记录](../../../../verification/windows-network-denial-decision.json)）；100%/200% DPI、真实中文 IME、干净用户/缺失 WebView2 与 Mac R02–R04 未附本轮独立机器证据，按用户验收收口记为 user-accepted（见 [收口记录](../../../../verification/windows-final-acceptance.json)，不得读作代理实测通过）。执行顺序和实现边界见 [tasks.md](tasks.md)、[design.md](design.md)。
 
 ## 目标与通用记录
 

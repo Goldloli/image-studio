@@ -1,7 +1,7 @@
 # Windows 端接续交接（2026-11-03）
 
 本文写给下一台 Windows 开发机上的代理/开发者。先读 [AGENTS.md](../AGENTS.md)、
-[CLAUDE.md](../CLAUDE.md)、本文件和 [proposal](../openspec/changes/introduce-windows-foundation/proposal.md)。
+[CLAUDE.md](../CLAUDE.md)、本文件和 [proposal](../openspec/changes/archive/2026-11-03-introduce-windows-foundation/proposal.md)。
 `doc/11-windows-development-handoff.md` 是 2026-11-01 的上一份交接；本轮进度以本文和 git
 历史为准。
 

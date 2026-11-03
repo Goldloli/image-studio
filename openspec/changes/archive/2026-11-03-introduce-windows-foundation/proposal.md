@@ -2,7 +2,7 @@
 
 七个型号、八项能力已完成当前 Mac 的实机验收，但 Windows 仍只有核心与协议编译证据。用户希望使用 Windows 10 x64、RTX 3080 Ti 12 GB、32 GB 内存、i7-13700K 开发 Windows 版本，需要先建立真实的平台基础和一个能在该设备运行的生成闭环。
 
-**批准状态：已确认。** 用户已明确要求继续开发并确认上述设备、首轮范围、技术路线和资源门槛。2026-11-01 Gate 0 已在目标机通过，正式产品安装与生成闭环仍待实施。来源与现状核对见 [sources.md](sources.md)，Gate 0 证据见 [Windows Gate 0](../../../verification/windows-gate0/README.md)。
+**批准状态：已确认。** 用户已明确要求继续开发并确认上述设备、首轮范围、技术路线和资源门槛。2026-11-01 Gate 0 已在目标机通过，正式产品安装与生成闭环仍待实施。来源与现状核对见 [sources.md](sources.md)，Gate 0 证据见 [Windows Gate 0](../../../../verification/windows-gate0/README.md)。
 
 ## What Changes
 
