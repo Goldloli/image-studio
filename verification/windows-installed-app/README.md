@@ -110,9 +110,14 @@ existing target: declining returns the same cancelled shape and leaves the old
 file untouched, confirming goes through the existing atomic overwrite path.
 The rebuilt package
 (`Image Studio_0.1.0_x64-setup.exe`, SHA-256 `56837792…f047`) shows the dialog;
-the manually declined run left both dummy targets byte-identical. Confirmed
-overwrite remains covered by the existing library unit test and the decision
-unit test in `host::tests`.
+the manually declined run left both dummy targets byte-identical. On 2026-11-03
+the confirmed path was exercised in the installed application (startup-diagnosis
+package `9e5ecc40…a8ba2`, installed executable `7270ba22…42c7`): exporting over
+an existing 22-byte dummy file raised the system `确认另存为` prompt and then the
+application's own `覆盖导出文件` confirmation, both answered 是. The dummy was
+replaced by the 1,525,897-byte PNG whose SHA-256 `39c71d75…6261` equals the
+neon-street work asset, so the Yes branch goes through the existing atomic
+overwrite path. P08 now has native evidence for both branches.
 
 ## Known open question (retested and closed)
 
@@ -140,8 +145,9 @@ the dark/light switch and native window controls were verified programmatically.
 Real Microsoft Chinese IME composition, a network-denied variant and the
 clean-user/WebView2 gates are not covered by this evidence. The generated
 samples are real model output but the visual quality review is still a human
-step. The confirmed-overwrite (Yes) branch of P08 remains covered only by unit
-tests and the code path, not by a native run.
+step. The confirmed-overwrite (Yes) branch of P08 was exercised natively on
+2026-11-03 (see above), so both the declined and confirmed branches now have
+installed-application evidence.
 
 Machine-readable record: [ui-acceptance.json](ui-acceptance.json).
 Screenshots: [install ready](screenshots/install-ready.png),

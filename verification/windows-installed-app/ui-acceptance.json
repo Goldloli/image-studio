@@ -315,10 +315,47 @@
       "installer_bytes": 244745354,
       "installed_executable_sha256": "2ccbadbfa048ea3bca6290f268e0bc781d2202a738609e3c371fae4362ef1e37",
       "installed_executable_bytes": 41994240,
-      "contains_overwrite_dialog_strings": true
+      "contains_overwrite_dialog_strings": true,
+      "note": "Package used for the manually declined run above. The confirmed-overwrite (Yes) run was repeated later on the newer startup-diagnosis package recorded in automated_yes_path."
     },
     "observed_after_fix": "After selecting an existing target, the overwrite confirmation dialog appeared (the user manually declined it). Both dummy targets remained byte-identical: overwrite-acceptance.png 19 bytes / eafabaa1…1210 and overwrite-acceptance2.png 21 bytes / 6ae230c5…d419.",
-    "automated_yes_path": "not rerun after the fix; confirmed-overwrite semantics remain covered by the library unit test and the shared export path. A later UI pass may exercise Yes explicitly.",
+    "automated_yes_path": {
+      "status": "passed",
+      "date": "2026-11-03",
+      "package": {
+        "installer_sha256": "9e5ecc402aff21046612c056be28efbb4863bb11a6464549759ef2d9b69a8ba2",
+        "installer_bytes": 244754133,
+        "installed_executable_sha256": "7270ba22979d1a8c37ebb2073c113e0feaf97d30ec70b087ad0ec406b49842c7"
+      },
+      "how": "Installed application launched with --data-dir target/windows-ui-probe-data-20261103 and the WebView2 debugging endpoint (CDP on port 9222); 作品 → 预览 → 导出 PNG, then the native save dialog was pointed at an existing dummy file.",
+      "target": "target/p08-yes/export-target.png",
+      "before": {
+        "bytes": 22,
+        "sha256": "3383e43bfe4fb7ebbbe446e64c2bc1740319556272ccb1193f49a3f9e16fbc77",
+        "content": "dummy-before-overwrite"
+      },
+      "dialogs": [
+        {
+          "title": "确认另存为",
+          "source": "system save dialog overwrite prompt",
+          "answer": "是",
+          "buttons": ["是(&Y)", "否(&N)"]
+        },
+        {
+          "title": "覆盖导出文件",
+          "source": "asset_export overwrite confirmation",
+          "answer": "是",
+          "buttons": ["是(&Y)", "否(&N)"]
+        }
+      ],
+      "after": {
+        "bytes": 1525897,
+        "sha256": "39c71d750df27fcde115944eb0accff911024b09f0869bc8657f5ff00ca06261",
+        "png": true,
+        "matches_work_asset": "asset-bfff2307f3cb4dc19fd0e87596d1604b"
+      },
+      "note": "The system save dialog prompts first because the target already exists, then the application shows its own explicit overwrite confirmation. The dummy target is only replaced after both are accepted, and the resulting file is the exact PNG bytes of the exported work asset."
+    },
     "required_by": "test-plan P08 (导出覆盖确认/取消) and design decision 5 (覆盖仍需用户确认)"
   },
   "limitations": [
