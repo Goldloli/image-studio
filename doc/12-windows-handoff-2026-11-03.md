@@ -118,6 +118,7 @@ Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-wo
 | 主动中断 → 同根续传 → Ready | passed，3110.89 s | `product-interrupted-resume.json` |
 | 运行准备/探针取消 + 重试 | passed | `product-runtime-cancel-retry.json` |
 | 坏摘要/缺件激活拒绝 | passed | `product-activation-failures.json` |
+| 空间不足拒绝（I03） | passed：27.74 GiB 可移动卷上安装前约 4 秒明确失败，无缓存下载/Job/Attempt/资产，已有标记文件保留 | `verification/windows-gate0/product-space-shortage.json` |
 | Windows 全量质量门（fmt/clippy/测试/构建/前端/清单审计） | passed | `verification/windows-quality-gate.json` / `.md` / `windows-r01-*.log` |
 | 安装版原生 UI：UI 安装→Ready、中英文三次真实生成、原生对话框导出 PNG、重启恢复、任务/作品、设置/存储/关于、明暗主题、原生最大化/还原/最小化/拖拽、Tab/Shift+Enter、合成 IME 组合保护、UI 停止落 cancelled | passed（部分项有明确限制） | `verification/windows-installed-app/README.md` + `ui-acceptance.json` |
 | 覆盖导出确认（P08 缺陷修复） | passed：拒绝覆盖时旧文件保持不变；2026-11-03 在安装版上自动跑通 Yes 路径（系统「确认另存为」+ 应用「覆盖导出文件」双确认，22 字节 dummy 被替换为 1,525,897 字节 PNG，SHA-256 与作品资产一致） | `ui-acceptance.json` 的 `export_overwrite`、`apps/desktop/src/host.rs` |
@@ -145,7 +146,8 @@ Copy-Item target/debug/diagnostic-worker.exe apps/desktop/binaries/diagnostic-wo
    原始触发条件仍未解释，但可观测缺陷（静默 101）已修复；W03 独立根共存由 W07-b 覆盖。
 4. 管理员配合项（脚本已准备，见 `scripts/windows-admin/README.md`）：
    - 整树禁网 I07/P06：`enable-network-denial.ps1` → 我/Copy 的 CDP 流程跑缓存安装 + 三次生成 → `remove-network-denial.ps1`；
-   - 空间不足：`create-small-volume.ps1` 建 40 GB VHD → 安装版 `--data-dir V:\acceptance-root` 触发错误 → `remove-small-volume.ps1 -DeleteVhd`。
+   - 空间不足 I03 已于 2026-11-03 用 27.74 GiB 可移动卷验证通过，无需再建 40 GB VHD；
+     `create-small-volume.ps1` 仅保留给将来需要 NTFS 小卷的复验。
 5. 人工项：100%/200% 显示缩放（当前机器是 150%/DPI 144，两逻辑尺寸已过）、
    真实微软拼音 IME、干净 Win10 测试用户（D02）、缺失/离线 WebView2（D03）。
 6. Mac 回归 R02–R04（必须回 Mac）：完整质量门、隔离源码/禁网启动、原 Z-Image 三画幅/取消/强杀恢复、

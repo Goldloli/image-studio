@@ -14,12 +14,13 @@ Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，�
 - Windows 目录/功能/设置投影（只投影一个已认证 Z-Image profile）、NSIS 当前用户安装包、安装版 UI 全路径（中英文三次生成、PNG 导出、重启恢复、任务/作品、明暗主题、原生窗口控件、合成 IME 保护）。
 - 2026-11-03 新增：启动失败诊断（`logs/startup-failure.log` + 原生对话框 + 退出码 3）与每数据根独立 WebView2 用户数据目录，已在 Windows 10 目标机以重建的 `9e5ecc40…a8ba2` 安装包复验通过（W07-a/a2/b）。
 - 2026-11-03 新增：导出覆盖确认的系统「确认另存为」与应用「覆盖导出文件」双确认 Yes 路径已在安装版跑通，导出文件 SHA-256 与正式 Asset 一致（P08 两个分支均有原生证据）。
+- 2026-11-03 新增：安装空间不足已在 27.74 GiB 可移动卷上验证——安装前约 4 秒失败、无缓存下载/Job/资产、已有标记文件保留（I03，证据 `verification/windows-gate0/product-space-shortage.json`）。
 
 剩余 P0 全部依赖环境或人工操作：
 
 | 类别 | 项目 | 说明 |
 |---|---|---|
-| 管理员 | 整树禁网 I07/P06、40 GB 小卷空间不足 I03 | 脚本在 `scripts/windows-admin/`，见其 README |
+| 管理员 | 整树禁网 I07/P06 | 脚本在 `scripts/windows-admin/`，见其 README |
 | 人工 | 100%/200% 显示缩放、真实微软拼音 IME、干净 Win10 用户 D02、缺失/离线 WebView2 D03 | 需在目标机原生环境操作 |
 | Mac | R02–R04：完整质量门、隔离源码/禁网启动、七型号回归 | 必须在 Mac 上执行 |
 

@@ -31,23 +31,11 @@
 
    验收结果里要同时记录“阻断规则生效”和“应用仍能本机生成”两个事实，不能只记录其中一条。
 
-## 2. 空间不足（I03 / neo.7，需管理员）
+## 2. 空间不足（I03 / neo.7，需管理员或小容量卷）
 
-1. 以**管理员** PowerShell 创建 40 GB 测试卷（默认挂载 `V:`）：
-
-   ```powershell
-   & scripts/windows-admin/create-small-volume.ps1
-   ```
-
-2. 代理用安装版应用以 `--data-dir V:\acceptance-root` 启动并点击安装。
-   预期：在下载前显示明确的磁盘空间不足错误，不激活、不创建 Job/资产、不删除其他数据。
-3. 验收后回收：
-
-   ```powershell
-   & scripts/windows-admin/remove-small-volume.ps1 -DeleteVhd
-   ```
-
-   该卷只有约 40 GB，小于安装计划的下载+目标+运行时+预留预算，因此会在下载前失败。
+**2026-11-03 已用可移动卷验证通过**（27.74 GiB 可用 FAT32 U 盘，小于 88.99 GiB 安装预算；
+证据 `verification/windows-gate0/product-space-shortage.json`），因此本节的 40 GB VHD 流程
+只在将来需要 NTFS 小卷复验时使用。任何可用空间小于安装预算的卷都可以触发同一检查。
 
 ## 3. 干净测试用户（D02，需人工登录）
 
@@ -94,7 +82,7 @@
 | 验收项 | 状态 | 依赖 |
 |---|---|---|
 | 整树禁网 I07 / P06 | 待运行 | 管理员 + 本 README 第 1 节 |
-| 空间不足 I03 | 待运行 | 管理员 + 第 2 节 |
+| 空间不足 I03 | 已通过（2026-11-03，27.74 GiB FAT32 可移动卷；证据 `verification/windows-gate0/product-space-shortage.json`） | 无需管理员 |
 | 干净用户 D02 | 待运行 | 人工登录新用户 |
 | 缺失/离线 WebView2 D03 | 待运行 | 沙盒/VM 或一次性移除 |
 | 100%/200% DPI W05 | 待运行 | 人工切换缩放 |
