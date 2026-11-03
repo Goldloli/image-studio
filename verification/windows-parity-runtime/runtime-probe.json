@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-runtime-probe",
+  "status": "pass",
+  "elapsed_seconds": 9.215,
+  "platform": {
+    "system": "win32",
+    "windows_version": {
+      "major": 10,
+      "minor": 0,
+      "build": 19045,
+      "platform_version": [
+        10,
+        0,
+        19041
+      ],
+      "service_pack": ""
+    },
+    "machine": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "python_executable": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\runtime\\python.exe",
+    "python_version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "isolated": true
+  },
+  "runtime_dir": {
+    "path": "target\\parity-runtime\\runtime",
+    "bytes": 4778861981
+  },
+  "wheelhouse": {
+    "path": "target\\parity-runtime\\wheelhouse",
+    "bytes": 2714172955
+  },
+  "offline_environment": {
+    "HF_HUB_OFFLINE": "1",
+    "TRANSFORMERS_OFFLINE": "1",
+    "HF_DATASETS_OFFLINE": "1",
+    "PIP_NO_INDEX": "1",
+    "HF_HUB_DISABLE_TELEMETRY": "1"
+  },
+  "pins": {
+    "accelerate": "1.12.0",
+    "annotated-doc": "0.0.5",
+    "anyio": "4.16.0",
+    "bitsandbytes": "0.50.2",
+    "certifi": "2026.10.23",
+    "charset-normalizer": "3.5.2",
+    "click": "8.5.0",
+    "colorama": "0.4.6",
+    "diffusers": "0.41.0",
+    "filelock": "4.2.7",
+    "flatbuffers": "25.12.19",
+    "fsspec": "2026.9.0",
+    "h11": "0.16.0",
+    "hf-xet": "1.8.0",
+    "httpcore": "1.0.9",
+    "httpx": "0.28.1",
+    "huggingface-hub": "1.33.0",
+    "idna": "3.20",
+    "importlib-metadata": "10.1.0",
+    "jinja2": "3.1.6",
+    "markdown-it-py": "4.2.0",
+    "markupsafe": "3.0.4",
+    "mdurl": "0.1.2",
+    "mpmath": "1.3.0",
+    "networkx": "3.7",
+    "numpy": "2.5.4",
+    "onnxruntime": "1.31.1",
+    "packaging": "26.3",
+    "pillow": "13.0.0",
+    "protobuf": "7.36.2",
+    "psutil": "7.1.3",
+    "pygments": "2.21.0",
+    "pyyaml": "6.0.3",
+    "regex": "2026.9.29",
+    "requests": "2.34.2",
+    "rich": "15.0.0",
+    "safetensors": "0.8.0",
+    "setuptools": "84.2.1",
+    "shellingham": "1.5.4",
+    "sympy": "1.14.0",
+    "tokenizers": "0.22.2",
+    "torch": "2.10.0+cu126",
+    "torchvision": "0.25.0+cu126",
+    "tqdm": "4.70.1",
+    "transformers": "5.3.0",
+    "typer": "0.27.3",
+    "typing-extensions": "4.16.0",
+    "urllib3": "2.8.0",
+    "zipp": "4.1.2"
+  },
+  "checks": [
+    {
+      "check": "lock_parse",
+      "result": {
+        "pins": 49
+      },
+      "status": "pass"
+    },
+    {
+      "check": "pinned_distributions_installed",
+      "status": "pass",
+      "installed_count": 49,
+      "expected_count": 49,
+      "missing": [],
+      "mismatched": {}
+    },
+    {
+      "check": "library_imports",
+      "status": "pass",
+      "imports": {
+        "torch": "2.10.0+cu126",
+        "torchvision": "0.25.0+cu126",
+        "diffusers": "0.41.0",
+        "transformers": "5.3.0",
+        "accelerate": "1.12.0",
+        "bitsandbytes": "0.50.2",
+        "safetensors": "0.8.0",
+        "huggingface_hub": "1.33.0",
+        "onnxruntime": "1.31.1",
+        "numpy": "2.5.4",
+        "PIL": "13.0.0",
+        "psutil": "7.1.3"
+      },
+      "errors": {}
+    },
+    {
+      "check": "torch_cuda_driver_level",
+      "result": {
+        "torch": "2.10.0+cu126",
+        "torch_cuda": "12.6",
+        "torch_cudnn": 91002,
+        "cuda_available": true,
+        "device_count": 1,
+        "device_name": "NVIDIA GeForce RTX 3080 Ti",
+        "device_capability": [
+          8,
+          6
+        ],
+        "bf16_supported": true
+      },
+      "status": "pass"
+    }
+  ],
+  "gpu": {
+    "before": {
+      "available": true,
+      "rows": [
+        "NVIDIA GeForce RTX 3080 Ti, GPU-78b715aa-ec51-31af-8813-eac9653458a7, 596.49, 12288 MiB, 789 MiB, 0 %"
+      ]
+    },
+    "after": {
+      "available": true,
+      "rows": [
+        "NVIDIA GeForce RTX 3080 Ti, GPU-78b715aa-ec51-31af-8813-eac9653458a7, 596.49, 12288 MiB, 789 MiB, 0 %"
+      ]
+    }
+  },
+  "limitations": [
+    "This probe proves the frozen interpreter installs and imports the pinned closure offline.",
+    "It does not prove model loading, inference quality, or resource budgets.",
+    "Without --cuda-context-probe no CUDA context is created, to avoid disturbing concurrent GPU work."
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-runtime-install-evidence",
+  "case_id": "1.2",
+  "runtime_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+  "status": "pass",
+  "started_at": "2026-11-04T00:11:18.0416774+08:00",
+  "finished_at": "2026-11-04T00:13:22.0180768+08:00",
+  "install_elapsed_seconds": 123.955,
+  "host": {
+    "hostname": "XIAOKA-PC",
+    "os": "Windows 10 10.0.19045",
+    "python_used_for_resolution": "3.14.7",
+    "python_used_for_probe": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "cpu_count": 24,
+    "ram_bytes": 34066575360
+  },
+  "commands": {
+    "resolve": "python -m pip install --dry-run --ignore-installed --report target/parity-runtime/pip-resolve-report.json --target target/parity-runtime/_resolve_probe -r target/parity-runtime/top-level-requirements.txt --only-binary=:all: --platform win_amd64 --implementation cp --python-version 3.12 --abi cp312 --index-url https://pypi.org/simple --extra-index-url https://download.pytorch.org/whl/cu126",
+    "download": "python -m pip download --no-deps -r resources/windows-parity/runtime-v2/requirements.lock --only-binary=:all: --platform win_amd64 --implementation cp --python-version 3.12 --abi cp312 -d target/parity-runtime/wheelhouse (PyPI for all but torch/torchvision; https://download.pytorch.org/whl/cu126 for torch/torchvision)",
+    "offline_install": "target/parity-runtime/runtime/python.exe -I -m pip install --no-index --find-links target/parity-runtime/wheelhouse -r resources/windows-parity/runtime-v2/requirements.lock --only-binary=:all: --no-cache-dir --disable-pip-version-check -v",
+    "probe": "target/parity-runtime/runtime/python.exe -I tools/windows-parity/runtime/probe_runtime_v2.py --output verification/windows-parity-runtime/runtime-probe.json"
+  },
+  "offline_checks": {
+    "install_uses_no_index": true,
+    "zero_download_lines_in_install_log": true,
+    "zero_http_urls_in_install_log": true,
+    "exit_code_zero": true,
+    "probe_passed": true
+  },
+  "install": {
+    "exit_code": 0,
+    "log": {
+      "path": "target/parity-runtime/offline-install.log",
+      "bytes": 27914,
+      "sha256": "b1e88195838c563fde656aea77865866c554400c0b89485b2c222d47fc6c16b1"
+    },
+    "download_lines": [],
+    "http_url_lines": [],
+    "lookup_lines": [
+      "Looking in links: target/parity-runtime/wheelhouse"
+    ],
+    "warnings": [
+      "WARNING: The script pygmentize.exe is installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\run",
+      "WARNING: The scripts f2py.exe and numpy-config.exe are installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\p",
+      "WARNING: The script idna.exe is installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\runtime\\S",
+      "WARNING: The script normalizer.exe is installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\run",
+      "WARNING: The script tqdm.exe is installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\runtime\\S",
+      "WARNING: The script onnxruntime_test.exe is installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runti",
+      "WARNING: The script markdown-it.exe is installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\ru",
+      "WARNING: The scripts torchfrtrace.exe and torchrun.exe are installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\targ",
+      "WARNING: The script httpx.exe is installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\runtime\\",
+      "WARNING: The script typer.exe is installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\runtime\\",
+      "WARNING: The scripts hf.exe, huggingface-cli.exe and tiny-agents.exe are installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\ima",
+      "WARNING: The script diffusers-cli.exe is installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\",
+      "WARNING: The scripts accelerate-config.exe, accelerate-estimate-memory.exe, accelerate-launch.exe, accelerate-merge-w",
+      "WARNING: The script transformers.exe is installed in 'C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\r"
+    ]
+  },
+  "resolution": {
+    "pip_version": "26.2.1",
+    "resolved_packages": 49,
+    "resolve_log": {
+      "path": "target/parity-runtime/pip-resolve.log",
+      "bytes": 20332,
+      "sha256": "7ebf85dc7935c9c5c876748e7b2a36b46163b608f6a0d000b1392177542c4920"
+    },
+    "indexes": [
+      "https://pypi.org/simple",
+      "https://download.pytorch.org/whl/cu126"
+    ]
+  },
+  "space": {
+    "wheelhouse": {
+      "path": "target/parity-runtime/wheelhouse",
+      "files": 50,
+      "bytes": 2714172955
+    },
+    "downloads": {
+      "path": "target/parity-runtime/downloads",
+      "bytes": 102082568
+    },
+    "installed_runtime": {
+      "path": "target/parity-runtime/runtime",
+      "bytes": 4778861981,
+      "files": 32580
+    },
+    "disk": {
+      "total": 2048167010304,
+      "used": 619740721152,
+      "free": 1428426289152
+    }
+  },
+  "locked_packages": 49,
+  "installed_distributions": 50,
+  "probe": {
+    "path": "verification/windows-parity-runtime/runtime-probe.json",
+    "sha256": "94e12915ce09b3f054574274dbe44883aad427008911d1fd142bfb41bd32c170",
+    "status": "pass",
+    "checks": [
+      {
+        "check": "lock_parse",
+        "status": "pass",
+        "result": {
+          "pins": 49
+        }
+      },
+      {
+        "check": "pinned_distributions_installed",
+        "status": "pass"
+      },
+      {
+        "check": "library_imports",
+        "status": "pass",
+        "imports": {
+          "torch": "2.10.0+cu126",
+          "torchvision": "0.25.0+cu126",
+          "diffusers": "0.41.0",
+          "transformers": "5.3.0",
+          "accelerate": "1.12.0",
+          "bitsandbytes": "0.50.2",
+          "safetensors": "0.8.0",
+          "huggingface_hub": "1.33.0",
+          "onnxruntime": "1.31.1",
+          "numpy": "2.5.4",
+          "PIL": "13.0.0",
+          "psutil": "7.1.3"
+        }
+      },
+      {
+        "check": "torch_cuda_driver_level",
+        "status": "pass",
+        "result": {
+          "torch": "2.10.0+cu126",
+          "torch_cuda": "12.6",
+          "torch_cudnn": 91002,
+          "cuda_available": true,
+          "device_count": 1,
+          "device_name": "NVIDIA GeForce RTX 3080 Ti",
+          "device_capability": [
+            8,
+            6
+          ],
+          "bf16_supported": true
+        }
+      }
+    ]
+  },
+  "artifacts": {
+    "runtime_manifest": {
+      "path": "resources/windows-parity/runtime-v2/runtime-manifest.json",
+      "sha256": "09453f503a42492a59c726ff958cd3e0c59f1d78ae55a07d3da4997f26a5dc49"
+    },
+    "requirements_lock": {
+      "path": "resources/windows-parity/runtime-v2/requirements.lock",
+      "sha256": "9930362ae08720fa72719dfffe1f9b2c7c9c563dbe4d715e0b0ed7069999a93b"
+    }
+  },
+  "onnxruntime_choice": {
+    "version": "1.31.1",
+    "wheel": "onnxruntime-1.31.1-cp312-cp312-win_amd64.whl",
+    "reason": "Latest stable onnxruntime release at freeze time with an official cp312 win_amd64 wheel; the CPU package is used only through the ONNX Runtime CPUExecutionProvider for BiRefNet, so GPU/other execution providers are not part of this runtime closure.",
+    "provider_used": "CPUExecutionProvider (planned BiRefNet worker)",
+    "wheel_sha256": "ae8a9a351efda685cc59a66226cdefaa37a126c1d66872ca23a2de9425326130"
+  },
+  "generated_at": "2026-11-03T16:17:51.088722+00:00",
+  "limitations": [
+    "The probe imports libraries and queries CUDA at driver level; it does not run model inference.",
+    "The offline proof covers the install step: pip ran with --no-index and only the local wheelhouse.",
+    "Python 3.12.10 is the last 3.12 release with official Windows binaries; later 3.12 releases are source-only."
+  ]
+}
