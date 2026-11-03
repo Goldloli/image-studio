@@ -25,7 +25,8 @@
     "icon": ["icons/icon.ico"],
     "externalBin": [
       "binaries/inference-supervisor",
-      "binaries/diagnostic-worker"
+      "binaries/diagnostic-worker",
+      "binaries/realesrgan-worker"
     ],
     "useLocalToolsDir": true,
     "windows": {

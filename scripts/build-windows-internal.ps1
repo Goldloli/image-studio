@@ -88,12 +88,13 @@ if (-not $SkipQualityGates) {
     Invoke-Checked "cargo.exe" @("test", "--workspace", "--locked")
 }
 
-Invoke-Checked "cargo.exe" @("build", "--release", "--locked", "-p", "inference-supervisor", "-p", "diagnostic-worker")
+Invoke-Checked "cargo.exe" @("build", "--release", "--locked", "-p", "inference-supervisor", "-p", "diagnostic-worker", "-p", "realesrgan-worker")
 
 New-Item -ItemType Directory -Force -Path $sidecars | Out-Null
 $sidecarCopies = @{
     "inference-supervisor.exe" = "inference-supervisor-$hostTriple.exe"
     "diagnostic-worker.exe" = "diagnostic-worker-$hostTriple.exe"
+    "realesrgan-worker.exe" = "realesrgan-worker-$hostTriple.exe"
 }
 foreach ($sourceName in $sidecarCopies.Keys) {
     $source = Join-Path $target $sourceName
