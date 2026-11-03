@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "id": "birefnet-general-epoch-244-windows-v1",
+  "repository": "ZhengPeng7/BiRefNet",
+  "revision": "v1 / release asset 186740004",
+  "license": "MIT",
+  "component_bytes": 972666916,
+  "download_source": {
+    "provider": "github-release",
+    "repository": "ZhengPeng7/BiRefNet",
+    "release": "v1",
+    "asset_id": 186740004,
+    "content_identity": "fixed release asset bytes and SHA-256"
+  },
+  "files": [
+    {
+      "path": "BiRefNet-general-epoch_244.onnx",
+      "url": "https://github.com/ZhengPeng7/BiRefNet/releases/download/v1/BiRefNet-general-epoch_244.onnx",
+      "bytes": 972666916,
+      "sha256": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+      "license": "MIT"
+    }
+  ],
+  "archives": [],
+  "licenses": [
+    {
+      "path": "LICENSE-BiRefNet.txt",
+      "bytes": 1087,
+      "sha256": "d7f5aa6ca5087c02da51a178073fe13df4480dfc2171e0c014bf39a7a57dd6a4",
+      "source": "resources/planned-models/birefnet/LICENSE-BiRefNet.txt",
+      "source_repository": "https://github.com/ZhengPeng7/BiRefNet",
+      "note": "Bundled as an application resource: the GitHub raw URL redirects to raw.githubusercontent.com, which is outside the installer URL allowlist, and the v1 release has no license asset."
+    }
+  ]
+}

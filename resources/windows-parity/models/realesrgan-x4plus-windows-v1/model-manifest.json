@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "id": "realesrgan-x4plus-windows-v1",
+  "repository": "xinntao/Real-ESRGAN",
+  "revision": "v0.2.5.0 / realesrgan-ncnn-vulkan-20220424 / x4plus",
+  "license": "BSD-3-Clause (model) / MIT (ncnn app)",
+  "component_bytes": 33540549,
+  "download_source": {
+    "provider": "github-release",
+    "repository": "xinntao/Real-ESRGAN",
+    "release": "v0.2.5.0",
+    "content_identity": "fixed official release asset bytes and SHA-256"
+  },
+  "files": [],
+  "archives": [
+    {
+      "path": "realesrgan-ncnn-vulkan-20220424-windows.zip",
+      "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-windows.zip",
+      "bytes": 45474481,
+      "sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+      "members": [
+        {
+          "archive_path": "models/realesrgan-x4plus.bin",
+          "path": "realesrgan-x4plus.bin",
+          "bytes": 33424520,
+          "sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+          "executable": false
+        },
+        {
+          "archive_path": "models/realesrgan-x4plus.param",
+          "path": "realesrgan-x4plus.param",
+          "bytes": 116029,
+          "sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86",
+          "executable": false
+        }
+      ]
+    }
+  ],
+  "licenses": [
+    {
+      "path": "LICENSE-RealESRGAN.txt",
+      "bytes": 1519,
+      "sha256": "4a699ec4863d96a91fc265948a0c90033f7e8735d515524dcf3444736406e0c2",
+      "source": "resources/windows-parity/realesrgan-ncnn-vulkan/LICENSE-RealESRGAN.txt",
+      "source_url": "https://raw.githubusercontent.com/xinntao/Real-ESRGAN/v0.2.5.0/LICENSE",
+      "note": "The official Windows zip does not contain license files; the text is bundled as an application resource."
+    },
+    {
+      "path": "LICENSE-ncnn-app.txt",
+      "bytes": 2228,
+      "sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937",
+      "source": "resources/windows-parity/realesrgan-ncnn-vulkan/LICENSE-ncnn-app.txt",
+      "source_url": "https://raw.githubusercontent.com/xinntao/Real-ESRGAN-ncnn-vulkan/v0.2.0/LICENSE",
+      "note": "MIT license of the ncnn application, bundled as an application resource."
+    }
+  ]
+}
