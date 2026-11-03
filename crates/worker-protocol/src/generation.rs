@@ -61,6 +61,197 @@ pub fn windows_z_image_parameters(seed: u32) -> BTreeMap<String, serde_json::Val
     ])
 }
 
+// Windows model-parity identities (design.md section 11). The existing macOS and Z-Image
+// Windows identities above stay untouched.
+/// Shared v2 Python runtime serving Klein, BiRefNet, Qwen-Image 2.1 and MOSS-Image-SFT.
+pub const WINDOWS_V2_RUNTIME_ID: &str =
+    "windows-python31210-torch2100-cu126-diff041-transformers53-v2";
+
+pub const KLEIN_WINDOWS_MODEL_ID: &str = "flux2-klein-4b-distilled-windows-v1";
+pub const KLEIN_WINDOWS_TEXT_CAPABILITY_ID: &str = "image.text-to-image.flux2-klein-4b.windows-v1";
+pub const KLEIN_WINDOWS_EDIT_CAPABILITY_ID: &str = "image.edit.flux2-klein-4b.windows-v1";
+pub const KLEIN_WINDOWS_TEXT_RECIPE_ID: &str = "klein4b-text-windows-v1";
+pub const KLEIN_WINDOWS_EDIT_RECIPE_ID: &str = "klein4b-edit-windows-v1";
+pub const KLEIN_WINDOWS_SNAPSHOT_ID: &str =
+    "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294";
+
+pub const BIREFNET_WINDOWS_MODEL_ID: &str = "birefnet-general-epoch-244-windows-v1";
+pub const BIREFNET_WINDOWS_CAPABILITY_ID: &str =
+    "image.remove-background.birefnet-general-epoch-244.windows-v1";
+pub const BIREFNET_WINDOWS_RECIPE_ID: &str = "birefnet-general-cpu-windows-v1";
+pub const BIREFNET_WINDOWS_SNAPSHOT_ID: &str = "birefnet-general-epoch-244-onnx-windows-v1";
+
+pub const REALESRGAN_WINDOWS_MODEL_ID: &str = "realesrgan-x4plus-windows-v1";
+pub const REALESRGAN_WINDOWS_CAPABILITY_ID: &str = "image.upscale.realesrgan-x4plus.windows-v1";
+pub const REALESRGAN_WINDOWS_RECIPE_ID: &str = "realesrgan-x4plus-windows-t128-v1";
+pub const REALESRGAN_WINDOWS_SNAPSHOT_ID: &str = "realesrgan-x4plus-ncnn-windows-v1";
+pub const REALESRGAN_WINDOWS_RUNTIME_ID: &str = "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1";
+
+pub const QWEN_IMAGE_21_WINDOWS_MODEL_ID: &str = "qwen-image-2.1-windows-v1";
+pub const QWEN_IMAGE_21_WINDOWS_CAPABILITY_ID: &str =
+    "image.text-to-image.qwen-image-2.1.windows-v1";
+pub const QWEN_IMAGE_21_WINDOWS_RECIPE_ID: &str = "qwen21-windows-txt2img-nf4-40-v1";
+pub const QWEN_IMAGE_21_WINDOWS_SNAPSHOT_ID: &str =
+    "qwen-image-2.1-windows-staged-d26bb61231c349cf6b7896fa83353113880e1ba3";
+
+pub const QWEN_IMAGE_21_TURBO_WINDOWS_MODEL_ID: &str = "qwen-image-2.1-turbo-windows-v1";
+pub const QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY_ID: &str =
+    "image.text-to-image.qwen-image-2.1-turbo.windows-v1";
+pub const QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE_ID: &str = "qwen21-turbo-windows-txt2img-nf4-8-v1";
+pub const QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT_ID: &str =
+    "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b";
+
+pub const MOSS_IMAGE_SFT_WINDOWS_MODEL_ID: &str = "moss-image-sft-windows-v1";
+pub const MOSS_IMAGE_SFT_WINDOWS_CAPABILITY_ID: &str =
+    "image.text-to-image.moss-image-sft.windows-v1";
+pub const MOSS_IMAGE_SFT_WINDOWS_RECIPE_ID: &str = "moss-image-sft-windows-txt2img-nf4-50-v1";
+pub const MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID: &str =
+    "moss-image-sft-windows-staged-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9";
+
+/// Windows runtimes may only be claimed by Windows recipes (design.md section 11).
+pub fn is_windows_runtime_id(value: &str) -> bool {
+    matches!(
+        value,
+        Z_IMAGE_WINDOWS_RUNTIME_ID | WINDOWS_V2_RUNTIME_ID | REALESRGAN_WINDOWS_RUNTIME_ID
+    )
+}
+
+/// Klein text-to-image and single-image edit share one frozen NF4 + component-offload map.
+pub fn windows_klein_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    windows_klein_parameter_map(KLEIN_WINDOWS_TEXT_RECIPE_ID, seed)
+}
+
+/// Klein edit uses the same frozen values with its own recipe identity.
+pub fn windows_klein_edit_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    windows_klein_parameter_map(KLEIN_WINDOWS_EDIT_RECIPE_ID, seed)
+}
+
+fn windows_klein_parameter_map(recipe_id: &str, seed: u32) -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        ("recipe".into(), serde_json::json!(recipe_id)),
+        ("recipe_version".into(), serde_json::json!(1)),
+        ("seed".into(), serde_json::json!(seed)),
+        ("steps".into(), serde_json::json!(4)),
+        ("guidance".into(), serde_json::json!(1.0)),
+        (
+            "scheduler".into(),
+            serde_json::json!("flow_match_euler_discrete"),
+        ),
+        ("token_budget".into(), serde_json::json!(512)),
+        ("thinking".into(), serde_json::json!(false)),
+        ("truncation".into(), serde_json::json!(false)),
+        ("quantization".into(), serde_json::json!("nf4")),
+        (
+            "load_strategy".into(),
+            serde_json::json!("nf4-component-offload-v1"),
+        ),
+    ])
+}
+
+/// BiRefNet keeps the macOS ONNX Runtime CPU contract on the shared Windows v2 runtime.
+pub fn windows_birefnet_parameters() -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        (
+            "recipe".into(),
+            serde_json::json!(BIREFNET_WINDOWS_RECIPE_ID),
+        ),
+        ("recipe_version".into(), serde_json::json!(1)),
+        ("provider".into(), serde_json::json!("CPUExecutionProvider")),
+        ("precision".into(), serde_json::json!("float32")),
+        (
+            "preprocessing".into(),
+            serde_json::json!("birefnet-1024-rgb-v1"),
+        ),
+        (
+            "postprocessing".into(),
+            serde_json::json!("birefnet-logits-sigmoid-v1"),
+        ),
+        ("intra_op_threads".into(), serde_json::json!(4)),
+        ("inter_op_threads".into(), serde_json::json!(1)),
+        ("execution_mode".into(), serde_json::json!("sequential")),
+    ])
+}
+
+/// Real-ESRGAN Windows fixes 4x scale, tile 128, 1:1:1 threads and no TTA.
+pub fn windows_realesrgan_parameters() -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        (
+            "recipe".into(),
+            serde_json::json!(REALESRGAN_WINDOWS_RECIPE_ID),
+        ),
+        ("recipe_version".into(), serde_json::json!(1)),
+        ("model".into(), serde_json::json!("realesrgan-x4plus")),
+        ("scale".into(), serde_json::json!(4)),
+        ("tile".into(), serde_json::json!(128)),
+        ("threads".into(), serde_json::json!("1:1:1")),
+        ("tta".into(), serde_json::json!(false)),
+    ])
+}
+
+pub fn windows_qwen21_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        (
+            "recipe".into(),
+            serde_json::json!(QWEN_IMAGE_21_WINDOWS_RECIPE_ID),
+        ),
+        ("recipe_version".into(), serde_json::json!(1)),
+        ("seed".into(), serde_json::json!(seed)),
+        ("steps".into(), serde_json::json!(40)),
+        ("guidance".into(), serde_json::json!(1.0)),
+        ("sampling".into(), serde_json::json!("linear")),
+        ("token_budget".into(), serde_json::json!(2048)),
+        ("quantization".into(), serde_json::json!("nf4")),
+        ("load_strategy".into(), serde_json::json!("staged-nf4-v1")),
+    ])
+}
+
+pub fn windows_qwen21_turbo_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    let mut parameters = BTreeMap::from([
+        (
+            "recipe".into(),
+            serde_json::json!(QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE_ID),
+        ),
+        ("recipe_version".into(), serde_json::json!(1)),
+        ("seed".into(), serde_json::json!(seed)),
+        ("steps".into(), serde_json::json!(8)),
+        ("guidance".into(), serde_json::json!(1.0)),
+        ("sampling".into(), serde_json::json!("linear")),
+        ("token_budget".into(), serde_json::json!(2048)),
+        ("quantization".into(), serde_json::json!("nf4")),
+        ("load_strategy".into(), serde_json::json!("staged-nf4-v1")),
+    ]);
+    parameters.insert(
+        "sampling_schedule".into(),
+        serde_json::json!("qwen-turbo-model-index-v1"),
+    );
+    parameters
+}
+
+pub fn windows_moss_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        (
+            "recipe".into(),
+            serde_json::json!(MOSS_IMAGE_SFT_WINDOWS_RECIPE_ID),
+        ),
+        ("recipe_version".into(), serde_json::json!(1)),
+        ("seed".into(), serde_json::json!(seed)),
+        ("steps".into(), serde_json::json!(50)),
+        ("guidance".into(), serde_json::json!(3.0)),
+        ("sampling".into(), serde_json::json!("moss_image")),
+        ("token_budget".into(), serde_json::json!(4096)),
+        ("thinking".into(), serde_json::json!(true)),
+        ("negative_prompt".into(), serde_json::json!("")),
+        ("uncond_skip_layers".into(), serde_json::json!([22])),
+        (
+            "quantized_components".into(),
+            serde_json::json!(["transformer", "text_encoder"]),
+        ),
+        ("text_encoder_precision".into(), serde_json::json!("nf4")),
+        ("vae_precision".into(), serde_json::json!("float32")),
+        ("load_strategy".into(), serde_json::json!("staged-nf4-v1")),
+    ])
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct WorkerIdentity {
@@ -250,6 +441,11 @@ impl ExecuteRequestV2 {
                 return Err(Error::Invalid("duplicate v2 output role"));
             }
         }
+        if is_windows_runtime_id(&self.runtime_lock_id) && is_macos_model_id(&self.model_id) {
+            return Err(Error::Invalid(
+                "Windows runtime cannot serve a macOS recipe",
+            ));
+        }
         match (self.model_id.as_str(), self.capability_id.as_str()) {
             ("flux2-klein-4b-distilled", "image.text-to-image.flux2-klein-4b.v1")
                 if self.recipe_id == "klein4b-text-v1" =>
@@ -421,6 +617,59 @@ impl ExecuteRequestV2 {
                 if self.parameters != windows_z_image_parameters(seed) {
                     return Err(Error::Invalid("invalid Windows Z-Image parameters"));
                 }
+            }
+            (KLEIN_WINDOWS_MODEL_ID, KLEIN_WINDOWS_TEXT_CAPABILITY_ID)
+                if self.recipe_id == KLEIN_WINDOWS_TEXT_RECIPE_ID =>
+            {
+                validate_windows_klein(self, &output_roles, false)?;
+            }
+            (KLEIN_WINDOWS_MODEL_ID, KLEIN_WINDOWS_EDIT_CAPABILITY_ID)
+                if self.recipe_id == KLEIN_WINDOWS_EDIT_RECIPE_ID =>
+            {
+                validate_windows_klein(self, &output_roles, true)?;
+            }
+            (BIREFNET_WINDOWS_MODEL_ID, BIREFNET_WINDOWS_CAPABILITY_ID)
+                if self.recipe_id == BIREFNET_WINDOWS_RECIPE_ID =>
+            {
+                validate_windows_birefnet(self, &output_roles)?;
+            }
+            (REALESRGAN_WINDOWS_MODEL_ID, REALESRGAN_WINDOWS_CAPABILITY_ID)
+                if self.recipe_id == REALESRGAN_WINDOWS_RECIPE_ID =>
+            {
+                validate_windows_realesrgan(self, &output_roles)?;
+            }
+            (QWEN_IMAGE_21_WINDOWS_MODEL_ID, QWEN_IMAGE_21_WINDOWS_CAPABILITY_ID)
+                if self.recipe_id == QWEN_IMAGE_21_WINDOWS_RECIPE_ID =>
+            {
+                validate_windows_staged_text_model(
+                    self,
+                    &output_roles,
+                    QWEN_IMAGE_21_WINDOWS_SNAPSHOT_ID,
+                    40,
+                    windows_qwen21_parameters(self.seed.unwrap_or_default()),
+                )?;
+            }
+            (QWEN_IMAGE_21_TURBO_WINDOWS_MODEL_ID, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY_ID)
+                if self.recipe_id == QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE_ID =>
+            {
+                validate_windows_staged_text_model(
+                    self,
+                    &output_roles,
+                    QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT_ID,
+                    8,
+                    windows_qwen21_turbo_parameters(self.seed.unwrap_or_default()),
+                )?;
+            }
+            (MOSS_IMAGE_SFT_WINDOWS_MODEL_ID, MOSS_IMAGE_SFT_WINDOWS_CAPABILITY_ID)
+                if self.recipe_id == MOSS_IMAGE_SFT_WINDOWS_RECIPE_ID =>
+            {
+                validate_windows_staged_text_model(
+                    self,
+                    &output_roles,
+                    MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID,
+                    50,
+                    windows_moss_parameters(self.seed.unwrap_or_default()),
+                )?;
             }
             _ => return Err(Error::Invalid("unsupported v2 model recipe")),
         }
@@ -1195,6 +1444,172 @@ fn validate_text_model_shape(
         .any(|output| (output.width, output.height) != (1024, 1024))
     {
         return Err(Error::Invalid("text model output must be 1024 square"));
+    }
+    Ok(())
+}
+
+/// Historical macOS model ids registered outside the Windows model-parity change.
+fn is_macos_model_id(value: &str) -> bool {
+    matches!(
+        value,
+        "z-image-turbo-q4"
+            | "flux2-klein-4b-distilled"
+            | "birefnet-general-epoch-244"
+            | "realesrgan-x4plus"
+            | "qwen-image-2.1-mflux-v1"
+            | "qwen-image-2.1-turbo-mflux-v1"
+            | "moss-image-sft-mflux-v1"
+    )
+}
+
+/// Klein keeps a fresh-process NF4 + component-offload recipe on the shared v2 runtime.
+fn validate_windows_klein(
+    request: &ExecuteRequestV2,
+    output_roles: &BTreeSet<&str>,
+    edit: bool,
+) -> Result<(), Error> {
+    let Some(seed) = request.seed else {
+        return Err(Error::Invalid("Windows Klein requires a resolved seed"));
+    };
+    if request.instruction.trim().is_empty()
+        || request.sampling_steps != Some(4)
+        || request.runtime_lock_id != WINDOWS_V2_RUNTIME_ID
+        || request.model_snapshot_id != KLEIN_WINDOWS_SNAPSHOT_ID
+        || request.inputs.len() != usize::from(edit)
+    {
+        return Err(Error::Invalid("invalid Windows Klein recipe"));
+    }
+    let expected = if edit {
+        windows_klein_edit_parameters(seed)
+    } else {
+        windows_klein_parameters(seed)
+    };
+    if request.parameters != expected {
+        return Err(Error::Invalid("invalid Windows Klein parameters"));
+    }
+    expect_outputs(
+        request.outputs.as_slice(),
+        output_roles,
+        &["primary"],
+        "image_rgb",
+    )?;
+    if request.outputs.iter().any(|output| {
+        (output.width, output.height) != (1024, 1024) || output.max_bytes > MAX_OUTPUT_BYTES
+    }) {
+        return Err(Error::Invalid(
+            "Windows Klein output must be one bounded 1024 square",
+        ));
+    }
+    Ok(())
+}
+
+/// BiRefNet keeps the macOS ONNX Runtime CPU dual-output contract on the v2 runtime.
+fn validate_windows_birefnet(
+    request: &ExecuteRequestV2,
+    output_roles: &BTreeSet<&str>,
+) -> Result<(), Error> {
+    if !request.instruction.is_empty()
+        || request.seed.is_some()
+        || request.sampling_steps.is_some()
+        || request.inputs.len() != 1
+        || request.runtime_lock_id != WINDOWS_V2_RUNTIME_ID
+        || request.model_snapshot_id != BIREFNET_WINDOWS_SNAPSHOT_ID
+        || request.parameters != windows_birefnet_parameters()
+    {
+        return Err(Error::Invalid("invalid Windows BiRefNet recipe"));
+    }
+    expect_two_outputs(
+        request.outputs.as_slice(),
+        output_roles,
+        "image_rgba",
+        "mask",
+    )?;
+    let source = &request.inputs[0];
+    if request.outputs.iter().any(|output| {
+        (output.width, output.height) != (source.width, source.height)
+            || output.max_bytes > MAX_OUTPUT_BYTES
+    }) {
+        return Err(Error::Invalid(
+            "Windows BiRefNet output must preserve source size",
+        ));
+    }
+    Ok(())
+}
+
+/// Real-ESRGAN Windows fixes 4x scale on its own ncnn Vulkan runtime.
+fn validate_windows_realesrgan(
+    request: &ExecuteRequestV2,
+    output_roles: &BTreeSet<&str>,
+) -> Result<(), Error> {
+    if !request.instruction.is_empty()
+        || request.seed.is_some()
+        || request.sampling_steps.is_some()
+        || request.inputs.len() != 1
+        || request.runtime_lock_id != REALESRGAN_WINDOWS_RUNTIME_ID
+        || request.model_snapshot_id != REALESRGAN_WINDOWS_SNAPSHOT_ID
+        || request.parameters != windows_realesrgan_parameters()
+    {
+        return Err(Error::Invalid("invalid Windows Real-ESRGAN recipe"));
+    }
+    expect_outputs(
+        request.outputs.as_slice(),
+        output_roles,
+        &["primary"],
+        "image_rgb",
+    )?;
+    let source = &request.inputs[0];
+    let Some(width) = source.width.checked_mul(4) else {
+        return Err(Error::Invalid("Windows Real-ESRGAN width overflow"));
+    };
+    let Some(height) = source.height.checked_mul(4) else {
+        return Err(Error::Invalid("Windows Real-ESRGAN height overflow"));
+    };
+    if request
+        .outputs
+        .iter()
+        .any(|output| (output.width, output.height) != (width, height))
+    {
+        return Err(Error::Invalid(
+            "Windows Real-ESRGAN output must be four times the source",
+        ));
+    }
+    Ok(())
+}
+
+/// Qwen base/Turbo and MOSS share the staged NF4 contract on the shared v2 runtime.
+fn validate_windows_staged_text_model(
+    request: &ExecuteRequestV2,
+    output_roles: &BTreeSet<&str>,
+    snapshot_id: &str,
+    steps: u32,
+    expected_parameters: BTreeMap<String, serde_json::Value>,
+) -> Result<(), Error> {
+    if request.instruction.trim().is_empty()
+        || request.seed.is_none()
+        || request.sampling_steps != Some(steps)
+        || !request.inputs.is_empty()
+        || request.runtime_lock_id != WINDOWS_V2_RUNTIME_ID
+        || request.model_snapshot_id != snapshot_id
+    {
+        return Err(Error::Invalid("invalid Windows staged text recipe"));
+    }
+    if request.parameters != expected_parameters {
+        return Err(Error::Invalid(
+            "invalid Windows staged text model parameters",
+        ));
+    }
+    expect_outputs(
+        request.outputs.as_slice(),
+        output_roles,
+        &["primary"],
+        "image_rgb",
+    )?;
+    if request.outputs.iter().any(|output| {
+        (output.width, output.height) != (1024, 1024) || output.max_bytes > MAX_OUTPUT_BYTES
+    }) {
+        return Err(Error::Invalid(
+            "Windows staged text output must be one bounded 1024 square",
+        ));
     }
     Ok(())
 }
