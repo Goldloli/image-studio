@@ -1,6 +1,6 @@
 # 实施与验收范围
 
-状态：待用户确认。范围是 Windows 与 macOS 七型号/八能力完全对齐；Gate 0 可行性实测已完成（见 verification/windows-parity-gate0），确认后按下列任务实施与验收。任务复选框在完成最小验证后勾选，Git 本地小步提交，不自动 push。
+状态：用户已确认（2026-11-03），按本清单顺序实施。范围是 Windows 与 macOS 七型号/八能力完全对齐；Gate 0 可行性实测已完成（见 verification/windows-parity-gate0）。任务复选框在完成最小验证后勾选，Git 本地小步提交，不自动 push。
 
 ## 1. Gate 0 与运行时
 

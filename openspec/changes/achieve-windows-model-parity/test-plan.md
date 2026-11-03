@@ -1,6 +1,6 @@
 # Windows 全模型对齐验收计划
 
-状态：待用户确认；Gate 0 可行性已部分实测（Qwen/MOSS 功能可行、内存预算未达标，见 verification/windows-parity-gate0）。本计划覆盖新增六个型号与 Windows 平台回归；每项记录 case ID、时间、平台、命令/原生操作、预期/实际、pass/fail/not_run/blocked、证据路径与资源数据。
+状态：用户已确认（2026-11-03）；Gate 0 可行性已部分实测（Qwen/MOSS 功能可行、内存预算未达标，见 verification/windows-parity-gate0）。本计划覆盖新增六个型号与 Windows 平台回归；每项记录 case ID、时间、平台、命令/原生操作、预期/实际、pass/fail/not_run/blocked、证据路径与资源数据。
 
 ## 通用规则
 
