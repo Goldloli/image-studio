@@ -104,8 +104,8 @@ def resolve_sources(
     source: str,
     modelscope_repo: str | None,
     modelscope_revision: str,
-) -> dict[str, dict]:
-    """Return path -> {url, source_revision, source_kind} for every manifest file."""
+) -> tuple[dict[str, dict], dict | None]:
+    """Return path -> source info for every manifest file, plus mirror checks."""
     files = manifest["files"]
     if source == "manifest":
         resolved = {}
@@ -127,7 +127,7 @@ def resolve_sources(
                 "source_revision": None if revision is None else str(revision),
                 "declared_url": url,
             }
-        return resolved
+        return resolved, None
 
     if source != "modelscope-mirror":
         raise RuntimeError(f"unknown source: {source}")
@@ -137,24 +137,44 @@ def resolve_sources(
     resolved = {}
     missing = []
     mismatched = []
+    checks = []
     for artifact in files:
         path = str(artifact["path"])
+        expected_bytes = int(artifact["bytes"])
+        expected_sha = str(artifact["sha256"]).lower()
         entry = mirror.get(path)
         if entry is None:
             missing.append(path)
-            continue
-        if entry["size"] != int(artifact["bytes"]) or (
-            entry["sha256"] and entry["sha256"] != str(artifact["sha256"]).lower()
-        ):
-            mismatched.append(
+            checks.append(
                 {
                     "path": path,
-                    "mirror_size": entry["size"],
-                    "manifest_size": int(artifact["bytes"]),
-                    "mirror_sha256": entry["sha256"],
-                    "manifest_sha256": str(artifact["sha256"]).lower(),
+                    "manifest_bytes": expected_bytes,
+                    "manifest_sha256": expected_sha,
+                    "mirror_bytes": None,
+                    "mirror_sha256": None,
+                    "present_in_mirror": False,
+                    "bytes_match": False,
+                    "sha256_match": False,
                 }
             )
+            continue
+        bytes_match = entry["size"] == expected_bytes
+        sha_match = bool(entry["sha256"]) and entry["sha256"] == expected_sha
+        checks.append(
+            {
+                "path": path,
+                "manifest_bytes": expected_bytes,
+                "manifest_sha256": expected_sha,
+                "mirror_bytes": entry["size"],
+                "mirror_sha256": entry["sha256"],
+                "mirror_revision": entry["revision"],
+                "present_in_mirror": True,
+                "bytes_match": bytes_match,
+                "sha256_match": sha_match,
+            }
+        )
+        if not (bytes_match and sha_match):
+            mismatched.append(checks[-1])
             continue
         resolved[path] = {
             "url": MODELSCOPE_FILE.format(
@@ -175,7 +195,63 @@ def resolve_sources(
             "ModelScope mirror files do not match the fixed manifest: "
             + json.dumps(mismatched, ensure_ascii=False)
         )
-    return resolved
+    mirror_info = {
+        "repository": modelscope_repo,
+        "listing_revision": modelscope_revision,
+        "mirror_file_count": len(checks),
+        "all_manifest_files_present": True,
+        "all_mirror_bytes_match_manifest": True,
+        "all_mirror_sha256_match_manifest": True,
+        "checks": checks,
+    }
+    return resolved, mirror_info
+
+
+def probe_endpoint(url: str, timeout_seconds: float = 30.0) -> dict:
+    """Probe an HTTP endpoint with curl and return reachability data."""
+    curl = "curl.exe" if os.name == "nt" else "curl"
+    command = [
+        curl,
+        "--location",
+        "--silent",
+        "--show-error",
+        "--max-time",
+        str(int(timeout_seconds)),
+        "--connect-timeout",
+        "10",
+        "--output",
+        os.devnull,
+        "--user-agent",
+        USER_AGENT,
+        "--write-out",
+        "%{http_code}\\t%{time_total}",
+        url,
+    ]
+    started = time.monotonic()
+    result = subprocess.run(
+        command, capture_output=True, text=True, errors="replace", check=False
+    )
+    elapsed = time.monotonic() - started
+    http_code = None
+    time_total = None
+    if result.stdout.strip():
+        fields = result.stdout.strip().splitlines()[-1].split("\t")
+        if len(fields) >= 2:
+            try:
+                http_code = int(fields[0])
+                time_total = float(fields[1])
+            except ValueError:
+                pass
+    return {
+        "url": url,
+        "http_code": http_code,
+        "curl_exit_code": result.returncode,
+        "elapsed_seconds": round(elapsed, 3),
+        "curl_time_total_seconds": time_total,
+        "reachable": result.returncode == 0 and http_code in (200, 206),
+        "error": (result.stderr or "").strip()[:500] or None,
+    }
+
 
 
 def curl_download(
@@ -425,6 +501,15 @@ def main() -> int:
     parser.add_argument("--speed-limit", type=int, default=10240)
     parser.add_argument("--speed-time", type=int, default=120)
     parser.add_argument("--progress", type=Path)
+    parser.add_argument(
+        "--probe-url",
+        action="append",
+        default=[],
+        help="optional endpoint to probe (reachability evidence), repeatable",
+    )
+    parser.add_argument(
+        "--probe-timeout-seconds", type=float, default=30.0
+    )
     args = parser.parse_args()
     if not 1 <= args.workers <= 8:
         raise RuntimeError("workers must be between 1 and 8")
@@ -442,7 +527,7 @@ def main() -> int:
 
     output_root = args.output.resolve()
     output_root.mkdir(parents=True, exist_ok=True)
-    resolved = resolve_sources(
+    resolved, mirror_info = resolve_sources(
         manifest, args.source, args.modelscope_repo, args.modelscope_revision
     )
     targets = {
@@ -478,6 +563,11 @@ def main() -> int:
             ),
             "official_manifest_urls_preserved": True,
             "integrity_basis": "fixed manifest bytes and SHA-256 verified per file",
+            "mirror_verification": mirror_info,
+            "endpoint_probes": [
+                probe_endpoint(url, args.probe_timeout_seconds)
+                for url in args.probe_url
+            ],
         },
         "machine": {
             "hostname": socket.gethostname(),
