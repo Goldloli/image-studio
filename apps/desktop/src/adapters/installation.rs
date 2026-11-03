@@ -64,10 +64,15 @@ const REALESRGAN_MODEL_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/realesrgan/model-manifest.json");
 const REALESRGAN_RUNTIME_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/realesrgan/runtime-manifest.json");
+// macOS-only Qwen/MOSS profiles: Windows installs use the frozen v2 runtime
+// manifests under resources/windows-parity instead.
+#[cfg(not(windows))]
 const QWEN_IMAGE_21_MODEL_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/qwen21/model-manifest.json");
+#[cfg(not(windows))]
 const QWEN_IMAGE_21_TURBO_MODEL_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/qwen21-turbo/model-manifest.json");
+#[cfg(not(windows))]
 const MOSS_IMAGE_SFT_MODEL_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/moss-image-sft/model-manifest.json");
 const WINDOWS_ZIMAGE_MODEL_MANIFEST: &str = include_str!(
@@ -81,10 +86,13 @@ const WINDOWS_ZIMAGE_LOCK: &str =
 const WINDOWS_ZIMAGE_WORKER_WHEEL: &[u8] = include_bytes!(
     "../../../../resources/windows-foundation/z-image-diffusers/studio_zimage_cuda_worker-0.1.0-py3-none-any.whl"
 );
+#[cfg(not(windows))]
 const RECIPES_V3_RUNTIME_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/qwen21/runtime-manifest.json");
+#[cfg(not(windows))]
 const RECIPES_V3_LOCK: &str =
     include_str!("../../../../resources/planned-models/qwen21/requirements.lock");
+#[cfg(not(windows))]
 const RECIPES_V3_WORKER_WHEEL: &[u8] = include_bytes!(
     "../../../../resources/planned-models/qwen21/studio_mflux_worker_v3-0.3.0-py3-none-any.whl"
 );
@@ -196,6 +204,7 @@ const REALESRGAN_PROFILE: InstallProfile = InstallProfile {
     worker_model_argument: false,
 };
 
+#[cfg(not(windows))]
 const QWEN_IMAGE_21_PROFILE: InstallProfile = InstallProfile {
     install_id: QWEN_IMAGE_21_INSTALL_ID,
     model_manifest: QWEN_IMAGE_21_MODEL_MANIFEST,
@@ -214,6 +223,7 @@ const QWEN_IMAGE_21_PROFILE: InstallProfile = InstallProfile {
     worker_model_argument: true,
 };
 
+#[cfg(not(windows))]
 const QWEN_IMAGE_21_TURBO_PROFILE: InstallProfile = InstallProfile {
     install_id: QWEN_IMAGE_21_TURBO_INSTALL_ID,
     model_manifest: QWEN_IMAGE_21_TURBO_MODEL_MANIFEST,
@@ -232,6 +242,7 @@ const QWEN_IMAGE_21_TURBO_PROFILE: InstallProfile = InstallProfile {
     worker_model_argument: true,
 };
 
+#[cfg(not(windows))]
 const MOSS_IMAGE_SFT_PROFILE: InstallProfile = InstallProfile {
     install_id: MOSS_IMAGE_SFT_INSTALL_ID,
     model_manifest: MOSS_IMAGE_SFT_MODEL_MANIFEST,
@@ -370,12 +381,19 @@ struct Inner {
 
 #[derive(Clone)]
 pub struct Installations {
+    #[cfg(not(windows))]
     legacy: Installation,
+    #[cfg(not(windows))]
     klein: Installation,
+    #[cfg(not(windows))]
     birefnet: Installation,
+    #[cfg(not(windows))]
     realesrgan: Installation,
+    #[cfg(not(windows))]
     qwen_image_21: Installation,
+    #[cfg(not(windows))]
     qwen_image_21_turbo: Installation,
+    #[cfg(not(windows))]
     moss_image_sft: Installation,
     #[cfg(windows)]
     windows_zimage: Installation,
@@ -383,17 +401,27 @@ pub struct Installations {
 
 impl Installations {
     pub fn new(paths: AppPaths) -> Result<Self, String> {
-        Ok(Self {
-            legacy: Installation::new(paths.clone())?,
-            klein: Installation::new_klein(paths.clone())?,
-            birefnet: Installation::new_birefnet(paths.clone())?,
-            realesrgan: Installation::new_realesrgan(paths.clone())?,
-            qwen_image_21: Installation::new_for(paths.clone(), QWEN_IMAGE_21_PROFILE)?,
-            qwen_image_21_turbo: Installation::new_for(paths.clone(), QWEN_IMAGE_21_TURBO_PROFILE)?,
-            moss_image_sft: Installation::new_for(paths.clone(), MOSS_IMAGE_SFT_PROFILE)?,
-            #[cfg(windows)]
-            windows_zimage: Installation::new_for(paths, WINDOWS_ZIMAGE_PROFILE)?,
-        })
+        #[cfg(not(windows))]
+        {
+            Ok(Self {
+                legacy: Installation::new(paths.clone())?,
+                klein: Installation::new_klein(paths.clone())?,
+                birefnet: Installation::new_birefnet(paths.clone())?,
+                realesrgan: Installation::new_realesrgan(paths.clone())?,
+                qwen_image_21: Installation::new_for(paths.clone(), QWEN_IMAGE_21_PROFILE)?,
+                qwen_image_21_turbo: Installation::new_for(
+                    paths.clone(),
+                    QWEN_IMAGE_21_TURBO_PROFILE,
+                )?,
+                moss_image_sft: Installation::new_for(paths.clone(), MOSS_IMAGE_SFT_PROFILE)?,
+            })
+        }
+        #[cfg(windows)]
+        {
+            Ok(Self {
+                windows_zimage: Installation::new_for(paths, WINDOWS_ZIMAGE_PROFILE)?,
+            })
+        }
     }
 
     pub fn snapshots(&self) -> Vec<InstallationSnapshot> {
@@ -460,24 +488,28 @@ impl Installations {
     }
 
     pub fn shutdown(&self) {
-        self.legacy.cancel();
-        self.klein.cancel();
-        self.birefnet.cancel();
-        self.realesrgan.cancel();
-        self.qwen_image_21.cancel();
-        self.qwen_image_21_turbo.cancel();
-        self.moss_image_sft.cancel();
+        #[cfg(not(windows))]
+        {
+            self.legacy.cancel();
+            self.klein.cancel();
+            self.birefnet.cancel();
+            self.realesrgan.cancel();
+            self.qwen_image_21.cancel();
+            self.qwen_image_21_turbo.cancel();
+            self.moss_image_sft.cancel();
+        }
         #[cfg(windows)]
         self.windows_zimage.cancel();
     }
 
     fn for_id(&self, install_id: &str) -> Option<&Installation> {
         #[cfg(windows)]
-        if install_id == WINDOWS_ZIMAGE_INSTALL_ID {
-            return Some(&self.windows_zimage);
+        {
+            if install_id == WINDOWS_ZIMAGE_INSTALL_ID {
+                return Some(&self.windows_zimage);
+            }
+            None
         }
-        #[cfg(windows)]
-        return None;
         #[cfg(not(windows))]
         match install_id {
             INSTALL_ID => Some(&self.legacy),
@@ -523,6 +555,14 @@ fn manifest_digest(manifest: &str) -> String {
 }
 fn canonical_requirements_lock(lock: &str) -> String {
     lock.replace("\r\n", "\n")
+}
+/// Native runtimes are trusted only for the operating system their manifest froze.
+fn native_runtime_platform() -> &'static str {
+    if cfg!(windows) {
+        "windows-amd64"
+    } else {
+        "macos-universal2"
+    }
 }
 #[derive(Serialize, Deserialize)]
 struct InventoryEntry {
@@ -693,8 +733,13 @@ impl Installation {
             ));
         }
         if runtime.is_native() {
-            if runtime.platform != "macos-universal2"
-                || runtime.executable.is_none()
+            if runtime.platform != native_runtime_platform() {
+                return Err(format!(
+                    "原生运行时平台不符；当前系统只接受 {} 清单。",
+                    native_runtime_platform()
+                ));
+            }
+            if runtime.executable.is_none()
                 || runtime.interpreter.is_some()
                 || !runtime.wheels.is_empty()
             {
@@ -4412,6 +4457,7 @@ mod tests {
         );
     }
 
+    #[cfg(not(windows))]
     #[test]
     fn qwen_and_moss_share_v3_runtime_but_keep_model_identity_and_worker_arguments() {
         for (profile, expected_model_bytes, expected_ready) in [
@@ -4464,6 +4510,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(windows))]
     #[test]
     fn qwen_and_moss_manifests_use_pinned_modelscope_files() {
         for (profile, repository) in [
@@ -4491,6 +4538,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(windows))]
     #[test]
     #[ignore = "explicit acceptance: requires ModelScope network access"]
     fn actual_modelscope_fixed_range_probe_returns_partial_content() {
@@ -4575,6 +4623,31 @@ mod tests {
     }
 
     #[test]
+    fn native_runtime_platform_is_the_current_operating_system() {
+        assert_eq!(
+            native_runtime_platform(),
+            if cfg!(windows) {
+                "windows-amd64"
+            } else {
+                "macos-universal2"
+            }
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn native_runtime_platform_gate_rejects_a_foreign_native_manifest() {
+        let temp = tempfile::tempdir().unwrap();
+        let paths = AppPaths::resolve(Some(temp.path())).unwrap();
+        let error = match Installation::new_for(paths, REALESRGAN_PROFILE) {
+            Ok(_) => panic!("a macOS native manifest must be rejected on Windows"),
+            Err(error) => error,
+        };
+        assert!(error.contains("平台"), "{error}");
+    }
+
+    #[cfg(not(windows))]
+    #[test]
     fn realesrgan_has_a_native_archive_runtime_and_fixed_model_pair() {
         let temp = tempfile::tempdir().unwrap();
         let paths = AppPaths::resolve(Some(temp.path())).unwrap();
@@ -4633,7 +4706,7 @@ mod tests {
 
     #[test]
     fn zip_extraction_rejects_links_and_paths_before_writing_members() {
-        let (temp, installer) = fixture_for(Installation::new_realesrgan);
+        let (temp, installer) = fixture();
         let destination = temp.path().join("out");
         fs::create_dir(&destination).unwrap();
         for (name, symlink) in [
@@ -4657,7 +4730,7 @@ mod tests {
 
     #[test]
     fn zip_extraction_requires_member_size_hash_and_presence() {
-        let (temp, installer) = fixture_for(Installation::new_realesrgan);
+        let (temp, installer) = fixture();
         let destination = temp.path().join("out");
         fs::create_dir(&destination).unwrap();
         let mut archive = zip_fixture(&installer, "tool", false);
