@@ -318,6 +318,11 @@ def main() -> int:
                 "repository": "xinntao/Real-ESRGAN",
                 "release": "v0.2.5.0",
                 "content_identity": "fixed official release asset bytes and SHA-256",
+                "cache_note": (
+                    "The native runtime manifest references the same zip; the installer cache is keyed by SHA-256, "
+                    "so the archive is stored and downloaded once. Space math counting both manifests is a "
+                    "conservative upper bound."
+                ),
             },
             "files": [],
             "archives": [archive],
