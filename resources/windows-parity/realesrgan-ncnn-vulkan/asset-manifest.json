@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+  "kind": "native-windows-vulkan-bundle",
+  "status": "content_verified_pending_gate0",
+  "platform": "windows-amd64",
+  "model": {
+    "name": "realesrgan-x4plus",
+    "scale": 4,
+    "license": "BSD-3-Clause (Real-ESRGAN) / MIT (ncnn app)",
+    "used_by": "Real-ESRGAN x4plus 4x upscale capability"
+  },
+  "upstream": {
+    "release_repository": "xinntao/Real-ESRGAN",
+    "release_tag": "v0.2.5.0",
+    "release_name": "Real-ESRGAN V0.2.5.0 Release Note",
+    "release_published_at": "2022-04-24T12:09:56Z",
+    "release_url": "https://github.com/xinntao/Real-ESRGAN/releases/tag/v0.2.5.0",
+    "app_repository": "xinntao/Real-ESRGAN-ncnn-vulkan",
+    "app_release": "v0.2.0",
+    "app_build_date": "2022-04-24",
+    "binary_release": "realesrgan-ncnn-vulkan-20220424-windows"
+  },
+  "archives": [
+    {
+      "path": "realesrgan-ncnn-vulkan-20220424-windows.zip",
+      "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-windows.zip",
+      "bytes": 45474481,
+      "sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+      "download_verification": {
+        "independent_downloads": 2,
+        "both_sha256": "abc02804e17982a3be33675e4d471e91ea374e65b70167abc09e31acb412802d",
+        "github_release_api_declared_bytes": 45474481,
+        "official_digest_published_by_upstream": false,
+        "note": "The 2022 release asset has no GitHub-published digest; size was cross-checked against the GitHub releases API and SHA-256 was reproduced by two independent HTTPS downloads."
+      }
+    }
+  ],
+  "archive_members": [
+    {"archive_path": "realesrgan-ncnn-vulkan.exe", "bytes": 6161408, "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c"},
+    {"archive_path": "vcomp140.dll", "bytes": 182704, "sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b"},
+    {"archive_path": "vcomp140d.dll", "bytes": 207736, "sha256": "34980f5a28002967d4f2659b10a417b1b9a242e240195947c89195083d146c53"},
+    {"archive_path": "models/realesrgan-x4plus.bin", "bytes": 33424520, "sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf"},
+    {"archive_path": "models/realesrgan-x4plus.param", "bytes": 116029, "sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"},
+    {"archive_path": "models/realesrgan-x4plus-anime.bin", "bytes": 8943500, "sha256": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc"},
+    {"archive_path": "models/realesrgan-x4plus-anime.param", "bytes": 30290, "sha256": "2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4"},
+    {"archive_path": "models/realesr-animevideov3-x2.bin", "bytes": 1247368, "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"},
+    {"archive_path": "models/realesr-animevideov3-x2.param", "bytes": 3173, "sha256": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04"},
+    {"archive_path": "models/realesr-animevideov3-x3.bin", "bytes": 1247368, "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"},
+    {"archive_path": "models/realesr-animevideov3-x3.param", "bytes": 3173, "sha256": "d1a5755008791d09b57e3425fc9dd0bd26b00fdf79c606210bc0e693f8230881"},
+    {"archive_path": "models/realesr-animevideov3-x4.bin", "bytes": 1247368, "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"},
+    {"archive_path": "models/realesr-animevideov3-x4.param", "bytes": 3077, "sha256": "850a248e7c14c27e5bd8cf7265113a9441036a7db63963bb8aa5169d788a435e"},
+    {"archive_path": "README_windows.md", "bytes": 1859, "sha256": "2b882314a0c7a9f17a347b9b04f909939f6274aa96cf5b2ebba2f7ab75987480"},
+    {"archive_path": "input.jpg", "bytes": 11985, "sha256": "2f49c8cf6249940408fff736f394a4f8a228a6488bcc2fe9f92bdfb90b54a504"},
+    {"archive_path": "input2.jpg", "bytes": 10286, "sha256": "ebf8662783a1a5f5d97c893f7257e46f59738a5f3848c7a1d05cd16d5670dc6b"},
+    {"archive_path": "onepiece_demo.mp4", "bytes": 592566, "sha256": "2f2084db2ca6b363b0857758ac99084775c7f40cd074bf7e23c35e2ce0477778"}
+  ],
+  "install_members": [
+    {
+      "archive_path": "realesrgan-ncnn-vulkan.exe",
+      "path": "realesrgan-ncnn-vulkan.exe",
+      "bytes": 6161408,
+      "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c",
+      "role": "executable",
+      "executable": true
+    },
+    {
+      "archive_path": "vcomp140.dll",
+      "path": "vcomp140.dll",
+      "bytes": 182704,
+      "sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b",
+      "role": "runtime-dependency",
+      "executable": false,
+      "note": "Microsoft Visual C++ OpenMP runtime shipped in the official portable archive; must stay next to the executable."
+    },
+    {
+      "archive_path": "models/realesrgan-x4plus.bin",
+      "path": "models/realesrgan-x4plus.bin",
+      "bytes": 33424520,
+      "sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+      "role": "model-weights",
+      "executable": false
+    },
+    {
+      "archive_path": "models/realesrgan-x4plus.param",
+      "path": "models/realesrgan-x4plus.param",
+      "bytes": 116029,
+      "sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86",
+      "role": "model-network-definition",
+      "executable": false
+    },
+    {
+      "archive_path": "README_windows.md",
+      "path": "README_windows.md",
+      "bytes": 1859,
+      "sha256": "2b882314a0c7a9f17a347b9b04f909939f6274aa96cf5b2ebba2f7ab75987480",
+      "role": "documentation",
+      "executable": false
+    }
+  ],
+  "not_installed": [
+    "models/realesrgan-x4plus-anime.bin",
+    "models/realesrgan-x4plus-anime.param",
+    "models/realesr-animevideov3-x2.bin",
+    "models/realesr-animevideov3-x2.param",
+    "models/realesr-animevideov3-x3.bin",
+    "models/realesr-animevideov3-x3.param",
+    "models/realesr-animevideov3-x4.bin",
+    "models/realesr-animevideov3-x4.param",
+    "input.jpg",
+    "input2.jpg",
+    "onepiece_demo.mp4",
+    "vcomp140d.dll"
+  ],
+  "licenses": [
+    {
+      "path": "LICENSE-RealESRGAN.txt",
+      "name": "Real-ESRGAN license",
+      "spdx": "BSD-3-Clause",
+      "url": "https://raw.githubusercontent.com/xinntao/Real-ESRGAN/v0.2.5.0/LICENSE",
+      "bytes": 1519,
+      "sha256": "4a699ec4863d96a91fc265948a0c90033f7e8735d515524dcf3444736406e0c2"
+    },
+    {
+      "path": "LICENSE-ncnn-app.txt",
+      "name": "Real-ESRGAN-ncnn-vulkan application license",
+      "spdx": "MIT",
+      "url": "https://raw.githubusercontent.com/xinntao/Real-ESRGAN-ncnn-vulkan/v0.2.0/LICENSE",
+      "bytes": 2228,
+      "sha256": "5abb941454de437b0e90d78dcb72e3688f74e14bcd4e24393273cb5cd0e9c937"
+    }
+  ],
+  "install_layout": {
+    "root": "portable archive layout with the licenses appended at the root",
+    "files": [
+      "realesrgan-ncnn-vulkan.exe",
+      "vcomp140.dll",
+      "models/realesrgan-x4plus.bin",
+      "models/realesrgan-x4plus.param",
+      "README_windows.md",
+      "LICENSE-RealESRGAN.txt",
+      "LICENSE-ncnn-app.txt"
+    ],
+    "installed_app_bytes": 39886520,
+    "installed_total_bytes": 39890267
+  },
+  "inference_contract": {
+    "model": "realesrgan-x4plus",
+    "scale": 4,
+    "tile_size": 128,
+    "gpu_ids": [0],
+    "single_gpu": true,
+    "threads_load_proc_save": "1:1:1",
+    "tta": false,
+    "output_format": "png",
+    "command_template": "realesrgan-ncnn-vulkan.exe -i <input.png> -o <output.png> -n realesrgan-x4plus -s 4 -t 128 -g 0 -j 1:1:1 -f png"
+  },
+  "gate0": {
+    "case_id": "G2-R1",
+    "status": "pass",
+    "evidence": [
+      "verification/windows-parity-realesrgan/g2-r1-input.json",
+      "verification/windows-parity-realesrgan/g2-r1-controlled.json",
+      "verification/windows-parity-realesrgan/g2-r1-vulkan-device-identity.json",
+      "verification/windows-parity-realesrgan/README.md"
+    ],
+    "runs": [
+      {
+        "label": "official release sample image (220x220)",
+        "wall_seconds": 4.863,
+        "input_dims": [220, 220],
+        "output_dims": [880, 880],
+        "exact_4x": true
+      },
+      {
+        "label": "controlled gradient/checker image (97x61)",
+        "wall_seconds": 2.207,
+        "input_dims": [97, 61],
+        "output_dims": [388, 244],
+        "exact_4x": true
+      }
+    ],
+    "device": "NVIDIA GeForce RTX 3080 Ti via Vulkan device 0 (Intel UHD 770 enumerated but not selected)",
+    "supplement_pending": "A public-domain real-photograph run is prepared (verification/windows-parity-realesrgan/real-photo-input-source.json) and will be recorded when a separate GPU window is granted.",
+    "required_checks": [
+      "exact 4x output dimensions",
+      "output bytes and sha256",
+      "Vulkan device identity",
+      "wall time within the Real-ESRGAN product time limit"
+    ]
+  },
+  "limitations": [
+    "The executable is not Authenticode-signed; integrity rests on the fixed SHA-256 and the official release URL.",
+    "This release predates newer GPU architectures and carries no vendor support statement beyond the upstream portable build.",
+    "ncnn tiles the input, so block-boundary differences from the PyTorch implementation are expected and accepted by the frozen contract."
+  ]
+}
