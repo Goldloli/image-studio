@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-realesrgan-gate0-run",
+  "case_id": "G2-R1",
+  "label": "controlled gradient/checker PNG (97x61)",
+  "status": "pass",
+  "failure": null,
+  "started_at": "2026-11-03T16:12:10.697052+00:00",
+  "finished_at": "2026-11-03T16:12:12.903576+00:00",
+  "wall_seconds": 2.207,
+  "host": {
+    "platform": "win32",
+    "system": "Windows_NT",
+    "python": "3.14.7",
+    "machine": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel"
+  },
+  "command": [
+    "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\app\\realesrgan-ncnn-vulkan.exe",
+    "-i",
+    "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\test\\controlled-97x61.png",
+    "-o",
+    "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-realesrgan\\g2-r1-controlled-97x61-4x.png",
+    "-n",
+    "realesrgan-x4plus",
+    "-s",
+    "4",
+    "-t",
+    "128",
+    "-g",
+    "0",
+    "-j",
+    "1:1:1",
+    "-f",
+    "png",
+    "-v"
+  ],
+  "cwd": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\app",
+  "exit_code": 0,
+  "fixed_parameters": {
+    "model": "realesrgan-x4plus",
+    "scale": 4,
+    "tile": 128,
+    "gpu_ids": [
+      0
+    ],
+    "single_gpu": true,
+    "threads": "1:1:1",
+    "tta": false,
+    "format": "png",
+    "executable_sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c"
+  },
+  "input": {
+    "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\test\\controlled-97x61.png",
+    "dims": [
+      97,
+      61
+    ],
+    "bytes": 14643,
+    "sha256": "60d78752db71fe5a92b5d4e0f293b727fbf589faa71e331e5788f961dfc7fbc1"
+  },
+  "output": {
+    "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-realesrgan\\g2-r1-controlled-97x61-4x.png",
+    "dims": [
+      388,
+      244
+    ],
+    "bytes": 124974,
+    "sha256": "368946826d6c9bf1d6b94ed8c958b75a807a65ffa8559d3c547092a1a811d9b4"
+  },
+  "exact_4x": true,
+  "device_identity": {
+    "ncnn_verbose_devices": [],
+    "ncnn_verbose_devices_note": "The run-time parser did not match ncnn's suffix-bearing device lines. Raw lines are in g2-r1-controlled.stderr.log and were parsed post-run into g2-r1-vulkan-device-identity.json; no run-time value is invented here.",
+    "nvidia_smi_before": {
+      "available": true,
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=name,uuid,driver_version,memory.total,memory.used,utilization.gpu",
+        "--format=csv,noheader"
+      ],
+      "rows": [
+        "NVIDIA GeForce RTX 3080 Ti, GPU-78b715aa-ec51-31af-8813-eac9653458a7, 596.49, 12288 MiB, 771 MiB, 4 %"
+      ],
+      "raw": "NVIDIA GeForce RTX 3080 Ti, GPU-78b715aa-ec51-31af-8813-eac9653458a7, 596.49, 12288 MiB, 771 MiB, 4 %"
+    },
+    "nvidia_smi_after": {
+      "available": true,
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=name,uuid,driver_version,memory.total,memory.used,utilization.gpu",
+        "--format=csv,noheader"
+      ],
+      "rows": [
+        "NVIDIA GeForce RTX 3080 Ti, GPU-78b715aa-ec51-31af-8813-eac9653458a7, 596.49, 12288 MiB, 729 MiB, 5 %"
+      ],
+      "raw": "NVIDIA GeForce RTX 3080 Ti, GPU-78b715aa-ec51-31af-8813-eac9653458a7, 596.49, 12288 MiB, 729 MiB, 5 %"
+    },
+    "device_index_check": 0
+  },
+  "log_files": {
+    "stdout": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-realesrgan\\g2-r1-controlled.stdout.log",
+    "stderr": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-realesrgan\\g2-r1-controlled.stderr.log"
+  },
+  "limitations": [
+    "Gate 0 single-run evidence for one input; not a throughput benchmark.",
+    "ncnn tiling may produce block-boundary differences from the PyTorch implementation."
+  ]
+}

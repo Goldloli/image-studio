@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-realesrgan-vulkan-device-identity",
+  "case_id": "G2-R1",
+  "extracted_at": "2026-11-03T16:12:41.428658+00:00",
+  "method": "Parsed post-run from the frozen executable's own -v stderr logs; no GPU work performed by this step.",
+  "sources": [
+    {
+      "path": "verification\\windows-parity-realesrgan\\g2-r1-input.stderr.log",
+      "bytes": 815,
+      "sha256": "61a6242bb922820e04feb0adba93e3addcb61a1f2c5c907b8cb47f152f8430b6",
+      "device_line_count": 8
+    },
+    {
+      "path": "verification\\windows-parity-realesrgan\\g2-r1-controlled.stderr.log",
+      "bytes": 807,
+      "sha256": "859140c1a54c9091aac0cead12e3d3d320109bb2717b5a9febbc357ed0b25db4",
+      "device_line_count": 8
+    }
+  ],
+  "devices": [
+    {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 3080 Ti",
+      "raw_lines": [
+        "[0 NVIDIA GeForce RTX 3080 Ti]  queueC=2[8]  queueG=0[16]  queueT=1[2]",
+        "[0 NVIDIA GeForce RTX 3080 Ti]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0",
+        "[0 NVIDIA GeForce RTX 3080 Ti]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1",
+        "[0 NVIDIA GeForce RTX 3080 Ti]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1"
+      ]
+    },
+    {
+      "index": 1,
+      "name": "Intel(R) UHD Graphics 770",
+      "raw_lines": [
+        "[1 Intel(R) UHD Graphics 770]  queueC=0[1]  queueG=0[1]  queueT=0[1]",
+        "[1 Intel(R) UHD Graphics 770]  bugsbn1=0  bugbilz=68  bugcopc=0  bugihfa=0",
+        "[1 Intel(R) UHD Graphics 770]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1",
+        "[1 Intel(R) UHD Graphics 770]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1",
+        "[1 Intel(R) UHD Graphics 770]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0"
+      ]
+    }
+  ],
+  "selected_device": {
+    "index": 0,
+    "name": "NVIDIA GeForce RTX 3080 Ti",
+    "raw_lines": [
+      "[0 NVIDIA GeForce RTX 3080 Ti]  queueC=2[8]  queueG=0[16]  queueT=1[2]",
+      "[0 NVIDIA GeForce RTX 3080 Ti]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0",
+      "[0 NVIDIA GeForce RTX 3080 Ti]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1",
+      "[0 NVIDIA GeForce RTX 3080 Ti]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1"
+    ]
+  },
+  "nvidia_device_selected": true,
+  "declared_gpu_arg": 0
+}

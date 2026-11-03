@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-realesrgan-real-photo-input",
+  "purpose": "Controlled real-photograph input for the Real-ESRGAN G2-R1 4x run, prepared while the GPU is owned by another experiment.",
+  "source": {
+    "provider": "NASA Image and Video Library",
+    "nasa_id": "as17-148-22717",
+    "title": "View of Africa and Madagascar from the Apollo 17 spacecraft",
+    "date_created": "1972-12-09T00:00:00Z",
+    "center": "JSC",
+    "asset_page": "https://images.nasa.gov/details/as17-148-22717",
+    "metadata_api": "https://images-api.nasa.gov/search?nasa_id=as17-148-22717",
+    "download_url": "https://images-assets.nasa.gov/image/as17-148-22717/as17-148-22717~medium.jpg",
+    "bytes": 373148,
+    "sha256": "ff27687dfa41acc984b6e5721c9a3f193d31ae1bb911f276cb6a4fafa262bfdb",
+    "dims": [1272, 1280],
+    "license": "Public domain (NASA media usage guidelines; NASA content is not copyrighted)",
+    "license_reference": "https://www.nasa.gov/nasa-brand-center/images-and-media/"
+  },
+  "derivation": {
+    "method": "Center crop to 4:3, then high-quality bicubic resize to 384x288 with System.Drawing, saved as PNG",
+    "tool": "PowerShell System.Drawing (Windows GDI+)",
+    "output_path_in_build_dir": "target/parity-runtime/realesrgan/test/nasa-as17-148-22717-real-photo-384x288.png",
+    "output_bytes": 330926,
+    "output_sha256": "93cb8295836a0a050954e1ba07b24099724f0c68f935a33605545ec17d89f4ac",
+    "output_dims": [384, 288]
+  },
+  "run_status": "not_run",
+  "note": "Prepared only; the real 4x run is deferred until the Lead grants a short GPU window while the MOSS staged experiments are paused."
+}

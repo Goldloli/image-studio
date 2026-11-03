@@ -1,0 +1,13 @@
+[0 NVIDIA GeForce RTX 3080 Ti]  queueC=2[8]  queueG=0[16]  queueT=1[2]
+[0 NVIDIA GeForce RTX 3080 Ti]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0
+[0 NVIDIA GeForce RTX 3080 Ti]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1
+[0 NVIDIA GeForce RTX 3080 Ti]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1
+[1 Intel(R) UHD Graphics 770]  queueC=0[1]  queueG=0[1]  queueT=0[1]
+[1 Intel(R) UHD Graphics 770]  bugsbn1=0  bugbilz=68  bugcopc=0  bugihfa=0
+[1 Intel(R) UHD Graphics 770]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1
+[1 Intel(R) UHD Graphics 770]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1
+0.00%
+25.00%
+50.00%
+75.00%
+C:\Users\XIAOKA-PC\Desktop\image-studio\target\parity-runtime\realesrgan\test\input.png -> C:\Users\XIAOKA-PC\Desktop\image-studio\verification\windows-parity-realesrgan\g2-r1-input-220x220-4x.png done
