@@ -1,0 +1,6 @@
+﻿vram_gb=Some(12)
+ram_gb=32
+label=显存 12 GB · 内存 32 GB
+gate[target]=true reason=None
+gate[low]=false reason=Some("当前设备不满足硬件门槛：显存 ≥ 12 GB（当前 8 GB）、内存 ≥ 32 GB（当前 16 GB）。为避免安装或生成中途失败，安装与生成入口已禁用。")
+gate[unknown]=false reason=Some("无法确认硬件门槛：显存 ≥ 12 GB（当前无法读取）、内存 ≥ 32 GB（当前无法读取）；请检查 NVIDIA 驱动与 nvidia-smi 是否可用。为避免安装或生成中途失败，安装与生成入口已禁用。")

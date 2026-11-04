@@ -1,0 +1,200 @@
+﻿cargo :    Compiling image-studio-desktop v0.1.0 (C:\Users\XIAOKA-PC\Desktop\image-studio\apps\desktop)
+所在位置 行:1 字符: 260
++ ...  '--- run tests ---'; cargo test -p image-studio-desktop 2>&1 | Tee-O ...
++                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (   Compiling im...o\apps\desktop):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.64s
+     Running unittests src\lib.rs (target\debug\deps\image_studio_desktop-863086e5cd387f68.exe)
+
+running 167 tests
+test adapters::device::tests::label_does_not_render_unknown_facts_as_zero ... ok
+test adapters::device::tests::satisfied_thresholds_are_eligible ... ok
+test adapters::device::tests::models_without_thresholds_are_eligible_on_any_device ... ok
+test adapters::device::tests::total_physical_memory_bytes_are_rounded_to_the_registered_gigabytes ... ok
+test adapters::installation::tests::actual_private_runtime_installs_offline_without_activating_missing_model ... ignored, explicit acceptance: requires all fixed runtime artifacts in validation cache
+test adapters::device::tests::unsatisfied_thresholds_are_disabled_with_an_actionable_reason ... ok
+test adapters::device::tests::nvidia_smi_memory_total_is_parsed_from_the_first_gpu ... ok
+test adapters::device::tests::memory_total_mib_is_rounded_to_nearest_gib ... ok
+test adapters::device::tests::unknown_device_facts_disable_required_thresholds_instead_of_passing ... ok
+test adapters::installation::tests::actual_windows_product_cancels_runtime_preparation_and_probe_and_retries ... ignored, explicit acceptance: cancels runtime preparation and the probe, then retries from the verified cache
+test adapters::installation::tests::actual_windows_product_installs_from_an_empty_cache_and_resumes_after_cancel ... ignored, explicit acceptance: cancels an empty-cache ModelScope install and resumes it
+test adapters::installation::tests::actual_windows_product_installs_from_the_validation_cache ... ignored, explicit acceptance: installs the complete Windows product closure from the Gate 0 validation cache
+test adapters::installation::tests::actual_windows_product_rejects_corrupt_and_missing_model_components ... ignored, explicit acceptance: activation rejects corrupt and missing model components
+test adapters::diagnostics::tests::unicode_log_tail_stays_within_byte_budget ... ok
+test adapters::installation::tests::installation_space_accounts_for_separate_and_shared_volumes ... ok
+test adapters::diagnostics::tests::unfinished_line_is_rejected_before_unbounded_allocation ... ok
+test adapters::installation::tests::klein_private_runtime_installs_offline_without_model_weights ... ignored, explicit acceptance: requires the pinned MFLUX wheel cache
+test adapters::diagnostics::tests::eof_does_not_complete_a_json_line_without_its_delimiter ... ok
+test adapters::feature_catalog::tests::registry_only_marks_implemented_model_with_real_ready_facts ... ok
+test adapters::feature_catalog::tests::hardware_ineligible_model_blocks_the_feature_with_reason ... ok
+test adapters::feature_catalog::tests::windows_projection_exposes_four_implemented_features ... ok
+test adapters::feature_catalog::tests::ready_projection_uses_catalog_not_family_keywords ... ok
+test adapters::installation::tests::native_runtime_platform_is_the_current_operating_system ... ok
+test adapters::installation::tests::range_requires_exact_start_end_and_total ... ok
+test adapters::catalog::tests::active_install_is_exposed_without_fake_completion ... ok
+test adapters::catalog::tests::entries_never_borrow_z_image_install_state ... ok
+test adapters::installation::tests::requirements_lock_identity_normalizes_checkout_line_endings ... ok
+test adapters::catalog::tests::install_states_are_joined_by_install_id ... ok
+test adapters::catalog::tests::catalog_contains_the_exact_supported_targets ... ok
+test adapters::catalog::tests::windows_catalog_registers_every_parity_identity_with_metadata ... ok
+test adapters::catalog::tests::unsatisfied_hardware_disables_entry_points_with_a_chinese_reason ... ok
+test adapters::installation::tests::staged_prepare_command_matches_the_worker_contract ... ok
+test adapters::catalog::tests::unknown_device_facts_are_not_silently_accepted ... ok
+test adapters::installation::tests::windows_gate_zero_manifest_is_an_independent_complete_closure ... ok
+test adapters::installation::tests::windows_gate_zero_result_records_three_budget_passed_runs ... ok
+test adapters::installation::tests::windows_gate_zero_runtime_manifest_is_fixed_and_binary_only ... ok
+test adapters::installation::tests::windows_gate_zero_runtime_probe_remains_explicitly_partial ... ok
+test adapters::installation::tests::paths_urls_and_hashes_fail_closed ... ok
+test adapters::installation::tests::tar_links_cannot_escape_the_private_runtime ... ok
+test adapters::installation::tests::segmented_ranges_are_complete_disjoint_and_resumeable ... ok
+test adapters::installation::tests::corrupt_segment_state_is_cleared_for_an_explicit_redownload ... ok
+test adapters::installation::tests::birefnet_has_an_independent_onnx_runtime_and_worker ... ok
+test adapters::installation::tests::fixed_manifests_are_complete ... ok
+test adapters::installation::tests::klein_has_an_independent_manifest_runtime_and_worker ... ok
+test adapters::installation::tests::native_runtime_platform_gate_rejects_a_foreign_native_manifest ... ok
+test adapters::device::tests::live_probe_reports_total_memory_without_panicking ... ok
+test adapters::library::conversations::tests::qwen_and_moss_accept_exact_text_only_square_turns ... ok
+test adapters::library::schema::tests::migration_is_rejected_for_an_unexpected_intermediate_version ... ok
+test adapters::installation::tests::staged_runtime_activation_swaps_the_complete_tree ... ok
+test adapters::library::sources::tests::jpeg_component_gate_rejects_gray_and_cmyk_before_decode ... ok
+test adapters::installation::tests::license_archive_failure_cannot_activate_silently ... ok
+test adapters::installation::tests::windows_plan_environment_binds_the_frozen_runtime_engine_and_device ... FAILED
+test adapters::installation::tests::plan_metadata_keeps_all_seventeen_pinned_components ... ok
+test adapters::installation::tests::windows_installation_manager_exposes_all_seven_profiles_in_fixed_order ... ok
+test adapters::installation::tests::stalled_transfer_cancellation_does_not_wait_for_a_file_or_read_deadline ... ok
+test adapters::installation::tests::runtime_activation_reuse_requires_identity_and_unchanged_metadata ... ok
+test adapters::installation::tests::activation_records_bind_bytes_even_when_version_labels_are_reused ... ok
+test adapters::installation::tests::only_segments_matching_the_current_source_identity_count_as_progress ... ok
+test adapters::library::tests::commit_crash_child ... ok
+test adapters::installation::tests::staged_prepared_cache_is_layout_bound_and_space_reserved ... ok
+test adapters::installation::tests::windows_profiles_parse_embedded_manifests_and_frozen_identities ... FAILED
+test adapters::installation::tests::interrupted_transfer_keeps_a_resumable_part_but_never_a_final_file ... ok
+test adapters::installation::tests::range_resume_requires_identity_and_preserves_exact_bytes ... ok
+test adapters::installation::tests::full_response_replaces_a_partial_without_appending ... ok
+test adapters::installation::tests::segmented_range_resume_preserves_the_existing_prefix ... ok
+test adapters::installation::tests::bundled_license_texts_are_archived_at_their_fixed_identity ... ok
+test adapters::installation::tests::wrong_digest_never_becomes_a_completed_cache_file ... ok
+test adapters::installation::tests::zip_extraction_requires_member_size_hash_and_presence ... ok
+test adapters::installation::tests::zip_extraction_rejects_links_and_paths_before_writing_members ... ok
+test adapters::installation::tests::windows_birefnet_and_realesrgan_archive_their_licenses ... ok
+test adapters::installation::tests::windows_shared_runtime_embeds_both_frozen_worker_wheels ... ok
+test adapters::installation::tests::windows_probe_cleanup_reaps_pipe_holding_descendants ... ok
+test adapters::library::sources::tests::imports_an_immutable_normalized_source_and_ignores_the_original ... ok
+test adapters::library::sources::tests::jpeg_exif_orientation_is_applied_once ... ok
+test adapters::library::tests::current_schema_installs_stable_query_indexes ... ok
+test adapters::library::tests::database_integer_boundaries_fail_without_wrapping_identifiers_or_versions ... ok
+test adapters::library::sources::tests::rgba_source_retains_alpha_and_reports_transparency ... ok
+test adapters::library::sources::tests::rejects_sixteen_bit_animated_icc_and_oversized_png ... ok
+test adapters::library::tests::fresh_library_has_one_conversation_and_receive_is_fast_and_idempotent ... ok
+test adapters::library::tests::failed_draft_write_and_submission_transaction_do_not_claim_success ... ok
+test adapters::library::tests::failure_first_cannot_be_changed_by_cancel ... ok
+test adapters::library::tests::duplicate_submission_busy_gate_and_retry_preserve_immutable_history ... ok
+test adapters::library::sources::tests::rejects_grayscale_fake_and_oversize_inputs_before_storage ... ok
+test adapters::library::tests::drafts_use_cas_and_restore_content_selection_and_unsupported_values ... ok
+test adapters::library::tests::failed_v1_migration_rolls_back_without_replacing_the_database ... ok
+test adapters::library::tests::initial_prompt_and_source_are_created_atomically ... ok
+test adapters::library::tests::installation_records_are_separate_from_generation_evidence ... ok
+test adapters::library::tests::host_ownership_precedes_recovery_and_default_project_is_not_reset ... ok
+test adapters::library::tests::invalid_initial_content_does_not_leave_an_empty_conversation ... ok
+test adapters::library::tests::accepted_cancel_wins_over_candidate_error_and_duplicate_terminal ... ok
+test adapters::library::tests::committed_asset_corruption_is_availability_not_history_mutation ... ok
+test adapters::library::tests::manual_conversation_title_is_stable_and_draft_version_conflicts_do_not_consume ... ok
+test adapters::library::tests::windows_second_process_host_lock_child ... ok
+test adapters::library::tests::birefnet_commits_primary_and_mask_as_one_job_result ... ok
+test adapters::paths::tests::occupied_directory_reports_action_without_overwriting ... ok
+test adapters::library::tests::birefnet_requires_both_valid_outputs_and_rolls_back_as_a_unit ... ok
+test adapters::library::tests::pending_turn_without_cancel_becomes_interrupted_after_restart ... ok
+test adapters::paths::tests::windows_local_app_data_is_an_absolute_known_folder ... ok
+test adapters::preferences::tests::corrupt_file_is_reported_and_not_overwritten_on_load ... ok
+test adapters::preferences::tests::malformed_fields_fall_back_individually_and_preserve_other_values ... ok
+test adapters::preferences::tests::missing_file_uses_defaults_without_writing ... ok
+test adapters::library::tests::database_asset_failure_rolls_back_manifest_and_asset_together ... ok
+test adapters::library::tests::scratch_preparation_failure_does_not_leave_an_active_job ... ok
+test adapters::library::tests::sqlite_configuration_unknown_schema_and_corruption_are_explicit ... ok
+test adapters::preferences::tests::save_is_versioned_atomic_and_reloadable ... ok
+test adapters::paths::tests::unicode_spaces_and_shell_characters_are_literal_paths ... ok
+test adapters::library::tests::pending_turn_cancel_recovery_and_job_binding_are_explicit ... ok
+test adapters::prompt_library::tests::real_image_download_matches_the_catalog ... ignored, requires the fixed GitHub image source and network access
+test adapters::safe_fs::tests::alternate_data_stream_is_rejected_before_open ... ok
+test adapters::safe_fs::tests::regular_file_opens_for_reading ... ok
+test adapters::safe_fs::tests::replace_file_handles_a_readonly_target ... ok
+test adapters::library::tests::windows_second_process_reports_in_use ... ok
+test adapters::library::tests::task_counts_and_search_cover_records_beyond_the_visible_page ... ok
+test adapters::library::tests::klein_edit_turn_copies_the_frozen_source_for_retry ... ok
+test adapters::storage::tests::arbitrary_paths_are_not_eligible_for_open ... ok
+test host::tests::export_overwrite_requires_an_explicit_confirmation ... ok
+test adapters::prompt_library::tests::cache_requires_exact_catalog_hash ... ok
+test options::tests::diagnostic_arguments_require_explicit_development_mode ... ok
+test options::tests::missing_unknown_or_empty_arguments_are_rejected ... ok
+test options::tests::ordinary_startup_does_not_enable_diagnostics ... ok
+test options::tests::paths_are_preserved_without_shell_interpretation ... ok
+test options::tests::viewport_controls_are_bounded_and_development_only ... ok
+test adapters::storage::tests::summary_reports_real_files_and_missing_directories_without_hashing ... ok
+test startup::tests::tauri_setup_panics_are_reported_and_other_panics_are_not ... ok
+test startup::tests::utc_timestamps_are_fixed_width ... ok
+test startup::tests::failure_report_names_the_reason_and_the_log_path ... ok
+test startup::tests::webview_profile_is_owned_by_the_data_root ... ok
+test adapters::prompt_library::tests::catalog_validation_rejects_duplicate_and_incomplete_entries ... ok
+test adapters::library::tests::legacy_v1_migration_preserves_drafts_jobs_and_is_idempotent ... ok
+test adapters::library::tests::repeated_asset_polling_invalidates_checks_after_same_length_replacement ... ok
+test adapters::prompt_library::tests::built_in_catalog_is_complete_and_rejects_unknown_ids ... ok
+test adapters::prompt_library::tests::cache_clear_leaves_unrelated_files_untouched ... ok
+test adapters::library::tests::untrusted_candidates_fail_before_asset_registration ... ok
+test adapters::prompt_library::tests::corrupt_favorites_are_reported_without_overwriting_the_file ... ok
+test adapters::library::tests::conversation_history_is_paginated_and_conversations_are_independent ... ok
+test studio::tests::legacy_source_url_notation_does_not_change_frozen_component_identity ... ok
+test adapters::library::tests::exports_are_atomic_external_copies_and_require_overwrite_confirmation ... ok
+test adapters::library::tests::conversation_list_paginates_without_repeating_activity_cursor_items ... ok
+test adapters::windows_process::tests::closing_the_outer_job_kills_the_live_supervisor ... ok
+test adapters::library::tests::v3_migration_preserves_drafts_and_adds_prompt_source ... ok
+test adapters::windows_process::tests::tokio_supervisor_spawn_uses_the_same_outer_job_boundary ... ok
+test host::tests::startup_does_not_start_worker_or_allow_unrequested_diagnostics ... ok
+test adapters::prompt_library::tests::favorites_are_atomic_and_unknown_removed_ids_are_preserved ... ok
+test studio::tests::windows_runtime_lock_matrix_is_pinned_for_settings_rows ... ok
+test adapters::library::tests::success_before_cancel_is_immutable_and_asset_reads_do_not_need_model ... ok
+test studio::tests::catalog_query_exposes_independent_model_install_actions ... ok
+test studio::tests::ipc_inputs_do_not_expose_paths_and_unready_submit_creates_no_job ... ok
+test studio::tests::inspiration_prompt_is_created_with_resolved_defaults_and_source ... ok
+test studio::tests::invalid_inspiration_source_is_rejected_without_a_partial_conversation ... ok
+test studio::tests::invalid_create_override_is_rejected_without_creating_a_conversation ... ok
+test adapters::library::tests::v4_to_v5_preserves_legacy_records_and_adds_output_role ... ok
+test studio::tests::applying_a_model_to_one_conversation_preserves_its_prompt_and_other_settings ... ok
+test studio::tests::conversation_receive_returns_quickly_and_missing_model_settles_rejected ... ok
+test studio::tests::legacy_v1_retry_checks_the_registered_z_image_installation ... ok
+test studio::tests::empty_library_can_save_and_restore_without_models ... ok
+test studio::tests::mac_defaults_are_preserved_until_the_user_selects_windows ... ok
+test studio::tests::windows_capability_mapping_uses_the_frozen_identities ... ok
+test studio::tests::new_conversation_uses_persisted_defaults_and_explicit_override ... ok
+test studio::tests::removed_saved_model_is_preserved_and_reported ... ok
+test studio::tests::windows_model_views_project_the_seven_models_with_hardware_facts ... ok
+test studio::tests::settings_snapshot_reports_the_current_platform_runtime ... ok
+test adapters::library::tests::feature_work_and_task_queries_are_stable_read_only_projections ... ok
+test studio::tests::capability_drafts_survive_tool_switches_and_restart_without_consuming_text ... ok
+test adapters::library::tests::real_process_exit_at_all_commit_boundaries_recovers_exactly_once ... ok
+test adapters::library::tests::submission_lookup_and_counts_are_not_limited_to_the_history_page ... ok
+test adapters::library::assets::bounds_tests::upscale_png_limits_do_not_relax_old_z_image_limits ... ok
+test adapters::library::tests::selected_asset_older_than_the_first_page_survives_restart ... ok
+
+failures:
+
+---- adapters::installation::tests::windows_plan_environment_binds_the_frozen_runtime_engine_and_device stdout ----
+
+thread 'adapters::installation::tests::windows_plan_environment_binds_the_frozen_runtime_engine_and_device' (25900) panicked at apps\desktop\src\adapters\installation.rs:6054:14:
+called `Result::unwrap()` on an `Err` value: "系统找不到指定的路径。 (os error 3)"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- adapters::installation::tests::windows_profiles_parse_embedded_manifests_and_frozen_identities stdout ----
+
+thread 'adapters::installation::tests::windows_profiles_parse_embedded_manifests_and_frozen_identities' (11764) panicked at apps\desktop\src\adapters\installation.rs:5910:13:
+assertion failed: installer.inner.profile.worker_model_argument
+
+
+failures:
+    adapters::installation::tests::windows_plan_environment_binds_the_frozen_runtime_engine_and_device
+    adapters::installation::tests::windows_profiles_parse_embedded_manifests_and_frozen_identities
+
+test result: FAILED. 158 passed; 2 failed; 7 ignored; 0 measured; 0 filtered out; finished in 4.06s
+
+error: test failed, to rerun pass `-p image-studio-desktop --lib`

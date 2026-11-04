@@ -1,0 +1,20 @@
+﻿
+> image-studio-ui@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.5 C:/Users/XIAOKA-PC/Desktop/image-studio/apps/frontend
+
+ ✓ src/model-catalog.test.ts (8 tests) 9ms
+ ✓ src/library-state.test.ts (5 tests) 8ms
+ ✓ src/model-recipes.test.ts (9 tests) 8ms
+ ✓ src/workspace-state.test.ts (14 tests) 11ms
+ ✓ src/draft-save.test.ts (4 tests) 5ms
+ ✓ src/conversation-state.test.ts (8 tests) 4ms
+ ✓ src/prompt-library-state.test.ts (4 tests) 3ms
+
+ Test Files  7 passed (7)
+      Tests  52 passed (52)
+   Start at  20:26:11
+   Duration  467ms (import 38%, transform 31%, tests 16%, worker 14%)
+

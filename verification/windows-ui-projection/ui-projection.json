@@ -1,0 +1,471 @@
+{
+  "schema_version": 1,
+  "kind": "windows-ui-projection",
+  "date": "2026-11-04",
+  "change": "achieve-windows-model-parity",
+  "tasks": [
+    "3.3 catalog/model page hardware thresholds, license and Windows status",
+    "4.1 feature/model page seven models and eight capabilities, v1/v2 runtimes"
+  ],
+  "target_platform": "windows-amd64",
+  "catalog": {
+    "path": "resources/windows-foundation/model-catalog.json",
+    "reviewedDate": "2026-11-04",
+    "total": 7,
+    "planned": 0,
+    "implemented": 7,
+    "installer_supported": 7,
+    "capability_pairs": 8,
+    "entries": [
+      {
+        "id": "z-image-turbo-diffusers-cuda-nf4-v1",
+        "displayName": "Z-Image Turbo",
+        "productStatus": "implemented",
+        "installId": "z-image-turbo-diffusers-cuda-nf4-v1",
+        "runtime": "Diffusers CUDA NF4 v1 · Python 3.12.10 / PyTorch 2.10.0 / CUDA 12.6",
+        "capabilities": [
+          {
+            "id": "text_to_image",
+            "label": "文生图"
+          }
+        ],
+        "minVramGb": 12,
+        "minRamGb": 32,
+        "quantization": "nf4",
+        "license": "Apache-2.0",
+        "licenseNotice": "Apache-2.0 · 可商用（保留版权与许可声明）",
+        "windowsStatus": "已接入 · 独立 v1 运行时 NF4+组件卸载（Gate 0 实测 CUDA 8.87 GiB / commit 23.69 GiB）",
+        "non_commercial": false
+      },
+      {
+        "id": "flux2-klein-4b-distilled-windows-v1",
+        "displayName": "FLUX.2 Klein 4B distilled",
+        "productStatus": "implemented",
+        "installId": "flux2-klein-4b-distilled-windows-v1",
+        "runtime": "v2 共享运行时 · Python 3.12.10 / PyTorch 2.10.0 / CUDA 12.6 / diffusers 0.41",
+        "capabilities": [
+          {
+            "id": "text_to_image",
+            "label": "文生图"
+          },
+          {
+            "id": "image_edit",
+            "label": "图片编辑"
+          }
+        ],
+        "minVramGb": 12,
+        "minRamGb": 32,
+        "quantization": "nf4",
+        "license": "Apache-2.0",
+        "licenseNotice": "Apache-2.0 · 可商用（保留版权与许可声明）",
+        "windowsStatus": "已接入 · NF4+组件 CPU offload fresh-process（Gate 0 实测 CUDA 9.21 GiB / commit 19.13 GiB）",
+        "non_commercial": false
+      },
+      {
+        "id": "birefnet-general-epoch-244-windows-v1",
+        "displayName": "BiRefNet general epoch_244",
+        "productStatus": "implemented",
+        "installId": "birefnet-general-epoch-244-windows-v1",
+        "runtime": "v2 共享运行时 · ONNX Runtime 1.31.1 CPU",
+        "capabilities": [
+          {
+            "id": "background_removal",
+            "label": "去背景"
+          }
+        ],
+        "minVramGb": 0,
+        "minRamGb": 16,
+        "quantization": "float32",
+        "license": "MIT",
+        "licenseNotice": "MIT",
+        "windowsStatus": "已接入 · ONNX Runtime CPU 无 GPU 常驻（Gate 0 实测 commit 10.14 GiB / 可用 RAM 15.52 GiB）",
+        "non_commercial": false
+      },
+      {
+        "id": "realesrgan-x4plus-windows-v1",
+        "displayName": "Real-ESRGAN x4plus",
+        "productStatus": "implemented",
+        "installId": "realesrgan-x4plus-windows-v1",
+        "runtime": "ncnn Vulkan v0.2.0 · 官方 Windows 便携包",
+        "capabilities": [
+          {
+            "id": "upscale",
+            "label": "放大"
+          }
+        ],
+        "minVramGb": 4,
+        "minRamGb": 8,
+        "quantization": "fp32",
+        "license": "Real-ESRGAN BSD-3-Clause · ncnn app MIT",
+        "licenseNotice": "BSD-3-Clause（Real-ESRGAN）/ MIT（ncnn 应用）",
+        "windowsStatus": "已接入 · ncnn Vulkan 固定 4×/tile 128/单 GPU（Gate 0 真实 4× 运行通过）",
+        "non_commercial": false
+      },
+      {
+        "id": "qwen-image-2.1-windows-v1",
+        "displayName": "Qwen-Image 2.1",
+        "productStatus": "implemented",
+        "installId": "qwen-image-2.1-windows-v1",
+        "runtime": "v2 共享运行时 · Python 3.12.10 / PyTorch 2.10.0 / CUDA 12.6 / diffusers 0.41 · staged NF4",
+        "capabilities": [
+          {
+            "id": "text_to_image",
+            "label": "文生图"
+          }
+        ],
+        "minVramGb": 12,
+        "minRamGb": 32,
+        "quantization": "nf4",
+        "license": "qwen-research",
+        "licenseNotice": "Qwen Research License：仅限非商业用途；商用需另行取得授权。",
+        "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 6.00 GiB / commit 13.96 GiB）",
+        "non_commercial": true
+      },
+      {
+        "id": "qwen-image-2.1-turbo-windows-v1",
+        "displayName": "Qwen-Image 2.1 Turbo",
+        "productStatus": "implemented",
+        "installId": "qwen-image-2.1-turbo-windows-v1",
+        "runtime": "v2 共享运行时 · Python 3.12.10 / PyTorch 2.10.0 / CUDA 12.6 / diffusers 0.41 · staged NF4",
+        "capabilities": [
+          {
+            "id": "text_to_image",
+            "label": "文生图"
+          }
+        ],
+        "minVramGb": 12,
+        "minRamGb": 32,
+        "quantization": "nf4",
+        "license": "qwen-research",
+        "licenseNotice": "Qwen Research License：仅限非商业用途；商用需另行取得授权。",
+        "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 6.00 GiB / commit 13.95 GiB）",
+        "non_commercial": true
+      },
+      {
+        "id": "moss-image-sft-windows-v1",
+        "displayName": "MOSS-Image-SFT",
+        "productStatus": "implemented",
+        "installId": "moss-image-sft-windows-v1",
+        "runtime": "v2 共享运行时 · Python 3.12.10 / PyTorch 2.10.0 / CUDA 12.6 / diffusers 0.41 · staged NF4",
+        "capabilities": [
+          {
+            "id": "text_to_image",
+            "label": "文生图"
+          }
+        ],
+        "minVramGb": 12,
+        "minRamGb": 32,
+        "quantization": "nf4",
+        "license": "Apache-2.0",
+        "licenseNotice": "Apache-2.0 · 可商用（保留版权与许可声明）",
+        "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 5.84 GiB / commit 9.20 GiB）",
+        "non_commercial": false
+      }
+    ]
+  },
+  "capability_projection": {
+    "model_count": 7,
+    "capability_pair_count": 8,
+    "pairs": [
+      {
+        "modelId": "z-image-turbo-diffusers-cuda-nf4-v1",
+        "capability": "text_to_image"
+      },
+      {
+        "modelId": "flux2-klein-4b-distilled-windows-v1",
+        "capability": "text_to_image"
+      },
+      {
+        "modelId": "flux2-klein-4b-distilled-windows-v1",
+        "capability": "image_edit"
+      },
+      {
+        "modelId": "birefnet-general-epoch-244-windows-v1",
+        "capability": "background_removal"
+      },
+      {
+        "modelId": "realesrgan-x4plus-windows-v1",
+        "capability": "upscale"
+      },
+      {
+        "modelId": "qwen-image-2.1-windows-v1",
+        "capability": "text_to_image"
+      },
+      {
+        "modelId": "qwen-image-2.1-turbo-windows-v1",
+        "capability": "text_to_image"
+      },
+      {
+        "modelId": "moss-image-sft-windows-v1",
+        "capability": "text_to_image"
+      }
+    ],
+    "note": "Seven Windows model variants; Klein registers both text-to-image and image-edit, so eight (model, capability) pairs."
+  },
+  "feature_catalog": {
+    "path": "resources/windows-foundation/feature-catalog.json",
+    "total": 4,
+    "planned": 0,
+    "entries": [
+      {
+        "featureId": "text-to-image",
+        "productStatus": "implemented",
+        "action": "open-composer",
+        "modelId": "z-image-turbo-diffusers-cuda-nf4-v1"
+      },
+      {
+        "featureId": "image-edit",
+        "productStatus": "implemented",
+        "action": "open-composer",
+        "modelId": "flux2-klein-4b-distilled-windows-v1"
+      },
+      {
+        "featureId": "remove-background",
+        "productStatus": "implemented",
+        "action": "open-composer",
+        "modelId": "birefnet-general-epoch-244-windows-v1"
+      },
+      {
+        "featureId": "upscale",
+        "productStatus": "implemented",
+        "action": "open-composer",
+        "modelId": "realesrgan-x4plus-windows-v1"
+      }
+    ]
+  },
+  "model_page_field_shape": {
+    "source": "apps/desktop/src/adapters/catalog.rs project_entry + apps/frontend/src/model-catalog.ts ModelEntry",
+    "fields": [
+      "id",
+      "displayName",
+      "variant",
+      "family",
+      "summary",
+      "description",
+      "capabilities",
+      "productStatus",
+      "runtime",
+      "license",
+      "licenseNotice",
+      "source",
+      "revision",
+      "modelBytes",
+      "knownArtifactBytes",
+      "requirements",
+      "exclusions",
+      "verifiedDevices",
+      "recipe",
+      "installId",
+      "installerSupported",
+      "minVramGb",
+      "minRamGb",
+      "quantization",
+      "windowsStatus",
+      "installPhase",
+      "componentsReady",
+      "runtimeReady",
+      "deviceVerified",
+      "executable",
+      "hardwareEligible",
+      "hardwareReason",
+      "busy",
+      "receivedBytes",
+      "installTotalBytes",
+      "runtimeBytes",
+      "requiredBytes",
+      "error",
+      "canInstall",
+      "canContinue",
+      "canStop",
+      "canUse"
+    ],
+    "hardware_fields": [
+      "minVramGb",
+      "minRamGb",
+      "quantization",
+      "licenseNotice",
+      "windowsStatus",
+      "hardwareEligible",
+      "hardwareReason"
+    ],
+    "legacy_fields_unchanged": true
+  },
+  "device_facts": {
+    "probe": [
+      "﻿vram_gb=Some(12)",
+      "ram_gb=32",
+      "label=显存 12 GB · 内存 32 GB",
+      "gate[target]=true reason=None",
+      "gate[low]=false reason=Some(\"当前设备不满足硬件门槛：显存 ≥ 12 GB（当前 8 GB）、内存 ≥ 32 GB（当前 16 GB）。为避免安装或生成中途失败，安装与生成入口已禁用。\")",
+      "gate[unknown]=false reason=Some(\"无法确认硬件门槛：显存 ≥ 12 GB（当前无法读取）、内存 ≥ 32 GB（当前无法读取）；请检查 NVIDIA 驱动与 nvidia-smi 是否可用。为避免安装或生成中途失败，安装与生成入口已禁用。\")"
+    ],
+    "gpu": [
+      "﻿name, memory.total [MiB], driver_version",
+      "NVIDIA GeForce RTX 3080 Ti, 12288 MiB, 596.49"
+    ],
+    "backend": "nvidia-smi --query-gpu=memory.total (MiB rounded to nearest GiB) + Win32 GlobalMemoryStatusEx (total physical bytes rounded to nearest GiB)",
+    "source": [
+      "verification/windows-ui-projection/device-probe.log",
+      "verification/windows-ui-projection/nvidia-smi.log"
+    ]
+  },
+  "hardware_gate": {
+    "target_12gb_32gb": {
+      "device": {
+        "vram_gb": 12,
+        "ram_gb": 32
+      },
+      "expected_eligible": [
+        "z-image-turbo-diffusers-cuda-nf4-v1",
+        "flux2-klein-4b-distilled-windows-v1",
+        "birefnet-general-epoch-244-windows-v1",
+        "realesrgan-x4plus-windows-v1",
+        "qwen-image-2.1-windows-v1",
+        "qwen-image-2.1-turbo-windows-v1",
+        "moss-image-sft-windows-v1"
+      ],
+      "expected_blocked": [],
+      "evidence": "cargo test -p image-studio-desktop windows_catalog_registers_every_parity_identity_with_metadata + unknown_device_facts_are_not_silently_accepted"
+    },
+    "low_8gb_16gb": {
+      "device": {
+        "vram_gb": 8,
+        "ram_gb": 16
+      },
+      "expected_eligible": [
+        "birefnet-general-epoch-244-windows-v1",
+        "realesrgan-x4plus-windows-v1"
+      ],
+      "expected_blocked": [
+        "z-image-turbo-diffusers-cuda-nf4-v1",
+        "flux2-klein-4b-distilled-windows-v1",
+        "qwen-image-2.1-windows-v1",
+        "qwen-image-2.1-turbo-windows-v1",
+        "moss-image-sft-windows-v1"
+      ],
+      "expected_reason_contains": [
+        "当前设备不满足硬件门槛",
+        "安装与生成入口已禁用"
+      ],
+      "evidence": "cargo test -p image-studio-desktop unsatisfied_hardware_disables_entry_points_with_a_chinese_reason"
+    },
+    "unknown_device": {
+      "device": {
+        "vram_gb": null,
+        "ram_gb": 0
+      },
+      "expected": "all models with a required threshold are blocked with an actionable nvidia-smi reason; nothing silently passes",
+      "evidence": "cargo test -p image-studio-desktop unknown_device_facts_are_not_silently_accepted + device.rs unknown_device_facts_disable_required_thresholds_instead_of_passing"
+    },
+    "gate_function": "apps/desktop/src/adapters/device.rs DeviceFacts::gate (unmet or unprovable threshold => eligible=false, Chinese reason; canInstall/canUse require hardwareEligible)"
+  },
+  "license_projection": {
+    "qwen_non_commercial": [
+      "qwen-image-2.1-windows-v1",
+      "qwen-image-2.1-turbo-windows-v1"
+    ],
+    "others": {
+      "z-image-turbo-diffusers-cuda-nf4-v1": "Apache-2.0 · 可商用（保留版权与许可声明）",
+      "flux2-klein-4b-distilled-windows-v1": "Apache-2.0 · 可商用（保留版权与许可声明）",
+      "birefnet-general-epoch-244-windows-v1": "MIT",
+      "realesrgan-x4plus-windows-v1": "BSD-3-Clause（Real-ESRGAN）/ MIT（ncnn 应用）",
+      "moss-image-sft-windows-v1": "Apache-2.0 · 可商用（保留版权与许可声明）"
+    },
+    "frontend": "apps/frontend/src/model-catalog.ts licenseLabel/isNonCommercialLicense rendered in ModelLibrary.tsx; npm test src/model-catalog.test.ts license projection"
+  },
+  "runtime_rows": {
+    "v1": {
+      "runtimeLockId": "windows-python31210-torch2100-cu126-bnb0482-v1",
+      "models": [
+        "z-image-turbo-diffusers-cuda-nf4-v1"
+      ]
+    },
+    "shared_v2": {
+      "runtimeLockId": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "models": [
+        "flux2-klein-4b-distilled-windows-v1",
+        "birefnet-general-epoch-244-windows-v1",
+        "qwen-image-2.1-windows-v1",
+        "qwen-image-2.1-turbo-windows-v1",
+        "moss-image-sft-windows-v1"
+      ]
+    },
+    "ncnn": {
+      "runtimeLockId": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+      "models": [
+        "realesrgan-x4plus-windows-v1"
+      ]
+    },
+    "evidence": "cargo test -p image-studio-desktop windows_runtime_lock_matrix_is_pinned_for_settings_rows; studio.rs settings_snapshot projects one row per registered install profile with label/runtimeLockId/hardwareEligible/hardwareReason"
+  },
+  "commands": [
+    {
+      "command": "npm --prefix apps/frontend test",
+      "result": "7 files / 52 tests passed",
+      "log": "verification/windows-ui-projection/npm-test.log"
+    },
+    {
+      "command": "npm --prefix apps/frontend run check",
+      "result": "tsc --noEmit exit 0",
+      "log": "verification/windows-ui-projection/npm-check.log"
+    },
+    {
+      "command": "cargo test -p image-studio-desktop",
+      "result": "158 passed / 2 failed / 7 ignored. The 2 failures are desktop-install's in-progress installation.rs tests (windows_profiles_parse_embedded_manifests_and_frozen_identities, windows_plan_environment_binds_the_frozen_runtime_engine_and_device), not this task's files. Every catalog/studio/feature/device test passed.",
+      "log": "verification/windows-ui-projection/cargo-test.log"
+    },
+    {
+      "command": "cargo test -p image-studio-desktop --lib studio::",
+      "result": "18 passed / 0 failed",
+      "log": "verification/windows-ui-projection/targeted-tests.log"
+    },
+    {
+      "command": "cargo test -p image-studio-desktop --lib adapters::catalog",
+      "result": "7 passed / 0 failed",
+      "log": "verification/windows-ui-projection/targeted-tests.log"
+    },
+    {
+      "command": "cargo test -p image-studio-desktop --lib adapters::feature_catalog",
+      "result": "4 passed / 0 failed",
+      "log": "verification/windows-ui-projection/targeted-tests.log"
+    },
+    {
+      "command": "cargo test -p image-studio-desktop --lib adapters::device",
+      "result": "9 passed / 0 failed",
+      "log": "verification/windows-ui-projection/targeted-tests.log"
+    },
+    {
+      "command": "cargo clippy -p image-studio-desktop --all-targets -- -D warnings",
+      "result": "no warnings for this task's files (finished clean while desktop-install WIP was in the tree)",
+      "log": null
+    },
+    {
+      "command": "rustc --edition 2024 --test apps/desktop/src/adapters/device.rs",
+      "result": "8 passed / 0 failed (live probe included)",
+      "log": null
+    }
+  ],
+  "not_run": [
+    {
+      "item": "原生 UI 截图（模型页/功能页/设置页）",
+      "status": "not_run",
+      "reason": "No installed Windows build is available yet in this round; desktop-install is still landing the installer profiles and the app cannot be launched from this task's scope."
+    },
+    {
+      "item": "安装版七型号真实发送/处理与查看/导出验收（parity task 4.2）",
+      "status": "not_run",
+      "reason": "Requires the installed package with worker wheels and the six Windows install profiles; out of this task's scope and dependent on desktop-install/worker tasks."
+    },
+    {
+      "item": "真实七型号硬件门槛 UI 提示（100% 实机截图）",
+      "status": "not_run",
+      "reason": "Unit/type-level evidence only; the UI gating logic is covered by model-catalog.test.ts and the host projection tests."
+    }
+  ],
+  "test_totals": {
+    "rust_full_suite": "158 passed / 2 failed (both failures are desktop-install WIP tests) / 7 ignored",
+    "rust_this_task_modules": "studio 18 + catalog 7 + feature_catalog 4 + device 9 = 38 passed / 0 failed",
+    "frontend": "52 passed / 0 failed, typecheck clean"
+  },
+  "captured_commit": "01e56cb (test(desktop): pin the Windows runtime lock matrix for settings rows); desktop-install's installation.rs/generation.rs were still uncommitted WIP at capture time"
+}
