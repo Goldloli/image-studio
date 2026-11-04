@@ -25,7 +25,13 @@ use std::{
 };
 use studio_core::{
     domain::JobId,
-    generation::AttemptState,
+    generation::{
+        AttemptState, BIREFNET_WINDOWS_CAPABILITY, KLEIN_WINDOWS_EDIT_CAPABILITY,
+        KLEIN_WINDOWS_TEXT_CAPABILITY, MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+        QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY, QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+        REALESRGAN_WINDOWS_CAPABILITY, WINDOWS_DIFFUSERS_WORKER, WINDOWS_ONNX_WORKER,
+        WINDOWS_REALESRGAN_WORKER,
+    },
     recipes::{
         BIREFNET_CAPABILITY, KLEIN_EDIT_CAPABILITY, KLEIN_TEXT_CAPABILITY,
         MOSS_IMAGE_SFT_CAPABILITY, QWEN_IMAGE_21_CAPABILITY, QWEN_IMAGE_21_TURBO_CAPABILITY,
@@ -309,6 +315,7 @@ impl GenerationController {
             && ready.worker_module != "studio_mflux_worker_v3"
             && ready.worker_module != "studio_onnx_worker"
             && ready.worker_module != "realesrgan-native-worker"
+            && ready.worker_module != "studio_diffusers_worker"
             && ready.worker_module != WINDOWS_ZIMAGE_WORKER_MODULE
         {
             return Err("计算模块身份不符".into());
@@ -335,32 +342,70 @@ impl GenerationController {
             .canonicalize()
             .map_err(error)?;
         let recipe = Recipe::from_request(&job.request).map_err(error)?;
-        let timeouts = if matches!(
-            recipe,
-            Recipe::QwenImage21 | Recipe::QwenImage21Turbo | Recipe::MossImageSft
-        ) {
-            Timeouts {
+        if let Some(expected_build) = expected_worker_build(recipe)
+            && ready.worker_build_id != expected_build
+        {
+            return Err("Windows 计算模块构建身份不符".into());
+        }
+        // Qwen base/Turbo and MOSS only start from the install-time prepared NF4
+        // cache; the worker derives it from the model path, so refuse early with an
+        // actionable message instead of failing inside the worker.
+        let mut worker_args = ready.worker_args.clone();
+        if staged_windows_recipe(recipe) {
+            let prepared = prepared_cache_path(ready)?;
+            for component in ["text_encoder", "transformer"] {
+                if !prepared.join(component).join("config.json").is_file() {
+                    return Err(format!(
+                        "量化缓存缺失或损坏，请重新安装所选型号（{}）。",
+                        prepared.display()
+                    ));
+                }
+            }
+            worker_args.push("--prepared-dir".into());
+            worker_args.push(prepared.to_str().ok_or("量化缓存路径不是 UTF-8")?.into());
+        }
+        let timeouts = match recipe {
+            Recipe::QwenImage21
+            | Recipe::QwenImage21Turbo
+            | Recipe::MossImageSft
+            | Recipe::QwenImage21Windows
+            | Recipe::QwenImage21TurboWindows
+            | Recipe::MossImageSftWindows => Timeouts {
                 handshake_ms: 30_000,
                 loading_ms: 600_000,
                 generation_ms: 1_920_000,
                 cancel_grace_ms: 5_000,
                 cleanup_deadline_ms: 30_000,
-            }
-        } else {
-            Timeouts::default()
+            },
+            // Klein's four-step Windows recipe runs in a fresh worker process with
+            // NF4 + CPU offload; keep the product 900 s generation budget explicit.
+            Recipe::KleinTextWindows | Recipe::KleinEditWindows => Timeouts {
+                handshake_ms: 30_000,
+                loading_ms: 600_000,
+                generation_ms: 900_000,
+                cancel_grace_ms: 5_000,
+                cleanup_deadline_ms: 30_000,
+            },
+            _ => Timeouts::default(),
         };
-        let worker_program = if recipe == Recipe::RealEsrgan {
-            self.inner
+        let worker_program = match recipe {
+            Recipe::RealEsrgan => self
+                .inner
                 .supervisor
                 .parent()
                 .ok_or("监督器目录缺失")?
-                .join("realesrgan-worker")
-        } else {
-            ready.worker_program.clone()
+                .join("realesrgan-worker"),
+            Recipe::RealEsrganWindows => self
+                .inner
+                .supervisor
+                .parent()
+                .ok_or("监督器目录缺失")?
+                .join("realesrgan-worker.exe"),
+            _ => ready.worker_program.clone(),
         };
         let config = SupervisorConfig {
             python_program: worker_program,
-            worker_args: ready.worker_args.clone(),
+            worker_args,
             working_dir: run_dir.clone(),
             execution_lock: self.inner.paths.data.join("execution.lock"),
             log_path: run_dir.join("worker.log"),
@@ -374,11 +419,22 @@ impl GenerationController {
                 Recipe::KleinText | Recipe::KleinEdit => {
                     vec![KLEIN_TEXT_CAPABILITY.into(), KLEIN_EDIT_CAPABILITY.into()]
                 }
+                Recipe::KleinTextWindows | Recipe::KleinEditWindows => vec![
+                    KLEIN_WINDOWS_TEXT_CAPABILITY.into(),
+                    KLEIN_WINDOWS_EDIT_CAPABILITY.into(),
+                ],
                 Recipe::BiRefNet => vec![BIREFNET_CAPABILITY.into()],
+                Recipe::BiRefNetWindows => vec![BIREFNET_WINDOWS_CAPABILITY.into()],
                 Recipe::RealEsrgan => vec![REALESRGAN_CAPABILITY.into()],
+                Recipe::RealEsrganWindows => vec![REALESRGAN_WINDOWS_CAPABILITY.into()],
                 Recipe::QwenImage21 => vec![QWEN_IMAGE_21_CAPABILITY.into()],
+                Recipe::QwenImage21Windows => vec![QWEN_IMAGE_21_WINDOWS_CAPABILITY.into()],
                 Recipe::QwenImage21Turbo => vec![QWEN_IMAGE_21_TURBO_CAPABILITY.into()],
+                Recipe::QwenImage21TurboWindows => {
+                    vec![QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY.into()]
+                }
                 Recipe::MossImageSft => vec![MOSS_IMAGE_SFT_CAPABILITY.into()],
+                Recipe::MossImageSftWindows => vec![MOSS_IMAGE_SFT_WINDOWS_CAPABILITY.into()],
                 _ => vec![job.request.capability.capability_id.clone()],
             },
             timeouts,
@@ -490,6 +546,51 @@ impl GenerationController {
                     session_id,
                     config.expected_worker.clone(),
                     vec![job.request.capability.capability_id.clone()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::KleinTextWindows || recipe == Recipe::KleinEditWindows {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![
+                        KLEIN_WINDOWS_TEXT_CAPABILITY.into(),
+                        KLEIN_WINDOWS_EDIT_CAPABILITY.into(),
+                    ],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::BiRefNetWindows {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![BIREFNET_WINDOWS_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::RealEsrganWindows {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![REALESRGAN_WINDOWS_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::QwenImage21Windows {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![QWEN_IMAGE_21_WINDOWS_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::QwenImage21TurboWindows {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::MossImageSftWindows {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![MOSS_IMAGE_SFT_WINDOWS_CAPABILITY.into()],
                 )
                 .map_err(error)
             } else {
@@ -814,6 +915,36 @@ impl GenerationController {
     }
 }
 
+/// Qwen base/Turbo and MOSS Windows recipes start from an install-time prepared cache.
+fn staged_windows_recipe(recipe: Recipe) -> bool {
+    matches!(
+        recipe,
+        Recipe::QwenImage21Windows | Recipe::QwenImage21TurboWindows | Recipe::MossImageSftWindows
+    )
+}
+/// The Windows diffusers worker derives the prepared cache from the model path
+/// (`<model>.prepared`), which is the fixed installer layout.
+fn prepared_cache_path(ready: &ReadyPaths) -> Result<PathBuf, String> {
+    if ready.model_snapshot_id.is_empty() {
+        return Err("安装记录缺少模型快照身份".into());
+    }
+    Ok(ready
+        .model_path
+        .with_file_name(format!("{}.prepared", ready.model_snapshot_id)))
+}
+fn expected_worker_build(recipe: Recipe) -> Option<&'static str> {
+    match recipe {
+        Recipe::KleinTextWindows
+        | Recipe::KleinEditWindows
+        | Recipe::QwenImage21Windows
+        | Recipe::QwenImage21TurboWindows
+        | Recipe::MossImageSftWindows => Some(WINDOWS_DIFFUSERS_WORKER),
+        Recipe::BiRefNetWindows => Some(WINDOWS_ONNX_WORKER),
+        Recipe::RealEsrganWindows => Some(WINDOWS_REALESRGAN_WORKER),
+        _ => None,
+    }
+}
+
 enum Terminal {
     Candidates(Vec<RoleCandidate>),
     Cancelled,
@@ -850,6 +981,7 @@ fn execute_request_v2(
     ready: &ReadyPaths,
     run: &Path,
 ) -> Result<ExecuteRequestV2, String> {
+    let recipe = Recipe::from_request(&job.request).map_err(error)?;
     let recipe_id = job
         .plan
         .effective_parameters
@@ -877,14 +1009,15 @@ fn execute_request_v2(
         .transpose()?
         .into_iter()
         .collect();
-    let max_bytes = if recipe_id == "realesrgan-x4plus-t128-v1" {
+    let max_bytes = if matches!(recipe, Recipe::RealEsrgan | Recipe::RealEsrganWindows) {
         wire::MAX_UPSCALE_OUTPUT_BYTES
     } else {
         32 * 1024 * 1024
     };
+    let birefnet = matches!(recipe, Recipe::BiRefNet | Recipe::BiRefNetWindows);
     let mut outputs = vec![OutputSpec {
         role: "primary".into(),
-        data_type: if recipe_id == "birefnet-general-cpu-v1" {
+        data_type: if birefnet {
             "image_rgba".into()
         } else {
             "image_rgb".into()
@@ -893,7 +1026,7 @@ fn execute_request_v2(
         height: job.plan.effective_output.height,
         max_bytes,
     }];
-    if recipe_id == "birefnet-general-cpu-v1" {
+    if birefnet {
         outputs.push(OutputSpec {
             role: "mask".into(),
             data_type: "mask".into(),
