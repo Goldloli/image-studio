@@ -1,16 +1,39 @@
 use std::path::{Path, PathBuf};
 
-/// Windows legacy `MAX_PATH` is 260 UTF-16 units. The frozen shared runtime
-/// keeps its longest load-relevant member at 86 units and stages with at most a
-/// 26-unit directory name, plus the `\runtimes\` prefix (10) and a separator;
-/// rejecting data paths above this limit leaves a 20-unit safety margin before
-/// onnxruntime/Python's non-long-path DLL loading can fail, and happens before
-/// any download or extraction starts.
+/// Windows legacy `MAX_PATH` is 260 UTF-16 units. The activated shared runtime
+/// lives at `data/runtimes/<runtime.id>`; the longest frozen runtime id is 61
+/// units and the longest load-relevant member (`numpy.libs/libscipy_openblas…dll`)
+/// is 86 units. Budget: 260 - 10 safety margin - 10 (`\runtimes\`) - 61 - 1 - 86
+/// = 92 data-path units. The short staging name (≤26) is not the upper bound once
+/// the runtime is activated, so the final layout drives this limit.
 #[cfg(windows)]
-pub const MAX_DATA_PATH_UNITS: usize = 117;
+pub const MAX_DATA_PATH_UNITS: usize = 92;
+
+#[cfg(windows)]
+const WINDOWS_MAX_PATH_UNITS: usize = 260;
+#[cfg(windows)]
+const RUNTIMES_PREFIX_UNITS: usize = 10;
+#[cfg(windows)]
+const LONGEST_RUNTIME_ID_UNITS: usize = 61;
+#[cfg(windows)]
+const LONGEST_LOAD_PATH_UNITS: usize = 86;
+#[cfg(windows)]
+const PATH_SAFETY_MARGIN_UNITS: usize = 10;
 
 #[cfg(windows)]
 const DATA_ROOT_SUGGESTION: &str = r"C:\ImageStudioData";
+
+/// The budget arithmetic must stay consistent: the fixed suffix for the final
+/// runtime layout plus the maximum allowed data path must fit `MAX_PATH`.
+#[cfg(windows)]
+const _: () = assert!(
+    RUNTIMES_PREFIX_UNITS
+        + LONGEST_RUNTIME_ID_UNITS
+        + 1
+        + LONGEST_LOAD_PATH_UNITS
+        + PATH_SAFETY_MARGIN_UNITS
+        == WINDOWS_MAX_PATH_UNITS - MAX_DATA_PATH_UNITS
+);
 
 #[derive(Debug, thiserror::Error)]
 pub enum PlatformError {
@@ -95,6 +118,12 @@ impl AppPaths {
                 source,
             })?;
         }
+        // Re-check the real paths after canonicalization; data and cache both live
+        // under the runtime-relevant root and are what workers actually use.
+        #[cfg(windows)]
+        for path in [&paths.data, &paths.cache] {
+            validate_canonical_path_length(path)?;
+        }
         Ok(paths)
     }
 
@@ -134,6 +163,56 @@ fn windows_path_units(path: &Path) -> usize {
     path.as_os_str().encode_wide().count()
 }
 
+/// Length of the path as third-party programs (Python/onnxruntime) see it:
+/// `std::fs::canonicalize` returns `\\?\C:\…` / `\\?\UNC\server\…`, but the
+/// non-long-path APIs receive the plain Win32 form.
+#[cfg(windows)]
+fn external_path_units(path: &Path) -> usize {
+    use std::os::windows::ffi::OsStrExt;
+    let units: Vec<u16> = path.as_os_str().encode_wide().collect();
+    let verbatim = [b'\\' as u16, b'\\' as u16, b'?' as u16, b'\\' as u16];
+    let unc = [
+        b'\\' as u16,
+        b'\\' as u16,
+        b'?' as u16,
+        b'\\' as u16,
+        b'U' as u16,
+        b'N' as u16,
+        b'C' as u16,
+        b'\\' as u16,
+    ];
+    let removed = if units.starts_with(&unc) {
+        6
+    } else if units.starts_with(&verbatim) {
+        4
+    } else {
+        0
+    };
+    units.len().saturating_sub(removed)
+}
+
+#[cfg(windows)]
+fn external_display_path(path: &Path) -> PathBuf {
+    let text = path.to_string_lossy();
+    if let Some(rest) = text.strip_prefix(r"\\?\UNC\") {
+        PathBuf::from(format!(r"\\{rest}"))
+    } else if let Some(rest) = text.strip_prefix(r"\\?\") {
+        PathBuf::from(rest)
+    } else {
+        PathBuf::from(text.as_ref())
+    }
+}
+
+#[cfg(windows)]
+fn data_path_too_long(path: PathBuf, length: usize) -> PlatformError {
+    PlatformError::DataPathTooLong {
+        path,
+        length,
+        limit: MAX_DATA_PATH_UNITS,
+        suggestion: DATA_ROOT_SUGGESTION,
+    }
+}
+
 #[cfg(windows)]
 fn validate_data_path_length(data: &Path) -> Result<(), PlatformError> {
     let absolute = std::path::absolute(data).map_err(|source| PlatformError::Directory {
@@ -142,12 +221,19 @@ fn validate_data_path_length(data: &Path) -> Result<(), PlatformError> {
     })?;
     let length = windows_path_units(&absolute);
     if length > MAX_DATA_PATH_UNITS {
-        return Err(PlatformError::DataPathTooLong {
-            path: absolute,
-            length,
-            limit: MAX_DATA_PATH_UNITS,
-            suggestion: DATA_ROOT_SUGGESTION,
-        });
+        return Err(data_path_too_long(absolute, length));
+    }
+    Ok(())
+}
+
+/// Re-check a canonicalized path. `std::path::absolute` does not resolve
+/// junctions or 8.3 short names, so an alias could otherwise bypass the guard
+/// and make the runtime/worker use a much longer physical path.
+#[cfg(windows)]
+fn validate_canonical_path_length(path: &Path) -> Result<(), PlatformError> {
+    let length = external_path_units(path);
+    if length > MAX_DATA_PATH_UNITS {
+        return Err(data_path_too_long(external_display_path(path), length));
     }
     Ok(())
 }
@@ -255,5 +341,44 @@ mod tests {
             MAX_DATA_PATH_UNITS + 2
         );
         assert!(validate_data_path_length(&path).is_err());
+    }
+
+    #[cfg(windows)]
+    fn with_verbatim_prefix(path: &Path) -> PathBuf {
+        let mut text = std::ffi::OsString::from(r"\\?\");
+        text.push(path.as_os_str());
+        PathBuf::from(text)
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_verbatim_prefix_is_not_counted_as_path_length() {
+        let plain = path_with_units(MAX_DATA_PATH_UNITS);
+        assert_eq!(external_path_units(&plain), MAX_DATA_PATH_UNITS);
+        let verbatim = with_verbatim_prefix(&plain);
+        assert_eq!(external_path_units(&verbatim), MAX_DATA_PATH_UNITS);
+        let unc_plain = Path::new(r"\\server\share\data");
+        let mut unc_text = std::ffi::OsString::from(r"\\?\UNC\");
+        unc_text.push("server\\share\\data");
+        assert_eq!(
+            external_path_units(&PathBuf::from(unc_text)),
+            windows_path_units(unc_plain)
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_canonical_path_guard_rejects_over_long_aliases() {
+        let boundary = with_verbatim_prefix(&path_with_units(MAX_DATA_PATH_UNITS));
+        validate_canonical_path_length(&boundary).expect("canonical boundary must be accepted");
+        let over = with_verbatim_prefix(&path_with_units(MAX_DATA_PATH_UNITS + 1));
+        let error = validate_canonical_path_length(&over)
+            .expect_err("canonical over-long path must be rejected");
+        let message = error.to_string();
+        assert!(message.contains("路径过长"), "{message}");
+        assert!(
+            !message.contains(r"\\?\"),
+            "display path must strip the verbatim prefix: {message}"
+        );
     }
 }
