@@ -254,6 +254,40 @@ const displayNames: Record<string, string> = {
 
 export const modelDisplayName = (modelId: string): string => displayNames[modelId] ?? modelId;
 
+/** Every model-variant id that the given platform can execute (seven per platform). */
+const PLATFORM_MODEL_IDS: Record<ModelPlatform, ReadonlySet<string>> = {
+  macos: new Set(Object.values(MODEL_IDS.macos).map(entry => entry.model)),
+  windows: new Set(Object.values(MODEL_IDS.windows).map(entry => entry.model)),
+};
+
+export const platformModelIds = (platform: ModelPlatform): ReadonlySet<string> =>
+  PLATFORM_MODEL_IDS[platform];
+
+export const isModelSupportedOn = (platform: ModelPlatform, modelId: string): boolean =>
+  platformModelIds(platform).has(modelId);
+
+const CROSS_PLATFORM_TEXT_ADVICE: Record<ModelPlatform, string> = {
+  windows:
+    '此会话保留来自其他平台的模型选择。请从模型菜单明确选择对应的 Windows 型号（Z-Image / Klein / Qwen / MOSS），并核对画幅与参数后再发送。',
+  macos: '此会话保留 Windows 端的模型选择。请从模型菜单明确选择对应的 macOS 型号，并核对画幅后再发送。',
+};
+
+/**
+ * Advisory text when a text recipe was frozen by the other platform.
+ *
+ * A text model that exists on the running platform is supported even when it is
+ * not installed yet; only the other platform's model ids need a reselect hint.
+ * Returns null for tool recipes and for models of the running platform.
+ */
+export const crossPlatformTextModelAdvice = (
+  platform: ModelPlatform,
+  modelId: string,
+): string | null => {
+  if (!textRecipeForModel(modelId)) return null;
+  if (isModelSupportedOn(platform, modelId)) return null;
+  return CROSS_PLATFORM_TEXT_ADVICE[platform];
+};
+
 /** Every Windows parity (model, capability) pair: 7 models, 8 pairs (Klein has two). */
 export const windowsParityProjection = (): { modelId: string; capabilityId: string }[] => {
   const windows = MODEL_IDS.windows;

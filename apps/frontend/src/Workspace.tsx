@@ -76,9 +76,8 @@ import {
   QWEN_IMAGE_21_TURBO_MODEL_ID,
   REALESRGAN_CAPABILITY,
   REALESRGAN_MODEL_ID,
-  Z_IMAGE_MODEL_ID,
-  Z_IMAGE_WINDOWS_MODEL_ID,
   capabilityForModel,
+  crossPlatformTextModelAdvice,
   modelDisplayName,
   textRecipeForModel,
 } from './model-recipes';
@@ -407,9 +406,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   const isUpscale = active.params.capabilityId === REALESRGAN_CAPABILITY;
   const isToolComposer = isRemoveBackground || isUpscale;
   const activeTextRecipe = textRecipeForModel(active.params.modelId);
-  const legacyWindowsTextModel = Z_IMAGE_MODEL_ID === Z_IMAGE_WINDOWS_MODEL_ID
-    && Boolean(activeTextRecipe)
-    && active.params.modelId !== Z_IMAGE_WINDOWS_MODEL_ID;
+  const crossPlatformTextAdvice = crossPlatformTextModelAdvice(MODEL_PLATFORM, active.params.modelId);
   const newTextOnlyModel = [QWEN_IMAGE_21_MODEL_ID, QWEN_IMAGE_21_TURBO_MODEL_ID, MOSS_IMAGE_SFT_MODEL_ID]
     .includes(active.params.modelId);
   const sourceImportSupported = isToolComposer || (active.params.modelId === KLEIN_MODEL_ID && !newTextOnlyModel);
@@ -427,7 +424,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     : active.params.capabilityId === KLEIN_EDIT_CAPABILITY
     ? modelReady ? 'Klein · 单图编辑' : 'Klein · 单图编辑 · 未就绪'
     : activeTextRecipe
-      ? modelReady ? activeTextRecipe.shortName : `${activeTextRecipe.shortName} · ${legacyWindowsTextModel ? '当前 Windows 未接入' : '未就绪'}`
+      ? modelReady ? activeTextRecipe.shortName : `${activeTextRecipe.shortName} · ${crossPlatformTextAdvice ? '当前平台未接入' : '未就绪'}`
       : modelReady ? 'Z-Image Turbo' : 'Z-Image Turbo · 未就绪';
   const selectedModelBlockedReason = !modelHardwareEligible
     ? modelHardwareReason ?? '当前设备不满足该模型的硬件门槛，生成入口已禁用。'
@@ -1303,7 +1300,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
           </div>
         </div>
         {overByteBudget && <p className="composer-warning" role="alert">提示词超过 16 KiB，请缩短后生成；内容完整保留。</p>}
-        {legacyWindowsTextModel && <p className="composer-warning" role="alert">此会话保留旧的跨平台模型选择。请从模型菜单明确选择 Windows Z-Image，并核对画幅后再发送。</p>}
+        {crossPlatformTextAdvice && <p className="composer-warning" role="alert">{crossPlatformTextAdvice}</p>}
         {selectedModelBlockedReason && <p className="composer-warning" role="alert">{selectedModelBlockedReason}</p>}
         <div className={`composer-save-note ${saveStatus === 'error' ? 'error-text' : ''}`} role="status">{!native ? '浏览器预览 · 草稿保留于本次页面' : !loaded ? '正在恢复本地会话' : saveStatus === 'error' ? `保存失败：${saveError}` : saveStatus === 'saved' ? '草稿已保存到本机' : '正在保存草稿…'}{saveStatus === 'error' && <button onClick={() => void flushAll().catch(() => {})}>重试</button>}</div>
       </section>

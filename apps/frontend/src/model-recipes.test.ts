@@ -3,8 +3,11 @@ import {
   MODEL_IDS,
   MODEL_PLATFORM,
   capabilityForModel,
+  crossPlatformTextModelAdvice,
   detectModelPlatform,
+  isModelSupportedOn,
   modelDisplayName,
+  platformModelIds,
   textRecipeForModel,
   windowsParityProjection,
 } from './model-recipes';
@@ -91,5 +94,55 @@ describe('platform model identity matrix', () => {
   it('resolves composer ids for the running platform', () => {
     expect(textRecipeForModel(MODEL_IDS[MODEL_PLATFORM].zImage.model)).not.toBeNull();
     expect(Object.keys(MODEL_IDS)).toEqual(['macos', 'windows']);
+  });
+});
+
+describe('cross-platform text model selection', () => {
+  const windowsTextIds = ['zImage', 'klein', 'qwen', 'qwenTurbo', 'moss'] as const;
+  const macosTextIds = ['zImage', 'klein', 'qwen', 'qwenTurbo', 'moss'] as const;
+
+  it('registers seven model ids per platform', () => {
+    expect(platformModelIds('windows').size).toBe(7);
+    expect(platformModelIds('macos').size).toBe(7);
+  });
+
+  it('keeps every Windows-native text model un-warned on Windows', () => {
+    for (const key of windowsTextIds) {
+      const modelId = MODEL_IDS.windows[key].model;
+      expect(isModelSupportedOn('windows', modelId)).toBe(true);
+      expect(crossPlatformTextModelAdvice('windows', modelId)).toBeNull();
+    }
+    expect(isModelSupportedOn('windows', MODEL_IDS.windows.birefnet.model)).toBe(true);
+    expect(isModelSupportedOn('windows', MODEL_IDS.windows.realesrgan.model)).toBe(true);
+  });
+
+  it('warns on Windows for legacy macOS text models with the Windows target family', () => {
+    for (const key of macosTextIds) {
+      const modelId = MODEL_IDS.macos[key].model;
+      expect(isModelSupportedOn('windows', modelId)).toBe(false);
+      const advice = crossPlatformTextModelAdvice('windows', modelId);
+      expect(advice).not.toBeNull();
+      expect(advice).toContain('Windows 型号');
+      expect(advice).toContain('Z-Image / Klein / Qwen / MOSS');
+      expect(advice).not.toContain('请选择 Windows Z-Image');
+    }
+  });
+
+  it('does not warn for unknown or tool model ids', () => {
+    expect(crossPlatformTextModelAdvice('windows', 'removed-model')).toBeNull();
+    expect(crossPlatformTextModelAdvice('windows', MODEL_IDS.macos.birefnet.model)).toBeNull();
+    expect(crossPlatformTextModelAdvice('macos', MODEL_IDS.windows.realesrgan.model)).toBeNull();
+  });
+
+  it('keeps macOS-native text models un-warned and Windows ids warned on macOS', () => {
+    for (const key of macosTextIds) {
+      expect(crossPlatformTextModelAdvice('macos', MODEL_IDS.macos[key].model)).toBeNull();
+    }
+    for (const key of windowsTextIds) {
+      const advice = crossPlatformTextModelAdvice('macos', MODEL_IDS.windows[key].model);
+      expect(advice).not.toBeNull();
+      expect(advice).toContain('Windows 端');
+      expect(advice).toContain('macOS 型号');
+    }
   });
 });
