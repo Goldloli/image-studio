@@ -1664,7 +1664,9 @@ impl Installation {
                             .find(|entry| entry.path == file.path)
                             .is_some_and(|entry| {
                                 inventory_metadata_matches(&runtime_root, entry).is_ok()
-                                    && (!file.executable || entry.mode & 0o111 != 0)
+                                    && (!file.executable
+                                        || cfg!(windows)
+                                        || entry.mode & 0o111 != 0)
                             })
                     })
                 } else {
