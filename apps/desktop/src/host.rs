@@ -1,7 +1,7 @@
 use crate::{
     DIAGNOSTIC_MODES,
     adapters::{
-        AppPaths,
+        AppPaths, PlatformError,
         diagnostics::{DiagnosticConfig, DiagnosticController, DiagnosticSnapshot},
         library::{AssetLibraryQuery, TaskCenterQuery},
         preferences::{AppearancePreferences, CreationDefaults},
@@ -637,7 +637,21 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         println!("{}", LaunchOptions::HELP);
         return Ok(());
     }
-    let paths = AppPaths::resolve(options.data_dir.as_deref())?;
+    let paths = match AppPaths::resolve(options.data_dir.as_deref()) {
+        Ok(paths) => paths,
+        Err(error @ PlatformError::DataPathTooLong { .. }) => {
+            // The rejected root was supplied by the user; keep the startup failure
+            // report and dialog inside it so `--data-dir` users can find the cause.
+            let logs = options
+                .data_dir
+                .clone()
+                .unwrap_or_else(|| PathBuf::from("."))
+                .join("logs");
+            let _ = std::fs::create_dir_all(&logs);
+            crate::startup::fail_startup(&logs, &error.to_string());
+        }
+        Err(error) => return Err(error.into()),
+    };
     crate::startup::install_panic_hook(paths.logs.clone());
     if let Err(error) = crate::startup::configure_webview_profile(&paths.cache) {
         crate::startup::fail_startup(

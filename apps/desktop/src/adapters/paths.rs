@@ -1,5 +1,17 @@
 use std::path::{Path, PathBuf};
 
+/// Windows legacy `MAX_PATH` is 260 UTF-16 units. The frozen shared runtime
+/// keeps its longest load-relevant member at 86 units and stages with at most a
+/// 26-unit directory name, plus the `\runtimes\` prefix (10) and a separator;
+/// rejecting data paths above this limit leaves a 20-unit safety margin before
+/// onnxruntime/Python's non-long-path DLL loading can fail, and happens before
+/// any download or extraction starts.
+#[cfg(windows)]
+pub const MAX_DATA_PATH_UNITS: usize = 117;
+
+#[cfg(windows)]
+const DATA_ROOT_SUGGESTION: &str = r"C:\ImageStudioData";
+
 #[derive(Debug, thiserror::Error)]
 pub enum PlatformError {
     #[error("无法解析应用目录：{0}。请使用 --data-dir 指定可写目录。")]
@@ -9,6 +21,16 @@ pub enum PlatformError {
         "无法解析 Windows 本地应用数据目录（HRESULT 0x{0:08X}）。请使用 --data-dir 指定可写目录。"
     )]
     WindowsKnownFolder(i32),
+    #[cfg(windows)]
+    #[error(
+        "数据目录 {path} 路径过长（{length} 个字符，Windows 运行时限 {limit}）。请把数据目录移到更短的位置，例如 {suggestion}，或用 --data-dir 指定短目录。"
+    )]
+    DataPathTooLong {
+        path: PathBuf,
+        length: usize,
+        limit: usize,
+        suggestion: &'static str,
+    },
     #[error("无法创建或写入目录 {path}: {source}。请检查权限或使用 --data-dir 更换位置。")]
     Directory {
         path: PathBuf,
@@ -37,6 +59,8 @@ impl AppPaths {
         } else {
             Self::system_paths()?
         };
+        #[cfg(windows)]
+        validate_data_path_length(&paths.data)?;
         for path in [
             &mut paths.data,
             &mut paths.cache,
@@ -102,6 +126,30 @@ impl AppPaths {
     fn system_paths() -> Result<Self, PlatformError> {
         Err(PlatformError::MissingLocation("当前平台默认目录尚未实现"))
     }
+}
+
+#[cfg(windows)]
+fn windows_path_units(path: &Path) -> usize {
+    use std::os::windows::ffi::OsStrExt;
+    path.as_os_str().encode_wide().count()
+}
+
+#[cfg(windows)]
+fn validate_data_path_length(data: &Path) -> Result<(), PlatformError> {
+    let absolute = std::path::absolute(data).map_err(|source| PlatformError::Directory {
+        path: data.to_path_buf(),
+        source,
+    })?;
+    let length = windows_path_units(&absolute);
+    if length > MAX_DATA_PATH_UNITS {
+        return Err(PlatformError::DataPathTooLong {
+            path: absolute,
+            length,
+            limit: MAX_DATA_PATH_UNITS,
+            suggestion: DATA_ROOT_SUGGESTION,
+        });
+    }
+    Ok(())
 }
 
 #[cfg(windows)]
@@ -171,5 +219,41 @@ mod tests {
             path.file_name().and_then(|name| name.to_str()),
             Some("Local")
         );
+    }
+
+    #[cfg(windows)]
+    fn path_with_units(units: usize) -> PathBuf {
+        // `C:\` is three UTF-16 units; the single component adds no separators.
+        assert!(units >= 3);
+        PathBuf::from(r"C:\").join("a".repeat(units - 3))
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_data_path_guard_accepts_the_boundary_and_rejects_one_more_unit() {
+        assert!(validate_data_path_length(Path::new(r"C:\ist-a\data")).is_ok());
+        assert!(validate_data_path_length(&path_with_units(MAX_DATA_PATH_UNITS)).is_ok());
+        let error = validate_data_path_length(&path_with_units(MAX_DATA_PATH_UNITS + 1))
+            .expect_err("one unit over the limit must be rejected");
+        let message = error.to_string();
+        assert!(message.contains("路径过长"), "{message}");
+        assert!(message.contains("--data-dir"), "{message}");
+        assert!(message.contains("ImageStudioData"), "{message}");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_data_path_guard_counts_utf16_code_units() {
+        use std::os::windows::ffi::OsStrExt;
+        let mut path = path_with_units(MAX_DATA_PATH_UNITS - 3);
+        path.push("😀"); // one separator + a surrogate pair = three UTF-16 units
+        assert_eq!(path.as_os_str().encode_wide().count(), MAX_DATA_PATH_UNITS);
+        assert!(validate_data_path_length(&path).is_ok());
+        path.push("x");
+        assert_eq!(
+            path.as_os_str().encode_wide().count(),
+            MAX_DATA_PATH_UNITS + 2
+        );
+        assert!(validate_data_path_length(&path).is_err());
     }
 }
