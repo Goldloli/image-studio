@@ -1219,11 +1219,38 @@ fn staging_runtime_dir_name(pid: u32, nonce: u64) -> String {
     format!("{STAGING_DIR_PREFIX}{pid:x}-{mixed:08x}")
 }
 
-/// Best-effort removal of `.staging-*` leftovers from previous runtime installs.
+/// Best-effort removal of leftover runtime staging directories from previous
+/// installs. Two naming generations exist:
+///
+/// * new: `.staging-<hexpid>-<8hex nonce>`
+/// * legacy: `.{runtime_id}.staging-<pid>-<nanos>` (decimal pid/nanos, which are
+///   a subset of hexadecimal), written before the short-name fix
 ///
 /// Only plain directories are removed; symlinks/junctions are skipped entirely
 /// so a manipulated data root cannot redirect the cleanup. Failures are returned
 /// as warnings and never fail the installation that follows.
+#[cfg(any(windows, test))]
+fn is_stale_runtime_staging_name(name: &str) -> bool {
+    if name.starts_with(STAGING_DIR_PREFIX) {
+        return true;
+    }
+    if !name.starts_with('.') {
+        return false;
+    }
+    let Some((_, suffix)) = name.rsplit_once(".staging-") else {
+        return false;
+    };
+    let Some((pid, nonce)) = suffix.split_once('-') else {
+        return false;
+    };
+    !pid.is_empty()
+        && pid.len() <= 10
+        && pid.bytes().all(|byte| byte.is_ascii_hexdigit())
+        && !nonce.is_empty()
+        && nonce.len() <= 20
+        && nonce.bytes().all(|byte| byte.is_ascii_hexdigit())
+}
+
 #[cfg(any(windows, test))]
 fn cleanup_stale_runtime_staging(runtimes: &Path) -> Vec<String> {
     let mut warnings = Vec::new();
@@ -1235,7 +1262,7 @@ fn cleanup_stale_runtime_staging(runtimes: &Path) -> Vec<String> {
         let Some(name) = name.to_str() else {
             continue;
         };
-        if !name.starts_with(STAGING_DIR_PREFIX) {
+        if !is_stale_runtime_staging_name(name) {
             continue;
         }
         let path = entry.path();
@@ -2114,6 +2141,12 @@ impl Installation {
         )?;
         fs2::FileExt::try_lock_exclusive(&lock)
             .map_err(|_| "另一个进程正在安装，请等待后重试。".to_string())?;
+        // Reclaim leftover staging directories before the space preflight so old
+        // failed attempts cannot make the new install report a full disk.
+        #[cfg(windows)]
+        for warning in cleanup_stale_runtime_staging(&self.inner.paths.data.join("runtimes")) {
+            eprintln!("{warning}");
+        }
         let mut all = self.inner.model.downloads();
         all.extend(self.runtime_downloads());
         let missing: u64 = all
@@ -2306,10 +2339,6 @@ impl Installation {
         )?;
         let runtime = self.runtime_dir();
         ensure_child_dir(&self.inner.paths.data, &runtime)?;
-        #[cfg(windows)]
-        for warning in cleanup_stale_runtime_staging(&self.inner.paths.data.join("runtimes")) {
-            eprintln!("{warning}");
-        }
         let runtime_manifest_sha256 = manifest_digest(self.inner.profile.runtime_manifest);
         let worker_wheels = bundled_worker_wheel_records(self.inner.profile);
         // Shared runtimes (several Windows v2 models, several macOS v3 models) must
@@ -7251,18 +7280,47 @@ mod tests {
         assert!(staging_runtime_dir_name(u32::MAX, u64::MAX).len() <= 26);
     }
     #[test]
+    fn stale_runtime_staging_names_match_new_and_legacy_generations() {
+        assert!(is_stale_runtime_staging_name(".staging-2a-0123abcd"));
+        assert!(is_stale_runtime_staging_name(
+            ".windows-python31210-torch2100-cu126-diff041-transformers53-v2.staging-27684-1793797083903590600"
+        ));
+        assert!(is_stale_runtime_staging_name(
+            ".realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1.staging-12-34"
+        ));
+        assert!(!is_stale_runtime_staging_name(
+            "windows-python31210-torch2100-cu126-diff041-transformers53-v2"
+        ));
+        assert!(!is_stale_runtime_staging_name(".runtime-config"));
+        assert!(!is_stale_runtime_staging_name(".foo.staging-bar"));
+        assert!(is_stale_runtime_staging_name(".staging-file"));
+        assert!(!is_stale_runtime_staging_name(".stagingfile"));
+    }
+
+    #[test]
     fn stale_runtime_staging_cleanup_removes_only_plain_staging_dirs() {
         let tmp = tempfile::tempdir().unwrap();
         let runtimes = tmp.path().join("runtimes");
         let formal = runtimes.join("windows-python31210-runtime-v2");
-        let stale = runtimes.join(".staging-2a-0123abcd");
+        let new_stale = runtimes.join(".staging-2a-0123abcd");
+        let legacy_stale = runtimes.join(
+            ".windows-python31210-torch2100-cu126-diff041-transformers53-v2.staging-27684-1793797083903590600",
+        );
+        let unrelated = runtimes.join(".runtime-config");
         fs::create_dir_all(&formal).unwrap();
-        fs::create_dir_all(&stale).unwrap();
-        fs::write(stale.join("Lib").join("placeholder"), b"partial").ok();
+        fs::create_dir_all(&new_stale).unwrap();
+        fs::create_dir_all(&legacy_stale).unwrap();
+        fs::create_dir_all(&unrelated).unwrap();
+        fs::write(new_stale.join("Lib").join("placeholder"), b"partial").ok();
         fs::write(runtimes.join(".staging-file"), b"not a dir").unwrap();
         let warnings = cleanup_stale_runtime_staging(&runtimes);
-        assert!(!stale.exists(), "stale staging directory must be removed");
+        assert!(!new_stale.exists(), "new-format staging must be removed");
+        assert!(!legacy_stale.exists(), "legacy staging must be removed");
         assert!(formal.is_dir(), "formal runtime must not be touched");
+        assert!(
+            unrelated.is_dir(),
+            "non-staging dot directories must not be touched"
+        );
         assert!(
             runtimes.join(".staging-file").is_file(),
             "non-directory staging entries are skipped"
