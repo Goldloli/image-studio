@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "kind": "windows-diffusers-worker-probe",
+  "status": "passed",
+  "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+  "identity": {
+    "build_id": "studio-diffusers-worker-windows-0.1.0",
+    "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+    "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294"
+  },
+  "python": "3.12.10",
+  "device": "gpu",
+  "device_name": "NVIDIA GeForce RTX 3080 Ti",
+  "compute_capability": "8.6",
+  "packages": {
+    "torch": "2.10.0+cu126",
+    "diffusers": "0.41.0",
+    "transformers": "5.3.0",
+    "accelerate": "1.12.0",
+    "bitsandbytes": "0.50.2",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.33.0",
+    "tokenizers": "0.22.2",
+    "numpy": "2.5.4",
+    "pillow": "13.0.0"
+  },
+  "elapsed_seconds": 5.25,
+  "worker_exit_code": 0,
+  "worker_stderr": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\py312\\Lib\\site-packages\\bitsandbytes\\backends\\cuda\\ops.py:957: UserWarning: inner dimension (32) is not aligned for fast kernel with blocksize=64, falling back to slower implementation.\n  warn(\n"
+}

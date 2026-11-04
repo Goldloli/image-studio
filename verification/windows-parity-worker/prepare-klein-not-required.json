@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "kind": "windows-diffusers-worker-prepare",
+  "status": "not_required",
+  "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+  "elapsed_seconds": 0.08,
+  "worker_exit_code": 0,
+  "prepare": {
+    "schema_version": 1,
+    "kind": "windows-diffusers-prepared-cache",
+    "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "worker_kind": "klein",
+    "model_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\klein",
+    "prepared_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-worker\\models\\klein-unused.prepared",
+    "mode": "reuse_then_prepare",
+    "status": "not_required",
+    "reason": "Klein uses fresh-process NF4 + model_cpu_offload directly from the fixed snapshot; no prepared cache is needed."
+  },
+  "worker_stderr": ""
+}

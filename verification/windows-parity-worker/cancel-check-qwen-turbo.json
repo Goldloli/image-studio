@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "kind": "windows-diffusers-worker-real-protocol",
+  "status": "passed",
+  "protocol_version": 2,
+  "mode": "cancel",
+  "model_snapshot_id": "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+  "identity": {
+    "build_id": "studio-diffusers-worker-windows-0.1.0",
+    "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+    "model_snapshot_id": "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b"
+  },
+  "capability": "image.text-to-image.qwen-image-2.1-turbo.windows-v1",
+  "request": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "seed": 3148150817,
+    "steps": 8,
+    "model_path": "target/parity-worker/models/qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+    "output_dir": "target/parity-worker/attempts/cancel-check",
+    "prepared_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-worker\\models\\qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b.prepared",
+    "inputs": []
+  },
+  "handshake": {
+    "type": "hello_accepted",
+    "versions": {
+      "min": 2,
+      "max": 2
+    },
+    "selected_version": 2,
+    "identity": {
+      "build_id": "studio-diffusers-worker-windows-0.1.0",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b"
+    },
+    "capabilities": [
+      "image.text-to-image.qwen-image-2.1-turbo.windows-v1"
+    ]
+  },
+  "progress": [
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    }
+  ],
+  "terminal": {
+    "type": "cancelled"
+  },
+  "worker_exit_code": 0,
+  "elapsed_seconds": 12.3,
+  "host_sampled_resources": {
+    "process_tree_private_commit_peak_gib": 2.084,
+    "system_available_ram_min_gib": 18.779,
+    "nvidia_used_peak_mib": 1908,
+    "sample_interval_seconds": 0.5
+  },
+  "worker_reported_resources": null,
+  "worker_stderr": "worker request validated\r\nqwen device=NVIDIA GeForce RTX 3080 Ti steps=8 prepared=qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b.prepared\r\n",
+  "output_image": null,
+  "cancel_received": true
+}

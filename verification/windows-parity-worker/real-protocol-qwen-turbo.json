@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "kind": "windows-diffusers-worker-real-protocol",
+  "status": "passed",
+  "protocol_version": 2,
+  "mode": "run",
+  "model_snapshot_id": "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+  "identity": {
+    "build_id": "studio-diffusers-worker-windows-0.1.0",
+    "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+    "model_snapshot_id": "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b"
+  },
+  "capability": "image.text-to-image.qwen-image-2.1-turbo.windows-v1",
+  "request": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "seed": 3148150817,
+    "steps": 8,
+    "model_path": "target/parity-worker/models/qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+    "output_dir": "target/parity-worker/attempts/qwen-turbo-nf4-8step",
+    "prepared_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-worker\\models\\qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b.prepared",
+    "inputs": []
+  },
+  "handshake": {
+    "type": "hello_accepted",
+    "versions": {
+      "min": 2,
+      "max": 2
+    },
+    "selected_version": 2,
+    "identity": {
+      "build_id": "studio-diffusers-worker-windows-0.1.0",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b"
+    },
+    "capabilities": [
+      "image.text-to-image.qwen-image-2.1-turbo.windows-v1"
+    ]
+  },
+  "progress": [
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "encoding",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 1,
+      "total": 8
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 2,
+      "total": 8
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 3,
+      "total": 8
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 4,
+      "total": 8
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 5,
+      "total": 8
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 6,
+      "total": 8
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 7,
+      "total": 8
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 8,
+      "total": 8
+    },
+    {
+      "type": "progress",
+      "stage": "decoding",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "writing",
+      "completed": null,
+      "total": null
+    }
+  ],
+  "terminal": {
+    "type": "output_candidate_v2",
+    "candidate": {
+      "role": "primary",
+      "data_type": "image_rgb",
+      "relative_path": "primary.png",
+      "width": 1024,
+      "height": 1024,
+      "size_bytes": 1759574,
+      "sha256": "b4be0981ec3be8fc9ca98291b3f4d6ccd21ccc0fb87fc13fce2754949960d68e"
+    }
+  },
+  "worker_exit_code": 0,
+  "elapsed_seconds": 33.45,
+  "host_sampled_resources": {
+    "process_tree_private_commit_peak_gib": 13.985,
+    "system_available_ram_min_gib": 13.005,
+    "nvidia_used_peak_mib": 7183,
+    "sample_interval_seconds": 0.5
+  },
+  "worker_reported_resources": {
+    "elapsed_seconds": 25.12,
+    "process_private_commit_peak_gib": 13.985,
+    "system_available_ram_min_gib": 13.142,
+    "system_physical_total_gib": 31.727,
+    "sample_interval_seconds": 0.2,
+    "sample_count": 116,
+    "cuda_reserved_peak_gib": 5.961,
+    "cuda_allocated_peak_gib": 5.948
+  },
+  "worker_stderr": "worker request validated\r\nqwen device=NVIDIA GeForce RTX 3080 Ti steps=8 prepared=qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b.prepared\r\n\rLoading weights:   0%|          | 0/750 [00:00<?, ?it/s]\rLoading weights:  37%|��������      | 280/750 [00:00<00:00, 2759.71it/s]\rLoading weights:  74%|����������������  | 556/750 [00:00<00:00, 2510.36it/s]\rLoading weights: 100%|��������������������| 750/750 [00:00<00:00, 2846.73it/s]\r\nqwen prompt_tokens=27 token_budget=2048 encode_seconds=0.41\r\nqwen text_reserved_after_release_gib=0.020 allocated_after_release_gib=0.008\r\nqwen sample_seconds=10.90 steps=8\r\nqwen transformer_reserved_after_release_gib=0.021 allocated_after_release_gib=0.008\r\nqwen vae_decode_seconds=1.74\r\nqwen vae_reserved_after_release_gib=0.021 allocated_after_release_gib=0.008\r\nqwen resources={\"elapsed_seconds\": 25.12, \"process_private_commit_peak_gib\": 13.985, \"system_available_ram_min_gib\": 13.142, \"system_physical_total_gib\": 31.727, \"sample_interval_seconds\": 0.2, \"sample_count\": 116, \"cuda_reserved_peak_gib\": 5.961, \"cuda_allocated_peak_gib\": 5.948}\r\n",
+  "output_image": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-worker\\attempts\\qwen-turbo-nf4-8step\\primary.png"
+}

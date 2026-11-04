@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "kind": "windows-diffusers-worker-prepare",
+  "status": "prepared",
+  "model_snapshot_id": "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+  "elapsed_seconds": 128.56,
+  "worker_exit_code": 0,
+  "prepare": {
+    "schema_version": 1,
+    "kind": "qwen",
+    "model_snapshot_id": "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+    "worker_kind": "qwen",
+    "model_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo",
+    "prepared_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-worker\\models\\qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b.prepared",
+    "mode": "rebuild",
+    "text_encoder": {
+      "status": "prepared",
+      "quantization": "nf4",
+      "load_seconds": 25.02,
+      "save_seconds": 6.07,
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-worker\\models\\qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b.prepared\\text_encoder",
+      "file_count": 3,
+      "total_bytes": 6378436043,
+      "files": [
+        {
+          "relative_path": "config.json",
+          "bytes": 2108,
+          "sha256": "ae5ba888c6c37c0a53822a7e2b1813b30df39ae60a48b0b5bae0eafa8f4a5f80"
+        },
+        {
+          "relative_path": "generation_config.json",
+          "bytes": 255,
+          "sha256": "534ef76930ccaab097f3141d26854522fc7142e99af2713bb0ca46a4f4b06460"
+        },
+        {
+          "relative_path": "model.safetensors",
+          "bytes": 6378433680,
+          "sha256": "13c2f7cdb087b336125a993489543a30df574aa94d4cfad029b8a01b0596e6f7"
+        }
+      ],
+      "resources": {
+        "process_private_commit_peak_gib": 23.384,
+        "system_available_ram_min_gib": 0.845,
+        "system_physical_total_gib": 31.727,
+        "sample_interval_seconds": 0.2,
+        "sample_count": 197
+      }
+    },
+    "transformer": {
+      "status": "prepared",
+      "quantization": "nf4",
+      "load_seconds": 45.45,
+      "save_seconds": 3.0,
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-worker\\models\\qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b.prepared\\transformer",
+      "file_count": 2,
+      "total_bytes": 3670961576,
+      "files": [
+        {
+          "relative_path": "config.json",
+          "bytes": 999,
+          "sha256": "714bb40b77c20fd493a38e3846003327112de19c2dfec05b0a738816a313569b"
+        },
+        {
+          "relative_path": "diffusion_pytorch_model.safetensors",
+          "bytes": 3670960577,
+          "sha256": "010c2c3bfd1101797c63c874560243dcf770db7b68473e5693acfacefc26615d"
+        }
+      ],
+      "resources": {
+        "process_private_commit_peak_gib": 25.313,
+        "system_available_ram_min_gib": 0.003,
+        "system_physical_total_gib": 31.727,
+        "sample_interval_seconds": 0.2,
+        "sample_count": 260
+      }
+    },
+    "prepared_cache": {
+      "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-worker\\models\\qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b.prepared",
+      "file_count": 5,
+      "total_bytes": 10049397619,
+      "files": [
+        {
+          "relative_path": "text_encoder/config.json",
+          "bytes": 2108,
+          "sha256": "ae5ba888c6c37c0a53822a7e2b1813b30df39ae60a48b0b5bae0eafa8f4a5f80"
+        },
+        {
+          "relative_path": "text_encoder/generation_config.json",
+          "bytes": 255,
+          "sha256": "534ef76930ccaab097f3141d26854522fc7142e99af2713bb0ca46a4f4b06460"
+        },
+        {
+          "relative_path": "text_encoder/model.safetensors",
+          "bytes": 6378433680,
+          "sha256": "13c2f7cdb087b336125a993489543a30df574aa94d4cfad029b8a01b0596e6f7"
+        },
+        {
+          "relative_path": "transformer/config.json",
+          "bytes": 999,
+          "sha256": "714bb40b77c20fd493a38e3846003327112de19c2dfec05b0a738816a313569b"
+        },
+        {
+          "relative_path": "transformer/diffusion_pytorch_model.safetensors",
+          "bytes": 3670960577,
+          "sha256": "010c2c3bfd1101797c63c874560243dcf770db7b68473e5693acfacefc26615d"
+        }
+      ]
+    },
+    "status": "prepared",
+    "elapsed_seconds": 126.16
+  },
+  "worker_stderr": "\rLoading weights:   0%|          | 0/750 [00:00<?, ?it/s]\rLoading weights:   1%|          | 4/750 [00:00<01:12, 10.28it/s]\rLoading weights:   1%|          | 6/750 [00:00<01:50,  6.75it/s]\rLoading weights:   2%|��         | 12/750 [00:00<00:49, 14.87it/s]\rLoading weights:   2%|��         | 15/750 [00:01<00:47, 15.57it/s]\rLoading weights:   2%|��         | 18/750 [00:01<00:56, 12.98it/s]\rLoading weights:   3%|��         | 23/750 [00:01<00:40, 18.14it/s]\rLoading weights:   3%|��         | 26/750 [00:01<00:41, 17.61it/s]\rLoading weights:   4%|��         | 29/750 [00:02<00:50, 14.36it/s]\rLoading weights:   5%|��         | 34/750 [00:02<00:37, 19.08it/s]\rLoading weights:   5%|��         | 37/750 [00:02<00:39, 18.18it/s]\rLoading weights:   5%|��         | 40/750 [00:02<00:52, 13.56it/s]\rLoading weights:   6%|��         | 45/750 [00:02<00:40, 17.62it/s]\rLoading weights:   6%|��         | 48/750 [00:03<00:41, 17.04it/s]\rLoading weights:   7%|��         | 51/750 [00:03<00:50, 13.77it/s]\rLoading weights:   7%|��         | 56/750 [00:03<00:38, 17.84it/s]\rLoading weights:   8%|��         | 59/750 [00:03<00:40, 17.02it/s]\rLoading weights:   8%|��         | 61/750 [00:04<00:54, 12.64it/s]\rLoading weights:   9%|��         | 67/750 [00:04<00:36, 18.92it/s]\rLoading weights:   9%|��         | 70/750 [00:04<00:37, 18.29it/s]\rLoading weights:  10%|��         | 73/750 [00:04<00:47, 14.20it/s]\rLoading weights:  10%|��         | 78/750 [00:04<00:36, 18.20it/s]\rLoading weights:  11%|��         | 81/750 [00:05<00:38, 17.34it/s]\rLoading weights:  11%|��         | 84/750 [00:05<00:49, 13.51it/s]\rLoading weights:  12%|����        | 89/750 [00:05<00:37, 17.70it/s]\rLoading weights:  12%|����        | 92/750 [00:05<00:45, 14.49it/s]\rLoading weights:  13%|����        | 94/750 [00:06<00:57, 11.38it/s]\rLoading weights:  13%|����        | 100/750 [00:06<00:37, 17.38it/s]\rLoading weights:  14%|����        | 103/750 [00:06<00:36, 17.60it/s]\rLoading weights:  14%|����        | 106/750 [00:06<00:45, 14.07it/s]\rLoading weights:  15%|����        | 111/750 [00:07<00:35, 17.98it/s]\rLoading weights:  15%|����        | 114/750 [00:07<00:35, 17.87it/s]\rLoading weights:  16%|����        | 117/750 [00:07<00:42, 14.85it/s]\rLoading weights:  16%|����        | 122/750 [00:07<00:31, 20.00it/s]\rLoading weights:  17%|����        | 125/750 [00:07<00:30, 20.35it/s]\rLoading weights:  17%|����        | 128/750 [00:08<00:39, 15.57it/s]\rLoading weights:  18%|����        | 133/750 [00:08<00:30, 20.49it/s]\rLoading weights:  18%|����        | 136/750 [00:08<00:30, 20.33it/s]\rLoading weights:  19%|����        | 139/750 [00:08<00:36, 16.64it/s]\rLoading weights:  19%|����        | 144/750 [00:08<00:27, 21.86it/s]\rLoading weights:  20%|����        | 147/750 [00:08<00:28, 21.06it/s]\rLoading weights:  20%|����        | 150/750 [00:09<00:35, 16.72it/s]\rLoading weights:  21%|����        | 155/750 [00:09<00:27, 21.85it/s]\rLoading weights:  21%|����        | 158/750 [00:09<00:28, 20.80it/s]\rLoading weights:  21%|������       | 161/750 [00:09<00:36, 16.00it/s]\rLoading weights:  22%|������       | 166/750 [00:09<00:27, 21.36it/s]\rLoading weights:  23%|������       | 169/750 [00:10<00:28, 20.61it/s]\rLoading weights:  23%|������       | 172/750 [00:10<00:36, 15.85it/s]\rLoading weights:  24%|������       | 177/750 [00:10<00:28, 20.46it/s]\rLoading weights:  24%|������       | 180/750 [00:10<00:28, 19.85it/s]\rLoading weights:  24%|������       | 183/750 [00:10<00:36, 15.62it/s]\rLoading weights:  25%|������       | 188/750 [00:11<00:26, 20.91it/s]\rLoading weights:  25%|������       | 191/750 [00:11<00:27, 20.16it/s]\rLoading weights:  26%|������       | 194/750 [00:11<00:36, 15.38it/s]\rLoading weights:  27%|������       | 199/750 [00:11<00:27, 20.22it/s]\rLoading weights:  27%|������       | 202/750 [00:11<00:28, 19.43it/s]\rLoading weights:  27%|������       | 205/750 [00:12<00:33, 16.13it/s]\rLoading weights:  28%|������       | 210/750 [00:12<00:25, 21.26it/s]\rLoading weights:  28%|������       | 213/750 [00:12<00:26, 20.53it/s]\rLoading weights:  29%|������       | 216/750 [00:12<00:34, 15.68it/s]\rLoading weights:  29%|������       | 221/750 [00:12<00:25, 20.68it/s]\rLoading weights:  30%|������       | 224/750 [00:13<00:26, 19.63it/s]\rLoading weights:  30%|������       | 227/750 [00:13<00:33, 15.45it/s]\rLoading weights:  31%|������       | 232/750 [00:13<00:25, 20.30it/s]\rLoading weights:  31%|��������      | 235/750 [00:13<00:27, 18.77it/s]\rLoading weights:  32%|��������      | 238/750 [00:14<00:36, 13.85it/s]\rLoading weights:  32%|��������      | 243/750 [00:14<00:27, 18.24it/s]\rLoading weights:  33%|��������      | 246/750 [00:14<00:28, 17.57it/s]\rLoading weights:  33%|��������      | 249/750 [00:14<00:34, 14.46it/s]\rLoading weights:  34%|��������      | 254/750 [00:14<00:26, 18.98it/s]\rLoading weights:  34%|��������      | 257/750 [00:14<00:26, 18.44it/s]\rLoading weights:  35%|��������      | 260/750 [00:15<00:32, 14.95it/s]\rLoading weights:  35%|��������      | 265/750 [00:15<00:24, 19.80it/s]\rLoading weights:  36%|��������      | 268/750 [00:15<00:25, 18.74it/s]\rLoading weights:  36%|��������      | 271/750 [00:15<00:32, 14.63it/s]\rLoading weights:  37%|��������      | 276/750 [00:16<00:25, 18.94it/s]\rLoading weights:  37%|��������      | 279/750 [00:16<00:26, 18.05it/s]\rLoading weights:  38%|��������      | 282/750 [00:16<00:32, 14.56it/s]\rLoading weights:  38%|��������      | 287/750 [00:16<00:24, 19.14it/s]\rLoading weights:  39%|��������      | 290/750 [00:16<00:24, 18.47it/s]\rLoading weights:  39%|��������      | 293/750 [00:17<00:30, 14.93it/s]\rLoading weights:  40%|��������      | 298/750 [00:17<00:23, 19.53it/s]\rLoading weights:  40%|��������      | 301/750 [00:17<00:23, 18.77it/s]\rLoading weights:  41%|��������      | 304/750 [00:17<00:30, 14.78it/s]\rLoading weights:  41%|��������      | 309/750 [00:17<00:22, 19.47it/s]\rLoading weights:  42%|����������     | 312/750 [00:18<00:23, 18.78it/s]\rLoading weights:  42%|����������     | 315/750 [00:18<00:28, 15.04it/s]\rLoading weights:  43%|����������     | 320/750 [00:18<00:22, 19.17it/s]\rLoading weights:  43%|����������     | 323/750 [00:18<00:23, 17.91it/s]\rLoading weights:  43%|����������     | 326/750 [00:19<00:29, 14.33it/s]\rLoading weights:  44%|����������     | 331/750 [00:19<00:22, 18.90it/s]\rLoading weights:  45%|����������     | 334/750 [00:19<00:22, 18.54it/s]\rLoading weights:  45%|����������     | 337/750 [00:19<00:27, 15.04it/s]\rLoading weights:  46%|����������     | 342/750 [00:19<00:20, 19.65it/s]\rLoading weights:  46%|����������     | 345/750 [00:20<00:21, 19.27it/s]\rLoading weights:  46%|����������     | 348/750 [00:20<00:25, 15.49it/s]\rLoading weights:  47%|����������     | 353/750 [00:20<00:19, 20.41it/s]\rLoading weights:  47%|����������     | 356/750 [00:20<00:20, 19.68it/s]\rLoading weights:  48%|����������     | 359/750 [00:20<00:25, 15.46it/s]\rLoading weights:  49%|����������     | 364/750 [00:21<00:18, 20.43it/s]\rLoading weights:  49%|����������     | 367/750 [00:21<00:19, 19.73it/s]\rLoading weights:  49%|����������     | 370/750 [00:21<00:24, 15.80it/s]\rLoading weights:  50%|����������     | 375/750 [00:21<00:18, 20.73it/s]\rLoading weights:  50%|����������     | 378/750 [00:21<00:18, 19.91it/s]\rLoading weights:  51%|����������     | 381/750 [00:22<00:23, 15.87it/s]\rLoading weights:  51%|������������    | 386/750 [00:22<00:17, 20.97it/s]\rLoading weights:  52%|������������    | 389/750 [00:22<00:17, 20.38it/s]\rLoading weights:  52%|������������    | 392/750 [00:22<00:22, 16.20it/s]\rLoading weights:  53%|������������    | 397/750 [00:22<00:16, 21.26it/s]\rLoading weights:  57%|������������    | 425/750 [00:22<00:04, 69.77it/s]\rLoading weights:  60%|������������    | 453/750 [00:22<00:02, 112.12it/s]\rLoading weights:  65%|��������������   | 487/750 [00:23<00:01, 163.14it/s]\rLoading weights:  69%|��������������   | 515/750 [00:23<00:01, 187.19it/s]\rLoading weights:  73%|����������������  | 547/750 [00:23<00:00, 218.24it/s]\rLoading weights:  76%|����������������  | 573/750 [00:23<00:00, 228.67it/s]\rLoading weights:  81%|����������������  | 605/750 [00:23<00:00, 252.28it/s]\rLoading weights:  84%|������������������ | 632/750 [00:23<00:00, 254.39it/s]\rLoading weights:  88%|������������������ | 659/750 [00:23<00:00, 220.67it/s]\rLoading weights:  91%|������������������ | 683/750 [00:23<00:00, 217.48it/s]\rLoading weights:  94%|��������������������| 707/750 [00:23<00:00, 222.77it/s]\rLoading weights:  97%|��������������������| 731/750 [00:24<00:00, 162.63it/s]\rLoading weights: 100%|��������������������| 750/750 [00:24<00:00, 30.54it/s] \r\n[prepare] qwen text_encoder load_seconds=25.02\r\n\rWriting model shards:   0%|          | 0/1 [00:00<?, ?it/s]\rWriting model shards: 100%|��������������������| 1/1 [00:05<00:00,  5.81s/it]\rWriting model shards: 100%|��������������������| 1/1 [00:05<00:00,  5.81s/it]\r\n[prepare] qwen text_encoder resources={\"process_private_commit_peak_gib\": 23.384, \"system_available_ram_min_gib\": 0.845, \"system_physical_total_gib\": 31.727, \"sample_interval_seconds\": 0.2, \"sample_count\": 197}\r\n\rLoading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]\rLoading checkpoint shards:  50%|����������     | 1/2 [00:36<00:36, 36.83s/it]\rLoading checkpoint shards: 100%|��������������������| 2/2 [00:45<00:00, 20.09s/it]\rLoading checkpoint shards: 100%|��������������������| 2/2 [00:45<00:00, 22.60s/it]\r\n[prepare] qwen transformer load_seconds=45.45\r\n[prepare] qwen transformer resources={\"process_private_commit_peak_gib\": 25.313, \"system_available_ram_min_gib\": 0.003, \"system_physical_total_gib\": 31.727, \"sample_interval_seconds\": 0.2, \"sample_count\": 260}\r\n"
+}
