@@ -1,6 +1,14 @@
 import type { DraftParams } from './workspace-state';
 import type { ExecutionView, TurnView } from './studio-api';
-import { textRecipeForModel } from './model-recipes';
+import {
+  BIREFNET_CAPABILITY,
+  BIREFNET_MODEL_ID,
+  KLEIN_EDIT_CAPABILITY,
+  KLEIN_MODEL_ID,
+  REALESRGAN_CAPABILITY,
+  REALESRGAN_MODEL_ID,
+  textRecipeForModel,
+} from './model-recipes';
 
 export type TurnProgress = { percent: number | null; label: string };
 export type ComposerAction =
@@ -117,21 +125,21 @@ export function supportedDraftParams(params: DraftParams): boolean {
   const textRecipe = textRecipeForModel(params.modelId);
   if (textRecipe) {
     const text = (params.capabilityId ?? textRecipe.capabilityId) === textRecipe.capabilityId && !params.sourceAssetId;
-    const edit = params.capabilityId === 'image.edit.flux2-klein-4b.v1' && Boolean(params.sourceAssetId);
+    const edit = params.capabilityId === KLEIN_EDIT_CAPABILITY && Boolean(params.sourceAssetId);
     return textRecipe.aspects.includes(params.aspect)
       && params.count === 1
-      && (text || (params.modelId === 'flux2-klein-4b-distilled' && edit))
+      && (text || (params.modelId === KLEIN_MODEL_ID && edit))
       && seedValid;
   }
-  if (params.modelId === 'birefnet-general-epoch-244') {
-    return params.capabilityId === 'image.remove-background.birefnet-general-epoch-244.v1'
+  if (params.modelId === BIREFNET_MODEL_ID) {
+    return params.capabilityId === BIREFNET_CAPABILITY
       && Boolean(params.sourceAssetId)
       && params.aspect === '1:1'
       && params.count === 1
       && params.seed === '';
   }
-  if (params.modelId === 'realesrgan-x4plus') {
-    return params.capabilityId === 'image.upscale.realesrgan-x4plus.v1'
+  if (params.modelId === REALESRGAN_MODEL_ID) {
+    return params.capabilityId === REALESRGAN_CAPABILITY
       && Boolean(params.sourceAssetId)
       && params.aspect === '1:1'
       && params.count === 1

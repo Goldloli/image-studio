@@ -66,12 +66,20 @@ import {
   supportedDraftParams,
 } from './conversation-state';
 import {
+  BIREFNET_CAPABILITY,
+  BIREFNET_MODEL_ID,
+  KLEIN_EDIT_CAPABILITY,
+  KLEIN_MODEL_ID,
+  MODEL_PLATFORM,
   MOSS_IMAGE_SFT_MODEL_ID,
   QWEN_IMAGE_21_MODEL_ID,
   QWEN_IMAGE_21_TURBO_MODEL_ID,
-  Z_IMAGE_CAPABILITY_FALLBACK,
+  REALESRGAN_CAPABILITY,
+  REALESRGAN_MODEL_ID,
   Z_IMAGE_MODEL_ID,
   Z_IMAGE_WINDOWS_MODEL_ID,
+  capabilityForModel,
+  modelDisplayName,
   textRecipeForModel,
 } from './model-recipes';
 import './workspace.css';
@@ -122,26 +130,10 @@ type PendingLibraryPrompt = {
 const resetTransform = (): Transform => ({ zoom: 1, x: 0, y: 0, rotation: 0 });
 const activeStates = ['Pending', 'Submitted', 'Preparing', 'Running', 'Committing', 'CancelRequested'];
 const retryStates = ['Failed', 'Cancelled', 'Interrupted'];
-const BIREFNET_MODEL = 'birefnet-general-epoch-244';
-const BIREFNET_CAPABILITY = 'image.remove-background.birefnet-general-epoch-244.v1';
-const REALESRGAN_MODEL = 'realesrgan-x4plus';
-const REALESRGAN_CAPABILITY = 'image.upscale.realesrgan-x4plus.v1';
-const capabilityForModel = (modelId: string) => textRecipeForModel(modelId)?.capabilityId
-  ?? (modelId === BIREFNET_MODEL
-    ? BIREFNET_CAPABILITY
-    : modelId === REALESRGAN_MODEL
-      ? REALESRGAN_CAPABILITY
-      : Z_IMAGE_CAPABILITY_FALLBACK);
-const modelDisplayName = (modelId: string) => textRecipeForModel(modelId)?.displayName
-  ?? (modelId === BIREFNET_MODEL
-    ? 'BiRefNet epoch_244 · 去背景'
-    : modelId === REALESRGAN_MODEL
-      ? 'Real-ESRGAN x4plus · 4× 放大'
-      : 'Z-Image Turbo');
 const modelShortName = (modelId: string) => textRecipeForModel(modelId)?.shortName
-  ?? (modelId === BIREFNET_MODEL
+  ?? (modelId === BIREFNET_MODEL_ID
     ? 'BiRefNet epoch_244'
-    : modelId === REALESRGAN_MODEL
+    : modelId === REALESRGAN_MODEL_ID
       ? 'Real-ESRGAN x4plus'
       : 'Z-Image Turbo');
 
@@ -420,21 +412,26 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     && active.params.modelId !== Z_IMAGE_WINDOWS_MODEL_ID;
   const newTextOnlyModel = [QWEN_IMAGE_21_MODEL_ID, QWEN_IMAGE_21_TURBO_MODEL_ID, MOSS_IMAGE_SFT_MODEL_ID]
     .includes(active.params.modelId);
-  const sourceImportSupported = isToolComposer || (active.params.modelId === 'flux2-klein-4b-distilled' && !newTextOnlyModel);
+  const sourceImportSupported = isToolComposer || (active.params.modelId === KLEIN_MODEL_ID && !newTextOnlyModel);
   const validText = isToolComposer ? active.prompt === '' : Boolean(active.prompt.trim()) && !overByteBudget;
   const availableModels = studio?.models ?? (studio?.model ? [studio.model] : []);
   const selectedModel = availableModels.find(model => model.id === active.params.modelId);
   const modelReady = selectedModel?.ready ?? false;
-  const selectedModelExecutable = modelReady;
+  const modelHardwareEligible = selectedModel?.staticFacts?.hardwareEligible !== false;
+  const modelHardwareReason = selectedModel?.staticFacts?.hardwareReason ?? null;
+  const selectedModelExecutable = modelReady && modelHardwareEligible;
   const selectedModelLabel = isRemoveBackground
     ? modelReady ? 'BiRefNet · 去背景' : 'BiRefNet · 去背景 · 未就绪'
     : isUpscale
       ? modelReady ? 'Real-ESRGAN · 4× 放大' : 'Real-ESRGAN · 4× 放大 · 未就绪'
-    : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1'
+    : active.params.capabilityId === KLEIN_EDIT_CAPABILITY
     ? modelReady ? 'Klein · 单图编辑' : 'Klein · 单图编辑 · 未就绪'
     : activeTextRecipe
       ? modelReady ? activeTextRecipe.shortName : `${activeTextRecipe.shortName} · ${legacyWindowsTextModel ? '当前 Windows 未接入' : '未就绪'}`
       : modelReady ? 'Z-Image Turbo' : 'Z-Image Turbo · 未就绪';
+  const selectedModelBlockedReason = !modelHardwareEligible
+    ? modelHardwareReason ?? '当前设备不满足该模型的硬件门槛，生成入口已禁用。'
+    : null;
   const busyInAnotherConversation = Boolean(systemBusy && !currentActiveTurn && runningConversation && runningConversation.id !== currentConversation.id);
   const canSend = native && loaded && selectedModelExecutable && validText && validParams && (isToolComposer || validSeed(active.params.seed)) && !switching && submittingDraftId === null && !systemBusy;
 
@@ -810,8 +807,8 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
         return;
       }
       setDraftParams({
-        modelId: isRemoveBackground ? BIREFNET_MODEL : isUpscale ? REALESRGAN_MODEL : 'flux2-klein-4b-distilled',
-        capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : isUpscale ? REALESRGAN_CAPABILITY : 'image.edit.flux2-klein-4b.v1',
+        modelId: isRemoveBackground ? BIREFNET_MODEL_ID : isUpscale ? REALESRGAN_MODEL_ID : KLEIN_MODEL_ID,
+        capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : isUpscale ? REALESRGAN_CAPABILITY : KLEIN_EDIT_CAPABILITY,
         sourceAssetId: imported.assetId,
         aspect: '1:1',
         count: 1,
@@ -979,7 +976,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
       seed: turn.seed,
       bytes: 0,
       outputRole: mask ? 'mask' : 'primary',
-      dataType: mask ? 'mask' : turn.modelId === BIREFNET_MODEL ? 'image_rgba' : 'image_rgb',
+      dataType: mask ? 'mask' : turn.modelId === BIREFNET_MODEL_ID ? 'image_rgba' : 'image_rgb',
       available: mask ? Boolean(turn.maskAssetAvailable) : turn.assetAvailable,
       error: mask ? turn.maskAssetError ?? null : turn.assetError,
     };
@@ -991,8 +988,8 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   });
   const chooseToolSource = (asset: AssetView) => {
     setDraftParams({
-      modelId: isRemoveBackground ? BIREFNET_MODEL : isUpscale ? REALESRGAN_MODEL : 'flux2-klein-4b-distilled',
-      capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : isUpscale ? REALESRGAN_CAPABILITY : 'image.edit.flux2-klein-4b.v1',
+      modelId: isRemoveBackground ? BIREFNET_MODEL_ID : isUpscale ? REALESRGAN_MODEL_ID : KLEIN_MODEL_ID,
+      capabilityId: isRemoveBackground ? BIREFNET_CAPABILITY : isUpscale ? REALESRGAN_CAPABILITY : KLEIN_EDIT_CAPABILITY,
       sourceAssetId: asset.id,
       aspect: '1:1',
       count: 1,
@@ -1253,7 +1250,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
         <button className="collapsed-composer" onClick={() => dispatch({ type: 'collapse' })}><ChevronUp size={15}/><span>{isRemoveBackground ? 'BiRefNet 去背景' : isUpscale ? 'Real-ESRGAN 4× 放大' : active.prompt || '展开提示词，继续创作'}</span></button>
         <div className="conversation-composer">
           <div className="composer-caption"><span>{currentConversation.title}</span><span>{isRemoveBackground ? '透明 PNG + 蒙版' : isUpscale ? '固定 4× PNG' : `${Array.from(active.prompt).length} 字符`}<IconButton label="收起输入区" onClick={() => { textarea.current?.blur(); dispatch({ type: 'collapse' }); }}><ChevronDown size={14}/></IconButton></span></div>
-          {isRemoveBackground ? <div className="tool-composer-summary" role="note"><ListChecks size={17}/><span><strong>提取主体并去除背景</strong><small>使用 BiRefNet epoch_244 · CPU · 输出原图尺寸的透明 PNG 与 8-bit 蒙版</small></span></div> : isUpscale ? <div className="tool-composer-summary" role="note"><ListChecks size={17}/><span><strong>将图片精确放大 4 倍</strong><small>使用 Real-ESRGAN x4plus · Metal GPU · tile 128 · 输出各边精确 4 倍的 PNG</small></span></div> : <textarea ref={textarea} value={active.prompt} readOnly={submittingDraftId === active.id} aria-label="图片提示词" placeholder="描述你想创作的画面……" spellCheck={false}
+          {isRemoveBackground ? <div className="tool-composer-summary" role="note"><ListChecks size={17}/><span><strong>提取主体并去除背景</strong><small>使用 BiRefNet epoch_244 · CPU · 输出原图尺寸的透明 PNG 与 8-bit 蒙版</small></span></div> : isUpscale ? <div className="tool-composer-summary" role="note"><ListChecks size={17}/><span><strong>将图片精确放大 4 倍</strong><small>使用 Real-ESRGAN x4plus · {MODEL_PLATFORM === 'windows' ? 'ncnn Vulkan GPU' : 'Metal GPU'} · tile 128 · 输出各边精确 4 倍的 PNG</small></span></div> : <textarea ref={textarea} value={active.prompt} readOnly={submittingDraftId === active.id} aria-label="图片提示词" placeholder="描述你想创作的画面……" spellCheck={false}
             onChange={event => dispatch({ type: 'edit', value: event.target.value, record: !compositions.current.has(active.id) })}
             onKeyDown={handleEditorKeyDown}
             onCompositionStart={() => { compositionDraftId.current = active.id; compositions.current.set(active.id, active.prompt); }}
@@ -1277,14 +1274,29 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
                 <button className="composer-chip" disabled={submittingDraftId !== null} onClick={() => { if (popup === 'sources') setPopup(null); else setPopup('sources'); }}>作品</button>
                 {popup === 'sources' && <div className="composer-popover model-popover source-popover" role="dialog" aria-label="选择已有作品作为源图"><div className="popover-heading"><strong>选择已有作品</strong><span>{sourceAssets.length} 张可用</span></div>{sourceAssets.map(asset => <button key={asset.id} className={`single-model-option ${active.params.sourceAssetId === asset.id ? 'is-selected' : ''}`} onClick={() => chooseToolSource(asset)}><img className="source-option-image" src={assetUrl(asset.id)} alt="" draggable={false}/><span><strong>{asset.width} × {asset.height}</strong><small>{asset.prompt}</small></span>{active.params.sourceAssetId === asset.id && <Check size={14}/>}</button>)}{sourceAssets.length === 0 && <p className="popover-note">{isUpscale ? '本机还没有不超过 1 MP 的无透明 RGB 正式作品。' : '本机还没有可用作源图的正式作品。'}</p>}</div>}
               </div>}
-              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前受控源图"/><span>{isRemoveBackground ? '去背景 · 原尺寸输出' : isUpscale ? selectedSource ? `${selectedSource.width}×${selectedSource.height} → ${selectedSource.width*4}×${selectedSource.height*4}` : '4× 放大 · 最长边 ≤1024'  : active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? '单图编辑 · 保比例缩放至 1 MP' : '源图'}</span><button aria-label="移除源图" title="移除源图" onClick={() => setDraftParams({ sourceAssetId: null, capabilityId: isToolComposer ? active.params.capabilityId : activeTextRecipe?.capabilityId ?? capabilityForModel(active.params.modelId) })}><X size={11}/></button></span>}
+              {active.params.sourceAssetId && <span className="source-pill"><img src={assetUrl(active.params.sourceAssetId)} alt="当前受控源图"/><span>{isRemoveBackground ? '去背景 · 原尺寸输出' : isUpscale ? selectedSource ? `${selectedSource.width}×${selectedSource.height} → ${selectedSource.width*4}×${selectedSource.height*4}` : '4× 放大 · 最长边 ≤1024'  : active.params.capabilityId === KLEIN_EDIT_CAPABILITY ? '单图编辑 · 保比例缩放至 1 MP' : '源图'}</span><button aria-label="移除源图" title="移除源图" onClick={() => setDraftParams({ sourceAssetId: null, capabilityId: isToolComposer ? active.params.capabilityId : activeTextRecipe?.capabilityId ?? capabilityForModel(active.params.modelId) })}><X size={11}/></button></span>}
               {!isToolComposer && <IconButton label={copyState === 'composer' ? '已复制提示词' : '复制提示词'} disabled={!active.prompt} onClick={() => void copyText(active.prompt, 'composer')}>{copyState === 'composer' ? <Check size={14}/> : <Copy size={14}/>}</IconButton>}
             </div>
             <div className="composer-right">
               <span className="composer-status">{currentActiveTurn ? studio?.execution.summary : composerStatus}</span>
               <div className="composer-popup-anchor" data-composer-popup>
-                <button className="model-select" aria-expanded={popup === 'models'} title={selectedModelExecutable ? '当前模型可执行' : '当前模型不可执行，请在模型菜单中选择已就绪型号'} onClick={() => { if (popup === 'models') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('models'); }}><span className="model-mark"><Palette size={13}/></span><span>{selectedModelLabel}</span><ChevronDown size={12}/></button>
-                {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型"><div className="popover-heading"><strong>本地图片模型</strong><span>{availableModels.filter(model => model.ready).length} 个可执行模型</span></div>{availableModels.map(model => { const capability = capabilityForModel(model.id); const selected = active.params.modelId === model.id && active.params.capabilityId === capability; const tool = capability === BIREFNET_CAPABILITY || capability === REALESRGAN_CAPABILITY; return <button key={model.id} className={`single-model-option ${selected ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: model.id, capabilityId: capability }); setPopup(null); if (!tool) requestAnimationFrame(() => textarea.current?.focus()); }}><span className="model-mark"><Palette size={14}/></span><span><strong>{modelDisplayName(model.id)}</strong><small>{model.summary}</small></span>{selected && <Check size={14}/>}</button>; })}{active.params.sourceAssetId && !isToolComposer && <button className={`single-model-option ${active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: 'flux2-klein-4b-distilled', capabilityId: 'image.edit.flux2-klein-4b.v1', aspect: '1:1' }); setPopup(null); }}><span className="model-mark"><ImageIcon size={14}/></span><span><strong>Klein 单图编辑</strong><small>使用当前源图和编辑指令</small></span>{active.params.capabilityId === 'image.edit.flux2-klein-4b.v1' && <Check size={14}/>}</button>}<button className="popover-action" onClick={() => { setPopup(null); onModels(); }}>前往模型中心 <ArrowUp size={12}/></button></div>}
+                <button className="model-select" aria-expanded={popup === 'models'} title={selectedModelBlockedReason ?? (selectedModelExecutable ? '当前模型可执行' : '当前模型不可执行，请在模型菜单中选择已就绪型号')} onClick={() => { if (popup === 'models') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('models'); }}><span className="model-mark"><Palette size={13}/></span><span>{selectedModelLabel}</span><ChevronDown size={12}/></button>
+                {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型">
+                  <div className="popover-heading"><strong>本地图片模型</strong><span>{availableModels.filter(model => model.ready && model.staticFacts.hardwareEligible).length} 个可执行模型</span></div>
+                  {availableModels.map(model => {
+                    const capability = capabilityForModel(model.id);
+                    const selected = active.params.modelId === model.id && active.params.capabilityId === capability;
+                    const tool = capability === BIREFNET_CAPABILITY || capability === REALESRGAN_CAPABILITY;
+                    const blockedReason = model.staticFacts.hardwareEligible ? null : (model.staticFacts.hardwareReason ?? '当前设备不满足该型号的硬件门槛，生成入口已禁用。');
+                    return <button key={model.id} disabled={!model.ready || Boolean(blockedReason)} title={blockedReason ?? model.summary} className={`single-model-option ${selected ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: model.id, capabilityId: capability }); setPopup(null); if (!tool) requestAnimationFrame(() => textarea.current?.focus()); }}>
+                      <span className="model-mark"><Palette size={14}/></span>
+                      <span><strong>{modelDisplayName(model.id)}</strong><small>{blockedReason ?? (model.ready ? model.summary : `${model.summary} · 未就绪`)}</small></span>
+                      {selected && <Check size={14}/>}
+                    </button>;
+                  })}
+                  {active.params.sourceAssetId && !isToolComposer && <button className={`single-model-option ${active.params.capabilityId === KLEIN_EDIT_CAPABILITY ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: KLEIN_MODEL_ID, capabilityId: KLEIN_EDIT_CAPABILITY, aspect: '1:1' }); setPopup(null); }}><span className="model-mark"><ImageIcon size={14}/></span><span><strong>Klein 单图编辑</strong><small>使用当前源图和编辑指令</small></span>{active.params.capabilityId === KLEIN_EDIT_CAPABILITY && <Check size={14}/>}</button>}
+                  <button className="popover-action" onClick={() => { setPopup(null); onModels(); }}>前往模型中心 <ArrowUp size={12}/></button>
+                </div>}
               </div>
               {sendButton}
             </div>
@@ -1292,6 +1304,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
         </div>
         {overByteBudget && <p className="composer-warning" role="alert">提示词超过 16 KiB，请缩短后生成；内容完整保留。</p>}
         {legacyWindowsTextModel && <p className="composer-warning" role="alert">此会话保留旧的跨平台模型选择。请从模型菜单明确选择 Windows Z-Image，并核对画幅后再发送。</p>}
+        {selectedModelBlockedReason && <p className="composer-warning" role="alert">{selectedModelBlockedReason}</p>}
         <div className={`composer-save-note ${saveStatus === 'error' ? 'error-text' : ''}`} role="status">{!native ? '浏览器预览 · 草稿保留于本次页面' : !loaded ? '正在恢复本地会话' : saveStatus === 'error' ? `保存失败：${saveError}` : saveStatus === 'saved' ? '草稿已保存到本机' : '正在保存草稿…'}{saveStatus === 'error' && <button onClick={() => void flushAll().catch(() => {})}>重试</button>}</div>
       </section>
     </main>

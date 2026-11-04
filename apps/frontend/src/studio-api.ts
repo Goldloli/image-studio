@@ -3,7 +3,23 @@ import type { DraftParams } from './workspace-state';
 
 export const native = isTauri();
 export type StoredDraft = { id: number; name: string; prompt: string; collapsed: boolean; promptSourceId?: string | null; params: DraftParams; version: number };
-export type ModelView = { id: string; name: string; phase: string; summary: string; ready: boolean; runtimeReady: boolean; modelReady: boolean; deviceVerified: boolean; receivedBytes: number; totalBytes: number; modelBytes: number; runtimeBytes: number; requiredBytes: number; error: string | null; busy: boolean };
+export type ModelStaticFacts = {
+  hardwareEligible: boolean;
+  hardwareReason: string | null;
+  minVramGb: number | null;
+  minRamGb: number | null;
+  quantization: string | null;
+  licenseNotice: string | null;
+  windowsStatus: string | null;
+  runtimeLockId: string | null;
+  deviceFacts: string;
+};
+export type ModelView = {
+  id: string; name: string; phase: string; summary: string; ready: boolean; available?: boolean;
+  runtimeReady: boolean; modelReady: boolean; deviceVerified: boolean;
+  receivedBytes: number; totalBytes: number; modelBytes: number; runtimeBytes: number; requiredBytes: number;
+  error: string | null; busy: boolean; staticFacts: ModelStaticFacts;
+};
 export type JobView = { id: string; turnId: string | null; conversationId: string | null; attemptId: string; state: string; prompt: string; width: number; height: number; seed: number | null; error: string | null; assetId: string | null; manifest: unknown | null };
 export type AssetView = { id: string; jobId: string; conversationId: string | null; turnId: string | null; prompt: string; width: number; height: number; seed: number | null; bytes: number; outputRole?: 'primary' | 'mask'; dataType?: 'image_rgb' | 'image_rgba' | 'mask'; available: boolean; error: string | null };
 export type StableCursor = { createdAt: number; id: string };
@@ -48,7 +64,7 @@ export type FeatureCatalogEntry = {
   featureId: string; title: string; category: string; summary: string; description: string;
   inputs: string[]; outputs: string[]; productStatus: 'implemented' | 'planned'; scope: string;
   action: 'open-composer' | null; modelId: string | null; dependencies: { kind: string; label: string }[];
-  state: 'available' | 'planned' | 'busy' | 'blocked' | 'model-missing' | 'runtime-not-ready' | 'device-not-ready';
+  state: 'available' | 'planned' | 'busy' | 'blocked' | 'model-missing' | 'runtime-not-ready' | 'device-not-ready' | 'hardware-ineligible';
   stateLabel: string; blockingReason: string | null; canStart: boolean;
 };
 export type FeatureCatalog = {

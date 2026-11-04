@@ -10,7 +10,13 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { api, native, type FeatureCatalog, type FeatureCatalogEntry, type StudioSnapshot } from './studio-api';
-import { textRecipeForModel, Z_IMAGE_CAPABILITY_FALLBACK } from './model-recipes';
+import {
+  BIREFNET_CAPABILITY,
+  KLEIN_EDIT_CAPABILITY,
+  REALESRGAN_CAPABILITY,
+  Z_IMAGE_CAPABILITY_FALLBACK,
+  textRecipeForModel,
+} from './model-recipes';
 
 type Props = {
   studio: StudioSnapshot | null;
@@ -155,8 +161,8 @@ function FeatureDetail({ feature, studio, onModels, onStart }: {
 }
 
 function capabilityFor(feature: FeatureCatalogEntry): string {
-  if (feature.featureId === 'image-edit') return 'image.edit.flux2-klein-4b.v1';
-  if (feature.featureId === 'remove-background') return 'image.remove-background.birefnet-general-epoch-244.v1';
-  if (feature.featureId === 'upscale') return 'image.upscale.realesrgan-x4plus.v1';
+  if (feature.featureId === 'image-edit') return KLEIN_EDIT_CAPABILITY;
+  if (feature.featureId === 'remove-background') return BIREFNET_CAPABILITY;
+  if (feature.featureId === 'upscale') return REALESRGAN_CAPABILITY;
   return textRecipeForModel(feature.modelId ?? '')?.capabilityId ?? Z_IMAGE_CAPABILITY_FALLBACK;
 }

@@ -1,5 +1,6 @@
 import type { AssetLibraryItem, AssetLibraryQuery, TaskCenterItem, TaskStatus } from './studio-api';
 import type { AssetView } from './studio-api';
+import { modelDisplayName } from './model-recipes';
 
 export const taskStatusOptions: { id: TaskStatus; label: string; count: keyof import('./studio-api').TaskCounts }[] = [
   { id: 'all', label: '全部', count: 'total' },
@@ -102,5 +103,5 @@ export function formatTime(value: number | null): string {
 }
 
 export function modelLabel(id: string): string {
-  return id === 'z-image-turbo-mflux-v1' || id === 'z-image-turbo-diffusers-cuda-nf4-v1' ? 'Z-Image Turbo' : id;
+  return modelDisplayName(id);
 }
