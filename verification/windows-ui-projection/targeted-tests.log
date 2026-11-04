@@ -1,8 +1,8 @@
-﻿== target/test-studio.log ==
-test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 149 filtered out; finished in 0.26s
-== target/test-catalog.log ==
-test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 160 filtered out; finished in 0.00s
-== target/test-feature.log ==
-test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 163 filtered out; finished in 0.00s
-== target/test-device.log ==
-test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 158 filtered out; finished in 0.07s
+﻿== cargo test -p image-studio-desktop --lib studio:: ==
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 150 filtered out; finished in 0.25s
+== cargo test -p image-studio-desktop --lib adapters::catalog ==
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 162 filtered out; finished in 0.00s
+== cargo test -p image-studio-desktop --lib adapters::feature_catalog ==
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 165 filtered out; finished in 0.00s
+== cargo test -p image-studio-desktop --lib adapters::device ==
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 160 filtered out; finished in 0.07s

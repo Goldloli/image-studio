@@ -60,19 +60,16 @@ canInstall / canContinue / canUse  (now require hardwareEligible)
 ```
 npm --prefix apps/frontend test          -> 7 files / 52 tests passed
 npm --prefix apps/frontend run check     -> tsc --noEmit exit 0
-cargo test -p image-studio-desktop       -> 158 passed / 2 failed / 7 ignored. The 2 failures are
-                                            desktop-install's in-progress installation.rs tests
-                                            (windows_profiles_parse_embedded_manifests_and_frozen_
-                                            identities, windows_plan_environment_binds_the_frozen_
-                                            runtime_engine_and_device); every catalog/studio/
-                                            feature/device test passed. See cargo-test.log.
+cargo test -p image-studio-desktop       -> 161 passed / 0 failed / 7 ignored (after
+                                            desktop-install committed the seven Windows install
+                                            profiles and the v2 execution wiring; this task's
+                                            projection tests are part of that run)
 cargo test -p image-studio-desktop --lib studio::                 -> 18 passed / 0 failed
 cargo test -p image-studio-desktop --lib adapters::catalog         -> 7 passed / 0 failed
 cargo test -p image-studio-desktop --lib adapters::feature_catalog -> 4 passed / 0 failed
 cargo test -p image-studio-desktop --lib adapters::device          -> 9 passed / 0 failed
-cargo clippy -p image-studio-desktop --all-targets -- -D warnings  -> no warnings for this task's
-                                            files (finished clean while desktop-install WIP was in
-                                            the tree)
+cargo clippy -p image-studio-desktop --all-targets -- -D warnings  -> exit 0, no warnings
+cargo fmt --all -- --check                                        -> exit 0
 ```
 
 Frontend new/changed tests: `model-recipes.test.ts` (Windows identity matrix, 7 models / 8 pairs,
@@ -80,8 +77,8 @@ frozen capability ids, historical macOS ids untouched), `model-catalog.test.ts` 
 filter, hardware gate disabling install/send including a stale-payload case, CPU route, license
 projection), plus the existing conversation/workspace suites kept green.
 
-Logs: `npm-test.log`, `npm-check.log`, `cargo-test.log`, `targeted-tests.log`, `device-probe.log`,
-`nvidia-smi.log`.
+Logs: `npm-test.log`, `npm-check.log`, `cargo-test.log`, `cargo-clippy.log`, `targeted-tests.log`,
+`device-probe.log`, `nvidia-smi.log`.
 
 ## Not run (requires the installed app)
 

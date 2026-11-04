@@ -411,7 +411,7 @@
     },
     {
       "command": "cargo test -p image-studio-desktop",
-      "result": "158 passed / 2 failed / 7 ignored. The 2 failures are desktop-install's in-progress installation.rs tests (windows_profiles_parse_embedded_manifests_and_frozen_identities, windows_plan_environment_binds_the_frozen_runtime_engine_and_device), not this task's files. Every catalog/studio/feature/device test passed.",
+      "result": "161 passed / 0 failed / 7 ignored (after desktop-install committed the seven install profiles and v2 execution wiring)",
       "log": "verification/windows-ui-projection/cargo-test.log"
     },
     {
@@ -436,7 +436,12 @@
     },
     {
       "command": "cargo clippy -p image-studio-desktop --all-targets -- -D warnings",
-      "result": "no warnings for this task's files (finished clean while desktop-install WIP was in the tree)",
+      "result": "exit 0, no warnings",
+      "log": "verification/windows-ui-projection/cargo-clippy.log"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "result": "exit 0 (workspace formatted)",
       "log": null
     },
     {
@@ -463,9 +468,9 @@
     }
   ],
   "test_totals": {
-    "rust_full_suite": "158 passed / 2 failed (both failures are desktop-install WIP tests) / 7 ignored",
+    "rust_full_suite": "161 passed / 0 failed / 7 ignored",
     "rust_this_task_modules": "studio 18 + catalog 7 + feature_catalog 4 + device 9 = 38 passed / 0 failed",
     "frontend": "52 passed / 0 failed, typecheck clean"
   },
-  "captured_commit": "01e56cb (test(desktop): pin the Windows runtime lock matrix for settings rows); desktop-install's installation.rs/generation.rs were still uncommitted WIP at capture time"
+  "captured_commit": "130f98c (desktop-install's last install/execution commit) on top of this task's commits through a0203ed; working tree clean for this task's files"
 }
