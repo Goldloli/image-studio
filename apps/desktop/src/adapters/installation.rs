@@ -854,6 +854,39 @@ struct LicenseFileRecord {
     bytes: u64,
     sha256: String,
 }
+/// One file of the installer-visible prepared quantized cache. The installer
+/// hashes the whole cache after `--prepare` and binds that inventory into the
+/// ready record so a stale or tampered cache is never reused.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+struct PreparedFileRecord {
+    path: String,
+    bytes: u64,
+    sha256: String,
+}
+/// Result of a staged prepare run: fixed cache location, deterministic inventory
+/// digest and the measured memory preflight values.
+#[derive(Debug)]
+struct PreparedCacheOutcome {
+    path: String,
+    files: Vec<PreparedFileRecord>,
+    digest: String,
+    preflight: PreparePreflightRecord,
+}
+/// Identity of one embedded worker wheel installed into the shared v2 runtime.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+struct WorkerWheelRecord {
+    path: String,
+    bytes: u64,
+    sha256: String,
+}
+/// Measured memory values for the install-time prepare preflight.
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
+struct PreparePreflightRecord {
+    available_physical_bytes: u64,
+    available_commit_bytes: u64,
+    minimum_available_physical_bytes: u64,
+    minimum_commit_headroom_bytes: u64,
+}
 #[derive(Serialize, Deserialize)]
 struct ReadyRecord {
     runtime_lock_id: String,
@@ -864,9 +897,21 @@ struct ReadyRecord {
     model_manifest_sha256: String,
     #[serde(default)]
     licenses: Vec<LicenseFileRecord>,
-    /// `<data>/models/<model_snapshot_id>.prepared` for staged Qwen/MOSS models.
+    /// `<data>/models/<model.id>.prepared` for staged Qwen/MOSS models.
     #[serde(default)]
     prepared_dir: Option<String>,
+    /// Deterministic inventory of the prepared cache written by this install.
+    #[serde(default)]
+    prepared_files: Vec<PreparedFileRecord>,
+    /// SHA-256 over `prepared_files` (sorted path/bytes/hash).
+    #[serde(default)]
+    prepared_digest: Option<String>,
+    /// Embedded worker wheels installed into the shared runtime by this build.
+    #[serde(default)]
+    worker_wheels: Vec<WorkerWheelRecord>,
+    /// Measured prepare preflight values (staged models only).
+    #[serde(default)]
+    prepare_preflight: Option<PreparePreflightRecord>,
     runtime_files: Vec<InventoryEntry>,
     probe: serde_json::Value,
 }
@@ -875,6 +920,7 @@ impl ReadyRecord {
         self.runtime_manifest_sha256 == manifest_digest(profile.runtime_manifest)
             && self.model_manifest_sha256 == manifest_digest(profile.model_manifest)
             && licenses_match_profile(profile, &self.licenses)
+            && worker_wheels_match(profile, &self.worker_wheels)
     }
 }
 fn license_root(data: &Path, profile: InstallProfile) -> PathBuf {
@@ -917,6 +963,99 @@ fn prepared_cache_ready(dir: &Path) -> Result<(), String> {
     }
     Ok(())
 }
+/// Deterministic inventory of the prepared cache: recursive files, no symlinks,
+/// forward-slash relative paths, sorted for a stable digest.
+fn prepared_cache_inventory(dir: &Path) -> Result<Vec<PreparedFileRecord>, String> {
+    let mut files = Vec::new();
+    prepared_inventory_walk(dir, dir, &mut files)?;
+    files.sort_by(|left, right| left.path.cmp(&right.path));
+    if files.is_empty() {
+        return Err("量化缓存为空；请重新安装该型号以重建量化缓存。".into());
+    }
+    Ok(files)
+}
+fn prepared_inventory_walk(
+    root: &Path,
+    path: &Path,
+    out: &mut Vec<PreparedFileRecord>,
+) -> Result<(), String> {
+    for entry in fs::read_dir(path).map_err(err)? {
+        let entry = entry.map_err(err)?;
+        let path = entry.path();
+        let metadata = fs::symlink_metadata(&path).map_err(err)?;
+        if metadata.file_type().is_symlink() {
+            return Err("量化缓存包含符号链接；请重新安装该型号。".into());
+        }
+        if metadata.is_dir() {
+            prepared_inventory_walk(root, &path, out)?;
+        } else if metadata.is_file() {
+            let mut file = File::open(&path).map_err(err)?;
+            let mut digest = Sha256::new();
+            std::io::copy(&mut file, &mut digest).map_err(err)?;
+            out.push(PreparedFileRecord {
+                path: path
+                    .strip_prefix(root)
+                    .map_err(err)?
+                    .to_string_lossy()
+                    .replace('\\', "/"),
+                bytes: metadata.len(),
+                sha256: format!("{:x}", digest.finalize()),
+            });
+        } else {
+            return Err("量化缓存包含特殊文件；请重新安装该型号。".into());
+        }
+    }
+    Ok(())
+}
+fn prepared_inventory_digest(files: &[PreparedFileRecord]) -> Result<String, String> {
+    if files.is_empty() {
+        return Err("量化缓存为空；请重新安装该型号以重建量化缓存。".into());
+    }
+    let mut digest = Sha256::new();
+    for file in files {
+        digest.update(file.path.as_bytes());
+        digest.update([0]);
+        digest.update(file.bytes.to_le_bytes());
+        digest.update([0]);
+        digest.update(file.sha256.as_bytes());
+        digest.update(b"\n");
+    }
+    Ok(format!("{:x}", digest.finalize()))
+}
+fn valid_digest(value: &str) -> bool {
+    value.len() == 64 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
+}
+/// Startup check: the ready record binds a non-empty prepared-cache inventory and
+/// every recorded file is present at its recorded size. Cheap; the full digest is
+/// re-hashed in `prepared_cache_matches` before execution.
+fn prepared_cache_metadata_matches(
+    data: &Path,
+    model_snapshot_id: &str,
+    profile: InstallProfile,
+    record: &ReadyRecord,
+) -> bool {
+    if !profile.prepare_with_model {
+        return true;
+    }
+    let expected = prepared_cache_dir(data, model_snapshot_id);
+    if record.prepared_dir.as_deref() != expected.to_str() {
+        return false;
+    }
+    let Some(digest) = record.prepared_digest.as_deref() else {
+        return false;
+    };
+    if !valid_digest(digest) || record.prepared_files.is_empty() {
+        return false;
+    }
+    if prepared_cache_ready(&expected).is_err() {
+        return false;
+    }
+    record.prepared_files.iter().all(|file| {
+        safe_relative(&file.path).is_ok()
+            && fs::symlink_metadata(expected.join(&file.path))
+                .is_ok_and(|metadata| metadata.is_file() && metadata.len() == file.bytes)
+    })
+}
 fn prepared_cache_matches(
     data: &Path,
     model_snapshot_id: &str,
@@ -934,15 +1073,26 @@ fn prepared_cache_matches(
     if Path::new(recorded) != expected {
         return Err("量化缓存路径与固定安装布局不符；请重新安装。".into());
     }
-    prepared_cache_ready(&expected)
+    prepared_cache_ready(&expected)?;
+    let files = prepared_cache_inventory(&expected)?;
+    let digest = prepared_inventory_digest(&files)?;
+    let recorded_digest = record
+        .prepared_digest
+        .as_deref()
+        .ok_or("就绪记录缺少量化缓存摘要；请重新安装所选型号以重建量化缓存。")?;
+    if recorded_digest != digest || record.prepared_files != files {
+        return Err("量化缓存内容与安装记录不符；请重新安装所选型号以重建量化缓存。".into());
+    }
+    Ok(())
 }
 fn prepare_worker_args(
     profile: InstallProfile,
     model_snapshot_id: &str,
     model_dir: &Path,
     prepared_dir: &Path,
+    force_rebuild: bool,
 ) -> Result<Vec<String>, String> {
-    Ok(vec![
+    let mut args = vec![
         "-I".into(),
         "-m".into(),
         profile.worker_module.into(),
@@ -956,7 +1106,11 @@ fn prepare_worker_args(
             .to_str()
             .ok_or("量化缓存路径不是 UTF-8")?
             .into(),
-    ])
+    ];
+    if force_rebuild {
+        args.push("--no-reuse-prepared".into());
+    }
+    Ok(args)
 }
 fn licenses_match_profile(profile: InstallProfile, recorded: &[LicenseFileRecord]) -> bool {
     let expected = license_records(profile);
@@ -986,18 +1140,30 @@ const RUNTIME_ACTIVATION_RECORD: &str = "runtime-activation.json";
 struct RuntimeActivation {
     runtime_lock_id: String,
     manifest_sha256: String,
+    /// Embedded worker wheel identities installed into this runtime. A runtime
+    /// built by an older app build is not reusable for python profiles because it
+    /// still carries the old worker wheels; it is rebuilt instead.
+    #[serde(default)]
+    worker_wheels: Vec<WorkerWheelRecord>,
     files: Vec<InventoryEntry>,
 }
-/// A completed shared runtime is reusable only for the exact manifest identity and
-/// while every recorded file still exists at its recorded size. This is what makes
-/// installing the second model on a shared runtime cheap and non-destructive.
-fn runtime_activation_matches(root: &Path, runtime_id: &str, manifest_sha256: &str) -> bool {
+/// A completed shared runtime is reusable only for the exact manifest identity,
+/// the same embedded worker wheels, and while every recorded file still exists at
+/// its recorded size. This is what makes installing the second model on a shared
+/// runtime cheap and non-destructive, while a worker-wheel update self-heals.
+fn runtime_activation_matches(
+    root: &Path,
+    runtime_id: &str,
+    manifest_sha256: &str,
+    worker_wheels: &[WorkerWheelRecord],
+) -> bool {
     fs::read(root.join(RUNTIME_ACTIVATION_RECORD))
         .ok()
         .and_then(|bytes| serde_json::from_slice::<RuntimeActivation>(&bytes).ok())
         .is_some_and(|activation| {
             activation.runtime_lock_id == runtime_id
                 && activation.manifest_sha256 == manifest_sha256
+                && activation.worker_wheels == worker_wheels
                 && !activation.files.is_empty()
                 && activation
                     .files
@@ -1009,6 +1175,7 @@ fn write_runtime_activation(
     root: &Path,
     runtime_id: &str,
     manifest_sha256: &str,
+    worker_wheels: &[WorkerWheelRecord],
 ) -> Result<(), String> {
     let mut files = Vec::new();
     inventory(root, root, &mut files)?;
@@ -1017,6 +1184,7 @@ fn write_runtime_activation(
         &RuntimeActivation {
             runtime_lock_id: runtime_id.into(),
             manifest_sha256: manifest_sha256.into(),
+            worker_wheels: worker_wheels.to_vec(),
             files,
         },
     )
@@ -1077,6 +1245,47 @@ fn bundled_runtime_wheels(profile: InstallProfile) -> Vec<Artifact> {
         })
         .collect()
 }
+/// Embedded worker wheel identities of this build. They are part of the runtime
+/// activation identity and the ready record, so a future app build that ships new
+/// worker wheels rebuilds the shared runtime instead of deadlocking the probe.
+fn bundled_worker_wheel_records(profile: InstallProfile) -> Vec<WorkerWheelRecord> {
+    profile
+        .shared_worker_wheels
+        .iter()
+        .map(|(path, bytes)| WorkerWheelRecord {
+            path: (*path).into(),
+            bytes: bytes.len() as u64,
+            sha256: format!("{:x}", Sha256::digest(bytes)),
+        })
+        .collect()
+}
+fn worker_wheels_match(profile: InstallProfile, recorded: &[WorkerWheelRecord]) -> bool {
+    bundled_worker_wheel_records(profile) == recorded
+}
+/// Identifies why an existing ready record no longer matches this build. Returns
+/// `None` when every identity dimension matches.
+fn ready_identity_error(
+    record: &ReadyRecord,
+    profile: InstallProfile,
+    runtime_id: &str,
+    snapshot_id: &str,
+) -> Option<String> {
+    if record.runtime_lock_id != runtime_id || record.model_snapshot_id != snapshot_id {
+        return Some("安装清单已变化或记录缺少字节身份，请修复安装。".into());
+    }
+    if record.runtime_manifest_sha256 != manifest_digest(profile.runtime_manifest)
+        || record.model_manifest_sha256 != manifest_digest(profile.model_manifest)
+    {
+        return Some("安装清单已变化或记录缺少字节身份，请修复安装。".into());
+    }
+    if !licenses_match_profile(profile, &record.licenses) {
+        return Some("安装许可证归档已变化，请修复安装。".into());
+    }
+    if !worker_wheels_match(profile, &record.worker_wheels) {
+        return Some("内嵌计算模块已更新（worker wheel 身份不一致），请重新安装所选型号。".into());
+    }
+    None
+}
 fn ready_record_matches(
     record: &ReadyRecord,
     profile: InstallProfile,
@@ -1100,6 +1309,100 @@ fn native_runtime_platform() -> &'static str {
     } else {
         "macos-universal2"
     }
+}
+
+/// Install-time prepare memory gate (design.md section 10.2 item 3). Gate 0 measured
+/// the staged Qwen text-encoder quantization transient at about 23.4 GiB of process
+/// commit while system available RAM dropped as low as 0.58 GiB, so the installer
+/// requires either enough available physical RAM or enough commit headroom before
+/// it starts `--prepare`; otherwise the install fails before any quantization work.
+const PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES: u64 = 28 * 1024 * 1024 * 1024;
+const PREPARE_MIN_COMMIT_HEADROOM_BYTES: u64 = 26 * 1024 * 1024 * 1024;
+const GIB_BYTES: u64 = 1024 * 1024 * 1024;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct MemoryFacts {
+    available_physical_bytes: u64,
+    available_commit_bytes: u64,
+}
+impl MemoryFacts {
+    fn preflight_record(self) -> PreparePreflightRecord {
+        PreparePreflightRecord {
+            available_physical_bytes: self.available_physical_bytes,
+            available_commit_bytes: self.available_commit_bytes,
+            minimum_available_physical_bytes: PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES,
+            minimum_commit_headroom_bytes: PREPARE_MIN_COMMIT_HEADROOM_BYTES,
+        }
+    }
+}
+fn gib_ratio(bytes: u64) -> f64 {
+    bytes as f64 / GIB_BYTES as f64
+}
+fn prepare_memory_error(facts: MemoryFacts) -> String {
+    format!(
+        "可用内存不足，未开始构建 Qwen/MOSS 量化缓存（未激活任何安装文件）。当前可用物理内存 {:.1} GiB（要求 ≥{} GiB）或可用提交余量 {:.1} GiB（要求 ≥{} GiB）；请关闭其它占用内存的程序、确认系统虚拟内存/提交上限充足后重试安装。",
+        gib_ratio(facts.available_physical_bytes),
+        PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES / GIB_BYTES,
+        gib_ratio(facts.available_commit_bytes),
+        PREPARE_MIN_COMMIT_HEADROOM_BYTES / GIB_BYTES,
+    )
+}
+/// Pure decision over measured values, unit-tested at both boundaries.
+fn prepare_memory_preflight(facts: MemoryFacts) -> Result<(), String> {
+    if facts.available_physical_bytes >= PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES
+        || facts.available_commit_bytes >= PREPARE_MIN_COMMIT_HEADROOM_BYTES
+    {
+        Ok(())
+    } else {
+        Err(prepare_memory_error(facts))
+    }
+}
+
+#[cfg(windows)]
+#[repr(C)]
+#[derive(Default)]
+struct MemoryStatusEx {
+    dw_length: u32,
+    dw_memory_load: u32,
+    ull_total_phys: u64,
+    ull_avail_phys: u64,
+    ull_total_page_file: u64,
+    ull_avail_page_file: u64,
+    ull_total_virtual: u64,
+    ull_avail_virtual: u64,
+    ull_avail_extended_virtual: u64,
+}
+
+#[cfg(windows)]
+#[link(name = "kernel32")]
+unsafe extern "system" {
+    fn GlobalMemoryStatusEx(buffer: *mut MemoryStatusEx) -> i32;
+}
+
+#[cfg(windows)]
+fn system_memory_facts() -> Result<MemoryFacts, String> {
+    let mut status = MemoryStatusEx {
+        dw_length: std::mem::size_of::<MemoryStatusEx>() as u32,
+        ..MemoryStatusEx::default()
+    };
+    // SAFETY: `status` is a valid, correctly sized and initialized MEMORYSTATUSEX
+    // buffer owned by this stack frame for the duration of the call.
+    let succeeded = unsafe { GlobalMemoryStatusEx(&mut status) };
+    if succeeded == 0 {
+        return Err(format!(
+            "无法读取系统内存状态（{}）；请修复系统后重试安装。",
+            std::io::Error::last_os_error()
+        ));
+    }
+    Ok(MemoryFacts {
+        available_physical_bytes: status.ull_avail_phys,
+        available_commit_bytes: status.ull_avail_page_file,
+    })
+}
+
+#[cfg(not(windows))]
+fn system_memory_facts() -> Result<MemoryFacts, String> {
+    Err("分阶段模型的内存预检仅支持 Windows；未开始量化缓存构建。".into())
 }
 #[derive(Serialize, Deserialize)]
 struct InventoryEntry {
@@ -1328,7 +1631,12 @@ impl Installation {
         if let Ok(record) = fs::read(paths.data.join(profile.ready_relative))
             .and_then(|b| serde_json::from_slice::<ReadyRecord>(&b).map_err(std::io::Error::other))
         {
-            if ready_record_matches(&record, profile, &runtime.id, &snapshot_id) {
+            if let Some(identity_error) =
+                ready_identity_error(&record, profile, &runtime.id, &snapshot_id)
+            {
+                state.phase = "unavailable".into();
+                state.error = Some(identity_error);
+            } else {
                 let runtime_root = paths.data.join("runtimes").join(&runtime.id);
                 let model_root = paths.data.join("models").join(&model.id);
                 let runtime_critical_ok = if runtime.is_native() {
@@ -1389,7 +1697,7 @@ impl Installation {
                     })
                     && runtime_critical_ok
                     && licenses_healthy(&paths.data, profile).is_ok()
-                    && prepared_cache_matches(&paths.data, &model.id, profile, &record).is_ok();
+                    && prepared_cache_metadata_matches(&paths.data, &model.id, profile, &record);
                 if healthy {
                     state.phase = "ready".into();
                     state.runtime_ready = true;
@@ -1399,9 +1707,6 @@ impl Installation {
                     state.phase = "unavailable".into();
                     state.error = Some("安装文件缺失或身份异常，请修复安装。".into());
                 }
-            } else {
-                state.phase = "unavailable".into();
-                state.error = Some("安装清单已变化或记录缺少字节身份，请修复安装。".into());
             }
         } else if paths.data.join(profile.installing_relative).exists() {
             state.phase = "interrupted".into();
@@ -1630,6 +1935,11 @@ impl Installation {
             .map_err(err)?,
         )
         .map_err(err)?;
+        if !worker_wheels_match(self.inner.profile, &record.worker_wheels) {
+            return Err(
+                "内嵌计算模块已更新（worker wheel 身份不一致），请重新安装所选型号。".into(),
+            );
+        }
         if !ready_record_matches(
             &record,
             self.inner.profile,
@@ -1826,8 +2136,13 @@ impl Installation {
             s.phase = "installing_runtime".into();
         });
         let mut record = self.prepare_runtime()?;
+        record.worker_wheels = bundled_worker_wheel_records(self.inner.profile);
         if self.inner.profile.prepare_with_model {
-            record.prepared_dir = Some(self.prepare_quantized_cache()?);
+            let prepared = self.prepare_quantized_cache()?;
+            record.prepared_dir = Some(prepared.path);
+            record.prepared_files = prepared.files;
+            record.prepared_digest = Some(prepared.digest);
+            record.prepare_preflight = Some(prepared.preflight);
         }
         // Fixed license texts are archived only after the runtime/probe succeeded,
         // and before the activation record so a failed write never activates.
@@ -1913,11 +2228,17 @@ impl Installation {
         let runtime = self.runtime_dir();
         ensure_child_dir(&self.inner.paths.data, &runtime)?;
         let runtime_manifest_sha256 = manifest_digest(self.inner.profile.runtime_manifest);
+        let worker_wheels = bundled_worker_wheel_records(self.inner.profile);
         // Shared runtimes (several Windows v2 models, several macOS v3 models) must
         // never be torn down by another model's install. A completed runtime with the
-        // same manifest identity is reused as-is.
-        let reuse =
-            runtime_activation_matches(&runtime, &self.inner.runtime.id, &runtime_manifest_sha256);
+        // same manifest identity and the same embedded worker wheels is reused as-is;
+        // a worker-wheel change forces a staged rebuild that installs the new wheels.
+        let reuse = runtime_activation_matches(
+            &runtime,
+            &self.inner.runtime.id,
+            &runtime_manifest_sha256,
+            &worker_wheels,
+        );
         // On Windows the interpreter is a self-contained embeddable tree, so a rebuild
         // can be prepared in a staging directory and swapped in only after the wheels
         // and the probe succeed. A cancelled rebuild therefore cannot strand a model
@@ -2050,7 +2371,12 @@ impl Installation {
         }
         self.check_cancel()?;
         if !reuse {
-            write_runtime_activation(&work, &self.inner.runtime.id, &runtime_manifest_sha256)?;
+            write_runtime_activation(
+                &work,
+                &self.inner.runtime.id,
+                &runtime_manifest_sha256,
+                &worker_wheels,
+            )?;
         }
         #[cfg(windows)]
         if staged {
@@ -2067,6 +2393,10 @@ impl Installation {
             model_manifest_sha256: manifest_digest(self.inner.profile.model_manifest),
             licenses: Vec::new(),
             prepared_dir: None,
+            prepared_files: Vec::new(),
+            prepared_digest: None,
+            worker_wheels: Vec::new(),
+            prepare_preflight: None,
             runtime_files,
             probe,
         };
@@ -2191,6 +2521,10 @@ impl Installation {
             model_manifest_sha256: manifest_digest(self.inner.profile.model_manifest),
             licenses: Vec::new(),
             prepared_dir: None,
+            prepared_files: Vec::new(),
+            prepared_digest: None,
+            worker_wheels: Vec::new(),
+            prepare_preflight: None,
             runtime_files,
             probe: serde_json::json!({
                 "identity": {
@@ -2224,10 +2558,86 @@ impl Installation {
             runtime.join("venv/bin/python3")
         }
     }
+    /// Best-effort append of the measured preflight values to the installer process
+    /// log; the same numbers are persisted in the ready record.
+    fn append_install_log(&self, message: &str) {
+        use std::io::{Seek, SeekFrom};
+        let path = self.inner.paths.logs.join("installation-process.log");
+        if let Ok(mut file) = open_regular(&path, true, false) {
+            let _ = file.seek(SeekFrom::End(0));
+            let _ = writeln!(file, "{message}");
+            let _ = file.sync_all();
+        }
+    }
+    /// Whether the existing prepared cache can be reused instead of rebuilt. Reuse
+    /// requires the exact same model manifest digest and a full current inventory
+    /// digest equal to the previous ready record, so a model snapshot change or a
+    /// tampered/stale cache always forces a clean deterministic rebuild.
+    fn prepared_cache_reuse_allowed(&self, prepared: &Path) -> bool {
+        if !prepared.is_dir() {
+            return false;
+        }
+        let Ok(bytes) = fs::read(
+            self.inner
+                .paths
+                .data
+                .join(self.inner.profile.ready_relative),
+        ) else {
+            return false;
+        };
+        let Ok(previous) = serde_json::from_slice::<ReadyRecord>(&bytes) else {
+            return false;
+        };
+        if previous.model_manifest_sha256 != manifest_digest(self.inner.profile.model_manifest) {
+            return false;
+        }
+        if previous.prepared_dir.as_deref() != prepared.to_str() {
+            return false;
+        }
+        let Ok(files) = prepared_cache_inventory(prepared) else {
+            return false;
+        };
+        let Ok(digest) = prepared_inventory_digest(&files) else {
+            return false;
+        };
+        previous.prepared_files == files
+            && previous.prepared_digest.as_deref() == Some(digest.as_str())
+    }
     /// Staged Qwen/MOSS installs build the deterministic NF4 cache through the
     /// diffusers worker. The worker derives the same path from the model path, so
     /// the fixed `<model>.prepared` location is both prepared and recorded here.
-    fn prepare_quantized_cache(&self) -> Result<String, String> {
+    fn prepare_quantized_cache(&self) -> Result<PreparedCacheOutcome, String> {
+        self.prepare_quantized_cache_with_facts(system_memory_facts()?)
+    }
+    fn prepare_quantized_cache_with_facts(
+        &self,
+        facts: MemoryFacts,
+    ) -> Result<PreparedCacheOutcome, String> {
+        let log_line = format!(
+            "[prepare-preflight] available_physical_bytes={} available_commit_bytes={} minimum_available_physical_bytes={} minimum_commit_headroom_bytes={}",
+            facts.available_physical_bytes,
+            facts.available_commit_bytes,
+            PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES,
+            PREPARE_MIN_COMMIT_HEADROOM_BYTES
+        );
+        // The prepare subprocess truncates installation-process.log, so the measured
+        // values are persisted separately as evidence as well.
+        let _ = atomic_json(
+            &self.inner.paths.logs.join("prepare-preflight.json"),
+            &facts.preflight_record(),
+        );
+        // Fails before any quantization work and before the ready record exists.
+        if let Err(error) = prepare_memory_preflight(facts) {
+            self.append_install_log(&format!("{log_line} result=blocked"));
+            return Err(error);
+        }
+        self.prepare_quantized_cache_after_preflight(facts, &log_line)
+    }
+    fn prepare_quantized_cache_after_preflight(
+        &self,
+        facts: MemoryFacts,
+        log_line: &str,
+    ) -> Result<PreparedCacheOutcome, String> {
         let prepared = prepared_cache_dir(&self.inner.paths.data, &self.inner.model.id);
         ensure_child_dir(
             &self.inner.paths.data,
@@ -2235,6 +2645,12 @@ impl Installation {
         )?;
         self.check_cancel()?;
         self.update(|state| state.phase = "preparing_model".into());
+        let reuse = self.prepared_cache_reuse_allowed(&prepared);
+        if !reuse && prepared.exists() {
+            // The model snapshot changed or the old cache failed its digest
+            // binding: remove it so the rebuild cannot reuse stale components.
+            fs::remove_dir_all(&prepared).map_err(err)?;
+        }
         let model = self.model_dir();
         let mut command = Command::new(self.private_python());
         command.args(prepare_worker_args(
@@ -2242,8 +2658,11 @@ impl Installation {
             &self.snapshot_id(),
             &model,
             &prepared,
+            !reuse,
         )?);
-        let output = self.command_with_deadline(&mut command, Duration::from_secs(1800))?;
+        let output = self.command_with_deadline(&mut command, Duration::from_secs(1800));
+        self.append_install_log(log_line);
+        let output = output?;
         let report: serde_json::Value = serde_json::from_slice(&output)
             .map_err(|error| format!("量化缓存构建输出无效：{error}"))?;
         let status = report["status"].as_str().unwrap_or("");
@@ -2257,8 +2676,15 @@ impl Installation {
             ));
         }
         prepared_cache_ready(&prepared)?;
+        let files = prepared_cache_inventory(&prepared)?;
+        let digest = prepared_inventory_digest(&files)?;
         self.check_cancel()?;
-        Ok(prepared.to_string_lossy().into_owned())
+        Ok(PreparedCacheOutcome {
+            path: prepared.to_string_lossy().into_owned(),
+            files,
+            digest,
+            preflight: facts.preflight_record(),
+        })
     }
     fn install_archive_members(
         &self,
@@ -4639,7 +5065,7 @@ mod tests {
         assert!(error.contains("管理目录"), "{error}");
     }
     #[test]
-    fn runtime_activation_reuse_requires_identity_and_unchanged_metadata() {
+    fn runtime_activation_reuse_requires_identity_wheels_and_unchanged_metadata() {
         let temp = tempfile::tempdir().unwrap();
         let runtime = temp.path().join("runtimes/windows-v2");
         fs::create_dir_all(runtime.join("Lib/site-packages/worker")).unwrap();
@@ -4649,32 +5075,73 @@ mod tests {
         // against canonical paths exactly like production does.
         let runtime = runtime.canonicalize().unwrap();
         let manifest = "a".repeat(64);
+        let wheels = vec![WorkerWheelRecord {
+            path: "studio_diffusers_worker-0.1.0-py3-none-any.whl".into(),
+            bytes: 4,
+            sha256: "c".repeat(64),
+        }];
         assert!(!runtime_activation_matches(
             &runtime,
             "windows-v2",
-            &manifest
+            &manifest,
+            &wheels
         ));
-        write_runtime_activation(&runtime, "windows-v2", &manifest).unwrap();
+        write_runtime_activation(&runtime, "windows-v2", &manifest, &wheels).unwrap();
         assert!(runtime_activation_matches(
             &runtime,
             "windows-v2",
-            &manifest
+            &manifest,
+            &wheels
         ));
         assert!(!runtime_activation_matches(
             &runtime,
             "other-runtime",
-            &manifest
+            &manifest,
+            &wheels
         ));
         assert!(!runtime_activation_matches(
             &runtime,
             "windows-v2",
-            &"b".repeat(64)
+            &"b".repeat(64),
+            &wheels
+        ));
+        // A future app build with different embedded worker wheels must not reuse
+        // the old runtime; the staging rebuild installs the new wheels.
+        let newer_wheels = vec![WorkerWheelRecord {
+            path: "studio_diffusers_worker-0.1.0-py3-none-any.whl".into(),
+            bytes: 4,
+            sha256: "d".repeat(64),
+        }];
+        assert!(!runtime_activation_matches(
+            &runtime,
+            "windows-v2",
+            &manifest,
+            &newer_wheels
+        ));
+        assert!(!runtime_activation_matches(
+            &runtime,
+            "windows-v2",
+            &manifest,
+            &[]
         ));
         fs::write(runtime.join("python.exe"), b"interpreter-changed").unwrap();
         assert!(!runtime_activation_matches(
             &runtime,
             "windows-v2",
-            &manifest
+            &manifest,
+            &wheels
+        ));
+    }
+    #[test]
+    fn legacy_profiles_have_no_worker_wheel_identity() {
+        assert!(worker_wheels_match(Z_PROFILE, &[]));
+        assert!(!worker_wheels_match(
+            Z_PROFILE,
+            &[WorkerWheelRecord {
+                path: "studio_diffusers_worker-0.1.0-py3-none-any.whl".into(),
+                bytes: 1,
+                sha256: "a".repeat(64),
+            }]
         ));
     }
     #[test]
@@ -4699,6 +5166,47 @@ mod tests {
             ..Z_PROFILE
         }
     }
+    fn memory_facts(available_physical_gib: u64, available_commit_gib: u64) -> MemoryFacts {
+        MemoryFacts {
+            available_physical_bytes: available_physical_gib * GIB_BYTES,
+            available_commit_bytes: available_commit_gib * GIB_BYTES,
+        }
+    }
+    fn write_prepared_cache(dir: &Path) -> (Vec<PreparedFileRecord>, String) {
+        for (relative, bytes) in [
+            ("text_encoder/config.json", &b"{}"[..]),
+            ("text_encoder/model.safetensors", &b"encoder-weights"[..]),
+            ("transformer/config.json", &b"{}"[..]),
+            ("transformer/model.safetensors", &b"dit-weights"[..]),
+        ] {
+            let target = dir.join(relative);
+            fs::create_dir_all(target.parent().unwrap()).unwrap();
+            fs::write(&target, bytes).unwrap();
+        }
+        let files = prepared_cache_inventory(dir).unwrap();
+        let digest = prepared_inventory_digest(&files).unwrap();
+        (files, digest)
+    }
+    fn staged_ready_record(
+        install: &Installation,
+        profile: InstallProfile,
+        model_id: &str,
+    ) -> ReadyRecord {
+        ReadyRecord {
+            runtime_lock_id: install.inner.runtime.id.clone(),
+            model_snapshot_id: model_id.into(),
+            runtime_manifest_sha256: manifest_digest(profile.runtime_manifest),
+            model_manifest_sha256: manifest_digest(profile.model_manifest),
+            licenses: vec![],
+            prepared_dir: None,
+            prepared_files: Vec::new(),
+            prepared_digest: None,
+            worker_wheels: bundled_worker_wheel_records(profile),
+            prepare_preflight: None,
+            runtime_files: vec![],
+            probe: serde_json::Value::Null,
+        }
+    }
     #[test]
     fn staged_prepare_command_matches_the_worker_contract() {
         let args = prepare_worker_args(
@@ -4706,6 +5214,7 @@ mod tests {
             "model-v1",
             Path::new("C:/data/models/model-v1"),
             Path::new("C:/data/models/model-v1.prepared"),
+            false,
         )
         .unwrap();
         assert_eq!(
@@ -4723,9 +5232,21 @@ mod tests {
                 "C:/data/models/model-v1.prepared",
             ]
         );
+        let rebuild = prepare_worker_args(
+            staged_profile(),
+            "model-v1",
+            Path::new("C:/data/models/model-v1"),
+            Path::new("C:/data/models/model-v1.prepared"),
+            true,
+        )
+        .unwrap();
+        assert_eq!(
+            rebuild.last().map(String::as_str),
+            Some("--no-reuse-prepared")
+        );
     }
     #[test]
-    fn staged_prepared_cache_is_layout_bound_and_space_reserved() {
+    fn staged_prepared_cache_is_digest_bound_and_space_reserved() {
         let profile = staged_profile();
         let (_temp, install) = fixture_for(|paths| Installation::new_for(paths, profile));
         let model_bytes = install
@@ -4748,28 +5269,58 @@ mod tests {
         );
         let model_id = install.inner.model.id.clone();
         let prepared = prepared_cache_dir(&install.inner.paths.data, &model_id);
-        let mut record = ReadyRecord {
-            runtime_lock_id: install.inner.runtime.id.clone(),
-            model_snapshot_id: model_id.clone(),
-            runtime_manifest_sha256: manifest_digest(profile.runtime_manifest),
-            model_manifest_sha256: manifest_digest(profile.model_manifest),
-            licenses: vec![],
-            prepared_dir: None,
-            runtime_files: vec![],
-            probe: serde_json::Value::Null,
-        };
+        let mut record = staged_ready_record(&install, profile, &model_id);
+        // An old/absent record is stale: metadata and digest checks fail.
         assert!(
             prepared_cache_matches(&install.inner.paths.data, &model_id, profile, &record).is_err()
         );
+        assert!(!prepared_cache_metadata_matches(
+            &install.inner.paths.data,
+            &model_id,
+            profile,
+            &record
+        ));
         record.prepared_dir = Some(prepared.to_string_lossy().into_owned());
         assert!(
             prepared_cache_matches(&install.inner.paths.data, &model_id, profile, &record).is_err()
         );
-        for component in ["text_encoder", "transformer"] {
-            fs::create_dir_all(prepared.join(component)).unwrap();
-            fs::write(prepared.join(component).join("config.json"), b"{}").unwrap();
-        }
+        let (files, digest) = write_prepared_cache(&prepared);
+        record.prepared_files = files.clone();
+        record.prepared_digest = Some(digest.clone());
         prepared_cache_matches(&install.inner.paths.data, &model_id, profile, &record).unwrap();
+        assert!(prepared_cache_metadata_matches(
+            &install.inner.paths.data,
+            &model_id,
+            profile,
+            &record
+        ));
+        // Same-size tampering keeps the metadata check passing but the digest
+        // binding catches it before execution.
+        let tampered = prepared.join("transformer/model.safetensors");
+        fs::write(&tampered, b"dit-weightZ").unwrap();
+        assert!(prepared_cache_metadata_matches(
+            &install.inner.paths.data,
+            &model_id,
+            profile,
+            &record
+        ));
+        let error = prepared_cache_matches(&install.inner.paths.data, &model_id, profile, &record)
+            .unwrap_err();
+        assert!(error.contains("量化缓存内容"), "{error}");
+        write_prepared_cache(&prepared);
+        // A record from before the digest binding (serde defaults) is stale.
+        let mut legacy = staged_ready_record(&install, profile, &model_id);
+        legacy.prepared_dir = Some(prepared.to_string_lossy().into_owned());
+        assert!(
+            prepared_cache_matches(&install.inner.paths.data, &model_id, profile, &legacy).is_err()
+        );
+        assert!(!prepared_cache_metadata_matches(
+            &install.inner.paths.data,
+            &model_id,
+            profile,
+            &legacy
+        ));
+        // A foreign prepared directory or a non-staged profile is handled safely.
         record.prepared_dir = Some(
             install
                 .inner
@@ -4782,10 +5333,192 @@ mod tests {
         assert!(
             prepared_cache_matches(&install.inner.paths.data, &model_id, profile, &record).is_err()
         );
+        record.prepared_dir = Some(prepared.to_string_lossy().into_owned());
         assert!(
             prepared_cache_matches(&install.inner.paths.data, &model_id, Z_PROFILE, &record)
                 .is_ok()
         );
+    }
+    #[test]
+    fn prepared_reuse_requires_same_model_manifest_and_matching_digest() {
+        let profile = staged_profile();
+        let (_temp, install) = fixture_for(|paths| Installation::new_for(paths, profile));
+        let model_id = install.inner.model.id.clone();
+        let prepared = prepared_cache_dir(&install.inner.paths.data, &model_id);
+        fs::create_dir_all(&prepared).unwrap();
+        let (files, digest) = write_prepared_cache(&prepared);
+        let mut record = staged_ready_record(&install, profile, &model_id);
+        record.prepared_dir = Some(prepared.to_string_lossy().into_owned());
+        record.prepared_files = files;
+        record.prepared_digest = Some(digest);
+        let ready_path = install.inner.paths.data.join(profile.ready_relative);
+        ensure_child_dir(&install.inner.paths.data, ready_path.parent().unwrap()).unwrap();
+        atomic_json(&ready_path, &record).unwrap();
+        assert!(install.prepared_cache_reuse_allowed(&prepared));
+        // A changed model manifest digest must force a clean rebuild.
+        record.model_manifest_sha256 = "a".repeat(64);
+        atomic_json(&ready_path, &record).unwrap();
+        assert!(!install.prepared_cache_reuse_allowed(&prepared));
+        record.model_manifest_sha256 = manifest_digest(profile.model_manifest);
+        atomic_json(&ready_path, &record).unwrap();
+        assert!(install.prepared_cache_reuse_allowed(&prepared));
+        // Tampered cache content invalidates reuse even at the same size.
+        fs::write(
+            prepared.join("transformer/model.safetensors"),
+            b"dit-weightZ",
+        )
+        .unwrap();
+        assert!(!install.prepared_cache_reuse_allowed(&prepared));
+        write_prepared_cache(&prepared);
+        // A record without the digest binding (old build) is not reusable.
+        record.prepared_files.clear();
+        record.prepared_digest = None;
+        atomic_json(&ready_path, &record).unwrap();
+        assert!(!install.prepared_cache_reuse_allowed(&prepared));
+        // A missing ready record is not reusable.
+        fs::remove_file(&ready_path).unwrap();
+        assert!(!install.prepared_cache_reuse_allowed(&prepared));
+    }
+    #[test]
+    fn prepare_memory_preflight_boundaries_and_actionable_message() {
+        assert!(prepare_memory_preflight(memory_facts(28, 0)).is_ok());
+        assert!(prepare_memory_preflight(memory_facts(0, 26)).is_ok());
+        assert!(prepare_memory_preflight(memory_facts(28, 26)).is_ok());
+        assert!(prepare_memory_preflight(memory_facts(31, 27)).is_ok());
+        let below = memory_facts(27, 25);
+        let error = prepare_memory_preflight(below).unwrap_err();
+        assert!(error.contains("内存不足"), "{error}");
+        assert!(error.contains("未开始构建"), "{error}");
+        assert!(error.contains("未激活"), "{error}");
+        assert!(error.contains("27.0 GiB"), "{error}");
+        assert!(error.contains("25.0 GiB"), "{error}");
+        assert!(error.contains("28 GiB"), "{error}");
+        assert!(error.contains("26 GiB"), "{error}");
+        // Exact byte boundaries: one byte below both minima fails, one minimum met
+        // passes.
+        let just_below = MemoryFacts {
+            available_physical_bytes: PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES - 1,
+            available_commit_bytes: PREPARE_MIN_COMMIT_HEADROOM_BYTES - 1,
+        };
+        assert!(prepare_memory_preflight(just_below).is_err());
+        let at_commit = MemoryFacts {
+            available_physical_bytes: 0,
+            available_commit_bytes: PREPARE_MIN_COMMIT_HEADROOM_BYTES,
+        };
+        assert!(prepare_memory_preflight(at_commit).is_ok());
+        let record = at_commit.preflight_record();
+        assert_eq!(
+            record.minimum_available_physical_bytes,
+            PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES
+        );
+        assert_eq!(
+            record.minimum_commit_headroom_bytes,
+            PREPARE_MIN_COMMIT_HEADROOM_BYTES
+        );
+        assert_eq!(
+            record.available_commit_bytes,
+            PREPARE_MIN_COMMIT_HEADROOM_BYTES
+        );
+    }
+    #[test]
+    fn prepare_quantization_is_skipped_when_the_memory_preflight_fails() {
+        let profile = staged_profile();
+        let (_temp, install) = fixture_for(|paths| Installation::new_for(paths, profile));
+        let prepared = prepared_cache_dir(&install.inner.paths.data, &install.inner.model.id);
+        let error = install
+            .prepare_quantized_cache_with_facts(memory_facts(6, 5))
+            .unwrap_err();
+        assert!(error.contains("内存不足"), "{error}");
+        assert!(error.contains("6.0 GiB"), "{error}");
+        // Nothing was created, activated or recorded by the prepare step.
+        assert!(!prepared.exists());
+        assert!(!install.inner.paths.data.join("models").exists());
+        assert!(
+            !install
+                .inner
+                .paths
+                .data
+                .join("installation-ready.json")
+                .exists()
+        );
+        assert!(
+            !install
+                .inner
+                .paths
+                .data
+                .join("installation-installing.json")
+                .exists()
+        );
+        assert_eq!(install.snapshot().phase, "not_installed");
+        assert!(!install.snapshot().runtime_ready);
+        assert!(!install.snapshot().model_ready);
+        // The measured values are persisted as evidence and in the install log.
+        let preflight: serde_json::Value = serde_json::from_slice(
+            &fs::read(install.inner.paths.logs.join("prepare-preflight.json")).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(preflight["available_physical_bytes"], 6 * GIB_BYTES);
+        assert_eq!(preflight["available_commit_bytes"], 5 * GIB_BYTES);
+        assert_eq!(
+            preflight["minimum_available_physical_bytes"],
+            PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES
+        );
+        let log = fs::read_to_string(install.inner.paths.logs.join("installation-process.log"))
+            .unwrap_or_default();
+        assert!(log.contains("[prepare-preflight]"), "{log}");
+        assert!(log.contains("result=blocked"), "{log}");
+    }
+    #[cfg(windows)]
+    #[test]
+    fn windows_prepare_ram_preflight_evidence_is_recorded() {
+        let example_facts = memory_facts(12, 8);
+        let boundaries = [
+            (28, 0, "pass_available_ram"),
+            (0, 26, "pass_commit_headroom"),
+            (28, 26, "pass_both"),
+            (27, 25, "fail_both_below"),
+            (28, 25, "pass_available_ram_with_low_commit"),
+            (27, 26, "pass_commit_headroom_with_low_ram"),
+        ]
+        .map(|(ram, commit, label)| {
+            serde_json::json!({
+                "label": label,
+                "available_physical_gib": ram,
+                "available_commit_gib": commit,
+                "passed": prepare_memory_preflight(memory_facts(ram, commit)).is_ok(),
+            })
+        });
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .canonicalize()
+            .unwrap();
+        let directory = repo.join("verification/windows-parity-app");
+        fs::create_dir_all(&directory).unwrap();
+        atomic_json(
+            &directory.join("prepare-ram-preflight.json"),
+            &serde_json::json!({
+                "schema_version": 1,
+                "kind": "windows-parity-prepare-ram-preflight",
+                "status": "unit_verified",
+                "thresholds": {
+                    "minimum_available_physical_bytes": PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES,
+                    "minimum_available_physical_gib": 28,
+                    "minimum_commit_headroom_bytes": PREPARE_MIN_COMMIT_HEADROOM_BYTES,
+                    "minimum_commit_headroom_gib": 26,
+                },
+                "decision_rule": "available physical RAM >= 28 GiB OR available commit headroom >= 26 GiB",
+                "measurement_source": "installer-private GlobalMemoryStatusEx (ullAvailPhys / ullAvailPageFile); no new crate and no cross-stream helper",
+                "measured_values_recorded_in": [
+                    "ReadyRecord.prepare_preflight",
+                    "logs/installation-process.log line '[prepare-preflight] available_physical_bytes=... available_commit_bytes=... minimum_available_physical_bytes=... minimum_commit_headroom_bytes=...'"
+                ],
+                "failure_message_example_for_12GiB_available_ram_8GiB_commit": prepare_memory_error(example_facts),
+                "boundary_cases": boundaries,
+                "when_it_runs": "after model+runtime install and runtime probe, before any quantization work; a failure leaves no ready record and does not activate the installation",
+                "real_install_note": "actual measured values are produced by the Lead's installed-app acceptance installs; this file documents the implemented gate and its unit-tested boundaries",
+            }),
+        )
+        .unwrap();
     }
     fn server(
         response: Vec<u8>,
@@ -5074,6 +5807,10 @@ mod tests {
                 model_manifest_sha256: manifest_digest(MODEL_MANIFEST),
                 licenses: vec![],
                 prepared_dir: None,
+                prepared_files: vec![],
+                prepared_digest: None,
+                worker_wheels: vec![],
+                prepare_preflight: None,
                 runtime_files: vec![],
                 probe: serde_json::json!({"device":"gpu","device_name":"fixture-device"}),
             },
@@ -6078,6 +6815,68 @@ mod tests {
     }
     #[cfg(windows)]
     #[test]
+    fn windows_embedded_worker_wheel_identity_is_bound_to_the_ready_record() {
+        let profile = WINDOWS_KLEIN_PROFILE;
+        let temp = tempfile::tempdir().unwrap();
+        let install =
+            Installation::new_for(AppPaths::resolve(Some(temp.path())).unwrap(), profile).unwrap();
+        let snapshot_id = install.snapshot_id();
+        let mut record = ReadyRecord {
+            runtime_lock_id: install.inner.runtime.id.clone(),
+            model_snapshot_id: snapshot_id.clone(),
+            runtime_manifest_sha256: manifest_digest(profile.runtime_manifest),
+            model_manifest_sha256: manifest_digest(profile.model_manifest),
+            licenses: license_records(profile),
+            prepared_dir: None,
+            prepared_files: Vec::new(),
+            prepared_digest: None,
+            worker_wheels: bundled_worker_wheel_records(profile),
+            prepare_preflight: None,
+            runtime_files: vec![],
+            probe: serde_json::Value::Null,
+        };
+        assert!(
+            ready_identity_error(&record, profile, &install.inner.runtime.id, &snapshot_id)
+                .is_none()
+        );
+        assert!(worker_wheels_match(profile, &record.worker_wheels));
+        // A record from an older app build (serde default: no wheel identity) must
+        // mark the installation stale instead of reusing the runtime loop.
+        record.worker_wheels.clear();
+        assert!(!worker_wheels_match(profile, &record.worker_wheels));
+        let error = ready_identity_error(&record, profile, &install.inner.runtime.id, &snapshot_id)
+            .unwrap();
+        assert!(error.contains("worker wheel"), "{error}");
+        // A different wheel build (changed sha) is stale too.
+        record.worker_wheels = bundled_worker_wheel_records(profile);
+        record.worker_wheels[0].sha256 = "0".repeat(64);
+        assert!(!worker_wheels_match(profile, &record.worker_wheels));
+        // Startup reports unavailable with the actionable reinstall message.
+        let ready_path = install.inner.paths.data.join(profile.ready_relative);
+        ensure_child_dir(&install.inner.paths.data, ready_path.parent().unwrap()).unwrap();
+        atomic_json(&ready_path, &record).unwrap();
+        let reloaded =
+            Installation::new_for(AppPaths::resolve(Some(temp.path())).unwrap(), profile).unwrap();
+        let snapshot = reloaded.snapshot();
+        assert_eq!(snapshot.phase, "unavailable");
+        assert!(snapshot.error.unwrap().contains("worker wheel"));
+        // Restoring the correct identity returns the installation to the normal
+        // metadata-only startup path (not ready yet because no runtime is installed).
+        record.worker_wheels = bundled_worker_wheel_records(profile);
+        atomic_json(&ready_path, &record).unwrap();
+        let reloaded =
+            Installation::new_for(AppPaths::resolve(Some(temp.path())).unwrap(), profile).unwrap();
+        assert_eq!(reloaded.snapshot().phase, "unavailable");
+        assert!(
+            reloaded
+                .snapshot()
+                .error
+                .as_deref()
+                .is_some_and(|error| !error.contains("worker wheel"))
+        );
+    }
+    #[cfg(windows)]
+    #[test]
     fn windows_embedded_worker_wheels_match_the_frozen_manifest_identities() {
         let manifest: serde_json::Value =
             serde_json::from_str(WINDOWS_V2_RUNTIME_MANIFEST).unwrap();
@@ -6121,6 +6920,10 @@ mod tests {
                 model_manifest_sha256: manifest_digest(profile.model_manifest),
                 licenses: license_records(profile),
                 prepared_dir: None,
+                prepared_files: vec![],
+                prepared_digest: None,
+                worker_wheels: bundled_worker_wheel_records(profile),
+                prepare_preflight: None,
                 runtime_files: vec![],
                 probe: serde_json::json!({
                     "device": profile.probe_device,
@@ -6241,6 +7044,10 @@ mod tests {
             model_manifest_sha256: manifest_digest(MODEL_MANIFEST),
             licenses: vec![],
             prepared_dir: None,
+            prepared_files: vec![],
+            prepared_digest: None,
+            worker_wheels: vec![],
+            prepare_preflight: None,
             runtime_files: vec![],
             probe: serde_json::json!({"device":"gpu","device_name":"fixture-device"}),
         };
