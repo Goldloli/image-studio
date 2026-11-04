@@ -12,10 +12,10 @@
 
 ## 2. 执行器与 worker
 
-- [ ] 2.1 实现分阶段量化装载执行器（文本→采样→解码，释放与清空缓存、独占显存采样、超预算失败），覆盖 Qwen 基础/Turbo 与 MOSS。
+- [x] 2.1 实现分阶段量化装载执行器（文本→采样→解码，释放与清空缓存、独占显存采样、超预算失败），覆盖 Qwen 基础/Turbo 与 MOSS。证据：tools/diffusers-worker-windows/（8385c46）；真实 v2 协议 Qwen Turbo 8 步（b20f402）、Qwen 基础 40 步、MOSS 50 步（3646433）全部 passed 且 prepared cache 与 Gate 0 独立构建一致。
 - [ ] 2.2 实现 Windows diffusers worker（Klein 文生图 + 单图编辑；Qwen；MOSS），沿用 generation v2 帧协议、有界日志、取消令牌与租约。
 - [x] 2.3 实现 Windows ONNX Runtime CPU worker（BiRefNet 双输出，复用 macOS 合同）。证据：tools/onnx-worker-windows/（b49b6dc/d8993e3）、wheel 41fb883、真实 v2 协议与 probe 9dac2c6（primary RGBA+mask、alpha==mask、CPU EP）。
-- [ ] 2.4 实现 Windows ncnn Vulkan worker（Real-ESRGAN x4plus，固定 4×/tile/单 GPU）。
+- [x] 2.4 实现 Windows ncnn Vulkan worker（Real-ESRGAN x4plus，固定 4×/tile/单 GPU）。证据：tools/realesrgan-worker（7c64c36 修复 Windows verbatim 路径与 ncnn RGBA 输出归一化）；真实 v2 协议 220×220→880×880 与 97×61→388×244 exact 4×、Vulkan 设备身份与 RGB 像素交叉校验（9296501/8465b1d）。
 - [ ] 2.5 接入取消、强杀、整树回收与执行租约，验证每个 worker 不提前允许下一任务、不伪造资产。
 
 ## 3. 身份、安装与目录
