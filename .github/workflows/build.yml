@@ -41,12 +41,18 @@ jobs:
       - name: Checksums and package evidence
         shell: pwsh
         run: |
-          $installer = "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe"
-          if (-not (Test-Path -LiteralPath $installer)) { throw "installer missing" }
+          $version = (node -p "require('./apps/desktop/tauri.conf.json').version").Trim()
+          $installerName = "Image Studio_${version}_x64-setup.exe"
+          $installer = Join-Path "target/release/bundle/nsis" $installerName
+          if (-not (Test-Path -LiteralPath $installer)) { throw "installer missing: $installer" }
           $hash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLower()
-          "$hash  Image Studio_0.1.0_x64-setup.exe" | Out-File -Encoding ascii SHA256SUMS-windows.txt
-          Copy-Item verification/windows-installer/internal-package.json .
-          Get-Content SHA256SUMS-windows.txt
+          $stage = Join-Path "target" "ci-artifacts/windows"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item -LiteralPath $installer -Destination (Join-Path $stage $installerName)
+          # LF line ending so the Ubuntu release job can run `sha256sum -c`.
+          [System.IO.File]::WriteAllText((Join-Path $stage "SHA256SUMS-windows.txt"), "$hash  $installerName`n")
+          Copy-Item -LiteralPath "verification/windows-installer/internal-package.json" -Destination (Join-Path $stage "internal-package.json")
+          Get-ChildItem -LiteralPath $stage | Select-Object Name, Length
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -54,10 +60,7 @@ jobs:
           name: windows-installer
           if-no-files-found: error
           retention-days: 14
-          path: |
-            target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe
-            SHA256SUMS-windows.txt
-            internal-package.json
+          path: target/ci-artifacts/windows/*
 
   macos:
     name: macOS app
@@ -85,6 +88,11 @@ jobs:
         working-directory: apps/frontend
         run: npm ci
 
+      # tauri::generate_context! embeds ../frontend/dist at compile time.
+      - name: frontend build (required by tauri generate_context)
+        working-directory: apps/frontend
+        run: npm run build
+
       - name: Build release workspace
         run: cargo build --release --locked --workspace
 
@@ -93,10 +101,14 @@ jobs:
           set -euo pipefail
           VERSION=$(node -p "require('./apps/desktop/tauri.conf.json').version")
           python3 scripts/prepare-macos-dev-app.py --profile release --output "target/release/Image Studio.app"
-          ARCHIVE="target/release/Image-Studio-${VERSION}-macos-arm64.zip"
+          ARCHIVE_NAME="Image-Studio-${VERSION}-macos-arm64.zip"
+          ARCHIVE="target/release/${ARCHIVE_NAME}"
           ditto -c -k --keepParent "target/release/Image Studio.app" "$ARCHIVE"
-          shasum -a 256 "$ARCHIVE" | sed "s#target/release/##" > SHA256SUMS-macos.txt
-          cat SHA256SUMS-macos.txt
+          STAGE="target/ci-artifacts/macos"
+          mkdir -p "$STAGE"
+          cp "$ARCHIVE" "$STAGE/$ARCHIVE_NAME"
+          shasum -a 256 "$STAGE/$ARCHIVE_NAME" | sed "s#${STAGE}/##" > "$STAGE/SHA256SUMS-macos.txt"
+          ls -l "$STAGE"
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
@@ -104,6 +116,4 @@ jobs:
           name: macos-app
           if-no-files-found: error
           retention-days: 14
-          path: |
-            target/release/Image-Studio-*-macos-arm64.zip
-            SHA256SUMS-macos.txt
+          path: target/ci-artifacts/macos/*

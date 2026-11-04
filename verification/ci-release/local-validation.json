@@ -18,7 +18,7 @@
       ".github/workflows/build.yml",
       ".github/workflows/release.yml"
     ],
-    "yaml_structure": "passed (PyYAML parse + trigger/jobs/steps shape checks in target/parity-gates/validate-workflows.py)",
+    "yaml_structure": "passed via scripts/ci/validate-workflows.py (committed)",
     "actionlint": "not available locally; GitHub-side validation is user-gated"
   },
   "command_parity": [
@@ -58,10 +58,10 @@
     "command": "./scripts/build-windows-internal.ps1 -SkipQualityGates",
     "exit_code": 0,
     "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
-    "installer_sha256": "fb37d774b10e1a3f3b73886644b7e5aea9f7b3782d7f791fa8c87588550fb171",
-    "installer_bytes": 245021486,
+    "installer_sha256": "63bdbf24802d9487c9ddff77f75d01c5494f1c58ad55dbc4dd139dc4943cac84",
+    "installer_bytes": 245017051,
     "internal_package": "verification/ci-release/internal-package.json",
-    "checksums": "verification/ci-release/windows-SHA256SUMS.sample",
+    "checksums": "verification/ci-release/windows-SHA256SUMS.sample (LF line endings)",
     "note": "same command and args as the quality workflow's build job; checksums generated with the workflow's PowerShell logic and match internal-package.json"
   },
   "macos_script": {
@@ -81,5 +81,14 @@
     "Unsigned Windows/macOS artifacts (SmartScreen/Gatekeeper warnings documented).",
     "CI does not download models or run GPU inference; model acceptance stays on the target machine evidence.",
     "YAML validation is syntactic/structural only; actionlint/GitHub schema validation happens on the first user-enabled run."
+  ],
+  "review_fixes": [
+    "frontend build moved before cargo steps in quality/build (clean-checkout tauri generate_context panic reproduced locally)",
+    "artifact payloads staged flat in target/ci-artifacts/{windows,macos} before upload; release passes files only",
+    "checksums written with LF so Ubuntu sha256sum -c passes; release verifies checksums before creating the draft",
+    "installer filename derived from tauri.conf version instead of hardcoding 0.1.0",
+    "verify-version job runs before the two 90-minute builds",
+    "quality timeout raised to 60 minutes",
+    "README Node/npm versions aligned with .nvmrc and engines"
   ]
 }

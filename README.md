@@ -76,7 +76,7 @@ bd prime
 
 ## 构建和启动
 
-已验证环境为 macOS 27.0.1 / Apple M3 Max / arm64，Rust 工具链固定为 1.99.1。前端已验证 Node.js 24.12.0 / npm 11.6.2。首次构建需要取得 npm 与 Cargo 依赖；应用启动使用内嵌字体，不下载模型、Python 或字体资源。
+已验证环境为 macOS 27.0.1 / Apple M3 Max / arm64，Rust 工具链固定为 1.99.1。前端固定 Node.js 24.19.0 / npm 11.17.0（与 .nvmrc、package.json engines 和 CI 一致）。首次构建需要取得 npm 与 Cargo 依赖；应用启动使用内嵌字体，不下载模型、Python 或字体资源。
 
 ```sh
 npm --prefix apps/frontend ci

@@ -12,15 +12,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build release artifacts
-    uses: ./.github/workflows/build.yml
-
-  release:
-    name: Draft GitHub release
-    needs: build
+  verify-version:
+    name: Verify tag matches application version
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
@@ -29,13 +24,7 @@ jobs:
         with:
           node-version: "24.19.0"
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-
-      - name: Verify tag matches application version
+      - name: Compare tag and tauri version
         shell: bash
         run: |
           set -euo pipefail
@@ -44,15 +33,43 @@ jobs:
           echo "app version: $VERSION, tag: $TAG"
           test "$VERSION" = "$TAG"
 
+  build:
+    name: Build release artifacts
+    needs: verify-version
+    uses: ./.github/workflows/build.yml
+
+  release:
+    name: Draft GitHub release
+    needs: [verify-version, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Verify checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd artifacts
+          sha256sum -c SHA256SUMS-windows.txt
+          sha256sum -c SHA256SUMS-macos.txt
+
       - name: Draft release with artifacts and checksums
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          ls -l artifacts
+          mapfile -t files < <(find artifacts -type f -print)
+          ls -l "${files[@]}"
           gh release create "$GITHUB_REF_NAME" \
             --draft \
             --title "Image Studio $GITHUB_REF_NAME" \
             --generate-notes \
-            artifacts/*
+            "${files[@]}"

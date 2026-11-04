@@ -17,7 +17,7 @@ jobs:
   quality:
     name: quality (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -48,6 +48,13 @@ jobs:
         working-directory: apps/frontend
         run: npm ci
 
+      # tauri::generate_context! embeds ../frontend/dist at compile time and
+      # panics when it is missing, so build the frontend before any cargo step
+      # on a clean checkout.
+      - name: frontend build (required by tauri generate_context)
+        working-directory: apps/frontend
+        run: npm run build
+
       - name: rustfmt
         run: cargo fmt --all -- --check
 
@@ -64,10 +71,6 @@ jobs:
       - name: frontend typecheck
         working-directory: apps/frontend
         run: npm run check
-
-      - name: frontend build
-        working-directory: apps/frontend
-        run: npm run build
 
       - name: OpenSpec strict validation
         run: openspec validate --all --strict
