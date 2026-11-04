@@ -572,8 +572,10 @@ fn parse_output_role(value: &str) -> Result<OutputRole> {
 }
 fn max_output_pixels(recipe: Recipe, role: OutputRole) -> u64 {
     match (recipe, role) {
-        (Recipe::RealEsrgan, OutputRole::Primary) => 16 * 1024 * 1024,
-        (Recipe::BiRefNet, OutputRole::Primary | OutputRole::Mask) => 4 * 1024 * 1024,
+        (Recipe::RealEsrgan | Recipe::RealEsrganWindows, OutputRole::Primary) => 16 * 1024 * 1024,
+        (Recipe::BiRefNet | Recipe::BiRefNetWindows, OutputRole::Primary | OutputRole::Mask) => {
+            4 * 1024 * 1024
+        }
         _ => 1024 * 1024,
     }
 }
@@ -670,7 +672,7 @@ fn validate_png(
     file.seek(SeekFrom::Start(0))?;
     // Reserve host output and decoder scratch from one recipe-specific budget.
     // The 16 MP upscale recipe must not expand the legacy decoder's allowance.
-    let decode_limit = if recipe == Recipe::RealEsrgan {
+    let decode_limit = if matches!(recipe, Recipe::RealEsrgan | Recipe::RealEsrganWindows) {
         UPSCALE_DECODE_LIMIT
     } else {
         LEGACY_DECODE_LIMIT
@@ -744,6 +746,22 @@ mod bounds_tests {
             OutputRole::Primary,
         )
         .unwrap();
+        validate_png(
+            &mut File::open(&path).unwrap(),
+            4096,
+            4096,
+            Recipe::RealEsrganWindows,
+            OutputRole::Primary,
+        )
+        .unwrap();
+        assert_eq!(
+            max_output_pixels(Recipe::RealEsrganWindows, OutputRole::Primary),
+            16 * 1024 * 1024
+        );
+        assert_eq!(
+            max_output_pixels(Recipe::BiRefNetWindows, OutputRole::Mask),
+            4 * 1024 * 1024
+        );
         assert!(
             validate_png(
                 &mut File::open(&path).unwrap(),
