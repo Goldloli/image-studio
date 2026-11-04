@@ -1,13 +1,13 @@
 # Windows diffusers worker (Klein / Qwen-Image 2.1 / MOSS)
 
 Status: worker package and wheel built, installer-facing probe/prepare paths and
-five real generation-v2 protocol exchanges executed on the Windows 10 target
-machine (2026-11-04, RTX 3080 Ti 12 GB / i7-13700K / 31.7 GiB RAM). Qwen-Image
-2.1 base and MOSS-Image-SFT are now covered by real exchanges too. The Windows
-Real-ESRGAN native worker release binary was built and its frozen ncnn bundle
-verified, but its real exchange is **blocked by a genuine Windows
-path-normalization defect in the committed native worker** (full defect evidence
-and fix owner below; the fix is assigned to the desktop-install teammate).
+five real diffusers generation-v2 protocol exchanges executed on the Windows 10
+target machine (2026-11-04, RTX 3080 Ti 12 GB / i7-13700K / 31.7 GiB RAM), plus
+two real native Real-ESRGAN ncnn worker exchanges and three cancel checks. The
+Qwen-Image 2.1 base and MOSS-Image-SFT real exchanges are covered here too. Two
+genuine Windows-only Real-ESRGAN worker defects were found and fixed during this
+task (path normalization and opaque-RGBA output); the historical defect record is
+kept below and the official fixed-binary evidence passes.
 
 ## Deliverable
 
@@ -142,55 +142,64 @@ asset was committed, and the Attempt output directory stayed empty (worker
 elapsed 12.3 s, worker process commit 2.084 GiB, nvidia-smi peak 1,908 MiB -
 i.e. no generation happened).
 
-[cancel-check-qwen21-base.json](cancel-check-qwen21-base.json): the same
-immediate-cancel check for the Qwen-Image 2.1 base snapshot. Terminal
-`{"type":"cancelled"}`, no candidate, no image file in the Attempt directory
-(worker stderr shows request validation and then cancellation; no sampling
-progress was emitted). The ncnn worker cancel check is pending the Real-ESRGAN
-worker fix below.
+[cancel-check-realesrgan.json](cancel-check-realesrgan.json): a `cancel` frame
+sent immediately after `execute_v2` to the native Real-ESRGAN worker. The worker
+terminated the ncnn child before a candidate was committed: terminal
+`{"type":"cancelled"}`, worker exit 0, 0.125 s elapsed, only `loading` progress,
+and the Attempt directory contains only the input copy (no `primary.png`).
 
-## Real-ESRGAN Windows ncnn worker (native)
+## Real-ESRGAN Windows ncnn worker (native, passed after fix)
 
-The Windows native worker release binary was built with
-`cargo build --release -p realesrgan-worker`
-(`target\release\realesrgan-worker.exe`, 990,720 bytes, SHA-256
-`22c4c679...b1ab`) and the frozen ncnn bundle was verified against the worker
-constants: `realesrgan-ncnn-vulkan.exe` 6,161,408 bytes / SHA-256
-`07e49f7c...7b1a0c`, `realesrgan-x4plus.bin` 33,424,520 bytes / SHA-256
-`713ee713...cdbcddf`, `realesrgan-x4plus.param` 116,029 bytes / SHA-256
-`35330ece...9f10a86`.
+The Windows native worker release binary was rebuilt after the two Windows-only
+worker defects below were fixed (commit `7c64c36`):
+`target\release\realesrgan-worker.exe`, 1,115,136 bytes, SHA-256
+`14789e96...13030f` (same binary staged at
+`apps/desktop/binaries/realesrgan-worker-x86_64-pc-windows-msvc.exe`). The frozen
+ncnn bundle was verified against the worker constants:
+`realesrgan-ncnn-vulkan.exe` 6,161,408 bytes / SHA-256 `07e49f7c...7b1a0c`,
+`realesrgan-x4plus.bin` 33,424,520 bytes / SHA-256 `713ee713...cdbcddf`,
+`realesrgan-x4plus.param` 116,029 bytes / SHA-256 `35330ece...9f10a86`.
 
-Status: **blocked by a real Windows portability defect in the committed native
-worker**, recorded with full reproductions in
-[realesrgan-worker-path-bug.json](realesrgan-worker-path-bug.json) (status
-`fail`, root cause and fix owner). In short:
+| Run | Evidence | Input | Output | Elapsed | Check |
+|---|---|---|---|---|---|
+| 220x220 official sample | [real-protocol-realesrgan-220x220.json](real-protocol-realesrgan-220x220.json) | 220x220, 117,553 B | 880x880, 984,304 B, `73eaef40...20c6817`, [png](real-protocol-realesrgan-220x220.png) | 2.562 s | exact 4x; RGB pixels identical to Gate 0 reference |
+| 97x61 controlled image | [real-protocol-realesrgan-97x61.json](real-protocol-realesrgan-97x61.json) | 97x61, 14,643 B | 388x244, 98,673 B, `cbe33a46...0366f95`, [png](real-protocol-realesrgan-97x61.png) | 2.172 s | exact 4x; RGB pixels identical to Gate 0 reference |
 
-- the worker validates `path.canonicalize()? != path` for the ncnn binary, model
-  dir and output dir; on Windows Rust `canonicalize` returns an extended-length
-  `\\?\C:\...` path, so every normal absolute path is rejected at startup
-  (`ncnn binary must be an absolute regular file named
-  realesrgan-ncnn-vulkan.exe`, worker exit 70, no handshake);
-- passing verbatim `\\?\` paths passes validation and starts real inference (the
-  ncnn stderr enumerates `[0 NVIDIA GeForce RTX 3080 Ti]` and
-  `[1 Intel(R) UHD Graphics 770]`), but the frozen ncnn executable cannot open
-  extended-length paths (`_wfopen <exe dir>\\?\C:\...param failed`) and exits
-  with `0xc0000409`; no candidate is produced.
+Both runs used the normal installer-style absolute paths (not verbatim), so they
+exercise the fixed product path, with the frozen recipe (`-s 4 -t 128 -g 0
+-j 1:1:1`, no TTA) and a verified `--ncnn-binary`. Terminal frame was
+`output_candidate_v2` with exit code 0. The ncnn stderr forwarded by the worker
+enumerates the Vulkan devices, with `[0 NVIDIA GeForce RTX 3080 Ti]` selected and
+`[1 Intel(R) UHD Graphics 770]` present but unused; `nvidia-smi` reports GPU
+`GPU-78b715aa-ec51-31af-8813-eac9653458a7`, driver 596.49, 12,288 MiB.
 
-This is a worker path-normalization bug, not a model/bundle/budget failure: the
-same frozen bundle passes the direct Gate 0 runs in
-`verification/windows-parity-realesrgan/`, and all hashes above match. The fix
-(strip/normalize the Windows `\\?\` prefix for the comparisons while keeping the
-ncnn `-i/-o/-m` paths un-prefixed, plus unit tests and a rebuilt release binary)
-is assigned to the desktop-install teammate (task-11); this task reruns the
-official 220x220 and 97x61 v2 exchanges once that binary is available and will
-replace this section with passing evidence.
+Byte-vs-pixel comparison with the Gate 0 direct-ncnn evidence: the Windows ncnn
+build writes opaque **RGBA** PNGs, while the frozen v2 contract requires one
+8-bit **RGB** candidate, so the worker normalizes opaque RGBA to 8-bit RGB
+(refusing non-opaque alpha). The output SHA-256 therefore differs from the Gate 0
+direct-run RGBA file (Gate 0 220x220 `33a47bc5...`, 1,191,677 B; 97x61
+`36894682...`, 124,974 B), but decoding both to RGB gives **zero differing
+pixels / zero max channel difference** for both images
+(`gate0_pixel_cross_check` in the evidence). This is the fixed behavior, not a
+quality regression.
+
+Historical defect evidence (kept intentionally): [realesrgan-worker-path-bug.json](realesrgan-worker-path-bug.json)
+records the originally committed Windows binary rejecting every normal absolute
+path (`Path::canonicalize()` returns `\\?\C:\...` on Windows) and the verbatim
+path workaround crashing the frozen ncnn executable (`_wfopen`, 0xc0000409). The
+fix commit `7c64c36` adds the platform-aware `trusted_user_path()` normalization
+plus opaque-RGBA→RGB output normalization; its fix validation is recorded in
+[realesrgan-worker-windows-path-fix.json](realesrgan-worker-windows-path-fix.json)
+and the plain/verbatim runs
+([realesrgan-path-fix-plain.json](realesrgan-path-fix-plain.json),
+[realesrgan-path-fix-verbatim.json](realesrgan-path-fix-verbatim.json)). The
+defect is resolved; the bug record stays as the found-before-fix evidence.
 
 ## Not run (time-boxed, clearly marked)
 
 | Case | Status | Why / coverage |
 |---|---|---|
 | Supervisor-wrapped exchange | not_run | The harness currently spawns the wheel directly with the same worker arguments the supervisor will use; supervisor lifecycle evidence is covered by the supervisor/worker tasks. |
-| Real-ESRGAN worker v2 exchange | blocked (worker fix task-11) | Committed Windows native binary rejects normal absolute paths; full defect evidence in [realesrgan-worker-path-bug.json](realesrgan-worker-path-bug.json). Official rerun scheduled after the fixed binary lands. |
 
 ## Safety and limitations
 
@@ -211,10 +220,13 @@ replace this section with passing evidence.
 - The MOSS run's minimum available RAM was 2.696 GiB, close to the frozen 2 GiB
   floor but inside budget; the worker would have failed closed below 2 GiB. No
   other heavy agent jobs were running during that run.
-- Real-ESRGAN worker evidence: the frozen ncnn executable itself passes the
-  direct Gate 0 runs, but the committed Windows worker binary cannot be exercised
-  until the `\\?\` canonicalize defect is fixed; the defect evidence includes the
-  rejected normal-path startup and the verbatim-path ncnn crash.
+- Real-ESRGAN worker evidence: the two Windows-only defects found here
+  (verbatim-path canonicalize comparison and opaque-RGBA ncnn output) are fixed
+  in commit `7c64c36` and the official rerun passes; the RGBA→RGB normalization
+  means the PNG byte SHA-256 differs from the Gate 0 direct-ncnn RGBA file by
+  container color type, while decoded RGB pixels are identical (recorded in
+  `gate0_pixel_cross_check`), so the records state both SHA-256 values instead of
+  conflating them.
 
 ## Commands used
 
@@ -237,7 +249,7 @@ target\parity-gate0\py312\python.exe tools\diffusers-worker-windows\tests\run_re
   --mode run     --python <py312> --worker-site <dir> --snapshot <snapshot> --model <model-dir> `
   --report-output target\parity-worker\attempts\<case> --report <json>
 
-# native Real-ESRGAN worker (after the task-11 fix lands)
+# native Real-ESRGAN worker (fixed binary)
 target\parity-gate0\py312\python.exe tools\diffusers-worker-windows\tests\run_realesrgan_protocol.py `
   --worker-exe target\release\realesrgan-worker.exe `
   --ncnn-binary target\parity-runtime\realesrgan\app\realesrgan-ncnn-vulkan.exe `
