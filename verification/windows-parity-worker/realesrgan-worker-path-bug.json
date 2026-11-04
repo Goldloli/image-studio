@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "kind": "windows-realesrgan-worker-path-bug",
+  "status": "fail",
+  "discovered_at_utc": "2026-11-04T12:36:00Z",
+  "discovered_by": "gate0-transfer while running team task-10 (parity tasks 2.4/2.5)",
+  "fix_owner": "desktop-install (team task-11, assigned by lead)",
+  "summary": "The committed Windows realesrgan-worker release binary rejects every normal absolute path because it compares Path::canonicalize() to the input path, and on Windows Rust canonicalize returns an extended-length \\?\\C:\\... path. Passing verbatim extended-length paths satisfies the comparison but the frozen ncnn executable cannot open them, so a real generation-v2 exchange cannot complete until the worker is fixed.",
+  "worker": {
+    "build_id": "studio-realesrgan-worker-windows-0.1.0",
+    "runtime_lock_id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+    "model_snapshot_id": "realesrgan-x4plus-ncnn-windows-v1",
+    "binary": {
+      "path": "target/release/realesrgan-worker.exe",
+      "bytes": 990720,
+      "sha256": "22c4c679201ada31a4fb437efe771f959baebeaf767945666d7cf6355900b1ab"
+    },
+    "built_with": "cargo build --release -p realesrgan-worker (rustc 1.99.1 x86_64-pc-windows-msvc)"
+  },
+  "ncnn_bundle": {
+    "binary": {
+      "path": "target/parity-runtime/realesrgan/app/realesrgan-ncnn-vulkan.exe",
+      "bytes": 6161408,
+      "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c"
+    },
+    "weights": {
+      "realesrgan-x4plus.bin": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf",
+      "realesrgan-x4plus.param": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+    },
+    "note": "ncnn exe and weights match the frozen manifest/worker constants; the same bundle passes the direct Gate 0 runs in verification/windows-parity-realesrgan/."
+  },
+  "root_cause": "tools/realesrgan-worker/src/main.rs normalizes paths with `path.canonicalize()? != path` in parse_binary(), validate_request() (model path and output dir). Rust std::fs::canonicalize on Windows returns the extended-length form `\\\\?\\C:\\...`, so the comparison always fails for a regular absolute path supplied by the installer / harness. This is a Windows portability defect of the native worker, not a model/runtime/budget failure.",
+  "affected_code": [
+    "tools/realesrgan-worker/src/main.rs parse_binary(): path.canonicalize()? != path",
+    "tools/realesrgan-worker/src/main.rs validate_request(): model.canonicalize()? != model",
+    "tools/realesrgan-worker/src/main.rs validate_request(): output_dir.canonicalize()? != output_dir"
+  ],
+  "reproductions": [
+    {
+      "id": "normal-absolute-paths",
+      "description": "All worker inputs are ordinary normalized absolute paths.",
+      "command": [
+        "target/release/realesrgan-worker.exe",
+        "--ncnn-binary",
+        "C:\\...\\target\\parity-runtime\\realesrgan\\app\\realesrgan-ncnn-vulkan.exe"
+      ],
+      "request": {
+        "input": {
+          "path": "target/parity-worker/attempts/realesrgan-220x220/source.png",
+          "width": 220,
+          "height": 220,
+          "sha256": "fd547d5c5c21986f13c1922cbdfdb8a5bbf64a314da5d357486ddd15d944bc01"
+        },
+        "parameters": {
+          "recipe": "realesrgan-x4plus-windows-t128-v1",
+          "recipe_version": 1,
+          "model": "realesrgan-x4plus",
+          "scale": 4,
+          "tile": 128,
+          "threads": "1:1:1",
+          "tta": false
+        },
+        "output_spec": {
+          "role": "primary",
+          "data_type": "image_rgb",
+          "width": 880,
+          "height": 880,
+          "max_bytes": 134217728
+        }
+      },
+      "observed": {
+        "worker_exit_code": 70,
+        "handshake_received": false,
+        "stderr": "realesrgan worker: ncnn binary must be an absolute regular file named realesrgan-ncnn-vulkan.exe"
+      },
+      "evidence_file": "target/parity-worker/results/realesrgan-normalpath-rejected.json"
+    },
+    {
+      "id": "verbatim-extended-length-paths",
+      "description": "The harness prefixes the worker binary argument, model path, output dir and source path with \\\\?\\ so the canonicalize comparison passes; the worker then starts real inference.",
+      "command": [
+        "target/release/realesrgan-worker.exe",
+        "--ncnn-binary",
+        "\\\\?\\C:\\...\\realesrgan-ncnn-vulkan.exe",
+        "request model_path/output_dir/source.path also verbatim"
+      ],
+      "observed": {
+        "handshake": {
+          "type": "hello_accepted",
+          "versions": {
+            "min": 2,
+            "max": 2
+          },
+          "selected_version": 2,
+          "identity": {
+            "build_id": "studio-realesrgan-worker-windows-0.1.0",
+            "runtime_lock_id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+            "model_snapshot_id": "realesrgan-x4plus-ncnn-windows-v1"
+          },
+          "capabilities": [
+            "image.upscale.realesrgan-x4plus.windows-v1"
+          ]
+        },
+        "progress": [
+          {
+            "type": "progress",
+            "stage": "loading",
+            "completed": null,
+            "total": null
+          }
+        ],
+        "terminal": {
+          "type": "error",
+          "code": "INFERENCE_ERROR",
+          "summary": "ncnn exited with exit code: 0xc0000409"
+        },
+        "worker_exit_code": 70,
+        "vulkan_devices_enumerated": [
+          "[0 NVIDIA GeForce RTX 3080 Ti]  queueC=2[8]  queueG=0[16]  queueT=1[2]",
+          "[0 NVIDIA GeForce RTX 3080 Ti]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0",
+          "[0 NVIDIA GeForce RTX 3080 Ti]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1",
+          "[0 NVIDIA GeForce RTX 3080 Ti]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1"
+        ],
+        "ncnn_stderr_excerpt": [
+          "_wfopen C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-runtime\\realesrgan\\app\\\\\\?\\C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-worker\\realesrgan\\model\\models/realesrgan-x4plus.param failed"
+        ],
+        "attempt_files": [
+          "source.png"
+        ]
+      },
+      "evidence_file": "target/parity-worker/results/realesrgan-verbatim-attempt.json"
+    }
+  ],
+  "impact": "Blocks the Real-ESRGAN Windows worker real protocol evidence (task-10 item 3) and would block the installed product worker on the target machine, because the installer passes the same normal absolute paths. No candidate was produced; the failure is a worker path-normalization defect, not a budget failure.",
+  "fix_proposal": "Normalize before comparing: accept the path when it is an absolute, non-symlink regular file/dir and its canonical form equals the input after stripping the Windows `\\\\?\\` prefix case-insensitively (the existing macOS behavior is unchanged). Keep the ncnn argv `-i/-o/-m` paths un-prefixed (normal absolute paths) because the frozen ncnn binary cannot open extended-length paths. Add unit tests for both normal and verbatim inputs and rebuild the release binary.",
+  "next_step": "desktop-install fixes tools/realesrgan-worker, rebuilds the release binary and verifies one 97x61 real exchange; then this task reruns the official 220x220 and 97x61 v2 exchanges and replaces this failure record with passing real-protocol evidence."
+}
