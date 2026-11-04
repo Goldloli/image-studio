@@ -1,22 +1,22 @@
 use std::path::{Path, PathBuf};
 
 /// Windows legacy `MAX_PATH` is 260 UTF-16 units. The activated shared runtime
-/// lives at `data/runtimes/<runtime.id>`; the longest frozen runtime id is 61
-/// units and the longest load-relevant member (`numpy.libs/libscipy_openblas…dll`)
-/// is 86 units. Budget: 260 - 10 safety margin - 10 (`\runtimes\`) - 61 - 1 - 86
-/// = 92 data-path units. The short staging name (≤26) is not the upper bound once
-/// the runtime is activated, so the final layout drives this limit.
+/// lives at `data/runtimes/rt-<12 hex>` (15 units; the runtime identity stays in
+/// the activation record). The longest **Python-openable** runtime path is 130
+/// units (a diffusers `.py` module; torch headers are longer but never opened).
+/// Budget: 260 - 10 safety margin - 10 (`\runtimes\`) - 15 - 1 - 130 = 94
+/// data-path units. Staging is shorter (≤26) and is not the upper bound.
 #[cfg(windows)]
-pub const MAX_DATA_PATH_UNITS: usize = 92;
+pub const MAX_DATA_PATH_UNITS: usize = 94;
 
 #[cfg(windows)]
 const WINDOWS_MAX_PATH_UNITS: usize = 260;
 #[cfg(windows)]
 const RUNTIMES_PREFIX_UNITS: usize = 10;
 #[cfg(windows)]
-const LONGEST_RUNTIME_ID_UNITS: usize = 61;
+const FINAL_RUNTIME_DIR_UNITS: usize = 15;
 #[cfg(windows)]
-const LONGEST_LOAD_PATH_UNITS: usize = 86;
+const LONGEST_LOAD_PATH_UNITS: usize = 130;
 #[cfg(windows)]
 const PATH_SAFETY_MARGIN_UNITS: usize = 10;
 
@@ -28,7 +28,7 @@ const DATA_ROOT_SUGGESTION: &str = r"C:\ImageStudioData";
 #[cfg(windows)]
 const _: () = assert!(
     RUNTIMES_PREFIX_UNITS
-        + LONGEST_RUNTIME_ID_UNITS
+        + FINAL_RUNTIME_DIR_UNITS
         + 1
         + LONGEST_LOAD_PATH_UNITS
         + PATH_SAFETY_MARGIN_UNITS
@@ -118,12 +118,11 @@ impl AppPaths {
                 source,
             })?;
         }
-        // Re-check the real paths after canonicalization; data and cache both live
-        // under the runtime-relevant root and are what workers actually use.
+        // Re-check the real data path after canonicalization. Only `data` holds
+        // the runtime tree; the file names under `cache` are short hashes, so its
+        // one-unit-longer path does not affect long-path loading.
         #[cfg(windows)]
-        for path in [&paths.data, &paths.cache] {
-            validate_canonical_path_length(path)?;
-        }
+        validate_canonical_path_length(&paths.data)?;
         Ok(paths)
     }
 
