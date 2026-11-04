@@ -64,8 +64,15 @@ bd prime
 目标机已补齐 macOS 的六个型号（`openspec/changes/archive/2026-11-04-achieve-windows-model-parity`）：FLUX.2 Klein 4B distilled（文生图 + 单图编辑）、BiRefNet epoch_244（CPU 去背景 RGBA+mask）、Real-ESRGAN x4plus（ncnn Vulkan 精确 4×）、Qwen-Image 2.1 / 2.1-Turbo（分阶段 NF4 + prepared cache）与 MOSS-Image-SFT（分阶段 NF4、vendored pipeline）。七个型号在安装版原生 UI 中完成真实生成/处理、查看、PNG/RGBA/mask 导出、任务与作品查询；模型页投影七个型号、硬件门槛与许可（Qwen 非商用标注），设置页展示 v1/v2/ncnn 运行时。
 
 - 证据：`verification/windows-parity-{gate0,runtime,realesrgan,worker,gpu,manifests,ui-projection,review,app}/`；安装版总账见 [Windows parity app acceptance](verification/windows-parity-app/README.md)。
-- 安装版验收使用隔离根与本地已校验缓存种子完成六型号安装；空缓存真实网络安装受当前 PyPI 吞吐阻塞、未冒充通过；整树禁网验收沿用 2026-11-03 用户 waive 决定。质量样图人工签收与最终归档待用户确认。
+- 安装版验收使用隔离根与本地已校验缓存种子完成六型号安装；空缓存真实网络安装受当前 PyPI 吞吐阻塞、未冒充通过；整树禁网验收沿用 2026-11-03 用户 waive 决定。not-run 行已获用户接受，change 已归档（`openspec/changes/archive/2026-11-04-achieve-windows-model-parity`）。
 - Windows 内部包 sidecar 现在包含 `inference-supervisor`、`diagnostic-worker` 与 `realesrgan-worker`，由 `scripts/build-windows-internal.ps1` 一并构建。
+- 深数据根已加固（change `harden-windows-data-root-paths`）：暂存目录名缩短为 `.staging-<pid>-<8hex>`，启动前拒绝 >117 字符数据路径（退出码 3 + 中文建议），安装前回收历史 `.staging-*` 残留；证据见 [verification/windows-data-root-guard/](verification/windows-data-root-guard/README.md)。
+
+### CI 与发布（GitHub Actions，用户启用）
+
+仓库内置跨平台质量门、Windows/macOS 产物构建与 draft Release workflow；workflow 文件与本地验证见 [doc/14-ci-release.md](doc/14-ci-release.md)，本机验收记录在 [verification/ci-release/](verification/ci-release/README.md)。首次 push、Actions 启用与 tag 发布需要仓库所有者授权；v1 产物未签名/未公证。
+
+[![quality](https://github.com/Goldloli/image-studio/actions/workflows/quality.yml/badge.svg)](https://github.com/Goldloli/image-studio/actions/workflows/quality.yml)
 
 ## 构建和启动
 

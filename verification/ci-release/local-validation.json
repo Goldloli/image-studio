@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "kind": "ci-release-local-validation",
+  "status": "passed_with_user_gated_rows",
+  "date": "2026-11-04",
+  "machine": "Windows 10 22H2 / RTX 3080 Ti / 32 GB RAM (local runner; macOS rows cannot run here)",
+  "build_commit": "ed29da7",
+  "toolchain": {
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "1.99.1 (5f94df478 2026-08-27)",
+    "node": "v24.19.0",
+    "npm": "11.17.0",
+    "openspec": "1.12.0"
+  },
+  "workflows": {
+    "files": [
+      ".github/workflows/quality.yml",
+      ".github/workflows/build.yml",
+      ".github/workflows/release.yml"
+    ],
+    "yaml_structure": "passed (PyYAML parse + trigger/jobs/steps shape checks in target/parity-gates/validate-workflows.py)",
+    "actionlint": "not available locally; GitHub-side validation is user-gated"
+  },
+  "command_parity": [
+    {
+      "command": "cargo fmt --all -- --check",
+      "exit_code": 0
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets --locked -- -D warnings",
+      "exit_code": 0
+    },
+    {
+      "command": "cargo test --workspace --locked",
+      "exit_code": 0,
+      "desktop_tests": "183 passed / 7 ignored; worker-protocol 42; studio-core 27+17"
+    },
+    {
+      "command": "npm test (apps/frontend)",
+      "exit_code": 0,
+      "tests": "52 passed in 7 files"
+    },
+    {
+      "command": "npm run check (apps/frontend)",
+      "exit_code": 0
+    },
+    {
+      "command": "npm run build (apps/frontend)",
+      "exit_code": 0
+    },
+    {
+      "command": "openspec validate --all --strict",
+      "exit_code": 0,
+      "items": "24 passed, 0 failed"
+    }
+  ],
+  "windows_build": {
+    "command": "./scripts/build-windows-internal.ps1 -SkipQualityGates",
+    "exit_code": 0,
+    "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
+    "installer_sha256": "fb37d774b10e1a3f3b73886644b7e5aea9f7b3782d7f791fa8c87588550fb171",
+    "installer_bytes": 245021486,
+    "internal_package": "verification/ci-release/internal-package.json",
+    "checksums": "verification/ci-release/windows-SHA256SUMS.sample",
+    "note": "same command and args as the quality workflow's build job; checksums generated with the workflow's PowerShell logic and match internal-package.json"
+  },
+  "macos_script": {
+    "command": "python -m py_compile scripts/prepare-macos-dev-app.py",
+    "exit_code": 0,
+    "help": "scripts/prepare-macos-dev-app.py --help exits 0 and lists --profile {debug,release}",
+    "gated": "real macOS build/packaging requires a Mac; CI build on macos-14 is user-gated"
+  },
+  "user_gated_rows": [
+    "git push origin main (needs explicit owner authorization)",
+    "GitHub Actions first quality run (Windows + macOS)",
+    "GitHub Actions manual build-artifacts run and artifact download/checksum verification",
+    "macOS release build and unsigned .app packaging",
+    "tag v* draft Release creation and manual publish"
+  ],
+  "limitations": [
+    "Unsigned Windows/macOS artifacts (SmartScreen/Gatekeeper warnings documented).",
+    "CI does not download models or run GPU inference; model acceptance stays on the target machine evidence.",
+    "YAML validation is syntactic/structural only; actionlint/GitHub schema validation happens on the first user-enabled run."
+  ]
+}
