@@ -1197,6 +1197,66 @@ fn activate_staged_runtime(staging: &Path, runtime: &Path) -> Result<(), String>
     fs::rename(staging, runtime).map_err(err)?;
     sync_directory(runtime.parent().ok_or("运行时路径无父目录")?)
 }
+
+/// Short, collision-resistant name for a staged runtime rebuild.
+///
+/// The legacy name embedded the 60-character runtime id and a nanosecond stamp,
+/// which pushed the staging path to the Windows legacy MAX_PATH edge for deep
+/// data roots (`onnxruntime_pybind11_state.pyd` failed with 文件名或扩展名太长
+/// in the parity acceptance). Hex pid + a mixed 32-bit nonce keeps the name at
+/// most 26 UTF-16 units while remaining unique per install attempt.
+#[cfg(any(windows, test))]
+const STAGING_DIR_PREFIX: &str = ".staging-";
+
+#[cfg(any(windows, test))]
+fn staging_runtime_dir_name(pid: u32, nonce: u64) -> String {
+    // splitmix64 finalizer keeps the low 32 bits well distributed even for
+    // nanosecond stamps that differ by tiny amounts.
+    let mut mixed = nonce.wrapping_add(0x9E37_79B9_7F4A_7C15);
+    mixed = (mixed ^ (mixed >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    mixed = (mixed ^ (mixed >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    let mixed = (mixed ^ (mixed >> 31)) as u32;
+    format!("{STAGING_DIR_PREFIX}{pid:x}-{mixed:08x}")
+}
+
+/// Best-effort removal of `.staging-*` leftovers from previous runtime installs.
+///
+/// Only plain directories are removed; symlinks/junctions are skipped entirely
+/// so a manipulated data root cannot redirect the cleanup. Failures are returned
+/// as warnings and never fail the installation that follows.
+#[cfg(any(windows, test))]
+fn cleanup_stale_runtime_staging(runtimes: &Path) -> Vec<String> {
+    let mut warnings = Vec::new();
+    let Ok(entries) = fs::read_dir(runtimes) else {
+        return warnings;
+    };
+    for entry in entries.flatten() {
+        let name = entry.file_name();
+        let Some(name) = name.to_str() else {
+            continue;
+        };
+        if !name.starts_with(STAGING_DIR_PREFIX) {
+            continue;
+        }
+        let path = entry.path();
+        match fs::symlink_metadata(&path) {
+            Ok(metadata) if metadata.is_dir() => {
+                if let Err(error) = fs::remove_dir_all(&path) {
+                    warnings.push(format!(
+                        "无法清理遗留运行时暂存目录 {}: {error}",
+                        path.display()
+                    ));
+                }
+            }
+            Ok(_) => warnings.push(format!("跳过非目录运行时暂存项 {}", path.display())),
+            Err(error) => warnings.push(format!(
+                "无法检查遗留运行时暂存项 {}: {error}",
+                path.display()
+            )),
+        }
+    }
+    warnings
+}
 /// design.md section 11 freezes a worker snapshot identity for every new Windows
 /// model; legacy profiles keep the model manifest id as their worker snapshot.
 fn execution_snapshot_id(install_id: &str) -> Option<&'static str> {
@@ -2246,6 +2306,10 @@ impl Installation {
         )?;
         let runtime = self.runtime_dir();
         ensure_child_dir(&self.inner.paths.data, &runtime)?;
+        #[cfg(windows)]
+        for warning in cleanup_stale_runtime_staging(&self.inner.paths.data.join("runtimes")) {
+            eprintln!("{warning}");
+        }
         let runtime_manifest_sha256 = manifest_digest(self.inner.profile.runtime_manifest);
         let worker_wheels = bundled_worker_wheel_records(self.inner.profile);
         // Shared runtimes (several Windows v2 models, several macOS v3 models) must
@@ -2425,13 +2489,13 @@ impl Installation {
     fn staging_runtime_dir(&self) -> PathBuf {
         let nonce = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .map(|elapsed| elapsed.as_nanos())
+            .map(|elapsed| elapsed.as_nanos() as u64)
             .unwrap_or(0);
-        self.inner.paths.data.join("runtimes").join(format!(
-            ".{}.staging-{}-{nonce}",
-            self.inner.runtime.id,
-            std::process::id()
-        ))
+        self.inner
+            .paths
+            .data
+            .join("runtimes")
+            .join(staging_runtime_dir_name(std::process::id(), nonce))
     }
     fn prepare_native_runtime(&self) -> Result<ReadyRecord, String> {
         for archive in &self.inner.runtime.archives {
@@ -7167,5 +7231,52 @@ mod tests {
         fs::write(&path, b"hello").unwrap();
         assert!(verify(&path, 5, &format!("{:x}", Sha256::digest(b"hello"))).is_ok());
         assert!(verify(&path, 5, &"0".repeat(64)).is_err());
+    }
+    #[test]
+    fn staging_runtime_dir_names_are_short_stable_and_distinct() {
+        let first = staging_runtime_dir_name(1234, 1);
+        assert!(first.starts_with(".staging-"), "{first}");
+        assert!(first.len() <= 26, "{first}");
+        assert!(
+            first
+                .chars()
+                .all(|character| character.is_ascii_alphanumeric()
+                    || character == '.'
+                    || character == '-'),
+            "{first}"
+        );
+        assert_ne!(first, staging_runtime_dir_name(1235, 1));
+        assert_ne!(first, staging_runtime_dir_name(1234, 2));
+        // u32::MAX pid still fits the length budget.
+        assert!(staging_runtime_dir_name(u32::MAX, u64::MAX).len() <= 26);
+    }
+    #[test]
+    fn stale_runtime_staging_cleanup_removes_only_plain_staging_dirs() {
+        let tmp = tempfile::tempdir().unwrap();
+        let runtimes = tmp.path().join("runtimes");
+        let formal = runtimes.join("windows-python31210-runtime-v2");
+        let stale = runtimes.join(".staging-2a-0123abcd");
+        fs::create_dir_all(&formal).unwrap();
+        fs::create_dir_all(&stale).unwrap();
+        fs::write(stale.join("Lib").join("placeholder"), b"partial").ok();
+        fs::write(runtimes.join(".staging-file"), b"not a dir").unwrap();
+        let warnings = cleanup_stale_runtime_staging(&runtimes);
+        assert!(!stale.exists(), "stale staging directory must be removed");
+        assert!(formal.is_dir(), "formal runtime must not be touched");
+        assert!(
+            runtimes.join(".staging-file").is_file(),
+            "non-directory staging entries are skipped"
+        );
+        assert!(
+            warnings
+                .iter()
+                .any(|warning| warning.contains("跳过非目录")),
+            "{warnings:?}"
+        );
+    }
+    #[test]
+    fn stale_runtime_staging_cleanup_tolerates_a_missing_runtimes_dir() {
+        let tmp = tempfile::tempdir().unwrap();
+        assert!(cleanup_stale_runtime_staging(&tmp.path().join("absent")).is_empty());
     }
 }
