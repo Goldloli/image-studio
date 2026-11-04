@@ -177,6 +177,15 @@ fn config_for(
     root: &std::path::Path,
     execution_lock: Option<PathBuf>,
 ) -> SupervisorConfig {
+    // Timeout fixtures keep the small budgets they assert against. Every other
+    // fixture gets generous budgets: this test binary spawns several Python
+    // workers and runs in parallel with the rest of the workspace suite, and the
+    // old 1.5s/2.5s budgets occasionally turned CPU contention into a spurious
+    // Error event (progress_flood_is_coalesced_and_logs_remain_bounded).
+    let (handshake_ms, loading_ms, generation_ms) = match mode {
+        "hang" | "generation-timeout" => (1500, 2500, 2500),
+        _ => (5000, 10000, 10000),
+    };
     SupervisorConfig {
         python_program: python(),
         worker_args: vec![
@@ -195,9 +204,9 @@ fn config_for(
         protocol_version: 1,
         expected_capabilities: vec!["image.text-to-image.z-image-turbo.v1".into()],
         timeouts: Timeouts {
-            handshake_ms: 1500,
-            loading_ms: 2500,
-            generation_ms: 2500,
+            handshake_ms,
+            loading_ms,
+            generation_ms,
             cancel_grace_ms: 100,
             cleanup_deadline_ms: 1500,
         },
