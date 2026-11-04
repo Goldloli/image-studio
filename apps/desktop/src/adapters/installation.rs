@@ -101,6 +101,93 @@ const SEGMENTED_DOWNLOAD_THRESHOLD: u64 = 2 * 1024 * 1024 * 1024;
 const DOWNLOAD_SEGMENTS: usize = 8;
 const SEGMENT_ATTEMPTS: usize = 5;
 
+// Windows model-parity install identities (design.md section 11). The installer
+// id / model variant id doubles as the model manifest id and install directory.
+pub const WINDOWS_KLEIN_INSTALL_ID: &str = "flux2-klein-4b-distilled-windows-v1";
+pub const WINDOWS_BIREFNET_INSTALL_ID: &str = "birefnet-general-epoch-244-windows-v1";
+pub const WINDOWS_REALESRGAN_INSTALL_ID: &str = "realesrgan-x4plus-windows-v1";
+pub const WINDOWS_QWEN_IMAGE_21_INSTALL_ID: &str = "qwen-image-2.1-windows-v1";
+pub const WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID: &str = "qwen-image-2.1-turbo-windows-v1";
+pub const WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID: &str = "moss-image-sft-windows-v1";
+
+#[cfg(windows)]
+const WINDOWS_V2_RUNTIME_MANIFEST: &str =
+    include_str!("../../../../resources/windows-parity/runtime-v2/product-runtime-manifest.json");
+#[cfg(windows)]
+const WINDOWS_V2_REQUIREMENTS_LOCK: &str =
+    include_str!("../../../../resources/windows-parity/runtime-v2/requirements.lock");
+#[cfg(windows)]
+const WINDOWS_KLEIN_MODEL_MANIFEST: &str = include_str!(
+    "../../../../resources/windows-parity/models/flux2-klein-4b-distilled-windows-v1/model-manifest.json"
+);
+#[cfg(windows)]
+const WINDOWS_BIREFNET_MODEL_MANIFEST: &str = include_str!(
+    "../../../../resources/windows-parity/models/birefnet-general-epoch-244-windows-v1/model-manifest.json"
+);
+#[cfg(windows)]
+const WINDOWS_REALESRGAN_MODEL_MANIFEST: &str = include_str!(
+    "../../../../resources/windows-parity/models/realesrgan-x4plus-windows-v1/model-manifest.json"
+);
+#[cfg(windows)]
+const WINDOWS_QWEN_IMAGE_21_MODEL_MANIFEST: &str = include_str!(
+    "../../../../resources/windows-parity/models/qwen-image-2.1-windows-v1/model-manifest.json"
+);
+#[cfg(windows)]
+const WINDOWS_QWEN_IMAGE_21_TURBO_MODEL_MANIFEST: &str = include_str!(
+    "../../../../resources/windows-parity/models/qwen-image-2.1-turbo-windows-v1/model-manifest.json"
+);
+#[cfg(windows)]
+const WINDOWS_MOSS_IMAGE_SFT_MODEL_MANIFEST: &str = include_str!(
+    "../../../../resources/windows-parity/models/moss-image-sft-windows-v1/model-manifest.json"
+);
+#[cfg(windows)]
+const WINDOWS_REALESRGAN_RUNTIME_MANIFEST: &str = include_str!(
+    "../../../../resources/windows-parity/realesrgan-ncnn-vulkan/runtime-manifest.json"
+);
+#[cfg(windows)]
+const WINDOWS_DIFFUSERS_WORKER_WHEEL: &[u8] = include_bytes!(
+    "../../../../resources/windows-parity/workers/studio_diffusers_worker-0.1.0-py3-none-any.whl"
+);
+#[cfg(windows)]
+const WINDOWS_ONNX_WORKER_WHEEL: &[u8] = include_bytes!(
+    "../../../../resources/windows-parity/workers/studio_onnx_worker-0.1.0-py3-none-any.whl"
+);
+/// The shared v2 runtime serves every Python Windows model, so both worker wheels
+/// must be present regardless of which model is installed first. The frozen
+/// product runtime manifest does not declare them yet (`worker_wheels_pending`),
+/// so the installer embeds them as fixed application resources instead.
+#[cfg(windows)]
+const WINDOWS_SHARED_WORKER_WHEELS: &[(&str, &[u8])] = &[
+    (
+        "studio_diffusers_worker-0.1.0-py3-none-any.whl",
+        WINDOWS_DIFFUSERS_WORKER_WHEEL,
+    ),
+    (
+        "studio_onnx_worker-0.1.0-py3-none-any.whl",
+        WINDOWS_ONNX_WORKER_WHEEL,
+    ),
+];
+#[cfg(windows)]
+const WINDOWS_BIREFNET_LICENSES: &[(&str, &[u8])] = &[(
+    "LICENSE-BiRefNet.txt",
+    include_bytes!("../../../../resources/planned-models/birefnet/LICENSE-BiRefNet.txt"),
+)];
+#[cfg(windows)]
+const WINDOWS_REALESRGAN_LICENSES: &[(&str, &[u8])] = &[
+    (
+        "LICENSE-RealESRGAN.txt",
+        include_bytes!(
+            "../../../../resources/windows-parity/realesrgan-ncnn-vulkan/LICENSE-RealESRGAN.txt"
+        ),
+    ),
+    (
+        "LICENSE-ncnn-app.txt",
+        include_bytes!(
+            "../../../../resources/windows-parity/realesrgan-ncnn-vulkan/LICENSE-ncnn-app.txt"
+        ),
+    ),
+];
+
 #[derive(Clone, Copy)]
 struct InstallProfile {
     install_id: &'static str,
@@ -121,6 +208,14 @@ struct InstallProfile {
     /// Fixed license texts that cannot be downloaded from an allowlisted URL and
     /// are archived under `<data>/licenses/<install_id>/` at install time.
     bundle_licenses: &'static [(&'static str, &'static [u8])],
+    /// Staged Qwen/MOSS models build a quantized cache with the worker at install
+    /// time; the prepared directory is recorded in the ready record.
+    prepare_with_model: bool,
+    /// Conservative space reserve for that prepared cache (design.md section 10).
+    prepared_cache_reserve: u64,
+    /// Fixed worker wheels embedded for the shared v2 runtime when the frozen
+    /// runtime manifest does not declare them (Windows model parity).
+    shared_worker_wheels: &'static [(&'static str, &'static [u8])],
 }
 
 struct SegmentDownload<'a> {
@@ -152,6 +247,9 @@ const Z_PROFILE: InstallProfile = InstallProfile {
     probe_with_model: false,
     worker_model_argument: false,
     bundle_licenses: &[],
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
 };
 
 const KLEIN_PROFILE: InstallProfile = InstallProfile {
@@ -171,6 +269,9 @@ const KLEIN_PROFILE: InstallProfile = InstallProfile {
     probe_with_model: false,
     worker_model_argument: false,
     bundle_licenses: &[],
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
 };
 
 const BIREFNET_PROFILE: InstallProfile = InstallProfile {
@@ -190,6 +291,9 @@ const BIREFNET_PROFILE: InstallProfile = InstallProfile {
     probe_with_model: true,
     worker_model_argument: false,
     bundle_licenses: &[],
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
 };
 
 const REALESRGAN_PROFILE: InstallProfile = InstallProfile {
@@ -209,6 +313,9 @@ const REALESRGAN_PROFILE: InstallProfile = InstallProfile {
     probe_with_model: true,
     worker_model_argument: false,
     bundle_licenses: &[],
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
 };
 
 #[cfg(not(windows))]
@@ -229,6 +336,9 @@ const QWEN_IMAGE_21_PROFILE: InstallProfile = InstallProfile {
     probe_with_model: false,
     worker_model_argument: true,
     bundle_licenses: &[],
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
 };
 
 #[cfg(not(windows))]
@@ -249,6 +359,9 @@ const QWEN_IMAGE_21_TURBO_PROFILE: InstallProfile = InstallProfile {
     probe_with_model: false,
     worker_model_argument: true,
     bundle_licenses: &[],
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
 };
 
 #[cfg(not(windows))]
@@ -269,6 +382,9 @@ const MOSS_IMAGE_SFT_PROFILE: InstallProfile = InstallProfile {
     probe_with_model: false,
     worker_model_argument: true,
     bundle_licenses: &[],
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
 };
 
 const WINDOWS_ZIMAGE_PROFILE: InstallProfile = InstallProfile {
@@ -288,6 +404,147 @@ const WINDOWS_ZIMAGE_PROFILE: InstallProfile = InstallProfile {
     probe_with_model: true,
     worker_model_argument: false,
     bundle_licenses: &[],
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
+};
+
+#[cfg(windows)]
+const WINDOWS_KLEIN_PROFILE: InstallProfile = InstallProfile {
+    install_id: WINDOWS_KLEIN_INSTALL_ID,
+    model_manifest: WINDOWS_KLEIN_MODEL_MANIFEST,
+    runtime_manifest: WINDOWS_V2_RUNTIME_MANIFEST,
+    requirements_lock: WINDOWS_V2_REQUIREMENTS_LOCK,
+    worker_wheel: &[],
+    worker_module: "studio_diffusers_worker",
+    worker_build_id: studio_core::generation::WINDOWS_DIFFUSERS_WORKER,
+    engine: studio_core::generation::WINDOWS_DIFFUSERS_ENGINE,
+    scheduler: "flow_match_euler_discrete",
+    probe_device: "gpu",
+    precision: "nf4;load_strategy=nf4-component-offload-v1",
+    ready_relative: "installations/models/flux2-klein-4b-distilled-windows-v1.json",
+    installing_relative: "installations/models/flux2-klein-4b-distilled-windows-v1.installing.json",
+    probe_with_model: true,
+    worker_model_argument: true,
+    bundle_licenses: &[],
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: WINDOWS_SHARED_WORKER_WHEELS,
+};
+
+#[cfg(windows)]
+const WINDOWS_BIREFNET_PROFILE: InstallProfile = InstallProfile {
+    install_id: WINDOWS_BIREFNET_INSTALL_ID,
+    model_manifest: WINDOWS_BIREFNET_MODEL_MANIFEST,
+    runtime_manifest: WINDOWS_V2_RUNTIME_MANIFEST,
+    requirements_lock: WINDOWS_V2_REQUIREMENTS_LOCK,
+    worker_wheel: &[],
+    worker_module: "studio_onnx_worker",
+    worker_build_id: studio_core::generation::WINDOWS_ONNX_WORKER,
+    engine: studio_core::generation::WINDOWS_ONNX_ENGINE,
+    scheduler: "birefnet-1024-rgb-v1",
+    probe_device: "windows-cpu",
+    precision: "float32",
+    ready_relative: "installations/models/birefnet-general-epoch-244-windows-v1.json",
+    installing_relative: "installations/models/birefnet-general-epoch-244-windows-v1.installing.json",
+    probe_with_model: true,
+    worker_model_argument: true,
+    bundle_licenses: WINDOWS_BIREFNET_LICENSES,
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: WINDOWS_SHARED_WORKER_WHEELS,
+};
+
+#[cfg(windows)]
+const WINDOWS_REALESRGAN_PROFILE: InstallProfile = InstallProfile {
+    install_id: WINDOWS_REALESRGAN_INSTALL_ID,
+    model_manifest: WINDOWS_REALESRGAN_MODEL_MANIFEST,
+    runtime_manifest: WINDOWS_REALESRGAN_RUNTIME_MANIFEST,
+    requirements_lock: "",
+    worker_wheel: &[],
+    worker_module: REALESRGAN_WORKER_MODULE,
+    worker_build_id: studio_core::generation::WINDOWS_REALESRGAN_WORKER,
+    engine: studio_core::generation::WINDOWS_NCNN_ENGINE,
+    scheduler: "realesrgan-x4plus-windows-t128-v1",
+    probe_device: "gpu",
+    precision: "vulkan-fp16;tile=128",
+    ready_relative: "installations/models/realesrgan-x4plus-windows-v1.json",
+    installing_relative: "installations/models/realesrgan-x4plus-windows-v1.installing.json",
+    probe_with_model: true,
+    worker_model_argument: true,
+    bundle_licenses: WINDOWS_REALESRGAN_LICENSES,
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
+};
+
+#[cfg(windows)]
+const WINDOWS_QWEN_IMAGE_21_PROFILE: InstallProfile = InstallProfile {
+    install_id: WINDOWS_QWEN_IMAGE_21_INSTALL_ID,
+    model_manifest: WINDOWS_QWEN_IMAGE_21_MODEL_MANIFEST,
+    runtime_manifest: WINDOWS_V2_RUNTIME_MANIFEST,
+    requirements_lock: WINDOWS_V2_REQUIREMENTS_LOCK,
+    worker_wheel: &[],
+    worker_module: "studio_diffusers_worker",
+    worker_build_id: studio_core::generation::WINDOWS_DIFFUSERS_WORKER,
+    engine: studio_core::generation::WINDOWS_DIFFUSERS_ENGINE,
+    scheduler: "linear",
+    probe_device: "gpu",
+    precision: "nf4;load_strategy=staged-nf4-v1",
+    ready_relative: "installations/models/qwen-image-2.1-windows-v1.json",
+    installing_relative: "installations/models/qwen-image-2.1-windows-v1.installing.json",
+    probe_with_model: true,
+    worker_model_argument: true,
+    bundle_licenses: &[],
+    prepare_with_model: true,
+    prepared_cache_reserve: 10_050_000_000,
+    shared_worker_wheels: WINDOWS_SHARED_WORKER_WHEELS,
+};
+
+#[cfg(windows)]
+const WINDOWS_QWEN_IMAGE_21_TURBO_PROFILE: InstallProfile = InstallProfile {
+    install_id: WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID,
+    model_manifest: WINDOWS_QWEN_IMAGE_21_TURBO_MODEL_MANIFEST,
+    runtime_manifest: WINDOWS_V2_RUNTIME_MANIFEST,
+    requirements_lock: WINDOWS_V2_REQUIREMENTS_LOCK,
+    worker_wheel: &[],
+    worker_module: "studio_diffusers_worker",
+    worker_build_id: studio_core::generation::WINDOWS_DIFFUSERS_WORKER,
+    engine: studio_core::generation::WINDOWS_DIFFUSERS_ENGINE,
+    scheduler: "linear",
+    probe_device: "gpu",
+    precision: "nf4;load_strategy=staged-nf4-v1",
+    ready_relative: "installations/models/qwen-image-2.1-turbo-windows-v1.json",
+    installing_relative: "installations/models/qwen-image-2.1-turbo-windows-v1.installing.json",
+    probe_with_model: true,
+    worker_model_argument: true,
+    bundle_licenses: &[],
+    prepare_with_model: true,
+    prepared_cache_reserve: 10_050_000_000,
+    shared_worker_wheels: WINDOWS_SHARED_WORKER_WHEELS,
+};
+
+#[cfg(windows)]
+const WINDOWS_MOSS_IMAGE_SFT_PROFILE: InstallProfile = InstallProfile {
+    install_id: WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID,
+    model_manifest: WINDOWS_MOSS_IMAGE_SFT_MODEL_MANIFEST,
+    runtime_manifest: WINDOWS_V2_RUNTIME_MANIFEST,
+    requirements_lock: WINDOWS_V2_REQUIREMENTS_LOCK,
+    worker_wheel: &[],
+    worker_module: "studio_diffusers_worker",
+    worker_build_id: studio_core::generation::WINDOWS_DIFFUSERS_WORKER,
+    engine: studio_core::generation::WINDOWS_DIFFUSERS_ENGINE,
+    scheduler: "moss_image",
+    probe_device: "gpu",
+    precision: "nf4;vae=float32",
+    ready_relative: "installations/models/moss-image-sft-windows-v1.json",
+    installing_relative: "installations/models/moss-image-sft-windows-v1.installing.json",
+    probe_with_model: true,
+    worker_model_argument: true,
+    bundle_licenses: &[],
+    prepare_with_model: true,
+    prepared_cache_reserve: 8_470_000_000,
+    shared_worker_wheels: WINDOWS_SHARED_WORKER_WHEELS,
 };
 
 #[derive(Clone, Debug, Deserialize)]
@@ -408,6 +665,18 @@ pub struct Installations {
     moss_image_sft: Installation,
     #[cfg(windows)]
     windows_zimage: Installation,
+    #[cfg(windows)]
+    windows_klein: Installation,
+    #[cfg(windows)]
+    windows_birefnet: Installation,
+    #[cfg(windows)]
+    windows_realesrgan: Installation,
+    #[cfg(windows)]
+    windows_qwen_image_21: Installation,
+    #[cfg(windows)]
+    windows_qwen_image_21_turbo: Installation,
+    #[cfg(windows)]
+    windows_moss_image_sft: Installation,
 }
 
 impl Installations {
@@ -430,7 +699,25 @@ impl Installations {
         #[cfg(windows)]
         {
             Ok(Self {
-                windows_zimage: Installation::new_for(paths, WINDOWS_ZIMAGE_PROFILE)?,
+                windows_zimage: Installation::new_for(paths.clone(), WINDOWS_ZIMAGE_PROFILE)?,
+                windows_klein: Installation::new_for(paths.clone(), WINDOWS_KLEIN_PROFILE)?,
+                windows_birefnet: Installation::new_for(paths.clone(), WINDOWS_BIREFNET_PROFILE)?,
+                windows_realesrgan: Installation::new_for(
+                    paths.clone(),
+                    WINDOWS_REALESRGAN_PROFILE,
+                )?,
+                windows_qwen_image_21: Installation::new_for(
+                    paths.clone(),
+                    WINDOWS_QWEN_IMAGE_21_PROFILE,
+                )?,
+                windows_qwen_image_21_turbo: Installation::new_for(
+                    paths.clone(),
+                    WINDOWS_QWEN_IMAGE_21_TURBO_PROFILE,
+                )?,
+                windows_moss_image_sft: Installation::new_for(
+                    paths,
+                    WINDOWS_MOSS_IMAGE_SFT_PROFILE,
+                )?,
             })
         }
     }
@@ -438,7 +725,17 @@ impl Installations {
     pub fn snapshots(&self) -> Vec<InstallationSnapshot> {
         #[cfg(windows)]
         {
-            vec![self.windows_zimage.snapshot()]
+            // Fixed Windows order: Z-Image first, then the six parity models in
+            // design.md section 11 order.
+            vec![
+                self.windows_zimage.snapshot(),
+                self.windows_klein.snapshot(),
+                self.windows_birefnet.snapshot(),
+                self.windows_realesrgan.snapshot(),
+                self.windows_qwen_image_21.snapshot(),
+                self.windows_qwen_image_21_turbo.snapshot(),
+                self.windows_moss_image_sft.snapshot(),
+            ]
         }
         #[cfg(not(windows))]
         vec![
@@ -493,7 +790,12 @@ impl Installations {
         self.snapshots().into_iter().any(|snapshot| {
             matches!(
                 snapshot.phase.as_str(),
-                "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
+                "preparing"
+                    | "preparing_model"
+                    | "downloading"
+                    | "verifying"
+                    | "installing_runtime"
+                    | "probing"
             )
         })
     }
@@ -510,16 +812,28 @@ impl Installations {
             self.moss_image_sft.cancel();
         }
         #[cfg(windows)]
-        self.windows_zimage.cancel();
+        {
+            self.windows_zimage.cancel();
+            self.windows_klein.cancel();
+            self.windows_birefnet.cancel();
+            self.windows_realesrgan.cancel();
+            self.windows_qwen_image_21.cancel();
+            self.windows_qwen_image_21_turbo.cancel();
+            self.windows_moss_image_sft.cancel();
+        }
     }
 
     fn for_id(&self, install_id: &str) -> Option<&Installation> {
         #[cfg(windows)]
-        {
-            if install_id == WINDOWS_ZIMAGE_INSTALL_ID {
-                return Some(&self.windows_zimage);
-            }
-            None
+        match install_id {
+            WINDOWS_ZIMAGE_INSTALL_ID => Some(&self.windows_zimage),
+            WINDOWS_KLEIN_INSTALL_ID => Some(&self.windows_klein),
+            WINDOWS_BIREFNET_INSTALL_ID => Some(&self.windows_birefnet),
+            WINDOWS_REALESRGAN_INSTALL_ID => Some(&self.windows_realesrgan),
+            WINDOWS_QWEN_IMAGE_21_INSTALL_ID => Some(&self.windows_qwen_image_21),
+            WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID => Some(&self.windows_qwen_image_21_turbo),
+            WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID => Some(&self.windows_moss_image_sft),
+            _ => None,
         }
         #[cfg(not(windows))]
         match install_id {
@@ -550,6 +864,9 @@ struct ReadyRecord {
     model_manifest_sha256: String,
     #[serde(default)]
     licenses: Vec<LicenseFileRecord>,
+    /// `<data>/models/<model_snapshot_id>.prepared` for staged Qwen/MOSS models.
+    #[serde(default)]
+    prepared_dir: Option<String>,
     runtime_files: Vec<InventoryEntry>,
     probe: serde_json::Value,
 }
@@ -580,6 +897,66 @@ fn bundle_license_bytes(profile: InstallProfile) -> u64 {
         .iter()
         .map(|(_, bytes)| bytes.len() as u64)
         .sum()
+}
+/// The worker derives the prepared cache from the model path (`<model>.prepared`),
+/// so the installer must use exactly that fixed location (design contract with the
+/// Windows diffusers worker).
+fn prepared_cache_dir(data: &Path, model_snapshot_id: &str) -> PathBuf {
+    data.join("models")
+        .join(format!("{model_snapshot_id}.prepared"))
+}
+fn prepared_cache_ready(dir: &Path) -> Result<(), String> {
+    for component in ["text_encoder", "transformer"] {
+        let config = dir.join(component).join("config.json");
+        if !config.is_file() {
+            return Err(format!(
+                "量化缓存缺少 {}/config.json；请重新安装该型号以重建量化缓存。",
+                component
+            ));
+        }
+    }
+    Ok(())
+}
+fn prepared_cache_matches(
+    data: &Path,
+    model_snapshot_id: &str,
+    profile: InstallProfile,
+    record: &ReadyRecord,
+) -> Result<(), String> {
+    if !profile.prepare_with_model {
+        return Ok(());
+    }
+    let expected = prepared_cache_dir(data, model_snapshot_id);
+    let recorded = record
+        .prepared_dir
+        .as_deref()
+        .ok_or("就绪记录缺少量化缓存路径；请重新安装。")?;
+    if Path::new(recorded) != expected {
+        return Err("量化缓存路径与固定安装布局不符；请重新安装。".into());
+    }
+    prepared_cache_ready(&expected)
+}
+fn prepare_worker_args(
+    profile: InstallProfile,
+    model_snapshot_id: &str,
+    model_dir: &Path,
+    prepared_dir: &Path,
+) -> Result<Vec<String>, String> {
+    Ok(vec![
+        "-I".into(),
+        "-m".into(),
+        profile.worker_module.into(),
+        "--model-snapshot-id".into(),
+        model_snapshot_id.into(),
+        "--prepare".into(),
+        "--model-dir".into(),
+        model_dir.to_str().ok_or("模型路径不是 UTF-8")?.into(),
+        "--prepared-dir".into(),
+        prepared_dir
+            .to_str()
+            .ok_or("量化缓存路径不是 UTF-8")?
+            .into(),
+    ])
 }
 fn licenses_match_profile(profile: InstallProfile, recorded: &[LicenseFileRecord]) -> bool {
     let expected = license_records(profile);
@@ -652,14 +1029,62 @@ fn activate_staged_runtime(staging: &Path, runtime: &Path) -> Result<(), String>
     fs::rename(staging, runtime).map_err(err)?;
     sync_directory(runtime.parent().ok_or("运行时路径无父目录")?)
 }
+/// design.md section 11 freezes a worker snapshot identity for every new Windows
+/// model; legacy profiles keep the model manifest id as their worker snapshot.
+fn execution_snapshot_id(install_id: &str) -> Option<&'static str> {
+    match install_id {
+        WINDOWS_KLEIN_INSTALL_ID => Some(studio_core::generation::KLEIN_WINDOWS_SNAPSHOT),
+        WINDOWS_BIREFNET_INSTALL_ID => Some(studio_core::generation::BIREFNET_WINDOWS_SNAPSHOT),
+        WINDOWS_REALESRGAN_INSTALL_ID => Some(studio_core::generation::REALESRGAN_WINDOWS_SNAPSHOT),
+        WINDOWS_QWEN_IMAGE_21_INSTALL_ID => {
+            Some(studio_core::generation::QWEN_IMAGE_21_WINDOWS_SNAPSHOT)
+        }
+        WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID => {
+            Some(studio_core::generation::QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT)
+        }
+        WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID => {
+            Some(studio_core::generation::MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT)
+        }
+        _ => None,
+    }
+}
+/// Frozen execution-plan device identity; legacy macOS profiles keep using the
+/// device name reported by their install probe.
+fn plan_device_id(install_id: &str) -> Option<&'static str> {
+    match install_id {
+        WINDOWS_ZIMAGE_INSTALL_ID => Some(studio_core::generation::Z_IMAGE_WINDOWS_DEVICE),
+        WINDOWS_KLEIN_INSTALL_ID
+        | WINDOWS_QWEN_IMAGE_21_INSTALL_ID
+        | WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID
+        | WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID => Some(studio_core::generation::WINDOWS_CUDA_DEVICE),
+        WINDOWS_BIREFNET_INSTALL_ID => Some(studio_core::generation::WINDOWS_CPU_DEVICE),
+        WINDOWS_REALESRGAN_INSTALL_ID => Some(studio_core::generation::WINDOWS_VULKAN_DEVICE),
+        _ => None,
+    }
+}
+/// Fixed worker wheels embedded in the binary for the shared v2 runtime. They are
+/// treated as runtime artifacts even though the frozen product runtime manifest
+/// still marks them as pending.
+fn bundled_runtime_wheels(profile: InstallProfile) -> Vec<Artifact> {
+    profile
+        .shared_worker_wheels
+        .iter()
+        .map(|(path, bytes)| Artifact {
+            path: (*path).into(),
+            url: "bundled:worker-wheel".into(),
+            bytes: bytes.len() as u64,
+            sha256: format!("{:x}", Sha256::digest(bytes)),
+        })
+        .collect()
+}
 fn ready_record_matches(
     record: &ReadyRecord,
     profile: InstallProfile,
     runtime_id: &str,
-    model_id: &str,
+    snapshot_id: &str,
 ) -> bool {
     record.runtime_lock_id == runtime_id
-        && record.model_snapshot_id == model_id
+        && record.model_snapshot_id == snapshot_id
         && record.matches_profile(profile)
 }
 fn manifest_digest(manifest: &str) -> String {
@@ -828,7 +1253,17 @@ impl Installation {
             validate_archive(archive)?;
         }
         let model_downloads = model.downloads();
-        let runtime_downloads = runtime.downloads();
+        let mut runtime_downloads = runtime.downloads();
+        for wheel in bundled_runtime_wheels(profile) {
+            if !runtime_downloads
+                .iter()
+                .any(|existing| existing.path == wheel.path)
+            {
+                runtime_downloads.push(wheel);
+            }
+        }
+        let snapshot_id = execution_snapshot_id(profile.install_id)
+            .map_or_else(|| model.id.clone(), str::to_owned);
         for file in model_downloads.iter().chain(&runtime_downloads) {
             validate_artifact(file)?;
         }
@@ -870,8 +1305,11 @@ impl Installation {
         // Initial upper bound is available before any network or large hashing:
         // full download cache + target model copy + runtime expansion + reserve.
         // start() refines missing cache bytes and checks both volumes separately.
-        let initial_required_bytes =
-            model_file_bytes * 2 + runtime_bytes * 7 + license_bytes + RESERVE;
+        let initial_required_bytes = model_file_bytes * 2
+            + runtime_bytes * 7
+            + license_bytes
+            + profile.prepared_cache_reserve
+            + RESERVE;
         let mut state = InstallationSnapshot {
             install_id: profile.install_id.into(),
             phase: "not_installed".into(),
@@ -890,7 +1328,7 @@ impl Installation {
         if let Ok(record) = fs::read(paths.data.join(profile.ready_relative))
             .and_then(|b| serde_json::from_slice::<ReadyRecord>(&b).map_err(std::io::Error::other))
         {
-            if ready_record_matches(&record, profile, &runtime.id, &model.id) {
+            if ready_record_matches(&record, profile, &runtime.id, &snapshot_id) {
                 let runtime_root = paths.data.join("runtimes").join(&runtime.id);
                 let model_root = paths.data.join("models").join(&model.id);
                 let runtime_critical_ok = if runtime.is_native() {
@@ -939,7 +1377,7 @@ impl Installation {
                 let healthy = record.probe["device"] == profile.probe_device
                     && record.probe["identity"]["build_id"] == profile.worker_build_id
                     && record.probe["identity"]["runtime_lock_id"] == runtime.id
-                    && record.probe["identity"]["model_snapshot_id"] == model.id
+                    && record.probe["identity"]["model_snapshot_id"] == snapshot_id
                     && record.probe["device_name"]
                         .as_str()
                         .is_some_and(|s| !s.is_empty())
@@ -950,7 +1388,8 @@ impl Installation {
                         })
                     })
                     && runtime_critical_ok
-                    && licenses_healthy(&paths.data, profile).is_ok();
+                    && licenses_healthy(&paths.data, profile).is_ok()
+                    && prepared_cache_matches(&paths.data, &model.id, profile, &record).is_ok();
                 if healthy {
                     state.phase = "ready".into();
                     state.runtime_ready = true;
@@ -986,10 +1425,6 @@ impl Installation {
     pub fn start(&self, install_id: &str) -> Result<InstallationSnapshot, String> {
         if install_id != self.inner.profile.install_id {
             return Err("未登记的安装标识。".into());
-        }
-        #[cfg(windows)]
-        if install_id != WINDOWS_ZIMAGE_INSTALL_ID {
-            return Err("此 Windows 版本仅开放已认证的 Z-Image 安装。".into());
         }
         #[cfg(not(windows))]
         if !cfg!(all(target_os = "macos", target_arch = "aarch64")) {
@@ -1076,7 +1511,7 @@ impl Installation {
             &record,
             self.inner.profile,
             &self.inner.runtime.id,
-            &self.inner.model.id,
+            &self.snapshot_id(),
         ) || record.probe["device"] != self.inner.profile.probe_device
         {
             return Err("安装探针身份不符。".into());
@@ -1113,11 +1548,8 @@ impl Installation {
                 },
             },
             device: DeviceSnapshot {
-                device_id: if self.inner.profile.install_id == WINDOWS_ZIMAGE_INSTALL_ID {
-                    studio_core::generation::Z_IMAGE_WINDOWS_DEVICE.into()
-                } else {
-                    device.into()
-                },
+                device_id: plan_device_id(self.inner.profile.install_id)
+                    .map_or_else(|| device.into(), str::to_owned),
                 precision: self.inner.profile.precision.into(),
             },
             scheduler: self.inner.profile.scheduler.into(),
@@ -1136,6 +1568,41 @@ impl Installation {
             .data
             .join("models")
             .join(&self.inner.model.id)
+    }
+    /// Worker/protocol snapshot identity (design.md section 11 for the new Windows models).
+    fn snapshot_id(&self) -> String {
+        execution_snapshot_id(self.inner.profile.install_id)
+            .map_or_else(|| self.inner.model.id.clone(), str::to_owned)
+    }
+    fn runtime_wheels(&self) -> Vec<Artifact> {
+        let mut wheels = self.inner.runtime.wheels.clone();
+        for wheel in bundled_runtime_wheels(self.inner.profile) {
+            if !wheels.iter().any(|existing| existing.path == wheel.path) {
+                wheels.push(wheel);
+            }
+        }
+        wheels
+    }
+    fn runtime_downloads(&self) -> Vec<Artifact> {
+        let mut downloads = self.inner.runtime.downloads();
+        for wheel in bundled_runtime_wheels(self.inner.profile) {
+            if !downloads.iter().any(|existing| existing.path == wheel.path) {
+                downloads.push(wheel);
+            }
+        }
+        downloads
+    }
+    fn bundled_worker_wheel_bytes(&self, path: &str) -> Option<&'static [u8]> {
+        self.inner
+            .profile
+            .shared_worker_wheels
+            .iter()
+            .find(|(candidate, _)| *candidate == path)
+            .map(|(_, bytes)| *bytes)
+            .or_else(|| {
+                (!self.inner.profile.worker_wheel.is_empty())
+                    .then_some(self.inner.profile.worker_wheel)
+            })
     }
     fn cache(&self) -> PathBuf {
         self.inner.paths.cache.join("downloads")
@@ -1167,10 +1634,16 @@ impl Installation {
             &record,
             self.inner.profile,
             &self.inner.runtime.id,
-            &self.inner.model.id,
+            &self.snapshot_id(),
         ) {
             return Err("安装身份已变化，请重新安装。".into());
         }
+        prepared_cache_matches(
+            &self.inner.paths.data,
+            &self.inner.model.id,
+            self.inner.profile,
+            &record,
+        )?;
         for file in self.inner.model.installed_files() {
             verify(&self.model_dir().join(&file.path), file.bytes, &file.sha256)?;
         }
@@ -1216,7 +1689,7 @@ impl Installation {
             ];
             if self.inner.profile.worker_model_argument {
                 arguments.push("--model-snapshot-id".into());
-                arguments.push(self.inner.model.id.clone());
+                arguments.push(self.snapshot_id());
             }
             #[cfg(windows)]
             let program = self.runtime_dir().join("python.exe");
@@ -1231,7 +1704,7 @@ impl Installation {
             worker_module: self.inner.profile.worker_module.into(),
             worker_build_id: self.inner.profile.worker_build_id.into(),
             runtime_lock_id: self.inner.runtime.id.clone(),
-            model_snapshot_id: self.inner.model.id.clone(),
+            model_snapshot_id: self.snapshot_id(),
         })
     }
     fn install(&self) -> Result<(), String> {
@@ -1253,7 +1726,7 @@ impl Installation {
         fs2::FileExt::try_lock_exclusive(&lock)
             .map_err(|_| "另一个进程正在安装，请等待后重试。".to_string())?;
         let mut all = self.inner.model.downloads();
-        all.extend(self.inner.runtime.downloads());
+        all.extend(self.runtime_downloads());
         let missing: u64 = all
             .iter()
             .filter(|a| !self.cache().join(&a.sha256).exists())
@@ -1263,16 +1736,16 @@ impl Installation {
         // Conservative full target copy and private expansion budget. Cache and data
         // may share a volume, in which case both peaks must fit simultaneously.
         let runtime_download_bytes = self
-            .inner
-            .runtime
-            .downloads()
+            .runtime_downloads()
             .iter()
             .map(|artifact| artifact.bytes)
             .sum::<u64>();
         let runtime_budget =
             runtime_download_bytes * if self.inner.runtime.is_native() { 3 } else { 6 };
         let license_bytes = bundle_license_bytes(self.inner.profile);
-        let required = missing + target + license_bytes + runtime_budget + RESERVE;
+        let prepared_reserve = self.inner.profile.prepared_cache_reserve;
+        let required =
+            missing + target + license_bytes + prepared_reserve + runtime_budget + RESERVE;
         self.update(|s| s.required_bytes = required);
         // Check both volumes independently; never rely on cross-volume rename.
         let data_free = fs2::available_space(&self.inner.paths.data).map_err(err)?;
@@ -1281,7 +1754,9 @@ impl Installation {
             data_free,
             cache_free,
             missing,
-            target.saturating_add(license_bytes),
+            target
+                .saturating_add(license_bytes)
+                .saturating_add(prepared_reserve),
             runtime_budget,
             RESERVE,
             same_volume(&self.inner.paths.data, &self.inner.paths.cache)?,
@@ -1294,7 +1769,7 @@ impl Installation {
                 .paths
                 .data
                 .join(self.inner.profile.installing_relative),
-            &serde_json::json!({"runtime_lock_id":self.inner.runtime.id,"model_snapshot_id":self.inner.model.id}),
+            &serde_json::json!({"runtime_lock_id":self.inner.runtime.id,"model_snapshot_id":self.snapshot_id()}),
         )?;
         self.update(|s| s.phase = "downloading".into());
         // Four bounded workers, each keeps at most a 1 MiB transfer buffer.
@@ -1351,6 +1826,9 @@ impl Installation {
             s.phase = "installing_runtime".into();
         });
         let mut record = self.prepare_runtime()?;
+        if self.inner.profile.prepare_with_model {
+            record.prepared_dir = Some(self.prepare_quantized_cache()?);
+        }
         // Fixed license texts are archived only after the runtime/probe succeeded,
         // and before the activation record so a failed write never activates.
         record.licenses = self.install_licenses()?;
@@ -1476,7 +1954,7 @@ impl Installation {
                 configure_embeddable_python(&work)?;
                 let site_packages = work.join("Lib/site-packages");
                 ensure_child_dir(&self.inner.paths.data, &site_packages)?;
-                for wheel in &self.inner.runtime.wheels {
+                for wheel in self.runtime_wheels() {
                     self.check_cancel()?;
                     install_wheel(
                         &self.cache().join(&wheel.sha256),
@@ -1501,11 +1979,11 @@ impl Installation {
                 )?;
                 let wheelhouse = work.join("wheelhouse");
                 ensure_child_dir(&self.inner.paths.data, &wheelhouse)?;
-                for wheel in &self.inner.runtime.wheels {
+                for wheel in self.runtime_wheels() {
                     copy_verified(
                         &self.cache().join(&wheel.sha256),
                         &wheelhouse.join(&wheel.path),
-                        wheel,
+                        &wheel,
                         &self.inner.paths.data,
                     )?;
                 }
@@ -1541,10 +2019,11 @@ impl Installation {
         let python = work.join("venv/bin/python3");
         self.check_cancel()?;
         self.update(|s| s.phase = "probing".into());
+        let snapshot_id = self.snapshot_id();
         let mut probe = Command::new(&python);
         probe.args(["-I", "-m", self.inner.profile.worker_module]);
         if self.inner.profile.worker_model_argument {
-            probe.arg("--model-snapshot-id").arg(&self.inner.model.id);
+            probe.arg("--model-snapshot-id").arg(&snapshot_id);
         }
         probe.arg("--probe");
         if self.inner.profile.probe_with_model {
@@ -1556,7 +2035,7 @@ impl Installation {
         if probe["python"].as_str() != Some(self.inner.runtime.python_version()?)
             || probe["identity"]["build_id"] != self.inner.profile.worker_build_id
             || probe["identity"]["runtime_lock_id"] != self.inner.runtime.id
-            || probe["identity"]["model_snapshot_id"] != self.inner.model.id
+            || probe["identity"]["model_snapshot_id"] != snapshot_id
             || probe["device"] != self.inner.profile.probe_device
         {
             return Err("运行时探针版本或设备不符。".into());
@@ -1583,10 +2062,11 @@ impl Installation {
         self.check_cancel()?;
         let record = ReadyRecord {
             runtime_lock_id: self.inner.runtime.id.clone(),
-            model_snapshot_id: self.inner.model.id.clone(),
+            model_snapshot_id: snapshot_id,
             runtime_manifest_sha256,
             model_manifest_sha256: manifest_digest(self.inner.profile.model_manifest),
             licenses: Vec::new(),
+            prepared_dir: None,
             runtime_files,
             probe,
         };
@@ -1706,16 +2186,17 @@ impl Installation {
         self.check_cancel()?;
         Ok(ReadyRecord {
             runtime_lock_id: self.inner.runtime.id.clone(),
-            model_snapshot_id: self.inner.model.id.clone(),
+            model_snapshot_id: self.snapshot_id(),
             runtime_manifest_sha256: manifest_digest(self.inner.profile.runtime_manifest),
             model_manifest_sha256: manifest_digest(self.inner.profile.model_manifest),
             licenses: Vec::new(),
+            prepared_dir: None,
             runtime_files,
             probe: serde_json::json!({
                 "identity": {
                     "build_id": self.inner.profile.worker_build_id,
                     "runtime_lock_id": self.inner.runtime.id,
-                    "model_snapshot_id": self.inner.model.id,
+                    "model_snapshot_id": self.snapshot_id(),
                 },
                 "device": "gpu",
                 "device_name": device_name,
@@ -1731,6 +2212,53 @@ impl Installation {
                 "probe_output_sha256": probe_output_sha256,
             }),
         })
+    }
+    fn private_python(&self) -> PathBuf {
+        let runtime = self.runtime_dir();
+        #[cfg(windows)]
+        {
+            runtime.join("python.exe")
+        }
+        #[cfg(not(windows))]
+        {
+            runtime.join("venv/bin/python3")
+        }
+    }
+    /// Staged Qwen/MOSS installs build the deterministic NF4 cache through the
+    /// diffusers worker. The worker derives the same path from the model path, so
+    /// the fixed `<model>.prepared` location is both prepared and recorded here.
+    fn prepare_quantized_cache(&self) -> Result<String, String> {
+        let prepared = prepared_cache_dir(&self.inner.paths.data, &self.inner.model.id);
+        ensure_child_dir(
+            &self.inner.paths.data,
+            prepared.parent().ok_or("量化缓存无父目录")?,
+        )?;
+        self.check_cancel()?;
+        self.update(|state| state.phase = "preparing_model".into());
+        let model = self.model_dir();
+        let mut command = Command::new(self.private_python());
+        command.args(prepare_worker_args(
+            self.inner.profile,
+            &self.snapshot_id(),
+            &model,
+            &prepared,
+        )?);
+        let output = self.command_with_deadline(&mut command, Duration::from_secs(1800))?;
+        let report: serde_json::Value = serde_json::from_slice(&output)
+            .map_err(|error| format!("量化缓存构建输出无效：{error}"))?;
+        let status = report["status"].as_str().unwrap_or("");
+        if !matches!(status, "prepared" | "reused") {
+            let detail = report["error"]
+                .as_str()
+                .or_else(|| report["reason"].as_str())
+                .unwrap_or("没有状态说明");
+            return Err(format!(
+                "量化缓存构建失败（{status}）：{detail}。请检查可用内存后重试安装。"
+            ));
+        }
+        prepared_cache_ready(&prepared)?;
+        self.check_cancel()?;
+        Ok(prepared.to_string_lossy().into_owned())
     }
     fn install_archive_members(
         &self,
@@ -1806,6 +2334,13 @@ impl Installation {
         Ok(())
     }
     fn command(&self, command: &mut Command) -> Result<Vec<u8>, String> {
+        self.command_with_deadline(command, Duration::from_secs(600))
+    }
+    fn command_with_deadline(
+        &self,
+        command: &mut Command,
+        timeout: Duration,
+    ) -> Result<Vec<u8>, String> {
         let log = open_regular(
             &self.inner.paths.logs.join("installation-process.log"),
             true,
@@ -1871,7 +2406,7 @@ impl Installation {
             }
             log.sync_all()
         });
-        let deadline = std::time::Instant::now() + Duration::from_secs(600);
+        let deadline = std::time::Instant::now() + timeout;
         loop {
             if let Some(status) = child.try_wait().map_err(err)? {
                 #[cfg(windows)]
@@ -1941,9 +2476,11 @@ impl Installation {
     async fn download_async(&self, a: &Artifact) -> Result<(), String> {
         let final_path = self.cache().join(&a.sha256);
         if a.url == "bundled:worker-wheel" {
+            let bytes = self
+                .bundled_worker_wheel_bytes(&a.path)
+                .ok_or_else(|| format!("缺少固定的 worker wheel 字节：{}", a.path))?;
             let mut file = open_regular(&final_path, true, true)?;
-            file.write_all(self.inner.profile.worker_wheel)
-                .map_err(err)?;
+            file.write_all(bytes).map_err(err)?;
             file.sync_all().map_err(err)?;
             drop(file);
             verify(&final_path, a.bytes, &a.sha256)?;
@@ -4154,6 +4691,102 @@ mod tests {
         assert_eq!(fs::read(runtime.join("python.exe")).unwrap(), b"new");
         assert!(!staging.exists());
     }
+    fn staged_profile() -> InstallProfile {
+        InstallProfile {
+            install_id: "staged-test-install-v1",
+            prepare_with_model: true,
+            prepared_cache_reserve: 123_456,
+            ..Z_PROFILE
+        }
+    }
+    #[test]
+    fn staged_prepare_command_matches_the_worker_contract() {
+        let args = prepare_worker_args(
+            staged_profile(),
+            "model-v1",
+            Path::new("C:/data/models/model-v1"),
+            Path::new("C:/data/models/model-v1.prepared"),
+        )
+        .unwrap();
+        assert_eq!(
+            args,
+            vec![
+                "-I",
+                "-m",
+                WORKER_MODULE,
+                "--model-snapshot-id",
+                "model-v1",
+                "--prepare",
+                "--model-dir",
+                "C:/data/models/model-v1",
+                "--prepared-dir",
+                "C:/data/models/model-v1.prepared",
+            ]
+        );
+    }
+    #[test]
+    fn staged_prepared_cache_is_layout_bound_and_space_reserved() {
+        let profile = staged_profile();
+        let (_temp, install) = fixture_for(|paths| Installation::new_for(paths, profile));
+        let model_bytes = install
+            .inner
+            .model
+            .downloads()
+            .iter()
+            .map(|artifact| artifact.bytes)
+            .sum::<u64>();
+        let runtime_bytes = install
+            .inner
+            .runtime
+            .downloads()
+            .iter()
+            .map(|artifact| artifact.bytes)
+            .sum::<u64>();
+        assert_eq!(
+            install.snapshot().required_bytes,
+            model_bytes * 2 + runtime_bytes * 7 + 123_456 + RESERVE
+        );
+        let model_id = install.inner.model.id.clone();
+        let prepared = prepared_cache_dir(&install.inner.paths.data, &model_id);
+        let mut record = ReadyRecord {
+            runtime_lock_id: install.inner.runtime.id.clone(),
+            model_snapshot_id: model_id.clone(),
+            runtime_manifest_sha256: manifest_digest(profile.runtime_manifest),
+            model_manifest_sha256: manifest_digest(profile.model_manifest),
+            licenses: vec![],
+            prepared_dir: None,
+            runtime_files: vec![],
+            probe: serde_json::Value::Null,
+        };
+        assert!(
+            prepared_cache_matches(&install.inner.paths.data, &model_id, profile, &record).is_err()
+        );
+        record.prepared_dir = Some(prepared.to_string_lossy().into_owned());
+        assert!(
+            prepared_cache_matches(&install.inner.paths.data, &model_id, profile, &record).is_err()
+        );
+        for component in ["text_encoder", "transformer"] {
+            fs::create_dir_all(prepared.join(component)).unwrap();
+            fs::write(prepared.join(component).join("config.json"), b"{}").unwrap();
+        }
+        prepared_cache_matches(&install.inner.paths.data, &model_id, profile, &record).unwrap();
+        record.prepared_dir = Some(
+            install
+                .inner
+                .paths
+                .data
+                .join("models/other.prepared")
+                .to_string_lossy()
+                .into_owned(),
+        );
+        assert!(
+            prepared_cache_matches(&install.inner.paths.data, &model_id, profile, &record).is_err()
+        );
+        assert!(
+            prepared_cache_matches(&install.inner.paths.data, &model_id, Z_PROFILE, &record)
+                .is_ok()
+        );
+    }
     fn server(
         response: Vec<u8>,
     ) -> (
@@ -4440,6 +5073,7 @@ mod tests {
                 runtime_manifest_sha256: manifest_digest(RUNTIME_MANIFEST),
                 model_manifest_sha256: manifest_digest(MODEL_MANIFEST),
                 licenses: vec![],
+                prepared_dir: None,
                 runtime_files: vec![],
                 probe: serde_json::json!({"device":"gpu","device_name":"fixture-device"}),
             },
@@ -5201,22 +5835,313 @@ mod tests {
     }
 
     #[cfg(windows)]
+    const WINDOWS_MODEL_BYTES: &[(&str, u64)] = &[
+        (WINDOWS_ZIMAGE_INSTALL_ID, 32_848_305_533),
+        (WINDOWS_KLEIN_INSTALL_ID, 15_980_141_329),
+        (WINDOWS_BIREFNET_INSTALL_ID, 972_666_916),
+        (WINDOWS_REALESRGAN_INSTALL_ID, 33_540_549),
+        (WINDOWS_QWEN_IMAGE_21_INSTALL_ID, 33_131_609_424),
+        (WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID, 32_451_607_098),
+        (WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID, 27_219_783_878),
+    ];
+    #[cfg(windows)]
+    fn windows_profile(install_id: &str) -> InstallProfile {
+        match install_id {
+            WINDOWS_ZIMAGE_INSTALL_ID => WINDOWS_ZIMAGE_PROFILE,
+            WINDOWS_KLEIN_INSTALL_ID => WINDOWS_KLEIN_PROFILE,
+            WINDOWS_BIREFNET_INSTALL_ID => WINDOWS_BIREFNET_PROFILE,
+            WINDOWS_REALESRGAN_INSTALL_ID => WINDOWS_REALESRGAN_PROFILE,
+            WINDOWS_QWEN_IMAGE_21_INSTALL_ID => WINDOWS_QWEN_IMAGE_21_PROFILE,
+            WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID => WINDOWS_QWEN_IMAGE_21_TURBO_PROFILE,
+            WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID => WINDOWS_MOSS_IMAGE_SFT_PROFILE,
+            _ => panic!("unregistered Windows install id"),
+        }
+    }
+    #[cfg(windows)]
     #[test]
-    fn windows_installation_manager_exposes_only_the_certified_profile() {
+    fn windows_installation_manager_exposes_all_seven_profiles_in_fixed_order() {
         let temp = tempfile::tempdir().unwrap();
         let manager = Installations::new(AppPaths::resolve(Some(temp.path())).unwrap()).unwrap();
         let snapshots = manager.snapshots();
-        assert_eq!(snapshots.len(), 1);
-        assert_eq!(snapshots[0].install_id, WINDOWS_ZIMAGE_INSTALL_ID);
-        assert_eq!(snapshots[0].model_bytes, 32_848_305_533);
-        assert_eq!(snapshots[0].phase, "not_installed");
-        assert!(manager.snapshot(INSTALL_ID).is_none());
-        assert!(manager.start(INSTALL_ID).is_err());
-        assert!(
-            manager
-                .snapshot(WINDOWS_ZIMAGE_INSTALL_ID)
-                .is_some_and(|snapshot| snapshot.phase == "not_installed")
+        assert_eq!(
+            snapshots
+                .iter()
+                .map(|snapshot| snapshot.install_id.as_str())
+                .collect::<Vec<_>>(),
+            WINDOWS_MODEL_BYTES
+                .iter()
+                .map(|(install_id, _)| *install_id)
+                .collect::<Vec<_>>()
         );
+        for &(install_id, model_bytes) in WINDOWS_MODEL_BYTES {
+            let snapshot = manager.snapshot(install_id).unwrap();
+            assert_eq!(snapshot.phase, "not_installed");
+            assert_eq!(snapshot.model_bytes, model_bytes);
+            assert!(!snapshot.runtime_ready);
+            assert!(!snapshot.model_ready);
+            assert!(!snapshot.device_verified);
+        }
+        assert!(manager.snapshot(INSTALL_ID).is_none());
+        assert!(manager.snapshot(KLEIN_INSTALL_ID).is_none());
+        assert!(manager.start(INSTALL_ID).is_err());
+        assert!(manager.start("https://untrusted").is_err());
+        assert!(manager.cancel("unregistered-model").is_err());
+        let profiles = WINDOWS_MODEL_BYTES
+            .iter()
+            .map(|&(install_id, _)| {
+                let profile = windows_profile(install_id);
+                let runtime: RuntimeManifest =
+                    serde_json::from_str(profile.runtime_manifest).unwrap();
+                serde_json::json!({
+                    "install_id": install_id,
+                    "model_snapshot_id": execution_snapshot_id(install_id)
+                        .map_or_else(|| install_id.to_owned(), str::to_owned),
+                    "runtime_lock_id": runtime.id,
+                    "worker_module": profile.worker_module,
+                    "worker_build_id": profile.worker_build_id,
+                    "engine": profile.engine,
+                    "scheduler": profile.scheduler,
+                    "precision": profile.precision,
+                    "probe_device": profile.probe_device,
+                    "prepare_with_model": profile.prepare_with_model,
+                    "prepared_cache_reserve": profile.prepared_cache_reserve,
+                    "bundled_license_count": profile.bundle_licenses.len(),
+                    "shared_worker_wheels": profile
+                        .shared_worker_wheels
+                        .iter()
+                        .map(|(path, _)| *path)
+                        .collect::<Vec<_>>(),
+                })
+            })
+            .collect::<Vec<_>>();
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .canonicalize()
+            .unwrap();
+        atomic_json(
+            &repo.join("verification/windows-installer/windows-parity-wiring.json"),
+            &serde_json::json!({
+                "schema_version": 1,
+                "kind": "windows-parity-installer-wiring",
+                "status": "unit_verified",
+                "snapshot_order": WINDOWS_MODEL_BYTES
+                    .iter()
+                    .map(|(install_id, _)| *install_id)
+                    .collect::<Vec<_>>(),
+                "prepared_cache_layout": "<data>/models/<install_id>.prepared",
+                "license_layout": "<data>/licenses/<install_id>/<relative path>",
+                "note": "Deterministic wiring evidence from cfg(windows) unit tests; real install and generation acceptance is run separately.",
+                "profiles": profiles,
+            }),
+        )
+        .unwrap();
+    }
+    #[cfg(windows)]
+    #[test]
+    fn windows_profiles_parse_embedded_manifests_and_frozen_identities() {
+        for &(install_id, model_bytes) in WINDOWS_MODEL_BYTES {
+            let profile = windows_profile(install_id);
+            let temp = tempfile::tempdir().unwrap();
+            let installer =
+                Installation::new_for(AppPaths::resolve(Some(temp.path())).unwrap(), profile)
+                    .unwrap();
+            assert_eq!(installer.snapshot().install_id, install_id);
+            // new_for already enforced component_bytes and URL allowlist; assert the
+            // dimensions wired into the host identity here.
+            assert_eq!(installer.inner.model.component_bytes, model_bytes);
+            let expected_snapshot = execution_snapshot_id(install_id).unwrap_or(install_id);
+            assert_eq!(installer.snapshot_id(), expected_snapshot);
+            assert_eq!(
+                install_device_expectation(install_id),
+                installer.inner.profile.probe_device
+            );
+            assert!(installer.inner.profile.probe_with_model);
+            assert_eq!(
+                installer.inner.profile.worker_model_argument,
+                install_id != WINDOWS_ZIMAGE_INSTALL_ID
+            );
+            assert!(plan_device_id(install_id).is_some());
+            if install_id == WINDOWS_BIREFNET_INSTALL_ID {
+                assert_eq!(installer.inner.profile.probe_device, "windows-cpu");
+                assert_eq!(
+                    installer.inner.profile.engine,
+                    studio_core::generation::WINDOWS_ONNX_ENGINE
+                );
+                assert!(!installer.inner.profile.bundle_licenses.is_empty());
+                assert!(installer.inner.profile.shared_worker_wheels.len() == 2);
+            } else if install_id == WINDOWS_REALESRGAN_INSTALL_ID {
+                assert!(installer.inner.runtime.is_native());
+                assert_eq!(
+                    installer.inner.runtime.id,
+                    studio_core::generation::REALESRGAN_WINDOWS_RUNTIME
+                );
+                assert_eq!(
+                    installer.inner.runtime.executable.as_deref(),
+                    Some("realesrgan-ncnn-vulkan.exe")
+                );
+                assert_eq!(
+                    installer.inner.profile.engine,
+                    studio_core::generation::WINDOWS_NCNN_ENGINE
+                );
+                assert_eq!(installer.inner.profile.bundle_licenses.len(), 2);
+                assert!(installer.inner.profile.shared_worker_wheels.is_empty());
+            } else if install_id == WINDOWS_ZIMAGE_INSTALL_ID {
+                assert_eq!(
+                    installer.inner.runtime.id,
+                    studio_core::generation::Z_IMAGE_WINDOWS_RUNTIME
+                );
+                assert_eq!(
+                    installer.inner.profile.engine,
+                    studio_core::generation::Z_IMAGE_WINDOWS_ENGINE
+                );
+            } else {
+                assert_eq!(
+                    installer.inner.runtime.id,
+                    studio_core::generation::WINDOWS_V2_RUNTIME
+                );
+                assert_eq!(
+                    installer.inner.profile.engine,
+                    studio_core::generation::WINDOWS_DIFFUSERS_ENGINE
+                );
+                assert_eq!(
+                    installer.inner.profile.shared_worker_wheels.len(),
+                    2,
+                    "{install_id} shares the v2 runtime"
+                );
+                let staged = matches!(
+                    install_id,
+                    WINDOWS_QWEN_IMAGE_21_INSTALL_ID
+                        | WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID
+                        | WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID
+                );
+                assert_eq!(installer.inner.profile.prepare_with_model, staged);
+                assert_eq!(installer.inner.profile.prepared_cache_reserve != 0, staged);
+            }
+        }
+    }
+    #[cfg(windows)]
+    fn install_device_expectation(install_id: &str) -> &'static str {
+        if install_id == WINDOWS_BIREFNET_INSTALL_ID {
+            "windows-cpu"
+        } else {
+            "gpu"
+        }
+    }
+    #[cfg(windows)]
+    #[test]
+    fn windows_shared_runtime_embeds_both_frozen_worker_wheels() {
+        for install_id in [
+            WINDOWS_KLEIN_INSTALL_ID,
+            WINDOWS_BIREFNET_INSTALL_ID,
+            WINDOWS_QWEN_IMAGE_21_INSTALL_ID,
+            WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID,
+            WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID,
+        ] {
+            let profile = windows_profile(install_id);
+            let temp = tempfile::tempdir().unwrap();
+            let installer =
+                Installation::new_for(AppPaths::resolve(Some(temp.path())).unwrap(), profile)
+                    .unwrap();
+            let wheels = installer.runtime_wheels();
+            let expected = [
+                (
+                    "studio_diffusers_worker-0.1.0-py3-none-any.whl",
+                    WINDOWS_DIFFUSERS_WORKER_WHEEL,
+                ),
+                (
+                    "studio_onnx_worker-0.1.0-py3-none-any.whl",
+                    WINDOWS_ONNX_WORKER_WHEEL,
+                ),
+            ];
+            for (path, bytes) in expected {
+                let wheel = wheels
+                    .iter()
+                    .find(|wheel| wheel.path == path)
+                    .unwrap_or_else(|| panic!("{install_id} misses {path}"));
+                assert_eq!(wheel.url, "bundled:worker-wheel");
+                assert_eq!(wheel.bytes, bytes.len() as u64);
+                assert_eq!(wheel.sha256, format!("{:x}", Sha256::digest(bytes)));
+                assert_eq!(installer.bundled_worker_wheel_bytes(path), Some(bytes));
+            }
+            // Bundled wheels are handled exactly once even though every model shares them.
+            let downloads = installer.runtime_downloads();
+            for (path, _) in expected {
+                assert_eq!(
+                    downloads
+                        .iter()
+                        .filter(|artifact| artifact.path == path)
+                        .count(),
+                    1
+                );
+            }
+        }
+    }
+    #[cfg(windows)]
+    #[test]
+    fn windows_plan_environment_binds_the_frozen_runtime_engine_and_device() {
+        for &(install_id, _) in WINDOWS_MODEL_BYTES {
+            let profile = windows_profile(install_id);
+            let temp = tempfile::tempdir().unwrap();
+            let installer =
+                Installation::new_for(AppPaths::resolve(Some(temp.path())).unwrap(), profile)
+                    .unwrap();
+            let snapshot_id = installer.snapshot_id();
+            let record = ReadyRecord {
+                runtime_lock_id: installer.inner.runtime.id.clone(),
+                model_snapshot_id: snapshot_id,
+                runtime_manifest_sha256: manifest_digest(profile.runtime_manifest),
+                model_manifest_sha256: manifest_digest(profile.model_manifest),
+                licenses: license_records(profile),
+                prepared_dir: None,
+                runtime_files: vec![],
+                probe: serde_json::json!({
+                    "device": profile.probe_device,
+                    "device_name": "fixture-device",
+                }),
+            };
+            let ready_path = installer.inner.paths.data.join(profile.ready_relative);
+            ensure_child_dir(&installer.inner.paths.data, ready_path.parent().unwrap()).unwrap();
+            atomic_json(&ready_path, &record).unwrap();
+            let plan = installer.plan_environment().unwrap();
+            assert_eq!(plan.runtime.package_id, installer.inner.runtime.id);
+            assert_eq!(plan.runtime.engine, profile.engine);
+            assert_eq!(plan.device.device_id, plan_device_id(install_id).unwrap());
+            assert_eq!(plan.device.precision, profile.precision);
+            assert_eq!(plan.scheduler, profile.scheduler);
+            assert!(!plan.components.is_empty());
+        }
+    }
+    #[cfg(windows)]
+    #[test]
+    fn windows_birefnet_and_realesrgan_archive_their_licenses() {
+        for (install_id, expected_paths) in [
+            (WINDOWS_BIREFNET_INSTALL_ID, vec!["LICENSE-BiRefNet.txt"]),
+            (
+                WINDOWS_REALESRGAN_INSTALL_ID,
+                vec!["LICENSE-RealESRGAN.txt", "LICENSE-ncnn-app.txt"],
+            ),
+        ] {
+            let profile = windows_profile(install_id);
+            let temp = tempfile::tempdir().unwrap();
+            let installer =
+                Installation::new_for(AppPaths::resolve(Some(temp.path())).unwrap(), profile)
+                    .unwrap();
+            let records = installer.install_licenses().unwrap();
+            assert_eq!(
+                records
+                    .iter()
+                    .map(|record| record.path.as_str())
+                    .collect::<Vec<_>>(),
+                expected_paths
+            );
+            let root = license_root(&installer.inner.paths.data, profile);
+            for record in &records {
+                verify(&root.join(&record.path), record.bytes, &record.sha256).unwrap();
+            }
+            assert!(licenses_healthy(&installer.inner.paths.data, profile).is_ok());
+            // License bytes are small but counted in the install plan.
+            assert!(installer.snapshot().required_bytes > installer.snapshot().total_bytes * 2);
+        }
     }
     #[test]
     fn range_requires_exact_start_end_and_total() {
@@ -5287,6 +6212,7 @@ mod tests {
             runtime_manifest_sha256: manifest_digest(RUNTIME_MANIFEST),
             model_manifest_sha256: manifest_digest(MODEL_MANIFEST),
             licenses: vec![],
+            prepared_dir: None,
             runtime_files: vec![],
             probe: serde_json::json!({"device":"gpu","device_name":"fixture-device"}),
         };
