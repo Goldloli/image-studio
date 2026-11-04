@@ -218,8 +218,16 @@ fn detect_ram_gb() -> u32 {
     if succeeded == 0 {
         0
     } else {
-        (status.total_phys / (1024 * 1024 * 1024)) as u32
+        bytes_to_gib_rounded(status.total_phys)
     }
+}
+
+/// Rounds total physical memory to the nearest GiB. A machine sold as 32 GB reports slightly less
+/// than 32 GiB total (firmware-reserved memory, e.g. 31.94 GiB), so flooring would wrongly mark the
+/// certified 32 GB target machine as below its registered threshold.
+fn bytes_to_gib_rounded(bytes: u64) -> u32 {
+    const GIB: u64 = 1024 * 1024 * 1024;
+    ((bytes + GIB / 2) / GIB) as u32
 }
 
 #[cfg(not(windows))]
@@ -252,6 +260,16 @@ mod tests {
         assert_eq!(mib_to_gib(8192), 8);
         assert_eq!(mib_to_gib(7168), 7);
         assert_eq!(mib_to_gib(0), 0);
+    }
+
+    #[test]
+    fn total_physical_memory_bytes_are_rounded_to_the_registered_gigabytes() {
+        assert_eq!(bytes_to_gib_rounded(32 * 1024 * 1024 * 1024), 32);
+        // A 32 GB machine loses a little total memory to firmware; it must still pass a 32 GB
+        // threshold instead of being reported as 31 GB.
+        assert_eq!(bytes_to_gib_rounded(34_293_030_912), 32);
+        assert_eq!(bytes_to_gib_rounded(16 * 1024 * 1024 * 1024), 16);
+        assert_eq!(bytes_to_gib_rounded(0), 0);
     }
 
     #[test]
