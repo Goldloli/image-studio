@@ -6078,6 +6078,34 @@ mod tests {
     }
     #[cfg(windows)]
     #[test]
+    fn windows_embedded_worker_wheels_match_the_frozen_manifest_identities() {
+        let manifest: serde_json::Value =
+            serde_json::from_str(WINDOWS_V2_RUNTIME_MANIFEST).unwrap();
+        let embedded = manifest["worker_wheels_embedded_by_installer"]["wheels"]
+            .as_array()
+            .unwrap();
+        assert_eq!(embedded.len(), WINDOWS_SHARED_WORKER_WHEELS.len());
+        for wheel in embedded {
+            let resource_path = wheel["path"].as_str().unwrap();
+            let file_name = resource_path.rsplit('/').next().unwrap();
+            let (_, bytes) = WINDOWS_SHARED_WORKER_WHEELS
+                .iter()
+                .find(|(candidate, _)| *candidate == file_name)
+                .unwrap_or_else(|| panic!("manifest wheel is not embedded: {resource_path}"));
+            assert_eq!(
+                wheel["bytes"].as_u64().unwrap(),
+                bytes.len() as u64,
+                "{file_name}"
+            );
+            assert_eq!(
+                wheel["sha256"].as_str().unwrap(),
+                format!("{:x}", Sha256::digest(bytes)),
+                "{file_name}"
+            );
+        }
+    }
+    #[cfg(windows)]
+    #[test]
     fn windows_plan_environment_binds_the_frozen_runtime_engine_and_device() {
         for &(install_id, _) in WINDOWS_MODEL_BYTES {
             let profile = windows_profile(install_id);
