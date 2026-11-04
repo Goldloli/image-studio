@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "kind": "cross-platform-model-selection-acceptance",
+  "status": "passed_with_user_gated_rows",
+  "date": "2026-11-04",
+  "build_commit": "959d95c",
+  "installer": {
+    "path": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
+    "sha256": "63bdbf24802d9487c9ddff77f75d01c5494f1c58ad55dbc4dd139dc4943cac84",
+    "bytes": 245017051
+  },
+  "installed_exe_sha256": "d50afea630d1d4258cc1801b6458c042d0fda69742ee5c3308e445c38b478dcc",
+  "machine": "Windows 10 22H2 / RTX 3080 Ti 12 GB / 32 GB RAM",
+  "unit_tests": {
+    "command": "npm --prefix apps/frontend test",
+    "files": 7,
+    "tests": 57,
+    "new_matrix": "platform x modelId (windows-native ids un-warned, legacy macOS ids warned, macOS reverse)"
+  },
+  "cases": [
+    {
+      "id": "S1-windows-native-text-models",
+      "method": "installed app, composer model menu on C:\\ist-a",
+      "result": "passed",
+      "observations": [
+        {"model": "FLUX.2 Klein 4B", "warnings": [], "label": "FLUX.2 Klein 4B"},
+        {"model": "Qwen 2.1 Turbo", "warnings": [], "label": "Qwen 2.1 Turbo"},
+        {"model": "MOSS-Image-SFT", "warnings": [], "label": "MOSS-Image-SFT"}
+      ],
+      "screenshot": "windows-native-models-no-warning.png"
+    },
+    {
+      "id": "S3-legacy-macos-selection",
+      "method": "draft params temporarily rewritten to z-image-turbo-mflux-v1 / image.text-to-image.z-image-turbo.v1 in the isolated C:\\ist-a library, app relaunched, draft restored afterwards",
+      "result": "passed",
+      "warning": "此会话保留来自其他平台的模型选择。请从模型菜单明确选择对应的 Windows 型号（Z-Image / Klein / Qwen / MOSS），并核对画幅与参数后再发送。",
+      "label": "Z-Image Turbo · 当前平台未接入",
+      "send_disabled": true,
+      "send_title": "模型未就绪",
+      "screenshot": "legacy-macos-selection-warning.png",
+      "old_warning_absent": true
+    },
+    {
+      "id": "S2-S4-same-platform-not-ready-label",
+      "result": "not_run",
+      "reason": "Z-Image (Windows) is not installed in C:\\ist-a and its model-menu option is disabled, so a same-platform not-ready text model could not be selected in the installed app. The platform/foreign-id label logic is covered by the pure-function matrix; the cross-platform label case was observed in S3."
+    }
+  ],
+  "user_gated": [
+    {
+      "id": "M1-macos-windows-session-advice",
+      "result": "not_run",
+      "reason": "macOS app cannot run on this machine; the same shared frontend is covered by the platform x modelId matrix. User must verify on the Mac."
+    },
+    {
+      "id": "M2-macos-native-model",
+      "result": "not_run",
+      "reason": "macOS app cannot run on this machine; native macOS ids return null advice in the matrix."
+    }
+  ],
+  "quality_gates": {
+    "cargo_fmt_clippy_workspace_tests": "passed in the final installer build (target/parity-gates/build-cross-platform-warning-2.log, exit 0)",
+    "frontend": "npm test 57 passed; npm run check; npm run build",
+    "openspec_validate": "passed"
+  }
+}
