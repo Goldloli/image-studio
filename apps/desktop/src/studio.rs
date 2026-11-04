@@ -62,6 +62,10 @@ pub struct StudioService {
     pub generation: Option<GenerationController>,
     pub startup_error: Option<String>,
     pub closing: AtomicBool,
+    /// Local device facts used by every hardware gate (catalog projection, install start and
+    /// generation send). Probed once per host process via `DeviceFacts::cached`; tests inject
+    /// deterministic values here instead of depending on the CI machine.
+    device_facts: DeviceFacts,
     scheduling: Mutex<()>,
 }
 
@@ -301,6 +305,34 @@ fn runtime_lock_id(install_id: &str) -> Option<&'static str> {
     None
 }
 
+/// Host-side hardware gate shared by the install and generation entry points.
+///
+/// The webview disables below-threshold entry points, but the host must not rely on that: a direct
+/// IPC call (or a frontend bug) could still ask to install or generate for a model whose
+/// `minVramGb`/`minRamGb` the local device does not meet. This mirrors the catalog projection:
+/// threshold `None`/`0` means "not required", unknown device facts fail closed inside
+/// `DeviceFacts::gate`, and the returned text is the exact actionable Chinese reason the catalog
+/// exposes (`hardwareReason`), so errors stay consistent between the model page and the host.
+///
+/// Unknown model ids are not judged here: they are not registered in the catalog and the install
+/// or turn path reports its own unknown-id error.
+fn enforce_hardware_gate(
+    catalog: &ModelCatalog,
+    model_id: &str,
+    device: &DeviceFacts,
+) -> Result<(), String> {
+    let Some(facts) = catalog.model_facts(model_id, device) else {
+        return Ok(());
+    };
+    if facts.hardware.eligible {
+        return Ok(());
+    }
+    Err(facts
+        .hardware
+        .reason
+        .unwrap_or_else(|| "当前设备不满足该模型的硬件门槛，安装与生成入口已禁用。".into()))
+}
+
 impl Default for DraftParams {
     fn default() -> Self {
         Self {
@@ -354,6 +386,7 @@ impl StudioService {
                 generation: None,
                 startup_error: Some(error.to_string()),
                 closing: AtomicBool::new(false),
+                device_facts: DeviceFacts::cached(),
                 scheduling: Mutex::new(()),
             },
             Ok(library) => {
@@ -372,6 +405,7 @@ impl StudioService {
                     generation: Some(generation),
                     startup_error,
                     closing: AtomicBool::new(false),
+                    device_facts: DeviceFacts::cached(),
                     scheduling: Mutex::new(()),
                 }
             }
@@ -432,7 +466,7 @@ impl StudioService {
     fn model_view_for(&self, install_id: &str) -> Value {
         let name = install_display_name(install_id);
         let fallback_model_bytes = fallback_model_bytes(install_id);
-        let device = DeviceFacts::cached();
+        let device = self.device_facts;
         let facts = self
             .catalog
             .as_ref()
@@ -500,7 +534,7 @@ impl StudioService {
         catalog.query(
             &installations,
             installation_error.as_deref(),
-            &DeviceFacts::cached(),
+            &self.device_facts,
         )
     }
     pub fn feature_catalog(&self) -> Result<Value, String> {
@@ -563,15 +597,7 @@ impl StudioService {
         if !catalog.supports(&defaults.model_id, "text_to_image") {
             return Err("默认模型必须支持已接入的文生图能力".into());
         }
-        let facts = catalog.model_facts(&defaults.model_id, &DeviceFacts::cached());
-        if let Some(facts) = facts
-            && !facts.hardware.eligible
-        {
-            return Err(facts
-                .hardware
-                .reason
-                .unwrap_or_else(|| "当前设备不满足该模型的硬件门槛".into()));
-        }
+        enforce_hardware_gate(catalog, &defaults.model_id, &self.device_facts)?;
         #[cfg(windows)]
         if defaults.aspect != "1:1" {
             return Err("当前 Windows 型号仅支持 1:1 默认画幅".into());
@@ -601,7 +627,7 @@ impl StudioService {
             .map(Installations::snapshots)
             .unwrap_or_default();
         let model = self.model_view();
-        let device = DeviceFacts::cached();
+        let device = self.device_facts;
         let runtime_list = installations
             .iter()
             .map(|snapshot| {
@@ -736,14 +762,7 @@ impl StudioService {
         if !catalog.executable(model_id) {
             return Err("该模型当前不可执行，不能用于会话".into());
         }
-        if let Some(facts) = catalog.model_facts(model_id, &DeviceFacts::cached())
-            && !facts.hardware.eligible
-        {
-            return Err(facts
-                .hardware
-                .reason
-                .unwrap_or_else(|| "当前设备不满足该模型的硬件门槛".into()));
-        }
+        enforce_hardware_gate(catalog, model_id, &self.device_facts)?;
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
         let snapshot = installation
             .snapshot(model_id)
@@ -1080,6 +1099,12 @@ impl StudioService {
             return Err("请等待生成和清理完成后安装".into());
         }
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
+        // Host-side hardware gate: refuse before `start` creates any install state. A direct IPC
+        // call must not bypass the model-page gate; the rejection text is the catalog reason.
+        {
+            let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
+            enforce_hardware_gate(catalog, id, &self.device_facts)?;
+        }
         installation.start(id)?;
         Ok(self.model_view_for(id))
     }
@@ -1249,6 +1274,9 @@ impl StudioService {
         if !catalog.executable(&input.model_id) {
             return Err("当前会话选择的模型尚不可执行，请切换到已就绪模型".into());
         }
+        // Host-side hardware gate: a direct IPC send must not bypass the composer gate. Reject
+        // before `accept_turn`, so no Turn/Attempt/Job or draft consumption is created.
+        enforce_hardware_gate(catalog, &input.model_id, &self.device_facts)?;
         let conversation_id =
             ConversationId::new(input.conversation_id).map_err(|error| error.to_string())?;
         let submission_key =
@@ -1338,6 +1366,12 @@ impl StudioService {
                 status if status != TurnStatus::Pending => return Ok(()),
                 _ => {}
             }
+        }
+        // Defense in depth for turns accepted before the gate existed or before device facts
+        // changed: reject here too, before `bind_turn_job` creates an Attempt/Job.
+        {
+            let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
+            enforce_hardware_gate(catalog, &turn.model_id, &self.device_facts)?;
         }
         let (width, height) = match turn.aspect.as_str() {
             "1:1" => (1024, 1024),
@@ -3057,5 +3091,310 @@ mod tests {
             );
         }
         assert_eq!(runtime_lock_id("unknown-install-id"), None);
+    }
+
+    /// Save a draft that is structured for the given model/capability so a send can reach the
+    /// hardware gate instead of failing draft validation.
+    fn save_gate_draft(
+        service: &StudioService,
+        model_id: &str,
+        capability_id: &str,
+        prompt: &str,
+    ) -> DraftRecord {
+        service
+            .save_draft(
+                DraftInput {
+                    id: 1,
+                    name: "硬件门槛".into(),
+                    prompt: prompt.into(),
+                    params: json!({
+                        "modelId": model_id,
+                        "aspect": "1:1",
+                        "count": 1,
+                        "seed": "",
+                        "capabilityId": capability_id,
+                        "sourceAssetId": null
+                    }),
+                    collapsed: false,
+                    prompt_source_id: None,
+                },
+                1,
+            )
+            .unwrap()
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn install_is_rejected_below_the_hardware_threshold_before_starting() {
+        let (_root, mut service) = fixture();
+        service.device_facts = DeviceFacts {
+            vram_gb: Some(8),
+            ram_gb: 16,
+        };
+        for model in [WINDOWS_KLEIN_MODEL, WINDOWS_MOSS_MODEL] {
+            let error = service.install(model).unwrap_err();
+            assert!(error.contains("当前设备不满足硬件门槛"), "{model}: {error}");
+            assert!(
+                error.contains("显存 ≥ 12 GB（当前 8 GB）"),
+                "{model}: {error}"
+            );
+            assert!(
+                error.contains("内存 ≥ 32 GB（当前 16 GB）"),
+                "{model}: {error}"
+            );
+            assert!(error.contains("安装与生成入口已禁用"), "{model}: {error}");
+            // Rejection happened before `Installations::start`: the profile is still not started.
+            let phase = service.model_view_for(model)["phase"]
+                .as_str()
+                .unwrap_or_default()
+                .to_owned();
+            assert!(
+                matches!(phase.as_str(), "not_installed" | "failed" | "unavailable"),
+                "{model} started installing: {phase}"
+            );
+        }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn conversation_send_is_rejected_below_the_hardware_threshold_without_a_turn() {
+        let (_root, mut service) = fixture();
+        service.device_facts = DeviceFacts {
+            vram_gb: Some(8),
+            ram_gb: 16,
+        };
+        let saved = save_gate_draft(
+            &service,
+            WINDOWS_KLEIN_MODEL,
+            studio_core::generation::KLEIN_WINDOWS_TEXT_CAPABILITY,
+            "硬件门槛拒绝",
+        );
+        let conversation = service.snapshot().unwrap()["activeConversationId"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let service = Arc::new(service);
+        let error = service
+            .conversation_send(ConversationSendInput {
+                conversation_id: conversation,
+                draft_id: 1,
+                expected_version: saved.version,
+                prompt: "硬件门槛拒绝".into(),
+                model_id: WINDOWS_KLEIN_MODEL.into(),
+                capability_id: Some(studio_core::generation::KLEIN_WINDOWS_TEXT_CAPABILITY.into()),
+                source_asset_id: None,
+                aspect: "1:1".into(),
+                count: 1,
+                seed: String::new(),
+                submission_key: "hardware-gate-send-rejected".into(),
+            })
+            .unwrap_err();
+        assert!(error.contains("当前设备不满足硬件门槛"), "{error}");
+        assert!(error.contains("安装与生成入口已禁用"), "{error}");
+        // No Turn/Attempt/Job exists and the stored draft was not consumed.
+        let snapshot = service.snapshot().unwrap();
+        assert_eq!(snapshot["turns"].as_array().unwrap().len(), 0);
+        assert_eq!(snapshot["jobCounts"], json!([0, 0, 0]));
+        assert_eq!(snapshot["drafts"][0]["prompt"], "硬件门槛拒绝");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn unprovable_device_facts_fail_closed_at_install_and_send() {
+        let (_root, mut service) = fixture();
+        service.device_facts = DeviceFacts {
+            vram_gb: None,
+            ram_gb: 0,
+        };
+        let install_error = service.install(WINDOWS_QWEN_MODEL).unwrap_err();
+        assert!(
+            install_error.contains("无法确认硬件门槛"),
+            "{install_error}"
+        );
+        assert!(install_error.contains("nvidia-smi"), "{install_error}");
+        assert!(
+            install_error.contains("安装与生成入口已禁用"),
+            "{install_error}"
+        );
+        let saved = save_gate_draft(
+            &service,
+            WINDOWS_QWEN_MODEL,
+            studio_core::generation::QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+            "无法确认设备",
+        );
+        let conversation = service.snapshot().unwrap()["activeConversationId"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let service = Arc::new(service);
+        let send_error = service
+            .conversation_send(ConversationSendInput {
+                conversation_id: conversation,
+                draft_id: 1,
+                expected_version: saved.version,
+                prompt: "无法确认设备".into(),
+                model_id: WINDOWS_QWEN_MODEL.into(),
+                capability_id: Some(
+                    studio_core::generation::QWEN_IMAGE_21_WINDOWS_CAPABILITY.into(),
+                ),
+                source_asset_id: None,
+                aspect: "1:1".into(),
+                count: 1,
+                seed: String::new(),
+                submission_key: "hardware-gate-unknown-send".into(),
+            })
+            .unwrap_err();
+        assert!(send_error.contains("无法确认硬件门槛"), "{send_error}");
+        assert_eq!(service.snapshot().unwrap()["jobCounts"], json!([0, 0, 0]));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn exactly_registered_hardware_thresholds_are_allowed() {
+        let catalog = ModelCatalog::load().unwrap();
+        let at_threshold = DeviceFacts {
+            vram_gb: Some(12),
+            ram_gb: 32,
+        };
+        for model in [
+            WINDOWS_ZIMAGE_INSTALL_ID,
+            WINDOWS_KLEIN_MODEL,
+            WINDOWS_BIREFNET_MODEL,
+            WINDOWS_REALESRGAN_MODEL,
+            WINDOWS_QWEN_MODEL,
+            WINDOWS_QWEN_TURBO_MODEL,
+            WINDOWS_MOSS_MODEL,
+        ] {
+            enforce_hardware_gate(&catalog, model, &at_threshold)
+                .unwrap_or_else(|error| panic!("{model} must be allowed: {error}"));
+        }
+        // One GiB below a registered VRAM/RAM threshold is rejected.
+        let low_vram = DeviceFacts {
+            vram_gb: Some(11),
+            ram_gb: 32,
+        };
+        let vram_error = enforce_hardware_gate(&catalog, WINDOWS_KLEIN_MODEL, &low_vram)
+            .expect_err("11 GB VRAM must not satisfy a 12 GB threshold");
+        assert!(
+            vram_error.contains("显存 ≥ 12 GB（当前 11 GB）"),
+            "{vram_error}"
+        );
+        let low_ram = DeviceFacts {
+            vram_gb: Some(12),
+            ram_gb: 31,
+        };
+        let ram_error = enforce_hardware_gate(&catalog, WINDOWS_KLEIN_MODEL, &low_ram)
+            .expect_err("31 GB RAM must not satisfy a 32 GB threshold");
+        assert!(
+            ram_error.contains("内存 ≥ 32 GB（当前 31 GB）"),
+            "{ram_error}"
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn hardware_gate_allows_a_send_at_exactly_the_registered_threshold() {
+        let (_root, mut service) = fixture();
+        service.device_facts = DeviceFacts {
+            vram_gb: Some(12),
+            ram_gb: 32,
+        };
+        // The send path also has to pass the library turn-input allowlist; in this tree that
+        // allowlist accepts the Windows Z-Image identity (the seven-model threshold matrix itself
+        // is covered by `exactly_registered_hardware_thresholds_are_allowed`).
+        let saved = save_gate_draft(
+            &service,
+            DEFAULT_MODEL_ID,
+            studio_core::generation::Z_IMAGE_WINDOWS_CAPABILITY,
+            "恰好达到门槛",
+        );
+        let conversation = service.snapshot().unwrap()["activeConversationId"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        let service = Arc::new(service);
+        let response = service
+            .conversation_send(ConversationSendInput {
+                conversation_id: conversation,
+                draft_id: 1,
+                expected_version: saved.version,
+                prompt: "恰好达到门槛".into(),
+                model_id: DEFAULT_MODEL_ID.into(),
+                capability_id: Some(studio_core::generation::Z_IMAGE_WINDOWS_CAPABILITY.into()),
+                source_asset_id: None,
+                aspect: "1:1".into(),
+                count: 1,
+                seed: String::new(),
+                submission_key: "hardware-gate-send-allowed".into(),
+            })
+            .unwrap();
+        assert!(
+            matches!(
+                response["turn"]["state"].as_str(),
+                Some("Pending" | "Rejected")
+            ),
+            "{}",
+            response["turn"]["state"]
+        );
+        // The preflight still settles (the fixture has no installed model), but the failure is the
+        // install state, not the hardware gate: the send itself was accepted.
+        let deadline = Instant::now() + Duration::from_secs(3);
+        loop {
+            let state = service.snapshot().unwrap()["turns"][0]["state"]
+                .as_str()
+                .unwrap()
+                .to_owned();
+            if state == "Rejected" {
+                assert!(
+                    !service.snapshot().unwrap()["turns"][0]["error"]
+                        .as_str()
+                        .unwrap_or_default()
+                        .contains("硬件门槛"),
+                    "the accepted send must not be rejected by the hardware gate"
+                );
+                break;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "preflight did not settle: {state}"
+            );
+            std::thread::sleep(Duration::from_millis(20));
+        }
+    }
+
+    #[test]
+    fn hardware_gate_does_not_apply_to_ids_outside_the_catalog() {
+        let catalog = ModelCatalog::load().unwrap();
+        let unknown_facts = DeviceFacts {
+            vram_gb: None,
+            ram_gb: 0,
+        };
+        // Unknown ids are rejected by the install/turn path itself; the gate must not invent a
+        // hardware threshold for them.
+        assert!(enforce_hardware_gate(&catalog, "not-registered", &unknown_facts).is_ok());
+        #[cfg(windows)]
+        for macos_id in ["z-image-turbo-mflux-v1", "flux2-klein-4b-distilled"] {
+            assert!(
+                enforce_hardware_gate(&catalog, macos_id, &unknown_facts).is_ok(),
+                "macOS id must not be gated by the Windows catalog: {macos_id}"
+            );
+        }
+        // On macOS the catalog registers no hardware thresholds, so unprovable facts cannot block
+        // any existing path (macOS behavior unchanged).
+        #[cfg(not(windows))]
+        for id in [
+            "z-image-turbo-mflux-v1",
+            "flux2-klein-4b-distilled",
+            "birefnet-general-epoch-244",
+            "realesrgan-x4plus",
+            "qwen-image-2.1-mflux-v1",
+            "qwen-image-2.1-turbo-mflux-v1",
+            "moss-image-sft-mflux-v1",
+        ] {
+            assert!(
+                enforce_hardware_gate(&catalog, id, &unknown_facts).is_ok(),
+                "macOS model must keep its ungated path: {id}"
+            );
+        }
     }
 }
