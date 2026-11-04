@@ -3299,13 +3299,13 @@ mod tests {
             vram_gb: Some(12),
             ram_gb: 32,
         };
-        // The send path also has to pass the library turn-input allowlist; in this tree that
-        // allowlist accepts the Windows Z-Image identity (the seven-model threshold matrix itself
-        // is covered by `exactly_registered_hardware_thresholds_are_allowed`).
+        // A parity model at exactly its registered threshold must pass both the host gate and the
+        // library turn-input allowlist (the seven-model threshold matrix itself is covered by
+        // `exactly_registered_hardware_thresholds_are_allowed`).
         let saved = save_gate_draft(
             &service,
-            DEFAULT_MODEL_ID,
-            studio_core::generation::Z_IMAGE_WINDOWS_CAPABILITY,
+            WINDOWS_KLEIN_MODEL,
+            studio_core::generation::KLEIN_WINDOWS_TEXT_CAPABILITY,
             "恰好达到门槛",
         );
         let conversation = service.snapshot().unwrap()["activeConversationId"]
@@ -3319,8 +3319,8 @@ mod tests {
                 draft_id: 1,
                 expected_version: saved.version,
                 prompt: "恰好达到门槛".into(),
-                model_id: DEFAULT_MODEL_ID.into(),
-                capability_id: Some(studio_core::generation::Z_IMAGE_WINDOWS_CAPABILITY.into()),
+                model_id: WINDOWS_KLEIN_MODEL.into(),
+                capability_id: Some(studio_core::generation::KLEIN_WINDOWS_TEXT_CAPABILITY.into()),
                 source_asset_id: None,
                 aspect: "1:1".into(),
                 count: 1,
