@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "kind": "windows-realesrgan-worker-path-fix",
+  "status": "passed",
+  "task": "team task-11",
+  "root_cause": "Rust Path::canonicalize returns an extended-length '\\\\?\\C:\\...' path on Windows. The worker compared it byte-wise against the plain input path, so every normal absolute path was rejected; passing the verbatim form instead made ncnn fail (_wfopen cannot open '\\\\?\\' paths, exit 0xc0000409). A second Windows-only discrepancy surfaced in the real exchange: the official Windows ncnn build always writes RGBA PNGs while the frozen v2 contract requires exactly one 8-bit RGB candidate (the macOS build writes RGB).",
+  "fix": [
+    "trusted_user_path() keeps the previous validation (absolute, not a symlink, canonicalizable, already normalized, file/directory kind) and on Windows strips the '\\\\?\\C:\\' / '\\\\?\\UNC\\' verbatim prefix; input and canonical paths are compared case-insensitively with '/' folded to '\\'.",
+    "--ncnn-binary, model_path, output_dir and the source input path all use trusted_user_path(); the ncnn -i/-o/-m arguments are plain absolute paths without the verbatim prefix.",
+    "normalize_ncnn_png() leaves existing 8-bit RGB output byte-identical (macOS behavior) and rewrites opaque 8-bit RGBA output (the Windows ncnn build) as an 8-bit RGB PNG; non-opaque alpha is rejected instead of dropped.",
+    "ncnn binary, model weight and source image SHA-256/size verification logic is unchanged."
+  ],
+  "harness": {
+    "path": "target/parity-worker/run_realesrgan_protocol_head.py",
+    "source": "git show HEAD:tools/diffusers-worker-windows/tests/run_realesrgan_protocol.py",
+    "reason": "The working-tree harness was being extended concurrently by gate0-transfer; the committed HEAD version is the stable verification harness for this evidence."
+  },
+  "worker_binary": {
+    "path": "target/release/realesrgan-worker.exe",
+    "bytes": 1115136,
+    "sha256": "14789e96236c611485bc990d1570ae270a928719d39ee0894ace36962713030f",
+    "staged_sidecar": "apps/desktop/binaries/realesrgan-worker-x86_64-pc-windows-msvc.exe",
+    "staged_sidecar_bytes": 1115136,
+    "staged_sidecar_sha256": "14789e96236c611485bc990d1570ae270a928719d39ee0894ace36962713030f"
+  },
+  "ncnn_binary": {
+    "path": "target/parity-runtime/realesrgan/app/realesrgan-ncnn-vulkan.exe",
+    "bytes": 6161408,
+    "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c"
+  },
+  "model_dir": "target/parity-worker/realesrgan/model",
+  "identity": {
+    "build_id": "studio-realesrgan-worker-windows-0.1.0",
+    "runtime_lock_id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+    "model_snapshot_id": "realesrgan-x4plus-ncnn-windows-v1"
+  },
+  "runs": [
+    {
+      "label": "plain absolute paths (previously rejected by the canonicalize comparison)",
+      "command": "target\\parity-gate0\\py312\\python.exe target\\parity-worker\\run_realesrgan_protocol_head.py --worker-exe target\\release\\realesrgan-worker.exe --ncnn-binary target\\parity-runtime\\realesrgan\\app\\realesrgan-ncnn-vulkan.exe --model-dir target\\parity-worker\\realesrgan\\model --input target\\parity-worker\\realesrgan\\inputs\\input-97x61.png --output target\\parity-worker\\attempts\\realesrgan-path-fix-plain --report verification\\windows-parity-worker\\realesrgan-path-fix-plain.json --no-verbatim",
+      "status": "passed",
+      "worker_exit_code": 0,
+      "elapsed_seconds": 6.656,
+      "input": {
+        "path": "image-studio/target/parity-worker/attempts/realesrgan-path-fix-plain/source.png",
+        "width": 97,
+        "height": 61,
+        "sha256": "60d78752db71fe5a92b5d4e0f293b727fbf589faa71e331e5788f961dfc7fbc1"
+      },
+      "output": {
+        "path": "image-studio/target/parity-worker/attempts/realesrgan-path-fix-plain/primary.png",
+        "bytes": 98673,
+        "sha256": "cbe33a4673348fd265b713a7ff22c49bbb4f54661f5d3e1eae3cd3b1e0366f95",
+        "width": 388,
+        "height": 244
+      },
+      "checks": {
+        "candidate_sha256_matches_file": true,
+        "candidate_bytes_match_file": true,
+        "candidate_dims_match_file": true,
+        "exact_4x_dimensions": true,
+        "expected_output_sha256": true,
+        "expected_output_bytes": true
+      },
+      "gpu_before": {
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "driver": "596.49",
+        "memory_used_mib": 2299,
+        "memory_total_mib": 12288,
+        "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7"
+      },
+      "gpu_after": {
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "driver": "596.49",
+        "memory_used_mib": 2302,
+        "memory_total_mib": 12288,
+        "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7"
+      },
+      "vulkan_devices_from_stderr": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3080 Ti"
+        },
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3080 Ti"
+        },
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3080 Ti"
+        },
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3080 Ti"
+        },
+        {
+          "index": 1,
+          "name": "Intel(R) UHD Graphics 770"
+        },
+        {
+          "index": 1,
+          "name": "Intel(R) UHD Graphics 770"
+        },
+        {
+          "index": 1,
+          "name": "Intel(R) UHD Graphics 770"
+        },
+        {
+          "index": 1,
+          "name": "Intel(R) UHD Graphics 770"
+        }
+      ],
+      "raw_report": "verification/windows-parity-worker/realesrgan-path-fix-plain.json"
+    },
+    {
+      "label": "installer-style verbatim '\\\\?\\' paths (previously corrupted ncnn _wfopen)",
+      "command": "target\\parity-gate0\\py312\\python.exe target\\parity-worker\\run_realesrgan_protocol_head.py --worker-exe target\\release\\realesrgan-worker.exe --ncnn-binary target\\parity-runtime\\realesrgan\\app\\realesrgan-ncnn-vulkan.exe --model-dir target\\parity-worker\\realesrgan\\model --input target\\parity-worker\\realesrgan\\inputs\\input-97x61.png --output target\\parity-worker\\attempts\\realesrgan-path-fix-verbatim --report verification\\windows-parity-worker\\realesrgan-path-fix-verbatim.json",
+      "status": "passed",
+      "worker_exit_code": 0,
+      "elapsed_seconds": 2.0,
+      "input": {
+        "path": "image-studio/target/parity-worker/attempts/realesrgan-path-fix-verbatim/source.png",
+        "width": 97,
+        "height": 61,
+        "sha256": "60d78752db71fe5a92b5d4e0f293b727fbf589faa71e331e5788f961dfc7fbc1"
+      },
+      "output": {
+        "path": "image-studio/target/parity-worker/attempts/realesrgan-path-fix-verbatim/primary.png",
+        "bytes": 98673,
+        "sha256": "cbe33a4673348fd265b713a7ff22c49bbb4f54661f5d3e1eae3cd3b1e0366f95",
+        "width": 388,
+        "height": 244
+      },
+      "checks": {
+        "candidate_sha256_matches_file": true,
+        "candidate_bytes_match_file": true,
+        "candidate_dims_match_file": true,
+        "exact_4x_dimensions": true,
+        "expected_output_sha256": true,
+        "expected_output_bytes": true
+      },
+      "gpu_before": {
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "driver": "596.49",
+        "memory_used_mib": 2302,
+        "memory_total_mib": 12288,
+        "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7"
+      },
+      "gpu_after": {
+        "name": "NVIDIA GeForce RTX 3080 Ti",
+        "driver": "596.49",
+        "memory_used_mib": 2302,
+        "memory_total_mib": 12288,
+        "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7"
+      },
+      "vulkan_devices_from_stderr": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3080 Ti"
+        },
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3080 Ti"
+        },
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3080 Ti"
+        },
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 3080 Ti"
+        },
+        {
+          "index": 1,
+          "name": "Intel(R) UHD Graphics 770"
+        },
+        {
+          "index": 1,
+          "name": "Intel(R) UHD Graphics 770"
+        },
+        {
+          "index": 1,
+          "name": "Intel(R) UHD Graphics 770"
+        },
+        {
+          "index": 1,
+          "name": "Intel(R) UHD Graphics 770"
+        }
+      ],
+      "raw_report": "verification/windows-parity-worker/realesrgan-path-fix-verbatim.json"
+    }
+  ],
+  "output_determinism": {
+    "identical_sha256_across_both_path_forms": true,
+    "sha256": "cbe33a4673348fd265b713a7ff22c49bbb4f54661f5d3e1eae3cd3b1e0366f95",
+    "bytes": 98673,
+    "width": 388,
+    "height": 244,
+    "exact_4x_from_97x61": true
+  },
+  "secondary_defect": {
+    "finding": "The official Windows ncnn build writes color type 6 (RGBA) PNGs even for RGB input; the Gate 0 raw outputs under verification/windows-parity-realesrgan/g2-r1-*.png are all color type 6 / bit depth 8.",
+    "handling": "The worker normalizes opaque RGBA to the frozen 8-bit RGB output contract; non-opaque alpha is rejected. The first pre-fix run exposed this as 'ncnn output must be 8-bit RGB PNG' with a 388x244 color type 6 file."
+  },
+  "tests": {
+    "command": "cargo test -p realesrgan-worker",
+    "result": "9 passed, 0 failed",
+    "coverage": [
+      "plain and verbatim absolute path acceptance with the verbatim prefix stripped for native use",
+      "Windows case-insensitive path comparison",
+      "relative / non-normalized / wrong-kind / symlink / junction rejection",
+      "RGBA-to-RGB normalization, transparent alpha rejection, byte-identical RGB passthrough",
+      "frozen identity, tile-progress and cancel-envelope behavior"
+    ],
+    "note": "Symlink creation requires administrator privilege on the validation machine; the test attempts a symlink and always exercises a junction (same reparse-point class, creatable without privilege).",
+    "quality_gates": [
+      "cargo test -p realesrgan-worker: 9 passed",
+      "cargo clippy -p realesrgan-worker --all-targets -- -D warnings: clean",
+      "cargo fmt --all -- --check: clean",
+      "cargo build --release -p realesrgan-worker: success"
+    ]
+  },
+  "environment": {
+    "os": "Windows-10-10.0.19045-SP0",
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3080 Ti",
+      "driver": "596.49",
+      "memory_used_mib": 2299,
+      "memory_total_mib": 12288,
+      "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7"
+    },
+    "note": "GPU was idle (0% utilization, desktop baseline memory) before the runs; each ncnn job took 2-5 s and no other GPU worker was started."
+  },
+  "follow_up": "gate0-transfer will re-run the formal Real-ESRGAN protocol evidence with the rebuilt worker binary."
+}

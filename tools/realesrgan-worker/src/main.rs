@@ -171,6 +171,92 @@ fn trusted_binary_name(name: Option<&OsStr>) -> bool {
     name == Some(OsStr::new(NCNN_FILE_NAME))
 }
 
+/// What a trusted user path must resolve to.
+#[derive(Clone, Copy)]
+enum PathKind {
+    File,
+    Directory,
+}
+
+/// Windows `Path::canonicalize` returns an extended-length `\\?\C:\...` path and
+/// `\\?\UNC\server\share` for UNC paths. The native ncnn executable cannot open
+/// the verbatim form (`_wfopen` failure), and a plain absolute path never compares
+/// equal to it, so the worker uses the stripped form for both comparison and the
+/// `-i`/`-o`/`-m` arguments.
+#[cfg(windows)]
+fn strip_verbatim(path: &Path) -> PathBuf {
+    let text = path.to_string_lossy();
+    if let Some(rest) = text.strip_prefix(r"\\?\UNC\") {
+        return PathBuf::from(format!(r"\\{rest}"));
+    }
+    if let Some(rest) = text.strip_prefix(r"\\?\") {
+        return PathBuf::from(rest);
+    }
+    path.to_path_buf()
+}
+
+#[cfg(not(windows))]
+fn strip_verbatim(path: &Path) -> PathBuf {
+    path.to_path_buf()
+}
+
+/// Normalized comparison key. Windows paths are case-insensitive and accept both
+/// separators, so fold both; other platforms keep byte equality semantics.
+#[cfg(windows)]
+fn comparable_path(path: &Path) -> String {
+    strip_verbatim(path)
+        .to_string_lossy()
+        .replace('/', "\\")
+        .to_lowercase()
+}
+
+#[cfg(windows)]
+fn same_path(left: &Path, right: &Path) -> bool {
+    comparable_path(left) == comparable_path(right)
+}
+
+#[cfg(not(windows))]
+fn same_path(left: &Path, right: &Path) -> bool {
+    left == right
+}
+
+/// Validate a user-supplied absolute path exactly as before (absolute, not a
+/// symlink, canonicalize succeeds, already normalized) and return the plain
+/// absolute path for native use. On Windows the verbatim prefix is stripped from
+/// the canonical result and the input comparison is case-insensitive.
+fn trusted_user_path(path: &Path, kind: PathKind) -> Result<PathBuf, String> {
+    if !path.is_absolute() {
+        return Err(format!("{}: path is not absolute", path.display()));
+    }
+    let metadata =
+        fs::symlink_metadata(path).map_err(|error| format!("{}: {error}", path.display()))?;
+    if metadata.file_type().is_symlink() {
+        return Err(format!("{}: path is a symlink", path.display()));
+    }
+    let canonical = path
+        .canonicalize()
+        .map_err(|error| format!("{}: {error}", path.display()))?;
+    if !same_path(&canonical, path) {
+        return Err(format!("{}: path is not normalized", path.display()));
+    }
+    let trusted = match kind {
+        PathKind::File if metadata.is_file() => true,
+        PathKind::Directory if metadata.is_dir() => true,
+        _ => false,
+    };
+    if !trusted {
+        return Err(format!(
+            "{}: path is not a trusted regular {}",
+            path.display(),
+            match kind {
+                PathKind::File => "file",
+                PathKind::Directory => "directory",
+            }
+        ));
+    }
+    Ok(strip_verbatim(&canonical))
+}
+
 fn parse_binary(args: impl IntoIterator<Item = OsString>) -> Result<PathBuf, String> {
     let mut args = args.into_iter();
     if args.next().as_deref() != Some(OsStr::new("--ncnn-binary")) {
@@ -180,12 +266,10 @@ fn parse_binary(args: impl IntoIterator<Item = OsString>) -> Result<PathBuf, Str
     if args.next().is_some() {
         return Err("unexpected worker argument".into());
     }
-    if !path.is_absolute()
-        || path.is_symlink()
-        || !path.is_file()
-        || path.canonicalize().map_err(|error| error.to_string())? != path
-        || !trusted_binary_name(path.file_name())
-    {
+    let path = trusted_user_path(&path, PathKind::File).map_err(|_| {
+        format!("ncnn binary must be an absolute regular file named {NCNN_FILE_NAME}")
+    })?;
+    if !trusted_binary_name(path.file_name()) {
         return Err(format!(
             "ncnn binary must be an absolute regular file named {NCNN_FILE_NAME}"
         ));
@@ -276,24 +360,14 @@ fn validate_request(request: &ExecuteRequestV2) -> Result<(), String> {
     {
         return Err("Real-ESRGAN output differs from exact 4x RGB".into());
     }
-    let model = Path::new(&request.model_path);
-    let output_dir = Path::new(&request.output_dir);
-    if !model.is_absolute()
-        || model.is_symlink()
-        || !model.is_dir()
-        || model.canonicalize().map_err(|error| error.to_string())? != model
-        || !output_dir.is_absolute()
-        || output_dir.is_symlink()
-        || !output_dir.is_dir()
-        || output_dir
-            .canonicalize()
-            .map_err(|error| error.to_string())?
-            != output_dir
-        || model == output_dir
-    {
+    let model = trusted_user_path(Path::new(&request.model_path), PathKind::Directory)
+        .map_err(|_| "model and output paths are not normalized local directories".to_string())?;
+    let output_dir = trusted_user_path(Path::new(&request.output_dir), PathKind::Directory)
+        .map_err(|_| "model and output paths are not normalized local directories".to_string())?;
+    if same_path(&model, &output_dir) {
         return Err("model and output paths are not normalized local directories".into());
     }
-    let weights = model_weights_dir(model)?;
+    let weights = model_weights_dir(&model)?;
     verify_file(
         &weights.join(MODEL_WEIGHT_FILES[0]),
         MODEL_BIN_SHA256,
@@ -304,11 +378,15 @@ fn validate_request(request: &ExecuteRequestV2) -> Result<(), String> {
         MODEL_PARAM_SHA256,
         Some(116_029),
     )?;
-    let source_path = Path::new(&source.path);
-    if source_path.parent() != Some(output_dir) {
+    let source_path = trusted_user_path(Path::new(&source.path), PathKind::File)
+        .map_err(|_| "source is not an Attempt-local regular file".to_string())?;
+    if source_path
+        .parent()
+        .is_none_or(|parent| !same_path(parent, &output_dir))
+    {
         return Err("source is not Attempt-local".into());
     }
-    verify_file(source_path, &source.sha256, None)?;
+    verify_file(&source_path, &source.sha256, None)?;
     Ok(())
 }
 
@@ -435,18 +513,23 @@ fn run_ncnn(
     request_id: &str,
     execution: &ExecutionContext,
 ) -> Result<Result<OutputCandidateV2, String>, String> {
-    let output = Path::new(&request.output_dir).join("primary.png");
+    // ncnn cannot open Windows verbatim (`\\?\`) paths and rejects nothing else
+    // here: hand it the normalized plain form for every user path.
+    let output_dir = trusted_user_path(Path::new(&request.output_dir), PathKind::Directory)?;
+    let model = trusted_user_path(Path::new(&request.model_path), PathKind::Directory)?;
+    let source = &request.inputs[0];
+    let source_path = trusted_user_path(Path::new(&source.path), PathKind::File)?;
+    let output = output_dir.join("primary.png");
     if output.exists() || output.is_symlink() {
         return Err("attempt output already exists".into());
     }
-    let source = &request.inputs[0];
-    let weights = model_weights_dir(Path::new(&request.model_path))?;
+    let weights = model_weights_dir(&model)?;
     let weights = weights.to_str().ok_or("model path is not UTF-8")?;
     let mut child = NativeChild(
         Command::new(binary)
             .args([
                 "-i",
-                &source.path,
+                source_path.to_str().ok_or("source path is not UTF-8")?,
                 "-o",
                 output.to_str().ok_or("output path is not UTF-8")?,
                 "-s",
@@ -530,6 +613,7 @@ fn run_ncnn(
         }
         Err(mpsc::TryRecvError::Empty) => {}
     }
+    normalize_ncnn_png(&output)?;
     let (width, height) = png_dimensions(&output)?;
     if (width, height) != (source.width * 4, source.height * 4) {
         return Err("ncnn output dimensions differ from exact 4x".into());
@@ -548,6 +632,60 @@ fn run_ncnn(
         size_bytes: size,
         sha256,
     }))
+}
+
+/// The official Windows ncnn build writes RGBA PNGs even for RGB inputs, while
+/// the frozen v2 output contract is exactly one 8-bit RGB candidate (the macOS
+/// build already writes RGB). Normalize in place for Windows and reject
+/// non-opaque alpha instead of silently dropping it; RGB output is untouched.
+fn normalize_ncnn_png(path: &Path) -> Result<(), String> {
+    let file = File::open(path).map_err(|error| error.to_string())?;
+    let decoder = png::Decoder::new(BufReader::new(file));
+    let mut reader = decoder.read_info().map_err(|error| error.to_string())?;
+    let buffer_size = reader
+        .output_buffer_size()
+        .ok_or("ncnn output PNG buffer size overflow")?;
+    let mut buffer = vec![0; buffer_size];
+    let info = reader
+        .next_frame(&mut buffer)
+        .map_err(|error| error.to_string())?;
+    match (info.bit_depth, info.color_type) {
+        (BitDepth::Eight, ColorType::Rgb) => Ok(()),
+        (BitDepth::Eight, ColorType::Rgba) => {
+            let pixels = &buffer[..info.buffer_size()];
+            let (pixels, remainder) = pixels.as_chunks::<4>();
+            if !remainder.is_empty() {
+                return Err("ncnn RGBA output has a partial trailing pixel".into());
+            }
+            if pixels.iter().any(|pixel| pixel[3] != 255) {
+                return Err("ncnn output contains non-opaque alpha".into());
+            }
+            let mut rgb = Vec::with_capacity(pixels.len() * 3);
+            for pixel in pixels {
+                rgb.extend_from_slice(&pixel[..3]);
+            }
+            let temporary = path.with_extension("rgb-tmp");
+            if fs::symlink_metadata(&temporary).is_ok() {
+                return Err("ncnn normalization scratch file already exists".into());
+            }
+            {
+                let file = File::create(&temporary).map_err(|error| error.to_string())?;
+                let mut encoder = png::Encoder::new(file, info.width, info.height);
+                encoder.set_color(ColorType::Rgb);
+                encoder.set_depth(BitDepth::Eight);
+                let mut writer = encoder.write_header().map_err(|error| error.to_string())?;
+                writer
+                    .write_image_data(&rgb)
+                    .map_err(|error| error.to_string())?;
+                writer.finish().map_err(|error| error.to_string())?;
+            }
+            fs::rename(&temporary, path).map_err(|error| error.to_string())
+        }
+        _ => Err(format!(
+            "ncnn output PNG must be 8-bit RGB (color type {:?}, bit depth {:?})",
+            info.color_type, info.bit_depth
+        )),
+    }
 }
 
 fn png_dimensions(path: &Path) -> Result<(u32, u32), String> {
@@ -808,6 +946,204 @@ mod tests {
         assert!(model_weights_dir(&root).is_err());
         write_pair(&flat.join("models"));
         assert!(model_weights_dir(&flat).is_err());
+        fs::remove_dir_all(&root).unwrap();
+    }
+
+    #[test]
+    fn verbatim_prefix_is_stripped_before_native_use() {
+        #[cfg(windows)]
+        {
+            assert_eq!(
+                strip_verbatim(Path::new(r"\\?\C:\models\realesrgan-x4plus.bin")),
+                PathBuf::from(r"C:\models\realesrgan-x4plus.bin")
+            );
+            assert_eq!(
+                strip_verbatim(Path::new(r"\\?\UNC\server\share\model")),
+                PathBuf::from(r"\\server\share\model")
+            );
+            assert_eq!(
+                strip_verbatim(Path::new(r"C:\models\model")),
+                PathBuf::from(r"C:\models\model")
+            );
+        }
+        #[cfg(not(windows))]
+        assert_eq!(
+            strip_verbatim(Path::new("/tmp/model")),
+            PathBuf::from("/tmp/model")
+        );
+    }
+
+    #[cfg(windows)]
+    fn scratch_root(label: &str) -> PathBuf {
+        let root = std::env::temp_dir().join(format!(
+            "realesrgan-worker-path-{}-{label}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir_all(&root).unwrap();
+        root
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn trusted_user_path_accepts_plain_and_verbatim_absolute_paths() {
+        let root = scratch_root("accept");
+        fs::write(root.join("input.png"), b"png").unwrap();
+        let canonical = root.canonicalize().unwrap();
+        let plain = strip_verbatim(&canonical);
+        assert!(!plain.to_string_lossy().starts_with(r"\\?\"));
+        assert_eq!(
+            trusted_user_path(&plain, PathKind::Directory).unwrap(),
+            plain
+        );
+        let verbatim = PathBuf::from(format!(r"\\?\{}", plain.display()));
+        assert_eq!(
+            trusted_user_path(&verbatim, PathKind::Directory).unwrap(),
+            plain
+        );
+        assert_eq!(
+            trusted_user_path(&verbatim.join("input.png"), PathKind::File).unwrap(),
+            plain.join("input.png")
+        );
+        // Windows paths compare case-insensitively, so an upper-cased spelling is
+        // still the same normalized path.
+        let upper = PathBuf::from(plain.to_string_lossy().to_uppercase());
+        assert!(trusted_user_path(&upper, PathKind::Directory).is_ok());
+        fs::remove_dir_all(&root).unwrap();
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn trusted_user_path_rejects_relative_non_normalized_symlink_and_wrong_kind() {
+        use std::os::windows::fs::{symlink_dir, symlink_file};
+        let root = scratch_root("reject");
+        fs::create_dir_all(root.join("nested")).unwrap();
+        let file = root.join("file.bin");
+        fs::write(&file, b"x").unwrap();
+        assert!(trusted_user_path(Path::new("relative/dir"), PathKind::Directory).is_err());
+        assert!(trusted_user_path(&root.join("nested").join(".."), PathKind::Directory).is_err());
+        assert!(trusted_user_path(&root, PathKind::File).is_err());
+        assert!(trusted_user_path(&file, PathKind::Directory).is_err());
+        // Symlinks are rejected when the platform permits creating one.
+        if symlink_dir(root.join("nested"), root.join("link-dir")).is_ok() {
+            assert!(trusted_user_path(&root.join("link-dir"), PathKind::Directory).is_err());
+        }
+        if symlink_file(&file, root.join("link-file.bin")).is_ok() {
+            assert!(trusted_user_path(&root.join("link-file.bin"), PathKind::File).is_err());
+        }
+        // Junctions need no symlink privilege but are reparse points too.
+        let junction = root.join("junction-dir");
+        let created = std::process::Command::new("cmd")
+            .args(["/C", "mklink", "/J"])
+            .arg(&junction)
+            .arg(root.join("nested"))
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .is_ok_and(|status| status.success());
+        if created {
+            assert!(trusted_user_path(&junction, PathKind::Directory).is_err());
+        }
+        fs::remove_dir_all(&root).unwrap();
+    }
+
+    fn scratch_png_root(label: &str) -> PathBuf {
+        let root = std::env::temp_dir().join(format!(
+            "realesrgan-worker-png-{}-{label}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir_all(&root).unwrap();
+        root
+    }
+
+    fn write_png(path: &Path, color: ColorType, pixels: &[u8], width: u32, height: u32) {
+        let file = File::create(path).unwrap();
+        let mut encoder = png::Encoder::new(file, width, height);
+        encoder.set_color(color);
+        encoder.set_depth(BitDepth::Eight);
+        let mut writer = encoder.write_header().unwrap();
+        writer.write_image_data(pixels).unwrap();
+        writer.finish().unwrap();
+    }
+
+    #[test]
+    fn windows_ncnn_rgba_output_is_normalized_to_the_rgb_contract() {
+        let root = scratch_png_root("rgba");
+        let rgba = root.join("rgba.png");
+        write_png(
+            &rgba,
+            ColorType::Rgba,
+            &[
+                10, 20, 30, 255, 40, 50, 60, 255, 70, 80, 90, 255, 1, 2, 3, 255,
+            ],
+            2,
+            2,
+        );
+        normalize_ncnn_png(&rgba).unwrap();
+        let file = File::open(&rgba).unwrap();
+        let decoder = png::Decoder::new(BufReader::new(file));
+        let reader = decoder.read_info().unwrap();
+        assert_eq!(reader.info().color_type, ColorType::Rgb);
+        assert_eq!(reader.info().bit_depth, BitDepth::Eight);
+        assert_eq!((reader.info().width, reader.info().height), (2, 2));
+        // Transparent pixels are rejected, never silently dropped.
+        let transparent = root.join("transparent.png");
+        write_png(
+            &transparent,
+            ColorType::Rgba,
+            &[0, 0, 0, 255, 0, 0, 0, 128, 0, 0, 0, 255, 0, 0, 0, 255],
+            2,
+            2,
+        );
+        assert!(normalize_ncnn_png(&transparent).is_err());
+        // An existing RGB output (the macOS behavior) stays byte-identical.
+        let rgb = root.join("rgb.png");
+        write_png(
+            &rgb,
+            ColorType::Rgb,
+            &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            2,
+            2,
+        );
+        let before = fs::read(&rgb).unwrap();
+        normalize_ncnn_png(&rgb).unwrap();
+        assert_eq!(fs::read(&rgb).unwrap(), before);
+        fs::remove_dir_all(&root).unwrap();
+    }
+
+    #[cfg(not(windows))]
+    #[test]
+    fn trusted_user_path_keeps_macos_byte_equality_semantics() {
+        use std::os::unix::fs::symlink;
+        let root = std::env::temp_dir().join(format!(
+            "realesrgan-worker-path-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir_all(root.join("nested")).unwrap();
+        let canonical = root.canonicalize().unwrap();
+        assert_eq!(
+            trusted_user_path(&canonical, PathKind::Directory).unwrap(),
+            canonical
+        );
+        assert!(trusted_user_path(Path::new("relative"), PathKind::Directory).is_err());
+        assert!(trusted_user_path(&root.join(".."), PathKind::Directory).is_err());
+        assert!(trusted_user_path(&canonical, PathKind::File).is_err());
+        let link = root.with_extension("link");
+        if symlink(&canonical, &link).is_ok() {
+            assert!(trusted_user_path(&link, PathKind::Directory).is_err());
+            fs::remove_file(&link).unwrap();
+        }
         fs::remove_dir_all(&root).unwrap();
     }
 }

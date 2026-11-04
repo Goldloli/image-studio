@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "kind": "windows-realesrgan-worker-real-protocol",
+  "status": "passed",
+  "mode": "run",
+  "identity": {
+    "build_id": "studio-realesrgan-worker-windows-0.1.0",
+    "runtime_lock_id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+    "model_snapshot_id": "realesrgan-x4plus-ncnn-windows-v1"
+  },
+  "worker_binary": {
+    "path": "image-studio/target/release/realesrgan-worker.exe",
+    "bytes": 1115136,
+    "sha256": "14789e96236c611485bc990d1570ae270a928719d39ee0894ace36962713030f"
+  },
+  "ncnn_binary": {
+    "path": "image-studio/target/parity-runtime/realesrgan/app/realesrgan-ncnn-vulkan.exe",
+    "bytes": 6161408,
+    "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c"
+  },
+  "model_dir": "image-studio/target/parity-worker/realesrgan/model",
+  "request": {
+    "input": {
+      "path": "image-studio/target/parity-worker/attempts/realesrgan-path-fix-plain/source.png",
+      "width": 97,
+      "height": 61,
+      "sha256": "60d78752db71fe5a92b5d4e0f293b727fbf589faa71e331e5788f961dfc7fbc1"
+    },
+    "parameters": {
+      "recipe": "realesrgan-x4plus-windows-t128-v1",
+      "recipe_version": 1,
+      "model": "realesrgan-x4plus",
+      "scale": 4,
+      "tile": 128,
+      "threads": "1:1:1",
+      "tta": false
+    },
+    "output_spec": {
+      "role": "primary",
+      "data_type": "image_rgb",
+      "width": 388,
+      "height": 244,
+      "max_bytes": 134217728
+    }
+  },
+  "handshake": {
+    "type": "hello_accepted",
+    "versions": {
+      "min": 2,
+      "max": 2
+    },
+    "selected_version": 2,
+    "identity": {
+      "build_id": "studio-realesrgan-worker-windows-0.1.0",
+      "runtime_lock_id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+      "model_snapshot_id": "realesrgan-x4plus-ncnn-windows-v1"
+    },
+    "capabilities": [
+      "image.upscale.realesrgan-x4plus.windows-v1"
+    ]
+  },
+  "progress": [
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    }
+  ],
+  "terminal": {
+    "type": "output_candidate_v2",
+    "candidate": {
+      "role": "primary",
+      "data_type": "image_rgb",
+      "relative_path": "primary.png",
+      "width": 388,
+      "height": 244,
+      "size_bytes": 98673,
+      "sha256": "cbe33a4673348fd265b713a7ff22c49bbb4f54661f5d3e1eae3cd3b1e0366f95"
+    }
+  },
+  "worker_exit_code": 0,
+  "elapsed_seconds": 6.656,
+  "gpu_before": {
+    "name": "NVIDIA GeForce RTX 3080 Ti",
+    "driver": "596.49",
+    "memory_used_mib": 2299,
+    "memory_total_mib": 12288,
+    "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7"
+  },
+  "gpu_after": {
+    "name": "NVIDIA GeForce RTX 3080 Ti",
+    "driver": "596.49",
+    "memory_used_mib": 2302,
+    "memory_total_mib": 12288,
+    "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7"
+  },
+  "vulkan_devices_from_stderr": [
+    {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 3080 Ti"
+    },
+    {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 3080 Ti"
+    },
+    {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 3080 Ti"
+    },
+    {
+      "index": 0,
+      "name": "NVIDIA GeForce RTX 3080 Ti"
+    },
+    {
+      "index": 1,
+      "name": "Intel(R) UHD Graphics 770"
+    },
+    {
+      "index": 1,
+      "name": "Intel(R) UHD Graphics 770"
+    },
+    {
+      "index": 1,
+      "name": "Intel(R) UHD Graphics 770"
+    },
+    {
+      "index": 1,
+      "name": "Intel(R) UHD Graphics 770"
+    }
+  ],
+  "worker_stderr": "[0 NVIDIA GeForce RTX 3080 Ti]  queueC=2[8]  queueG=0[16]  queueT=1[2]\r\n[0 NVIDIA GeForce RTX 3080 Ti]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0\r\n[0 NVIDIA GeForce RTX 3080 Ti]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\r\n[0 NVIDIA GeForce RTX 3080 Ti]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\r\n[1 Intel(R) UHD Graphics 770]  queueC=0[1]  queueG=0[1]  queueT=0[1]\r\n[1 Intel(R) UHD Graphics 770]  bugsbn1=0  bugbilz=0  bugcopc=0  bugihfa=0\r\n[1 Intel(R) UHD Graphics 770]  fp16-p/s/a=1/1/1  int8-p/s/a=1/1/1\r\n[1 Intel(R) UHD Graphics 770]  subgroup=32  basic=1  vote=1  ballot=1  shuffle=1\r\n0.00%\r\n",
+  "attempt_files": [
+    "primary.png",
+    "source.png"
+  ],
+  "failure": null,
+  "output": {
+    "path": "image-studio/target/parity-worker/attempts/realesrgan-path-fix-plain/primary.png",
+    "bytes": 98673,
+    "sha256": "cbe33a4673348fd265b713a7ff22c49bbb4f54661f5d3e1eae3cd3b1e0366f95",
+    "width": 388,
+    "height": 244
+  },
+  "checks": {
+    "candidate_sha256_matches_file": true,
+    "candidate_bytes_match_file": true,
+    "candidate_dims_match_file": true,
+    "exact_4x_dimensions": true,
+    "expected_output_sha256": true,
+    "expected_output_bytes": true
+  }
+}
