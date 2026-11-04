@@ -1393,7 +1393,35 @@
         },
         "status": "pass"
       },
-      "status": "pass"
+      "status": "pass",
+      "embedded_worker_wheels_check": {
+        "status": "pass",
+        "install_mechanism": "The Windows installer embeds these two wheels with include_bytes! (WINDOWS_SHARED_WORKER_WHEELS) and installs them directly into the v2 runtime's Lib/site-packages during installation, matching the v1 bundled:worker-wheel precedent. They are intentionally NOT Artifacts in `wheels`, so the installer never tries to download them.",
+        "wheels": [
+          {
+            "path": "resources/windows-parity/workers/studio_diffusers_worker-0.1.0-py3-none-any.whl",
+            "expected_bytes": 41530,
+            "expected_sha256": "79799fd9f0fae9f8f54e94cb57472779d8c49c1ba26c34c066a2018d75909e1b",
+            "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\resources\\windows-parity\\workers\\studio_diffusers_worker-0.1.0-py3-none-any.whl",
+            "actual_bytes": 41530,
+            "actual_sha256": "79799fd9f0fae9f8f54e94cb57472779d8c49c1ba26c34c066a2018d75909e1b",
+            "status": "pass",
+            "package": "studio-diffusers-worker",
+            "declared_as_download": false
+          },
+          {
+            "path": "resources/windows-parity/workers/studio_onnx_worker-0.1.0-py3-none-any.whl",
+            "expected_bytes": 10190,
+            "expected_sha256": "453757530db217424f1aa6799d1df3d163901e1d711ac49c3ecd447fd5b1e1d6",
+            "local_path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\resources\\windows-parity\\workers\\studio_onnx_worker-0.1.0-py3-none-any.whl",
+            "actual_bytes": 10190,
+            "actual_sha256": "453757530db217424f1aa6799d1df3d163901e1d711ac49c3ecd447fd5b1e1d6",
+            "status": "pass",
+            "package": "studio-onnx-worker",
+            "declared_as_download": false
+          }
+        ]
+      }
     },
     {
       "kind": "native-runtime-manifest",

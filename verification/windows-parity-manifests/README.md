@@ -42,6 +42,11 @@ For every manifest:
    (`python.exe -I -c "import importlib.metadata,json; print(...)"`) and
    compares the resulting normalized name→version map with the manifest:
    50 distributions probed, 49/49 manifest entries match.
+7. **Embedded worker wheels**: `worker_wheels_embedded_by_installer` must hold
+   the two fixed worker-wheel identities; the verifier re-hashes the committed
+   `resources/windows-parity/workers/*.whl` files against them and asserts the
+   two wheels are not present in the `wheels` download list (the installer
+   embeds them with `include_bytes!`).
 
 ## Result
 
@@ -77,9 +82,12 @@ installer `RuntimeManifest` view of task 1.2:
 - `archives: []`, `install_layout:
   {interpreter_root: python.exe, site_packages: Lib/site-packages,
   path_file: python312._pth}`
-- `worker_wheels_pending`: the manifest is explicitly incomplete on the
-  Windows worker wheels until `studio-diffusers-worker` / `studio-onnx-worker`
-  are appended to `wheels`
+- `worker_wheels_embedded_by_installer`: the two Windows worker wheels
+  (`studio-diffusers-worker`, `studio-onnx-worker`) are embedded by the installer
+  (`include_bytes!` / `WINDOWS_SHARED_WORKER_WHEELS`) and installed directly into
+  the v2 runtime's `Lib/site-packages`, following the v1 `bundled:worker-wheel`
+  precedent. The manifest records their fixed bytes/SHA-256 but deliberately
+  does **not** list them in `wheels`, so the installer never downloads them
 
 ### Real-ESRGAN native runtime manifest
 
@@ -130,10 +138,14 @@ installer `RuntimeManifest` view of task 1.2:
   manifest reference the same official zip, so the installer download cache
   (keyed by SHA-256) stores it once; counting it per manifest is a conservative
   space upper bound.
-- `worker_wheels_pending` in the product runtime manifest: Windows worker
-  wheels are produced by the worker streams and will be appended to `wheels`
-  later; the file is explicitly marked incomplete on that field and must not
-  activate an installation until then.
+- **Worker wheels are installer-embedded, not downloads**: the v2 product
+  runtime manifest records `worker_wheels_embedded_by_installer` with the fixed
+  identities of `studio_diffusers_worker-0.1.0-py3-none-any.whl` (41,530 B,
+  SHA-256 `79799fd9…`) and `studio_onnx_worker-0.1.0-py3-none-any.whl`
+  (10,190 B, SHA-256 `45375753…`). The verifier re-hashes the committed wheel
+  files, checks both records, and asserts neither wheel appears in the `wheels`
+  download list. The runtime manifest therefore has no missing download item for
+  activation.
 
 ## Reproduction
 
