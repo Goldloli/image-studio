@@ -480,6 +480,15 @@ impl Library {
                 ),
             );
             params.insert("sourceAssetId".into(), Value::Null);
+        } else if let Some(capability) = windows_capability_for_model(model_id) {
+            params.insert("capabilityId".into(), Value::String(capability.into()));
+            params.insert("sourceAssetId".into(), Value::Null);
+            if is_windows_tool_model(model_id) {
+                params.insert("aspect".into(), Value::String("1:1".into()));
+                params.insert("seed".into(), Value::String(String::new()));
+            } else if model_id == studio_core::generation::KLEIN_WINDOWS_MODEL {
+                params.insert("aspect".into(), Value::String("1:1".into()));
+            }
         } else if model_id == DEFAULT_MODEL_ID {
             params.insert(
                 "capabilityId".into(),
@@ -510,10 +519,7 @@ impl Library {
                         params.insert(key.into(), value.clone());
                     }
                 }
-            } else if matches!(
-                model_id,
-                studio_core::recipes::BIREFNET_MODEL | studio_core::recipes::REALESRGAN_MODEL
-            ) {
+            } else if is_instruction_less_tool(model_id, next_capability.as_str()) {
                 draft.prompt.clear();
                 draft.prompt_source = None;
             }
@@ -799,19 +805,11 @@ impl Library {
             .expected_version
             .checked_add(1)
             .ok_or_else(|| LibraryError::Invalid("草稿版本溢出".into()))?;
-        let auto_title = auto_title(
-            if input.prompt.trim().is_empty()
-                && input.model_id == studio_core::recipes::BIREFNET_MODEL
-            {
-                "去背景"
-            } else if input.prompt.trim().is_empty()
-                && input.model_id == studio_core::recipes::REALESRGAN_MODEL
-            {
-                "放大 4 倍"
-            } else {
-                &input.prompt
-            },
-        );
+        let auto_title = auto_title(if input.prompt.trim().is_empty() {
+            tool_auto_title(&input.model_id).unwrap_or(&input.prompt)
+        } else {
+            &input.prompt
+        });
         let title_source: String = tx.query_row(
             "SELECT title_source FROM conversations WHERE id=?",
             [input.conversation_id.as_str()],
@@ -888,11 +886,8 @@ impl Library {
         };
         #[cfg(windows)]
         let expected_model = turn.model_id.as_str();
-        let tool_output_matches = matches!(
-            turn.model_id.as_str(),
-            studio_core::recipes::BIREFNET_MODEL | studio_core::recipes::REALESRGAN_MODEL
-        ) || request.requested_output.width == width
-            && request.requested_output.height == height;
+        let tool_output_matches = is_instruction_less_tool(&turn.model_id, &turn.capability_id)
+            || request.requested_output.width == width && request.requested_output.height == height;
         if request.model_variant_id.as_str() != expected_model
             || request.capability.capability_id != turn.capability_id
             || request.instruction != turn.prompt && request.capability.instruction_required
@@ -1201,17 +1196,97 @@ fn ensure_no_other_pending_turn(db: &Connection, turn_id: &TurnId) -> Result<()>
     }
 }
 
-fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
-    let tool_without_prompt = matches!(
-        (input.model_id.as_str(), input.capability_id.as_str()),
+/// Windows model-parity send identities (design.md section 11). The allowlist keys
+/// off the frozen studio-core constants so it cannot drift from the installer and
+/// worker identities.
+fn windows_capability_for_model(model_id: &str) -> Option<&'static str> {
+    use studio_core::generation::{
+        BIREFNET_WINDOWS_CAPABILITY, BIREFNET_WINDOWS_MODEL, KLEIN_WINDOWS_MODEL,
+        KLEIN_WINDOWS_TEXT_CAPABILITY, MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+        MOSS_IMAGE_SFT_WINDOWS_MODEL, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+        QWEN_IMAGE_21_TURBO_WINDOWS_MODEL, QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+        QWEN_IMAGE_21_WINDOWS_MODEL, REALESRGAN_WINDOWS_CAPABILITY, REALESRGAN_WINDOWS_MODEL,
+    };
+    match model_id {
+        KLEIN_WINDOWS_MODEL => Some(KLEIN_WINDOWS_TEXT_CAPABILITY),
+        BIREFNET_WINDOWS_MODEL => Some(BIREFNET_WINDOWS_CAPABILITY),
+        REALESRGAN_WINDOWS_MODEL => Some(REALESRGAN_WINDOWS_CAPABILITY),
+        QWEN_IMAGE_21_WINDOWS_MODEL => Some(QWEN_IMAGE_21_WINDOWS_CAPABILITY),
+        QWEN_IMAGE_21_TURBO_WINDOWS_MODEL => Some(QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY),
+        MOSS_IMAGE_SFT_WINDOWS_MODEL => Some(MOSS_IMAGE_SFT_WINDOWS_CAPABILITY),
+        _ => None,
+    }
+}
+
+fn is_windows_tool_model(model_id: &str) -> bool {
+    matches!(
+        model_id,
+        studio_core::generation::BIREFNET_WINDOWS_MODEL
+            | studio_core::generation::REALESRGAN_WINDOWS_MODEL
+    )
+}
+
+/// Processing recipes (macOS and Windows) take one source image, no instruction and
+/// no seed; their outputs are source-shaped, not aspect-derived.
+fn is_instruction_less_tool(model_id: &str, capability_id: &str) -> bool {
+    matches!(
+        (model_id, capability_id),
         (
             studio_core::recipes::BIREFNET_MODEL,
             studio_core::recipes::BIREFNET_CAPABILITY
         ) | (
             studio_core::recipes::REALESRGAN_MODEL,
             studio_core::recipes::REALESRGAN_CAPABILITY
+        ) | (
+            studio_core::generation::BIREFNET_WINDOWS_MODEL,
+            studio_core::generation::BIREFNET_WINDOWS_CAPABILITY
+        ) | (
+            studio_core::generation::REALESRGAN_WINDOWS_MODEL,
+            studio_core::generation::REALESRGAN_WINDOWS_CAPABILITY
         )
-    ) && input.prompt.is_empty()
+    )
+}
+
+fn tool_auto_title(model_id: &str) -> Option<&'static str> {
+    match model_id {
+        studio_core::recipes::BIREFNET_MODEL | studio_core::generation::BIREFNET_WINDOWS_MODEL => {
+            Some("去背景")
+        }
+        studio_core::recipes::REALESRGAN_MODEL
+        | studio_core::generation::REALESRGAN_WINDOWS_MODEL => Some("放大 4 倍"),
+        _ => None,
+    }
+}
+
+/// Windows parity pairs from design.md section 11: Klein text/edit share one model,
+/// BiRefNet and Real-ESRGAN take one source, Qwen base/Turbo and MOSS are text-only.
+/// Every Windows recipe is square (1024x1024 or source-preserving tools).
+fn windows_supported_pair(model: &str, capability: &str, has_source: bool, aspect: &str) -> bool {
+    use studio_core::generation::{
+        BIREFNET_WINDOWS_CAPABILITY, BIREFNET_WINDOWS_MODEL, KLEIN_WINDOWS_EDIT_CAPABILITY,
+        KLEIN_WINDOWS_MODEL, KLEIN_WINDOWS_TEXT_CAPABILITY, MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+        MOSS_IMAGE_SFT_WINDOWS_MODEL, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+        QWEN_IMAGE_21_TURBO_WINDOWS_MODEL, QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+        QWEN_IMAGE_21_WINDOWS_MODEL, REALESRGAN_WINDOWS_CAPABILITY, REALESRGAN_WINDOWS_MODEL,
+    };
+    let square = aspect == "1:1";
+    match (model, capability, has_source) {
+        (KLEIN_WINDOWS_MODEL, KLEIN_WINDOWS_TEXT_CAPABILITY, false) => square,
+        (KLEIN_WINDOWS_MODEL, KLEIN_WINDOWS_EDIT_CAPABILITY, true) => square,
+        (BIREFNET_WINDOWS_MODEL, BIREFNET_WINDOWS_CAPABILITY, true) => square,
+        (REALESRGAN_WINDOWS_MODEL, REALESRGAN_WINDOWS_CAPABILITY, true) => square,
+        (QWEN_IMAGE_21_WINDOWS_MODEL, QWEN_IMAGE_21_WINDOWS_CAPABILITY, false) => square,
+        (QWEN_IMAGE_21_TURBO_WINDOWS_MODEL, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY, false) => {
+            square
+        }
+        (MOSS_IMAGE_SFT_WINDOWS_MODEL, MOSS_IMAGE_SFT_WINDOWS_CAPABILITY, false) => square,
+        _ => false,
+    }
+}
+
+fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
+    let tool_without_prompt = is_instruction_less_tool(&input.model_id, &input.capability_id)
+        && input.prompt.is_empty()
         && input.seed.is_empty();
     if (!tool_without_prompt && input.prompt.trim().is_empty())
         || input.prompt.len() > studio_core::generation::MAX_PROMPT_BYTES
@@ -1226,10 +1301,8 @@ fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
         &input.capability_id,
         input.source_asset_id.is_some(),
         &input.aspect,
-    ) || matches!(
-        input.capability_id.as_str(),
-        studio_core::recipes::BIREFNET_CAPABILITY | studio_core::recipes::REALESRGAN_CAPABILITY
-    ) && (!input.prompt.is_empty() || !input.seed.is_empty())
+    ) || is_instruction_less_tool(&input.model_id, &input.capability_id)
+        && (!input.prompt.is_empty() || !input.seed.is_empty())
     {
         return Err(LibraryError::Invalid("模型、能力与源图组合不受支持".into()));
     }
@@ -1273,7 +1346,7 @@ fn supported_turn_recipe(model: &str, capability: &str, has_source: bool, aspect
             studio_core::recipes::MOSS_IMAGE_SFT_CAPABILITY,
             false,
         ) => aspect == "1:1",
-        _ => false,
+        _ => windows_supported_pair(model, capability, has_source, aspect),
     }
 }
 
@@ -1344,5 +1417,258 @@ mod tests {
             assert!(!supported_turn_recipe(model, capability, true, "1:1"));
             assert!(!supported_turn_recipe(model, capability, false, "4:3"));
         }
+    }
+
+    /// (model_id, capability_id, takes_one_source, is_instruction_less_tool)
+    fn windows_parity_pairs() -> Vec<(&'static str, &'static str, bool, bool)> {
+        use studio_core::generation::{
+            BIREFNET_WINDOWS_CAPABILITY, BIREFNET_WINDOWS_MODEL, KLEIN_WINDOWS_EDIT_CAPABILITY,
+            KLEIN_WINDOWS_MODEL, KLEIN_WINDOWS_TEXT_CAPABILITY, MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+            MOSS_IMAGE_SFT_WINDOWS_MODEL, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+            QWEN_IMAGE_21_TURBO_WINDOWS_MODEL, QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+            QWEN_IMAGE_21_WINDOWS_MODEL, REALESRGAN_WINDOWS_CAPABILITY, REALESRGAN_WINDOWS_MODEL,
+        };
+        vec![
+            (
+                KLEIN_WINDOWS_MODEL,
+                KLEIN_WINDOWS_TEXT_CAPABILITY,
+                false,
+                false,
+            ),
+            (
+                KLEIN_WINDOWS_MODEL,
+                KLEIN_WINDOWS_EDIT_CAPABILITY,
+                true,
+                false,
+            ),
+            (
+                BIREFNET_WINDOWS_MODEL,
+                BIREFNET_WINDOWS_CAPABILITY,
+                true,
+                true,
+            ),
+            (
+                REALESRGAN_WINDOWS_MODEL,
+                REALESRGAN_WINDOWS_CAPABILITY,
+                true,
+                true,
+            ),
+            (
+                QWEN_IMAGE_21_WINDOWS_MODEL,
+                QWEN_IMAGE_21_WINDOWS_CAPABILITY,
+                false,
+                false,
+            ),
+            (
+                QWEN_IMAGE_21_TURBO_WINDOWS_MODEL,
+                QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+                false,
+                false,
+            ),
+            (
+                MOSS_IMAGE_SFT_WINDOWS_MODEL,
+                MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+                false,
+                false,
+            ),
+        ]
+    }
+
+    fn turn_input(
+        model_id: &str,
+        capability_id: &str,
+        prompt: &str,
+        seed: &str,
+        source: Option<&str>,
+        aspect: &str,
+    ) -> AcceptTurnInput {
+        AcceptTurnInput {
+            conversation_id: ConversationId::new("conversation-1").unwrap(),
+            draft_id: 1,
+            expected_version: 1,
+            submission_key: IdempotencyKey::new("submit-1").unwrap(),
+            prompt: prompt.into(),
+            model_id: model_id.into(),
+            capability_id: capability_id.into(),
+            source_asset_id: source.map(|id| AssetId::new(id).unwrap()),
+            aspect: aspect.into(),
+            count: 1,
+            seed: seed.into(),
+        }
+    }
+
+    fn shape(model_id: &str, capability_id: &str, has_source: bool, tool: bool) -> AcceptTurnInput {
+        let source = has_source.then_some("asset-1");
+        if tool {
+            turn_input(model_id, capability_id, "", "", source, "1:1")
+        } else {
+            turn_input(model_id, capability_id, "提示词", "7", source, "1:1")
+        }
+    }
+
+    #[test]
+    fn windows_parity_turn_pairs_accept_the_frozen_shape() {
+        for (model, capability, has_source, tool) in windows_parity_pairs() {
+            let input = shape(model, capability, has_source, tool);
+            validate_turn_input(&input)
+                .unwrap_or_else(|error| panic!("{model}/{capability} must be accepted: {error}"));
+            assert!(supported_turn_recipe(model, capability, has_source, "1:1"));
+            assert!(windows_capability_for_model(model).is_some());
+        }
+    }
+
+    #[test]
+    fn windows_parity_turn_pairs_reject_wrong_source_aspect_or_instruction_shapes() {
+        for (model, capability, has_source, tool) in windows_parity_pairs() {
+            let (prompt, seed) = if tool { ("", "") } else { ("提示词", "7") };
+            // Source presence must match the frozen recipe.
+            let wrong_source = turn_input(
+                model,
+                capability,
+                prompt,
+                seed,
+                (!has_source).then_some("asset-1"),
+                "1:1",
+            );
+            assert!(
+                validate_turn_input(&wrong_source).is_err(),
+                "{model}/{capability} accepted the wrong source shape"
+            );
+            // Every Windows parity recipe is square.
+            let wrong_aspect = turn_input(
+                model,
+                capability,
+                prompt,
+                seed,
+                has_source.then_some("asset-1"),
+                "4:3",
+            );
+            assert!(
+                validate_turn_input(&wrong_aspect).is_err(),
+                "{model}/{capability} accepted a non-square aspect"
+            );
+            // A capability from another frozen recipe pair is rejected.
+            let cross_capability = if tool {
+                studio_core::generation::KLEIN_WINDOWS_TEXT_CAPABILITY
+            } else {
+                studio_core::generation::BIREFNET_WINDOWS_CAPABILITY
+            };
+            let mismatched = turn_input(
+                model,
+                cross_capability,
+                prompt,
+                seed,
+                has_source.then_some("asset-1"),
+                "1:1",
+            );
+            assert!(
+                validate_turn_input(&mismatched).is_err(),
+                "{model} accepted a foreign capability"
+            );
+            // Instruction/seed rules mirror the macOS mapping.
+            if tool {
+                let with_instruction = turn_input(
+                    model,
+                    capability,
+                    "去背景",
+                    "",
+                    has_source.then_some("asset-1"),
+                    "1:1",
+                );
+                assert!(
+                    validate_turn_input(&with_instruction).is_err(),
+                    "{model} accepted an instruction"
+                );
+                let with_seed = turn_input(
+                    model,
+                    capability,
+                    "",
+                    "7",
+                    has_source.then_some("asset-1"),
+                    "1:1",
+                );
+                assert!(
+                    validate_turn_input(&with_seed).is_err(),
+                    "{model} accepted a seed"
+                );
+            } else {
+                let empty_prompt = turn_input(
+                    model,
+                    capability,
+                    "",
+                    "7",
+                    has_source.then_some("asset-1"),
+                    "1:1",
+                );
+                assert!(
+                    validate_turn_input(&empty_prompt).is_err(),
+                    "{model} accepted an empty prompt"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn windows_parity_model_mappings_cover_every_frozen_identity() {
+        use studio_core::generation::{
+            BIREFNET_WINDOWS_MODEL, KLEIN_WINDOWS_EDIT_CAPABILITY, KLEIN_WINDOWS_MODEL,
+            KLEIN_WINDOWS_TEXT_CAPABILITY, MOSS_IMAGE_SFT_WINDOWS_MODEL,
+            QWEN_IMAGE_21_TURBO_WINDOWS_MODEL, QWEN_IMAGE_21_WINDOWS_MODEL,
+            REALESRGAN_WINDOWS_MODEL,
+        };
+        let pairs = windows_parity_pairs();
+        for (model, capability, _, tool) in &pairs {
+            if *model != KLEIN_WINDOWS_MODEL {
+                assert_eq!(
+                    windows_capability_for_model(model),
+                    Some(*capability),
+                    "{model}"
+                );
+                assert_eq!(is_windows_tool_model(model), *tool, "{model}");
+            }
+            if *tool {
+                assert!(is_instruction_less_tool(model, capability), "{model}");
+            }
+        }
+        // Klein is one model with two capabilities: text is the model-level default,
+        // the edit capability is selected by attaching a source image.
+        assert_eq!(
+            windows_capability_for_model(KLEIN_WINDOWS_MODEL),
+            Some(KLEIN_WINDOWS_TEXT_CAPABILITY)
+        );
+        assert!(!is_windows_tool_model(KLEIN_WINDOWS_MODEL));
+        assert!(pairs.iter().any(|(model, capability, has_source, _)| {
+            *model == KLEIN_WINDOWS_MODEL
+                && *capability == KLEIN_WINDOWS_TEXT_CAPABILITY
+                && !has_source
+        }));
+        assert!(pairs.iter().any(|(model, capability, has_source, _)| {
+            *model == KLEIN_WINDOWS_MODEL
+                && *capability == KLEIN_WINDOWS_EDIT_CAPABILITY
+                && *has_source
+        }));
+        assert_eq!(tool_auto_title(BIREFNET_WINDOWS_MODEL), Some("去背景"));
+        assert_eq!(tool_auto_title(REALESRGAN_WINDOWS_MODEL), Some("放大 4 倍"));
+        assert_eq!(tool_auto_title(QWEN_IMAGE_21_WINDOWS_MODEL), None);
+        assert_eq!(tool_auto_title(QWEN_IMAGE_21_TURBO_WINDOWS_MODEL), None);
+        assert_eq!(tool_auto_title(MOSS_IMAGE_SFT_WINDOWS_MODEL), None);
+        // The macOS processing pairs keep their source-shaped/instruction-less meaning.
+        assert!(is_instruction_less_tool(
+            studio_core::recipes::BIREFNET_MODEL,
+            studio_core::recipes::BIREFNET_CAPABILITY
+        ));
+        assert!(is_instruction_less_tool(
+            studio_core::recipes::REALESRGAN_MODEL,
+            studio_core::recipes::REALESRGAN_CAPABILITY
+        ));
+        assert_eq!(
+            tool_auto_title(studio_core::recipes::BIREFNET_MODEL),
+            Some("去背景")
+        );
+        assert_eq!(
+            tool_auto_title(studio_core::recipes::REALESRGAN_MODEL),
+            Some("放大 4 倍")
+        );
+        assert!(windows_capability_for_model(BIREFNET_WINDOWS_MODEL).is_some());
     }
 }
