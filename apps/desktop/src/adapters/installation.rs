@@ -1302,6 +1302,23 @@ fn manifest_digest(manifest: &str) -> String {
 fn canonical_requirements_lock(lock: &str) -> String {
     lock.replace("\r\n", "\n")
 }
+/// Formats a filesystem path for a child process that opens paths with legacy
+/// Win32 APIs (`_wfopen` in the official ncnn build) and cannot read the
+/// `\\?\` verbatim form that Rust canonicalization returns on Windows. Internal
+/// installer paths, hashing and inventory keep the canonical form.
+fn external_process_path(path: &Path) -> std::borrow::Cow<'_, str> {
+    let text = path.to_string_lossy();
+    #[cfg(windows)]
+    {
+        if let Some(rest) = text.strip_prefix(r"\\?\UNC\") {
+            return std::borrow::Cow::Owned(format!(r"\\{rest}"));
+        }
+        if let Some(rest) = text.strip_prefix(r"\\?\") {
+            return std::borrow::Cow::Owned(rest.to_string());
+        }
+    }
+    text
+}
 /// Native runtimes are trusted only for the operating system their manifest froze.
 fn native_runtime_platform() -> &'static str {
     if cfg!(windows) {
@@ -2470,19 +2487,27 @@ impl Installation {
         }
         image.save(&input).map_err(err)?;
         let model = self.model_dir();
+        // The installer's own paths are Rust canonical paths, which carry the
+        // `\\?\` verbatim prefix on Windows. The official ncnn executable opens
+        // `-i/-o/-m` with `_wfopen` and cannot read verbatim paths, so external
+        // process arguments get the plain Win32 form while internal hashing and
+        // inventory keep using the canonical paths.
+        let input_arg = external_process_path(&input);
+        let output_arg = external_process_path(&output);
+        let model_arg = external_process_path(&model);
         self.command(
             Command::new(&ncnn)
                 .args([
                     "-i",
-                    input.to_str().ok_or("探针输入路径不是 UTF-8")?,
+                    input_arg.as_ref(),
                     "-o",
-                    output.to_str().ok_or("探针输出路径不是 UTF-8")?,
+                    output_arg.as_ref(),
                     "-s",
                     "4",
                     "-t",
                     "128",
                     "-m",
-                    model.to_str().ok_or("模型路径不是 UTF-8")?,
+                    model_arg.as_ref(),
                     "-n",
                     "realesrgan-x4plus",
                     "-g",
@@ -3905,6 +3930,28 @@ fn inventory(root: &Path, path: &Path, out: &mut Vec<InventoryEntry>) -> Result<
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(windows)]
+    #[test]
+    fn external_process_paths_drop_the_windows_verbatim_prefix() {
+        let canonical = Path::new(r"\\?\C:\ist-a\data\models\realesrgan-x4plus-windows-v1");
+        assert_eq!(
+            external_process_path(canonical).as_ref(),
+            r"C:\ist-a\data\models\realesrgan-x4plus-windows-v1"
+        );
+        let unc = Path::new(r"\\?\UNC\server\share\models");
+        assert_eq!(
+            external_process_path(unc).as_ref(),
+            r"\\server\share\models"
+        );
+        let plain = Path::new(r"C:\ist-a\models");
+        assert_eq!(external_process_path(plain).as_ref(), r"C:\ist-a\models");
+    }
+    #[cfg(not(windows))]
+    #[test]
+    fn external_process_paths_are_unchanged_off_windows() {
+        let path = Path::new("/tmp/models");
+        assert_eq!(external_process_path(path).as_ref(), "/tmp/models");
+    }
     #[cfg(windows)]
     fn seed_windows_validation_cache(installer: &Installation) {
         let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
