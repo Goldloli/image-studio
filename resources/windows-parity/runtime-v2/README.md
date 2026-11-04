@@ -132,11 +132,22 @@ runtime:
 - `archives: []`
 - `install_layout`: `{"interpreter_root": "python.exe", "site_packages":
   "Lib/site-packages", "path_file": "python312._pth"}`
-- `worker_wheels_pending`: explicitly marks the manifest incomplete on the
-  Windows worker wheels (`studio-diffusers-worker`, `studio-onnx-worker`); they
-  are appended to `wheels` when the worker streams build them, and the field is
-  removed then. Until then the manifest must not be used to activate an
-  installation.
+- `worker_wheels_embedded_by_installer`: resolves the worker-wheel question. The
+  Windows installer embeds the two worker wheels with `include_bytes!`
+  (`WINDOWS_SHARED_WORKER_WHEELS`) and installs them directly into the v2
+  runtime's `Lib/site-packages` during installation, following the v1
+  `bundled:worker-wheel` precedent. The field records their fixed identity
+  (`resources/windows-parity/workers/`):
+  - `studio-diffusers-worker 0.1.0`
+    `studio_diffusers_worker-0.1.0-py3-none-any.whl`: 41,530 bytes, SHA-256
+    `79799fd9f0fae9f8f54e94cb57472779d8c49c1ba26c34c066a2018d75909e1b`
+  - `studio-onnx-worker 0.1.0`
+    `studio_onnx_worker-0.1.0-py3-none-any.whl`: 10,190 bytes, SHA-256
+    `453757530db217424f1aa6799d1df3d163901e1d711ac49c3ecd447fd5b1e1d6`
+
+  They are intentionally **not** added to the `wheels` array: `wheels` is the
+  installer's download list and must stay at the 49 frozen closure wheels. The
+  installer never downloads the worker wheels.
 
 `verification/windows-parity-manifests/` re-validates the manifest against the
 installer schema rules, the URL allowlist, every local wheel hash and the lock
