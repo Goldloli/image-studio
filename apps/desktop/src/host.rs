@@ -1,7 +1,9 @@
+#[cfg(windows)]
+use crate::adapters::PlatformError;
 use crate::{
     DIAGNOSTIC_MODES,
     adapters::{
-        AppPaths, PlatformError,
+        AppPaths,
         diagnostics::{DiagnosticConfig, DiagnosticController, DiagnosticSnapshot},
         library::{AssetLibraryQuery, TaskCenterQuery},
         preferences::{AppearancePreferences, CreationDefaults},
@@ -639,18 +641,20 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
     let paths = match AppPaths::resolve(options.data_dir.as_deref()) {
         Ok(paths) => paths,
-        Err(error @ PlatformError::DataPathTooLong { .. }) => {
-            // The rejected root was supplied by the user; keep the startup failure
-            // report and dialog inside it so `--data-dir` users can find the cause.
-            let logs = options
-                .data_dir
-                .clone()
-                .unwrap_or_else(|| PathBuf::from("."))
-                .join("logs");
-            let _ = std::fs::create_dir_all(&logs);
-            crate::startup::fail_startup(&logs, &error.to_string());
+        Err(error) => {
+            #[cfg(windows)]
+            if let PlatformError::DataPathTooLong { ref path, .. } = error {
+                // The rejected root is the data path's parent (both for --data-dir
+                // and the %LOCALAPPDATA% default); write the report inside it.
+                let logs = path
+                    .parent()
+                    .map(|root| root.join("logs"))
+                    .unwrap_or_else(|| PathBuf::from("logs"));
+                let _ = std::fs::create_dir_all(&logs);
+                crate::startup::fail_startup(&logs, &error.to_string());
+            }
+            return Err(error.into());
         }
-        Err(error) => return Err(error.into()),
     };
     crate::startup::install_panic_hook(paths.logs.clone());
     if let Err(error) = crate::startup::configure_webview_profile(&paths.cache) {
