@@ -370,6 +370,7 @@ def stage_text(args, sampler: AuditSampler, work: Path, audit: dict) -> dict:
     text_encoder = load_text_encoder(args.model_dir, args.prepared_dir / "text_encoder")
     load_seconds = time.perf_counter() - started
     audit["text_encoder"] = device_audit(text_encoder)
+    sampler.record_cuda("text_encoder_loaded")
 
     sampler.set_phase("text_encode")
     encode_started = time.perf_counter()
@@ -401,6 +402,7 @@ def stage_text(args, sampler: AuditSampler, work: Path, audit: dict) -> dict:
         "image_pad_tokens": int(image_pad_mask.sum().item()),
         "prompt_embeds_device_before_cpu": str(embeds.device),
     }
+    sampler.record_cuda("text_encoder_released")
     del text_encoder, processor, embeds, embeds_mask, image_pad_mask, model_inputs, hidden_states
     gc.collect()
     torch.cuda.empty_cache()
@@ -449,6 +451,7 @@ def stage_transformer(args, sampler: AuditSampler, work: Path, audit: dict) -> d
     transformer = load_transformer(args.model_dir, args.prepared_dir / "transformer")
     load_seconds = time.perf_counter() - started
     audit["transformer"] = device_audit(transformer)
+    sampler.record_cuda("transformer_loaded")
     audit["dit_inputs"] = [
         tensor_audit("prompt_embeds", prompt_embeds),
         tensor_audit("prompt_embeds_mask", prompt_embeds_mask) if prompt_embeds_mask is not None else {"name": "prompt_embeds_mask", "device": "cpu-none", "on_cuda": False},
@@ -521,6 +524,7 @@ def stage_transformer(args, sampler: AuditSampler, work: Path, audit: dict) -> d
             latents = scheduler.step(noise_pred, timestep, latents, return_dict=False)[0]
             torch.cuda.synchronize()
             step_seconds = time.perf_counter() - step_started
+            sampler.record_cuda(f"dit_step_{index}_after_sync")
             steps.append(
                 {
                     "step": index,
@@ -554,6 +558,7 @@ def stage_transformer(args, sampler: AuditSampler, work: Path, audit: dict) -> d
         "step_seconds_min": round(min((item["seconds"] for item in steps), default=0.0), 4),
         "step_seconds_max": round(max((item["seconds"] for item in steps), default=0.0), 4),
     }
+    sampler.record_cuda("transformer_released")
     del transformer, scheduler, cond_cache
     gc.collect()
     torch.cuda.empty_cache()
@@ -579,6 +584,7 @@ def stage_vae(args, sampler: AuditSampler, work: Path, audit: dict) -> dict:
     vae.eval()
     load_seconds = time.perf_counter() - started
     audit["vae"] = device_audit(vae)
+    sampler.record_cuda("vae_loaded")
     if args.vae_tiling and hasattr(vae, "enable_tiling"):
         vae.enable_tiling()
 
@@ -595,6 +601,7 @@ def stage_vae(args, sampler: AuditSampler, work: Path, audit: dict) -> dict:
         image = vae.decode(unpacked, return_dict=False)[0][:, :, 0]
     torch.cuda.synchronize()
     decode_seconds = time.perf_counter() - decode_started
+    sampler.record_cuda("vae_decoded")
     audit["vae_decode_tensors"] = [
         tensor_audit("unpacked_latents", unpacked),
         tensor_audit("decoded_image", image),
@@ -858,6 +865,7 @@ def main() -> int:
         if len(sampler.samples) > 1
         else None
     )
+    record["main_thread_cuda_samples"] = sampler.main_thread_cuda
     record["step_times_seconds"] = [item["seconds"] for item in record["stages"].get("transformer", {}).get("step_times", [])]
     if record["step_times_seconds"]:
         record["steps_stats"] = stats(record["step_times_seconds"])
