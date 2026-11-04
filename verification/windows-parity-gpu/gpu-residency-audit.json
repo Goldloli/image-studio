@@ -1,0 +1,1836 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-gpu-residency-audit",
+  "case_id": "GPU-AUD-1",
+  "started_at_utc": "2026-11-04T12:21:13.196069+00:00",
+  "machine": {
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "gpu_total_mib": 12288,
+    "cpu_count": 24,
+    "system_total_gib": 31.73
+  },
+  "parameters": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "steps": 8,
+    "width": 1024,
+    "height": 1024,
+    "seed": 3148150817,
+    "vae_tiling": true,
+    "sample_interval_seconds": 0.2
+  },
+  "precision": "bitsandbytes NF4 (text encoder + transformer), bfloat16 compute, bfloat16 VAE",
+  "audit": {
+    "prepared_cache": {
+      "prepared_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\staged\\prepared-qwen21-turbo",
+      "components": {
+        "text_encoder": {
+          "bytes": 6378436043,
+          "config_keys": [
+            "architectures",
+            "dtype",
+            "image_token_id",
+            "model_type",
+            "quantization_config",
+            "text_config",
+            "tie_word_embeddings",
+            "transformers_version",
+            "video_token_id",
+            "vision_config",
+            "vision_end_token_id",
+            "vision_start_token_id"
+          ],
+          "quantization_config": {
+            "_load_in_4bit": true,
+            "_load_in_8bit": false,
+            "bnb_4bit_compute_dtype": "bfloat16",
+            "bnb_4bit_quant_storage": "uint8",
+            "bnb_4bit_quant_type": "nf4",
+            "bnb_4bit_use_double_quant": true,
+            "llm_int8_enable_fp32_cpu_offload": false,
+            "llm_int8_has_fp16_weight": false,
+            "llm_int8_skip_modules": null,
+            "llm_int8_threshold": 6.0,
+            "load_in_4bit": true,
+            "load_in_8bit": false,
+            "quant_method": "bitsandbytes"
+          },
+          "torch_dtype": null,
+          "safetensors": {
+            "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\staged\\prepared-qwen21-turbo\\text_encoder\\model.safetensors",
+            "bytes": 6378433680,
+            "tensor_count": 2590,
+            "dtype_histogram": {
+              "BF16": 382,
+              "U8": 1104,
+              "F32": 1104
+            },
+            "metadata": {
+              "format": "pt"
+            },
+            "first_tensors": [
+              {
+                "name": "lm_head.weight",
+                "dtype": "BF16",
+                "shape": [
+                  151936,
+                  4096
+                ]
+              },
+              {
+                "name": "model.language_model.embed_tokens.weight",
+                "dtype": "BF16",
+                "shape": [
+                  151936,
+                  4096
+                ]
+              },
+              {
+                "name": "model.language_model.layers.0.input_layernorm.weight",
+                "dtype": "BF16",
+                "shape": [
+                  4096
+                ]
+              }
+            ]
+          }
+        },
+        "transformer": {
+          "bytes": 3670961576,
+          "config_keys": [
+            "_class_name",
+            "_diffusers_version",
+            "_name_or_path",
+            "attention_head_dim",
+            "axes_dims_rope",
+            "causal_condition",
+            "context_in_dim",
+            "eps",
+            "in_channels",
+            "mlp_ratio",
+            "num_attention_heads",
+            "num_layers",
+            "out_channels",
+            "patch_size",
+            "quantization_config"
+          ],
+          "quantization_config": {
+            "_load_in_4bit": true,
+            "_load_in_8bit": false,
+            "bnb_4bit_compute_dtype": "bfloat16",
+            "bnb_4bit_quant_storage": "uint8",
+            "bnb_4bit_quant_type": "nf4",
+            "bnb_4bit_use_double_quant": true,
+            "llm_int8_enable_fp32_cpu_offload": false,
+            "llm_int8_has_fp16_weight": false,
+            "llm_int8_skip_modules": null,
+            "llm_int8_threshold": 6.0,
+            "load_in_4bit": true,
+            "load_in_8bit": false,
+            "quant_method": "bitsandbytes"
+          },
+          "torch_dtype": null,
+          "safetensors": {
+            "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\staged\\prepared-qwen21-turbo\\transformer\\diffusion_pytorch_model.safetensors",
+            "bytes": 3670960577,
+            "tensor_count": 1457,
+            "dtype_histogram": {
+              "U8": 696,
+              "F32": 696,
+              "BF16": 65
+            },
+            "metadata": {
+              "format": "pt"
+            },
+            "first_tensors": [
+              {
+                "name": "img_in.weight",
+                "dtype": "U8",
+                "shape": [
+                  131072,
+                  1
+                ]
+              },
+              {
+                "name": "img_in.weight.absmax",
+                "dtype": "U8",
+                "shape": [
+                  4096
+                ]
+              },
+              {
+                "name": "img_in.weight.nested_absmax",
+                "dtype": "F32",
+                "shape": [
+                  16
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "model_dir": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\parity-gate0\\models\\qwen-image-2.1-turbo",
+      "total_prepared_bytes": 10049397619
+    },
+    "text_encoder": {
+      "parameters": 750,
+      "device_counts": {
+        "cuda": 750
+      },
+      "all_parameters_on_cuda": true,
+      "estimated_parameter_bytes_total": 6258342368,
+      "estimated_parameter_bytes_cuda": 6258342368,
+      "parameter_dtypes": {
+        "torch.bfloat16": 382,
+        "torch.uint8": 368
+      }
+    },
+    "text_encode_tensors": [
+      {
+        "name": "input_ids",
+        "device": "cuda:0",
+        "dtype": "torch.int64",
+        "shape": [
+          1,
+          41
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "attention_mask",
+        "device": "cuda:0",
+        "dtype": "torch.int64",
+        "shape": [
+          1,
+          41
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "hidden_states",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          41,
+          4096
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "prompt_embeds_gpu",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          27,
+          4096
+        ],
+        "on_cuda": true
+      }
+    ],
+    "transformer": {
+      "parameters": 297,
+      "device_counts": {
+        "cuda": 297
+      },
+      "all_parameters_on_cuda": true,
+      "estimated_parameter_bytes_total": 3557580800,
+      "estimated_parameter_bytes_cuda": 3557580800,
+      "parameter_dtypes": {
+        "torch.uint8": 232,
+        "torch.bfloat16": 65
+      }
+    },
+    "dit_inputs": [
+      {
+        "name": "prompt_embeds",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          27,
+          4096
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "prompt_embeds_mask",
+        "device": "cpu-none",
+        "on_cuda": false
+      },
+      {
+        "name": "image_pad_mask",
+        "device": "cuda:0",
+        "dtype": "torch.bool",
+        "shape": [
+          1,
+          27
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "latents",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          4096,
+          64
+        ],
+        "on_cuda": true
+      }
+    ],
+    "vae": {
+      "parameters": 238,
+      "device_counts": {
+        "cuda": 238
+      },
+      "all_parameters_on_cuda": true,
+      "estimated_parameter_bytes_total": 675480808,
+      "estimated_parameter_bytes_cuda": 675480808,
+      "parameter_dtypes": {
+        "torch.bfloat16": 238
+      }
+    },
+    "vae_decode_tensors": [
+      {
+        "name": "unpacked_latents",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          64,
+          1,
+          64,
+          64
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "decoded_image",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          4,
+          1024,
+          1024
+        ],
+        "on_cuda": true
+      }
+    ]
+  },
+  "phases": {
+    "idle_baseline": {
+      "samples": 3,
+      "duration_seconds_sampled": 0.52,
+      "gpu_utilization_pct": {
+        "count": 3,
+        "mean": 20.33,
+        "median": 27.0,
+        "p95": 27.0,
+        "max": 27.0,
+        "min": 7.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 3,
+        "mean": 1.33,
+        "median": 1.0,
+        "p95": 2.0,
+        "max": 2.0,
+        "min": 1.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 3,
+        "mean": 4537.33,
+        "median": 4522.0,
+        "p95": 4569.0,
+        "max": 4569.0,
+        "min": 4521.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 3,
+        "mean": 1815.0,
+        "median": 1965.0,
+        "p95": 1965.0,
+        "max": 1965.0,
+        "min": 1515.0
+      },
+      "gpu_temperature_c": {
+        "count": 3,
+        "mean": 40.33,
+        "median": 41.0,
+        "p95": 41.0,
+        "max": 41.0,
+        "min": 39.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 3,
+        "mean": 5.87,
+        "median": 5.9,
+        "p95": 6.2,
+        "max": 6.2,
+        "min": 5.5
+      },
+      "system_cpu_pct": {
+        "count": 3,
+        "mean": 39.67,
+        "median": 38.7,
+        "p95": 43.1,
+        "max": 43.1,
+        "min": 37.2
+      },
+      "system_available_ram_gib": {
+        "min": 12.65,
+        "max": 13.8
+      }
+    },
+    "text_load": {
+      "samples": 45,
+      "duration_seconds_sampled": 12.83,
+      "gpu_utilization_pct": {
+        "count": 45,
+        "mean": 31.84,
+        "median": 15.0,
+        "p95": 100.0,
+        "max": 100.0,
+        "min": 4.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 45,
+        "mean": 6.29,
+        "median": 1.0,
+        "p95": 31.0,
+        "max": 31.0,
+        "min": 1.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 45,
+        "mean": 4797.44,
+        "median": 4820.0,
+        "p95": 7792.0,
+        "max": 7795.0,
+        "min": 1743.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 45,
+        "mean": 1814.0,
+        "median": 1905.0,
+        "p95": 1965.0,
+        "max": 1965.0,
+        "min": 1665.0
+      },
+      "gpu_temperature_c": {
+        "count": 45,
+        "mean": 46.31,
+        "median": 44.0,
+        "p95": 55.0,
+        "max": 55.0,
+        "min": 42.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 45,
+        "mean": 70.04,
+        "median": 66.7,
+        "p95": 100.1,
+        "max": 111.2,
+        "min": 35.4
+      },
+      "system_cpu_pct": {
+        "count": 45,
+        "mean": 43.04,
+        "median": 41.7,
+        "p95": 63.9,
+        "max": 74.4,
+        "min": 27.6
+      },
+      "system_available_ram_gib": {
+        "min": 10.74,
+        "max": 16.71
+      }
+    },
+    "text_encode": {
+      "samples": 2,
+      "duration_seconds_sampled": 0.26,
+      "gpu_utilization_pct": {
+        "count": 2,
+        "mean": 8.5,
+        "median": 8.0,
+        "p95": 9.0,
+        "max": 9.0,
+        "min": 8.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 2,
+        "mean": 1.0,
+        "median": 1.0,
+        "p95": 1.0,
+        "max": 1.0,
+        "min": 1.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 2,
+        "mean": 8059.5,
+        "median": 8058.0,
+        "p95": 8061.0,
+        "max": 8061.0,
+        "min": 8058.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 2,
+        "mean": 1665.0,
+        "median": 1665.0,
+        "p95": 1665.0,
+        "max": 1665.0,
+        "min": 1665.0
+      },
+      "gpu_temperature_c": {
+        "count": 2,
+        "mean": 43.0,
+        "median": 43.0,
+        "p95": 43.0,
+        "max": 43.0,
+        "min": 43.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 2,
+        "mean": 99.8,
+        "median": 94.0,
+        "p95": 105.6,
+        "max": 105.6,
+        "min": 94.0
+      },
+      "system_cpu_pct": {
+        "count": 2,
+        "mean": 64.0,
+        "median": 54.6,
+        "p95": 73.4,
+        "max": 73.4,
+        "min": 54.6
+      },
+      "system_available_ram_gib": {
+        "min": 16.21,
+        "max": 16.28
+      }
+    },
+    "text_release": {
+      "samples": 3,
+      "duration_seconds_sampled": 0.53,
+      "gpu_utilization_pct": {
+        "count": 3,
+        "mean": 5.0,
+        "median": 6.0,
+        "p95": 6.0,
+        "max": 6.0,
+        "min": 3.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 3,
+        "mean": 1.67,
+        "median": 2.0,
+        "p95": 2.0,
+        "max": 2.0,
+        "min": 1.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 3,
+        "mean": 2608.0,
+        "median": 1934.0,
+        "p95": 3958.0,
+        "max": 3958.0,
+        "min": 1932.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 3,
+        "mean": 1455.0,
+        "median": 1350.0,
+        "p95": 1665.0,
+        "max": 1665.0,
+        "min": 1350.0
+      },
+      "gpu_temperature_c": {
+        "count": 3,
+        "mean": 42.0,
+        "median": 42.0,
+        "p95": 42.0,
+        "max": 42.0,
+        "min": 42.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 3,
+        "mean": 88.27,
+        "median": 82.5,
+        "p95": 100.1,
+        "max": 100.1,
+        "min": 82.2
+      },
+      "system_cpu_pct": {
+        "count": 3,
+        "mean": 47.77,
+        "median": 47.4,
+        "p95": 49.8,
+        "max": 49.8,
+        "min": 46.1
+      },
+      "system_available_ram_gib": {
+        "min": 15.9,
+        "max": 16.19
+      }
+    },
+    "dit_load": {
+      "samples": 18,
+      "duration_seconds_sampled": 4.65,
+      "gpu_utilization_pct": {
+        "count": 18,
+        "mean": 12.0,
+        "median": 12.0,
+        "p95": 15.0,
+        "max": 15.0,
+        "min": 3.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 18,
+        "mean": 1.0,
+        "median": 1.0,
+        "p95": 1.0,
+        "max": 1.0,
+        "min": 1.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 18,
+        "mean": 3640.22,
+        "median": 3407.0,
+        "p95": 5494.0,
+        "max": 5642.0,
+        "min": 1845.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 18,
+        "mean": 1665.0,
+        "median": 1665.0,
+        "p95": 1665.0,
+        "max": 1665.0,
+        "min": 1665.0
+      },
+      "gpu_temperature_c": {
+        "count": 18,
+        "mean": 42.94,
+        "median": 43.0,
+        "p95": 43.0,
+        "max": 43.0,
+        "min": 42.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 18,
+        "mean": 109.18,
+        "median": 56.2,
+        "p95": 85.4,
+        "max": 1033.8,
+        "min": 27.7
+      },
+      "system_cpu_pct": {
+        "count": 18,
+        "mean": 45.92,
+        "median": 42.5,
+        "p95": 63.9,
+        "max": 85.8,
+        "min": 28.9
+      },
+      "system_available_ram_gib": {
+        "min": 12.62,
+        "max": 16.06
+      }
+    },
+    "dit_sample": {
+      "samples": 36,
+      "duration_seconds_sampled": 9.85,
+      "gpu_utilization_pct": {
+        "count": 36,
+        "mean": 96.94,
+        "median": 100.0,
+        "p95": 100.0,
+        "max": 100.0,
+        "min": 9.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 36,
+        "mean": 28.22,
+        "median": 29.0,
+        "p95": 30.0,
+        "max": 30.0,
+        "min": 1.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 36,
+        "mean": 8453.22,
+        "median": 8431.0,
+        "p95": 8753.0,
+        "max": 8756.0,
+        "min": 6508.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 36,
+        "mean": 1895.0,
+        "median": 1905.0,
+        "p95": 1920.0,
+        "max": 1920.0,
+        "min": 1665.0
+      },
+      "gpu_temperature_c": {
+        "count": 36,
+        "mean": 57.58,
+        "median": 58.0,
+        "p95": 61.0,
+        "max": 61.0,
+        "min": 43.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 36,
+        "mean": 106.09,
+        "median": 105.6,
+        "p95": 115.7,
+        "max": 116.8,
+        "min": 94.3
+      },
+      "system_cpu_pct": {
+        "count": 36,
+        "mean": 59.35,
+        "median": 61.1,
+        "p95": 72.6,
+        "max": 75.7,
+        "min": 37.3
+      },
+      "system_available_ram_gib": {
+        "min": 9.25,
+        "max": 15.89
+      }
+    },
+    "dit_release": {
+      "samples": 1,
+      "duration_seconds_sampled": 0.0,
+      "gpu_utilization_pct": {
+        "count": 1,
+        "mean": 100.0,
+        "median": 100.0,
+        "p95": 100.0,
+        "max": 100.0,
+        "min": 100.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 1,
+        "mean": 29.0,
+        "median": 29.0,
+        "p95": 29.0,
+        "max": 29.0,
+        "min": 29.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 1,
+        "mean": 4821.0,
+        "median": 4821.0,
+        "p95": 4821.0,
+        "max": 4821.0,
+        "min": 4821.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 1,
+        "mean": 1890.0,
+        "median": 1890.0,
+        "p95": 1890.0,
+        "max": 1890.0,
+        "min": 1890.0
+      },
+      "gpu_temperature_c": {
+        "count": 1,
+        "mean": 61.0,
+        "median": 61.0,
+        "p95": 61.0,
+        "max": 61.0,
+        "min": 61.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 1,
+        "mean": 96.3,
+        "median": 96.3,
+        "p95": 96.3,
+        "max": 96.3,
+        "min": 96.3
+      },
+      "system_cpu_pct": {
+        "count": 1,
+        "mean": 71.7,
+        "median": 71.7,
+        "p95": 71.7,
+        "max": 71.7,
+        "min": 71.7
+      },
+      "system_available_ram_gib": {
+        "min": 9.02,
+        "max": 9.02
+      }
+    },
+    "vae_load": {
+      "samples": 6,
+      "duration_seconds_sampled": 1.48,
+      "gpu_utilization_pct": {
+        "count": 6,
+        "mean": 13.17,
+        "median": 12.0,
+        "p95": 22.0,
+        "max": 22.0,
+        "min": 9.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 6,
+        "mean": 1.0,
+        "median": 1.0,
+        "p95": 1.0,
+        "max": 1.0,
+        "min": 1.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 6,
+        "mean": 4099.83,
+        "median": 4035.0,
+        "p95": 4427.0,
+        "max": 4427.0,
+        "min": 3815.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 6,
+        "mean": 1827.5,
+        "median": 1950.0,
+        "p95": 1950.0,
+        "max": 1950.0,
+        "min": 1215.0
+      },
+      "gpu_temperature_c": {
+        "count": 6,
+        "mean": 52.83,
+        "median": 52.0,
+        "p95": 55.0,
+        "max": 55.0,
+        "min": 52.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 6,
+        "mean": 54.72,
+        "median": 50.0,
+        "p95": 77.8,
+        "max": 77.8,
+        "min": 40.1
+      },
+      "system_cpu_pct": {
+        "count": 6,
+        "mean": 72.78,
+        "median": 71.8,
+        "p95": 77.8,
+        "max": 77.8,
+        "min": 64.6
+      },
+      "system_available_ram_gib": {
+        "min": 7.42,
+        "max": 8.8
+      }
+    },
+    "vae_decode": {
+      "samples": 7,
+      "duration_seconds_sampled": 1.81,
+      "gpu_utilization_pct": {
+        "count": 7,
+        "mean": 68.0,
+        "median": 82.0,
+        "p95": 98.0,
+        "max": 98.0,
+        "min": 9.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 7,
+        "mean": 30.0,
+        "median": 36.0,
+        "p95": 45.0,
+        "max": 45.0,
+        "min": 2.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 7,
+        "mean": 4867.0,
+        "median": 4939.0,
+        "p95": 4949.0,
+        "max": 4949.0,
+        "min": 4431.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 7,
+        "mean": 1630.71,
+        "median": 1740.0,
+        "p95": 1905.0,
+        "max": 1905.0,
+        "min": 1110.0
+      },
+      "gpu_temperature_c": {
+        "count": 7,
+        "mean": 52.71,
+        "median": 49.0,
+        "p95": 58.0,
+        "max": 58.0,
+        "min": 49.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 7,
+        "mean": 87.29,
+        "median": 79.9,
+        "p95": 119.1,
+        "max": 119.1,
+        "min": 63.1
+      },
+      "system_cpu_pct": {
+        "count": 7,
+        "mean": 76.07,
+        "median": 75.6,
+        "p95": 81.1,
+        "max": 81.1,
+        "min": 71.3
+      },
+      "system_available_ram_gib": {
+        "min": 5.42,
+        "max": 7.84
+      }
+    },
+    "vae_save": {
+      "samples": 2,
+      "duration_seconds_sampled": 0.53,
+      "gpu_utilization_pct": {
+        "count": 2,
+        "mean": 8.0,
+        "median": 3.0,
+        "p95": 13.0,
+        "max": 13.0,
+        "min": 3.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 2,
+        "mean": 1.0,
+        "median": 1.0,
+        "p95": 1.0,
+        "max": 1.0,
+        "min": 1.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 2,
+        "mean": 4402.0,
+        "median": 3855.0,
+        "p95": 4949.0,
+        "max": 4949.0,
+        "min": 3855.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 2,
+        "mean": 1950.0,
+        "median": 1950.0,
+        "p95": 1950.0,
+        "max": 1950.0,
+        "min": 1950.0
+      },
+      "gpu_temperature_c": {
+        "count": 2,
+        "mean": 52.5,
+        "median": 52.0,
+        "p95": 53.0,
+        "max": 53.0,
+        "min": 52.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 2,
+        "mean": 241.35,
+        "median": 88.3,
+        "p95": 394.4,
+        "max": 394.4,
+        "min": 88.3
+      },
+      "system_cpu_pct": {
+        "count": 2,
+        "mean": 90.85,
+        "median": 85.5,
+        "p95": 96.2,
+        "max": 96.2,
+        "min": 85.5
+      },
+      "system_available_ram_gib": {
+        "min": 4.12,
+        "max": 5.21
+      }
+    },
+    "idle_after": {
+      "samples": 2,
+      "duration_seconds_sampled": 0.28,
+      "gpu_utilization_pct": {
+        "count": 2,
+        "mean": 12.0,
+        "median": 12.0,
+        "p95": 12.0,
+        "max": 12.0,
+        "min": 12.0
+      },
+      "gpu_memory_utilization_pct": {
+        "count": 2,
+        "mean": 1.0,
+        "median": 1.0,
+        "p95": 1.0,
+        "max": 1.0,
+        "min": 1.0
+      },
+      "gpu_memory_used_mib": {
+        "count": 2,
+        "mean": 3856.0,
+        "median": 3855.0,
+        "p95": 3857.0,
+        "max": 3857.0,
+        "min": 3855.0
+      },
+      "gpu_clocks_sm_mhz": {
+        "count": 2,
+        "mean": 1950.0,
+        "median": 1950.0,
+        "p95": 1950.0,
+        "max": 1950.0,
+        "min": 1950.0
+      },
+      "gpu_temperature_c": {
+        "count": 2,
+        "mean": 51.0,
+        "median": 51.0,
+        "p95": 51.0,
+        "max": 51.0,
+        "min": 51.0
+      },
+      "cuda_allocated_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "cuda_reserved_gib": {
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0,
+        "min": 0.0
+      },
+      "process_cpu_pct": {
+        "count": 2,
+        "mean": 13.15,
+        "median": 10.5,
+        "p95": 15.8,
+        "max": 15.8,
+        "min": 10.5
+      },
+      "system_cpu_pct": {
+        "count": 2,
+        "mean": 77.9,
+        "median": 74.4,
+        "p95": 81.4,
+        "max": 81.4,
+        "min": 74.4
+      },
+      "system_available_ram_gib": {
+        "min": 3.71,
+        "max": 4.03
+      }
+    }
+  },
+  "steps": [],
+  "residency": {
+    "text_encoder": {
+      "parameters": 750,
+      "device_counts": {
+        "cuda": 750
+      },
+      "all_parameters_on_cuda": true,
+      "estimated_parameter_bytes_total": 6258342368,
+      "estimated_parameter_bytes_cuda": 6258342368,
+      "parameter_dtypes": {
+        "torch.bfloat16": 382,
+        "torch.uint8": 368
+      }
+    },
+    "transformer": {
+      "parameters": 297,
+      "device_counts": {
+        "cuda": 297
+      },
+      "all_parameters_on_cuda": true,
+      "estimated_parameter_bytes_total": 3557580800,
+      "estimated_parameter_bytes_cuda": 3557580800,
+      "parameter_dtypes": {
+        "torch.uint8": 232,
+        "torch.bfloat16": 65
+      }
+    },
+    "vae": {
+      "parameters": 238,
+      "device_counts": {
+        "cuda": 238
+      },
+      "all_parameters_on_cuda": true,
+      "estimated_parameter_bytes_total": 675480808,
+      "estimated_parameter_bytes_cuda": 675480808,
+      "parameter_dtypes": {
+        "torch.bfloat16": 238
+      }
+    },
+    "text_encode_tensors": [
+      {
+        "name": "input_ids",
+        "device": "cuda:0",
+        "dtype": "torch.int64",
+        "shape": [
+          1,
+          41
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "attention_mask",
+        "device": "cuda:0",
+        "dtype": "torch.int64",
+        "shape": [
+          1,
+          41
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "hidden_states",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          41,
+          4096
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "prompt_embeds_gpu",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          27,
+          4096
+        ],
+        "on_cuda": true
+      }
+    ],
+    "dit_inputs": [
+      {
+        "name": "prompt_embeds",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          27,
+          4096
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "prompt_embeds_mask",
+        "device": "cpu-none",
+        "on_cuda": false
+      },
+      {
+        "name": "image_pad_mask",
+        "device": "cuda:0",
+        "dtype": "torch.bool",
+        "shape": [
+          1,
+          27
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "latents",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          4096,
+          64
+        ],
+        "on_cuda": true
+      }
+    ],
+    "vae_decode_tensors": [
+      {
+        "name": "unpacked_latents",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          64,
+          1,
+          64,
+          64
+        ],
+        "on_cuda": true
+      },
+      {
+        "name": "decoded_image",
+        "device": "cuda:0",
+        "dtype": "torch.bfloat16",
+        "shape": [
+          1,
+          4,
+          1024,
+          1024
+        ],
+        "on_cuda": true
+      }
+    ],
+    "dit_forward_hook_devices": [
+      {
+        "device": "cuda:0",
+        "on_cuda": true
+      },
+      {
+        "device": "cuda:0",
+        "on_cuda": true
+      },
+      {
+        "device": "cuda:0",
+        "on_cuda": true
+      },
+      {
+        "device": "cuda:0",
+        "on_cuda": true
+      },
+      {
+        "device": "cuda:0",
+        "on_cuda": true
+      },
+      {
+        "device": "cuda:0",
+        "on_cuda": true
+      },
+      {
+        "device": "cuda:0",
+        "on_cuda": true
+      },
+      {
+        "device": "cuda:0",
+        "on_cuda": true
+      }
+    ],
+    "all_dit_forward_inputs_on_cuda": true
+  },
+  "versions": {
+    "diffusers": "0.41.0",
+    "transformers": "5.3.0",
+    "torch": "2.10.0+cu126",
+    "cuda": "12.6",
+    "python": "3.12.10"
+  },
+  "stages": {
+    "text": {
+      "load_seconds": 12.88,
+      "encode_seconds": 0.82,
+      "prompt_tokens": 27,
+      "prompt_embeds_shape": [
+        1,
+        27,
+        4096
+      ],
+      "prompt_embeds_dtype": "torch.bfloat16",
+      "image_pad_tokens": 0,
+      "prompt_embeds_device_before_cpu": "cuda:0",
+      "reserved_after_release_gib": 0.02,
+      "allocated_after_release_gib": 0.008
+    },
+    "transformer": {
+      "load_seconds": 4.82,
+      "sample_seconds": 10.24,
+      "steps": 8,
+      "sigmas": [
+        1.0,
+        0.978453,
+        0.95418,
+        0.926626,
+        0.89508,
+        0.845148,
+        0.704534,
+        0.414568
+      ],
+      "latent_tokens": 4096,
+      "step_times": [
+        {
+          "step": 0,
+          "timestep": 1000.0,
+          "kv_cache_mode": "extract",
+          "seconds": 1.3537,
+          "synchronize_monotonic": 261358.7888477,
+          "cuda_allocated_bytes": 3699687936,
+          "cuda_reserved_bytes": 4911529984
+        },
+        {
+          "step": 1,
+          "timestep": 978.4530029296875,
+          "kv_cache_mode": "cached",
+          "seconds": 1.2593,
+          "synchronize_monotonic": 261360.0486136,
+          "cuda_allocated_bytes": 3699684352,
+          "cuda_reserved_bytes": 4911529984
+        },
+        {
+          "step": 2,
+          "timestep": 954.1799926757812,
+          "kv_cache_mode": "cached",
+          "seconds": 1.2514,
+          "synchronize_monotonic": 261361.3004057,
+          "cuda_allocated_bytes": 3699684352,
+          "cuda_reserved_bytes": 4911529984
+        },
+        {
+          "step": 3,
+          "timestep": 926.6260375976562,
+          "kv_cache_mode": "cached",
+          "seconds": 1.2483,
+          "synchronize_monotonic": 261362.5491835,
+          "cuda_allocated_bytes": 3699684352,
+          "cuda_reserved_bytes": 4911529984
+        },
+        {
+          "step": 4,
+          "timestep": 895.0799560546875,
+          "kv_cache_mode": "cached",
+          "seconds": 1.3006,
+          "synchronize_monotonic": 261363.8504839,
+          "cuda_allocated_bytes": 3699684352,
+          "cuda_reserved_bytes": 4911529984
+        },
+        {
+          "step": 5,
+          "timestep": 845.1480102539062,
+          "kv_cache_mode": "cached",
+          "seconds": 1.2598,
+          "synchronize_monotonic": 261365.110866,
+          "cuda_allocated_bytes": 3699684352,
+          "cuda_reserved_bytes": 4911529984
+        },
+        {
+          "step": 6,
+          "timestep": 704.5339965820312,
+          "kv_cache_mode": "cached",
+          "seconds": 1.2895,
+          "synchronize_monotonic": 261366.4011022,
+          "cuda_allocated_bytes": 3699684352,
+          "cuda_reserved_bytes": 4911529984
+        },
+        {
+          "step": 7,
+          "timestep": 414.5679931640625,
+          "kv_cache_mode": "cached",
+          "seconds": 1.2748,
+          "synchronize_monotonic": 261367.6763977,
+          "cuda_allocated_bytes": 3699684352,
+          "cuda_reserved_bytes": 4911529984
+        }
+      ],
+      "forward_hook_devices": [
+        {
+          "device": "cuda:0",
+          "on_cuda": true
+        },
+        {
+          "device": "cuda:0",
+          "on_cuda": true
+        },
+        {
+          "device": "cuda:0",
+          "on_cuda": true
+        },
+        {
+          "device": "cuda:0",
+          "on_cuda": true
+        },
+        {
+          "device": "cuda:0",
+          "on_cuda": true
+        },
+        {
+          "device": "cuda:0",
+          "on_cuda": true
+        },
+        {
+          "device": "cuda:0",
+          "on_cuda": true
+        },
+        {
+          "device": "cuda:0",
+          "on_cuda": true
+        }
+      ],
+      "all_forward_inputs_on_cuda": true,
+      "step_seconds_mean": 1.2797,
+      "step_seconds_min": 1.2483,
+      "step_seconds_max": 1.3537,
+      "reserved_after_release_gib": 0.027,
+      "allocated_after_release_gib": 0.009
+    },
+    "vae": {
+      "load_seconds": 1.87,
+      "decode_seconds": 1.98,
+      "image": {
+        "path": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-parity-gpu\\qwen21-turbo-gpu-audit.png",
+        "bytes": 2007139,
+        "sha256": "cf071e9ce8d1bc7769fa55a5b90faab2bcca69aaf1921163e2aa77abfeb9cd73",
+        "width": 1024,
+        "height": 1024
+      },
+      "reserved_after_release_gib": 0.021,
+      "allocated_after_release_gib": 0.008
+    }
+  },
+  "wall_seconds": 40.78,
+  "finished_at_utc": "2026-11-04T12:21:53.977710+00:00",
+  "events": [
+    {
+      "phase": "idle_baseline",
+      "monotonic": 261337.0895562,
+      "wall_iso": "2026-11-04T12:21:17.734335+00:00"
+    },
+    {
+      "phase": "text_load",
+      "monotonic": 261338.0900064,
+      "wall_iso": "2026-11-04T12:21:18.735217+00:00"
+    },
+    {
+      "phase": "text_encode",
+      "monotonic": 261350.9736575,
+      "wall_iso": "2026-11-04T12:21:31.618250+00:00"
+    },
+    {
+      "phase": "text_release",
+      "monotonic": 261351.7956142,
+      "wall_iso": "2026-11-04T12:21:32.440418+00:00"
+    },
+    {
+      "phase": "dit_load",
+      "monotonic": 261352.6001683,
+      "wall_iso": "2026-11-04T12:21:33.244981+00:00"
+    },
+    {
+      "phase": "dit_sample",
+      "monotonic": 261357.4349547,
+      "wall_iso": "2026-11-04T12:21:38.080185+00:00"
+    },
+    {
+      "phase": "dit_release",
+      "monotonic": 261367.6798446,
+      "wall_iso": "2026-11-04T12:21:48.324782+00:00"
+    },
+    {
+      "phase": "vae_load",
+      "monotonic": 261368.0313011,
+      "wall_iso": "2026-11-04T12:21:48.676448+00:00"
+    },
+    {
+      "phase": "vae_decode",
+      "monotonic": 261369.9013254,
+      "wall_iso": "2026-11-04T12:21:50.546233+00:00"
+    },
+    {
+      "phase": "vae_save",
+      "monotonic": 261371.8860366,
+      "wall_iso": "2026-11-04T12:21:52.531296+00:00"
+    },
+    {
+      "phase": "idle_after",
+      "monotonic": 261372.6774526,
+      "wall_iso": "2026-11-04T12:21:53.322646+00:00"
+    }
+  ],
+  "sample_count": 126,
+  "effective_sample_interval_seconds": 0.289,
+  "step_times_seconds": [
+    1.3537,
+    1.2593,
+    1.2514,
+    1.2483,
+    1.3006,
+    1.2598,
+    1.2895,
+    1.2748
+  ],
+  "steps_stats": {
+    "count": 8,
+    "mean": 1.28,
+    "median": 1.27,
+    "p95": 1.35,
+    "max": 1.35,
+    "min": 1.25
+  },
+  "checks": {
+    "residency_all_phases_on_cuda": true,
+    "phases_present": [
+      "text_load",
+      "text_encode",
+      "dit_load",
+      "dit_sample",
+      "vae_load",
+      "vae_decode"
+    ],
+    "missing_phases": [],
+    "image_written": true,
+    "sampling_phase_samples": 36,
+    "gpu_utilization_observed_max_pct": 100.0,
+    "sm_clock_observed_max_mhz": 1965.0
+  },
+  "wall_clock_context": {
+    "prepare": {
+      "path": "target\\parity-gate0\\staged\\qwen21-turbo-prepare.json",
+      "stages": {
+        "text_encoder": {
+          "load_seconds": 22.23,
+          "save_seconds": 6.94,
+          "prepared_bytes": 6378436043
+        },
+        "transformer": {
+          "load_seconds": 23.22,
+          "save_seconds": 1.64,
+          "prepared_bytes": 3670961576
+        }
+      }
+    },
+    "prior_generation": {
+      "path": "target\\parity-gate0\\staged\\qwen21-turbo-staged-prepared.json",
+      "total_seconds": null,
+      "stages": {
+        "text": {
+          "load_seconds": 12.11,
+          "sample_seconds": null,
+          "encode_seconds": 0.71,
+          "decode_seconds": null
+        },
+        "transformer": {
+          "load_seconds": 4.45,
+          "sample_seconds": 10.66,
+          "encode_seconds": null,
+          "decode_seconds": null
+        },
+        "vae": {
+          "load_seconds": 0.92,
+          "sample_seconds": null,
+          "encode_seconds": null,
+          "decode_seconds": 1.54
+        }
+      }
+    },
+    "model_transfer_reference_qwen_base": {
+      "path": "verification\\windows-parity-gate0\\transfer-qwen21-base.json",
+      "elapsed_seconds": 753.124
+    }
+  },
+  "status": "pass",
+  "error": null,
+  "interpretation": "During the measured generation window the GPU was actively computing: every phase's parameters and tensors were CUDA-resident, the DiT sampling loop ran at high GPU utilization and SM clocks rose from the idle baseline, and each 1024x1024 image step is only a short burst (~1 s). The long CPU-looking timeline belongs to download, NF4 quantization/prepare and component load/release phases, not to inference. The GPU is not a CPU fallback and it is not idle during sampling.",
+  "phase_split": {
+    "one_time_setup_seconds_reference": 939.1,
+    "prior_generation_seconds": 34.0,
+    "audit_generation_seconds": 40.78,
+    "dit_sampling_share_of_reference_pipeline": 0.01052,
+    "reference_pipeline_seconds": 973.1,
+    "rows": [
+      {
+        "phase": "model download / transfer (Qwen base reference, 33.13 GB)",
+        "device": "network + disk",
+        "wall_seconds": 753.124,
+        "status": "measured_reference",
+        "evidence": "verification/windows-parity-gate0/transfer-qwen21-base.json",
+        "note": "Qwen-Image 2.1-Turbo was transferred in the same pipeline; its own transfer report was not kept, and its snapshot is 32,451,607,098 bytes vs 33,131,609,424 bytes for the base model. The base transfer is the measured reference for the download share."
+      },
+      {
+        "phase": "NF4 prepare (CPU quantization + save of text encoder and transformer)",
+        "device": "cpu",
+        "wall_seconds": 62.0,
+        "status": "measured",
+        "evidence": "target/parity-gate0/staged/qwen21-turbo-prepare.json",
+        "components": {
+          "text_encoder": {
+            "load_seconds": 22.23,
+            "save_seconds": 6.94,
+            "prepared_bytes": 6378436043
+          },
+          "transformer": {
+            "load_seconds": 23.22,
+            "save_seconds": 1.64,
+            "prepared_bytes": 3670961576
+          }
+        },
+        "prepared_bytes": null,
+        "note": "This is the install-time prepare phase; its transient commit peak was ~23.4 GiB (recorded there)."
+      },
+      {
+        "phase": "Windows v2 runtime install (one-time, 2.71 GB wheelhouse -> 4.78 GB runtime)",
+        "device": "cpu + disk",
+        "wall_seconds": 123.955,
+        "status": "measured",
+        "evidence": "verification/windows-parity-runtime/install-evidence.json",
+        "wheelhouse_bytes": 2714172955,
+        "installed_runtime_bytes": 4778861981
+      },
+      {
+        "phase": "generation (prior Gate 0 run, warm prepared cache)",
+        "device": "gpu",
+        "wall_seconds": 34.0,
+        "status": "measured",
+        "evidence": "target/parity-gate0/staged/qwen21-turbo-staged-prepared.json",
+        "stage_seconds": {
+          "text": {
+            "load_seconds": 12.11,
+            "encode_seconds": 0.71,
+            "sample_seconds": null,
+            "decode_seconds": null
+          },
+          "transformer": {
+            "load_seconds": 4.45,
+            "encode_seconds": null,
+            "sample_seconds": 10.66,
+            "decode_seconds": null
+          },
+          "vae": {
+            "load_seconds": 0.92,
+            "encode_seconds": null,
+            "sample_seconds": null,
+            "decode_seconds": 1.54
+          }
+        }
+      },
+      {
+        "phase": "generation (this audit run, warm prepared cache)",
+        "device": "gpu",
+        "wall_seconds": 40.78,
+        "status": "measured",
+        "evidence": "verification/windows-parity-gpu/gpu-residency-audit.json",
+        "stage_seconds": {
+          "text_load": 12.88,
+          "text_encode": 0.82,
+          "dit_load": 4.82,
+          "dit_sample": 10.24,
+          "vae_load": 1.87,
+          "vae_decode": 1.98
+        },
+        "gpu_active_seconds": 13.04,
+        "gpu_active_fraction_of_run": 0.32
+      }
+    ],
+    "explanation": "The user-visible timeline is dominated by one-time setup measured in minutes: the model transfer (~753 s for the 33 GB class snapshot), the CPU NF4 prepare (~62 s for this cache plus quantization transients), and the runtime install (~124 s, 2.71 GB wheelhouse -> 4.78 GB unpacked). A warm-cache generation is a short burst: ~34-41 s wall clock for a 1024x1024 8-step Turbo image, of which the DiT sampling itself is ~10 s on the GPU. So nvidia-smi looked idle whenever the pipeline was in a download, quantization, build or Python-load phase; it was never idle during sampling."
+  },
+  "gpu_idle_explanation": {
+    "summary": "Earlier long CPU-looking stretches were setup phases (downloads ~100 GB of model snapshots, CPU NF4 quantization/prepare, runtime install, Rust builds); the GPU only has work during the short load/encode/sample/decode bursts of a generation, and sampling is a bursty single-batch 4-bit workload.",
+    "measured_low_utilization_phases": {
+      "text_load": {
+        "count": 45,
+        "mean": 31.84,
+        "median": 15.0,
+        "p95": 100.0,
+        "max": 100.0,
+        "min": 4.0
+      },
+      "text_encode": {
+        "count": 2,
+        "mean": 8.5,
+        "median": 8.0,
+        "p95": 9.0,
+        "max": 9.0,
+        "min": 8.0
+      },
+      "dit_load": {
+        "count": 18,
+        "mean": 12.0,
+        "median": 12.0,
+        "p95": 15.0,
+        "max": 15.0,
+        "min": 3.0
+      }
+    },
+    "measured_generation_phases": {
+      "dit_sample": {
+        "count": 36,
+        "mean": 96.94,
+        "median": 100.0,
+        "p95": 100.0,
+        "max": 100.0,
+        "min": 9.0
+      },
+      "vae_decode": {
+        "count": 7,
+        "mean": 68.0,
+        "median": 82.0,
+        "p95": 98.0,
+        "max": 98.0,
+        "min": 9.0
+      }
+    }
+  },
+  "interpretation_sentence": "During staged generation the GPU is genuinely doing the work: every model parameter and intermediate tensor (text encoder 750/750, DiT 297/297, VAE 238/238 parameters, latents and prompt embeds) is CUDA-resident, all 8 DiT forward passes ran on cuda, GPU utilization during DiT sampling was mean 96.94% / median 100% / p95 100% / max 100% with SM clocks at ~1.9 GHz, and each 1024x1024 step took ~1.28 s; the long CPU-looking timeline is one-time download/prepare/build work, not CPU fallback or idle inference.",
+  "limitations": [
+    "The background sampler thread's torch.cuda.memory_allocated/reserved values read 0 in this run (thread-level allocator visibility limitation, not a computation problem); the real values were recorded from the main CUDA thread at every step: 3,699,684,352 bytes allocated / 4,911,529,984 bytes reserved during all 8 DiT steps.",
+    "The recorded JSON is the summarized phase statistics; raw 200 ms sample rows and the enriched mem_get_info sampler were added after this run and are used by future reruns.",
+    "One generation only (seed 3148150817, 8 steps); this is not a throughput benchmark.",
+    "GPU baseline includes desktop compositor usage (~1.4-4.5 GiB in this run)."
+  ],
+  "commands": {
+    "run": "target/parity-gate0/py312/python.exe tools/windows-parity-gpu-audit/sample_utilization.py --model-dir target/parity-gate0/models/qwen-image-2.1-turbo --prepared-dir target/parity-gate0/staged/prepared-qwen21-turbo --work-dir target/parity-gate0/staged/gpu-audit --output verification/windows-parity-gpu/qwen21-turbo-gpu-audit.png --report verification/windows-parity-gpu/gpu-residency-audit.json",
+    "environment": {
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTHONUTF8": "1",
+      "PYTHONNOUSERSITE": "1",
+      "HF_HUB_OFFLINE": "1",
+      "TRANSFORMERS_OFFLINE": "1"
+    },
+    "summarize": "python tools/windows-parity-gpu-audit/summarize_evidence.py"
+  }
+}
