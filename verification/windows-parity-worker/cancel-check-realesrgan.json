@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "kind": "windows-realesrgan-worker-real-protocol",
+  "status": "passed",
+  "mode": "cancel",
+  "identity": {
+    "build_id": "studio-realesrgan-worker-windows-0.1.0",
+    "runtime_lock_id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+    "model_snapshot_id": "realesrgan-x4plus-ncnn-windows-v1"
+  },
+  "worker_binary": {
+    "path": "target/release/realesrgan-worker.exe",
+    "bytes": 1115136,
+    "sha256": "14789e96236c611485bc990d1570ae270a928719d39ee0894ace36962713030f"
+  },
+  "ncnn_binary": {
+    "path": "target/parity-runtime/realesrgan/app/realesrgan-ncnn-vulkan.exe",
+    "bytes": 6161408,
+    "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c"
+  },
+  "model_dir": "target/parity-worker/realesrgan/model",
+  "request": {
+    "input": {
+      "path": "target/parity-worker/attempts/realesrgan-cancel/source.png",
+      "width": 220,
+      "height": 220,
+      "sha256": "fd547d5c5c21986f13c1922cbdfdb8a5bbf64a314da5d357486ddd15d944bc01"
+    },
+    "parameters": {
+      "recipe": "realesrgan-x4plus-windows-t128-v1",
+      "recipe_version": 1,
+      "model": "realesrgan-x4plus",
+      "scale": 4,
+      "tile": 128,
+      "threads": "1:1:1",
+      "tta": false
+    },
+    "output_spec": {
+      "role": "primary",
+      "data_type": "image_rgb",
+      "width": 880,
+      "height": 880,
+      "max_bytes": 134217728
+    }
+  },
+  "handshake": {
+    "type": "hello_accepted",
+    "versions": {
+      "min": 2,
+      "max": 2
+    },
+    "selected_version": 2,
+    "identity": {
+      "build_id": "studio-realesrgan-worker-windows-0.1.0",
+      "runtime_lock_id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+      "model_snapshot_id": "realesrgan-x4plus-ncnn-windows-v1"
+    },
+    "capabilities": [
+      "image.upscale.realesrgan-x4plus.windows-v1"
+    ]
+  },
+  "progress": [
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    }
+  ],
+  "terminal": {
+    "type": "cancelled"
+  },
+  "worker_exit_code": 0,
+  "elapsed_seconds": 0.125,
+  "gpu_before": {
+    "name": "NVIDIA GeForce RTX 3080 Ti",
+    "driver": "596.49",
+    "memory_used_mib": 2674,
+    "memory_total_mib": 12288,
+    "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7"
+  },
+  "gpu_after": {
+    "name": "NVIDIA GeForce RTX 3080 Ti",
+    "driver": "596.49",
+    "memory_used_mib": 2668,
+    "memory_total_mib": 12288,
+    "uuid": "GPU-78b715aa-ec51-31af-8813-eac9653458a7"
+  },
+  "vulkan_devices_from_stderr": [],
+  "worker_stderr": "",
+  "attempt_files": [
+    "source.png"
+  ],
+  "failure": null,
+  "cancel_received": true,
+  "no_candidate_file": true
+}
