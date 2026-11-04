@@ -3027,4 +3027,35 @@ mod tests {
                 .contains("不接受种子")
         );
     }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_runtime_lock_matrix_is_pinned_for_settings_rows() {
+        use studio_core::generation as windows;
+        // v1 runtime: Z-Image stays on its unchanged first-round runtime.
+        assert_eq!(
+            runtime_lock_id(WINDOWS_ZIMAGE_INSTALL_ID),
+            Some(windows::Z_IMAGE_WINDOWS_RUNTIME)
+        );
+        // ncnn Vulkan: Real-ESRGAN has its own native runtime.
+        assert_eq!(
+            runtime_lock_id(WINDOWS_REALESRGAN_MODEL),
+            Some(windows::REALESRGAN_WINDOWS_RUNTIME)
+        );
+        // Shared v2 runtime: Klein, BiRefNet, Qwen base/Turbo and MOSS.
+        for model in [
+            WINDOWS_KLEIN_MODEL,
+            WINDOWS_BIREFNET_MODEL,
+            WINDOWS_QWEN_MODEL,
+            WINDOWS_QWEN_TURBO_MODEL,
+            WINDOWS_MOSS_MODEL,
+        ] {
+            assert_eq!(
+                runtime_lock_id(model),
+                Some(windows::WINDOWS_V2_RUNTIME),
+                "{model}"
+            );
+        }
+        assert_eq!(runtime_lock_id("unknown-install-id"), None);
+    }
 }
