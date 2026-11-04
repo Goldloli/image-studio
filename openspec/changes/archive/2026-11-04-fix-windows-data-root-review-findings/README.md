@@ -1,6 +1,6 @@
 # fix-windows-data-root-review-findings
 
-**状态：等待用户确认（2026-11-04）。** 对已归档的数据根加固做独立 review 后发现 6 个真实问题（macOS 编译 blocker、路径预算 unsafe、canonical 绕过、旧格式残留不回收、清理晚于空间预检、默认根日志写 CWD）。完整 review 见 `verification/full-review-2026-11-04/README.md`；本目录目前只有 change 文档，未改实现代码。
+**状态：已实现、安装版验收并归档（2026-11-04）。** 独立 review 发现的 6 个数据根问题全部修复：macOS cfg 编译、短运行时目录 `rt-<12 hex>` + 94 units 预算（按最长 Python 可打开路径）、canonical data 复检、新旧暂存目录在空间预检前回收、默认根日志路径。安装版验证 data=88 / 94 真实生成成功、data=127 exit 3、真实 4.23 GB 旧残留被回收、旧运行时目录迁移后 6/6 ready。证据 `verification/windows-data-root-guard/review-fix/` 与 `verification/full-review-2026-11-04/README.md`。
 
 来源：bd `image-studio-kf5`（P0）。
 

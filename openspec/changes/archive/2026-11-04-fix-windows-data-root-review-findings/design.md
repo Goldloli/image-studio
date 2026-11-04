@@ -31,27 +31,39 @@ let paths = match AppPaths::resolve(options.data_dir.as_deref()) {
 非 Windows 构建不再引用该变体；`--data-dir` 与默认根都通过 `path.parent()` 得到
 `<root>/logs`（`path` 是 data 路径）。
 
-## F2/F9 正确的数据路径预算
+## F2/F9 正确的数据路径预算与短运行时目录
 
-最终运行时目录：`<data>/runtimes/<runtime.id>`。冻结的 v2 id 为 61 units，最长的
-**装载相关**相对路径为 86 units（`numpy.libs/libscipy_openblas…dll`；onnxruntime pyd
-为 66）。Win32 传统限制 260，保留 10 units 余量：
+最终运行时目录：`<data>/runtimes/rt-<12 hex>`（15 units；runtime 身份保留在激活记录
+与 worker 身份中）。**实现阶段发现**：仅把预算从 117 降到 92 仍不够——深根 data=88 的
+安装/probe 通过，但第一次真实生成时 Python 打开
+`…\Lib\site-packages\transformers\models\audio_spectrogram_transformer\configuration_audio_spectrogram_transformer.py`
+报 `No such file or directory`：该路径 = 88+10+61+1+103 > 260。运行时中最长的
+**Python 可打开**相对路径是 130 units（diffusers 的 `.py`；torch 头文件 137 不会被
+Python 打开），因此只按 86 的 DLL 预算不够。
+
+修正后的布局与预算：
 
 ```
-data + 10 (\runtimes\) + 61 (v2 id) + 1 + 86 + 10 = data + 168 <= 260
-MAX_DATA_PATH_UNITS = 92
+data + 10 (\runtimes\) + 15 (rt-<12 hex>) + 1 + 130 (最长 Python 可打开相对路径) + 10 (余量)
+    = data + 166 <= 260
+MAX_DATA_PATH_UNITS = 94
 ```
 
-- 暂存目录名（≤26）比最终目录短，因此最终目录是上界；暂存预算作为第二重常量保留。
+- 正式目录名由 `runtime_directory_name(runtime_id)` 生成：`rt-` + SHA-256(id) 前 12 hex
+  （15 units，确定性；不同 runtime id 不同名）。旧构建按原始 id（52–61 units）命名的
+  正式目录在 `new_for` 就绪检查时同卷 rename 迁移到短目录；短目录已存在时不覆盖、
+  不删除旧数据。
 - 校验发生在两处：
   1. 创建子目录之前，用 `std::path::absolute(data)` 做早失败（避免下载/解压）；
-  2. canonicalize 之后，再按**去掉 `\\?\` 前缀**的 UTF-16 长度校验 data 与 cache，
-     防止 junction/8.3 短名把实际路径变长。
-- 旧上限 117 会允许 data=117：最终 numpy DLL 路径 = 117+10+61+1+86 = 275 > 260，
-  属于本次 review 的 unsafe upper bound；新上限 92 时最长路径 = 92+158 = 250，
-  保留 10 units 余量。
-- 单元测试：92 通过/93 拒绝；中文与 surrogate pair 按 UTF-16 计数；`\\?\` strip 帮助
-  函数有边界测试。
+  2. canonicalize 之后，再按**去掉 `\\?\` 前缀**的 UTF-16 长度校验 data（runtime 树所在
+     路径；cache 下只有短 hash 文件名，长 1 unit 不影响装载），防止 junction/8.3 短名把
+     实际路径变长。
+- 旧上限 117 会允许 data=117；仅按 DLL 预算的 92 会允许 data=92，但 Python 打开的最长
+  120–130 units 文件仍会越界（实现阶段已在 data=88 复现）。最终方案 94 让边界根最长
+  路径 = 94+156 = 250，保留 10 units 余量。
+- 暂存目录名（≤26）仍短于正式目录（15+分隔），不是上界；清理逻辑不变。
+- 单元测试：94 通过/95 拒绝；中文与 surrogate pair 按 UTF-16 计数；`\\?\` strip；
+  `runtime_directory_name` 长度/确定性/唯一性；旧目录迁移一次、短目录存在时不覆盖。
 
 ## F3 canonical 校验
 
@@ -105,21 +117,24 @@ for warning in cleanup_stale_runtime_staging(&data.join("runtimes")) { eprintln!
 
 ## 验收设计
 
-- 深数据根（data 88，原失败长度）：安装 BiRefNet 后不仅 probe，还要在安装版 UI 完成
-  一次真实生成（Klein 或 BiRefNet 处理），证明最终路径可装载。
-- 新上限边界（data 92，基于仓库路径构造）：安装共享运行时 + 一个模型并生成，确认
-  边界通过；data 93 由单元测试覆盖，data >92 的真实根启动 exit 3。
+- 深数据根（data 88，原失败长度）：安装共享运行时 + 模型后完成一次真实生成（不是只有
+  probe），证明最终短目录路径下 Python 可打开最长模块。
+- 新上限边界（data 94，基于仓库路径构造）：安装共享运行时 + 一个模型并生成，确认
+  边界通过；data 95 由单元测试覆盖，data >94 的真实根启动 exit 3。
 - 旧格式残留：在 `<data>/runtimes/` 预置
   `.{runtime_id}.staging-<pid>-<nanos>` 目录（复刻 root-a 真实命名），确认安装开始时
   被回收（即使随后因预检/网络失败，也已释放）。
+- 旧正式目录迁移：deep root 中保留旧 `runtimes/<runtime_id>` 目录，启动/安装后确认已
+  迁移为 `rt-<12 hex>`，模型仍 ready，并完成真实生成。
 - 证据：`verification/windows-data-root-guard/review-fix/`（results.json、截图、日志），
-  README 增加 “review fix” 段并说明原 D4 只覆盖新格式。
+  README 增加 “review fix” 段并说明原 D4 只覆盖新格式、92 预算在生成阶段被推翻。
 
 ## 风险
 
 | 风险 | 处理 |
 |---|---|
-| 降低上限到 92 后拒绝此前可工作的 93–117 数据根 | 这些根在最终路径上 unsafe；启动消息给出短目录建议，文档明确支持边界 |
+| 降低上限到 94 后拒绝此前可工作的 95–117 数据根 | 这些根在最终路径上 unsafe；启动消息给出短目录建议，文档明确支持边界 |
 | 旧格式匹配误删 | 要求 `.` 前缀 + 最后 `.staging-` + 两段十六进制；非匹配目录不动；有单测 |
+| 旧正式运行目录迁移失败/冲突 | 同卷 rename、best effort；短目录已存在时不覆盖不删除；失败时 readiness 会给出明确不可用原因 |
 | 清理提前到空间预检前可能与其它进程冲突 | 清理在独占 installation.lock 内；review 确认锁语义 |
 | macOS 编译仅静态保证 | cfg 结构简单；首次 macOS CI run 作为 user-gated 验证，不在本机冒充 |
