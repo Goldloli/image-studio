@@ -38,17 +38,22 @@
 .catalog-status.is-ready{color:var(--accent)}
 .catalog-status.is-active{color:#3974b8}
 .catalog-status.is-error{color:var(--danger)}
+.catalog-status.is-blocked{color:var(--danger)}
 .catalog-progress{padding:0 14px 12px 64px}
 .catalog-progress>div{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--muted)}
 .catalog-progress small{margin-left:auto}
 .catalog-progress progress{display:block;width:100%;height:4px;margin-top:7px;accent-color:var(--accent)}
 .catalog-model-details{padding:16px 18px 17px 64px;border-top:.5px solid var(--border);background:color-mix(in srgb,var(--input) 58%,var(--surface))}
 .catalog-description{font-size:12px;max-width:780px;margin-bottom:13px}
-.catalog-state-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:14px 0}
+.catalog-state-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin:14px 0}
 .catalog-state-grid>div{display:flex;flex-direction:column;gap:2px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface)}
 .catalog-state-grid span{font-size:9px;color:var(--muted)}
 .catalog-state-grid strong{font-size:10px;font-weight:550;color:var(--muted)}
 .catalog-state-grid strong.is-positive{color:var(--accent)}
+.catalog-license,.catalog-hardware{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:9px 10px;margin-bottom:8px;border-radius:8px;background:var(--surface);border:1px solid var(--border);font-size:10px;color:var(--muted)}
+.catalog-license strong,.catalog-hardware strong{font-size:10px;color:var(--text);margin-right:4px}
+.license-badge{font-style:normal;font-size:9px;padding:2px 7px;border-radius:5px;background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--danger);white-space:nowrap}
+.catalog-hardware-block{margin-top:10px;padding:9px 10px;border-radius:8px;background:color-mix(in srgb,var(--danger) 9%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);color:var(--danger);font-size:10px;line-height:1.6}
 .catalog-detail-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:13px 0}
 .catalog-detail-columns section{border-top:1px solid var(--border);padding-top:9px}
 .catalog-detail-columns h3{font-size:10px;margin-bottom:5px}

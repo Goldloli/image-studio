@@ -11,6 +11,7 @@ export type ModelEntry = {
   productStatus: ModelProductStatus;
   runtime: string;
   license: string;
+  licenseNotice: string | null;
   source: string;
   revision: string;
   modelBytes: number | null;
@@ -21,11 +22,20 @@ export type ModelEntry = {
   recipe: string;
   installId: string | null;
   installerSupported: boolean;
+  /** Hardware thresholds registered by the host catalog (design.md section 10.2). */
+  minVramGb: number | null;
+  minRamGb: number | null;
+  quantization: string | null;
+  windowsStatus: string | null;
   installPhase: string;
   componentsReady: boolean;
   runtimeReady: boolean;
   deviceVerified: boolean;
   executable: boolean;
+  /** Whether the local device meets (or can prove) the registered thresholds. */
+  hardwareEligible: boolean;
+  /** Actionable Chinese explanation when `hardwareEligible` is false. */
+  hardwareReason: string | null;
   busy: boolean;
   receivedBytes: number;
   installTotalBytes: number;
@@ -44,6 +54,7 @@ export type CatalogCounts = {
   executable: number;
   planned: number;
   runtimeReady: number;
+  hardwareEligible: number;
 };
 export type CatalogPayload = {
   schemaVersion: number;
@@ -51,13 +62,14 @@ export type CatalogPayload = {
   entries: ModelEntry[];
   counts: CatalogCounts;
 };
-export type PrimaryFilter = 'all' | 'installed' | 'executable' | 'planned' | 'runtime';
+export type PrimaryFilter = 'all' | 'installed' | 'executable' | 'planned' | 'runtime' | 'eligible';
 export type CapabilityFilter = 'all' | 'text_to_image' | 'image_edit' | 'background_removal' | 'upscale';
 
 export const primaryFilters: { id: PrimaryFilter; label: string }[] = [
   { id: 'all', label: '全部' },
   { id: 'installed', label: '已安装' },
   { id: 'executable', label: '可执行' },
+  { id: 'eligible', label: '设备满足' },
   { id: 'planned', label: '计划中' },
   { id: 'runtime', label: '运行环境' },
 ];
@@ -88,6 +100,7 @@ export function filterCatalog(
     const matchesPrimary = primary === 'all'
       || primary === 'installed' && entry.componentsReady
       || primary === 'executable' && entry.executable
+      || primary === 'eligible' && entry.hardwareEligible
       || primary === 'planned' && entry.productStatus === 'planned'
       || primary === 'runtime' && entry.runtimeReady;
     const matchesCapability = capability === 'all'
@@ -105,3 +118,32 @@ export function installProgress(entry: ModelEntry): { value: number; max: number
     label: known ? '可确定的下载字节' : '当前阶段无法换算百分比',
   };
 }
+
+/** True when the registered hardware gate disables install/generation entry points. */
+export const hardwareBlocked = (entry: ModelEntry): boolean => !entry.hardwareEligible;
+
+/**
+ * Effective entry-point permission. The host already gates `canInstall`/`canUse` with the device
+ * facts, but the UI re-checks `hardwareEligible` so a stale catalog payload can never re-enable a
+ * model the device cannot run.
+ */
+export const canStartGeneration = (entry: ModelEntry): boolean =>
+  entry.canUse && entry.executable && entry.hardwareEligible;
+
+export const canInstallModel = (entry: ModelEntry): boolean =>
+  entry.canInstall && entry.hardwareEligible;
+
+/** Human-readable threshold summary, e.g. "需要显存 ≥ 12 GB · 内存 ≥ 32 GB". */
+export function hardwareThresholdLabel(entry: ModelEntry): string {
+  const parts: string[] = [];
+  if (entry.minVramGb !== null && entry.minVramGb > 0) parts.push(`显存 ≥ ${entry.minVramGb} GB`);
+  if (entry.minRamGb !== null && entry.minRamGb > 0) parts.push(`内存 ≥ ${entry.minRamGb} GB`);
+  if (entry.minVramGb === 0) parts.push('CPU 路线（无显存门槛）');
+  return parts.length ? `需要${parts.join(' · ')}` : '未登记硬件门槛';
+}
+
+/** The license text shown on the model page; the full notice wins over the short license id. */
+export const licenseLabel = (entry: ModelEntry): string => entry.licenseNotice ?? entry.license;
+
+export const isNonCommercialLicense = (entry: ModelEntry): boolean =>
+  /非商业|non-commercial|research/i.test(licenseLabel(entry));

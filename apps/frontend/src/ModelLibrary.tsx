@@ -18,8 +18,14 @@ import {
 import { api, bytesLabel, native, type StoredDraft, type StudioSnapshot } from './studio-api';
 import {
   capabilityFilters,
+  canInstallModel,
+  canStartGeneration,
   filterCatalog,
+  hardwareBlocked,
+  hardwareThresholdLabel,
   installProgress,
+  isNonCommercialLicense,
+  licenseLabel,
   primaryFilters,
   type CapabilityFilter,
   type CatalogPayload,
@@ -52,6 +58,7 @@ const phaseLabels: Record<string, string> = {
 };
 
 function statusText(entry: ModelEntry): string {
+  if (hardwareBlocked(entry)) return '设备不满足门槛';
   if (entry.executable) return '当前可执行';
   if (entry.busy) return phaseLabels[entry.installPhase] ?? entry.installPhase;
   if (entry.componentsReady && !entry.runtimeReady) return '组件已安装，运行环境未就绪';
@@ -60,6 +67,7 @@ function statusText(entry: ModelEntry): string {
 }
 
 function statusTone(entry: ModelEntry): string {
+  if (hardwareBlocked(entry)) return 'is-blocked';
   if (entry.executable) return 'is-ready';
   if (entry.busy) return 'is-active';
   if (entry.error) return 'is-error';
@@ -180,12 +188,13 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
               {filter.id === 'all' ? catalog?.counts.total ?? '—'
                 : filter.id === 'installed' ? catalog?.counts.installed ?? '—'
                   : filter.id === 'executable' ? catalog?.counts.executable ?? '—'
-                    : filter.id === 'planned' ? catalog?.counts.planned ?? '—'
-                      : catalog?.counts.runtimeReady ?? '—'}
+                    : filter.id === 'eligible' ? catalog?.counts.hardwareEligible ?? '—'
+                      : filter.id === 'planned' ? catalog?.counts.planned ?? '—'
+                        : catalog?.counts.runtimeReady ?? '—'}
             </span>
           </button>
         ))}
-        <p className="sidebar-note">已接入、文件已安装、运行时就绪、当前可执行和设备验证分别显示。<br/>计划中型号不会提供安装或生成入口。</p>
+        <p className="sidebar-note">已接入、文件已安装、运行时就绪、当前可执行、设备满足和设备验证分别显示。<br/>低于显存/内存门槛时安装与生成入口会被禁用并展示原因。</p>
       </aside>
 
       <section className="detail-page model-detail">
@@ -201,6 +210,7 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
           <span>正式接入 <strong>{catalog?.counts.supported ?? '—'}</strong></span>
           <span>已安装 <strong>{catalog?.counts.installed ?? '—'}</strong></span>
           <span>可执行 <strong>{catalog?.counts.executable ?? '—'}</strong></span>
+          <span>设备满足 <strong>{catalog?.counts.hardwareEligible ?? '—'}</strong></span>
         </div>
 
         <div className="catalog-controls">
@@ -271,14 +281,26 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                       <span>{entry.family}</span>
                       <span>{entry.recipe}</span>
                       <span>{entry.license}</span>
+                      {entry.quantization && <span>量化 {entry.quantization}</span>}
                       {entry.modelBytes !== null && <span>原始模型 {bytesLabel(entry.modelBytes)}</span>}
                       {entry.runtimeBytes > 0 && <span>运行时 {bytesLabel(entry.runtimeBytes)}</span>}
                       {entry.requiredBytes > 0 && <span>安装预算 {bytesLabel(entry.requiredBytes)}</span>}
+                    </div>
+                    <div className="catalog-license">
+                      <strong>许可</strong>
+                      <span>{licenseLabel(entry)}</span>
+                      {isNonCommercialLicense(entry) && <i className="license-badge">仅限非商业用途</i>}
+                    </div>
+                    <div className="catalog-hardware">
+                      <strong>设备门槛</strong>
+                      <span>{hardwareThresholdLabel(entry)}</span>
+                      <span>{entry.hardwareEligible ? '当前设备满足门槛' : entry.hardwareReason ?? '当前设备不满足门槛'}</span>
                     </div>
                     <div className="catalog-state-grid">
                       <StateFact label="产品接入" value={entry.productStatus === 'implemented' ? '已接入' : '计划中'} positive={entry.productStatus === 'implemented'}/>
                       <StateFact label="模型组件" value={entry.componentsReady ? '文件齐备' : entry.installerSupported ? '尚未齐备' : '未接入'} positive={entry.componentsReady}/>
                       <StateFact label="运行时" value={entry.runtimeReady ? '已就绪' : '未就绪'} positive={entry.runtimeReady}/>
+                      <StateFact label="设备满足" value={entry.hardwareEligible ? '满足' : '不满足'} positive={entry.hardwareEligible}/>
                       <StateFact label="设备探针" value={entry.deviceVerified ? '已通过' : '未通过'} positive={entry.deviceVerified}/>
                       <StateFact label="当前可执行" value={entry.executable ? '是' : '否'} positive={entry.executable}/>
                     </div>
@@ -293,17 +315,20 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                       <span>{entry.verifiedDevices.length ? `实机验证：${entry.verifiedDevices.join('；')}` : '尚未完成目标设备实机验证。'}</span>
                     </div>
                     {entry.error && <p className="error-text" role="alert">{entry.error}</p>}
+                    {hardwareBlocked(entry) && <p className="catalog-hardware-block" role="alert">
+                      {entry.hardwareReason ?? '当前设备不满足该型号的显存或内存门槛；安装与生成入口已禁用。'}
+                    </p>}
                     <div className="catalog-actions">
-                      {entry.canUse && <button className="primary-action" disabled={pending === entry.id || !currentConversation} onClick={() => void useModel(entry)}>
+                      {canStartGeneration(entry) && <button className="primary-action" disabled={pending === entry.id || !currentConversation} onClick={() => void useModel(entry)}>
                         {pending === entry.id ? <LoaderCircle size={14} className="spin"/> : <Check size={14}/>}用于当前会话
                       </button>}
                       {entry.canStop && <button className="secondary" disabled={pending === entry.id} onClick={() => void action(entry, 'model_cancel')}><Square size={12}/>停止安装</button>}
-                      {entry.canInstall && <button className="primary-action" disabled={pending === entry.id} onClick={() => void action(entry, 'model_install')}>
+                      {canInstallModel(entry) && <button className="primary-action" disabled={pending === entry.id} onClick={() => void action(entry, 'model_install')}>
                         {pending === entry.id ? <LoaderCircle size={14} className="spin"/> : <Download size={14}/>}
                         {entry.canContinue ? '继续安装' : entry.installPhase === 'unavailable' || entry.installPhase === 'failed' ? '修复安装' : '安装模型与运行环境'}
                       </button>}
                       {entry.executable && <button className="secondary" onClick={onBack}><Play size={13}/>前往创作</button>}
-                      {!entry.executable && !entry.canInstall && !entry.canStop && <span className="catalog-boundary">当前阶段不提供下载、生成或编辑动作。</span>}
+                      {!canStartGeneration(entry) && !canInstallModel(entry) && !entry.canStop && <span className="catalog-boundary">{hardwareBlocked(entry) ? '设备不满足硬件门槛，安装与生成入口已禁用。' : '当前阶段不提供下载、生成或编辑动作。'}</span>}
                       <button className="secondary" onClick={onBack}><ArrowLeft size={13}/>返回创作</button>
                     </div>
                   </div>}

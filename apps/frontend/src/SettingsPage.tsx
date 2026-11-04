@@ -24,6 +24,7 @@ import {
   type SettingsSnapshot,
 } from './settings-types';
 import { textRecipeForModel } from './model-recipes';
+import { isNonCommercialLicense } from './model-catalog';
 import './model-settings.css';
 
 type Group = 'appearance' | 'defaults' | 'storage' | 'runtime' | 'about';
@@ -245,8 +246,8 @@ export function SettingsPage({
               <label>
                 <span>默认模型</span>
                 <select value={defaults.modelId} onChange={event => setDefaults({ ...defaults, modelId: event.target.value })}>
-                  {(snapshot?.catalog.entries ?? []).filter(model => model.productStatus === 'implemented' && model.capabilities.some(capability => capability.id === 'text_to_image')).map(model => <option key={model.id} value={model.id}>
-                    {model.displayName}{model.productStatus === 'planned' ? '（计划中）' : ''}
+                  {(snapshot?.catalog.entries ?? []).filter(model => model.productStatus === 'implemented' && model.capabilities.some(capability => capability.id === 'text_to_image')).map(model => <option key={model.id} value={model.id} disabled={!model.hardwareEligible}>
+                    {model.displayName}{model.productStatus === 'planned' ? '（计划中）' : ''}{model.hardwareEligible ? '' : '（设备不满足）'}
                   </option>)}
                 </select>
                 <small>{modelAvailabilityNote(snapshot, defaults.modelId)}</small>
@@ -309,6 +310,7 @@ export function SettingsPage({
             <div className="runtime-summary">
               <InfoRow label="平台" value={`${snapshot?.environment.platform ?? '—'} · ${snapshot?.environment.architecture ?? '—'}`}/>
               <InfoRow label="运行时" value={`${snapshot?.environment.runtimeName ?? '—'} ${snapshot?.environment.runtimeVersion ?? ''} · Python ${snapshot?.environment.pythonVersion ?? '—'}`}/>
+              <InfoRow label="本地设备" value={snapshot?.environment.deviceFacts ?? '尚未读取'}/>
               <InfoRow label="当前状态" value={snapshot?.environment.runtime.summary ?? '尚未读取'}/>
               <InfoRow label="运行时就绪" value={snapshot?.environment.runtime.runtimeReady ? '是' : '否'}/>
               <InfoRow label="设备探针" value={snapshot?.environment.runtime.deviceVerified ? '已通过' : '尚未通过'}/>
@@ -318,8 +320,8 @@ export function SettingsPage({
             <div className="runtime-summary">
               {(snapshot?.environment.runtimes ?? []).map(entry => <InfoRow
                 key={entry.installId}
-                label={entry.installId}
-                value={`${entry.phase} · 模型${entry.modelReady ? '就绪' : '未就绪'} · 环境${entry.runtimeReady ? '就绪' : '未就绪'} · 设备${entry.deviceVerified ? '已验证' : '未验证'}${entry.lastError ? ` · ${entry.lastError}` : ''}`}
+                label={`${entry.label} · ${entry.runtimeLockId ?? '未登记运行时'}`}
+                value={`${entry.phase} · 模型${entry.modelReady ? '就绪' : '未就绪'} · 环境${entry.runtimeReady ? '就绪' : '未就绪'} · 设备${entry.deviceVerified ? '已验证' : '未验证'} · 硬件门槛${entry.hardwareEligible ? '满足' : `不满足（${entry.hardwareReason ?? '显存或内存不足'}）`}${entry.lastError ? ` · ${entry.lastError}` : ''}`}
               />)}
             </div>
             <div className="runtime-actions">
@@ -417,7 +419,9 @@ function CheckIcon() {
 function modelAvailabilityNote(snapshot: SettingsSnapshot | null, modelId: string): string {
   const model = snapshot?.catalog.entries.find(entry => entry.id === modelId);
   if (!model) return '模型目录不可用；保存会被拒绝。';
+  if (!model.hardwareEligible) return `当前设备不满足该型号的硬件门槛，保存会被拒绝：${model.hardwareReason ?? '显存或内存不足'}。`;
   if (model.productStatus === 'planned') return '该模型已登记但尚未接入；可作为默认选择保存，新会话会保留原因且不会自动替换。';
   if (!model.executable) return '该模型已登记但当前组件或运行环境未就绪；新会话会保留选择。';
+  if (isNonCommercialLicense(model)) return '该模型当前可执行；许可见模型页，仅限非商业用途。';
   return '该模型当前可执行。';
 }

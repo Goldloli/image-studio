@@ -46,7 +46,16 @@ export type RuntimeSummary = {
   deviceVerified: boolean;
   lastError: string | null;
 };
-export type RuntimeEntry = RuntimeSummary & { installId: string };
+export type RuntimeEntry = RuntimeSummary & {
+  installId: string;
+  label: string;
+  /** Registered runtime lock id (Windows reports the v1 runtime, shared v2 runtime or ncnn). */
+  runtimeLockId: string | null;
+  hardwareEligible: boolean;
+  hardwareReason: string | null;
+  minVramGb: number | null;
+  minRamGb: number | null;
+};
 export type SettingsSnapshot = {
   preferences: PreferencesSnapshot;
   catalog: CatalogPayload;
@@ -60,6 +69,10 @@ export type SettingsSnapshot = {
     diagnosticsEnabled: boolean;
     runtime: RuntimeSummary;
     runtimes: RuntimeEntry[];
+    /** Human-readable local device facts, e.g. "显存 12 GB · 内存 32 GB". */
+    deviceFacts: string;
+    deviceVramGb: number | null;
+    deviceRamGb: number;
   };
   about: {
     version: string;
