@@ -112,10 +112,13 @@ The earlier failed Real-ESRGAN job (`job-5792ea…`, error “PNG 头部尺寸�
   before activation; recorded in
   [install-birefnet-empty-cache-network-blocked.json](install-birefnet-empty-cache-network-blocked.json).
   The seeded-cache installs above are **cache-hit** evidence, not a substitute.
-- **Deep data-root path**: an artificially deep acceptance root made the runtime
-  staging path approach the legacy MAX_PATH limit and the onnxruntime probe
-  failed with “文件名或扩展名太长”; recorded in
+- **Deep data-root path** (resolved by follow-up change
+  `harden-windows-data-root-paths`): an artificially deep acceptance root made
+  the runtime staging path approach the legacy MAX_PATH limit and the onnxruntime
+  probe failed with “文件名或扩展名太长”; recorded in
   [install-failure-long-data-root.json](install-failure-long-data-root.json).
+  The startup guard and short staging name now reject/handle that case; see
+  [verification/windows-data-root-guard/](../windows-data-root-guard/README.md).
 - **Space-shortage and missing-file regressions (I2-2/I2-3)** for the new models:
   the first-round mechanism is unchanged; this run exercised the corrupt-cache
   rejection only. No small spare volume was available to repeat the 27.74 GiB

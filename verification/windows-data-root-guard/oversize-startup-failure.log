@@ -1,0 +1,6 @@
+﻿Image Studio 启动失败
+时间（UTC）：2026-11-04T14:36:51Z
+原因：数据目录 C:\ist-root-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\data 路径过长（127 个字符，Windows 运行时限 117）。请把数据目录移到更短的位置，例如 C:\ImageStudioData，或用 --data-dir 指定短目录。
+日志：C:\ist-root-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\logs\startup-failure.log
+建议：确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。
+

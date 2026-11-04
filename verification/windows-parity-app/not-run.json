@@ -48,8 +48,8 @@
     },
     {
       "case_id": "Deep data root (> legacy MAX_PATH in the runtime staging path)",
-      "result": "fail_recorded",
-      "reason": "An artificially deep acceptance root made onnxruntime import fail with 'file name too long'; the short root works. Product follow-up: validate/harden long data roots.",
+      "result": "resolved",
+      "reason": "Follow-up change harden-windows-data-root-paths: startup guard rejects >117-unit data paths with an actionable exit-3 message; the 83-character root that failed now installs and probes successfully with short staging names and stale staging cleanup. Evidence: verification/windows-data-root-guard/.",
       "evidence": "install-failure-long-data-root.json",
       "not_a_pass": true
     }

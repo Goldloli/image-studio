@@ -1,0 +1,59 @@
+﻿{
+    "date":  "2026-11-04",
+    "machine":  "XIAOKA-PC / RTX 3080 Ti 12 GB / 32 GB RAM",
+    "deep_root":  {
+                      "path":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\windows-data-root-accept\\deep-root-b",
+                      "root_len":  83,
+                      "data_path_len":  88,
+                      "install_id":  "birefnet-general-epoch-244-windows-v1",
+                      "phase":  "ready",
+                      "executable":  true,
+                      "error":  null,
+                      "runtime_dir":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\windows-data-root-accept\\deep-root-b\\data\\runtimes\\windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                      "runtime_files":  21020,
+                      "longest_runtime_relative_path":  "Lib\\site-packages\\torch\\include\\ATen\\native\\transformers\\cuda\\mem_eff_attention\\iterators\\predicated_tile_access_iterator_residual_last.h",
+                      "longest_runtime_full_path_length":  297,
+                      "onnxruntime_pyd_full_path_length":  225,
+                      "stale_staging_removed":  true,
+                      "staging_dirs_remaining":  0,
+                      "probe":  {
+                                    "device":  "windows-cpu",
+                                    "device_name":  "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+                                    "build_id":  "studio-onnx-worker-windows-0.1.0"
+                                },
+                      "prior_failure":  "verification/windows-parity-app/install-failure-long-data-root.json (root-a, 252-char staging pyd path, onnxruntime DLL import too long)",
+                      "ready_record":  "verification/windows-data-root-guard/deep-root-birefnet-ready-record.json"
+                  },
+    "oversize_root":  {
+                          "path":  "C:\\\\ist-root-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                          "data_path_len":  127,
+                          "limit":  117,
+                          "exit_code":  3,
+                          "startup_failure_log_written":  true,
+                          "data_dir_created":  false,
+                          "runtimes_dir_created":  false,
+                          "screenshot":  "verification/windows-data-root-guard/oversize-dialog.png",
+                          "startup_failure_log":  "verification/windows-data-root-guard/oversize-startup-failure.log"
+                      },
+    "build_commit":  "d97b5d42433a93bf28ed5e073b6df6e85097d4ff",
+    "installed_exe_sha256":  "e1cd5fb3ac87835aa86e2a537d5e85c0ed175929a10fb2ea3f9715dc2844f944",
+    "short_root_regression":  {
+                                  "path":  "C:\\ist-a",
+                                  "data_path_len":  13,
+                                  "catalog_counts":  {
+                                                         "hardwareEligible":  7,
+                                                         "supported":  7,
+                                                         "installed":  6,
+                                                         "total":  7,
+                                                         "planned":  0,
+                                                         "executable":  6
+                                                     },
+                                  "generation":  {
+                                                     "capability":  "image.text-to-image.flux2-klein-4b.windows-v1",
+                                                     "state":  "Succeeded",
+                                                     "asset_id":  "asset-bf5ad5130aab4086b323cb6bed02319a",
+                                                     "error":  null
+                                                 },
+                                  "note":  "existing parity root still starts with 6/6 ready models and completes a real Klein text-to-image after the guard change"
+                              }
+}
