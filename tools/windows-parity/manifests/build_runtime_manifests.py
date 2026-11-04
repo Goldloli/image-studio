@@ -75,30 +75,56 @@ REALESRGAN_LICENSES = [
     },
 ]
 
-WORKER_WHEELS_PENDING = {
-    "status": "pending",
-    "expected_wheels": [
-        {
-            "package": "studio-diffusers-worker",
-            "version": "0.1.0",
-            "worker_build": "studio-diffusers-worker-windows-0.1.0",
-            "serves": ["Klein text-to-image", "Klein single-image edit", "Qwen base", "Qwen Turbo", "MOSS"],
-        },
-        {
-            "package": "studio-onnx-worker",
-            "version": "0.1.0",
-            "worker_build": "studio-onnx-worker-windows-0.1.0",
-            "serves": ["BiRefNet"],
-        },
-    ],
-    "note": (
-        "The Windows worker wheels are produced by the worker implementation streams. They will be appended to "
-        "`wheels` as Artifacts (path/url as 'bundled:worker-wheel' or a frozen local artifact, bytes and sha256 "
-        "from the built wheel) when available, and this field will be removed then. Until that happens this "
-        "runtime manifest is explicitly incomplete on the worker-wheel field and must not be used to activate an "
-        "installation."
-    ),
-}
+WORKER_WHEELS_EMBEDDED_SPEC = [
+    {
+        "package": "studio-diffusers-worker",
+        "version": "0.1.0",
+        "worker_build": "studio-diffusers-worker-windows-0.1.0",
+        "wheel": "studio_diffusers_worker-0.1.0-py3-none-any.whl",
+        "serves": ["Klein text-to-image", "Klein single-image edit", "Qwen base", "Qwen Turbo", "MOSS"],
+    },
+    {
+        "package": "studio-onnx-worker",
+        "version": "0.1.0",
+        "worker_build": "studio-onnx-worker-windows-0.1.0",
+        "wheel": "studio_onnx_worker-0.1.0-py3-none-any.whl",
+        "serves": ["BiRefNet"],
+    },
+]
+
+
+def embedded_worker_wheels(resources_root: Path) -> dict:
+    wheels = []
+    for spec in WORKER_WHEELS_EMBEDDED_SPEC:
+        path = resources_root / "windows-parity" / "workers" / spec["wheel"]
+        if not path.is_file():
+            raise SystemExit(f"missing embedded worker wheel: {path}")
+        wheels.append(
+            {
+                "package": spec["package"],
+                "version": spec["version"],
+                "worker_build": spec["worker_build"],
+                "path": f"resources/windows-parity/workers/{spec['wheel']}",
+                "bytes": path.stat().st_size,
+                "sha256": sha256_file(path),
+                "serves": spec["serves"],
+            }
+        )
+    return {
+        "status": "embedded_by_installer",
+        "install_mechanism": (
+            "The Windows installer embeds these two wheels with include_bytes! (WINDOWS_SHARED_WORKER_WHEELS) "
+            "and installs them directly into the v2 runtime's Lib/site-packages during installation, matching the "
+            "v1 bundled:worker-wheel precedent. They are intentionally NOT Artifacts in `wheels`, so the installer "
+            "never tries to download them."
+        ),
+        "wheels": wheels,
+        "activation_note": (
+            "The runtime manifest is complete for installer use: the runtime download list is the 49 frozen wheels "
+            "plus the Python archive, and the two worker wheels come from the installer bundle."
+        ),
+    }
+
 
 
 def sha256_file(path: Path) -> str:
@@ -218,7 +244,7 @@ def main() -> int:
             "site_packages": "Lib/site-packages",
             "path_file": "python312._pth",
         },
-        "worker_wheels_pending": WORKER_WHEELS_PENDING,
+        "worker_wheels_embedded_by_installer": embedded_worker_wheels(ROOT / "resources"),
         "frozen_runtime_manifest": {
             "path": "resources/windows-parity/runtime-v2/runtime-manifest.json",
             "sha256": sha256_file(args.frozen_runtime),
@@ -234,8 +260,8 @@ def main() -> int:
         "notes": [
             "This manifest is the installer RuntimeManifest view of the frozen runtime; the frozen evidence "
             "closure with per-file index metadata and licenses stays in runtime-manifest.json.",
-            "worker_wheels_pending marks the manifest as incomplete for product activation until the worker "
-            "wheels are appended.",
+            "Worker wheels are embedded by the installer (v1 bundled:worker-wheel precedent) and are intentionally "
+            "not listed in `wheels`; see worker_wheels_embedded_by_installer for their fixed identities.",
         ],
     }
     write_json(args.product_output, product)

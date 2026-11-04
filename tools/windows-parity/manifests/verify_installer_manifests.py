@@ -419,14 +419,58 @@ def main() -> int:
             "installer_probe": probe_check,
             "status": "pass" if not package_errors and probe_check.get("status") != "fail" else "fail",
         }
+        embedded_failures: list[dict] = []
+        embedded = runtime.get("worker_wheels_embedded_by_installer")
+        wheel_shas = {wheel.get("sha256") for wheel in wheels}
+        if "worker_wheels_pending" in runtime:
+            embedded_failures.append({"error": "legacy worker_wheels_pending field still present"})
+        if isinstance(embedded, dict):
+            embedded_records = embedded.get("wheels") or []
+            checks = []
+            for record in embedded_records:
+                local = ROOT / str(record.get("path", ""))
+                check = check_local_file(
+                    {
+                        "path": record.get("path"),
+                        "bytes": record.get("bytes"),
+                        "sha256": record.get("sha256"),
+                    },
+                    local,
+                )
+                check["package"] = record.get("package")
+                check["declared_as_download"] = record.get("sha256") in wheel_shas
+                if check["status"] == "pass" and check["declared_as_download"]:
+                    check["status"] = "fail"
+                    check["error"] = "embedded worker wheel must not be listed in the download `wheels` array"
+                checks.append(check)
+                if check["status"] != "pass":
+                    embedded_failures.append(check)
+            if len(checks) != 2:
+                embedded_failures.append({"error": f"expected 2 embedded worker wheels, found {len(checks)}"})
+            entry["embedded_worker_wheels_check"] = {
+                "status": "pass" if not embedded_failures else "fail",
+                "install_mechanism": embedded.get("install_mechanism", ""),
+                "wheels": checks,
+            }
+        else:
+            embedded_failures.append({"error": "worker_wheels_embedded_by_installer field missing"})
+            entry["embedded_worker_wheels_check"] = {"status": "fail", "wheels": []}
         wheel_failures = [item for item in entry["file_checks"] if item["status"] != "pass"]
         entry["status"] = (
             "pass"
-            if not entry["schema_errors"] and not wheel_failures and not package_errors
+            if not entry["schema_errors"] and not wheel_failures and not package_errors and not embedded_failures
             else "fail"
         )
         if entry["status"] != "pass":
-            evidence["failures"].append({"manifest": entry["path"], "schema_errors": entry["schema_errors"], "file_failures": wheel_failures, "package_errors": package_errors})
+            evidence["failures"].append(
+                {
+                    "manifest": entry["path"],
+                    "schema_errors": entry["schema_errors"],
+                    "file_failures": wheel_failures,
+                    "package_errors": package_errors,
+                    "embedded_worker_wheel_failures": embedded_failures,
+                }
+            )
         evidence["manifests"].append(entry)
     else:
         evidence["notes"].append("product-runtime-manifest.json not present yet; runtime manifest checks skipped.")
