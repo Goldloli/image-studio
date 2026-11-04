@@ -3,7 +3,9 @@ import {
   MODEL_IDS,
   MODEL_PLATFORM,
   capabilityForModel,
+  crossPlatformModelAdvice,
   crossPlatformTextModelAdvice,
+  crossPlatformToolModelAdvice,
   detectModelPlatform,
   isModelSupportedOn,
   modelDisplayName,
@@ -144,5 +146,33 @@ describe('cross-platform text model selection', () => {
       expect(advice).toContain('Windows 端');
       expect(advice).toContain('macOS 型号');
     }
+  });
+
+  it('covers the source-only tool models in both directions', () => {
+    const windowsTool = crossPlatformToolModelAdvice('windows', MACOS.birefnet.model);
+    expect(windowsTool).not.toBeNull();
+    expect(windowsTool).toContain('Windows BiRefNet 去背景');
+    expect(windowsTool).toContain('核对源图');
+    expect(crossPlatformToolModelAdvice('windows', MACOS.realesrgan.model)).toContain(
+      'Windows Real-ESRGAN 放大',
+    );
+    expect(crossPlatformToolModelAdvice('windows', WINDOWS.birefnet.model)).toBeNull();
+    expect(crossPlatformToolModelAdvice('windows', WINDOWS.realesrgan.model)).toBeNull();
+
+    const macTool = crossPlatformToolModelAdvice('macos', WINDOWS.realesrgan.model);
+    expect(macTool).not.toBeNull();
+    expect(macTool).toContain('Windows 端');
+    expect(macTool).toContain('macOS Real-ESRGAN 放大');
+    expect(crossPlatformToolModelAdvice('macos', MACOS.birefnet.model)).toBeNull();
+
+    // The combined helper keeps the text behaviour and adds the tool mirror.
+    expect(crossPlatformModelAdvice('windows', MACOS.zImage.model)).toContain(
+      'Z-Image / Klein / Qwen / MOSS',
+    );
+    expect(crossPlatformModelAdvice('windows', MACOS.birefnet.model)).toContain(
+      'Windows BiRefNet 去背景',
+    );
+    expect(crossPlatformModelAdvice('windows', WINDOWS.qwenTurbo.model)).toBeNull();
+    expect(crossPlatformModelAdvice('windows', 'removed-model')).toBeNull();
   });
 });

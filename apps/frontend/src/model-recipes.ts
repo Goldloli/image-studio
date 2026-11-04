@@ -288,6 +288,44 @@ export const crossPlatformTextModelAdvice = (
   return CROSS_PLATFORM_TEXT_ADVICE[platform];
 };
 
+const TOOL_ROLE_LABELS: Record<'birefnet' | 'realesrgan', string> = {
+  birefnet: 'BiRefNet 去背景',
+  realesrgan: 'Real-ESRGAN 放大',
+};
+
+/**
+ * Mirror advice for the source-only tool models (BiRefNet / Real-ESRGAN).
+ *
+ * They are not text recipes, so `activeTextRecipe` is null for a foreign tool
+ * draft; without this helper the composer would show the generic "Z-Image
+ * Turbo · 未就绪" label and no cross-platform hint.
+ */
+export const crossPlatformToolModelAdvice = (
+  platform: ModelPlatform,
+  modelId: string,
+): string | null => {
+  for (const role of ['birefnet', 'realesrgan'] as const) {
+    const otherId =
+      platform === 'windows'
+        ? MODEL_IDS.macos[role].model
+        : MODEL_IDS.windows[role].model;
+    if (modelId !== otherId) continue;
+    const label = TOOL_ROLE_LABELS[role];
+    return platform === 'windows'
+      ? `此会话保留来自其他平台的模型选择。请从模型菜单明确选择对应的 Windows ${label} 型号，并核对源图后再发送。`
+      : `此会话保留 Windows 端的模型选择。请从模型菜单明确选择对应的 macOS ${label} 型号，并核对源图后再发送。`;
+  }
+  return null;
+};
+
+/** Text advice first, then the tool-model mirror. */
+export const crossPlatformModelAdvice = (
+  platform: ModelPlatform,
+  modelId: string,
+): string | null =>
+  crossPlatformTextModelAdvice(platform, modelId)
+  ?? crossPlatformToolModelAdvice(platform, modelId);
+
 /** Every Windows parity (model, capability) pair: 7 models, 8 pairs (Klein has two). */
 export const windowsParityProjection = (): { modelId: string; capabilityId: string }[] => {
   const windows = MODEL_IDS.windows;
