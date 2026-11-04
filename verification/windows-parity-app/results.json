@@ -1,0 +1,723 @@
+﻿{
+    "schema_version":  1,
+    "kind":  "windows-parity-app-acceptance",
+    "status":  "passed_with_not_run",
+    "date":  "2026-11-04",
+    "build_commit":  "4ba1c6ff85e4f9ee4be10a3990e7586404909285",
+    "installed":  {
+                      "exe_sha256":  "64b0b6bda06c20f119b0f4f33e3c59750ae5e7822215daa369bf721275afbddb",
+                      "installer":  {
+                                        "schema_version":  1,
+                                        "kind":  "windows-internal-nsis-package",
+                                        "status":  "built",
+                                        "installer":  "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
+                                        "installer_sha256":  "396c20b9e4e7ae8708cbfca61fe4c87c7ea9aa3eba79043d82ea7f2d704b9d15",
+                                        "installer_bytes":  245004499,
+                                        "target":  "x86_64-pc-windows-msvc",
+                                        "install_mode":  "currentUser",
+                                        "webview2_install_mode":  "offlineInstaller",
+                                        "signed":  false,
+                                        "model_weights_bundled":  false,
+                                        "private_python_bundled":  false,
+                                        "sidecars":  [
+                                                         {
+                                                             "name":  "diagnostic-worker-x86_64-pc-windows-msvc.exe",
+                                                             "sha256":  "906098812f9225f541b804ec28f1288b99bfada410eece4f8ac03da2e8a9e4d8",
+                                                             "bytes":  462848
+                                                         },
+                                                         {
+                                                             "name":  "inference-supervisor-x86_64-pc-windows-msvc.exe",
+                                                             "sha256":  "3b2eb51af37f7555de6ab40b5fe2fdeb779214cefc356e2af4b36abeb786e623",
+                                                             "bytes":  1050624
+                                                         },
+                                                         {
+                                                             "name":  "realesrgan-worker-x86_64-pc-windows-msvc.exe",
+                                                             "sha256":  "14789e96236c611485bc990d1570ae270a928719d39ee0894ace36962713030f",
+                                                             "bytes":  1115136
+                                                         }
+                                                     ]
+                                    }
+                  },
+    "machine":  {
+                    "captured_at_utc":  "2026-11-04T12:43:13Z",
+                    "commit":  "888dccabb40500e74053ea37ea8412facc17660c",
+                    "branch":  "main",
+                    "os":  "Microsoft Windows 10 专业版 10.0.19045",
+                    "cpu":  "13th Gen Intel(R) Core(TM) i7-13700K",
+                    "physical_memory_bytes":  34066575360,
+                    "gpu":  "NVIDIA GeForce RTX 3080 Ti, 596.49, 12288 MiB, 8.6",
+                    "disk_c_free_bytes":  1371141513216,
+                    "rustc":  "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+                    "cargo":  "cargo 1.99.1 (5f94df478 2026-08-27)",
+                    "node":  "v24.19.0",
+                    "npm":  "11.17.0",
+                    "python":  "3.12.10"
+                },
+    "catalog_counts":  {
+                           "executable":  6,
+                           "hardwareEligible":  7,
+                           "installed":  6,
+                           "planned":  0,
+                           "runtimeReady":  6,
+                           "supported":  7,
+                           "total":  7
+                       },
+    "installs":  [
+                     {
+                         "install_id":  "birefnet-general-epoch-244-windows-v1",
+                         "runtime_lock_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                         "model_snapshot_id":  "birefnet-general-epoch-244-onnx-windows-v1",
+                         "licenses":  1,
+                         "prepared_digest":  null,
+                         "runtime_files":  20926,
+                         "probe":  {
+                                       "device":  "windows-cpu",
+                                       "device_name":  "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+                                       "build_id":  "studio-onnx-worker-windows-0.1.0"
+                                   }
+                     },
+                     {
+                         "install_id":  "flux2-klein-4b-distilled-windows-v1",
+                         "runtime_lock_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                         "model_snapshot_id":  "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+                         "licenses":  0,
+                         "prepared_digest":  null,
+                         "runtime_files":  20926,
+                         "probe":  {
+                                       "device":  "gpu",
+                                       "device_name":  "NVIDIA GeForce RTX 3080 Ti",
+                                       "build_id":  "studio-diffusers-worker-windows-0.1.0"
+                                   }
+                     },
+                     {
+                         "install_id":  "moss-image-sft-windows-v1",
+                         "runtime_lock_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                         "model_snapshot_id":  "moss-image-sft-windows-staged-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+                         "licenses":  0,
+                         "prepared_digest":  "b662c5d30667761fb1062dbfae9b2f5a43ef81f2e41b5af9e3f6cef18893d20c",
+                         "runtime_files":  20926,
+                         "probe":  {
+                                       "device":  "gpu",
+                                       "device_name":  "NVIDIA GeForce RTX 3080 Ti",
+                                       "build_id":  "studio-diffusers-worker-windows-0.1.0"
+                                   }
+                     },
+                     {
+                         "install_id":  "qwen-image-2.1-turbo-windows-v1",
+                         "runtime_lock_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                         "model_snapshot_id":  "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+                         "licenses":  0,
+                         "prepared_digest":  "2d2d68ae6ae8fa91ad585cba45040f90f63304a16a5ebc6dbb7e32cc0021606a",
+                         "runtime_files":  20926,
+                         "probe":  {
+                                       "device":  "gpu",
+                                       "device_name":  "NVIDIA GeForce RTX 3080 Ti",
+                                       "build_id":  "studio-diffusers-worker-windows-0.1.0"
+                                   }
+                     },
+                     {
+                         "install_id":  "qwen-image-2.1-windows-v1",
+                         "runtime_lock_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                         "model_snapshot_id":  "qwen-image-2.1-windows-staged-d26bb61231c349cf6b7896fa83353113880e1ba3",
+                         "licenses":  0,
+                         "prepared_digest":  "921e68547d09c3359dc7eb5014fb0d03acf64d4e8ffd0f69fc22277b63c82230",
+                         "runtime_files":  20926,
+                         "probe":  {
+                                       "device":  "gpu",
+                                       "device_name":  "NVIDIA GeForce RTX 3080 Ti",
+                                       "build_id":  "studio-diffusers-worker-windows-0.1.0"
+                                   }
+                     },
+                     {
+                         "install_id":  "realesrgan-x4plus-windows-v1",
+                         "runtime_lock_id":  "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+                         "model_snapshot_id":  "realesrgan-x4plus-ncnn-windows-v1",
+                         "licenses":  2,
+                         "prepared_digest":  null,
+                         "runtime_files":  3,
+                         "probe":  {
+                                       "device":  "gpu",
+                                       "device_name":  "NVIDIA GeForce RTX 3080 Ti",
+                                       "build_id":  "studio-realesrgan-worker-windows-0.1.0"
+                                   }
+                     }
+                 ],
+    "cases":  [
+                  {
+                      "job_id":  "job-18366c16de524a1588f124d9d7f59664",
+                      "turn_id":  "turn-eea4a803514f464b98423bf975b4c953",
+                      "conversation_id":  "conv-default",
+                      "model_id":  "qwen-image-2.1-turbo-windows-v1",
+                      "capability_id":  "image.text-to-image.qwen-image-2.1-turbo.windows-v1",
+                      "state":  "Succeeded",
+                      "error":  null,
+                      "prompt":  "互斥测试：雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+                      "seed":  2940240340,
+                      "width":  1024,
+                      "height":  1024,
+                      "recipe":  "qwen21-turbo-windows-txt2img-nf4-8-v1",
+                      "recipe_version":  1,
+                      "effective_parameters":  {
+                                                   "guidance":  1,
+                                                   "load_strategy":  "staged-nf4-v1",
+                                                   "quantization":  "nf4",
+                                                   "recipe":  "qwen21-turbo-windows-txt2img-nf4-8-v1",
+                                                   "recipe_version":  1,
+                                                   "sampling":  "linear",
+                                                   "sampling_schedule":  "qwen-turbo-model-index-v1",
+                                                   "seed":  2940240340,
+                                                   "steps":  8,
+                                                   "token_budget":  2048
+                                               },
+                      "device":  {
+                                     "device_id":  "nvidia-cuda-sm86",
+                                     "precision":  "nf4;load_strategy=staged-nf4-v1"
+                                 },
+                      "runtime":  {
+                                      "engine":  "diffusers-cuda",
+                                      "package_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                                      "source":  {
+                                                     "revision":  "0f1174a0ac11eee8e6e64a5da46e0a187f69e1d8103c76f32c6a03fe4bb8b0d4",
+                                                     "source":  "image-studio:runtime-manifest:windows-python31210-torch2100-cu126-diff041-transformers53-v2"
+                                                 }
+                                  },
+                      "components":  16,
+                      "attempt":  {
+                                      "id":  "attempt-6c2883c946434250a6b43fdc487b7d8a",
+                                      "state":  "Succeeded",
+                                      "phase":  "writing",
+                                      "started_at":  1793801335837,
+                                      "completed_at":  1793801370166,
+                                      "error":  null
+                                  },
+                      "outputs":  [
+                                      {
+                                          "asset_id":  "asset-51602fbe898e41cfadabb8c9e4911a30",
+                                          "content_hash":  "b093bb0d4c924c9426b6b7103d9903d815811d77ce3f5c132996f82ee296fa15",
+                                          "data_type":  "image_rgb"
+                                      }
+                                  ],
+                      "export":  {
+                                     "path":  "verification/windows-parity-app/artifacts/export-qwen-turbo.png",
+                                     "sha256":  "b093bb0d4c924c9426b6b7103d9903d815811d77ce3f5c132996f82ee296fa15"
+                                 }
+                  },
+                  {
+                      "job_id":  "job-a137cbf3fef041aba0894d5805a81b3c",
+                      "turn_id":  "turn-d9ca897bd29c4a2d8fd3874c5516318b",
+                      "conversation_id":  "conv-default",
+                      "model_id":  "qwen-image-2.1-turbo-windows-v1",
+                      "capability_id":  "image.text-to-image.qwen-image-2.1-turbo.windows-v1",
+                      "state":  "Cancelled",
+                      "error":  null,
+                      "prompt":  "强制终止测试：雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+                      "seed":  305729300,
+                      "width":  1024,
+                      "height":  1024,
+                      "recipe":  "qwen21-turbo-windows-txt2img-nf4-8-v1",
+                      "recipe_version":  1,
+                      "effective_parameters":  {
+                                                   "guidance":  1,
+                                                   "load_strategy":  "staged-nf4-v1",
+                                                   "quantization":  "nf4",
+                                                   "recipe":  "qwen21-turbo-windows-txt2img-nf4-8-v1",
+                                                   "recipe_version":  1,
+                                                   "sampling":  "linear",
+                                                   "sampling_schedule":  "qwen-turbo-model-index-v1",
+                                                   "seed":  305729300,
+                                                   "steps":  8,
+                                                   "token_budget":  2048
+                                               },
+                      "device":  {
+                                     "device_id":  "nvidia-cuda-sm86",
+                                     "precision":  "nf4;load_strategy=staged-nf4-v1"
+                                 },
+                      "runtime":  {
+                                      "engine":  "diffusers-cuda",
+                                      "package_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                                      "source":  {
+                                                     "revision":  "0f1174a0ac11eee8e6e64a5da46e0a187f69e1d8103c76f32c6a03fe4bb8b0d4",
+                                                     "source":  "image-studio:runtime-manifest:windows-python31210-torch2100-cu126-diff041-transformers53-v2"
+                                                 }
+                                  },
+                      "components":  16,
+                      "attempt":  {
+                                      "id":  "attempt-c3852e28748044c48a7823aefe323217",
+                                      "state":  "Cancelled",
+                                      "phase":  "submitted",
+                                      "started_at":  1793801233380,
+                                      "completed_at":  1793801237991,
+                                      "error":  null
+                                  },
+                      "outputs":  [
+
+                                  ]
+                  },
+                  {
+                      "job_id":  "job-59e5682d82fe4307bf43493cbbf07444",
+                      "turn_id":  "turn-94ef628767cb4a42b3116833f2d345f9",
+                      "conversation_id":  "conv-default",
+                      "model_id":  "realesrgan-x4plus-windows-v1",
+                      "capability_id":  "image.upscale.realesrgan-x4plus.windows-v1",
+                      "state":  "Succeeded",
+                      "error":  null,
+                      "prompt":  "",
+                      "seed":  null,
+                      "width":  4096,
+                      "height":  4096,
+                      "recipe":  "realesrgan-x4plus-windows-t128-v1",
+                      "recipe_version":  1,
+                      "effective_parameters":  {
+                                                   "model":  "realesrgan-x4plus",
+                                                   "recipe":  "realesrgan-x4plus-windows-t128-v1",
+                                                   "recipe_version":  1,
+                                                   "scale":  4,
+                                                   "threads":  "1:1:1",
+                                                   "tile":  128,
+                                                   "tta":  false
+                                               },
+                      "device":  {
+                                     "device_id":  "windows-vulkan",
+                                     "precision":  "vulkan-fp16;tile=128"
+                                 },
+                      "runtime":  {
+                                      "engine":  "ncnn",
+                                      "package_id":  "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+                                      "source":  {
+                                                     "revision":  "819d50423e0d58273e4f588875892ba091e6b1c94850a4cdc5a9e7c7ab65f151",
+                                                     "source":  "image-studio:runtime-manifest:realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1"
+                                                 }
+                                  },
+                      "components":  2,
+                      "attempt":  {
+                                      "id":  "attempt-e0caaae8a3574041bbe4da12fe0ab906",
+                                      "state":  "Succeeded",
+                                      "phase":  "inference",
+                                      "started_at":  1793801022546,
+                                      "completed_at":  1793801028217,
+                                      "error":  null
+                                  },
+                      "outputs":  [
+                                      {
+                                          "asset_id":  "asset-3fa471d77e714bfcb1fc88bd21b8a07b",
+                                          "content_hash":  "984b90454b99ed6a3282806b9facbedd3c471dfbf9646a3e35e256d418c2c2e3",
+                                          "data_type":  "image_rgb"
+                                      }
+                                  ],
+                      "export":  {
+                                     "path":  "verification/windows-parity-app/artifacts/export-realesrgan-4x.png",
+                                     "sha256":  "984b90454b99ed6a3282806b9facbedd3c471dfbf9646a3e35e256d418c2c2e3"
+                                 }
+                  },
+                  {
+                      "job_id":  "job-dcb27dd6128a4b1591ba4c6c3fb2f605",
+                      "turn_id":  "turn-9d72812438f74c19a0ef444fb120105b",
+                      "conversation_id":  "conv-default",
+                      "model_id":  "flux2-klein-4b-distilled-windows-v1",
+                      "capability_id":  "image.edit.flux2-klein-4b.windows-v1",
+                      "state":  "Succeeded",
+                      "error":  null,
+                      "prompt":  "把背景换成雨后的上海夜景街道，保留人物的面部和发型，写实摄影",
+                      "seed":  1905335761,
+                      "width":  1024,
+                      "height":  1024,
+                      "recipe":  "klein4b-edit-windows-v1",
+                      "recipe_version":  1,
+                      "effective_parameters":  {
+                                                   "guidance":  1,
+                                                   "load_strategy":  "nf4-component-offload-v1",
+                                                   "quantization":  "nf4",
+                                                   "recipe":  "klein4b-edit-windows-v1",
+                                                   "recipe_version":  1,
+                                                   "scheduler":  "flow_match_euler_discrete",
+                                                   "seed":  1905335761,
+                                                   "steps":  4,
+                                                   "thinking":  false,
+                                                   "token_budget":  512,
+                                                   "truncation":  false
+                                               },
+                      "device":  {
+                                     "device_id":  "nvidia-cuda-sm86",
+                                     "precision":  "nf4;load_strategy=nf4-component-offload-v1"
+                                 },
+                      "runtime":  {
+                                      "engine":  "diffusers-cuda",
+                                      "package_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                                      "source":  {
+                                                     "revision":  "0f1174a0ac11eee8e6e64a5da46e0a187f69e1d8103c76f32c6a03fe4bb8b0d4",
+                                                     "source":  "image-studio:runtime-manifest:windows-python31210-torch2100-cu126-diff041-transformers53-v2"
+                                                 }
+                                  },
+                      "components":  19,
+                      "attempt":  {
+                                      "id":  "attempt-218b1d09e3c34435a4612c909900c1f8",
+                                      "state":  "Succeeded",
+                                      "phase":  "writing",
+                                      "started_at":  1793800406736,
+                                      "completed_at":  1793800432518,
+                                      "error":  null
+                                  },
+                      "outputs":  [
+                                      {
+                                          "asset_id":  "asset-c8988b7591384b5589f1433ed4ec63cd",
+                                          "content_hash":  "245f8b1e6c078bd6ad8abd95fa8ed129a22354f14965c2ce03660a530d9f389c",
+                                          "data_type":  "image_rgb"
+                                      }
+                                  ]
+                  },
+                  {
+                      "job_id":  "job-c5dca478b73c4f869a3838049400210a",
+                      "turn_id":  "turn-7fea78df8c1f416b959158b7bc274a28",
+                      "conversation_id":  "conv-default",
+                      "model_id":  "moss-image-sft-windows-v1",
+                      "capability_id":  "image.text-to-image.moss-image-sft.windows-v1",
+                      "state":  "Succeeded",
+                      "error":  null,
+                      "prompt":  "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+                      "seed":  2908961624,
+                      "width":  1024,
+                      "height":  1024,
+                      "recipe":  "moss-image-sft-windows-txt2img-nf4-50-v1",
+                      "recipe_version":  1,
+                      "effective_parameters":  {
+                                                   "guidance":  3,
+                                                   "load_strategy":  "staged-nf4-v1",
+                                                   "negative_prompt":  "",
+                                                   "quantized_components":  [
+                                                                                "transformer",
+                                                                                "text_encoder"
+                                                                            ],
+                                                   "recipe":  "moss-image-sft-windows-txt2img-nf4-50-v1",
+                                                   "recipe_version":  1,
+                                                   "sampling":  "moss_image",
+                                                   "seed":  2908961624,
+                                                   "steps":  50,
+                                                   "text_encoder_precision":  "nf4",
+                                                   "thinking":  true,
+                                                   "token_budget":  4096,
+                                                   "uncond_skip_layers":  [
+                                                                              22
+                                                                          ],
+                                                   "vae_precision":  "float32"
+                                               },
+                      "device":  {
+                                     "device_id":  "nvidia-cuda-sm86",
+                                     "precision":  "nf4;vae=float32"
+                                 },
+                      "runtime":  {
+                                      "engine":  "diffusers-cuda",
+                                      "package_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                                      "source":  {
+                                                     "revision":  "0f1174a0ac11eee8e6e64a5da46e0a187f69e1d8103c76f32c6a03fe4bb8b0d4",
+                                                     "source":  "image-studio:runtime-manifest:windows-python31210-torch2100-cu126-diff041-transformers53-v2"
+                                                 }
+                                  },
+                      "components":  19,
+                      "attempt":  {
+                                      "id":  "attempt-ac5bfca0c3ed4f5c96db9356301eb1fe",
+                                      "state":  "Succeeded",
+                                      "phase":  "writing",
+                                      "started_at":  1793800120342,
+                                      "completed_at":  1793800250862,
+                                      "error":  null
+                                  },
+                      "outputs":  [
+                                      {
+                                          "asset_id":  "asset-fda1a43ee7114cdcae3cdffa2f84881d",
+                                          "content_hash":  "b730b183144210433870847c49fb7c6e583287938398a3ec36161eecbca09d13",
+                                          "data_type":  "image_rgb"
+                                      }
+                                  ]
+                  },
+                  {
+                      "job_id":  "job-689499bfc7a241418f75195a59701dc2",
+                      "turn_id":  "turn-558694a746844632b4ac8f3fc85bb8d1",
+                      "conversation_id":  "conv-default",
+                      "model_id":  "qwen-image-2.1-windows-v1",
+                      "capability_id":  "image.text-to-image.qwen-image-2.1.windows-v1",
+                      "state":  "Succeeded",
+                      "error":  null,
+                      "prompt":  "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+                      "seed":  1208863210,
+                      "width":  1024,
+                      "height":  1024,
+                      "recipe":  "qwen21-windows-txt2img-nf4-40-v1",
+                      "recipe_version":  1,
+                      "effective_parameters":  {
+                                                   "guidance":  1,
+                                                   "load_strategy":  "staged-nf4-v1",
+                                                   "quantization":  "nf4",
+                                                   "recipe":  "qwen21-windows-txt2img-nf4-40-v1",
+                                                   "recipe_version":  1,
+                                                   "sampling":  "linear",
+                                                   "seed":  1208863210,
+                                                   "steps":  40,
+                                                   "token_budget":  2048
+                                               },
+                      "device":  {
+                                     "device_id":  "nvidia-cuda-sm86",
+                                     "precision":  "nf4;load_strategy=staged-nf4-v1"
+                                 },
+                      "runtime":  {
+                                      "engine":  "diffusers-cuda",
+                                      "package_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                                      "source":  {
+                                                     "revision":  "0f1174a0ac11eee8e6e64a5da46e0a187f69e1d8103c76f32c6a03fe4bb8b0d4",
+                                                     "source":  "image-studio:runtime-manifest:windows-python31210-torch2100-cu126-diff041-transformers53-v2"
+                                                 }
+                                  },
+                      "components":  25,
+                      "attempt":  {
+                                      "id":  "attempt-e0d96a511908446e849186a55778d779",
+                                      "state":  "Succeeded",
+                                      "phase":  "writing",
+                                      "started_at":  1793799956304,
+                                      "completed_at":  1793800031138,
+                                      "error":  null
+                                  },
+                      "outputs":  [
+                                      {
+                                          "asset_id":  "asset-10ed68cc1f334a73a7bf4cfb4c7299d5",
+                                          "content_hash":  "7349ba3f45d93b7b3d9ef3ecbc728f39ef24dc9c64a3a5a7fd024b789425b56d",
+                                          "data_type":  "image_rgb"
+                                      }
+                                  ]
+                  },
+                  {
+                      "job_id":  "job-a0122e1faf8d41708577cf1f84e8b8c6",
+                      "turn_id":  "turn-4e1c5fc5418c4597beaebfde8bfc6aa5",
+                      "conversation_id":  "conv-default",
+                      "model_id":  "qwen-image-2.1-turbo-windows-v1",
+                      "capability_id":  "image.text-to-image.qwen-image-2.1-turbo.windows-v1",
+                      "state":  "Succeeded",
+                      "error":  null,
+                      "prompt":  "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+                      "seed":  3571548759,
+                      "width":  1024,
+                      "height":  1024,
+                      "recipe":  "qwen21-turbo-windows-txt2img-nf4-8-v1",
+                      "recipe_version":  1,
+                      "effective_parameters":  {
+                                                   "guidance":  1,
+                                                   "load_strategy":  "staged-nf4-v1",
+                                                   "quantization":  "nf4",
+                                                   "recipe":  "qwen21-turbo-windows-txt2img-nf4-8-v1",
+                                                   "recipe_version":  1,
+                                                   "sampling":  "linear",
+                                                   "sampling_schedule":  "qwen-turbo-model-index-v1",
+                                                   "seed":  3571548759,
+                                                   "steps":  8,
+                                                   "token_budget":  2048
+                                               },
+                      "device":  {
+                                     "device_id":  "nvidia-cuda-sm86",
+                                     "precision":  "nf4;load_strategy=staged-nf4-v1"
+                                 },
+                      "runtime":  {
+                                      "engine":  "diffusers-cuda",
+                                      "package_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                                      "source":  {
+                                                     "revision":  "0f1174a0ac11eee8e6e64a5da46e0a187f69e1d8103c76f32c6a03fe4bb8b0d4",
+                                                     "source":  "image-studio:runtime-manifest:windows-python31210-torch2100-cu126-diff041-transformers53-v2"
+                                                 }
+                                  },
+                      "components":  16,
+                      "attempt":  {
+                                      "id":  "attempt-9d1b289ba27848ab97d856e0d219aa6f",
+                                      "state":  "Succeeded",
+                                      "phase":  "writing",
+                                      "started_at":  1793799822027,
+                                      "completed_at":  1793799855288,
+                                      "error":  null
+                                  },
+                      "outputs":  [
+                                      {
+                                          "asset_id":  "asset-186ae2d83edd4fd2b6674c46f7f451e9",
+                                          "content_hash":  "18cac6f37a29906dfe2e0afe1ce6d42d7a7c8e4d2bca5cab57d16f434883812a",
+                                          "data_type":  "image_rgb"
+                                      }
+                                  ]
+                  },
+                  {
+                      "job_id":  "job-5792ea6a23204919826774b0c03e001d",
+                      "turn_id":  "turn-857186f7933842df9dd9c2e19a37b657",
+                      "conversation_id":  "conv-default",
+                      "model_id":  "realesrgan-x4plus-windows-v1",
+                      "capability_id":  "image.upscale.realesrgan-x4plus.windows-v1",
+                      "state":  "Failed",
+                      "error":  "无效操作：PNG 头部尺寸或像素格式不符合冻结计划",
+                      "prompt":  "",
+                      "seed":  null,
+                      "width":  4096,
+                      "height":  4096,
+                      "recipe":  "realesrgan-x4plus-windows-t128-v1",
+                      "recipe_version":  1,
+                      "effective_parameters":  {
+                                                   "model":  "realesrgan-x4plus",
+                                                   "recipe":  "realesrgan-x4plus-windows-t128-v1",
+                                                   "recipe_version":  1,
+                                                   "scale":  4,
+                                                   "threads":  "1:1:1",
+                                                   "tile":  128,
+                                                   "tta":  false
+                                               },
+                      "device":  {
+                                     "device_id":  "windows-vulkan",
+                                     "precision":  "vulkan-fp16;tile=128"
+                                 },
+                      "runtime":  {
+                                      "engine":  "ncnn",
+                                      "package_id":  "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+                                      "source":  {
+                                                     "revision":  "819d50423e0d58273e4f588875892ba091e6b1c94850a4cdc5a9e7c7ab65f151",
+                                                     "source":  "image-studio:runtime-manifest:realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1"
+                                                 }
+                                  },
+                      "components":  2,
+                      "attempt":  {
+                                      "id":  "attempt-2fe2ab66d3c24a62a6ef9baadc6f327e",
+                                      "state":  "Failed",
+                                      "phase":  "inference",
+                                      "started_at":  1793799702771,
+                                      "completed_at":  1793799708543,
+                                      "error":  "无效操作：PNG 头部尺寸或像素格式不符合冻结计划"
+                                  },
+                      "outputs":  [
+
+                                  ]
+                  },
+                  {
+                      "job_id":  "job-8e836959289b4226a88b95d772d99ff2",
+                      "turn_id":  "turn-9ded632c451548fd95c612a7ded0ba64",
+                      "conversation_id":  "conv-default",
+                      "model_id":  "birefnet-general-epoch-244-windows-v1",
+                      "capability_id":  "image.remove-background.birefnet-general-epoch-244.windows-v1",
+                      "state":  "Succeeded",
+                      "error":  null,
+                      "prompt":  "",
+                      "seed":  null,
+                      "width":  1024,
+                      "height":  1024,
+                      "recipe":  "birefnet-general-cpu-windows-v1",
+                      "recipe_version":  1,
+                      "effective_parameters":  {
+                                                   "execution_mode":  "sequential",
+                                                   "inter_op_threads":  1,
+                                                   "intra_op_threads":  4,
+                                                   "postprocessing":  "birefnet-logits-sigmoid-v1",
+                                                   "precision":  "float32",
+                                                   "preprocessing":  "birefnet-1024-rgb-v1",
+                                                   "provider":  "CPUExecutionProvider",
+                                                   "recipe":  "birefnet-general-cpu-windows-v1",
+                                                   "recipe_version":  1
+                                               },
+                      "device":  {
+                                     "device_id":  "windows-cpu",
+                                     "precision":  "float32"
+                                 },
+                      "runtime":  {
+                                      "engine":  "onnxruntime",
+                                      "package_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                                      "source":  {
+                                                     "revision":  "0f1174a0ac11eee8e6e64a5da46e0a187f69e1d8103c76f32c6a03fe4bb8b0d4",
+                                                     "source":  "image-studio:runtime-manifest:windows-python31210-torch2100-cu126-diff041-transformers53-v2"
+                                                 }
+                                  },
+                      "components":  1,
+                      "attempt":  {
+                                      "id":  "attempt-76abc121fd5c43a78dcfa2d94cb4b13e",
+                                      "state":  "Succeeded",
+                                      "phase":  "writing",
+                                      "started_at":  1793799658531,
+                                      "completed_at":  1793799680879,
+                                      "error":  null
+                                  },
+                      "outputs":  [
+                                      {
+                                          "asset_id":  "asset-a468e6c2009b4360b08906cdf9960474",
+                                          "content_hash":  "3a5089bdac5d21545b4a72ee95c417a48cae7d3bd1b9734a158a4204df264dac",
+                                          "data_type":  "image_rgba"
+                                      },
+                                      {
+                                          "asset_id":  "asset-739a4afd52f1472f8849a8089598d69e",
+                                          "content_hash":  "d0348d86fba98010cd6bdd267e5dcc084024521b5ce11fab34cf493f8f4b17b6",
+                                          "data_type":  "mask"
+                                      }
+                                  ],
+                      "export":  {
+                                     "path":  "verification/windows-parity-app/artifacts/export-birefnet-primary.png",
+                                     "sha256":  "3a5089bdac5d21545b4a72ee95c417a48cae7d3bd1b9734a158a4204df264dac",
+                                     "mask_path":  "verification/windows-parity-app/artifacts/export-birefnet-mask.png",
+                                     "mask_sha256":  "d0348d86fba98010cd6bdd267e5dcc084024521b5ce11fab34cf493f8f4b17b6"
+                                 }
+                  },
+                  {
+                      "job_id":  "job-a8d977259c834221a490990f0a230095",
+                      "turn_id":  "turn-fc304891450943ce8579171761078060",
+                      "conversation_id":  "conv-default",
+                      "model_id":  "flux2-klein-4b-distilled-windows-v1",
+                      "capability_id":  "image.text-to-image.flux2-klein-4b.windows-v1",
+                      "state":  "Succeeded",
+                      "error":  null,
+                      "prompt":  "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+                      "seed":  1980923821,
+                      "width":  1024,
+                      "height":  1024,
+                      "recipe":  "klein4b-text-windows-v1",
+                      "recipe_version":  1,
+                      "effective_parameters":  {
+                                                   "guidance":  1,
+                                                   "load_strategy":  "nf4-component-offload-v1",
+                                                   "quantization":  "nf4",
+                                                   "recipe":  "klein4b-text-windows-v1",
+                                                   "recipe_version":  1,
+                                                   "scheduler":  "flow_match_euler_discrete",
+                                                   "seed":  1980923821,
+                                                   "steps":  4,
+                                                   "thinking":  false,
+                                                   "token_budget":  512,
+                                                   "truncation":  false
+                                               },
+                      "device":  {
+                                     "device_id":  "nvidia-cuda-sm86",
+                                     "precision":  "nf4;load_strategy=nf4-component-offload-v1"
+                                 },
+                      "runtime":  {
+                                      "engine":  "diffusers-cuda",
+                                      "package_id":  "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+                                      "source":  {
+                                                     "revision":  "0f1174a0ac11eee8e6e64a5da46e0a187f69e1d8103c76f32c6a03fe4bb8b0d4",
+                                                     "source":  "image-studio:runtime-manifest:windows-python31210-torch2100-cu126-diff041-transformers53-v2"
+                                                 }
+                                  },
+                      "components":  19,
+                      "attempt":  {
+                                      "id":  "attempt-032d60feaf48474ba03a594226e5610b",
+                                      "state":  "Succeeded",
+                                      "phase":  "writing",
+                                      "started_at":  1793799515464,
+                                      "completed_at":  1793799543159,
+                                      "error":  null
+                                  },
+                      "outputs":  [
+                                      {
+                                          "asset_id":  "asset-f02f6389987d44a4a75f5872ab63c6b8",
+                                          "content_hash":  "b5965b3d1dd2a63ad8d00e42184e7c24ad37a3b0d13e5173503d8315f3d344d5",
+                                          "data_type":  "image_rgb"
+                                      }
+                                  ],
+                      "export":  {
+                                     "path":  "verification/windows-parity-app/artifacts/export-klein-t2i.png",
+                                     "sha256":  "b5965b3d1dd2a63ad8d00e42184e7c24ad37a3b0d13e5173503d8315f3d344d5"
+                                 }
+                  }
+              ],
+    "lifecycle":  "verification/windows-parity-app/lifecycle.json",
+    "not_run":  "verification/windows-parity-app/not-run.json",
+    "ui_screenshots":  [
+                           "verification/windows-parity-app/screenshots/model-page-seven.png",
+                           "verification/windows-parity-app/screenshots/conversation-seven-results.png",
+                           "verification/windows-parity-app/screenshots/works-page.png",
+                           "verification/windows-parity-app/screenshots/settings-runtime.png"
+                       ]
+}

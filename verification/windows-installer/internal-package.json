@@ -3,8 +3,8 @@
     "kind":  "windows-internal-nsis-package",
     "status":  "built",
     "installer":  "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
-    "installer_sha256":  "9e5ecc402aff21046612c056be28efbb4863bb11a6464549759ef2d9b69a8ba2",
-    "installer_bytes":  244754133,
+    "installer_sha256":  "396c20b9e4e7ae8708cbfca61fe4c87c7ea9aa3eba79043d82ea7f2d704b9d15",
+    "installer_bytes":  245004499,
     "target":  "x86_64-pc-windows-msvc",
     "install_mode":  "currentUser",
     "webview2_install_mode":  "offlineInstaller",
@@ -14,13 +14,18 @@
     "sidecars":  [
                      {
                          "name":  "diagnostic-worker-x86_64-pc-windows-msvc.exe",
-                         "sha256":  "bfe1943debf59d496b49352c25fdba0e8f8bccd3f9afc254487b942225e217ae",
-                         "bytes":  463360
+                         "sha256":  "906098812f9225f541b804ec28f1288b99bfada410eece4f8ac03da2e8a9e4d8",
+                         "bytes":  462848
                      },
                      {
                          "name":  "inference-supervisor-x86_64-pc-windows-msvc.exe",
-                         "sha256":  "e157e7c086bd6b4ec0d0e3f876f886228f284bcf3f5097ef6af4783585ff3680",
-                         "bytes":  1008640
+                         "sha256":  "3b2eb51af37f7555de6ab40b5fe2fdeb779214cefc356e2af4b36abeb786e623",
+                         "bytes":  1050624
+                     },
+                     {
+                         "name":  "realesrgan-worker-x86_64-pc-windows-msvc.exe",
+                         "sha256":  "14789e96236c611485bc990d1570ae270a928719d39ee0894ace36962713030f",
+                         "bytes":  1115136
                      }
                  ]
 }

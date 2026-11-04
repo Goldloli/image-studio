@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-app-not-run",
+  "status": "documented",
+  "rows": [
+    {
+      "case_id": "I2-1 empty-cache real download for the shared runtime",
+      "result": "blocked",
+      "reason": "Outbound PyPI throughput collapsed to ~0.2–0.3 MB/s during the shared v2 runtime wheel downloads (PyTorch/GitHub hosts were 30–45 MB/s); the install was stopped before activation.",
+      "evidence": "install-birefnet-empty-cache-network-blocked.json",
+      "not_a_pass": true
+    },
+    {
+      "case_id": "I2-2 bad checksum / missing file for the new models",
+      "result": "partial",
+      "reason": "Corrupt-cache rejection and re-download were exercised (lifecycle.json); the full bad-sum failure and missing-file rejection were not completed because the recovery download inherits the same network blocker.",
+      "not_a_pass": true
+    },
+    {
+      "case_id": "I2-3 space-shortage regression on the new models",
+      "result": "not_run",
+      "reason": "No small spare volume was available in this run; the first-round mechanism and its 27.74 GiB volume evidence are unchanged.",
+      "not_a_pass": true
+    },
+    {
+      "case_id": "I2-4 network-denied install",
+      "result": "waived_not_run",
+      "reason": "User decision 2026-11-03 (verification/windows-network-denial-decision.json); not a pass.",
+      "not_a_pass": true
+    },
+    {
+      "case_id": "R2-2 Z-Image Windows regression",
+      "result": "not_run",
+      "reason": "Z-Image was not reinstalled in the isolated root; the first-round Z-Image evidence stands and the shared code paths are covered by the green workspace tests.",
+      "not_a_pass": true
+    },
+    {
+      "case_id": "macOS regression R02–R04",
+      "result": "not_run",
+      "reason": "macOS user acceptance is outside this Windows run.",
+      "not_a_pass": true
+    },
+    {
+      "case_id": "4.4 human quality review",
+      "result": "pending_user",
+      "reason": "Sample images are exported and visible; the visual quality sign-off is a user step.",
+      "not_a_pass": true
+    },
+    {
+      "case_id": "Deep data root (> legacy MAX_PATH in the runtime staging path)",
+      "result": "fail_recorded",
+      "reason": "An artificially deep acceptance root made onnxruntime import fail with 'file name too long'; the short root works. Product follow-up: validate/harden long data roots.",
+      "evidence": "install-failure-long-data-root.json",
+      "not_a_pass": true
+    }
+  ]
+}

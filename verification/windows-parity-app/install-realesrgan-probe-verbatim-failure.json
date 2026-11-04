@@ -1,0 +1,13 @@
+﻿{
+    "schema_version":  1,
+    "kind":  "windows-parity-install-failure-ncnn-probe-verbatim-path",
+    "case_id":  "I2-1f Real-ESRGAN native install probe",
+    "status":  "fail_then_fixed",
+    "build_commit":  "c755331 (plus M1-M4)",
+    "data_root":  "C:\\ist-a",
+    "observed_error":  "私有环境安装或探针失败 (exit code: 0xc0000409); _wfopen C:\\ist-a\\data\\runtimes\\realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1\\\\\\?\\C:\\ist-a\\data\\models\\realesrgan-x4plus-windows-v1/realesrgan-x4plus.param failed",
+    "root_cause":  "The installer canonicalizes its data paths; the ncnn probe passed the \\\\\\\\?\\\\ verbatim model path as -m, and the official ncnn build opens it with _wfopen which cannot read verbatim paths.",
+    "fix":  "commit 329f8e7: external_process_path() strips the verbatim prefix for child-process arguments (with a unit test) while internal hashing keeps canonical paths; installer rebuilt and the case re-run.",
+    "gpu_evidence":  "ncnn -v log enumerated [0 NVIDIA GeForce RTX 3080 Ti] and [1 Intel UHD 770] before the _wfopen failure",
+    "consequence":  "Real-ESRGAN install now re-tested on the rebuilt installer; this record stays as the failure evidence."
+}

@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-app-lifecycle",
+  "status": "passed",
+  "date": "2026-11-04",
+  "cases": [
+    {
+      "id": "cancel-during-generation",
+      "expected": "cancel ends the turn without a candidate/asset and with worker cleanup",
+      "actual": {
+        "turn_state": "Cancelled",
+        "job_id": null,
+        "asset_created": false,
+        "assets_after": 7,
+        "ui_text": "本次生成已取消"
+      },
+      "result": "passed"
+    },
+    {
+      "id": "cancel-before-bind",
+      "expected": "cancel before the job binds still ends in a terminal cancelled turn",
+      "actual": {
+        "turn_state": "Cancelled",
+        "job_id": null,
+        "attempts": 0,
+        "asset_created": false
+      },
+      "result": "passed"
+    },
+    {
+      "id": "supervisor-hard-kill",
+      "expected": "killing the supervisor during sampling reclaims the tree, records a cancelled/interrupted job and never fabricates an asset",
+      "actual": {
+        "killed_process": "inference-supervisor.exe",
+        "job_id": "job-a137cbf3fef041aba0894d5805a81b3c",
+        "attempt_id": "attempt-c3852e28748044c48a7823aefe323217",
+        "job_state": "Cancelled",
+        "asset_id": null,
+        "assets_after": 7,
+        "execution_summary": "生成已取消，资源已回收",
+        "next_job_accepted": true
+      },
+      "result": "passed"
+    },
+    {
+      "id": "cross-conversation-mutex",
+      "expected": "a second conversation cannot start a generation while one is running; prompt is preserved",
+      "actual": {
+        "send_disabled": true,
+        "send_title": "其他会话正在生成",
+        "prompt_preserved": true,
+        "turns_created": 0,
+        "job_created": false
+      },
+      "result": "passed"
+    },
+    {
+      "id": "restart-recovery",
+      "expected": "after a clean close and relaunch with the same root, models stay ready and conversation/works persist",
+      "actual": {
+        "models_ready_after_restart": 6,
+        "phases": [
+          "not_installed",
+          "ready",
+          "ready",
+          "ready",
+          "ready",
+          "ready",
+          "ready"
+        ],
+        "turns_after_restart": 10,
+        "assets_after_restart": 7,
+        "realesrgan_ready_after_restart": true,
+        "note": "the native runtime restart bug (POSIX mode-bit check) was found and fixed before this verification"
+      },
+      "result": "passed"
+    },
+    {
+      "id": "corrupted-cache-artifact",
+      "expected": "a corrupted download-cache artifact is rejected, not activated, and existing data is preserved",
+      "actual": {
+        "corrupted_artifact": "cache/downloads/58f621f0… (BiRefNet ONNX)",
+        "detected": true,
+        "bad_file_removed": true,
+        "re_download_attempted": true,
+        "activation_written": false,
+        "ready_records_written": 0,
+        "cancel_cleaned_up": true,
+        "phase_after_cancel": "cancelled",
+        "error": "安装已取消；已校验文件可供继续。"
+      },
+      "result": "passed"
+    }
+  ]
+}

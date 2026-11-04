@@ -1,0 +1,87 @@
+﻿{
+    "schema_version":  1,
+    "kind":  "windows-parity-quality-gate",
+    "status":  "passed",
+    "date":  "2026-11-04",
+    "build_commit":  "4ba1c6ff85e4f9ee4be10a3990e7586404909285",
+    "commands":  [
+                     {
+                         "exit_code":  0,
+                         "name":  "cargo fmt --all -- --check"
+                     },
+                     {
+                         "exit_code":  0,
+                         "name":  "cargo clippy --workspace --all-targets --locked -- -D warnings"
+                     },
+                     {
+                         "suites":  [
+                                        {
+                                            "crate":  "studio-core",
+                                            "tests":  27
+                                        },
+                                        {
+                                            "crate":  "studio-core contracts",
+                                            "tests":  17
+                                        },
+                                        {
+                                            "crate":  "worker-protocol",
+                                            "tests":  42
+                                        },
+                                        {
+                                            "crate":  "image-studio-desktop",
+                                            "tests":  177,
+                                            "ignored":  7
+                                        },
+                                        {
+                                            "crate":  "realesrgan-worker",
+                                            "tests":  9
+                                        },
+                                        {
+                                            "crate":  "inference-supervisor",
+                                            "tests":  12
+                                        },
+                                        {
+                                            "crate":  "diagnostic-worker",
+                                            "tests":  6
+                                        }
+                                    ],
+                         "name":  "cargo test --workspace --locked",
+                         "exit_code":  0
+                     },
+                     {
+                         "name":  "npm --prefix apps/frontend test",
+                         "tests":  52,
+                         "exit_code":  0
+                     },
+                     {
+                         "exit_code":  0,
+                         "name":  "npm --prefix apps/frontend run check"
+                     },
+                     {
+                         "exit_code":  0,
+                         "name":  "npm --prefix apps/frontend run build"
+                     },
+                     {
+                         "name":  "openspec validate --all --strict",
+                         "items":  24,
+                         "exit_code":  0
+                     },
+                     {
+                         "name":  "scripts/build-windows-internal.ps1 (includes all gates above)",
+                         "log":  "target/parity-gates/build-installer-final4.log",
+                         "exit_code":  0
+                     }
+                 ],
+    "toolchain":  {
+                      "rustc":  "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+                      "cargo":  "cargo 1.99.1 (5f94df478 2026-08-27)",
+                      "node":  "v24.19.0",
+                      "npm":  "11.17.0",
+                      "python":  "3.12.10",
+                      "diffusers":  "0.41.0",
+                      "transformers":  "5.3.0",
+                      "torch":  "2.10.0+cu126",
+                      "cuda":  "12.6"
+                  },
+    "note":  "The final installer build ran the full repository quality gates (frontend tests/build, fmt, clippy -D warnings, workspace tests) and succeeded; the individual counts above come from the final per-crate runs recorded by the owning workstreams."
+}

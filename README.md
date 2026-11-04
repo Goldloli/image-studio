@@ -59,6 +59,14 @@ bd prime
 
 模型安装、真实生成与资源预算只在 3080 Ti 目标机认证。2060 SUPER 为 sm75 / 8 GiB：低于配方实测 8.87 GiB 的 CUDA reserved 峰值，且不具备配方使用的 BF16 计算，不在支持范围；Windows 11 结果按 [Windows 规格](openspec/specs/windows-desktop/spec.md) 只作补充。记录见 [平台一致性](verification/windows-platform-parity/README.md)。
 
+### Windows 全模型对齐（2026-11-04）
+
+目标机已补齐 macOS 的六个型号（`openspec/changes/achieve-windows-model-parity`）：FLUX.2 Klein 4B distilled（文生图 + 单图编辑）、BiRefNet epoch_244（CPU 去背景 RGBA+mask）、Real-ESRGAN x4plus（ncnn Vulkan 精确 4×）、Qwen-Image 2.1 / 2.1-Turbo（分阶段 NF4 + prepared cache）与 MOSS-Image-SFT（分阶段 NF4、vendored pipeline）。七个型号在安装版原生 UI 中完成真实生成/处理、查看、PNG/RGBA/mask 导出、任务与作品查询；模型页投影七个型号、硬件门槛与许可（Qwen 非商用标注），设置页展示 v1/v2/ncnn 运行时。
+
+- 证据：`verification/windows-parity-{gate0,runtime,realesrgan,worker,gpu,manifests,ui-projection,review,app}/`；安装版总账见 [Windows parity app acceptance](verification/windows-parity-app/README.md)。
+- 安装版验收使用隔离根与本地已校验缓存种子完成六型号安装；空缓存真实网络安装受当前 PyPI 吞吐阻塞、未冒充通过；整树禁网验收沿用 2026-11-03 用户 waive 决定。质量样图人工签收与最终归档待用户确认。
+- Windows 内部包 sidecar 现在包含 `inference-supervisor`、`diagnostic-worker` 与 `realesrgan-worker`，由 `scripts/build-windows-internal.ps1` 一并构建。
+
 ## 构建和启动
 
 已验证环境为 macOS 27.0.1 / Apple M3 Max / arm64，Rust 工具链固定为 1.99.1。前端已验证 Node.js 24.12.0 / npm 11.6.2。首次构建需要取得 npm 与 Cargo 依赖；应用启动使用内嵌字体，不下载模型、Python 或字体资源。
