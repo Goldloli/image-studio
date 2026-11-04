@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "kind": "windows-data-root-review-fix-acceptance",
+  "status": "passed",
+  "date": "2026-11-04",
+  "source_commits": ["732fac9", "e972da7", "e446074", "e5150e5", "e4b6e46"],
+  "build": {
+    "installer_sha256": "3492a8c4ff28553ca1219ec0e5d6cd16cd2b60d9f5704b879191655c35d4e2f3",
+    "installer_bytes": 245005633,
+    "installed_exe_sha256": "72f38b619c7a93260fa68682eb6e0007b356cb7a7c3f8623ea617e160e423769",
+    "note": "installer built from the same source content; the code commits were made immediately after the build and before this evidence commit"
+  },
+  "cases": [
+    {
+      "id": "deep-root-88-generation",
+      "data_path_units": 88,
+      "expected": "activated runtime paths including the longest Python-openable module stay inside MAX_PATH; real generation succeeds",
+      "actual": {
+        "legacy_runtime_dir_before": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+        "runtime_dir_after": "rt-7137668922e0",
+        "migration": "renamed on readiness check",
+        "models_ready": ["flux2-klein-4b-distilled-windows-v1", "birefnet-general-epoch-244-windows-v1"],
+        "generation_state": "Succeeded",
+        "asset_id": "asset-b4f090d2dee245618ee74862bb28acc6",
+        "intermediate_failure": "On the earlier 92-budget build (64-char runtime dir) the same root failed real generation with FileNotFoundError on a 103-unit transformers .py path (262 chars); this drove the short runtime directory design."
+      },
+      "result": "passed"
+    },
+    {
+      "id": "boundary-root-94-generation",
+      "data_path_units": 94,
+      "expected": "guard accepts data=94; install, probe and real generation succeed",
+      "actual": {
+        "runtime_dir": "rt-7137668922e0",
+        "klein_install_phase": "ready",
+        "generation_state": "Succeeded",
+        "asset_id": "asset-d085ab421d18488ca056ca19afd1127e"
+      },
+      "result": "passed"
+    },
+    {
+      "id": "over-limit-root-127",
+      "data_path_units": 127,
+      "expected": "exit code 3 with actionable Chinese log under the rejected root, no data/runtimes created",
+      "actual": {
+        "exit_code": 3,
+        "limit_in_message": 94,
+        "startup_failure_log": "oversize-startup-failure.log",
+        "dialog_screenshot": "oversize-dialog.png",
+        "data_dir_created": false,
+        "runtimes_dir_created": false
+      },
+      "result": "passed"
+    },
+    {
+      "id": "legacy-staging-residue-real-cleanup",
+      "root": "target/windows-parity-accept/root-a",
+      "expected": "the real old-format residue from the failed parity install is removed at install start, before the space preflight",
+      "actual": {
+        "residue_before": ".windows-python31210-torch2100-cu126-diff041-transformers53-v2.staging-27684-1793797083903590600 (4,326.9 MB / 20,621 files)",
+        "removed_on": "Real-ESRGAN install start",
+        "after_runtimes_entries": ["rt-341f0de1c0f5", "windows-python31210-torch2100-cu126-diff041-transformers53-v2 (empty legacy dir without a ready record)"],
+        "realesrgan_phase": "ready",
+        "note": "the empty legacy v2 dir has no ready record, so the readiness-based migration is not triggered; it contains no files and is not used"
+      },
+      "result": "passed"
+    },
+    {
+      "id": "short-root-migration-regression",
+      "root": "C:\\ist-a",
+      "expected": "existing legacy runtime directories migrate to short names and all installed models stay ready",
+      "actual": {
+        "before": [
+          "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+          "windows-python31210-torch2100-cu126-diff041-transformers53-v2"
+        ],
+        "after": ["rt-341f0de1c0f5", "rt-7137668922e0"],
+        "catalog_counts": {"executable": 6, "hardwareEligible": 7, "installed": 6, "planned": 0, "runtimeReady": 6, "supported": 7, "total": 7},
+        "phases": ["not_installed", "ready", "ready", "ready", "ready", "ready", "ready"]
+      },
+      "result": "passed"
+    }
+  ],
+  "unit_tests": {
+    "desktop": "188 passed, 0 failed, 7 ignored",
+    "new_coverage": [
+      "data path 94/95 boundary, UTF-16 surrogate pairs, verbatim prefix stripping, canonical over-long alias",
+      "runtime directory name 15 units/deterministic/unique",
+      "legacy runtime directory migration once; conflict keeps both",
+      "new and legacy staging-name matching + cleanup before space preflight (code-order change)"
+    ]
+  },
+  "user_gated": [
+    {
+      "id": "macOS-compile",
+      "result": "not_run",
+      "reason": "No macOS toolchain on this machine; the DataPathTooLong import/branch are now cfg(windows)-gated so the non-Windows build no longer references the Windows-only variant. First macOS CI run remains the verification."
+    }
+  ],
+  "quality_gates": {
+    "cargo fmt": "pass",
+    "cargo clippy -D warnings": "pass",
+    "cargo test -p image-studio-desktop": "188 passed / 7 ignored",
+    "installer build (scripts/build-windows-internal.ps1)": "exit 0, includes the full workspace/frontend gates"
+  }
+}

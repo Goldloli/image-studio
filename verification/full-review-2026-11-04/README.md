@@ -32,15 +32,15 @@ fixture's 1.5s/2.5s timeouts under CPU contention, not by product code; fixed in
 
 | ID | Severity | Finding | Status |
 |---|---|---|---|
-| F1 | **blocker** | `apps/desktop/src/host.rs:642` matches `PlatformError::DataPathTooLong`, which is `#[cfg(windows)]` (`paths.rs:24-33`). `host` is compiled on every target and the macOS quality job runs `cargo test --workspace` → `E0599`, so the first macOS CI run cannot pass. | **open** (fix in follow-up change) |
+| F1 | **blocker** | `host.rs` matched a Windows-only `PlatformError` variant unconditionally, so the macOS build/CI could not compile. | fixed (`732fac9`): import and branch are `cfg(windows)`-gated; the log now comes from the rejected data path. macOS compile itself remains user-gated (first CI run). |
 | C1 | **blocker** | `quality.yml` ran clippy/tests **before** the frontend build. `tauri::generate_context!` embeds `apps/frontend/dist`; a clean checkout has no `dist`, so the desktop crate panics. Reproduced locally by hiding `dist` and running `cargo check -p image-studio-desktop` (`The frontendDist configuration is set to "../frontend/dist" but this path doesn't exist`). | fixed (`8d7c881`): frontend build before all cargo steps |
 | C2 | **blocker** | `build.yml` macOS job ran `npm ci` but no frontend build before `cargo build --release --workspace` → same panic, no `.app`/zip. | fixed (`8d7c881`) |
 | C3 | **blocker** | Artifact upload mixed repository-root files with `target/release/...`; upload-artifact uses the least common ancestor as the artifact root, so `merge-multiple` produced `artifacts/target/release/...` plus a directory, and `gh release create … artifacts/*` would fail after creating a partial draft. | fixed (`8d7c881`): flat `target/ci-artifacts/{windows,macos}` payload staging, release passes files only, plus checksum verification |
-| F2 | **high** | The data-path guard budget (117 units) was derived from the 26-unit **staging** name, but activation renames it to `runtimes/<runtime.id>` (61 units for v2). A path just under the limit would install/probe from staging and then fail during real generation from the longer final path (`numpy` DLL full path ≈ 275 > 260). The deep-root acceptance at data 88 works, but the upper bound is unsafe. | **open** (follow-up change: budget from final runtime layout, max 92 units, plus canonical re-check) |
-| F3 | medium | Guard validates `std::path::absolute` before canonicalization; a junction/short-name alias can canonicalize to a longer path and bypass the guard (verified locally: 61-unit junction path → 146-unit canonical path). | **open** (re-validate canonical data path) |
-| F4 | medium | `cleanup_stale_runtime_staging` only matches names starting `.staging-`; the **old** format `.{runtime_id}.staging-{pid}-{nanos}` (the form that left 4.23 GB / 20,621 files in `target/windows-parity-accept/root-a`) is never matched, so "回收历史残留" is not true for old residue. The acceptance D4 seeded a new-format name and therefore under-tested this. | **open** (match both formats + old-name test) |
-| F5 | medium | Cleanup runs inside `prepare_python_runtime` **after** the disk-space preflight (and downloads); stale staging can make the preflight fail before anything is cleaned. | **open** (run after the exclusive install lock, before preflight) |
-| F6 | medium | Startup failure log path for the default data root: `host.rs` falls back to `.` (CWD) when `--data-dir` is absent, and ignores write errors; only `--data-dir` gets the root's `logs`. | **open** (derive root from the rejected data path) |
+| F2 | **high** | The guard budget came from the staging name, not the activated runtime; mid-implementation testing showed that even a corrected 92-unit budget was unsafe because Python opens a 130-unit `.py` path (real data=88 generation failed with `FileNotFoundError` on a 262-character path). | fixed (`e5150e5`, `e4b6e46`): activated runtimes use `runtimes/rt-<12 hex>` (15 units) with legacy migration, and the guard is 94 units derived from the longest Python-openable path + canonical data re-check. Verified: data=88 and data=94 real generations succeed; data=127 exits 3. |
+| F3 | medium | Guard validated a pre-canonical path (junction/8.3 aliases could bypass it). | fixed (`e4b6e46`): canonical data path re-checked with the `\\?\` prefix stripped; unit test covers over-long aliases. |
+| F4 | medium | Cleanup only matched new-format `.staging-*`; old-format residue (4.23 GB on disk) was never reclaimed. | fixed (`e446074`): matcher accepts both generations; the real 4.23 GB root-a residue was removed on an install start. Unit test covers both names and non-matching dirs. |
+| F5 | medium | Cleanup ran after the disk-space preflight. | fixed (`e446074`): moved into `install()` right after the exclusive lock, before the preflight/downloads; verified on root-a. |
+| F6 | medium | Default-root startup failure wrote its log to CWD. | fixed (`732fac9`): `<root>/logs/startup-failure.log` is derived from the rejected data path. |
 | C4 | high | Windows build artifact name hardcoded `Image Studio_0.1.0_x64-setup.exe`; a version bump would fail "installer missing" and block releases. | fixed (`8d7c881`): filename derived from `tauri.conf.json` |
 | C5 | medium | Release artifacts are verified? The original workflow never verified checksums; Windows checksums would have been written with CRLF (Ubuntu `sha256sum -c` would fail). | fixed (`8d7c881`): LF checksums + `sha256sum -c` before draft |
 | C6 | medium | Version/tag check ran only after both 90-minute builds. | fixed (`8d7c881`): `verify-version` job runs first |
@@ -49,7 +49,7 @@ fixture's 1.5s/2.5s timeouts under CPU contention, not by product code; fixed in
 | F8 | low/medium | Cross-platform **tool** drafts (mac `birefnet-general-epoch-244` / `realesrgan-x4plus` on Windows) are not covered by the new advice helper: `activeTextRecipe` is null, so no warning is shown and the label falls back to "Z-Image Turbo · 未就绪". Same class as the fixed text-model issue. | open (bd, separate small fix) |
 | C8 | medium | Third-party actions use mutable major-version tags, not commit SHAs. Private repo with no secrets in v1; documented as follow-up. | accepted for v1 (bd follow-up) |
 | C9 | low | Docs: README Node/npm versions were stale; the workflow validation script referenced by the evidence lived only under `target/` and was not reproducible. | fixed (`8d7c881`): README aligned, `scripts/ci/validate-workflows.py` committed |
-| F9 | info | Data-path guard now rejects paths above 117 though the short staging name means some 118–137 paths might work; the follow-up recomputes a correct upper bound (92) instead of the current incorrect 117. | folded into F2 |
+| F9 | info | The 117-upward limit was arbitrary; the final bound is 94 with a short activated runtime directory. | folded into F2 (fixed in `e4b6e46`) |
 | F10 | info | Supervisor test flake (workspace parallel load). | fixed (`a40974c`) |
 
 ## Evidence
@@ -64,3 +64,18 @@ fixture's 1.5s/2.5s timeouts under CPU contention, not by product code; fixed in
 1. Confirm and implement `fix-windows-data-root-review-findings` (F1–F6): macOS compile gate, correct final-path guard budget + canonical re-check, legacy staging cleanup + early cleanup, startup log path; rebuild installer and refresh the data-root evidence with a deep-root **generation** and an old-format residue test.
 2. Fix the cross-platform tool-model advice (F8) as a separate small change or together, then re-run gates.
 3. Re-check the CI workflow blockers are gone, then (only with explicit authorization) push and run the first Actions pass; a macOS run can then confirm F1 in CI.
+
+## Fixes landed (2026-11-04)
+
+Commits: `732fac9` (non-Windows startup cfg + log path), `e972da7`/`e4b6e46`
+(data-path budget + canonical re-check), `e5150e5` (short activated runtime dir +
+legacy migration), `e446074` (legacy staging cleanup before the preflight).
+
+Acceptance evidence: [review-fix/results.json](../windows-data-root-guard/review-fix/results.json) —
+installer `3492a8c4…`, installed app `72f38b61…`; real generation succeeds at data
+paths 88 and 94, data=127 exits 3 with the log under the rejected root, the real
+4.23 GB legacy staging residue was removed at install start, and `C:\ist-a` legacy
+runtime directories migrated to `rt-…` with 6/6 models ready. Unit tests: 188
+desktop tests passed. F7 (cleanup observability/TOCTOU) stays documented; F8
+(cross-platform tool-model advice) remains bd `image-studio-5w0`; action SHA
+pinning remains bd `image-studio-06k`.
