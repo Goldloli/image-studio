@@ -65,6 +65,11 @@ Screenshots: [model page with 7 models](screenshots/model-page-seven.png),
 [conversation with the seven results](screenshots/conversation-seven-results.png),
 [works page](screenshots/works-page.png), [settings runtime rows](screenshots/settings-runtime.png).
 
+Quality review sheet (4.4): [quality-samples.png](artifacts/quality-samples.png)
+shows every primary output plus the BiRefNet RGBA/mask pair with labels. The
+individual formal assets are copied next to it as `asset-*.png`; the exported
+copies are `export-*.png`.
+
 ## Lifecycle
 
 | Case | Result | Evidence |
