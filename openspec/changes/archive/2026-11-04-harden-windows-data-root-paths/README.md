@@ -1,4 +1,4 @@
-# harden-windows-data-root-paths
+﻿# harden-windows-data-root-paths
 
 **状态：等待用户确认（2026-11-04）。** 用户已确认顺序：先做本 change，再做 `introduce-ci-release-pipeline`；本目录目前只有 change 文档，未写实现代码。
 
@@ -11,3 +11,4 @@
 | [specs/](specs/) | `windows-desktop`、`model-installation` 的 delta |
 | [tasks.md](tasks.md) | 实现、测试、安装包复验与归档任务 |
 | [test-plan.md](test-plan.md) | 深根/超限/回收/回归验收矩阵 |
+
