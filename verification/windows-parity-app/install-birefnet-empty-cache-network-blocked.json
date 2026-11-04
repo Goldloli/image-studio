@@ -1,0 +1,46 @@
+﻿{
+    "schema_version":  1,
+    "kind":  "windows-parity-install-empty-cache-network-blocked",
+    "case_id":  "I2-1b (BiRefNet, empty cache, real network)",
+    "status":  "blocked",
+    "reason":  "Outbound download throughput to files.pythonhosted.org collapsed during the shared v2 runtime wheel downloads; the install was stopped before activation. This is an environment/network blocker, not a product pass.",
+    "build_commit":  "888dccabb40500e74053ea37ea8412facc17660c",
+    "installer":  {
+                      "path":  "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
+                      "bytes":  244990805,
+                      "sha256":  "0c274ad03bc19b84eca76369197410c7ccbe59a4e62707f19856bc672bd7f672"
+                  },
+    "data_root":  "target/windows-parity-accept/root-a",
+    "started_at_utc":  "2026-11-04T12:45:00Z",
+    "stopped_at_utc":  "2026-11-04T12:55:00Z",
+    "ui_observed":  {
+                        "phase":  "正在下载",
+                        "progress":  "1.27 GB / 3.70 GB",
+                        "install_budget":  "25.30 GB",
+                        "stop_error":  "网络中断：numpy-2.5.4-cp312-cp312-win_amd64.whl：安装已取消；已校验文件可供继续。",
+                        "after_stop":  "安装已停止，可继续"
+                    },
+    "cache_at_stop":  {
+                          "model_onnx":  {
+                                             "path":  "cache/downloads/58f621f0...",
+                                             "bytes":  972666916,
+                                             "sha256":  "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+                                             "verified":  true
+                                         },
+                          "runtime_wheels":  "partially downloaded; at least one wheel (numpy-2.5.4-cp312-cp312-win_amd64.whl) stalled; 4 resume/.part pairs present",
+                          "total_cache_bytes_at_stop":  1188138634
+                      },
+    "network_measurements_utc":  {
+                                     "files.pythonhosted.org (IPv4, accelerate wheel)":  "0.19 MB/s",
+                                     "files.pythonhosted.org (IPv6, accelerate wheel)":  "0.29 MB/s",
+                                     "download.pytorch.org (torch cu126 IPv4 range)":  "36.8 MB/s",
+                                     "download.pytorch.org (torch cu126 IPv6 range)":  "29.2 MB/s",
+                                     "github.com release redirect (earlier gate 0 transfers)":  "~45 MB/s",
+                                     "note":  "PyPI throughput was the blocker; pytorch/GitHub hosts were healthy."
+                                 },
+    "consequence":  "Empty-cache installs of the shared Python runtime cannot complete in a reasonable time on this network. Functional/app acceptance is therefore run from the locally verified cache seeded by scripts/windows-parity/seed-parity-cache.ps1 (cache-hit installs); the network-path case remains blocked/not_run and must not be counted as a pass. Real-ESRGAN (GitHub-hosted 45 MB model/runtime archive) can still be exercised over the real network as a separate case.",
+    "evidence_files":  [
+                           "target/windows-parity-accept/seed-root-a.log",
+                           "verification/windows-parity-app/seed-cache-root-a.json"
+                       ]
+}

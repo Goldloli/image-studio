@@ -1,0 +1,19 @@
+﻿{
+    "schema_version":  1,
+    "kind":  "windows-parity-install-failure-long-data-root",
+    "case_id":  "I2-1b probe failure",
+    "status":  "fail",
+    "build_commit":  "888dccabb40500e74053ea37ea8412facc17660c",
+    "data_root":  "target/windows-parity-accept/root-a",
+    "phase":  "installing_runtime / probe",
+    "error":  "私有环境安装或探针失败 (exit code: 70)；worker startup failed: ImportError: DLL load failed while importing onnxruntime_pybind11_state: 文件名或扩展名太长",
+    "root_cause_analysis":  {
+                                "staging_runtime_path":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\windows-parity-accept\\root-a\\data\\runtimes\\.windows-python31210-torch2100-cu126-diff041-transformers53-v2.staging-27684-1793797083903590600",
+                                "staging_pyd_path_length":  252,
+                                "final_pyd_path_length":  217,
+                                "note":  "The nested acceptance data root makes the runtime staging path approach/exceed the Windows legacy MAX_PATH limit; onnxruntime\u0027s pybind11 DLL import fails with \u0027文件名或扩展名太长\u0027. This is a test-root choice / product long-path robustness finding, not a model failure."
+                            },
+    "consequence":  "Acceptance re-run with a short data root (C:\\\\ist-a); product follow-up: validate or harden long data roots (long-path-aware runtime or early actionable error at startup/install).",
+    "staged_runtime_left":  "staging directory remained after the failed install (4.23 GB / 20621 files); final runtime dir empty",
+    "evidence":  "verification/windows-parity-app/install-birefnet-empty-cache-network-blocked.json (earlier network stop in the same root)"
+}
