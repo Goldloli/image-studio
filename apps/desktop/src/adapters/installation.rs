@@ -1219,6 +1219,43 @@ fn staging_runtime_dir_name(pid: u32, nonce: u64) -> String {
     format!("{STAGING_DIR_PREFIX}{pid:x}-{mixed:08x}")
 }
 
+/// Deterministic short directory name for an activated runtime.
+///
+/// The frozen runtime ids are 52-61 characters long; keeping them as the final
+/// directory name pushes Python-opened paths (the longest importable runtime file
+/// is 130 units) over the legacy Win32 MAX_PATH for data roots that passed the
+/// staging-based guard. The identity remains in the activation record and worker
+/// identity; only the directory name is shortened (`rt-<12 hex>` = 15 units).
+#[cfg(windows)]
+fn runtime_directory_name(runtime_id: &str) -> String {
+    let digest = Sha256::digest(runtime_id.as_bytes());
+    let mut hex = String::with_capacity(12);
+    for byte in &digest[..6] {
+        hex.push_str(&format!("{byte:02x}"));
+    }
+    format!("rt-{hex}")
+}
+
+#[cfg(not(windows))]
+fn runtime_directory_name(runtime_id: &str) -> String {
+    runtime_id.to_owned()
+}
+
+/// Rename a runtime installed by a build that used the raw runtime id as the
+/// directory name. Best effort: failures leave the legacy layout in place and the
+/// normal readiness diagnostics report it.
+#[cfg(windows)]
+fn migrate_legacy_runtime_dir(runtimes: &Path, runtime_id: &str) -> Result<bool, String> {
+    let legacy = runtimes.join(runtime_id);
+    let current = runtimes.join(runtime_directory_name(runtime_id));
+    if current.exists() || !legacy.exists() {
+        return Ok(false);
+    }
+    fs::rename(&legacy, &current).map_err(err)?;
+    sync_directory(runtimes)?;
+    Ok(true)
+}
+
 /// Best-effort removal of leftover runtime staging directories from previous
 /// installs. Two naming generations exist:
 ///
@@ -1741,7 +1778,12 @@ impl Installation {
                 state.phase = "unavailable".into();
                 state.error = Some(identity_error);
             } else {
-                let runtime_root = paths.data.join("runtimes").join(&runtime.id);
+                #[cfg(windows)]
+                let _ = migrate_legacy_runtime_dir(&paths.data.join("runtimes"), &runtime.id);
+                let runtime_root = paths
+                    .data
+                    .join("runtimes")
+                    .join(runtime_directory_name(&runtime.id));
                 let model_root = paths.data.join("models").join(&model.id);
                 let runtime_critical_ok = if runtime.is_native() {
                     runtime.native_installed_files().iter().all(|file| {
@@ -1971,7 +2013,7 @@ impl Installation {
             .paths
             .data
             .join("runtimes")
-            .join(&self.inner.runtime.id)
+            .join(runtime_directory_name(&self.inner.runtime.id))
     }
     fn model_dir(&self) -> PathBuf {
         self.inner
@@ -7336,5 +7378,37 @@ mod tests {
     fn stale_runtime_staging_cleanup_tolerates_a_missing_runtimes_dir() {
         let tmp = tempfile::tempdir().unwrap();
         assert!(cleanup_stale_runtime_staging(&tmp.path().join("absent")).is_empty());
+    }
+    #[cfg(windows)]
+    #[test]
+    fn runtime_directory_names_are_short_deterministic_and_distinct() {
+        let v2 = "windows-python31210-torch2100-cu126-diff041-transformers53-v2";
+        let name = runtime_directory_name(v2);
+        assert_eq!(name.len(), 15, "{name}");
+        assert!(name.starts_with("rt-"), "{name}");
+        assert_eq!(name, runtime_directory_name(v2));
+        assert_ne!(
+            name,
+            runtime_directory_name("realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1")
+        );
+    }
+    #[cfg(windows)]
+    #[test]
+    fn legacy_runtime_directory_is_migrated_once() {
+        let tmp = tempfile::tempdir().unwrap();
+        let runtimes = tmp.path().join("runtimes");
+        let runtime_id = "windows-python31210-torch2100-cu126-diff041-transformers53-v2";
+        let legacy = runtimes.join(runtime_id);
+        fs::create_dir_all(&legacy).unwrap();
+        fs::write(legacy.join("python.exe"), b"legacy").unwrap();
+        assert!(migrate_legacy_runtime_dir(&runtimes, runtime_id).unwrap());
+        let current = runtimes.join(runtime_directory_name(runtime_id));
+        assert!(!legacy.exists(), "legacy directory must be renamed");
+        assert_eq!(fs::read(current.join("python.exe")).unwrap(), b"legacy");
+        assert!(!migrate_legacy_runtime_dir(&runtimes, runtime_id).unwrap());
+        // If both layouts exist, keep the short one and leave the legacy data alone.
+        fs::create_dir_all(&legacy).unwrap();
+        assert!(!migrate_legacy_runtime_dir(&runtimes, runtime_id).unwrap());
+        assert!(legacy.is_dir() && current.is_dir());
     }
 }
