@@ -1,11 +1,13 @@
 # Windows diffusers worker (Klein / Qwen-Image 2.1 / MOSS)
 
 Status: worker package and wheel built, installer-facing probe/prepare paths and
-three real generation-v2 protocol exchanges executed on the Windows 10 target
+five real generation-v2 protocol exchanges executed on the Windows 10 target
 machine (2026-11-04, RTX 3080 Ti 12 GB / i7-13700K / 31.7 GiB RAM). Qwen-Image
-2.1 base and MOSS-Image-SFT real generations are marked `not_run` (see below);
-their request validation, prepared-cache logic and vendored pipeline modules are
-covered by unit tests and the frozen Gate 0 staged evidence from the Lead.
+2.1 base and MOSS-Image-SFT are now covered by real exchanges too. The Windows
+Real-ESRGAN native worker release binary was built and its frozen ncnn bundle
+verified, but its real exchange is **blocked by a genuine Windows
+path-normalization defect in the committed native worker** (full defect evidence
+and fix owner below; the fix is assigned to the desktop-install teammate).
 
 ## Deliverable
 
@@ -76,6 +78,12 @@ Qwen-Image 2.1-Turbo rebuild on the target machine
   ([prepare-klein-not-required.json](prepare-klein-not-required.json)); its
   Gate 0 strategy loads NF4 + component CPU offload directly from the fixed
   snapshot in a fresh generation process.
+- The Qwen base and MOSS real runs reused the Lead's Gate 0 prepared caches by
+  copying them into the agreed `models/<snapshot>.prepared` locations and
+  re-hashing every file: Qwen base `prepared-qwen21-base` (5 files,
+  10,049,397,583 bytes) and MOSS `prepared-moss` (4 files, 8,471,497,242 bytes)
+  are byte-identical to the source caches, so the real runs exercised the same
+  deterministic prepared bytes already measured at Gate 0.
 
 ## Real generation-v2 protocol exchanges
 
@@ -90,6 +98,8 @@ the SHA-256 below is what the worker put into the candidate frame.
 | Qwen Turbo, 8 steps | [real-protocol-qwen-turbo.json](real-protocol-qwen-turbo.json) | 33.45 s (generation 25.12 s) | 5.961 GiB | 13.985 GiB | 13.005 GiB | 7,183 MiB | 1024x1024, 1,759,574 B, `b4be0981...60d68e`, [png](real-protocol-qwen-turbo.png) |
 | Klein text-to-image, 4 steps | [real-protocol-klein-text.json](real-protocol-klein-text.json) | 42.27 s (generation 30.75 s) | 9.221 GiB | 19.485 GiB | 9.994 GiB | 11,135 MiB | 1024x1024, 2,074,705 B, `2802c200...0ff404`, [png](real-protocol-klein-text.png) |
 | Klein single-image edit, 4 steps | [real-protocol-klein-edit.json](real-protocol-klein-edit.json) | 38.03 s (generation 28.62 s) | 9.182 GiB | 18.925 GiB | 11.457 GiB | 11,033 MiB | 1024x1024, 1,859,640 B, `3c337047...b914a9`, [png](real-protocol-klein-edit.png) |
+| Qwen-Image 2.1 base, 40 steps | [real-protocol-qwen21-base.json](real-protocol-qwen21-base.json) | 78.73 s (generation 69.64 s) | 5.961 GiB | 13.968 GiB | 14.737 GiB | 7,804 MiB | 1024x1024, 1,915,726 B, `1a38ca6f...d4a543`, [png](real-protocol-qwen21-base.png) |
+| MOSS-Image-SFT, 50 steps | [real-protocol-moss.json](real-protocol-moss.json) | 139.27 s (generation 127.08 s) | 5.539 GiB | 13.064 GiB | 2.696 GiB | 7,750 MiB | 1024x1024, 1,842,307 B, `4cd42c8f...01b3a`, [png](real-protocol-moss.png) |
 
 Protocol details:
 
@@ -105,7 +115,16 @@ Protocol details:
   1024x1024 RGB per the frozen output specification. Gate 0 measured the
   condition-derived 912x1136 size without explicit dimensions; the product
   contract pins 1024 square, so the worker passes explicit output dimensions.
-- All three runs stayed inside the design budgets (CUDA reserved <= 10.5 GiB,
+- Qwen base: the same staged NF4 executor as Turbo with the model's 40-step
+  linear schedule and 2,048-token budget; progress `sampling 1..40 of 40` then
+  `decoding`/`writing`, fixed seed 3148150817, terminal `output_candidate_v2`.
+- MOSS: staged NF4 text encoder + NF4 DiT with the vendored fixed pipeline module
+  and the documented dtype shim, 50 steps, CFG 3.0, empty negative prompt,
+  negative-branch skip block 22; progress `sampling 1..50 of 50`. The staged-NF4
+  output is a real MOSS generation and is not bit-identical to the Gate 0
+  bf16 model-offload sample (different execution strategy); that is expected and
+  not a determinism claim across strategies.
+- All five runs stayed inside the design budgets (CUDA reserved <= 10.5 GiB,
   private commit <= 24 GiB, available RAM >= 2 GiB, load/generation limits); the
   worker enforces them as hard failures.
 - One earlier Klein edit attempt during a period of concurrent builds by other
@@ -123,13 +142,55 @@ asset was committed, and the Attempt output directory stayed empty (worker
 elapsed 12.3 s, worker process commit 2.084 GiB, nvidia-smi peak 1,908 MiB -
 i.e. no generation happened).
 
+[cancel-check-qwen21-base.json](cancel-check-qwen21-base.json): the same
+immediate-cancel check for the Qwen-Image 2.1 base snapshot. Terminal
+`{"type":"cancelled"}`, no candidate, no image file in the Attempt directory
+(worker stderr shows request validation and then cancellation; no sampling
+progress was emitted). The ncnn worker cancel check is pending the Real-ESRGAN
+worker fix below.
+
+## Real-ESRGAN Windows ncnn worker (native)
+
+The Windows native worker release binary was built with
+`cargo build --release -p realesrgan-worker`
+(`target\release\realesrgan-worker.exe`, 990,720 bytes, SHA-256
+`22c4c679...b1ab`) and the frozen ncnn bundle was verified against the worker
+constants: `realesrgan-ncnn-vulkan.exe` 6,161,408 bytes / SHA-256
+`07e49f7c...7b1a0c`, `realesrgan-x4plus.bin` 33,424,520 bytes / SHA-256
+`713ee713...cdbcddf`, `realesrgan-x4plus.param` 116,029 bytes / SHA-256
+`35330ece...9f10a86`.
+
+Status: **blocked by a real Windows portability defect in the committed native
+worker**, recorded with full reproductions in
+[realesrgan-worker-path-bug.json](realesrgan-worker-path-bug.json) (status
+`fail`, root cause and fix owner). In short:
+
+- the worker validates `path.canonicalize()? != path` for the ncnn binary, model
+  dir and output dir; on Windows Rust `canonicalize` returns an extended-length
+  `\\?\C:\...` path, so every normal absolute path is rejected at startup
+  (`ncnn binary must be an absolute regular file named
+  realesrgan-ncnn-vulkan.exe`, worker exit 70, no handshake);
+- passing verbatim `\\?\` paths passes validation and starts real inference (the
+  ncnn stderr enumerates `[0 NVIDIA GeForce RTX 3080 Ti]` and
+  `[1 Intel(R) UHD Graphics 770]`), but the frozen ncnn executable cannot open
+  extended-length paths (`_wfopen <exe dir>\\?\C:\...param failed`) and exits
+  with `0xc0000409`; no candidate is produced.
+
+This is a worker path-normalization bug, not a model/bundle/budget failure: the
+same frozen bundle passes the direct Gate 0 runs in
+`verification/windows-parity-realesrgan/`, and all hashes above match. The fix
+(strip/normalize the Windows `\\?\` prefix for the comparisons while keeping the
+ncnn `-i/-o/-m` paths un-prefixed, plus unit tests and a rebuilt release binary)
+is assigned to the desktop-install teammate (task-11); this task reruns the
+official 220x220 and 97x61 v2 exchanges once that binary is available and will
+replace this section with passing evidence.
+
 ## Not run (time-boxed, clearly marked)
 
 | Case | Status | Why / coverage |
 |---|---|---|
-| Qwen-Image 2.1 base real generation | not_run | Same staged executor code path as Turbo (40 steps, 2048-token budget); measured basis is the Lead's Gate 0 staged evidence. Prepare for the base snapshot was not rerun to avoid another 10 GB/25 GiB-transient build. |
-| MOSS-Image-SFT real generation | not_run | Staged executor + vendored pipeline module are unit-tested (frozen 25,060 B / SHA-256 `1dac1aca...`), and the Gate 0 staged run from the Lead is the measured basis; not rerun within this task. |
 | Supervisor-wrapped exchange | not_run | The harness currently spawns the wheel directly with the same worker arguments the supervisor will use; supervisor lifecycle evidence is covered by the supervisor/worker tasks. |
+| Real-ESRGAN worker v2 exchange | blocked (worker fix task-11) | Committed Windows native binary rejects normal absolute paths; full defect evidence in [realesrgan-worker-path-bug.json](realesrgan-worker-path-bug.json). Official rerun scheduled after the fixed binary lands. |
 
 ## Safety and limitations
 
@@ -144,7 +205,16 @@ i.e. no generation happened).
 - `nvidia-smi` totals include ~0.8-1.5 GiB of desktop WDDM clients, so CUDA
   reserved is the primary VRAM decision value.
 - The pipeline variants are not bit-comparable across staged/offload strategies;
-  the fixed-seed SHA-256 equality only holds for the same strategy and settings.
+  the fixed-seed SHA-256 equality only holds for the same strategy and settings
+  (e.g. the staged-NF4 MOSS output differs from the Gate 0 bf16 model-offload
+  sample, as expected).
+- The MOSS run's minimum available RAM was 2.696 GiB, close to the frozen 2 GiB
+  floor but inside budget; the worker would have failed closed below 2 GiB. No
+  other heavy agent jobs were running during that run.
+- Real-ESRGAN worker evidence: the frozen ncnn executable itself passes the
+  direct Gate 0 runs, but the committed Windows worker binary cannot be exercised
+  until the `\\?\` canonicalize defect is fixed; the defect evidence includes the
+  rejected normal-path startup and the verbatim-path ncnn crash.
 
 ## Commands used
 
@@ -166,4 +236,11 @@ target\parity-gate0\py312\python.exe tools\diffusers-worker-windows\tests\run_re
 target\parity-gate0\py312\python.exe tools\diffusers-worker-windows\tests\run_real_protocol.py `
   --mode run     --python <py312> --worker-site <dir> --snapshot <snapshot> --model <model-dir> `
   --report-output target\parity-worker\attempts\<case> --report <json>
+
+# native Real-ESRGAN worker (after the task-11 fix lands)
+target\parity-gate0\py312\python.exe tools\diffusers-worker-windows\tests\run_realesrgan_protocol.py `
+  --worker-exe target\release\realesrgan-worker.exe `
+  --ncnn-binary target\parity-runtime\realesrgan\app\realesrgan-ncnn-vulkan.exe `
+  --model-dir target\parity-worker\realesrgan\model --input <png> `
+  --output target\parity-worker\attempts\<case> --report <json>
 ```
