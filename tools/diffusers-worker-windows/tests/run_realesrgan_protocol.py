@@ -156,6 +156,42 @@ def display_path(path: Path) -> str:
         return path.name
 
 
+def pixel_cross_check(image_path: Path, reference_path: Path, report: dict) -> bool:
+    """Compare RGB pixels with a Gate 0 direct-ncnn reference output.
+
+    The worker contract requires one 8-bit RGB PNG while the Gate 0 direct ncnn
+    run kept the input alpha channel, so the PNG byte SHA-256 differs by container
+    color type. Comparing RGB pixels proves the restored image content is the
+    same.
+    """
+    from PIL import Image
+
+    import numpy as np
+
+    with Image.open(image_path) as opened:
+        actual = np.asarray(opened.convert("RGB"), dtype=np.int16)
+    with Image.open(reference_path) as opened:
+        expected = np.asarray(opened.convert("RGB"), dtype=np.int16)
+    if actual.shape != expected.shape:
+        report["gate0_pixel_cross_check"] = {
+            "reference": display_path(reference_path),
+            "shape_mismatch": [list(actual.shape), list(expected.shape)],
+        }
+        return False
+    difference = np.abs(actual - expected)
+    max_diff = int(difference.max())
+    different_pixels = int((difference.sum(axis=2) > 0).sum())
+    report["gate0_pixel_cross_check"] = {
+        "reference": display_path(reference_path),
+        "width": int(actual.shape[1]),
+        "height": int(actual.shape[0]),
+        "max_channel_difference": max_diff,
+        "different_pixels": different_pixels,
+        "identical_rgb_pixels": max_diff == 0,
+    }
+    return max_diff == 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--worker-exe", type=Path, required=True)
@@ -166,6 +202,11 @@ def main() -> int:
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--expected-output-sha256")
     parser.add_argument("--expected-output-bytes", type=int)
+    parser.add_argument(
+        "--pixel-reference",
+        type=Path,
+        help="optional Gate 0 direct-ncnn output to cross-check RGB pixels",
+    )
     parser.add_argument("--cancel-immediately", action="store_true")
     parser.add_argument(
         "--no-verbatim",
@@ -420,6 +461,10 @@ def main() -> int:
                 or image.stat().st_size == args.expected_output_bytes
             ),
         }
+        if args.pixel_reference is not None:
+            checks["rgb_pixels_match_gate0_reference"] = pixel_cross_check(
+                image, args.pixel_reference.resolve(), report
+            )
         report["checks"] = checks
         report["status"] = "passed" if all(checks.values()) else "failed"
     if args.report:
