@@ -922,15 +922,12 @@ fn staged_windows_recipe(recipe: Recipe) -> bool {
         Recipe::QwenImage21Windows | Recipe::QwenImage21TurboWindows | Recipe::MossImageSftWindows
     )
 }
-/// The Windows diffusers worker derives the prepared cache from the model path
-/// (`<model>.prepared`), which is the fixed installer layout.
+/// The Windows diffusers worker derives the prepared cache by appending
+/// `.prepared` to the model path, so the host must derive exactly that path from
+/// the installed model directory (not from the worker snapshot identity).
 fn prepared_cache_path(ready: &ReadyPaths) -> Result<PathBuf, String> {
-    if ready.model_snapshot_id.is_empty() {
-        return Err("安装记录缺少模型快照身份".into());
-    }
-    Ok(ready
-        .model_path
-        .with_file_name(format!("{}.prepared", ready.model_snapshot_id)))
+    let model = ready.model_path.to_str().ok_or("模型路径不是 UTF-8")?;
+    Ok(PathBuf::from(format!("{model}.prepared")))
 }
 fn expected_worker_build(recipe: Recipe) -> Option<&'static str> {
     match recipe {
@@ -1133,3 +1130,25 @@ fn trim_log(text: &mut String) {
 
 #[cfg(all(test, unix))]
 mod tests;
+
+#[cfg(test)]
+mod generation_windows_tests {
+    use super::*;
+    #[test]
+    fn prepared_cache_path_appends_to_the_installed_model_directory() {
+        let ready = ReadyPaths {
+            worker_program: PathBuf::from("python.exe"),
+            worker_args: vec![],
+            model_path: PathBuf::from("data/models/qwen-image-2.1-windows-v1"),
+            worker_module: "studio_diffusers_worker".into(),
+            worker_build_id: WINDOWS_DIFFUSERS_WORKER.into(),
+            runtime_lock_id: "runtime".into(),
+            model_snapshot_id:
+                "qwen-image-2.1-windows-staged-d26bb61231c349cf6b7896fa83353113880e1ba3".into(),
+        };
+        assert_eq!(
+            prepared_cache_path(&ready).unwrap(),
+            PathBuf::from("data/models/qwen-image-2.1-windows-v1.prepared")
+        );
+    }
+}
