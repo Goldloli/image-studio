@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "kind": "cross-platform-tool-model-advice-acceptance",
+  "status": "passed_with_user_gated_rows",
+  "date": "2026-11-04",
+  "build": {
+    "installer_sha256": "575927c5638be32678a18017b3835748fe5717a5cc25c8e0c2e496f7fcf6286a",
+    "installer_bytes": 245005175,
+    "installed_exe_sha256": "9296a6ec3b1f4b33487a63ab49a346296575dad7a162e907ed2cdab2fbe33f63"
+  },
+  "cases": [
+    {
+      "id": "legacy-macos-tool-draft",
+      "method": "draft 1 params temporarily rewritten to birefnet-general-epoch-244 / image.remove-background.birefnet-general-epoch-244.v1 in the isolated C:\\ist-a library, app relaunched, draft restored afterwards",
+      "result": "passed",
+      "warning": "此会话保留来自其他平台的模型选择。请从模型菜单明确选择对应的 Windows BiRefNet 去背景 型号，并核对源图后再发送。",
+      "label": "BiRefNet epoch_244 · 去背景 · 当前平台未接入",
+      "send_disabled": true,
+      "send_title": "模型未就绪",
+      "old_wrong_label_absent": true,
+      "screenshot": "legacy-mac-tool-advice.png"
+    },
+    {
+      "id": "windows-native-tool-model",
+      "method": "restore original library, relaunch, select BiRefNet from the model menu",
+      "result": "passed",
+      "warnings": [],
+      "label": "BiRefNet · 去背景"
+    }
+  ],
+  "unit_tests": {
+    "command": "npm --prefix apps/frontend test",
+    "files": 7,
+    "tests": 58,
+    "new_coverage": [
+      "Windows advises the Windows BiRefNet/Real-ESRGAN target with 核对源图",
+      "macOS advises the macOS tool target for Windows tool ids",
+      "native tool ids and unknown ids return null",
+      "text advice unchanged (combined helper keeps the family text)"
+    ]
+  },
+  "user_gated": [
+    {
+      "id": "M1-macos-windows-tool-session",
+      "result": "not_run",
+      "reason": "No macOS app on this machine; the shared frontend is covered by the platform x tool-id matrix."
+    }
+  ],
+  "quality_gates": {
+    "frontend": "npm test 58 passed; npm run check; npm run build",
+    "installer_build": "scripts/build-windows-internal.ps1 exit 0 (includes workspace tests/frontend gates)"
+  }
+}
