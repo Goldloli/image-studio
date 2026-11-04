@@ -6,7 +6,7 @@
     {
       "case_id": "I2-1 empty-cache real download for the shared runtime",
       "result": "blocked",
-      "reason": "Outbound PyPI throughput collapsed to ~0.2–0.3 MB/s during the shared v2 runtime wheel downloads (PyTorch/GitHub hosts were 30–45 MB/s); the install was stopped before activation.",
+      "reason": "Outbound PyPI throughput collapsed to ~0.2–0.3 MB/s during the shared v2 runtime wheel downloads (PyTorch/GitHub hosts were 30–45 MB/s); the install was stopped before activation. A retry in a fresh root on 2026-11-04 22:17–22:26 downloaded 1.0 GB of the 25.3 GB BiRefNet plan (~0.35 MB/s in the model phase, runtime wheels not reached) and was stopped after the user accepted the blocked row.",
       "evidence": "install-birefnet-empty-cache-network-blocked.json",
       "not_a_pass": true
     },

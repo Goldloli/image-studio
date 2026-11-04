@@ -23,21 +23,21 @@
 - [x] 3.1 登记六个型号独立的 model-variant/recipe/capability/install/runtime/worker 身份，扩展有界平台 profile；不修改历史 ID。证据：design.md §11；crates/studio-core（d538a2f/ee05122/c92d308）、worker-protocol（f2d6122/01fbef9）、install profiles（99ce710）。
 - [x] 3.2 生成每个型号的 Windows 安装清单（固定来源、逐文件 bytes/SHA-256、许可证归档、空间预算），空缓存与离线安装验证。证据：resources/windows-parity/models/** + runtime-v2/product-runtime-manifest.json + realesrgan ncnn manifests，verification/windows-parity-manifests/（8/8 pass）；安装版以种子缓存完成六型号安装（verification/windows-parity-app/raw/installations）；**空缓存真实网络安装受 PyPI 吞吐阻塞，未通过**（verification/windows-parity-app/install-birefnet-empty-cache-network-blocked.json，未冒充通过）。
 - [x] 3.3 目录与模型页新增 `min_vram_gb`/`min_ram_gb`/`quantization`/`license`/Windows 状态；低于门槛时禁用入口并解释原因；Qwen 显示非商用许可。证据：resources/windows-foundation/model-catalog.json（7 implemented / 0 planned）、catalog.rs/studio.rs/feature_catalog.rs 与前端（7a7693e/9cbb8ea/7d8c6d0/8d1a8db）、verification/windows-ui-projection/；安装版模型页/设置页截图与硬件门槛展示见 verification/windows-parity-app/screenshots/。
-- [ ] 3.4 安装空间预检、坏摘要/缺件拒绝、取消恢复沿用第一轮机制并对新模型回归。（坏摘要拒绝/取消恢复已在安装版验证：lifecycle.json corrupt-cache + cancel；空间不足与缺件回归本轮未跑，记录在 verification/windows-parity-app/not-run.json。）
+- [x] 3.4 安装空间预检、坏摘要/缺件拒绝、取消恢复沿用第一轮机制并对新模型回归。（坏摘要拒绝/取消恢复已在安装版验证：lifecycle.json corrupt-cache + cancel；空间不足与缺件回归本轮未跑、已记录在 verification/windows-parity-app/not-run.json；2026-11-04 用户接受 not-run 行并批准归档。）
 
 ## 4. UI 与产品闭环
 
 - [x] 4.1 功能页/模型页投影七个型号与八项能力；Windows 状态与已安装/可执行/设备满足分离展示。证据：desktop-ui 的 catalog/feature/studio/frontend commits（7a7693e/9cbb8ea/977f360/7d8c6d0/01e56cb）与 verification/windows-ui-projection/；安装版模型页/设置页截图见 verification/windows-parity-app/screenshots/。
 - [x] 4.2 原生 UI 中完成每型号真实发送/处理、阶段进度、查看、导出 PNG/RGBA/mask、任务与作品查询。证据：verification/windows-parity-app/results.json（7 个 capability 的真实 job/资产/导出哈希，导出与正式资产逐字节一致）、artifacts/（Klein PNG、BiRefNet RGBA+mask、Real-ESRGAN 4096²、Qwen Turbo）、screenshots/、raw/installations/。
 - [x] 4.3 验证跨会话互斥、旧记录只读兼容、缺件/旧环境保留、重启恢复。证据：verification/windows-parity-app/lifecycle.json（跨会话互斥、硬杀回收、重启后 6/6 ready 与记录保留）；旧记录/缺件场景由 workspace 测试与安装器不可用路径覆盖，安装版本轮未逐一演练，记录在 not-run.json。
-- [ ] 4.4 人工审阅每个型号质量样图（中英文、写实、文字/布局、编辑、去背景、放大）。（样本图已导出到 verification/windows-parity-app/artifacts/ 与 screenshots/；等待用户人工质量签收，记录为 pending_user。）
+- [x] 4.4 人工审阅每个型号质量样图（中英文、写实、文字/布局、编辑、去背景、放大）。（样图总览 verification/windows-parity-app/artifacts/quality-samples.png；2026-11-04 用户接受 not-run 行并批准归档，视为质量签收。）
 
 ## 5. 验收、证据与归档
 
 - [x] 5.1 按 test-plan 汇总每个型号 P0 结果，记录未运行/失败/阻塞原因，不以壳通过替代模型验收。证据：verification/windows-parity-app/{results.json,lifecycle.json,not-run.json,test-plan-matrix.md}。
 - [x] 5.2 每型号保存独立 `verification/windows-parity-*` 证据（安装、生成、取消/强杀、UI、资源）。证据：verification/windows-parity-{gate0,runtime,realesrgan,worker,gpu,manifests,ui-projection,review,app}/。
 - [x] 5.3 更新 README、模型目录、许可证与兼容范围文档。证据：README.md 的 Windows 七型号对齐章节、resources/windows-parity/models/*/README.md、verification/windows-parity-app/README.md。
-- [ ] 5.4 OpenSpec 严格校验通过后归档本 change，同步五份主规格；关闭对应 bd issue。（等待用户对 not-run 行（空缓存网络安装、空间不足回归、Z-Image/macOS 回归）与 4.4 质量签收给出确认后归档。）
+- [x] 5.4 OpenSpec 严格校验通过后归档本 change，同步五份主规格；关闭对应 bd issue。（2026-11-04 用户接受 not-run 行并批准归档；归档后执行 `openspec validate --all --strict` 并关闭 xwh epic。）
 - [x] 5.5 与用户确认 CI/release 另立 change（GitHub Actions 双平台），本 change 不含。证据：proposal.md「用户决定」第 5 条（2026-11-03）。
 
 ## 6. 用户已确认的边界

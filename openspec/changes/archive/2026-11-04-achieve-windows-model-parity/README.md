@@ -2,7 +2,7 @@
 
 在 Windows 目标机（RTX 3080 Ti 12 GB / 32 GB RAM）上补齐 macOS 已有的全部七个型号与八项能力，使 Windows 产品与 macOS 功能对齐；对 12 GB 显存无法满足的模型，通过分阶段量化装载或明确的硬件门槛说明来交付。
 
-**状态：用户已确认（2026-11-03）；实施与安装版验收已完成（2026-11-04），等待用户对 not-run 行与质量样图签收后归档。** 进度：Gate 0 六型号全部通过（design.md §10，证据 `verification/windows-parity-gate0/`）；Windows v2 运行时与 Real-ESRGAN ncnn 包已冻结并离线验证（`verification/windows-parity-runtime/`、`verification/windows-parity-realesrgan/`）；Windows 身份在 design.md §11 冻结；worker、安装器与目录/UI 已实现；安装版在隔离数据根上完成六型号缓存命中安装与七项能力的真实生成/处理、导出与生命周期验收（`verification/windows-parity-app/`）。空缓存真实网络安装受当前 PyPI 吞吐阻塞、未冒充通过；质量签收与归档待用户确认。Gate 0 可行性实验原始记录见 [verification/windows-parity-gate0](../../../verification/windows-parity-gate0/README.md)。用户已确认：Windows 与 macOS 全部对齐；只支持本机 12 GB 目标机；接受 Qwen-Image-2.1 的非商用研究许可；GitHub Actions CI/release 由代理出设计、用户在 Mac 启用（另立 change）。
+**状态：已归档（2026-11-04）。** 用户 2026-11-03 确认，2026-11-04 接受 blocked/not-run 行并批准归档。实施与安装版验收完成：Gate 0 六型号全通过、Windows v2 运行时与 Real-ESRGAN ncnn 包冻结、Windows 身份一致、三个 worker 与安装器/目录/UI 全部实现；安装版在隔离数据根上完成六型号缓存命中安装与七项能力的真实生成/处理、导出与生命周期验收（`verification/windows-parity-app/`）。空缓存真实网络安装受 PyPI 吞吐阻塞、未冒充通过；空间/缺件回归、Z-Image 与 macOS 回归记录为 not_run/waived（`verification/windows-parity-app/not-run.json`）。Gate 0 可行性实验原始记录见 [verification/windows-parity-gate0](../../../verification/windows-parity-gate0/README.md)。用户已确认：Windows 与 macOS 全部对齐；只支持本机 12 GB 目标机；接受 Qwen-Image-2.1 的非商用研究许可；GitHub Actions CI/release 由代理出设计、用户在 Mac 启用（另立 change）。
 
 | 文档 | 内容 |
 |---|---|
