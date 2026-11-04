@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "kind": "windows-parity-onnx-birefnet-v2-protocol",
+  "case_id": "G2-B2",
+  "status": "passed",
+  "started_at_utc": "2026-11-04T12:21:29+00:00",
+  "finished_at_utc": "2026-11-04T12:21:59+00:00",
+  "machine": {
+    "os": "Windows-10-10.0.19045-SP0",
+    "python": "3.12.10",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "logical_cores": 24
+  },
+  "identity": {
+    "build_id": "studio-onnx-worker-windows-0.1.0",
+    "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+    "model_snapshot_id": "birefnet-general-epoch-244-onnx-windows-v1"
+  },
+  "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+  "worker_wheel": {
+    "path": "resources/windows-parity/workers/studio_onnx_worker-0.1.0-py3-none-any.whl",
+    "bytes": 10190,
+    "sha256": "453757530db217424f1aa6799d1df3d163901e1d711ac49c3ecd447fd5b1e1d6",
+    "installed_site": "target/parity-worker/onnx-birefnet/wheel-site"
+  },
+  "model": {
+    "path": "target/parity-worker/onnx-birefnet/model/BiRefNet-general-epoch_244.onnx",
+    "bytes": 972666916,
+    "sha256": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+    "expected_bytes": 972666916,
+    "expected_sha256": "58f621f00f5d756097615970a88a791584600dcf7c45b18a0a6267535a1ebd3c",
+    "matches_frozen_asset": true
+  },
+  "input": {
+    "path": "target/parity-worker/onnx-birefnet/attempt-real-wheel/input.png",
+    "source_path": "verification/planned-models-20261031/fixtures/original/portrait-hair.png",
+    "mode": "RGB",
+    "width": 1122,
+    "height": 1402,
+    "bytes": 2598783,
+    "sha256": "63d07fbf4beabb99cfa48fca25b69d5e41c00f9f7d5fe5e02a6c0dec4d9de8d6"
+  },
+  "request": {
+    "model_id": "birefnet-general-epoch-244-windows-v1",
+    "capability_id": "image.remove-background.birefnet-general-epoch-244.windows-v1",
+    "recipe_id": "birefnet-general-cpu-windows-v1",
+    "recipe_version": 1,
+    "instruction": "",
+    "seed": null,
+    "sampling_steps": null,
+    "parameters": {
+      "recipe": "birefnet-general-cpu-windows-v1",
+      "recipe_version": 1,
+      "provider": "CPUExecutionProvider",
+      "precision": "float32",
+      "preprocessing": "birefnet-1024-rgb-v1",
+      "postprocessing": "birefnet-logits-sigmoid-v1",
+      "intra_op_threads": 4,
+      "inter_op_threads": 1,
+      "execution_mode": "sequential"
+    },
+    "inputs": 1,
+    "outputs": [
+      "primary(image_rgba)",
+      "mask(mask)"
+    ]
+  },
+  "protocol": {
+    "family": "image-studio.generation",
+    "version": 2,
+    "hello_accepted": true,
+    "progress_frames": 4,
+    "candidate_frames": 2
+  },
+  "progress": [
+    {
+      "stage": "loading",
+      "completed": null,
+      "total": null,
+      "seconds_since_execute": 0.125,
+      "seconds_since_start": 1.125
+    },
+    {
+      "stage": "inference",
+      "completed": null,
+      "total": null,
+      "seconds_since_execute": 9.812,
+      "seconds_since_start": 10.812
+    },
+    {
+      "stage": "decoding",
+      "completed": null,
+      "total": null,
+      "seconds_since_execute": 26.922,
+      "seconds_since_start": 27.922
+    },
+    {
+      "stage": "writing",
+      "completed": null,
+      "total": null,
+      "seconds_since_execute": 27.156,
+      "seconds_since_start": 28.156
+    }
+  ],
+  "timings": {
+    "total_seconds": 29.484,
+    "handshake_seconds": 0.125,
+    "execute_to_terminal_seconds": 28.484,
+    "first_observed_stage_seconds": {
+      "loading": 1.125,
+      "inference": 10.812,
+      "decoding": 27.922,
+      "writing": 28.156
+    }
+  },
+  "resources": {
+    "worker_peak_working_set_mib": 8318.8,
+    "sample_count": 264,
+    "sample_interval_seconds": 0.1
+  },
+  "candidates": [
+    {
+      "role": "primary",
+      "data_type": "image_rgba",
+      "relative_path": "primary.png",
+      "width": 1122,
+      "height": 1402,
+      "size_bytes": 2797794,
+      "sha256": "9d1800cfaab8cc346c9fdd29385fa0fd405985c6ec1aa8fe02a02d052a479309"
+    },
+    {
+      "role": "mask",
+      "data_type": "mask",
+      "relative_path": "mask.png",
+      "width": 1122,
+      "height": 1402,
+      "size_bytes": 35198,
+      "sha256": "4433c05c9af567ee5455d8f9176f01cc81d8e9ab764bbb37de0b82f95522684e"
+    }
+  ],
+  "checks": {
+    "primary_mode_rgba": true,
+    "mask_mode_l": true,
+    "primary_dimensions_equal_source": true,
+    "mask_dimensions_equal_source": true,
+    "primary_alpha_equals_mask": true,
+    "primary_rgb_equals_source_rgb_straight_alpha": true,
+    "mask_has_partial_alpha": true,
+    "mask_spatial_variation": true,
+    "mask_fully_transparent_pixels": 912381,
+    "mask_fully_opaque_pixels": 630334,
+    "mask_partial_pixels": 30329,
+    "mask_mean": 104.779
+  },
+  "evidence": {
+    "onnx-birefnet-primary.png": {
+      "path": "verification/windows-parity-worker/onnx-birefnet-primary.png",
+      "bytes": 2797794,
+      "sha256": "9d1800cfaab8cc346c9fdd29385fa0fd405985c6ec1aa8fe02a02d052a479309"
+    },
+    "onnx-birefnet-mask.png": {
+      "path": "verification/windows-parity-worker/onnx-birefnet-mask.png",
+      "bytes": 35198,
+      "sha256": "4433c05c9af567ee5455d8f9176f01cc81d8e9ab764bbb37de0b82f95522684e"
+    }
+  },
+  "worker_stderr_tail": "",
+  "failures": []
+}
