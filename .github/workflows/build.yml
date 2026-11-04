@@ -1,0 +1,109 @@
+name: build-artifacts
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-artifacts-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows installer
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.99.1
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+
+      - name: Build internal installer
+        shell: pwsh
+        run: ./scripts/build-windows-internal.ps1 -SkipQualityGates
+
+      - name: Checksums and package evidence
+        shell: pwsh
+        run: |
+          $installer = "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe"
+          if (-not (Test-Path -LiteralPath $installer)) { throw "installer missing" }
+          $hash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLower()
+          "$hash  Image Studio_0.1.0_x64-setup.exe" | Out-File -Encoding ascii SHA256SUMS-windows.txt
+          Copy-Item verification/windows-installer/internal-package.json .
+          Get-Content SHA256SUMS-windows.txt
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe
+            SHA256SUMS-windows.txt
+            internal-package.json
+
+  macos:
+    name: macOS app
+    runs-on: macos-14
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.99.1
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: apps/frontend
+        run: npm ci
+
+      - name: Build release workspace
+        run: cargo build --release --locked --workspace
+
+      - name: Package unsigned app
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./apps/desktop/tauri.conf.json').version")
+          python3 scripts/prepare-macos-dev-app.py --profile release --output "target/release/Image Studio.app"
+          ARCHIVE="target/release/Image-Studio-${VERSION}-macos-arm64.zip"
+          ditto -c -k --keepParent "target/release/Image Studio.app" "$ARCHIVE"
+          shasum -a 256 "$ARCHIVE" | sed "s#target/release/##" > SHA256SUMS-macos.txt
+          cat SHA256SUMS-macos.txt
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-app
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            target/release/Image-Studio-*-macos-arm64.zip
+            SHA256SUMS-macos.txt

@@ -1,0 +1,58 @@
+name: release-draft
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build release artifacts
+    uses: ./.github/workflows/build.yml
+
+  release:
+    name: Draft GitHub release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Verify tag matches application version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./apps/desktop/tauri.conf.json').version")
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "app version: $VERSION, tag: $TAG"
+          test "$VERSION" = "$TAG"
+
+      - name: Draft release with artifacts and checksums
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ls -l artifacts
+          gh release create "$GITHUB_REF_NAME" \
+            --draft \
+            --title "Image Studio $GITHUB_REF_NAME" \
+            --generate-notes \
+            artifacts/*

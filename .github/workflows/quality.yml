@@ -1,0 +1,82 @@
+name: quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: quality (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-14]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.99.1
+          components: rustfmt, clippy
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install pinned Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.19.0"
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+
+      - name: Install OpenSpec CLI
+        run: npm install --global @fission-ai/openspec@1.12.0
+
+      - name: Install frontend dependencies
+        working-directory: apps/frontend
+        run: npm ci
+
+      - name: rustfmt
+        run: cargo fmt --all -- --check
+
+      - name: clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: workspace tests
+        run: cargo test --workspace --locked
+
+      - name: frontend tests
+        working-directory: apps/frontend
+        run: npm test
+
+      - name: frontend typecheck
+        working-directory: apps/frontend
+        run: npm run check
+
+      - name: frontend build
+        working-directory: apps/frontend
+        run: npm run build
+
+      - name: OpenSpec strict validation
+        run: openspec validate --all --strict
+
+      - name: Tool versions
+        shell: bash
+        run: |
+          rustc -V
+          cargo -V
+          node -v
+          npm -v
+          openspec --version
