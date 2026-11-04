@@ -1,7 +1,7 @@
 # Real-ESRGAN ncnn Vulkan Gate 0 evidence (G2-R1)
 
 Case **G2-R1** from
-`openspec/changes/achieve-windows-model-parity/test-plan.md`: "Real-ESRGAN ncnn
+`openspec/changes/archive/2026-11-04-achieve-windows-model-parity/test-plan.md`: "Real-ESRGAN ncnn
 Vulkan 4× — 精确 4×、tile 固定、单 GPU；预算与时限". Implements task 1.3 of the
 change. Frozen bundle: `resources/windows-parity/realesrgan-ncnn-vulkan/`.
 

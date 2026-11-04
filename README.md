@@ -61,7 +61,7 @@ bd prime
 
 ### Windows 全模型对齐（2026-11-04）
 
-目标机已补齐 macOS 的六个型号（`openspec/changes/achieve-windows-model-parity`）：FLUX.2 Klein 4B distilled（文生图 + 单图编辑）、BiRefNet epoch_244（CPU 去背景 RGBA+mask）、Real-ESRGAN x4plus（ncnn Vulkan 精确 4×）、Qwen-Image 2.1 / 2.1-Turbo（分阶段 NF4 + prepared cache）与 MOSS-Image-SFT（分阶段 NF4、vendored pipeline）。七个型号在安装版原生 UI 中完成真实生成/处理、查看、PNG/RGBA/mask 导出、任务与作品查询；模型页投影七个型号、硬件门槛与许可（Qwen 非商用标注），设置页展示 v1/v2/ncnn 运行时。
+目标机已补齐 macOS 的六个型号（`openspec/changes/archive/2026-11-04-achieve-windows-model-parity`）：FLUX.2 Klein 4B distilled（文生图 + 单图编辑）、BiRefNet epoch_244（CPU 去背景 RGBA+mask）、Real-ESRGAN x4plus（ncnn Vulkan 精确 4×）、Qwen-Image 2.1 / 2.1-Turbo（分阶段 NF4 + prepared cache）与 MOSS-Image-SFT（分阶段 NF4、vendored pipeline）。七个型号在安装版原生 UI 中完成真实生成/处理、查看、PNG/RGBA/mask 导出、任务与作品查询；模型页投影七个型号、硬件门槛与许可（Qwen 非商用标注），设置页展示 v1/v2/ncnn 运行时。
 
 - 证据：`verification/windows-parity-{gate0,runtime,realesrgan,worker,gpu,manifests,ui-projection,review,app}/`；安装版总账见 [Windows parity app acceptance](verification/windows-parity-app/README.md)。
 - 安装版验收使用隔离根与本地已校验缓存种子完成六型号安装；空缓存真实网络安装受当前 PyPI 吞吐阻塞、未冒充通过；整树禁网验收沿用 2026-11-03 用户 waive 决定。质量样图人工签收与最终归档待用户确认。

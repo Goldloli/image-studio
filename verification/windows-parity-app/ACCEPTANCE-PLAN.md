@@ -3,7 +3,7 @@
 Status: **plan only — no acceptance case has been executed from this directory
 yet.** Every case below starts as `not_run`; results are only recorded when the
 real Windows installed app exercises them. This plan is the runbook for the
-parity change (`openspec/changes/achieve-windows-model-parity`, tasks 3.2-3.4 /
+parity change (`openspec/changes/archive/2026-11-04-achieve-windows-model-parity`, tasks 3.2-3.4 /
 4.x / test-plan I2, P2, R2) and it must not be read as evidence of a pass.
 
 ## 1. Scope and preconditions

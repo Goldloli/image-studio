@@ -3,7 +3,7 @@
 Case: change task **1.2** — "冻结 Windows v2 运行时（Python 3.12.10 / torch
 2.10.0+cu126 / torchvision 0.25.0 / diffusers 0.41 / transformers 5.3 /
 accelerate / bitsandbytes / onnxruntime），登记 wheel 与运行时清单 SHA-256，
-证明离线可安装" (`openspec/changes/achieve-windows-model-parity/tasks.md`).
+证明离线可安装" (`openspec/changes/archive/2026-11-04-achieve-windows-model-parity/tasks.md`).
 
 Runtime under test:
 `windows-python31210-torch2100-cu126-diff041-transformers53-v2`

@@ -1,7 +1,7 @@
 # Windows parity installer manifest verification
 
 Validates the installer-consumable resources for the Windows model parity change
-(`openspec/changes/achieve-windows-model-parity`, task 3.2 partial) against the
+(`openspec/changes/archive/2026-11-04-achieve-windows-model-parity`, task 3.2 partial) against the
 real transferred artifacts and the installer rules implemented in
 `apps/desktop/src/adapters/installation.rs` (lines 271-324 schemas, 570-720
 component-byte/validation rules, 2194-2217 URL allowlist, 2342-2371 artifact

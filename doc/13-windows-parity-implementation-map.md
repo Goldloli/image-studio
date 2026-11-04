@@ -1,7 +1,7 @@
 # Windows model-parity implementation map
 
 Status: research notes for the confirmed OpenSpec change
-`openspec/changes/achieve-windows-model-parity` (2026-11-03). This is an
+`openspec/changes/archive/2026-11-04-achieve-windows-model-parity` (2026-11-03). This is an
 implementation map, not a spec; the change documents stay authoritative.
 Legend: **[V]** verified by reading the cited file.
 

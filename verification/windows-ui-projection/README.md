@@ -6,7 +6,7 @@ rows. This is **unit/type-level evidence**; the installed-app screenshots and th
 send/process acceptance (parity tasks 4.2) are recorded as `not_run` below because no installed
 package exists in this round yet.
 
-Change: `openspec/changes/achieve-windows-model-parity` (tasks 3.3, 4.1). Task: task-7.
+Change: `openspec/changes/archive/2026-11-04-achieve-windows-model-parity` (tasks 3.3, 4.1). Task: task-7.
 Machine: Windows 10 22H2 target machine (RTX 3080 Ti 12 GiB · driver 596.49 · 32 GB RAM).
 
 ## What was verified

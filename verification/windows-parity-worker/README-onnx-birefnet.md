@@ -1,6 +1,6 @@
 # Windows parity — BiRefNet ONNX Runtime CPU worker evidence
 
-Task 2.3/2.5 of `openspec/changes/achieve-windows-model-parity`: one Windows
+Task 2.3/2.5 of `openspec/changes/archive/2026-11-04-achieve-windows-model-parity`: one Windows
 generation-v2 worker process for BiRefNet `epoch_244` running **only** on the
 ONNX Runtime CPU execution provider. The worker package is
 [`tools/onnx-worker-windows/`](../../tools/onnx-worker-windows/README.md); this
