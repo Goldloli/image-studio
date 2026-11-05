@@ -17,10 +17,10 @@
 
 ## 3. 协议与配方身份
 
-- [ ] 3.1 在 `crates/worker-protocol` 增加 compact 配方白名单与参数映射：Qwen 基础/Turbo、MOSS、Klein 文生图/编辑、Z-Image；standard 映射逐字不变。
-- [ ] 3.2 在 `crates/studio-core/src/recipes.rs` 增加对应 `Recipe` 变体：`id()`、`from_request`、`effective_parameters`、`accepts_output`（768²/512²）、`max_output_bytes`、`Timeouts`。
-- [ ] 3.3 协议测试：compact 请求被接受；参数多键/少键/错值被拒绝；macOS 身份仍被拒绝；standard 参数映射快照不变。
-- [ ] 3.4 验证：`cargo test -p worker-protocol -p studio-core` 全绿。
+- [x] 3.1 在 `crates/worker-protocol` 增加 compact 配方白名单与参数映射：Qwen 基础/Turbo、MOSS、Klein 文生图/编辑、Z-Image；standard 映射逐字不变。
+- [x] 3.2 在 `crates/studio-core/src/recipes.rs` 增加对应 `Recipe` 变体：`id()`、`from_request`、`effective_parameters`、`accepts_output`（768²/512²）、`max_output_bytes`、`Timeouts`。
+- [x] 3.3 协议测试：compact 请求被接受；参数多键/少键/错值被拒绝；macOS 身份仍被拒绝；standard 参数映射快照不变。
+- [x] 3.4 验证：`cargo test -p worker-protocol -p studio-core` 全绿。
 
 ## 4. 安装期量化准备的低内存路径
 
