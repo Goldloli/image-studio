@@ -64,6 +64,9 @@ def quant_config(module, compute_dtype):
         "bnb_4bit_compute_dtype": compute_dtype,
         "bnb_4bit_use_double_quant": True,
         "llm_int8_skip_modules": ["proj_out"],
+        # Components are built on the CPU and moved by the offload hooks; without this flag a
+        # quantized checkpoint refuses to be dispatched off the GPU.
+        "llm_int8_enable_fp32_cpu_offload": True,
     }
     return (
         TransformersBnB(**kwargs)
@@ -149,11 +152,11 @@ def generate(request, progress, cancel):
     print("backend generation started", file=sys.stderr)
     checkpoint(cancel)
     resolution = int(request["parameters"].get("resolution", 1024))
-    compute_dtype = (
-        torch.float16
-        if request["parameters"].get("compute_dtype") == "float16"
-        else torch.bfloat16
-    )
+    compute_dtype_name = request["parameters"].get("compute_dtype")
+    compute_dtype = {
+        "float16": torch.float16,
+        "float32": torch.float32,
+    }.get(compute_dtype_name, torch.bfloat16)
     compact = resolution != 1024
     vae_dtype = (
         torch.float32
