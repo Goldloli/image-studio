@@ -39,16 +39,16 @@
 
 ## 6. MOSS-Image-SFT 与 Qwen-Image 2.1 compact
 
-- [ ] 6.1 MOSS：下载 25.4 GB → prepare → Gate 0（50 步、CFG 3.0、skip 22、768²）；`vae_precision` 由实测决定。
-- [ ] 6.2 Qwen 基础版：下载 30.9 GB → prepare → Gate 0（40 步、768²）。
-- [ ] 6.3 两个模型各自记录峰值、耗时、画质样图与 SHA-256；超 6.0 GiB 时按 design R3 降到 512² 重测。
+- [x] 6.1 MOSS：下载 25.4 GB → prepare → Gate 0（50 步、CFG 3.0、skip 22、768²）；`vae_precision` 由实测决定。
+- [x] 6.2 Qwen 基础版：下载 30.9 GB → prepare → Gate 0（40 步、768²）。
+- [x] 6.3 两个模型各自记录峰值、耗时、画质样图与 SHA-256；超 6.0 GiB 时按 design R3 降到 512² 重测。
 
 ## 7. FLUX.2 Klein 4B compact
 
-- [ ] 7.1 Klein 增加 prepared 预量化（文本编码器 + transformer），消除卡上量化瞬时。
-- [ ] 7.2 worker 改为顺序 offload（逐层）+ 768²；`vae_precision` 由实测决定（FLUX VAE 的 fp16 风险）。
-- [ ] 7.3 下载 14.9 GB → prepare → Gate 0：文生图与单图编辑各一次，记录峰值与耗时。
-- [ ] 7.4 编辑路径不得用 img2img 伪装；源图条件仍走 `source` 输入角色。
+- [x] 7.1 Klein 增加 prepared 预量化（文本编码器 + transformer），消除卡上量化瞬时。
+- [x] 7.2 worker 改为顺序 offload（逐层）+ 768²；`vae_precision` 由实测决定（FLUX VAE 的 fp16 风险）。
+- [x] 7.3 下载 14.9 GB → prepare → Gate 0：文生图与单图编辑各一次，记录峰值与耗时。
+- [x] 7.4 编辑路径不得用 img2img 伪装；源图条件仍走 `source` 输入角色。
 
 ## 8. Z-Image Turbo compact（高风险，R1）
 

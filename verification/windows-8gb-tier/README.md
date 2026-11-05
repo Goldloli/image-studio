@@ -73,6 +73,22 @@ Output: [klein-t2i-768.png](klein-t2i-768.png), 768×768, 1,209,215 bytes, SHA-2
 
 Record: [klein-gate0.json](klein-gate0.json).
 
+## Qwen-Image 2.1 base compact — Gate 0 passed (2026-11-05)
+
+Same machine, same prompt and seed, 768 square, 40 steps, guidance 1.0, staged NF4. The prepared
+cache was rebuilt on this machine in 723 s and is byte-identical in size (10,049,397,532 B) to the
+Turbo one.
+
+| Metric | Measured | Budget |
+|---|---|---|
+| CUDA reserved peak | **5.961 GiB** | ≤ 6.0 GiB |
+| CUDA allocated peak | 5.948 GiB | — |
+| Process private commit peak | 14.755 GiB | ≤ 24 GiB |
+| Total elapsed | 391.30 s (40 steps) | ≤ 900 s |
+
+Output: [qwen21-base-768.png](qwen21-base-768.png), 768×768, 1,220,897 bytes.
+Record: [qwen21-base-gate0.json](qwen21-base-gate0.json).
+
 ## Z-Image Turbo compact — not deliverable on 8 GB (measured 2026-11-05)
 
 Z-Image keeps its original 12 GB contract. Three measured attempts on the same machine failed,
