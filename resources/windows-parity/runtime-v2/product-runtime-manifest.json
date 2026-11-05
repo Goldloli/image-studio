@@ -470,8 +470,8 @@
         "version": "0.1.0",
         "worker_build": "studio-diffusers-worker-windows-0.1.0",
         "path": "resources/windows-parity/workers/studio_diffusers_worker-0.1.0-py3-none-any.whl",
-        "bytes": 41530,
-        "sha256": "79799fd9f0fae9f8f54e94cb57472779d8c49c1ba26c34c066a2018d75909e1b",
+        "bytes": 43526,
+        "sha256": "6c3cae91a91328b3ad2e8d3ec4b29d5847eedaf794b3a4ad0c14d8163d2425ad",
         "serves": [
           "Klein text-to-image",
           "Klein single-image edit",
