@@ -316,6 +316,22 @@ fn runtime_lock_id(install_id: &str) -> Option<&'static str> {
 ///
 /// Unknown model ids are not judged here: they are not registered in the catalog and the install
 /// or turn path reports its own unknown-id error.
+/// The output size for one aspect at the selected tier. The compact tier renders a 768 square
+/// and has no other registered aspect, so a 4:3 or 3:4 request must fail instead of silently
+/// falling back to the 1024 standard recipe.
+fn compact_aspect_size(aspect: &str, compact: bool) -> Result<(u32, u32), String> {
+    match (aspect, compact) {
+        ("1:1", true) => Ok((768, 768)),
+        (_, true) => {
+            Err("当前设备使用紧凑档（8 GB 显存），仅支持 1:1 方图；请把画幅改为 1:1。".into())
+        }
+        ("1:1", false) => Ok((1024, 1024)),
+        ("4:3", false) => Ok((1024, 768)),
+        ("3:4", false) => Ok((768, 1024)),
+        _ => Err("当前模型不支持此画幅，请明确修改参数".into()),
+    }
+}
+
 fn enforce_hardware_gate(
     catalog: &ModelCatalog,
     model_id: &str,
@@ -1391,12 +1407,16 @@ impl StudioService {
             let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
             enforce_hardware_gate(catalog, &turn.model_id, &self.device_facts)?;
         }
-        let (width, height) = match turn.aspect.as_str() {
-            "1:1" => (1024, 1024),
-            "4:3" => (1024, 768),
-            "3:4" => (768, 1024),
-            _ => return Err("当前模型不支持此画幅，请明确修改参数".into()),
-        };
+        // A device that only satisfies the compact tier runs the model at 768 square; other
+        // aspects would silently fall back to the 1024 standard recipe, so reject them.
+        let compact_tier = self
+            .catalog
+            .as_ref()
+            .ok()
+            .and_then(|catalog| catalog.model_facts(&turn.model_id, &self.device_facts))
+            .and_then(|facts| facts.tier.id)
+            .is_some_and(|id| id == "compact");
+        let (width, height) = compact_aspect_size(&turn.aspect, compact_tier)?;
         let seed = if turn.seed.is_empty() {
             None
         } else {
@@ -3154,6 +3174,17 @@ mod tests {
                 1,
             )
             .unwrap()
+    }
+
+    #[test]
+    fn compact_tier_renders_768_square_and_rejects_other_aspects() {
+        assert_eq!(compact_aspect_size("1:1", true), Ok((768, 768)));
+        assert_eq!(compact_aspect_size("1:1", false), Ok((1024, 1024)));
+        assert_eq!(compact_aspect_size("4:3", false), Ok((1024, 768)));
+        assert_eq!(compact_aspect_size("3:4", false), Ok((768, 1024)));
+        let error = compact_aspect_size("4:3", true).unwrap_err();
+        assert!(error.contains("紧凑档"), "{error}");
+        assert!(compact_aspect_size("16:9", false).is_err());
     }
 
     #[cfg(windows)]
