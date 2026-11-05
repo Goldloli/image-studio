@@ -29,15 +29,16 @@ use std::{
 use studio_core::{
     domain::*,
     generation::{
-        GenerationInput, Z_IMAGE_WINDOWS_CAPABILITY, freeze_windows_z_image, freeze_z_image,
+        GenerationInput, Z_IMAGE_WINDOWS_CAPABILITY, freeze_windows_z_image,
+        freeze_windows_z_image_compact, freeze_z_image,
     },
     recipes::{
         BiRefNetInput, KleinInput, MOSS_IMAGE_SFT_CAPABILITY, MOSS_IMAGE_SFT_MODEL,
         QWEN_IMAGE_21_CAPABILITY, QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY,
         QWEN_IMAGE_21_TURBO_MODEL, RealEsrganInput, Recipe, SourceAsset, SourceFacts,
         TextModelInput, freeze_birefnet, freeze_klein, freeze_realesrgan, freeze_text_model,
-        freeze_windows_birefnet, freeze_windows_klein, freeze_windows_realesrgan,
-        freeze_windows_text_model,
+        freeze_windows_birefnet, freeze_windows_klein, freeze_windows_klein_compact,
+        freeze_windows_realesrgan, freeze_windows_text_model,
     },
 };
 use uuid::Uuid;
@@ -1609,10 +1610,14 @@ impl StudioService {
             turn.model_id.as_str(),
             WINDOWS_QWEN_MODEL | WINDOWS_QWEN_TURBO_MODEL | WINDOWS_MOSS_MODEL
         ) {
-            let recipe = match turn.model_id.as_str() {
-                WINDOWS_QWEN_MODEL => Recipe::QwenImage21Windows,
-                WINDOWS_QWEN_TURBO_MODEL => Recipe::QwenImage21TurboWindows,
-                WINDOWS_MOSS_MODEL => Recipe::MossImageSftWindows,
+            // A compact-tier turn asks for 768 square, which selects the compact recipe identity.
+            let recipe = match (turn.model_id.as_str(), width == 768) {
+                (WINDOWS_QWEN_MODEL, false) => Recipe::QwenImage21Windows,
+                (WINDOWS_QWEN_MODEL, true) => Recipe::QwenImage21WindowsCompact,
+                (WINDOWS_QWEN_TURBO_MODEL, false) => Recipe::QwenImage21TurboWindows,
+                (WINDOWS_QWEN_TURBO_MODEL, true) => Recipe::QwenImage21TurboWindowsCompact,
+                (WINDOWS_MOSS_MODEL, false) => Recipe::MossImageSftWindows,
+                (WINDOWS_MOSS_MODEL, true) => Recipe::MossImageSftWindowsCompact,
                 _ => unreachable!(),
             };
             let frozen = freeze_windows_text_model(
@@ -1646,37 +1651,56 @@ impl StudioService {
                     })
                 })
                 .transpose()?;
-            let frozen = freeze_windows_klein(
-                KleinInput {
-                    request_id,
-                    project_id,
-                    idempotency_key,
-                    plan_id,
-                    prompt: turn.prompt.clone(),
-                    seed,
-                    source,
-                },
-                random_seed,
-                environment,
-            )
+            let input = KleinInput {
+                request_id,
+                project_id,
+                idempotency_key,
+                plan_id,
+                prompt: turn.prompt.clone(),
+                seed,
+                source,
+            };
+            let frozen = if compact_tier {
+                freeze_windows_klein_compact(input, random_seed, environment)
+            } else {
+                freeze_windows_klein(input, random_seed, environment)
+            }
             .map_err(|error| error.to_string())?;
             (frozen.request, frozen.plan)
         } else if turn.model_id == WINDOWS_ZIMAGE_INSTALL_ID {
-            let frozen = freeze_windows_z_image(
-                GenerationInput {
-                    request_id,
-                    project_id,
-                    idempotency_key,
-                    plan_id,
-                    prompt: turn.prompt.clone(),
-                    width,
-                    height,
-                    count: turn.count,
-                    seed,
-                },
-                random_seed,
-                environment,
-            )
+            let frozen = if compact_tier {
+                freeze_windows_z_image_compact(
+                    GenerationInput {
+                        request_id,
+                        project_id,
+                        idempotency_key,
+                        plan_id,
+                        prompt: turn.prompt.clone(),
+                        width,
+                        height,
+                        count: turn.count,
+                        seed,
+                    },
+                    random_seed,
+                    environment,
+                )
+            } else {
+                freeze_windows_z_image(
+                    GenerationInput {
+                        request_id: request_id.clone(),
+                        project_id: project_id.clone(),
+                        idempotency_key: idempotency_key.clone(),
+                        plan_id: plan_id.clone(),
+                        prompt: turn.prompt.clone(),
+                        width,
+                        height,
+                        count: turn.count,
+                        seed,
+                    },
+                    random_seed,
+                    environment,
+                )
+            }
             .map_err(|error| error.to_string())?;
             (frozen.request, frozen.plan)
         } else {

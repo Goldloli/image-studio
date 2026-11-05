@@ -558,7 +558,10 @@ impl GenerationController {
                     vec![MOSS_IMAGE_SFT_CAPABILITY.into()],
                 )
                 .map_err(error)
-            } else if recipe == Recipe::ZImageTurboCudaNf4 {
+            } else if matches!(
+                recipe,
+                Recipe::ZImageTurboCudaNf4 | Recipe::ZImageTurboCudaNf4Compact
+            ) {
                 HostSession::new_v2(
                     session_id,
                     config.expected_worker.clone(),

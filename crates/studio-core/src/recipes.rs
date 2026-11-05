@@ -1843,7 +1843,7 @@ fn windows_z_image_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> 
 }
 
 /// Compact Z-Image: the standard map plus 768²/fp16 compute and the fp16 VAE.
-fn windows_z_image_compact_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+pub(crate) fn windows_z_image_compact_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
     let mut parameters = windows_z_image_parameters(seed);
     parameters.insert("recipe".into(), json!(Z_IMAGE_WINDOWS_COMPACT_RECIPE));
     parameters.insert("resolution".into(), json!(768));
