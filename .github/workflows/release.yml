@@ -142,8 +142,9 @@ jobs:
           import pathlib
 
           tag = os.environ["TAG"]
+          version = tag.removeprefix("v")
           source = pathlib.Path("RELEASE_NOTES.md").read_text(encoding="utf-8")
-          rendered = source.replace("{{TAG}}", tag)
+          rendered = source.replace("{{TAG}}", tag).replace("{{VERSION}}", version)
           pathlib.Path("artifacts/RELEASE-NOTES.md").write_text(rendered, encoding="utf-8")
           PY
 
