@@ -5,12 +5,15 @@
 //! host. Hardware gates are advisory facts for the model catalog; an unknown fact is treated as
 //! "not proven", so a model requiring a GPU/amount of RAM is disabled with an actionable reason
 //! instead of silently starting and failing later.
+#[cfg(windows)]
 use std::time::{Duration, Instant};
 
 /// The probe timeout for the NVIDIA driver query. `nvidia-smi` answers in well under a second on
 /// a healthy target machine; a driver hang must not stall the host.
+#[cfg(windows)]
 const NVIDIA_SMI_TIMEOUT: Duration = Duration::from_secs(2);
 
+#[cfg(windows)]
 const MIB_PER_GIB: u64 = 1024;
 
 /// Local device facts. `vram_gb` is `None` when no NVIDIA GPU query is available (for example a
@@ -121,6 +124,7 @@ impl DeviceFacts {
     }
 }
 
+#[cfg(windows)]
 fn mib_to_gib(mib: u64) -> u32 {
     // Round to the nearest GiB so that e.g. 12282 MiB is reported as 12 GB instead of 11 GB.
     ((mib + MIB_PER_GIB / 2) / MIB_PER_GIB) as u32
@@ -128,6 +132,7 @@ fn mib_to_gib(mib: u64) -> u32 {
 
 /// Parses the first non-empty line of `nvidia-smi --query-gpu=memory.total
 /// --format=csv,noheader,nounits`. The default unit is MiB, so the returned number is MiB.
+#[cfg(windows)]
 fn parse_nvidia_smi_mib(output: &str) -> Option<u64> {
     let line = output
         .lines()
@@ -225,6 +230,7 @@ fn detect_ram_gb() -> u32 {
 /// Rounds total physical memory to the nearest GiB. A machine sold as 32 GB reports slightly less
 /// than 32 GiB total (firmware-reserved memory, e.g. 31.94 GiB), so flooring would wrongly mark the
 /// certified 32 GB target machine as below its registered threshold.
+#[cfg(windows)]
 fn bytes_to_gib_rounded(bytes: u64) -> u32 {
     const GIB: u64 = 1024 * 1024 * 1024;
     ((bytes + GIB / 2) / GIB) as u32
@@ -244,6 +250,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(windows)]
     fn nvidia_smi_memory_total_is_parsed_from_the_first_gpu() {
         assert_eq!(parse_nvidia_smi_mib("12288\n"), Some(12288));
         assert_eq!(parse_nvidia_smi_mib("  12288  \n6144\n"), Some(12288));
@@ -254,6 +261,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(windows)]
     fn memory_total_mib_is_rounded_to_nearest_gib() {
         assert_eq!(mib_to_gib(12288), 12);
         assert_eq!(mib_to_gib(12282), 12);
@@ -263,6 +271,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(windows)]
     fn total_physical_memory_bytes_are_rounded_to_the_registered_gigabytes() {
         assert_eq!(bytes_to_gib_rounded(32 * 1024 * 1024 * 1024), 32);
         // A 32 GB machine loses a little total memory to firmware; it must still pass a 32 GB

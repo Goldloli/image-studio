@@ -2,8 +2,10 @@
 use super::paths::AppPaths;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+#[cfg(windows)]
+use std::fs::OpenOptions;
 use std::{
-    fs::{self, File, OpenOptions},
+    fs::{self, File},
     io::{Read, Write},
     path::{Component, Path, PathBuf},
     process::{Command, Stdio},
@@ -75,14 +77,18 @@ const QWEN_IMAGE_21_TURBO_MODEL_MANIFEST: &str =
 #[cfg(not(windows))]
 const MOSS_IMAGE_SFT_MODEL_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/moss-image-sft/model-manifest.json");
+#[cfg(windows)]
 const WINDOWS_ZIMAGE_MODEL_MANIFEST: &str = include_str!(
     "../../../../resources/windows-foundation/z-image-diffusers/product-model-manifest.json"
 );
+#[cfg(windows)]
 const WINDOWS_ZIMAGE_RUNTIME_MANIFEST: &str = include_str!(
     "../../../../resources/windows-foundation/python-runtime/product-runtime-manifest.json"
 );
+#[cfg(windows)]
 const WINDOWS_ZIMAGE_LOCK: &str =
     include_str!("../../../../resources/windows-foundation/python-runtime/requirements.lock");
+#[cfg(windows)]
 const WINDOWS_ZIMAGE_WORKER_WHEEL: &[u8] = include_bytes!(
     "../../../../resources/windows-foundation/z-image-diffusers/studio_zimage_cuda_worker-0.1.0-py3-none-any.whl"
 );
@@ -387,6 +393,7 @@ const MOSS_IMAGE_SFT_PROFILE: InstallProfile = InstallProfile {
     shared_worker_wheels: &[],
 };
 
+#[cfg(windows)]
 const WINDOWS_ZIMAGE_PROFILE: InstallProfile = InstallProfile {
     install_id: WINDOWS_ZIMAGE_INSTALL_ID,
     model_manifest: WINDOWS_ZIMAGE_MODEL_MANIFEST,

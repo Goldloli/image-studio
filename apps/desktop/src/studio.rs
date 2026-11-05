@@ -3095,6 +3095,7 @@ mod tests {
 
     /// Save a draft that is structured for the given model/capability so a send can reach the
     /// hardware gate instead of failing draft validation.
+    #[cfg(windows)]
     fn save_gate_draft(
         service: &StudioService,
         model_id: &str,

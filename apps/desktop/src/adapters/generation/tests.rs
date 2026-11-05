@@ -162,7 +162,7 @@ fn existing_lease_blocks_launch_and_does_not_claim_resource_release() {
     assert!(f.controller.snapshot().busy);
     assert_eq!(f.record().state, AttemptState::Failed);
     drop(lock);
-    assert!(!f.controller.is_busy());
+    wait_for(|| !f.controller.is_busy());
 }
 
 #[test]

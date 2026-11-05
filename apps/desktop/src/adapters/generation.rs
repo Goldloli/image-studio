@@ -270,6 +270,9 @@ impl GenerationController {
                 .stderr(Stdio::piped());
             command.spawn().map(|child| (child, ())).map_err(error)
         })();
+        // The Windows job keeps the outer process group alive until stream cleanup finishes.
+        // Other targets deliberately have no owning guard to drop.
+        #[cfg_attr(not(windows), allow(unused_variables))]
         let (child, outer_job) = match spawn_result {
             Ok(spawned) => spawned,
             Err(detail) => {
@@ -278,6 +281,7 @@ impl GenerationController {
             }
         };
         let result = self.exchange(child, &job, &ready, &config, &control);
+        #[cfg(windows)]
         drop(outer_job);
         match result {
             Ok(terminal) => {
