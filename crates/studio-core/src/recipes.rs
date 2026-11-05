@@ -16,9 +16,10 @@ use crate::{
         REALESRGAN_WINDOWS_RECIPE, REALESRGAN_WINDOWS_RUNTIME, WINDOWS_CPU_DEVICE,
         WINDOWS_CUDA_DEVICE, WINDOWS_DIFFUSERS_ENGINE, WINDOWS_NCNN_ENGINE, WINDOWS_ONNX_ENGINE,
         WINDOWS_V2_RUNTIME, WINDOWS_VULKAN_DEVICE, Z_IMAGE_CAPABILITY, Z_IMAGE_MODEL,
-        Z_IMAGE_WINDOWS_CAPABILITY, Z_IMAGE_WINDOWS_MODEL, is_windows_runtime,
-        validate_windows_z_image_plan, validate_windows_z_image_request, validate_z_image_plan,
-        validate_z_image_request,
+        Z_IMAGE_WINDOWS_CAPABILITY, Z_IMAGE_WINDOWS_DEVICE, Z_IMAGE_WINDOWS_ENGINE,
+        Z_IMAGE_WINDOWS_MODEL, Z_IMAGE_WINDOWS_RECIPE, Z_IMAGE_WINDOWS_RUNTIME,
+        Z_IMAGE_WINDOWS_SCHEDULER, is_windows_runtime, validate_windows_z_image_plan,
+        validate_windows_z_image_request, validate_z_image_plan, validate_z_image_request,
     },
     require,
 };
@@ -50,6 +51,7 @@ pub const QWEN_IMAGE_21_TURBO_WINDOWS_COMPACT_RECIPE: &str =
     "qwen21-turbo-windows-txt2img-nf4-8-compact-v1";
 pub const MOSS_IMAGE_SFT_WINDOWS_COMPACT_RECIPE: &str =
     "moss-image-sft-windows-txt2img-nf4-50-compact-v1";
+pub const Z_IMAGE_WINDOWS_COMPACT_RECIPE: &str = "z-image-turbo-nf4-cuda-compact-v1";
 
 pub const SOURCE_ROLE: &str = "source";
 pub const PRIMARY_ROLE: &str = "primary";
@@ -86,6 +88,7 @@ pub enum Recipe {
     QwenImage21WindowsCompact,
     QwenImage21TurboWindowsCompact,
     MossImageSftWindowsCompact,
+    ZImageTurboCudaNf4Compact,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -191,6 +194,11 @@ impl Recipe {
             request.capability.capability_id.as_str(),
         ) {
             (Z_IMAGE_MODEL, Z_IMAGE_CAPABILITY) => Self::ZImageTurbo,
+            (Z_IMAGE_WINDOWS_MODEL, Z_IMAGE_WINDOWS_CAPABILITY)
+                if requests_compact_output(request) =>
+            {
+                Self::ZImageTurboCudaNf4Compact
+            }
             (Z_IMAGE_WINDOWS_MODEL, Z_IMAGE_WINDOWS_CAPABILITY) => Self::ZImageTurboCudaNf4,
             (KLEIN_MODEL, KLEIN_TEXT_CAPABILITY) => Self::KleinText,
             (KLEIN_MODEL, KLEIN_EDIT_CAPABILITY) => Self::KleinEdit,
@@ -269,6 +277,7 @@ impl Recipe {
             Self::QwenImage21WindowsCompact => QWEN_IMAGE_21_WINDOWS_COMPACT_RECIPE,
             Self::QwenImage21TurboWindowsCompact => QWEN_IMAGE_21_TURBO_WINDOWS_COMPACT_RECIPE,
             Self::MossImageSftWindowsCompact => MOSS_IMAGE_SFT_WINDOWS_COMPACT_RECIPE,
+            Self::ZImageTurboCudaNf4Compact => Z_IMAGE_WINDOWS_COMPACT_RECIPE,
         }
     }
 
@@ -289,6 +298,7 @@ impl Recipe {
                 | Self::QwenImage21WindowsCompact
                 | Self::QwenImage21TurboWindowsCompact
                 | Self::MossImageSftWindowsCompact
+                | Self::ZImageTurboCudaNf4Compact
         )
     }
 
@@ -324,7 +334,8 @@ impl Recipe {
                 | Self::KleinEditWindowsCompact
                 | Self::QwenImage21WindowsCompact
                 | Self::QwenImage21TurboWindowsCompact
-                | Self::MossImageSftWindowsCompact,
+                | Self::MossImageSftWindowsCompact
+                | Self::ZImageTurboCudaNf4Compact,
                 OutputRole::Primary,
             ) => matches!(kind, AssetKind::ImageRgb),
             (Self::BiRefNet | Self::BiRefNetWindows, OutputRole::Primary) => {
@@ -359,7 +370,8 @@ impl Recipe {
                 | Self::KleinEditWindowsCompact
                 | Self::QwenImage21WindowsCompact
                 | Self::QwenImage21TurboWindowsCompact
-                | Self::MossImageSftWindowsCompact,
+                | Self::MossImageSftWindowsCompact
+                | Self::ZImageTurboCudaNf4Compact,
                 OutputRole::Primary,
             )
             | (Self::BiRefNet | Self::BiRefNetWindows, OutputRole::Primary | OutputRole::Mask) => {
@@ -385,6 +397,13 @@ impl Recipe {
             )?;
             return validate_windows_z_image_request(request);
         }
+        if self == Self::ZImageTurboCudaNf4Compact {
+            require(
+                source.is_none(),
+                "Windows Z-Image compact does not accept a source image",
+            )?;
+            return validate_windows_z_image_compact_request(request);
+        }
         request.validate()?;
         let expected_capability = match self {
             Self::KleinText => KLEIN_TEXT_CAPABILITY,
@@ -406,7 +425,9 @@ impl Recipe {
             Self::QwenImage21WindowsCompact => QWEN_IMAGE_21_WINDOWS_CAPABILITY,
             Self::QwenImage21TurboWindowsCompact => QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
             Self::MossImageSftWindowsCompact => MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
-            Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
+            Self::ZImageTurbo | Self::ZImageTurboCudaNf4 | Self::ZImageTurboCudaNf4Compact => {
+                unreachable!()
+            }
         };
         require(
             request.capability.capability_id == expected_capability,
@@ -492,7 +513,9 @@ impl Recipe {
             | Self::MossImageSftWindowsCompact => {
                 validate_text_model_request(request, source, 768)?;
             }
-            Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
+            Self::ZImageTurbo | Self::ZImageTurboCudaNf4 | Self::ZImageTurboCudaNf4Compact => {
+                unreachable!()
+            }
         }
         Ok(())
     }
@@ -600,6 +623,9 @@ impl Recipe {
             | Self::QwenImage21TurboWindowsCompact
             | Self::MossImageSftWindowsCompact => {
                 windows_text_model_parameters(self, text_model_effective_seed(request, plan)?)
+            }
+            Self::ZImageTurboCudaNf4Compact => {
+                windows_z_image_compact_parameters(windows_z_image_effective_seed(request, plan)?)
             }
             Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
         };
@@ -1502,6 +1528,11 @@ fn windows_plan_identity(recipe: Recipe) -> (&'static str, &'static str, &'stati
             WINDOWS_NCNN_ENGINE,
             WINDOWS_VULKAN_DEVICE,
         ),
+        Recipe::ZImageTurboCudaNf4Compact => (
+            Z_IMAGE_WINDOWS_RUNTIME,
+            Z_IMAGE_WINDOWS_ENGINE,
+            Z_IMAGE_WINDOWS_DEVICE,
+        ),
         _ => unreachable!("only Windows recipes have a Windows plan identity"),
     }
 }
@@ -1721,6 +1752,104 @@ fn windows_text_model_parameters(recipe: Recipe, seed: u32) -> BTreeMap<String, 
         Recipe::MossImageSftWindowsCompact => windows_moss_compact_parameters(seed),
         _ => unreachable!("only Windows staged text models have a frozen parameter map"),
     }
+}
+
+/// Compact Z-Image keeps the historical v1 Windows runtime contract, only at 768².
+fn validate_windows_z_image_compact_request(request: &UserRequest) -> Result<(), ContractError> {
+    request.validate()?;
+    require(
+        request.model_variant_id.as_str() == Z_IMAGE_WINDOWS_MODEL,
+        "unsupported Windows model variant",
+    )?;
+    require(
+        request.capability.capability_id == Z_IMAGE_WINDOWS_CAPABILITY
+            && request.capability.input_roles.is_empty()
+            && request.inputs.is_empty(),
+        "unsupported Windows generation capability or inputs",
+    )?;
+    require(
+        !request.instruction.trim().is_empty() && request.instruction.len() <= MAX_PROMPT_BYTES,
+        "prompt must contain text and be at most 16 KiB UTF-8",
+    )?;
+    require(
+        (
+            request.requested_output.width,
+            request.requested_output.height,
+        ) == (768, 768)
+            && request.requested_output.count == 1,
+        "compact Windows Z-Image requires one 768x768 image",
+    )?;
+    require(
+        request.parameters.keys().all(|key| key == "seed"),
+        "unsupported Windows request parameter",
+    )?;
+    if let Some(seed) = request.parameters.get("seed") {
+        require(
+            seed.is_null() || seed.as_u64().is_some_and(|v| u32::try_from(v).is_ok()),
+            "seed must be empty or u32",
+        )?;
+    }
+    Ok(())
+}
+
+fn windows_z_image_effective_seed(
+    request: &UserRequest,
+    plan: &ExecutionPlan,
+) -> Result<u32, ContractError> {
+    let requested = request
+        .parameters
+        .get("seed")
+        .and_then(serde_json::Value::as_u64)
+        .and_then(|value| u32::try_from(value).ok());
+    let effective = plan
+        .effective_parameters
+        .get("seed")
+        .and_then(serde_json::Value::as_u64)
+        .and_then(|value| u32::try_from(value).ok())
+        .ok_or_else(|| {
+            ContractError::InvalidValue("Windows Z-Image effective seed must be u32".into())
+        })?;
+    if let Some(requested) = requested {
+        require(
+            effective == requested,
+            "effective seed must preserve the explicit Windows Z-Image seed",
+        )?;
+    }
+    Ok(effective)
+}
+
+/// Windows Z-Image Turbo keeps the historical v1 runtime, NF4 components and model CPU offload.
+fn windows_z_image_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        ("seed".into(), json!(seed)),
+        ("steps".into(), json!(9)),
+        ("quantization".into(), json!("nf4")),
+        ("guidance".into(), json!(0.0)),
+        ("scheduler".into(), json!(Z_IMAGE_WINDOWS_SCHEDULER)),
+        ("recipe".into(), json!(Z_IMAGE_WINDOWS_RECIPE)),
+        ("recipe_version".into(), json!(1)),
+        ("token_budget".into(), json!(512)),
+        ("truncation".into(), json!(false)),
+        ("thinking".into(), json!(true)),
+        (
+            "quantized_components".into(),
+            json!(["transformer", "text_encoder"]),
+        ),
+        ("compute_dtype".into(), json!("bfloat16")),
+        ("vae_precision".into(), json!("bfloat16")),
+        ("attention".into(), json!("_native_efficient")),
+        ("offload".into(), json!("model_cpu")),
+    ])
+}
+
+/// Compact Z-Image: the standard map plus 768²/fp16 compute and the fp16 VAE.
+fn windows_z_image_compact_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    let mut parameters = windows_z_image_parameters(seed);
+    parameters.insert("recipe".into(), json!(Z_IMAGE_WINDOWS_COMPACT_RECIPE));
+    parameters.insert("resolution".into(), json!(768));
+    parameters.insert("compute_dtype".into(), json!("float16"));
+    parameters.insert("vae_precision".into(), json!("float16"));
+    parameters
 }
 
 #[cfg(test)]
@@ -2563,6 +2692,13 @@ mod tests {
                 false,
                 Recipe::MossImageSftWindowsCompact,
             ),
+            (
+                Z_IMAGE_WINDOWS_MODEL,
+                Z_IMAGE_WINDOWS_CAPABILITY,
+                true,
+                false,
+                Recipe::ZImageTurboCudaNf4Compact,
+            ),
         ] {
             let mut compact = request(model, capability, instruction_required, source);
             compact.requested_output = ImageOutput {
@@ -2604,8 +2740,164 @@ mod tests {
             "moss-image-sft-windows-txt2img-nf4-50-compact-v1"
         );
         assert_eq!(
+            Recipe::ZImageTurboCudaNf4Compact.id(),
+            "z-image-turbo-nf4-cuda-compact-v1"
+        );
+        assert_eq!(
             Recipe::KleinTextWindowsCompact.max_output_bytes(OutputRole::Mask),
             None
+        );
+    }
+
+    #[test]
+    fn windows_z_image_compact_recipe_keeps_the_frozen_worker_map() {
+        let seed = 17;
+        let standard = request(
+            Z_IMAGE_WINDOWS_MODEL,
+            Z_IMAGE_WINDOWS_CAPABILITY,
+            true,
+            false,
+        );
+        let mut compact = standard.clone();
+        compact.requested_output = ImageOutput {
+            width: 768,
+            height: 768,
+            count: 1,
+        };
+        assert_eq!(
+            Recipe::from_request(&compact).unwrap(),
+            Recipe::ZImageTurboCudaNf4Compact
+        );
+        assert_eq!(
+            Recipe::from_request(&standard).unwrap(),
+            Recipe::ZImageTurboCudaNf4,
+            "1024 requests keep the standard Z-Image recipe"
+        );
+        assert_eq!(
+            Recipe::ZImageTurboCudaNf4Compact.id(),
+            "z-image-turbo-nf4-cuda-compact-v1"
+        );
+        assert!(Recipe::ZImageTurboCudaNf4Compact.is_windows());
+        assert_eq!(
+            Recipe::ZImageTurboCudaNf4Compact.outputs(),
+            &[OutputRole::Primary]
+        );
+        assert!(
+            Recipe::ZImageTurboCudaNf4Compact
+                .accepts_output(OutputRole::Primary, AssetKind::ImageRgb)
+        );
+        assert!(
+            !Recipe::ZImageTurboCudaNf4Compact
+                .accepts_output(OutputRole::Primary, AssetKind::ImageRgba)
+        );
+        assert_eq!(
+            Recipe::ZImageTurboCudaNf4Compact.max_output_bytes(OutputRole::Primary),
+            Some(MAX_TOOL_OUTPUT_BYTES)
+        );
+        assert_eq!(
+            Recipe::ZImageTurboCudaNf4Compact.max_output_bytes(OutputRole::Mask),
+            None
+        );
+        assert!(validate_recipe_request(&compact, None).is_ok());
+        assert!(validate_recipe_request(&standard, None).is_ok());
+        assert!(
+            Recipe::ZImageTurboCudaNf4Compact
+                .validate_request(&standard, None)
+                .is_err()
+        );
+        assert!(
+            Recipe::ZImageTurboCudaNf4
+                .validate_request(&compact, None)
+                .is_err()
+        );
+
+        let mut execution_plan = plan(&compact, windows_z_image_compact_parameters(seed));
+        execution_plan.runtime = RuntimeSnapshot {
+            package_id: crate::generation::Z_IMAGE_WINDOWS_RUNTIME.into(),
+            engine: crate::generation::Z_IMAGE_WINDOWS_ENGINE.into(),
+            source: SourceRevision {
+                source: "fixture".into(),
+                revision: "pinned".into(),
+            },
+        };
+        execution_plan.device = DeviceSnapshot {
+            device_id: crate::generation::Z_IMAGE_WINDOWS_DEVICE.into(),
+            precision: crate::generation::Z_IMAGE_WINDOWS_PRECISION.into(),
+        };
+        assert_eq!(
+            validate_recipe_plan(&compact, &execution_plan, None).unwrap(),
+            Recipe::ZImageTurboCudaNf4Compact
+        );
+        assert_eq!(
+            execution_plan.effective_parameters,
+            value_map(&[
+                ("seed", json!(seed)),
+                ("steps", json!(9)),
+                ("quantization", json!("nf4")),
+                ("guidance", json!(0.0)),
+                ("scheduler", json!("FlowMatchEulerDiscreteScheduler")),
+                ("recipe", json!("z-image-turbo-nf4-cuda-compact-v1")),
+                ("recipe_version", json!(1)),
+                ("token_budget", json!(512)),
+                ("truncation", json!(false)),
+                ("thinking", json!(true)),
+                (
+                    "quantized_components",
+                    json!(["transformer", "text_encoder"]),
+                ),
+                ("compute_dtype", json!("float16")),
+                ("vae_precision", json!("float16")),
+                ("attention", json!("_native_efficient")),
+                ("offload", json!("model_cpu")),
+                ("resolution", json!(768)),
+            ])
+        );
+
+        let mut wrong = execution_plan.clone();
+        wrong.effective_parameters = windows_z_image_parameters(seed);
+        assert!(
+            validate_recipe_plan(&compact, &wrong, None).is_err(),
+            "compact recipe accepted the standard parameter map"
+        );
+
+        let mut wrong = execution_plan.clone();
+        wrong.runtime.package_id = crate::generation::WINDOWS_V2_RUNTIME.into();
+        assert!(
+            validate_recipe_plan(&compact, &wrong, None).is_err(),
+            "compact recipe accepted the shared v2 runtime"
+        );
+
+        let mut wrong = compact.clone();
+        wrong.requested_output = standard.requested_output.clone();
+        assert_eq!(
+            Recipe::from_request(&wrong).unwrap(),
+            Recipe::ZImageTurboCudaNf4,
+            "1024 requests keep the standard Z-Image recipe"
+        );
+        assert!(
+            Recipe::ZImageTurboCudaNf4Compact
+                .validate_request(&wrong, None)
+                .is_err(),
+            "compact recipe accepted a 1024 output"
+        );
+
+        let mut wrong = execution_plan.clone();
+        wrong.effective_output = standard.requested_output.clone();
+        assert!(
+            validate_recipe_plan(&compact, &wrong, None).is_err(),
+            "compact plan accepted a 1024 output"
+        );
+
+        let mut standard_plan = plan(&standard, windows_z_image_parameters(seed));
+        standard_plan.runtime = execution_plan.runtime.clone();
+        standard_plan.device = execution_plan.device.clone();
+        assert!(validate_recipe_plan(&standard, &standard_plan, None).is_ok());
+        let mut wrong = plan(&standard, windows_z_image_compact_parameters(seed));
+        wrong.runtime = execution_plan.runtime.clone();
+        wrong.device = execution_plan.device.clone();
+        assert!(
+            validate_recipe_plan(&standard, &wrong, None).is_err(),
+            "standard recipe accepted compact parameters"
         );
     }
 

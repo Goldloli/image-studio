@@ -118,6 +118,7 @@ pub const QWEN_IMAGE_21_TURBO_WINDOWS_COMPACT_RECIPE_ID: &str =
     "qwen21-turbo-windows-txt2img-nf4-8-compact-v1";
 pub const MOSS_IMAGE_SFT_WINDOWS_COMPACT_RECIPE_ID: &str =
     "moss-image-sft-windows-txt2img-nf4-50-compact-v1";
+pub const Z_IMAGE_WINDOWS_COMPACT_RECIPE_ID: &str = "z-image-turbo-nf4-cuda-compact-v1";
 
 /// Windows runtimes may only be claimed by Windows recipes (design.md section 11).
 pub fn is_windows_runtime_id(value: &str) -> bool {
@@ -333,6 +334,20 @@ pub fn windows_moss_compact_parameters(seed: u32) -> BTreeMap<String, serde_json
         "load_strategy".into(),
         serde_json::json!("staged-nf4-sequential-v1"),
     );
+    parameters
+}
+
+/// Compact Z-Image Turbo: the standard map plus 768²/fp16 compute and the fp16 VAE that avoids
+/// the sm75 bfloat16 path. Every other value, including the v1 runtime identity, stays frozen.
+pub fn windows_z_image_compact_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    let mut parameters = windows_z_image_parameters(seed);
+    parameters.insert(
+        "recipe".into(),
+        serde_json::json!(Z_IMAGE_WINDOWS_COMPACT_RECIPE_ID),
+    );
+    parameters.insert("resolution".into(), serde_json::json!(768));
+    parameters.insert("compute_dtype".into(), serde_json::json!("float16"));
+    parameters.insert("vae_precision".into(), serde_json::json!("float16"));
     parameters
 }
 
@@ -700,6 +715,35 @@ impl ExecuteRequestV2 {
                 }
                 if self.parameters != windows_z_image_parameters(seed) {
                     return Err(Error::Invalid("invalid Windows Z-Image parameters"));
+                }
+            }
+            (Z_IMAGE_WINDOWS_MODEL_ID, Z_IMAGE_WINDOWS_CAPABILITY_ID)
+                if self.recipe_id == Z_IMAGE_WINDOWS_COMPACT_RECIPE_ID =>
+            {
+                let Some(seed) = self.seed else {
+                    return Err(Error::Invalid(
+                        "Windows Z-Image compact requires a resolved seed",
+                    ));
+                };
+                if self.instruction.trim().is_empty()
+                    || self.sampling_steps != Some(9)
+                    || !self.inputs.is_empty()
+                    || self.runtime_lock_id != Z_IMAGE_WINDOWS_RUNTIME_ID
+                    || self.model_snapshot_id != Z_IMAGE_WINDOWS_MODEL_ID
+                {
+                    return Err(Error::Invalid("invalid Windows Z-Image compact recipe"));
+                }
+                expect_outputs(&self.outputs, &output_roles, &["primary"], "image_rgb")?;
+                if self.outputs.iter().any(|output| {
+                    (output.width, output.height) != (768, 768)
+                        || output.max_bytes > MAX_OUTPUT_BYTES
+                }) {
+                    return Err(Error::Invalid(
+                        "Windows Z-Image compact output must be one bounded 768 square",
+                    ));
+                }
+                if self.parameters != windows_z_image_compact_parameters(seed) {
+                    return Err(Error::Invalid("invalid Windows Z-Image compact parameters"));
                 }
             }
             (KLEIN_WINDOWS_MODEL_ID, KLEIN_WINDOWS_TEXT_CAPABILITY_ID)
