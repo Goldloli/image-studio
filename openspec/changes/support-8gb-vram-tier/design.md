@@ -31,15 +31,15 @@
 
 | 模型 | 现有峰值 | 峰值来源 | compact 手段 | 目标峰值 | 风险 |
 |---|---|---|---|---|---|
-| Qwen-Image 2.1-Turbo | 6.00 GiB | 文本编码器整体上卡（6.38 GB NF4） | 文本编码器逐层上卡 + 768² 采样 + fp16 | ≤ 4.0 GiB | 低 |
-| Qwen-Image 2.1 | 6.00 GiB | 同上（40 步） | 同上 | ≤ 4.0 GiB | 低 |
-| MOSS-Image-SFT | 5.84 GiB | 文本编码器 + fp32 VAE 解码 | 文本编码器逐层上卡 + 768² + VAE 分块 | ≤ 4.5 GiB | 低–中 |
+| Qwen-Image 2.1-Turbo | 6.00 GiB | 文本编码器整体上卡（6.38 GB NF4） | 768² 采样 + fp16 + 分阶段释放 | **实测 5.961 GiB** | 已通过 |
+| Qwen-Image 2.1 | 6.00 GiB | 同上（40 步） | 同上 | 待实测 | 中 |
+| MOSS-Image-SFT | 5.84 GiB | 文本编码器 + fp32 VAE 解码 | 768² + fp16 + VAE 分块 | 待实测 | 中 |
 | FLUX.2 Klein 4B | 9.21 GiB | 组件级 offload 下的单组件驻留与量化瞬时 | prepared 预量化 + 顺序 offload + 768² | ≤ 6.0 GiB | 中 |
 | Z-Image Turbo | 8.87 GiB | v1 运行时 NF4 全驻留 | 768² + 文本编码器 staged（v1 worker 改造） | ≤ 6.0 GiB | 高 |
 
 实现要点：
 
-- **Qwen / MOSS**：现有 staged 执行器把 NF4 文本编码器一次搬上卡。compact 改为在文本阶段用 accelerate 的逐层 hook（等价 `enable_sequential_cpu_offload` 的搬运语义），只保留当前层与 KV 所需缓冲在卡上；DiT 阶段仍整块驻留，但 768² 把 token 数从 16384 降到 9216，注意力与激活随之下降。
+- **Qwen / MOSS**：compact 沿用"单大组件驻留"的分阶段执行，但画幅降到 768²、计算精度改为 fp16。**2026-11-05 实测否定了逐层 offload**：bnb 检查点的 `Params4bit.quant_state` 不随 `.to()` 搬移（`mat2 is on cpu`），`device_map="auto"` 需要 `llm_int8_enable_fp32_cpu_offload` 而模型构造期会对 meta 张量调用 `Tensor.item()`，`accelerate.cpu_offload` 随后报 `Cannot copy out of meta tensor`。整块搬移在 8 GB 卡上实测 CUDA reserved **5.961 GiB**，落在 6.0 GiB 预算内。
 - **Klein**：`enable_model_cpu_offload` 仍是组件级；compact 改用逐层 offload，并复用安装期 prepared 量化缓存消除"bf16 分片在卡上量化"的瞬时。Klein 只有 4 步，逐层搬运的速度代价可以接受。
 - **Z-Image**：使用独立 v1 运行时（`windows-python31210-torch2100-cu126-bnb0482-v1`）与 `studio_zimage_cuda_worker`。compact 需要该 worker 支持 768² 与文本编码器 staged；若 v1 运行时在 sm75 上不可行，则本 change 必须把 Z-Image 迁到 v2 运行时并登记新的运行时身份（范围扩大，需另行确认）。
 - 画幅降级只改变画布与 token 数，不改变步数、guidance、调度器与种子语义；输出尺寸随档位变化，`accepts_output` 与输出规格必须按档位校验。

@@ -2,12 +2,12 @@
 
 ### Requirement: 8 GB 显存设备使用紧凑档执行
 
-当设备显存满足紧凑档门槛（≥ 8 GB）但不满足标准档门槛时，Windows 生成 SHALL 使用该模型的 compact 配方：画幅 768²（单模型实测超预算时允许登记 512²）、`compute_dtype="float16"`，并在文本阶段使用逐层上卡、在采样阶段保持单组件驻留。compact 执行 SHALL 满足：CUDA reserved ≤ 6.0 GiB、加载 ≤ 600 s、单次生成 ≤ 900 s，且 MUST NOT 触发 WDDM 共享内存回退。若某模型在 512² 下仍无法满足预算，该模型在 8 GB 设备上 SHALL 标记为不可执行并如实说明，不得用降低步数或虚构通过。
+当设备显存满足紧凑档门槛（≥ 8 GB）但不满足标准档门槛时，Windows 生成 SHALL 使用该模型的 compact 配方：画幅 768²（单模型实测超预算时允许登记 512²）、`compute_dtype="float16"`，并保持与标准档相同的"同一时刻只有一个 NF4 大组件驻留"的分阶段策略（实测表明 bitsandbytes 检查点不支持逐层 offload）。compact 执行 SHALL 满足：CUDA reserved ≤ 6.0 GiB、加载 ≤ 600 s、单次生成 ≤ 900 s，且 MUST NOT 触发 WDDM 共享内存回退。若某模型在 512² 下仍无法满足预算，该模型在 8 GB 设备上 SHALL 标记为不可执行并如实说明，不得用降低步数或虚构通过。
 
 #### Scenario: 8 GB 设备生成 Qwen Turbo
 
 - **WHEN** 设备显存 8 GB，用户以紧凑档发送一次 Qwen-Image 2.1-Turbo 文生图
-- **THEN** 文本编码器逐层上卡、编码后释放，DiT 以 768² 采样，VAE 分块解码；资源报告显示 CUDA reserved ≤ 6.0 GiB 且无共享内存回退
+- **THEN** 文本编码器作为单个组件上卡、编码后释放，DiT 以 768² 采样，VAE 分块解码；资源报告显示 CUDA reserved ≤ 6.0 GiB 且无共享内存回退
 
 #### Scenario: 紧凑档超预算
 
@@ -23,7 +23,7 @@
 
 ### Requirement: 大模型分阶段量化装载与资源门槛
 
-对于在目标机上无法整载的模型，Windows 执行 SHALL 采用分阶段执行：文本编码 → 释放并清空缓存 → DiT 采样 → VAE 分块解码；同一时刻只允许一个大组件驻留 GPU，记录独占显存、进程提交与耗时；SHALL 禁止以 WDDM 共享内存回退或页面文件超卖作为通过。该分阶段语义 SHALL 同时适用于标准档（12 GB，1024²，`bfloat16`，CUDA reserved ≤ 10.5 GiB）与紧凑档（8 GB，768²，`float16`，CUDA reserved ≤ 6.0 GiB）：紧凑档在文本阶段 SHALL 进一步把文本编码器按层上卡，而不是整块驻留。
+对于在目标机上无法整载的模型，Windows 执行 SHALL 采用分阶段执行：文本编码 → 释放并清空缓存 → DiT 采样 → VAE 分块解码；同一时刻只允许一个大组件驻留 GPU，记录独占显存、进程提交与耗时；SHALL 禁止以 WDDM 共享内存回退或页面文件超卖作为通过。该分阶段语义 SHALL 同时适用于标准档（12 GB，1024²，`bfloat16`，CUDA reserved ≤ 10.5 GiB）与紧凑档（8 GB，768²，`float16`，CUDA reserved ≤ 6.0 GiB）：紧凑档 SHALL 保持同一"单大组件驻留"语义：文本编码器、DiT 与 VAE 依次独占显存并在阶段间释放；实测表明 bitsandbytes NF4 检查点无法逐层搬移（quant_state 与 meta 张量限制），因此逐层 offload 不作为 compact 实现。
 
 #### Scenario: Qwen Turbo 在 12 GB 上生成
 
