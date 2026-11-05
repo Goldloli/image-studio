@@ -191,7 +191,12 @@ class BudgetExceeded(RuntimeError):
     """Raised when the measured generation exceeds the frozen Windows budget."""
 
 
-def enforce_budget(sampler: ResourceSampler, cuda: CudaPeaks, elapsed_seconds: float) -> None:
+def enforce_budget(
+    sampler: ResourceSampler,
+    cuda: CudaPeaks,
+    elapsed_seconds: float,
+    cuda_limit_gib: float = CUDA_RESERVED_LIMIT_GIB,
+) -> None:
     """Fail closed when the measured generation exceeds the frozen budget."""
     resources = sampler.snapshot()
     gpu = cuda.snapshot()
@@ -208,10 +213,10 @@ def enforce_budget(sampler: ResourceSampler, cuda: CudaPeaks, elapsed_seconds: f
             f"{resources['system_available_ram_min_gib']} GiB < "
             f"{AVAILABLE_RAM_MINIMUM_GIB} GiB"
         )
-    if gpu["cuda_reserved_peak_gib"] > CUDA_RESERVED_LIMIT_GIB:
+    if gpu["cuda_reserved_peak_gib"] > cuda_limit_gib:
         problems.append(
             f"CUDA reserved {gpu['cuda_reserved_peak_gib']} GiB > "
-            f"{CUDA_RESERVED_LIMIT_GIB} GiB"
+            f"{cuda_limit_gib} GiB"
         )
     if elapsed_seconds > GENERATION_LIMIT_SECONDS:
         problems.append(

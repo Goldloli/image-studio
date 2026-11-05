@@ -19,6 +19,7 @@ import time
 from pathlib import Path
 
 from ..resources import (
+    CUDA_RESERVED_LIMIT_GIB,
     BudgetExceeded,
     CudaPeaks,
     ResourceSampler,
@@ -36,6 +37,8 @@ PROMPT_TEMPLATE_T2I = (
 )
 IMAGE_PAD_TOKEN = "<|image_pad|>"
 LOAD_LIMIT_SECONDS = 600.0
+# The compact tier must fit an 8 GB card that also runs the desktop compositor.
+COMPACT_CUDA_LIMIT_GIB = 6.0
 CLEANUP_RESERVED_LIMIT_GIB = 2.5
 CLEANUP_ALLOCATED_LIMIT_GIB = 0.25
 
@@ -69,42 +72,6 @@ def load_processor(model_dir: Path):
     return Qwen3VLProcessor.from_pretrained(str(model_dir), subfolder="processor")
 
 
-def _enable_sequential_text_encoder(encoder, device_index: int = 0):
-    """Keep one decoder layer resident on the GPU at a time.
-
-    The standard staged path moves the whole NF4 text encoder to the card, which peaks at
-    6.0 GiB on a 12 GB machine. The compact path instead moves each decoder layer onto the
-    card before its forward and back to the CPU afterwards, leaving the small embedding,
-    norm and visual towers resident.
-    """
-    import torch
-
-    device = torch.device("cuda", device_index)
-    language_model = getattr(encoder.model, "language_model", encoder.model)
-    hooks = []
-    for layer in language_model.layers:
-        layer.to("cpu")
-
-        def before(module):
-            module.to(device)
-
-        def after(module, _inputs, output):
-            module.to("cpu")
-            return output
-
-        hooks.append(layer.register_forward_pre_hook(lambda module, _args: before(module)))
-        hooks.append(layer.register_forward_hook(after))
-    for name in ("embed_tokens", "norm", "rotary_emb"):
-        module = getattr(language_model, name, None)
-        if module is not None:
-            module.to(device)
-    visual = getattr(encoder.model, "visual", None)
-    if visual is not None:
-        visual.to(device)
-    encoder._sequential_hooks = hooks
-    return encoder
-
-
 def load_text_encoder(prepared_dir: Path, compute_dtype=None, sequential: bool = False):
     import torch
     from transformers import Qwen3VLForConditionalGeneration
@@ -114,20 +81,25 @@ def load_text_encoder(prepared_dir: Path, compute_dtype=None, sequential: bool =
             "prepared NF4 text encoder cache is missing; run --prepare first"
         )
     dtype = compute_dtype or torch.bfloat16
-    encoder = Qwen3VLForConditionalGeneration.from_pretrained(
-        str(prepared_dir),
-        torch_dtype=dtype,
-        device_map="cpu",
-        low_cpu_mem_usage=True,
-    )
     if sequential:
-        encoder = _enable_sequential_text_encoder(encoder)
-        log("qwen text encoder loaded with sequential per-layer offload")
+        # Compact measurement path: keep the whole NF4 encoder on the card and rely on the
+        # 768-square sampling stage plus staged release to stay inside the 8 GB budget.
+        encoder = Qwen3VLForConditionalGeneration.from_pretrained(
+            str(prepared_dir),
+            torch_dtype=dtype,
+            device_map="cpu",
+            low_cpu_mem_usage=True,
+        )
+        encoder = encoder.to("cuda:0")
+        log("qwen text encoder moved to the card as one component (compact)")
     else:
+        encoder = Qwen3VLForConditionalGeneration.from_pretrained(
+            str(prepared_dir),
+            torch_dtype=dtype,
+        )
         encoder = encoder.to("cuda:0")
     encoder.eval()
     return encoder
-
 
 def encode_prompt(processor, text_encoder, prompt: str):
     """Mirror of QwenImage21Pipeline._get_qwen_prompt_embeds for text-to-image."""
@@ -266,7 +238,9 @@ def generate(request, progress, cancel):
     sequential = request["parameters"].get("load_strategy") == "staged-nf4-sequential-v1"
     try:
         require_available_ram("qwen text stage")
-        device_index, properties = select_device()
+        device_index, properties = select_device(
+            8 if sequential else 10, (7, 5) if sequential else (8, 6)
+        )
         torch.cuda.set_device(device_index)
         torch.cuda.empty_cache()
         log(
@@ -369,11 +343,18 @@ def generate(request, progress, cancel):
         _release()
         _cleanup_check("vae")
         progress("writing")
-        candidate = save_primary_image(Path(request["output_dir"]), image)
+        candidate = save_primary_image(
+            Path(request["output_dir"]), image, width=resolution, height=resolution
+        )
         elapsed_seconds = time.monotonic() - started
         resources = resource_report(sampler, cuda, elapsed_seconds)
         log("qwen resources=" + json.dumps(resources, ensure_ascii=False))
-        enforce_budget(sampler, cuda, elapsed_seconds)
+        enforce_budget(
+            sampler,
+            cuda,
+            elapsed_seconds,
+            COMPACT_CUDA_LIMIT_GIB if sequential else CUDA_RESERVED_LIMIT_GIB,
+        )
         return candidate
     finally:
         sampler.stop()

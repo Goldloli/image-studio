@@ -239,7 +239,9 @@ def probe(snapshot_id, model_path=None):
             raise RuntimeError(f"private package identity mismatch: {name}")
     from .backends.common import select_device
 
-    index, properties = select_device()
+    # The probe runs during installation, before a tier is chosen, so it certifies the
+    # lowest supported device (8 GiB, Turing) and reports which tier that device gets.
+    index, properties = select_device(8, (7, 5))
     torch.cuda.set_device(index)
     # Turing (7.5) has no native BF16 path, so the compact tier runs fp16; probe the dtype the
     # device will actually execute rather than assuming BF16.

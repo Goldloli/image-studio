@@ -35,8 +35,13 @@ def warm_imports() -> None:
     import transformers  # noqa: F401
 
 
-def select_device():
-    """Return (device_index, properties) for the certified NVIDIA sm86 card."""
+def select_device(minimum_memory_gib: int = 10, minimum_capability=(8, 6)):
+    """Return (device_index, properties) for a certified NVIDIA card.
+
+    The standard recipes are certified on the sm86 10 GiB-visible target card. The compact
+    tier runs on Turing-class 8 GB cards, so its callers pass ``minimum_capability=(7, 5)``
+    and ``minimum_memory_gib=8`` instead of relaxing the standard contract.
+    """
     import torch
 
     if not torch.cuda.is_available() or torch.version.cuda != "12.6":
@@ -45,11 +50,16 @@ def select_device():
         properties = torch.cuda.get_device_properties(index)
         if (
             "NVIDIA" in properties.name.upper()
-            and (properties.major, properties.minor) == (8, 6)
-            and properties.total_memory >= 10 * 1024**3
+            and (properties.major, properties.minor) >= minimum_capability
+            # Driver-reserved memory makes an 8 GB card report ~7.9996 GiB, so compare the
+            # rounded visible size instead of the raw byte count.
+            and round(properties.total_memory / 1024**3) >= minimum_memory_gib
         ):
             return index, properties
-    raise RuntimeError("required NVIDIA sm86 device was not found")
+    raise RuntimeError(
+        f"required NVIDIA compute capability {minimum_capability} with "
+        f">= {minimum_memory_gib} GiB was not found"
+    )
 
 
 def prepared_directory(model_path: str | os.PathLike) -> Path:

@@ -317,6 +317,9 @@ def run_protocol(args, snapshot_id: str, import_path: Path) -> int:
     prepare_attempt_output(output)
     capability = args.capability or model_spec(snapshot_id)["capabilities"][0]
     recipe_id, steps = recipe_for(snapshot_id, capability)
+    compact = bool(getattr(args, "compact", False))
+    if compact:
+        recipe_id = recipe_id[: -len("-v1")] + "-compact-v1"
     seed = args.seed
     inputs = []
     if args.source_image is not None:
@@ -331,9 +334,9 @@ def run_protocol(args, snapshot_id: str, import_path: Path) -> int:
         "instruction": args.prompt,
         "seed": seed,
         "sampling_steps": steps,
-        "parameters": expected_parameters(snapshot_id, capability, seed),
+        "parameters": expected_parameters(snapshot_id, capability, seed, recipe_id),
         "inputs": inputs,
-        "outputs": output_specs(snapshot_id),
+        "outputs": output_specs(snapshot_id, 768 if compact else 1024),
         "model_path": str(model),
         "output_dir": str(output),
     }
@@ -517,6 +520,11 @@ def run_protocol(args, snapshot_id: str, import_path: Path) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", choices=["run", "probe", "prepare"], default="run")
+    parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="use the 8 GB compact recipe (768 square, fp16)",
+    )
     parser.add_argument("--python", type=Path, required=True)
     parser.add_argument("--worker-site", type=Path, required=True)
     parser.add_argument("--snapshot", required=True)
