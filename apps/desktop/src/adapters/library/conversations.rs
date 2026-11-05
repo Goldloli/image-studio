@@ -855,10 +855,12 @@ impl Library {
         let source = self.source_facts_for_request(&request)?;
         studio_core::recipes::validate_recipe_plan(&request, &plan, source)?;
         let turn = self.turn(turn_id)?;
-        let (width, height) = match turn.aspect.as_str() {
-            "1:1" => (1024, 1024),
-            "4:3" => (1024, 768),
-            "3:4" => (768, 1024),
+        // A 1:1 turn may be frozen at the standard 1024 canvas or the compact 768 canvas; the
+        // device tier decides which one, and both are valid for the same aspect.
+        let expected_sizes: &[(u32, u32)] = match turn.aspect.as_str() {
+            "1:1" => &[(1024, 1024), (768, 768)],
+            "4:3" => &[(1024, 768)],
+            "3:4" => &[(768, 1024)],
             _ => return Err(LibraryError::Invalid("轮次画幅无效".into())),
         };
         let requested_seed = if turn.seed.is_empty() {
@@ -887,7 +889,10 @@ impl Library {
         #[cfg(windows)]
         let expected_model = turn.model_id.as_str();
         let tool_output_matches = is_instruction_less_tool(&turn.model_id, &turn.capability_id)
-            || request.requested_output.width == width && request.requested_output.height == height;
+            || expected_sizes.contains(&(
+                request.requested_output.width,
+                request.requested_output.height,
+            ));
         if request.model_variant_id.as_str() != expected_model
             || request.capability.capability_id != turn.capability_id
             || request.instruction != turn.prompt && request.capability.instruction_required
