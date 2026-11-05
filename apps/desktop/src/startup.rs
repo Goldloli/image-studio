@@ -1,10 +1,11 @@
-//! Startup failure reporting and per-data-root WebView2 profile isolation.
+//! Startup failure reporting and per-data-root system-WebView profile isolation.
 //!
-//! Tauri panics while creating the native window when the WebView2 runtime is
-//! missing, broken or cannot use its user data folder. A release build hides the
-//! console, so without this module the only observable result is exit code 101
-//! and no explanation. The hook below turns that class of failure into a log
-//! record, a native message box and the documented exit code.
+//! Tauri panics while creating the native window when the platform WebView
+//! runtime is missing, broken or cannot use its user data folder. A release
+//! build may hide the console, so without this module the only observable
+//! result is exit code 101 and no explanation. The hook below turns that class
+//! of failure into a log record, a native message box where supported, and the
+//! documented exit code.
 
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -87,8 +88,12 @@ fn startup_failure_detail(payload: &(dyn std::any::Any + Send)) -> Option<String
 fn failure_report(logs: &Path, detail: &str, now: SystemTime) -> String {
     let seconds = now.duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
     let log_path = logs.join(STARTUP_FAILURE_LOG);
+    #[cfg(windows)]
+    let advice = "确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。";
+    #[cfg(not(windows))]
+    let advice = "确认系统 WebView 可启动；确认数据根可写；仍失败时保留本文件供排查。";
     format!(
-        "Image Studio 启动失败\n时间（UTC）：{}\n原因：{}\n日志：{}\n建议：确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。\n",
+        "Image Studio 启动失败\n时间（UTC）：{}\n原因：{}\n日志：{}\n建议：{advice}\n",
         format_utc_timestamp(seconds),
         detail.trim(),
         log_path.display()

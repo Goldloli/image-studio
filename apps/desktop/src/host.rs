@@ -660,7 +660,14 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     if let Err(error) = crate::startup::configure_webview_profile(&paths.cache) {
         crate::startup::fail_startup(
             &paths.logs,
-            &format!("无法创建 WebView2 用户数据目录：{error}"),
+            &format!(
+                "无法创建{}：{error}",
+                if cfg!(windows) {
+                    " WebView2 用户数据目录"
+                } else {
+                    " WebView 缓存目录"
+                }
+            ),
         );
     }
     let worker = options.worker.clone().unwrap_or_else(|| {
