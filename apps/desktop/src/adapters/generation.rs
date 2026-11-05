@@ -378,7 +378,9 @@ impl GenerationController {
             | Recipe::QwenImage21WindowsCompact
             | Recipe::QwenImage21TurboWindowsCompact
             | Recipe::MossImageSftWindowsCompact => Timeouts {
-                handshake_ms: 30_000,
+                // The installed runtime's first torch import can exceed 30 s on a cold cache,
+                // which used to abort the handshake before the worker answered.
+                handshake_ms: 120_000,
                 loading_ms: 600_000,
                 generation_ms: 1_920_000,
                 cancel_grace_ms: 5_000,
@@ -390,7 +392,7 @@ impl GenerationController {
             | Recipe::KleinEditWindows
             | Recipe::KleinTextWindowsCompact
             | Recipe::KleinEditWindowsCompact => Timeouts {
-                handshake_ms: 30_000,
+                handshake_ms: 120_000,
                 loading_ms: 600_000,
                 generation_ms: 900_000,
                 cancel_grace_ms: 5_000,
