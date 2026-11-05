@@ -1,7 +1,7 @@
 # Cross-platform CI/release evidence
 
-Status: **local hardening passed; real GitHub Actions and draft Release pending**
-(2026-11-05).
+Status: **local and real GitHub Actions acceptance passed; draft Release awaits
+manual review** (2026-11-05).
 
 Change: `openspec/changes/introduce-ci-release-pipeline`. Workflows:
 `.github/workflows/{quality,build,release}.yml`; operator guide:
@@ -22,22 +22,23 @@ Change: `openspec/changes/introduce-ci-release-pipeline`. Workflows:
 | macOS release bundle | arm64, stable identifier, 15 zip entries | same evidence file |
 | macOS archive | 32,457,641 B, SHA-256 `9f275384…` | same evidence file |
 | Windows installer command | previously PASS; new SHA-256 download change awaits Windows runner | [local-validation.json](local-validation.json) |
+| Final main quality | PASS on Windows + macOS arm64 | [github-actions-acceptance-2026-11-05.json](github-actions-acceptance-2026-11-05.json) |
+| Manual dual-platform build | PASS; both artifacts downloaded and rechecked | same evidence file |
+| `v0.1.0` draft Release | PASS; 10 assets, checksums and docs present | same evidence file |
 
 The local Node runtime is `24.12.0`, while CI pins `24.19.0`; tests/build were
 run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
 24.19.0 check.
 
-## Pending real GitHub rows
+## Real GitHub rows
 
-1. Push implementation commits; quality runs on Windows and `macos-15` arm64.
-2. Manually run `build-artifacts`; download and independently verify both
-   artifacts and checksums.
-3. Confirm Windows installer identity/bytes and macOS arm64/package identity
-   from the downloaded files.
-4. Push tag `v0.1.0`; verify the draft Release contains both artifacts,
-   checksums, README, license/notice files and release notes.
-5. Record run URLs, artifact digests and draft Release URL here.
+1. Final `main` quality: PASS, Windows and macOS arm64.
+2. Manual `build-artifacts`: PASS, both artifacts independently downloaded and
+   checksum-verified.
+3. macOS downloaded package: stable identifier, arm64 core/sidecars and legal
+   resources verified.
+4. `v0.1.0` tag: version/main provenance check passed.
+5. Draft Release: PASS with 10 assets; manual publish remains a user decision.
 
-These rows are not passes until the GitHub runs and downloaded artifacts have
-been checked. Unsigned/notarization limitations are documented in
+Unsigned/notarization limitations are documented in
 [doc/14-ci-release.md](../../doc/14-ci-release.md).

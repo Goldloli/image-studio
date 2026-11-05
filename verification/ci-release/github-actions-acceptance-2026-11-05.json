@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "kind": "github-actions-and-draft-release-acceptance",
+  "date": "2026-11-05",
+  "status": "passed",
+  "tag": "v0.1.0",
+  "tag_commit": "91b4c03b248f0b29d8ba88bfd2357c93d0366437",
+  "quality": {
+    "final_main_run": 41979600295,
+    "final_main_url": "https://github.com/Goldloli/image-studio/actions/runs/41979600295",
+    "final_main_result": "success",
+    "windows_result": "success",
+    "macos_result": "success",
+    "macos_runner": "macos-15 arm64",
+    "earlier_failures_fixed": [
+      {
+        "run": 41974168445,
+        "failure": "Windows clippy could not resolve Tauri sidecar resources because apps/desktop/binaries was empty"
+      },
+      {
+        "run": 41974799752,
+        "failure": "Two studio tests used the GitHub Windows runner's 16 GB / no-NVIDIA facts instead of deterministic fixture facts"
+      }
+    ]
+  },
+  "manual_build": {
+    "run": 41976972819,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/41976972819",
+    "result": "success",
+    "download_recheck": "passed",
+    "macos": {
+      "file": "Image-Studio-0.1.0-macos-arm64.zip",
+      "bytes": 32443097,
+      "sha256": "3080d129038918f86bbd34122d113bcf7918ce394f2130dae463694439ad2c6a",
+      "identifier": "io.github.goldloli.image-studio",
+      "version": "0.1.0",
+      "arches": {
+        "image-studio-desktop": "arm64",
+        "diagnostic-worker": "arm64",
+        "inference-supervisor": "arm64",
+        "realesrgan-worker": "arm64"
+      },
+      "zip_entries": 15,
+      "embedded_legal_resources": 5
+    },
+    "windows": {
+      "file": "Image Studio_0.1.0_x64-setup.exe",
+      "bytes": 245072781,
+      "sha256": "699f68b04d21862b43d4f111636c347fb149b6a5e17a092f3a791aecf058b1cf",
+      "target": "x86_64-pc-windows-msvc",
+      "checksum_verified": true,
+      "internal_package_verified": true
+    }
+  },
+  "draft_release": {
+    "run": 41979625386,
+    "workflow_url": "https://github.com/Goldloli/image-studio/actions/runs/41979625386",
+    "result": "success",
+    "release_id": 434851753,
+    "release_url": "https://github.com/Goldloli/image-studio/releases/tag/untagged-5c3e5680ab398dd56eb4",
+    "is_draft": true,
+    "asset_count": 10,
+    "windows_asset": {
+      "name": "Image.Studio_0.1.0_x64-setup.exe",
+      "bytes": 245074796,
+      "sha256": "9e45886f4d96512a71ea6cea684873036a98fcc42337e880ca7f493a579c275b"
+    },
+    "macos_asset": {
+      "name": "Image-Studio-0.1.0-macos-arm64.zip",
+      "bytes": 32443097,
+      "sha256": "ebaf1dbdfe656f296ca7ae9cfe7dd6e3078b6e5843f616b0f94ec47347a17685"
+    },
+    "checksum_recheck": {
+      "macos": "passed",
+      "windows": "passed"
+    },
+    "included_documents": [
+      "README.md",
+      "LICENSE",
+      "NOTICE",
+      "THIRD_PARTY_NOTICES.md",
+      "RELEASE-NOTES.md"
+    ]
+  },
+  "security": {
+    "secret_scanning_alerts": 0,
+    "dependabot_alert_1": {
+      "state": "dismissed",
+      "reason": "not_used",
+      "package": "glib",
+      "note": "Linux-only Tauri/GTK dependency; product targets are macOS arm64 and Windows"
+    },
+    "remaining_advisory": "Pinned checkout/setup-node/upload/download actions still emit GitHub Node 20 deprecation warnings; Dependabot major-version PRs remain for follow-up."
+  },
+  "pending_user_action": [
+    "review and publish the draft release manually",
+    "optionally merge reviewed Dependabot dependency/action updates in a later change"
+  ]
+}

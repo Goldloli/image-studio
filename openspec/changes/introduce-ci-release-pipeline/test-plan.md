@@ -37,6 +37,8 @@
 
 R1–R3、R6 与 R8 已在本地修复：workflow 使用 `macos-15` arm64、macOS Clippy 全绿、默认并行测试连续 5 次通过、正式 bundle identity 已写入并验证、Actions 无 high/medium 安全发现。对应真实 GitHub runner 行仍待 C11–C19 验证。
 
+2026-11-05 真实运行已完成：最终 `main` quality（41979600295）、手动双平台 build（41976972819）和 `v0.1.0` draft Release（41979625386）全部成功；两平台下载产物 checksum、Windows metadata 与 macOS arm64/包身份已独立复核。详见 [GitHub Actions acceptance](../../../verification/ci-release/github-actions-acceptance-2026-11-05.json)。
+
 ## 修复后新增验收
 
 | ID | 场景 | 期望 | 证据 |

@@ -50,12 +50,12 @@
 - [x] 8.2 macOS build 验证四个 sidecar 的 Mach-O 架构、`Info.plist`、正式 bundle identifier `io.github.goldloli.image-studio`、zip 结构与 SHA-256。
 - [x] 8.3 Windows build 验证 installer target、字节数和 internal-package SHA-256；NSIS/Tauri utils 下载改用固定 SHA-256。
 - [x] 8.4 draft Release 附两平台产物、checksums、README、第三方许可摘要、未签名说明和简版 notes；不得自动 publish。
-- [ ] 8.5 运行首次 quality 与手动 build；下载两平台 artifact、复算 checksum、确认 macOS arm64，并把 run/artifact 记录落到 `verification/ci-release/`。
-- [ ] 8.6 推送与 `tauri.conf.json` 一致的 `v*` tag，确认 draft Release 内容；发布动作仍由用户人工完成。
+- [x] 8.5 运行首次 quality 与手动 build；下载两平台 artifact、复算 checksum、确认 macOS arm64，并把 run/artifact 记录落到 `verification/ci-release/`。
+- [x] 8.6 推送与 `tauri.conf.json` 一致的 `v*` tag，确认 draft Release 内容；发布动作仍由用户人工完成。
 
 ## 9. 收口与归档
 
 - [x] 9.1 全量本地质量门、actionlint、workflow 安全扫描、OpenSpec strict 全部通过。
-- [ ] 9.2 用 GitHub 真实 run URL、artifact checksum、draft Release URL 补齐验收证据。
+- [x] 9.2 用 GitHub 真实 run URL、artifact checksum、draft Release URL 补齐验收证据。
 - [ ] 9.3 归档本 change，同步 `ci-release` 与 `product-identity` 主规格。
 - [ ] 9.4 关闭 Beads 实现 issue，并报告所有 user-gated 或仍需人工配置的项。
