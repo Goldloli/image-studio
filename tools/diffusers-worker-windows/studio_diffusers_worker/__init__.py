@@ -117,13 +117,32 @@ def recipe_for(snapshot_id, capability):
     return recipe["recipe_id"], int(recipe["steps"])
 
 
-def expected_parameters(snapshot_id, capability, seed):
-    """Return the exact frozen effective-parameter map for a request."""
-    recipe_id, steps = recipe_for(snapshot_id, capability)
+COMPACT_SUFFIX = "-compact-v1"
+
+
+def is_compact_recipe(recipe_id) -> bool:
+    return isinstance(recipe_id, str) and recipe_id.endswith(COMPACT_SUFFIX)
+
+
+def compact_recipe_id(standard_recipe_id: str) -> str:
+    return standard_recipe_id[: -len("-v1")] + COMPACT_SUFFIX
+
+
+def expected_parameters(snapshot_id, capability, seed, recipe_id=None):
+    """Return the exact frozen effective-parameter map for a request.
+
+    ``recipe_id`` selects the compact (8 GB) map when it ends with ``-compact-v1``; the
+    standard map is returned otherwise, including when no recipe id is supplied.
+    """
+    standard_recipe_id, steps = recipe_for(snapshot_id, capability)
+    compact = is_compact_recipe(recipe_id)
+    if compact and recipe_id != compact_recipe_id(standard_recipe_id):
+        raise ValueError(f"unsupported compact recipe: {recipe_id!r}")
+    recipe = recipe_id if compact else standard_recipe_id
     kind = SNAPSHOTS[snapshot_id]["kind"]
     if kind == "klein":
-        return {
-            "recipe": recipe_id,
+        parameters = {
+            "recipe": recipe,
             "recipe_version": 1,
             "seed": seed,
             "steps": 4,
@@ -133,11 +152,18 @@ def expected_parameters(snapshot_id, capability, seed):
             "thinking": False,
             "truncation": False,
             "quantization": "nf4",
-            "load_strategy": "nf4-component-offload-v1",
+            "load_strategy": (
+                "nf4-sequential-offload-v1" if compact else "nf4-component-offload-v1"
+            ),
         }
+        if compact:
+            parameters["resolution"] = 768
+            parameters["compute_dtype"] = "float16"
+            parameters["vae_precision"] = "float16"
+        return parameters
     if kind == "qwen":
         parameters = {
-            "recipe": recipe_id,
+            "recipe": recipe,
             "recipe_version": 1,
             "seed": seed,
             "steps": steps,
@@ -145,14 +171,17 @@ def expected_parameters(snapshot_id, capability, seed):
             "sampling": "linear",
             "token_budget": 2048,
             "quantization": "nf4",
-            "load_strategy": "staged-nf4-v1",
+            "load_strategy": "staged-nf4-sequential-v1" if compact else "staged-nf4-v1",
         }
         if steps == 8:
             parameters["sampling_schedule"] = "qwen-turbo-model-index-v1"
+        if compact:
+            parameters["resolution"] = 768
+            parameters["compute_dtype"] = "float16"
         return parameters
     if kind == "moss":
-        return {
-            "recipe": recipe_id,
+        parameters = {
+            "recipe": recipe,
             "recipe_version": 1,
             "seed": seed,
             "steps": 50,
@@ -165,12 +194,16 @@ def expected_parameters(snapshot_id, capability, seed):
             "quantized_components": ["transformer", "text_encoder"],
             "text_encoder_precision": "nf4",
             "vae_precision": "float32",
-            "load_strategy": "staged-nf4-v1",
+            "load_strategy": "staged-nf4-sequential-v1" if compact else "staged-nf4-v1",
         }
+        if compact:
+            parameters["resolution"] = 768
+            parameters["compute_dtype"] = "float16"
+        return parameters
     raise ValueError(f"unsupported worker kind: {kind}")
 
 
-def output_specs(snapshot_id):
+def output_specs(snapshot_id, resolution=1024):
     """Return the frozen output specification list for one snapshot."""
     kind = SNAPSHOTS[snapshot_id]["kind"]
     if kind in ("klein", "qwen", "moss"):
@@ -178,13 +211,12 @@ def output_specs(snapshot_id):
             {
                 "role": "primary",
                 "data_type": "image_rgb",
-                "width": 1024,
-                "height": 1024,
+                "width": resolution,
+                "height": resolution,
                 "max_bytes": 32 * 1024 * 1024,
             }
         ]
     raise ValueError(f"unsupported worker kind: {kind}")
-
 
 __all__ = [
     "BUILD_ID",

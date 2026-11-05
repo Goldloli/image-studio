@@ -40,14 +40,25 @@ CLEANUP_RESERVED_LIMIT_GIB = 2.5
 CLEANUP_ALLOCATED_LIMIT_GIB = 0.25
 
 
-def quant_config():
+def compute_torch_dtype(name: str | None):
+    """Map the frozen `compute_dtype` parameter to a torch dtype.
+
+    The compact tier runs on 8 GB Turing cards, which have no native BF16 path, so the
+    protocol freezes `float16` there; the standard tier keeps `bfloat16`.
+    """
+    import torch
+
+    return torch.float16 if name == "float16" else torch.bfloat16
+
+
+def quant_config(compute_dtype=None):
     import torch
     from transformers import BitsAndBytesConfig
 
     return BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
+        bnb_4bit_compute_dtype=compute_dtype or torch.bfloat16,
         bnb_4bit_use_double_quant=True,
     )
 
@@ -58,7 +69,43 @@ def load_processor(model_dir: Path):
     return Qwen3VLProcessor.from_pretrained(str(model_dir), subfolder="processor")
 
 
-def load_text_encoder(prepared_dir: Path):
+def _enable_sequential_text_encoder(encoder, device_index: int = 0):
+    """Keep one decoder layer resident on the GPU at a time.
+
+    The standard staged path moves the whole NF4 text encoder to the card, which peaks at
+    6.0 GiB on a 12 GB machine. The compact path instead moves each decoder layer onto the
+    card before its forward and back to the CPU afterwards, leaving the small embedding,
+    norm and visual towers resident.
+    """
+    import torch
+
+    device = torch.device("cuda", device_index)
+    language_model = getattr(encoder.model, "language_model", encoder.model)
+    hooks = []
+    for layer in language_model.layers:
+        layer.to("cpu")
+
+        def before(module):
+            module.to(device)
+
+        def after(module, _inputs, output):
+            module.to("cpu")
+            return output
+
+        hooks.append(layer.register_forward_pre_hook(lambda module, _args: before(module)))
+        hooks.append(layer.register_forward_hook(after))
+    for name in ("embed_tokens", "norm", "rotary_emb"):
+        module = getattr(language_model, name, None)
+        if module is not None:
+            module.to(device)
+    visual = getattr(encoder.model, "visual", None)
+    if visual is not None:
+        visual.to(device)
+    encoder._sequential_hooks = hooks
+    return encoder
+
+
+def load_text_encoder(prepared_dir: Path, compute_dtype=None, sequential: bool = False):
     import torch
     from transformers import Qwen3VLForConditionalGeneration
 
@@ -66,13 +113,18 @@ def load_text_encoder(prepared_dir: Path):
         raise ValueError(
             "prepared NF4 text encoder cache is missing; run --prepare first"
         )
+    dtype = compute_dtype or torch.bfloat16
     encoder = Qwen3VLForConditionalGeneration.from_pretrained(
         str(prepared_dir),
-        torch_dtype=torch.bfloat16,
+        torch_dtype=dtype,
         device_map="cpu",
         low_cpu_mem_usage=True,
     )
-    encoder = encoder.to("cuda:0")
+    if sequential:
+        encoder = _enable_sequential_text_encoder(encoder)
+        log("qwen text encoder loaded with sequential per-layer offload")
+    else:
+        encoder = encoder.to("cuda:0")
     encoder.eval()
     return encoder
 
@@ -150,7 +202,7 @@ def encode_prompt(processor, text_encoder, prompt: str):
     return prompt_embeds.cpu(), encoder_attention_mask.cpu(), image_pad_mask.cpu()
 
 
-def load_transformer(prepared_dir: Path):
+def load_transformer(prepared_dir: Path, compute_dtype=None):
     import torch
     from diffusers import QwenImage21Transformer2DModel
 
@@ -160,7 +212,7 @@ def load_transformer(prepared_dir: Path):
         )
     transformer = QwenImage21Transformer2DModel.from_pretrained(
         str(prepared_dir),
-        torch_dtype=torch.bfloat16,
+        torch_dtype=compute_dtype or torch.bfloat16,
         device_map="cpu",
         low_cpu_mem_usage=True,
     )
@@ -209,6 +261,9 @@ def generate(request, progress, cancel):
     model_dir = Path(request["model_path"])
     steps = int(request["parameters"]["steps"])
     token_budget = int(request["parameters"]["token_budget"])
+    resolution = int(request["parameters"]["resolution"] if "resolution" in request["parameters"] else 1024)
+    compute_dtype = compute_torch_dtype(request["parameters"].get("compute_dtype"))
+    sequential = request["parameters"].get("load_strategy") == "staged-nf4-sequential-v1"
     try:
         require_available_ram("qwen text stage")
         device_index, properties = select_device()
@@ -225,7 +280,9 @@ def generate(request, progress, cancel):
         stage_started = time.perf_counter()
         processor = load_processor(model_dir)
         checkpoint(cancel)
-        text_encoder = load_text_encoder(prepared / "text_encoder")
+        text_encoder = load_text_encoder(
+            prepared / "text_encoder", compute_dtype, sequential
+        )
         text_load_seconds = time.perf_counter() - stage_started
         if text_load_seconds > LOAD_LIMIT_SECONDS:
             raise BudgetExceeded(
@@ -259,7 +316,7 @@ def generate(request, progress, cancel):
         cuda.reset_phase()
         stage_started = time.perf_counter()
         scheduler = _load_scheduler(model_dir)
-        transformer = load_transformer(prepared / "transformer")
+        transformer = load_transformer(prepared / "transformer", compute_dtype)
         transformer_load_seconds = time.perf_counter() - stage_started
         if transformer_load_seconds > LOAD_LIMIT_SECONDS:
             raise BudgetExceeded(
@@ -279,6 +336,8 @@ def generate(request, progress, cancel):
             progress,
             cancel,
             cuda,
+            resolution,
+            compute_dtype,
         )
         checkpoint(cancel)
         del transformer
@@ -305,7 +364,7 @@ def generate(request, progress, cancel):
                 f"qwen VAE load {vae_load_seconds:.1f} s > {LOAD_LIMIT_SECONDS:.0f} s"
             )
         cuda.record_phase()
-        image = _decode_vae(vae, latents, 1024, 1024)
+        image = _decode_vae(vae, latents, resolution, resolution)
         del vae
         _release()
         _cleanup_check("vae")
@@ -346,6 +405,8 @@ def _sample(
     progress,
     cancel,
     cuda: CudaPeaks,
+    resolution: int = 1024,
+    dtype=None,
 ):
     import json as json_module
 
@@ -357,8 +418,9 @@ def _sample(
         retrieve_timesteps,
     )
 
-    height = 1024
-    width = 1024
+    height = resolution
+    width = resolution
+    dtype = dtype or torch.bfloat16
     embeds = embeds.to("cuda:0")
     embeds_mask = embeds_mask.to("cuda:0") if embeds_mask is not None else None
     if embeds_mask is not None and embeds_mask.all():
@@ -373,7 +435,7 @@ def _sample(
         (1, 1, num_channels, height_latent, width_latent),
         generator=generator,
         device="cuda:0",
-        dtype=torch.bfloat16,
+        dtype=dtype,
     )
     latents = latents.view(1, num_channels, height_latent * width_latent).transpose(1, 2)
     model_index = json_module.loads(
