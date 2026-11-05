@@ -374,7 +374,10 @@ impl GenerationController {
             | Recipe::MossImageSft
             | Recipe::QwenImage21Windows
             | Recipe::QwenImage21TurboWindows
-            | Recipe::MossImageSftWindows => Timeouts {
+            | Recipe::MossImageSftWindows
+            | Recipe::QwenImage21WindowsCompact
+            | Recipe::QwenImage21TurboWindowsCompact
+            | Recipe::MossImageSftWindowsCompact => Timeouts {
                 handshake_ms: 30_000,
                 loading_ms: 600_000,
                 generation_ms: 1_920_000,
@@ -383,7 +386,10 @@ impl GenerationController {
             },
             // Klein's four-step Windows recipe runs in a fresh worker process with
             // NF4 + CPU offload; keep the product 900 s generation budget explicit.
-            Recipe::KleinTextWindows | Recipe::KleinEditWindows => Timeouts {
+            Recipe::KleinTextWindows
+            | Recipe::KleinEditWindows
+            | Recipe::KleinTextWindowsCompact
+            | Recipe::KleinEditWindowsCompact => Timeouts {
                 handshake_ms: 30_000,
                 loading_ms: 600_000,
                 generation_ms: 900_000,
@@ -423,7 +429,10 @@ impl GenerationController {
                 Recipe::KleinText | Recipe::KleinEdit => {
                     vec![KLEIN_TEXT_CAPABILITY.into(), KLEIN_EDIT_CAPABILITY.into()]
                 }
-                Recipe::KleinTextWindows | Recipe::KleinEditWindows => vec![
+                Recipe::KleinTextWindows
+                | Recipe::KleinEditWindows
+                | Recipe::KleinTextWindowsCompact
+                | Recipe::KleinEditWindowsCompact => vec![
                     KLEIN_WINDOWS_TEXT_CAPABILITY.into(),
                     KLEIN_WINDOWS_EDIT_CAPABILITY.into(),
                 ],
@@ -432,13 +441,17 @@ impl GenerationController {
                 Recipe::RealEsrgan => vec![REALESRGAN_CAPABILITY.into()],
                 Recipe::RealEsrganWindows => vec![REALESRGAN_WINDOWS_CAPABILITY.into()],
                 Recipe::QwenImage21 => vec![QWEN_IMAGE_21_CAPABILITY.into()],
-                Recipe::QwenImage21Windows => vec![QWEN_IMAGE_21_WINDOWS_CAPABILITY.into()],
+                Recipe::QwenImage21Windows | Recipe::QwenImage21WindowsCompact => {
+                    vec![QWEN_IMAGE_21_WINDOWS_CAPABILITY.into()]
+                }
                 Recipe::QwenImage21Turbo => vec![QWEN_IMAGE_21_TURBO_CAPABILITY.into()],
-                Recipe::QwenImage21TurboWindows => {
+                Recipe::QwenImage21TurboWindows | Recipe::QwenImage21TurboWindowsCompact => {
                     vec![QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY.into()]
                 }
                 Recipe::MossImageSft => vec![MOSS_IMAGE_SFT_CAPABILITY.into()],
-                Recipe::MossImageSftWindows => vec![MOSS_IMAGE_SFT_WINDOWS_CAPABILITY.into()],
+                Recipe::MossImageSftWindows | Recipe::MossImageSftWindowsCompact => {
+                    vec![MOSS_IMAGE_SFT_WINDOWS_CAPABILITY.into()]
+                }
                 _ => vec![job.request.capability.capability_id.clone()],
             },
             timeouts,
@@ -552,7 +565,13 @@ impl GenerationController {
                     vec![job.request.capability.capability_id.clone()],
                 )
                 .map_err(error)
-            } else if recipe == Recipe::KleinTextWindows || recipe == Recipe::KleinEditWindows {
+            } else if matches!(
+                recipe,
+                Recipe::KleinTextWindows
+                    | Recipe::KleinEditWindows
+                    | Recipe::KleinTextWindowsCompact
+                    | Recipe::KleinEditWindowsCompact
+            ) {
                 HostSession::new_v2(
                     session_id,
                     config.expected_worker.clone(),
@@ -576,21 +595,30 @@ impl GenerationController {
                     vec![REALESRGAN_WINDOWS_CAPABILITY.into()],
                 )
                 .map_err(error)
-            } else if recipe == Recipe::QwenImage21Windows {
+            } else if matches!(
+                recipe,
+                Recipe::QwenImage21Windows | Recipe::QwenImage21WindowsCompact
+            ) {
                 HostSession::new_v2(
                     session_id,
                     config.expected_worker.clone(),
                     vec![QWEN_IMAGE_21_WINDOWS_CAPABILITY.into()],
                 )
                 .map_err(error)
-            } else if recipe == Recipe::QwenImage21TurboWindows {
+            } else if matches!(
+                recipe,
+                Recipe::QwenImage21TurboWindows | Recipe::QwenImage21TurboWindowsCompact
+            ) {
                 HostSession::new_v2(
                     session_id,
                     config.expected_worker.clone(),
                     vec![QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY.into()],
                 )
                 .map_err(error)
-            } else if recipe == Recipe::MossImageSftWindows {
+            } else if matches!(
+                recipe,
+                Recipe::MossImageSftWindows | Recipe::MossImageSftWindowsCompact
+            ) {
                 HostSession::new_v2(
                     session_id,
                     config.expected_worker.clone(),
@@ -923,7 +951,12 @@ impl GenerationController {
 fn staged_windows_recipe(recipe: Recipe) -> bool {
     matches!(
         recipe,
-        Recipe::QwenImage21Windows | Recipe::QwenImage21TurboWindows | Recipe::MossImageSftWindows
+        Recipe::QwenImage21Windows
+            | Recipe::QwenImage21TurboWindows
+            | Recipe::MossImageSftWindows
+            | Recipe::QwenImage21WindowsCompact
+            | Recipe::QwenImage21TurboWindowsCompact
+            | Recipe::MossImageSftWindowsCompact
     )
 }
 /// The Windows diffusers worker derives the prepared cache by appending
@@ -937,9 +970,14 @@ fn expected_worker_build(recipe: Recipe) -> Option<&'static str> {
     match recipe {
         Recipe::KleinTextWindows
         | Recipe::KleinEditWindows
+        | Recipe::KleinTextWindowsCompact
+        | Recipe::KleinEditWindowsCompact
         | Recipe::QwenImage21Windows
         | Recipe::QwenImage21TurboWindows
-        | Recipe::MossImageSftWindows => Some(WINDOWS_DIFFUSERS_WORKER),
+        | Recipe::MossImageSftWindows
+        | Recipe::QwenImage21WindowsCompact
+        | Recipe::QwenImage21TurboWindowsCompact
+        | Recipe::MossImageSftWindowsCompact => Some(WINDOWS_DIFFUSERS_WORKER),
         Recipe::BiRefNetWindows => Some(WINDOWS_ONNX_WORKER),
         Recipe::RealEsrganWindows => Some(WINDOWS_REALESRGAN_WORKER),
         _ => None,

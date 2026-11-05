@@ -108,6 +108,17 @@ pub const MOSS_IMAGE_SFT_WINDOWS_RECIPE_ID: &str = "moss-image-sft-windows-txt2i
 pub const MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID: &str =
     "moss-image-sft-windows-staged-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9";
 
+// Compact (8 GB VRAM) tier identities. They share every standard identity except the recipe id
+// and the frozen compact parameter map; the standard maps above stay byte-identical.
+pub const KLEIN_WINDOWS_TEXT_COMPACT_RECIPE_ID: &str = "klein4b-text-windows-compact-v1";
+pub const KLEIN_WINDOWS_EDIT_COMPACT_RECIPE_ID: &str = "klein4b-edit-windows-compact-v1";
+pub const QWEN_IMAGE_21_WINDOWS_COMPACT_RECIPE_ID: &str =
+    "qwen21-windows-txt2img-nf4-40-compact-v1";
+pub const QWEN_IMAGE_21_TURBO_WINDOWS_COMPACT_RECIPE_ID: &str =
+    "qwen21-turbo-windows-txt2img-nf4-8-compact-v1";
+pub const MOSS_IMAGE_SFT_WINDOWS_COMPACT_RECIPE_ID: &str =
+    "moss-image-sft-windows-txt2img-nf4-50-compact-v1";
+
 /// Windows runtimes may only be claimed by Windows recipes (design.md section 11).
 pub fn is_windows_runtime_id(value: &str) -> bool {
     matches!(
@@ -250,6 +261,79 @@ pub fn windows_moss_parameters(seed: u32) -> BTreeMap<String, serde_json::Value>
         ("vae_precision".into(), serde_json::json!("float32")),
         ("load_strategy".into(), serde_json::json!("staged-nf4-v1")),
     ])
+}
+
+/// Compact Klein text-to-image: the standard map plus 768²/fp16 and sequential offload.
+pub fn windows_klein_compact_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    windows_klein_compact_parameter_map(KLEIN_WINDOWS_TEXT_COMPACT_RECIPE_ID, seed)
+}
+
+/// Compact Klein edit: the standard edit map with its own compact recipe identity.
+pub fn windows_klein_edit_compact_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    windows_klein_compact_parameter_map(KLEIN_WINDOWS_EDIT_COMPACT_RECIPE_ID, seed)
+}
+
+fn windows_klein_compact_parameter_map(
+    recipe_id: &str,
+    seed: u32,
+) -> BTreeMap<String, serde_json::Value> {
+    let mut parameters = windows_klein_parameter_map(recipe_id, seed);
+    parameters.insert(
+        "load_strategy".into(),
+        serde_json::json!("nf4-sequential-offload-v1"),
+    );
+    parameters.insert("resolution".into(), serde_json::json!(768));
+    parameters.insert("compute_dtype".into(), serde_json::json!("float16"));
+    parameters.insert("vae_precision".into(), serde_json::json!("float16"));
+    parameters
+}
+
+/// Compact Qwen-Image 2.1: the standard map plus 768²/fp16 and sequential staging.
+pub fn windows_qwen21_compact_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    let mut parameters = windows_qwen21_parameters(seed);
+    parameters.insert(
+        "recipe".into(),
+        serde_json::json!(QWEN_IMAGE_21_WINDOWS_COMPACT_RECIPE_ID),
+    );
+    parameters.insert("resolution".into(), serde_json::json!(768));
+    parameters.insert("compute_dtype".into(), serde_json::json!("float16"));
+    parameters.insert(
+        "load_strategy".into(),
+        serde_json::json!("staged-nf4-sequential-v1"),
+    );
+    parameters
+}
+
+/// Compact Qwen-Image 2.1 Turbo keeps the standard Turbo sampling schedule.
+pub fn windows_qwen21_turbo_compact_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    let mut parameters = windows_qwen21_turbo_parameters(seed);
+    parameters.insert(
+        "recipe".into(),
+        serde_json::json!(QWEN_IMAGE_21_TURBO_WINDOWS_COMPACT_RECIPE_ID),
+    );
+    parameters.insert("resolution".into(), serde_json::json!(768));
+    parameters.insert("compute_dtype".into(), serde_json::json!("float16"));
+    parameters.insert(
+        "load_strategy".into(),
+        serde_json::json!("staged-nf4-sequential-v1"),
+    );
+    parameters
+}
+
+/// Compact MOSS-Image-SFT keeps the standard sampler values, including fp32 VAE precision.
+pub fn windows_moss_compact_parameters(seed: u32) -> BTreeMap<String, serde_json::Value> {
+    let mut parameters = windows_moss_parameters(seed);
+    parameters.insert(
+        "recipe".into(),
+        serde_json::json!(MOSS_IMAGE_SFT_WINDOWS_COMPACT_RECIPE_ID),
+    );
+    parameters.insert("resolution".into(), serde_json::json!(768));
+    parameters.insert("compute_dtype".into(), serde_json::json!("float16"));
+    parameters.insert(
+        "load_strategy".into(),
+        serde_json::json!("staged-nf4-sequential-v1"),
+    );
+    parameters
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -621,12 +705,22 @@ impl ExecuteRequestV2 {
             (KLEIN_WINDOWS_MODEL_ID, KLEIN_WINDOWS_TEXT_CAPABILITY_ID)
                 if self.recipe_id == KLEIN_WINDOWS_TEXT_RECIPE_ID =>
             {
-                validate_windows_klein(self, &output_roles, false)?;
+                validate_windows_klein(self, &output_roles, false, None)?;
+            }
+            (KLEIN_WINDOWS_MODEL_ID, KLEIN_WINDOWS_TEXT_CAPABILITY_ID)
+                if self.recipe_id == KLEIN_WINDOWS_TEXT_COMPACT_RECIPE_ID =>
+            {
+                validate_windows_klein(self, &output_roles, false, Some(768))?;
             }
             (KLEIN_WINDOWS_MODEL_ID, KLEIN_WINDOWS_EDIT_CAPABILITY_ID)
                 if self.recipe_id == KLEIN_WINDOWS_EDIT_RECIPE_ID =>
             {
-                validate_windows_klein(self, &output_roles, true)?;
+                validate_windows_klein(self, &output_roles, true, None)?;
+            }
+            (KLEIN_WINDOWS_MODEL_ID, KLEIN_WINDOWS_EDIT_CAPABILITY_ID)
+                if self.recipe_id == KLEIN_WINDOWS_EDIT_COMPACT_RECIPE_ID =>
+            {
+                validate_windows_klein(self, &output_roles, true, Some(768))?;
             }
             (BIREFNET_WINDOWS_MODEL_ID, BIREFNET_WINDOWS_CAPABILITY_ID)
                 if self.recipe_id == BIREFNET_WINDOWS_RECIPE_ID =>
@@ -646,7 +740,20 @@ impl ExecuteRequestV2 {
                     &output_roles,
                     QWEN_IMAGE_21_WINDOWS_SNAPSHOT_ID,
                     40,
+                    1024,
                     windows_qwen21_parameters(self.seed.unwrap_or_default()),
+                )?;
+            }
+            (QWEN_IMAGE_21_WINDOWS_MODEL_ID, QWEN_IMAGE_21_WINDOWS_CAPABILITY_ID)
+                if self.recipe_id == QWEN_IMAGE_21_WINDOWS_COMPACT_RECIPE_ID =>
+            {
+                validate_windows_staged_text_model(
+                    self,
+                    &output_roles,
+                    QWEN_IMAGE_21_WINDOWS_SNAPSHOT_ID,
+                    40,
+                    768,
+                    windows_qwen21_compact_parameters(self.seed.unwrap_or_default()),
                 )?;
             }
             (QWEN_IMAGE_21_TURBO_WINDOWS_MODEL_ID, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY_ID)
@@ -657,7 +764,20 @@ impl ExecuteRequestV2 {
                     &output_roles,
                     QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT_ID,
                     8,
+                    1024,
                     windows_qwen21_turbo_parameters(self.seed.unwrap_or_default()),
+                )?;
+            }
+            (QWEN_IMAGE_21_TURBO_WINDOWS_MODEL_ID, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY_ID)
+                if self.recipe_id == QWEN_IMAGE_21_TURBO_WINDOWS_COMPACT_RECIPE_ID =>
+            {
+                validate_windows_staged_text_model(
+                    self,
+                    &output_roles,
+                    QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT_ID,
+                    8,
+                    768,
+                    windows_qwen21_turbo_compact_parameters(self.seed.unwrap_or_default()),
                 )?;
             }
             (MOSS_IMAGE_SFT_WINDOWS_MODEL_ID, MOSS_IMAGE_SFT_WINDOWS_CAPABILITY_ID)
@@ -668,7 +788,20 @@ impl ExecuteRequestV2 {
                     &output_roles,
                     MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID,
                     50,
+                    1024,
                     windows_moss_parameters(self.seed.unwrap_or_default()),
+                )?;
+            }
+            (MOSS_IMAGE_SFT_WINDOWS_MODEL_ID, MOSS_IMAGE_SFT_WINDOWS_CAPABILITY_ID)
+                if self.recipe_id == MOSS_IMAGE_SFT_WINDOWS_COMPACT_RECIPE_ID =>
+            {
+                validate_windows_staged_text_model(
+                    self,
+                    &output_roles,
+                    MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID,
+                    50,
+                    768,
+                    windows_moss_compact_parameters(self.seed.unwrap_or_default()),
                 )?;
             }
             _ => return Err(Error::Invalid("unsupported v2 model recipe")),
@@ -1463,10 +1596,12 @@ fn is_macos_model_id(value: &str) -> bool {
 }
 
 /// Klein keeps a fresh-process NF4 + component-offload recipe on the shared v2 runtime.
+/// `resolution: None` is the standard 1024² map; `Some(768)` is the compact tier.
 fn validate_windows_klein(
     request: &ExecuteRequestV2,
     output_roles: &BTreeSet<&str>,
     edit: bool,
+    resolution: Option<u32>,
 ) -> Result<(), Error> {
     let Some(seed) = request.seed else {
         return Err(Error::Invalid("Windows Klein requires a resolved seed"));
@@ -1479,10 +1614,12 @@ fn validate_windows_klein(
     {
         return Err(Error::Invalid("invalid Windows Klein recipe"));
     }
-    let expected = if edit {
-        windows_klein_edit_parameters(seed)
-    } else {
-        windows_klein_parameters(seed)
+    let expected = match (edit, resolution) {
+        (false, None) => windows_klein_parameters(seed),
+        (true, None) => windows_klein_edit_parameters(seed),
+        (false, Some(768)) => windows_klein_compact_parameters(seed),
+        (true, Some(768)) => windows_klein_edit_compact_parameters(seed),
+        (_, Some(_)) => return Err(Error::Invalid("unsupported Windows Klein resolution")),
     };
     if request.parameters != expected {
         return Err(Error::Invalid("invalid Windows Klein parameters"));
@@ -1493,12 +1630,16 @@ fn validate_windows_klein(
         &["primary"],
         "image_rgb",
     )?;
+    let resolution = resolution.unwrap_or(1024);
     if request.outputs.iter().any(|output| {
-        (output.width, output.height) != (1024, 1024) || output.max_bytes > MAX_OUTPUT_BYTES
+        (output.width, output.height) != (resolution, resolution)
+            || output.max_bytes > MAX_OUTPUT_BYTES
     }) {
-        return Err(Error::Invalid(
-            "Windows Klein output must be one bounded 1024 square",
-        ));
+        return Err(Error::Invalid(if resolution == 1024 {
+            "Windows Klein output must be one bounded 1024 square"
+        } else {
+            "Windows Klein output must be one bounded 768 square"
+        }));
     }
     Ok(())
 }
@@ -1577,11 +1718,13 @@ fn validate_windows_realesrgan(
 }
 
 /// Qwen base/Turbo and MOSS share the staged NF4 contract on the shared v2 runtime.
+/// `resolution` is 1024 for the standard tier and 768 for the compact tier.
 fn validate_windows_staged_text_model(
     request: &ExecuteRequestV2,
     output_roles: &BTreeSet<&str>,
     snapshot_id: &str,
     steps: u32,
+    resolution: u32,
     expected_parameters: BTreeMap<String, serde_json::Value>,
 ) -> Result<(), Error> {
     if request.instruction.trim().is_empty()
@@ -1605,11 +1748,14 @@ fn validate_windows_staged_text_model(
         "image_rgb",
     )?;
     if request.outputs.iter().any(|output| {
-        (output.width, output.height) != (1024, 1024) || output.max_bytes > MAX_OUTPUT_BYTES
+        (output.width, output.height) != (resolution, resolution)
+            || output.max_bytes > MAX_OUTPUT_BYTES
     }) {
-        return Err(Error::Invalid(
-            "Windows staged text output must be one bounded 1024 square",
-        ));
+        return Err(Error::Invalid(if resolution == 1024 {
+            "Windows staged text output must be one bounded 1024 square"
+        } else {
+            "Windows staged text output must be one bounded 768 square"
+        }));
     }
     Ok(())
 }
