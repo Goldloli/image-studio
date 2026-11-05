@@ -23,6 +23,20 @@ const MIB_PER_GIB: u64 = 1024;
 pub struct DeviceFacts {
     pub vram_gb: Option<u32>,
     pub ram_gb: u32,
+    /// NVIDIA compute capability as `(major, minor)`, e.g. `(7, 5)` for Turing. `None` when the
+    /// driver does not report it or no NVIDIA GPU is present; an unknown capability is not treated
+    /// as a hard failure because older drivers omit the field while still reporting the VRAM.
+    pub compute_capability: Option<(u32, u32)>,
+}
+
+impl DeviceFacts {
+    /// Whether this device can execute the compact tier on a Turing-or-newer GPU. Unknown compute
+    /// capability passes (`None`) so a missing driver field does not silently disable the tier; the
+    /// worker probe still has to prove fp16 execution before a generation runs.
+    pub fn meets_compact_compute_capability(&self) -> bool {
+        self.compute_capability
+            .is_none_or(|(major, minor)| (major, minor) >= (7, 5))
+    }
 }
 
 /// The outcome of comparing [`DeviceFacts`] with a registered model's minimum requirements.
@@ -35,14 +49,14 @@ pub struct HardwareGate {
 }
 
 impl HardwareGate {
-    fn eligible() -> Self {
+    pub fn eligible() -> Self {
         Self {
             eligible: true,
             reason: None,
         }
     }
 
-    fn blocked(reason: String) -> Self {
+    pub fn blocked(reason: String) -> Self {
         Self {
             eligible: false,
             reason: Some(reason),
@@ -61,9 +75,14 @@ impl DeviceFacts {
 
     /// Probes the local device without caching. Best effort, bounded, never panics.
     pub fn detect() -> Self {
+        #[cfg(windows)]
+        let (vram_gb, compute_capability) = detect_gpu_facts();
+        #[cfg(not(windows))]
+        let (vram_gb, compute_capability) = (None, None);
         Self {
-            vram_gb: detect_vram_gb(),
+            vram_gb,
             ram_gb: detect_ram_gb(),
+            compute_capability,
         }
     }
 
@@ -130,20 +149,40 @@ fn mib_to_gib(mib: u64) -> u32 {
     ((mib + MIB_PER_GIB / 2) / MIB_PER_GIB) as u32
 }
 
-/// Parses the first non-empty line of `nvidia-smi --query-gpu=memory.total
-/// --format=csv,noheader,nounits`. The default unit is MiB, so the returned number is MiB.
+/// Parses the first non-empty line of `nvidia-smi --query-gpu=memory.total,compute_cap
+/// --format=csv,noheader,nounits`. The first column is MiB, the second optional column is the
+/// `major.minor` compute capability. A single-column answer (older driver) keeps the VRAM and
+/// reports an unknown capability instead of failing the whole probe.
 #[cfg(windows)]
-fn parse_nvidia_smi_mib(output: &str) -> Option<u64> {
-    let line = output
-        .lines()
+fn parse_nvidia_smi_gpu(output: &str) -> (Option<u64>, Option<(u32, u32)>) {
+    let Some(line) = output.lines().map(str::trim).find(|line| !line.is_empty()) else {
+        return (None, None);
+    };
+    let mut columns = line.split(',');
+    let mib = columns
+        .next()
+        .and_then(|value| value.split_whitespace().next())
+        .and_then(|value| value.parse::<u64>().ok())
+        .filter(|value| *value > 0);
+    let compute = columns
+        .next()
         .map(str::trim)
-        .find(|line| !line.is_empty())?;
-    let token = line.split_whitespace().next()?;
-    token.parse::<u64>().ok().filter(|value| *value > 0)
+        .and_then(parse_compute_capability);
+    (mib, compute)
 }
 
 #[cfg(windows)]
-fn detect_vram_gb() -> Option<u32> {
+fn parse_compute_capability(text: &str) -> Option<(u32, u32)> {
+    let (major, minor) = text.split_once('.')?;
+    let major = major.trim().parse::<u32>().ok()?;
+    let minor = minor.trim().parse::<u32>().ok()?;
+    ((major, minor) >= (5, 0) && (major, minor) <= (20, 0)).then_some((major, minor))
+}
+
+/// Times a bounded `nvidia-smi` query and returns its stdout. Any failure, timeout or non-zero
+/// exit yields `None`; the probe must never block the host.
+#[cfg(windows)]
+fn nvidia_smi(args: &[&str]) -> Option<String> {
     use std::{
         io::Read,
         os::windows::process::CommandExt,
@@ -151,7 +190,7 @@ fn detect_vram_gb() -> Option<u32> {
     };
     const CREATE_NO_WINDOW: u32 = 0x0800_0000;
     let mut child = Command::new("nvidia-smi")
-        .args(["--query-gpu=memory.total", "--format=csv,noheader,nounits"])
+        .args(args)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
@@ -184,12 +223,24 @@ fn detect_vram_gb() -> Option<u32> {
     }
     let mut output = String::new();
     child.stdout.take()?.read_to_string(&mut output).ok()?;
-    parse_nvidia_smi_mib(&output).map(mib_to_gib)
+    Some(output)
+}
+
+#[cfg(windows)]
+fn detect_gpu_facts() -> (Option<u32>, Option<(u32, u32)>) {
+    let Some(output) = nvidia_smi(&[
+        "--query-gpu=memory.total,compute_cap",
+        "--format=csv,noheader,nounits",
+    ]) else {
+        return (None, None);
+    };
+    let (mib, compute) = parse_nvidia_smi_gpu(&output);
+    (mib.map(mib_to_gib), compute)
 }
 
 #[cfg(not(windows))]
-fn detect_vram_gb() -> Option<u32> {
-    None
+fn detect_gpu_facts() -> (Option<u32>, Option<(u32, u32)>) {
+    (None, None)
 }
 
 #[cfg(windows)]
@@ -246,18 +297,53 @@ mod tests {
     use super::*;
 
     fn fake(vram_gb: Option<u32>, ram_gb: u32) -> DeviceFacts {
-        DeviceFacts { vram_gb, ram_gb }
+        DeviceFacts {
+            vram_gb,
+            ram_gb,
+            compute_capability: None,
+        }
+    }
+
+    fn fake_with_capability(vram_gb: u32, ram_gb: u32, capability: (u32, u32)) -> DeviceFacts {
+        DeviceFacts {
+            vram_gb: Some(vram_gb),
+            ram_gb,
+            compute_capability: Some(capability),
+        }
     }
 
     #[test]
     #[cfg(windows)]
-    fn nvidia_smi_memory_total_is_parsed_from_the_first_gpu() {
-        assert_eq!(parse_nvidia_smi_mib("12288\n"), Some(12288));
-        assert_eq!(parse_nvidia_smi_mib("  12288  \n6144\n"), Some(12288));
-        assert_eq!(parse_nvidia_smi_mib("12288 MiB\n"), Some(12288));
-        assert_eq!(parse_nvidia_smi_mib("0\n"), None);
-        assert_eq!(parse_nvidia_smi_mib("N/A\n"), None);
-        assert_eq!(parse_nvidia_smi_mib("\n\n"), None);
+    fn nvidia_smi_memory_total_and_compute_capability_are_parsed_from_the_first_gpu() {
+        let (mib, compute) = parse_nvidia_smi_gpu("12288, 8.6\n");
+        assert_eq!(mib, Some(12288));
+        assert_eq!(compute, Some((8, 6)));
+        // A Turing card reports 7.5.
+        assert_eq!(parse_nvidia_smi_gpu("8192, 7.5\n").1, Some((7, 5)));
+        // Older drivers only answer the memory column; the capability stays unknown.
+        assert_eq!(parse_nvidia_smi_gpu("12288\n"), (Some(12288), None));
+        assert_eq!(parse_nvidia_smi_gpu("0\n"), (None, None));
+        assert_eq!(parse_nvidia_smi_gpu("N/A\n"), (None, None));
+        assert_eq!(parse_nvidia_smi_gpu("\n\n"), (None, None));
+        assert_eq!(parse_nvidia_smi_gpu("8192, N/A\n").1, None);
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn compute_capability_parser_rejects_implausible_values() {
+        assert_eq!(parse_compute_capability("7.5"), Some((7, 5)));
+        assert_eq!(parse_compute_capability("12.0"), Some((12, 0)));
+        assert_eq!(parse_compute_capability("N/A"), None);
+        assert_eq!(parse_compute_capability("nonsense"), None);
+        assert_eq!(parse_compute_capability("1.0"), None);
+    }
+
+    #[test]
+    fn compact_tier_requires_turing_or_newer_only_when_the_capability_is_known() {
+        assert!(fake(None, 32).meets_compact_compute_capability());
+        assert!(fake_with_capability(8, 32, (7, 5)).meets_compact_compute_capability());
+        assert!(fake_with_capability(8, 32, (8, 6)).meets_compact_compute_capability());
+        assert!(!fake_with_capability(8, 32, (6, 1)).meets_compact_compute_capability());
     }
 
     #[test]
