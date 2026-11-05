@@ -47,8 +47,9 @@ jobs:
         shell: pwsh
         run: |
           $version = (node -p "require('./apps/desktop/tauri.conf.json').version").Trim()
-          $installerName = "Image Studio_${version}_x64-setup.exe"
-          $installer = Join-Path "target/release/bundle/nsis" $installerName
+          $builtInstallerName = "Image Studio_${version}_x64-setup.exe"
+          $installerName = $builtInstallerName.Replace(" ", ".")
+          $installer = Join-Path "target/release/bundle/nsis" $builtInstallerName
           if (-not (Test-Path -LiteralPath $installer)) { throw "installer missing: $installer" }
           $hash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLower()
           $bytes = (Get-Item -LiteralPath $installer).Length
