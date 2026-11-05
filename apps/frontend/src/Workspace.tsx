@@ -1287,9 +1287,12 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
                     const selected = active.params.modelId === model.id && active.params.capabilityId === capability;
                     const tool = capability === BIREFNET_CAPABILITY || capability === REALESRGAN_CAPABILITY;
                     const blockedReason = model.staticFacts.hardwareEligible ? null : (model.staticFacts.hardwareReason ?? '当前设备不满足该型号的硬件门槛，生成入口已禁用。');
+                    const tierHint = model.staticFacts.tier === 'compact'
+                      ? `紧凑档 ${model.staticFacts.resolution ?? 768}×${model.staticFacts.resolution ?? 768}${model.staticFacts.computeDtype ? ` · ${model.staticFacts.computeDtype}` : ''}`
+                      : null;
                     return <button key={model.id} disabled={!model.ready || Boolean(blockedReason)} title={blockedReason ?? model.summary} className={`single-model-option ${selected ? 'is-selected' : ''}`} onClick={() => { setDraftParams({ modelId: model.id, capabilityId: capability }); setPopup(null); if (!tool) requestAnimationFrame(() => textarea.current?.focus()); }}>
                       <span className="model-mark"><Palette size={14}/></span>
-                      <span><strong>{modelDisplayName(model.id)}</strong><small>{blockedReason ?? (model.ready ? model.summary : `${model.summary} · 未就绪`)}</small></span>
+                      <span><strong>{modelDisplayName(model.id)}</strong><small>{blockedReason ?? (model.ready ? model.summary : `${model.summary} · 未就绪`)}{tierHint && model.ready ? ` · ${tierHint}` : ''}</small></span>
                       {selected && <Check size={14}/>}
                     </button>;
                   })}
