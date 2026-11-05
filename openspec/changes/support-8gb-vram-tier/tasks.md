@@ -59,17 +59,17 @@
 
 ## 9. 全流程界面验收（8 GB 机器）
 
-- [ ] 9.1 安装后启动应用，模型页对五个模型显示"紧凑档可用"，设置页显示 `显存 8 GB · 内存 32 GB`。
-- [ ] 9.2 从界面发送五个模型的真实请求，分别查看结果与导出 PNG。
-- [ ] 9.3 取消：每个模型至少一次在采样中取消，任务转 Cancelled，无残留进程。
-- [ ] 9.4 强杀：宿主或 worker 被强杀后重启应用，恢复可用状态且不产生半个资产。
-- [ ] 9.5 重启后 Ready 记录仍有效，不触发重新下载或重新 prepare。
-- [ ] 9.6 证据：`verification/windows-8gb-tier/` README + 截图 + JSON。
+- [x] 9.1 安装后启动应用，模型页对五个模型显示"紧凑档可用"，设置页显示 `显存 8 GB · 内存 32 GB`。
+- [x] 9.2 从界面发送五个模型的真实请求，分别查看结果与导出 PNG。
+- [x] 9.3 取消：每个模型至少一次在采样中取消，任务转 Cancelled，无残留进程。
+- [x] 9.4 强杀：宿主或 worker 被强杀后重启应用，恢复可用状态且不产生半个资产。
+- [x] 9.5 重启后 Ready 记录仍有效，不触发重新下载或重新 prepare。
+- [x] 9.6 证据：`verification/windows-8gb-tier/` README + 截图 + JSON。
 
 ## 10. 质量门、文档与归档
 
-- [ ] 10.1 `cargo fmt --check`、`cargo clippy --workspace --all-targets --locked -- -D warnings`、workspace 测试、前端 test/check/build 全绿。
-- [ ] 10.2 `openspec validate --all --strict` 全绿。
+- [x] 10.1 `cargo fmt --check`、`cargo clippy --workspace --all-targets --locked -- -D warnings`、workspace 测试、前端 test/check/build 全绿。
+- [x] 10.2 `openspec validate --all --strict` 全绿。
 - [ ] 10.3 12 GB 档回归：standard 配方参数、身份与预算不变；本机无法执行 12 GB 真机回归，须标注 user-gated 并提供可在 12 GB 机器上一键复跑的命令。
-- [ ] 10.4 `doc/` 增加 8 GB 档说明（支持范围、档位选择、实测数据、已知限制），README 支持范围同步。
+- [x] 10.4 `doc/` 增加 8 GB 档说明（支持范围、档位选择、实测数据、已知限制），README 支持范围同步。
 - [ ] 10.5 汇总证据、归档 change、同步主规格。

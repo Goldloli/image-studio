@@ -110,8 +110,36 @@ identity stays implemented in the protocol for future hardware but is not offere
 catalog.
 
 Support summary after this round: **four of the five generative models** run in the compact tier
-on this machine (Qwen-Image 2.1-Turbo, MOSS-Image-SFT, FLUX.2 Klein 4B 文生图/编辑, plus Qwen-Image
-2.1 when its measurement lands); Z-Image stays 12 GB.
+on this machine (Qwen-Image 2.1-Turbo, Qwen-Image 2.1, MOSS-Image-SFT and FLUX.2 Klein 4B 文生图/编辑); Z-Image stays 12 GB.
+
+## Product UI flow on the 8 GB machine (2026-11-05)
+
+The installed build (`Image Studio_0.1.0_x64-setup.exe`, rebuilt with the compact worker wheel)
+was driven through its real WebView2 page with `scripts/windows-ui/cdp.mjs` against an isolated
+data root.
+
+| Step | Result |
+|---|---|
+| Model page | 7 entries, **设备满足 6**; Z-Image shows the 12 GB reason, `Qwen-Image 2.1 Turbo` shows "紧凑档 768×768 · float16" ([model page](ui-model-page.png)) |
+| Install (UI) | Downloaded/verified 35.18 GB from a seeded cache, installed the private Python 3.12.10 runtime, the embedded worker wheel probed the card (**sm75**, fp16) and the install-time prepare ran inside the product (commit peak 23.1 GiB, available RAM floor 0.43 GiB) |
+| Ready | Ready record written; the composer lists `Qwen-Image 2.1 Turbo · 模型已就绪 · 紧凑档 768×768` |
+| Send | One prompt at 1:1 produced a **768×768** asset through the product's own supervisor/worker ([conversation](ui-result.png), [asset](ui-qwen-turbo-768.png)) |
+| Export | `导出 PNG` wrote a byte-identical file (1,176,635 B, SHA-256 `0e56258e…`), same as the asset |
+| Cancel | A second send cancelled from the UI settles as `cancelled` ("本次生成已取消") with no worker left over |
+| Kill recovery | Killing the host mid-turn and restarting marks the pending turn `interrupted`, leaves no worker process, and the next send succeeds |
+
+Two product fixes came out of this flow:
+
+1. `bind_turn_job` compared the frozen request against a hardcoded 1024 canvas, so every compact
+   1:1 turn failed with "冻结请求与已接收轮次快照不一致" before the worker started.
+2. The supervisor measured its 30 s handshake from its own start, so the installed runtime's
+   first torch import on a cold cache could abort the turn; Windows diffusers recipes now allow
+   120 s.
+
+Known roughness on this machine: consecutive attempts can stall at "正在接收提示词" until the
+host is restarted, and a cancelled turn takes up to ~2 minutes to settle because cleanup waits
+for the process group. Both are recorded rather than hidden.
+
 
 
 
