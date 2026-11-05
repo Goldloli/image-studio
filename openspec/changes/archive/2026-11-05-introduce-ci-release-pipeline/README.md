@@ -1,6 +1,6 @@
 # introduce-ci-release-pipeline
 
-**状态：2026-11-05 已实现并完成真实 GitHub Actions 与 draft Release 验收。** Windows/macOS quality、手动双平台构建、下载后 checksum/架构/包身份复核、tag 版本/main 来源校验和 `v0.1.0` draft Release 均通过；等待归档同步主规格。
+**状态：2026-11-05 已实现、完成真实 GitHub Actions 与 draft Release 验收，并归档同步主规格。** Windows/macOS quality、手动双平台构建、下载后 checksum/架构/包身份复核、tag 版本/main 来源校验和 `v0.1.0` draft Release 均通过。
 
 边界：`macos-14` 已于 2026-11-02 退役且为 Intel x64；当前把其产物命名为 `macos-arm64` 不成立。用户已授权在文档完成后将仓库切换为 public；源码实现必须在本修订获确认后开始。首次 quality/build/release run、产物下载校验与 draft Release 人工审阅仍以 GitHub 真实结果为准，不得用本地模拟冒充上线通过。
 

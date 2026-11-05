@@ -3,7 +3,8 @@
 Status: **local and real GitHub Actions acceptance passed; draft Release awaits
 manual review** (2026-11-05).
 
-Change: `openspec/changes/introduce-ci-release-pipeline`. Workflows:
+Change: `openspec/changes/archive/2026-11-05-introduce-ci-release-pipeline`.
+Workflows:
 `.github/workflows/{quality,build,release}.yml`; operator guide:
 [doc/14-ci-release.md](../../doc/14-ci-release.md).
 

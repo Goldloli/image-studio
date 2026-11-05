@@ -57,5 +57,5 @@
 
 - [x] 9.1 全量本地质量门、actionlint、workflow 安全扫描、OpenSpec strict 全部通过。
 - [x] 9.2 用 GitHub 真实 run URL、artifact checksum、draft Release URL 补齐验收证据。
-- [ ] 9.3 归档本 change，同步 `ci-release` 与 `product-identity` 主规格。
+- [x] 9.3 归档本 change，同步 `ci-release` 与 `product-identity` 主规格。
 - [ ] 9.4 关闭 Beads 实现 issue，并报告所有 user-gated 或仍需人工配置的项。
