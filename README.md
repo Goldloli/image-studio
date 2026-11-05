@@ -36,9 +36,15 @@ machine.
 | FLUX.2 Klein 4B distilled | Text to image, single-image edit | 4-bit loading, 4 steps, guidance 1.0 |
 | BiRefNet general epoch_244 | Remove background, RGBA + mask | ONNX Runtime CPU, float32 |
 | Real-ESRGAN x4plus | Exact 4× upscale | ncnn Vulkan, tile 128 |
-| Qwen-Image 2.1 | Text to image | 8-bit, 40 steps, guidance 1.0 |
-| Qwen-Image 2.1 Turbo | Text to image | 8-bit, 8 steps, official Turbo sampling |
-| MOSS-Image-SFT | Text to image | 8-bit, 50 steps, guidance 3.0 |
+| Qwen-Image 2.1 | Text to image | 4-bit NF4, 40 steps, guidance 1.0 |
+| Qwen-Image 2.1 Turbo | Text to image | 4-bit NF4, 8 steps, official Turbo sampling |
+| MOSS-Image-SFT | Text to image | 4-bit NF4, 50 steps, guidance 3.0 |
+
+**VRAM tiers**: the five generative models register a `standard` tier (≥ 12 GB, 1024², bf16) and a
+`compact` tier (≥ 8 GB, 768², fp16) that share one model download and one prepared cache; a device
+that only meets the compact tier degrades automatically and the model page names the tier.
+Z-Image Turbo cannot run on 8 GB as measured and keeps its 12 GB threshold. See
+[`doc/15-windows-8gb-tier.md`](doc/15-windows-8gb-tier.md).
 
 The authoritative model catalog is
 [`resources/model-catalog/catalog.json`](resources/model-catalog/catalog.json).

@@ -32,9 +32,14 @@ Image Studio 是面向 **macOS arm64** 与 **Windows x64** 的本地优先桌面
 | FLUX.2 Klein 4B distilled | 文生图、单图编辑 | 4-bit 加载、4 步、guidance 1.0 |
 | BiRefNet general epoch_244 | 去背景、RGBA + mask | ONNX Runtime CPU、float32 |
 | Real-ESRGAN x4plus | 精确 4× 放大 | ncnn Vulkan、tile 128 |
-| Qwen-Image 2.1 | 文生图 | 8-bit、40 步、guidance 1.0 |
-| Qwen-Image 2.1 Turbo | 文生图 | 8-bit、8 步、官方 Turbo 采样 |
-| MOSS-Image-SFT | 文生图 | 8-bit、50 步、guidance 3.0 |
+| Qwen-Image 2.1 | 文生图 | 4-bit（NF4）、40 步、guidance 1.0 |
+| Qwen-Image 2.1 Turbo | 文生图 | 4-bit（NF4）、8 步、官方 Turbo 采样 |
+| MOSS-Image-SFT | 文生图 | 4-bit（NF4）、50 步、guidance 3.0 |
+
+**显存档位**：五个生成模型登记 `standard`（≥ 12 GB，1024²，bf16）与 `compact`（≥ 8 GB，768²，
+fp16）两档，同一份模型下载与 prepared 缓存共用；设备只满足紧凑档时自动降级并在模型页标明。
+Z-Image Turbo 实测无法在 8 GB 上运行，保持 12 GB 门槛。详见
+[`doc/15-windows-8gb-tier.md`](doc/15-windows-8gb-tier.md)。
 
 权威模型目录位于
 [`resources/model-catalog/catalog.json`](resources/model-catalog/catalog.json)。
