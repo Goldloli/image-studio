@@ -1054,7 +1054,7 @@ fn windows_compact_recipe_parameter_helpers_extend_the_frozen_maps() {
                 serde_json::json!(["transformer", "text_encoder"])
             ),
             ("compute_dtype", serde_json::json!("float16")),
-            ("vae_precision", serde_json::json!("float16")),
+            ("vae_precision", serde_json::json!("float32")),
             ("attention", serde_json::json!("_native_efficient")),
             ("offload", serde_json::json!("model_cpu")),
             ("resolution", serde_json::json!(768)),

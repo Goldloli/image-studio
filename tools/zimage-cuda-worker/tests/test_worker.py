@@ -98,9 +98,9 @@ def test_compact_parameters_are_frozen():
     compact = expected_parameters(7, COMPACT_RECIPE_ID)
     assert standard["compute_dtype"] == "bfloat16"
     assert compact["recipe"] == COMPACT_RECIPE_ID
-    assert compact["resolution"] == 768
-    assert compact["compute_dtype"] == "float16"
-    assert compact["vae_precision"] == "float16"
+    assert compact["resolution"] == 512
+    assert compact["compute_dtype"] == "bfloat16"
+    assert compact["vae_precision"] == "bfloat16"
     assert compact["steps"] == 9
     assert len(compact) == len(standard) + 1
     for key, value in standard.items():

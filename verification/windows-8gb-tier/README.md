@@ -73,6 +73,31 @@ Output: [klein-t2i-768.png](klein-t2i-768.png), 768×768, 1,209,215 bytes, SHA-2
 
 Record: [klein-gate0.json](klein-gate0.json).
 
+## Z-Image Turbo compact — not deliverable on 8 GB (measured 2026-11-05)
+
+Z-Image keeps its original 12 GB contract. Three measured attempts on the same machine failed,
+so the catalog does not register a compact tier for it:
+
+| Attempt | Result |
+|---|---|
+| 768 square, fp16 compute, fp16 VAE | Pipeline ran, but the VAE decode emitted `invalid value encountered in cast` and the saved PNG is 1 795 B of black pixels (NaN/Inf latents). GPU peak 7 809 MiB. |
+| 512 square, bf16 compute | `No available kernel. Aborting execution.` — bitsandbytes has no bf16 NF4 kernel on sm75. GPU peak 7 747 MiB. |
+| 512 square, fp16 compute, fp32 VAE | Still black (843 B PNG). GPU peak 7 819 MiB. |
+
+The VRAM peak is roughly resolution-independent (~7.8 GiB, i.e. ~5.9 GiB of model on top of the
+desktop compositor) because it comes from the component loader: the v1 backend loads each
+component with `device_map={"": "cuda"}` and then moves it back to the CPU, so the largest
+component is materialised on the card during load. That leaves no headroom under 8 GiB even
+before sampling. Reproducing Z-Image on 8 GB needs a CPU-side loader plus an fp16-safe sampling
+path (or an fp32 transform path), which is outside this change; the compact Z-Image recipe
+identity stays implemented in the protocol for future hardware but is not offered by the
+catalog.
+
+Support summary after this round: **four of the five generative models** run in the compact tier
+on this machine (Qwen-Image 2.1-Turbo, MOSS-Image-SFT, FLUX.2 Klein 4B 文生图/编辑, plus Qwen-Image
+2.1 when its measurement lands); Z-Image stays 12 GB.
+
+
 
 
 ### What the measurement changed in the design

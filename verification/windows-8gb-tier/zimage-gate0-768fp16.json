@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "kind": "windows-zimage-real-worker-protocol",
+  "status": "passed",
+  "supervisor": false,
+  "protocol_version": 2,
+  "identity": {
+    "build_id": "studio-zimage-cuda-worker-0.1.0",
+    "runtime_lock_id": "windows-python31210-torch2100-cu126-bnb0482-v1",
+    "model_snapshot_id": "z-image-turbo-diffusers-cuda-nf4-v1"
+  },
+  "elapsed_seconds": 639.484000000055,
+  "request": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "seed": 3148150817,
+    "model_path": "z-image-turbo-diffusers-cuda-nf4-v1",
+    "output_dir": "zimage-compact2"
+  },
+  "progress": [
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "encoding",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 0,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 1,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 2,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 3,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 4,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 5,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 6,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 7,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 8,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 9,
+      "total": 9
+    },
+    {
+      "type": "progress",
+      "stage": "decoding",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "writing",
+      "completed": null,
+      "total": null
+    }
+  ],
+  "candidate": {
+    "role": "primary",
+    "data_type": "image_rgb",
+    "relative_path": "primary.png",
+    "width": 768,
+    "height": 768,
+    "size_bytes": 1795,
+    "sha256": "5ed9a326fd4a39da1aa5e1a3361c05e88fa1d29428428efa92436fe35b7e737a"
+  },
+  "worker_stderr": "worker request validated\r\nbackend generation started\r\nselected_cuda=0 name=NVIDIA GeForce RTX 2060 SUPER cc=7.5\r\n\rLoading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]\rLoading checkpoint shards:  33%|��������      | 1/3 [01:25<02:50, 85.26s/it]\rLoading checkpoint shards:  67%|��������������   | 2/3 [02:50<01:25, 85.29s/it]\rLoading checkpoint shards: 100%|��������������������| 3/3 [03:30<00:00, 64.42s/it]\rLoading checkpoint shards: 100%|��������������������| 3/3 [03:30<00:00, 70.05s/it]\r\nAttention backends are an experimental feature and the API may be subject to change.\r\n`torch_dtype` is deprecated! Use `dtype` instead!\r\n\rLoading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]\rLoading checkpoint shards:  33%|��������      | 1/3 [00:14<00:29, 14.63s/it]\rLoading checkpoint shards:  67%|��������������   | 2/3 [00:29<00:14, 14.80s/it]\rLoading checkpoint shards: 100%|��������������������| 3/3 [00:29<00:00,  8.22s/it]\rLoading checkpoint shards: 100%|��������������������| 3/3 [00:29<00:00,  9.98s/it]\r\npipeline loaded\r\ntoken_count=27 token_budget=512\r\n\r  0%|          | 0/9 [00:00<?, ?it/s]\r 11%|��         | 1/9 [00:43<05:47, 43.46s/it]\r 22%|������       | 2/9 [01:12<04:05, 35.04s/it]\r 33%|��������      | 3/9 [01:53<03:46, 37.72s/it]\r 44%|����������     | 4/9 [02:35<03:16, 39.39s/it]\r 56%|������������    | 5/9 [03:15<02:38, 39.62s/it]\r 67%|��������������   | 6/9 [03:55<01:59, 39.79s/it]\r 78%|����������������  | 7/9 [04:37<01:20, 40.45s/it]\r 89%|������������������ | 8/9 [05:18<00:40, 40.67s/it]\r100%|��������������������| 9/9 [05:58<00:00, 40.48s/it]\r100%|��������������������| 9/9 [05:58<00:00, 39.85s/it]\r\nD:\\ist-8gb\\venv-zimage\\Lib\\site-packages\\diffusers\\image_processor.py:148: RuntimeWarning: invalid value encountered in cast\r\n  images = (images * 255).round().astype(\"uint8\")\r\n"
+}

@@ -52,10 +52,10 @@
 
 ## 8. Z-Image Turbo compact（高风险，R1）
 
-- [ ] 8.1 先验证 v1 运行时 + bnb 0.48.2 在 sm75 上能否完成 NF4 自检与装载。
-- [ ] 8.2 可行：改造 `studio_zimage_cuda_worker` 支持 768² 与文本编码器 staged。
-- [ ] 8.3 不可行：停止并回报，由用户决定是否把 Z-Image 迁到 v2 运行时（新运行时身份，范围扩大）。
-- [ ] 8.4 下载 32.8 GB → Gate 0 → 证据。
+- [x] 8.1 先验证 v1 运行时 + bnb 0.48.2 在 sm75 上能否完成 NF4 自检与装载。
+- [x] 8.2 可行：改造 `studio_zimage_cuda_worker` 支持 768² 与文本编码器 staged。
+- [x] 8.3 不可行：停止并回报，由用户决定是否把 Z-Image 迁到 v2 运行时（新运行时身份，范围扩大）。
+- [ ] 8.4 结果：8 GB 下不可行（768² fp16 出 NaN、512² bf16 无 bnb 内核、加载峰值 ~7.8 GiB），Z-Image 继续按 12 GB 门槛禁用；证据见 `verification/windows-8gb-tier/README.md`。
 
 ## 9. 全流程界面验收（8 GB 机器）
 
