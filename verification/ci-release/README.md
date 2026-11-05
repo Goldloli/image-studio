@@ -1,7 +1,7 @@
 # Cross-platform CI/release evidence
 
-Status: **local and real GitHub Actions acceptance passed; draft Release awaits
-manual review** (2026-11-05).
+Status: **local and real GitHub Actions acceptance passed; `v0.1.0` is
+publicly published** (2026-11-05).
 
 Change: `openspec/changes/archive/2026-11-05-introduce-ci-release-pipeline`.
 Workflows:
@@ -22,10 +22,10 @@ Workflows:
 | macOS runner contract | `macos-15` arm64 + runtime assertion | workflow |
 | macOS release bundle | arm64, stable identifier, 15 zip entries | same evidence file |
 | macOS archive | 32,457,641 B, SHA-256 `9f275384…` | same evidence file |
-| Windows installer command | previously PASS; new SHA-256 download change awaits Windows runner | [local-validation.json](local-validation.json) |
-| Final main quality | PASS on Windows + macOS arm64 | [github-actions-acceptance-2026-11-05.json](github-actions-acceptance-2026-11-05.json) |
-| Manual dual-platform build | PASS; both artifacts downloaded and rechecked | same evidence file |
-| `v0.1.0` draft Release | PASS; 10 assets, checksums and docs present | same evidence file |
+| Final main quality after dependency upgrades | PASS on Windows + macOS arm64 | [github-actions-acceptance-2026-11-05.json](github-actions-acceptance-2026-11-05.json) |
+| Manual post-upgrade dual-platform build | PASS; both artifacts downloaded and rechecked | same evidence file |
+| Dependabot PRs | PASS; 7/7 merged, 0 open PRs | same evidence file |
+| `v0.1.0` public Release | PASS; 10 assets, checksums and bilingual notes present | same evidence file |
 
 The local Node runtime is `24.12.0`, while CI pins `24.19.0`; tests/build were
 run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
@@ -33,13 +33,15 @@ run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
 
 ## Real GitHub rows
 
-1. Final `main` quality: PASS, Windows and macOS arm64.
+1. Final `main` quality: PASS, Windows and macOS arm64, including the merged
+   action/runtime dependency updates.
 2. Manual `build-artifacts`: PASS, both artifacts independently downloaded and
    checksum-verified.
-3. macOS downloaded package: stable identifier, arm64 core/sidecars and legal
-   resources verified.
+3. macOS downloaded package: stable identifier, macOS 11 minimum, arm64
+   core/sidecars and legal resources verified.
 4. `v0.1.0` tag: version/main provenance check passed.
-5. Draft Release: PASS with 10 assets; manual publish remains a user decision.
+5. Public Release: PASS with 10 assets and bilingual install/release notes:
+   <https://github.com/Goldloli/image-studio/releases/tag/v0.1.0>.
 
 Unsigned/notarization limitations are documented in
 [doc/14-ci-release.md](../../doc/14-ci-release.md).

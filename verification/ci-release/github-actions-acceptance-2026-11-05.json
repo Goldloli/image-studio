@@ -1,20 +1,21 @@
 {
   "schema_version": 1,
-  "kind": "github-actions-and-draft-release-acceptance",
+  "kind": "github-actions-and-public-release-acceptance",
   "date": "2026-11-05",
   "status": "passed",
   "tag": "v0.1.0",
   "tag_commit": "91b4c03b248f0b29d8ba88bfd2357c93d0366437",
   "quality": {
-    "final_main_run": 41979600295,
-    "final_main_url": "https://github.com/Goldloli/image-studio/actions/runs/41979600295",
+    "final_main_run": 41983367229,
+    "final_main_url": "https://github.com/Goldloli/image-studio/actions/runs/41983367229",
     "final_main_result": "success",
-    "archive_main_run": 41980741975,
-    "archive_main_url": "https://github.com/Goldloli/image-studio/actions/runs/41980741975",
-    "archive_main_result": "success",
+    "head_sha": "7e5b1c1f8fd11f8146c1ebfea896c1121cfc735e",
     "windows_result": "success",
     "macos_result": "success",
+    "windows_duration": "5m22s",
+    "macos_duration": "3m05s",
     "macos_runner": "macos-15 arm64",
+    "previous_final_main_run": 41979600295,
     "earlier_failures_fixed": [
       {
         "run": 41974168445,
@@ -27,16 +28,17 @@
     ]
   },
   "manual_build": {
-    "run": 41976972819,
-    "url": "https://github.com/Goldloli/image-studio/actions/runs/41976972819",
+    "run": 41983779275,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/41983779275",
     "result": "success",
     "download_recheck": "passed",
     "macos": {
       "file": "Image-Studio-0.1.0-macos-arm64.zip",
-      "bytes": 32443097,
-      "sha256": "3080d129038918f86bbd34122d113bcf7918ce394f2130dae463694439ad2c6a",
+      "bytes": 32479261,
+      "sha256": "5d13708228a9b5828c96f4f05859a8f77199e186595477d7863684bf83d6f588",
       "identifier": "io.github.goldloli.image-studio",
       "version": "0.1.0",
+      "minimum_system_version": "11.0",
       "arches": {
         "image-studio-desktop": "arm64",
         "diagnostic-worker": "arm64",
@@ -47,21 +49,74 @@
       "embedded_legal_resources": 5
     },
     "windows": {
-      "file": "Image Studio_0.1.0_x64-setup.exe",
-      "bytes": 245072781,
-      "sha256": "699f68b04d21862b43d4f111636c347fb149b6a5e17a092f3a791aecf058b1cf",
+      "file": "Image.Studio_0.1.0_x64-setup.exe",
+      "bytes": 245111086,
+      "sha256": "eb1322d6af27b44db9f715af9a1888a8abc797d9d1e66c92dfb83bc88b1e6ec8",
       "target": "x86_64-pc-windows-msvc",
       "checksum_verified": true,
-      "internal_package_verified": true
-    }
+      "internal_package_verified": true,
+      "file_type": "PE32 Nullsoft Installer self-extracting archive"
+    },
+    "note": "Rebuilt after merging Dependabot PRs; public v0.1.0 assets belong to tag commit 91b4c03b248f0b29d8ba88bfd2357c93d0366437"
   },
-  "draft_release": {
+  "dependabot": {
+    "open_pull_requests_after_merge": 0,
+    "merged": [
+      {
+        "number": 1,
+        "name": "actions/download-artifact",
+        "version": "v8.0.2",
+        "merge_commit": "1ccec9a326d34eeee404ba9554baf13b6e02972f"
+      },
+      {
+        "number": 2,
+        "name": "actions/checkout",
+        "version": "v7.0.1",
+        "merge_commit": "2536d3b47d02fbb508cd4a3447650237b01e10a3"
+      },
+      {
+        "number": 3,
+        "name": "actions/setup-node",
+        "version": "v7.1.0",
+        "merge_commit": "ff8ed730fdf23e1b86e99bae7f17c51b29341c49"
+      },
+      {
+        "number": 4,
+        "name": "actions/upload-artifact",
+        "version": "v7.0.2",
+        "merge_commit": "6b69e7c24d25d540f2c3185ddf5fde3ee3e5f9e9"
+      },
+      {
+        "number": 5,
+        "name": "image",
+        "version": "0.25.10",
+        "merge_commit": "349bd82a75385fa73c43af81941360aedc517fb3"
+      },
+      {
+        "number": 6,
+        "name": "zip",
+        "version": "9.2.2",
+        "merge_commit": "35491745c76b0fdbc80929fa98160761ceb390e1"
+      },
+      {
+        "number": 7,
+        "name": "lucide-react",
+        "version": "1.66.0",
+        "merge_commit": "7e5b1c1f8fd11f8146c1ebfea896c1121cfc735e"
+      }
+    ]
+  },
+  "public_release": {
     "run": 41979625386,
     "workflow_url": "https://github.com/Goldloli/image-studio/actions/runs/41979625386",
     "result": "success",
     "release_id": 434851753,
-    "release_url": "https://github.com/Goldloli/image-studio/releases/tag/untagged-5c3e5680ab398dd56eb4",
-    "is_draft": true,
+    "release_url": "https://github.com/Goldloli/image-studio/releases/tag/v0.1.0",
+    "created_at": "2026-11-05T06:19:14Z",
+    "published_at": "2026-11-05T06:47:30Z",
+    "is_draft": false,
+    "is_prerelease": false,
+    "anonymous_api_verified": true,
     "asset_count": 10,
     "windows_asset": {
       "name": "Image.Studio_0.1.0_x64-setup.exe",
@@ -93,10 +148,10 @@
       "package": "glib",
       "note": "Linux-only Tauri/GTK dependency; product targets are macOS arm64 and Windows"
     },
-    "remaining_advisory": "Pinned checkout/setup-node/upload/download actions still emit GitHub Node 20 deprecation warnings; Dependabot major-version PRs remain for follow-up."
+    "remaining_advisory": "No open Dependabot PRs or action runtime deprecation warnings remained in the final quality/build runs."
   },
-  "pending_user_action": [
-    "review and publish the draft release manually",
-    "optionally merge reviewed Dependabot dependency/action updates in a later change"
+  "remaining_risks": [
+    "Windows and macOS installers are unsigned; macOS is not notarized.",
+    "Model weights and private Python runtimes are downloaded separately and are not bundled in the installers."
   ]
 }

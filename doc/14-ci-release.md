@@ -38,6 +38,11 @@ tag commit 还必须属于 `main`。任一条件不满足时，release 在 Windo
 - draft Release 附两平台产物、checksums、README、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md` 与 `RELEASE-NOTES.md`。
 - 不自动 publish。同名 Release 已存在时，重跑会明确失败，避免生成部分 release。
 
+`v0.1.0` 已于 2026-11-05 人工审阅并公开：
+<https://github.com/Goldloli/image-studio/releases/tag/v0.1.0>。公开页包含 Windows x64
+NSIS 安装包、macOS arm64 zip、两平台 checksum、双语 `RELEASE-NOTES.md` 与许可文件。
+workflow 后续仍默认创建 draft，由维护者检查后发布。
+
 下载后应在对应页签执行：
 
 ```bash
@@ -60,7 +65,7 @@ sha256sum -c SHA256SUMS-macos.txt
 - Secret scanning、push protection、依赖漏洞告警与 Dependabot security updates 已启用；目标是把 Security 告警保持为 0。
 - quality/build 对 fork PR 只有只读 token，不接触 secrets。
 - Actions 缓存只用于 quality/build；发布 artifact 来自当前 tag run，并由 SHA-256 再次验证。
-- main 分支保护、首次真实 runs 和 draft Release URL 属于上线验证项，记录在 `verification/ci-release/`。
+- main 分支保护、真实 runs、Dependabot 合并结果和公开 Release 验收记录在 `verification/ci-release/`。
 
 ## 本地验证
 
