@@ -25,6 +25,16 @@ export type ModelEntry = {
   /** Hardware thresholds registered by the host catalog (design.md section 10.2). */
   minVramGb: number | null;
   minRamGb: number | null;
+  /** The standard-tier VRAM threshold when the entry registers execution tiers. */
+  standardMinVramGb: number | null;
+  /** Execution tier the current device will use, or null for single-threshold entries. */
+  tier: 'standard' | 'compact' | null;
+  /** Output edge in pixels for the selected tier (1024 standard, 768/512 compact). */
+  resolution: number | null;
+  computeDtype: string | null;
+  /** Why the compact tier was selected, e.g. "显存 8 GB 低于标准档 12 GB 门槛…". */
+  tierReason: string | null;
+  tiers: { id: string; minVramGb: number; minRamGb: number; resolution: number; computeDtype: string }[];
   quantization: string | null;
   windowsStatus: string | null;
   installPhase: string;
@@ -136,10 +146,24 @@ export const canInstallModel = (entry: ModelEntry): boolean =>
 /** Human-readable threshold summary, e.g. "需要显存 ≥ 12 GB · 内存 ≥ 32 GB". */
 export function hardwareThresholdLabel(entry: ModelEntry): string {
   const parts: string[] = [];
-  if (entry.minVramGb !== null && entry.minVramGb > 0) parts.push(`显存 ≥ ${entry.minVramGb} GB`);
+  if (entry.minVramGb !== null && entry.minVramGb > 0) {
+    const standard = entry.standardMinVramGb;
+    parts.push(standard !== null && standard > entry.minVramGb
+      ? `显存 ≥ ${entry.minVramGb} GB（紧凑档）/ ${standard} GB（标准档）`
+      : `显存 ≥ ${entry.minVramGb} GB`);
+  }
   if (entry.minRamGb !== null && entry.minRamGb > 0) parts.push(`内存 ≥ ${entry.minRamGb} GB`);
   if (entry.minVramGb === 0) parts.push('CPU 路线（无显存门槛）');
   return parts.length ? `需要${parts.join(' · ')}` : '未登记硬件门槛';
+}
+
+/** The tier the device will execute, e.g. "紧凑档 768×768 · float16"; null without tiers. */
+export function executionTierLabel(entry: ModelEntry): string | null {
+  if (entry.tier === null) return null;
+  const name = entry.tier === 'compact' ? '紧凑档' : '标准档';
+  const size = entry.resolution === null ? '' : ` ${entry.resolution}×${entry.resolution}`;
+  const dtype = entry.computeDtype === null ? '' : ` · ${entry.computeDtype}`;
+  return `${name}${size}${dtype}`;
 }
 
 /** The license text shown on the model page; the full notice wins over the short license id. */

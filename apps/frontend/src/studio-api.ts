@@ -8,6 +8,11 @@ export type ModelStaticFacts = {
   hardwareReason: string | null;
   minVramGb: number | null;
   minRamGb: number | null;
+  standardMinVramGb: number | null;
+  tier: 'standard' | 'compact' | null;
+  resolution: number | null;
+  computeDtype: string | null;
+  tierReason: string | null;
   quantization: string | null;
   licenseNotice: string | null;
   windowsStatus: string | null;
