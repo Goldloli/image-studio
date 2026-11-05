@@ -65,6 +65,18 @@ jobs:
         working-directory: apps/frontend
         run: npm run build
 
+      - name: Build Windows sidecars
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cargo build --locked -p inference-supervisor -p diagnostic-worker -p realesrgan-worker
+          $target = "x86_64-pc-windows-msvc"
+          $destination = "apps/desktop/binaries"
+          New-Item -ItemType Directory -Force -Path $destination | Out-Null
+          foreach ($name in @("inference-supervisor", "diagnostic-worker", "realesrgan-worker")) {
+            Copy-Item -Force -LiteralPath "target/debug/$name.exe" -Destination "$destination/$name-$target.exe"
+          }
+
       - name: rustfmt
         run: cargo fmt --all -- --check
 
