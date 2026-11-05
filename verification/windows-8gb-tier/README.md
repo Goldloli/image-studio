@@ -55,6 +55,25 @@ Note: 752 s of 900 s leaves little headroom. A machine with a slower CPU or a se
 consumer would exceed the generation budget, so the 50-step MOSS recipe is the first candidate
 for a documented speed expectation in the UI.
 
+## FLUX.2 Klein 4B compact — Gate 0 passed (2026-11-05)
+
+Same machine, same prompt and seed, 768 square, 4 steps, guidance 1.0, NF4 text encoder and
+transformer with model CPU offload, fp16 components. Klein needs no prepared cache.
+
+| Metric | Measured | Budget |
+|---|---|---|
+| CUDA reserved peak | **5.436 GiB** | ≤ 6.0 GiB |
+| CUDA allocated peak | 4.458 GiB | — |
+| Generation (4 steps) | 9.83 s | — |
+| Process private commit peak | 15.384 GiB | ≤ 24 GiB |
+| Total elapsed | 145.61 s | ≤ 900 s |
+
+Output: [klein-t2i-768.png](klein-t2i-768.png), 768×768, 1,209,215 bytes, SHA-256
+`5bb23d72acd8d481d570699ab28831ec0e36e994292b22d89c321e5f3bd0c110`.
+
+Record: [klein-gate0.json](klein-gate0.json).
+
+
 
 ### What the measurement changed in the design
 

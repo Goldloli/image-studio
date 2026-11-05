@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "kind": "windows-diffusers-worker-real-protocol",
+  "status": "passed",
+  "protocol_version": 2,
+  "mode": "run",
+  "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+  "identity": {
+    "build_id": "studio-diffusers-worker-windows-0.1.0",
+    "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+    "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294"
+  },
+  "capability": "image.text-to-image.flux2-klein-4b.windows-v1",
+  "request": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "seed": 3148150817,
+    "steps": 4,
+    "model_path": "klein",
+    "output_dir": "klein-compact",
+    "prepared_dir": "D:\\ist-8gb\\models\\klein.prepared",
+    "inputs": []
+  },
+  "handshake": {
+    "type": "hello_accepted",
+    "versions": {
+      "min": 2,
+      "max": 2
+    },
+    "selected_version": 2,
+    "identity": {
+      "build_id": "studio-diffusers-worker-windows-0.1.0",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294"
+    },
+    "capabilities": [
+      "image.text-to-image.flux2-klein-4b.windows-v1",
+      "image.edit.flux2-klein-4b.windows-v1"
+    ]
+  },
+  "progress": [
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 0,
+      "total": 4
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 1,
+      "total": 4
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 2,
+      "total": 4
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 3,
+      "total": 4
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 4,
+      "total": 4
+    },
+    {
+      "type": "progress",
+      "stage": "writing",
+      "completed": null,
+      "total": null
+    }
+  ],
+  "terminal": {
+    "type": "output_candidate_v2",
+    "candidate": {
+      "role": "primary",
+      "data_type": "image_rgb",
+      "relative_path": "primary.png",
+      "width": 768,
+      "height": 768,
+      "size_bytes": 1209215,
+      "sha256": "5bb23d72acd8d481d570699ab28831ec0e36e994292b22d89c321e5f3bd0c110"
+    }
+  },
+  "worker_exit_code": 0,
+  "elapsed_seconds": 167.95,
+  "host_sampled_resources": {
+    "process_tree_private_commit_peak_gib": 15.385,
+    "system_available_ram_min_gib": 12.046,
+    "nvidia_used_peak_mib": 7044,
+    "sample_interval_seconds": 0.5
+  },
+  "worker_reported_resources": {
+    "elapsed_seconds": 145.61,
+    "process_private_commit_peak_gib": 15.384,
+    "system_available_ram_min_gib": 11.736,
+    "system_physical_total_gib": 31.909,
+    "sample_interval_seconds": 0.2,
+    "sample_count": 707,
+    "cuda_reserved_peak_gib": 5.436,
+    "cuda_allocated_peak_gib": 4.458
+  },
+  "worker_stderr": "worker request validated\r\nklein device=NVIDIA GeForce RTX 2060 SUPER cc=7.5 resolution=768\r\nD:\\ist-8gb\\venv\\Lib\\site-packages\\diffusers\\utils\\deprecation_utils.py:23: FutureWarning: `torch_dtype` is deprecated and will be removed in version 1.0.0. Please use `dtype` instead.\r\n  deprecate(\"torch_dtype\", \"1.0.0\", _TORCH_DTYPE_DEPRECATION_MESSAGE)\r\n\rLoading pipeline components...:   0%|          | 0/5 [00:00<?, ?it/s]\rLoading pipeline components...:  20%|����        | 1/5 [00:01<00:04,  1.17s/it]\rLoading pipeline components...:  40%|��������      | 2/5 [00:01<00:01,  1.73it/s]\r\n\rLoading weights:   0%|          | 0/398 [00:00<?, ?it/s]\u001b[A\r\n\rLoading weights:   0%|          | 1/398 [00:28<3:11:23, 28.92s/it]\u001b[A\r\n\rLoading weights:   1%|          | 3/398 [00:37<1:09:08, 10.50s/it]\u001b[A\r\n\rLoading weights:  26%|������       | 102/398 [00:37<00:58,  5.06it/s]\u001b[A\r\n\rLoading weights:  42%|����������     | 168/398 [00:37<00:24,  9.50it/s]\u001b[A\r\n\rLoading weights:  52%|������������    | 207/398 [00:43<00:22,  8.56it/s]\u001b[A\r\n\rLoading weights:  58%|������������    | 231/398 [00:46<00:20,  8.21it/s]\u001b[A\r\n\rLoading weights:  62%|��������������   | 247/398 [00:46<00:15,  9.70it/s]\u001b[A\r\n\rLoading weights:  66%|��������������   | 263/398 [00:46<00:11, 11.70it/s]\u001b[A\r\n\rLoading weights:  70%|��������������   | 278/398 [00:46<00:08, 14.35it/s]\u001b[A\r\n\rLoading weights:  99%|��������������������| 393/398 [00:47<00:00, 44.73it/s]\u001b[A\rLoading weights: 100%|��������������������| 398/398 [00:47<00:00,  8.46it/s]\r\n\rLoading pipeline components...:  60%|������������    | 3/5 [00:49<00:44, 22.47s/it]The config attributes {'force_upcast': True} were passed to AutoencoderKLFlux2, but are not expected and will be ignored. Please verify your config.json configuration file.\r\n\rLoading pipeline components...:  80%|����������������  | 4/5 [00:52<00:14, 14.57s/it]\rLoading pipeline components...: 100%|��������������������| 5/5 [02:09<00:00, 37.22s/it]\rLoading pipeline components...: 100%|��������������������| 5/5 [02:09<00:00, 25.94s/it]\r\nklein pipeline loaded (nf4 components, model cpu offload)\r\nklein load_seconds=135.53 cuda_reserved_peak_gib=5.436\r\nklein instruction_tokens=19 token_budget=512\r\nklein generation_seconds=9.83 kind=text cuda_reserved_peak_gib=2.844\r\nklein resources={\"elapsed_seconds\": 145.61, \"process_private_commit_peak_gib\": 15.384, \"system_available_ram_min_gib\": 11.736, \"system_physical_total_gib\": 31.909, \"sample_interval_seconds\": 0.2, \"sample_count\": 707, \"cuda_reserved_peak_gib\": 5.436, \"cuda_allocated_peak_gib\": 4.458}\r\n",
+  "output_image": "D:\\ist-8gb\\evidence\\klein-compact\\primary.png"
+}
