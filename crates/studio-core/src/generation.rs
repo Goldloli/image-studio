@@ -278,6 +278,59 @@ pub fn freeze_windows_z_image(
     Ok(FrozenGeneration { request, plan })
 }
 
+/// Freeze the 8 GB Z-Image compact plan (768 square, fp16) for the same Windows runtime.
+pub fn freeze_windows_z_image_compact(
+    input: GenerationInput,
+    resolved_seed: u32,
+    env: PlanEnvironment,
+) -> Result<FrozenGeneration, ContractError> {
+    require(
+        (input.width, input.height, input.count) == (768, 768, 1),
+        "Windows Z-Image compact accepts exactly one 768x768 image",
+    )?;
+    let output = ImageOutput {
+        width: 768,
+        height: 768,
+        count: 1,
+    };
+    let request = UserRequest {
+        schema_version: REQUEST_SCHEMA_VERSION,
+        request_id: input.request_id,
+        project_id: input.project_id,
+        capability: CapabilityDescriptor {
+            capability_id: Z_IMAGE_WINDOWS_CAPABILITY.into(),
+            instruction_required: true,
+            input_roles: vec![],
+        },
+        instruction: input.prompt,
+        inputs: vec![],
+        model_variant_id: ModelVariantId::new(Z_IMAGE_WINDOWS_MODEL)?,
+        requested_output: output.clone(),
+        policy: AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: false,
+        },
+        parameters: BTreeMap::from([("seed".into(), json!(input.seed))]),
+        idempotency_key: input.idempotency_key,
+    };
+    let seed = input.seed.unwrap_or(resolved_seed);
+    let plan = ExecutionPlan {
+        schema_version: PLAN_SCHEMA_VERSION,
+        plan_id: input.plan_id,
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: env.components,
+        runtime: env.runtime,
+        device: env.device,
+        effective_output: output,
+        effective_parameters: crate::recipes::windows_z_image_compact_parameters(seed),
+        adjustments: vec![],
+    };
+    crate::recipes::Recipe::ZImageTurboCudaNf4Compact.validate_plan(&request, &plan, None)?;
+    Ok(FrozenGeneration { request, plan })
+}
+
 pub fn validate_z_image_request(request: &UserRequest) -> Result<(), ContractError> {
     request.validate()?;
     require(
