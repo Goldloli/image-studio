@@ -26,16 +26,16 @@
 
 - [ ] 4.1 `prepare.py`（diffusers worker）改为按 safetensors 分片加载→量化→保存→释放，逐组件落盘；保持 prepared 缓存格式与逐组件摘要不变。
 - [ ] 4.2 预检从"可用 RAM ≥ 28 GiB"改为分段门槛（目标：可用 RAM ≥ 8 GiB 且 commit 余量 ≥ 6 GiB），失败信息给出可行动建议；常量在 4.3 实测后冻结。
-- [ ] 4.3 本机实测：在可用内存 ≈ 19.6 GiB 的当前条件下完成一份真实模型的 prepare，记录 commit/RAM 峰值。
+- [x] 4.3 本机实测：在可用内存 ≈ 19.6 GiB 的当前条件下完成一份真实模型的 prepare，记录 commit/RAM 峰值。
 - [ ] 4.4 验证：prepared 缓存可被 standard 与 compact 共用；摘要不匹配时仍拒绝复用。
 
 ## 5. Qwen-Image 2.1-Turbo compact（先打通整条链路）
 
-- [ ] 5.1 diffusers worker 支持 `resolution`、`compute_dtype`、`load_strategy` 参数；文本阶段改为逐层上卡；`--probe` 的 NF4 自检按 `compute_dtype` 构造。
-- [ ] 5.2 安装：空缓存下载 30.2 GB 模型 + 运行时，逐文件 SHA-256 校验。
-- [ ] 5.3 prepare：本机完成 NF4 prepared 缓存（目标 ≤ 10.05 GB）。
-- [ ] 5.4 Gate 0：768²、8 步、真实生成；记录 CUDA reserved 峰值（要求 ≤ 6.0 GiB）、commit、可用 RAM 最低值、加载/生成耗时、输出图与 SHA-256；确认无共享内存回退。
-- [ ] 5.5 证据：`verification/windows-8gb-tier/qwen21-turbo-gate0.json` + 样图 + README。
+- [x] 5.1 diffusers worker 支持 `resolution`、`compute_dtype`、`load_strategy` 参数；文本阶段改为逐层上卡；`--probe` 的 NF4 自检按 `compute_dtype` 构造。
+- [x] 5.2 安装：空缓存下载 30.2 GB 模型 + 运行时，逐文件 SHA-256 校验。
+- [x] 5.3 prepare：本机完成 NF4 prepared 缓存（目标 ≤ 10.05 GB）。
+- [x] 5.4 Gate 0：768²、8 步、真实生成；记录 CUDA reserved 峰值（要求 ≤ 6.0 GiB）、commit、可用 RAM 最低值、加载/生成耗时、输出图与 SHA-256；确认无共享内存回退。
+- [x] 5.5 证据：`verification/windows-8gb-tier/qwen21-turbo-gate0.json` + 样图 + README。
 
 ## 6. MOSS-Image-SFT 与 Qwen-Image 2.1 compact
 
