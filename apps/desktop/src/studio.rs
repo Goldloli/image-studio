@@ -2053,10 +2053,14 @@ mod tests {
     use std::time::{Duration, Instant};
     fn fixture() -> (tempfile::TempDir, StudioService) {
         let root = tempfile::tempdir().unwrap();
-        let service = StudioService::new(
+        let mut service = StudioService::new(
             AppPaths::resolve(Some(root.path())).unwrap(),
             root.path().join("not-installed-supervisor"),
         );
+        service.device_facts = DeviceFacts {
+            vram_gb: Some(12),
+            ram_gb: 32,
+        };
         (root, service)
     }
     #[test]
@@ -2252,10 +2256,15 @@ mod tests {
     #[test]
     fn conversation_receive_returns_quickly_and_missing_model_settles_rejected() {
         let root = tempfile::tempdir().unwrap();
-        let service = Arc::new(StudioService::new(
+        let mut service = StudioService::new(
             AppPaths::resolve(Some(root.path())).unwrap(),
             root.path().join("not-installed-supervisor"),
-        ));
+        );
+        service.device_facts = DeviceFacts {
+            vram_gb: Some(12),
+            ram_gb: 32,
+        };
+        let service = Arc::new(service);
         let typed = service
             .save_draft(
                 DraftInput {
