@@ -47,11 +47,11 @@ def expected_parameters(seed, recipe_id=None):
         "truncation": False,
         "thinking": True,
         "quantized_components": ["transformer", "text_encoder"],
-        "compute_dtype": "float16",
-        "vae_precision": "float32",
+        "compute_dtype": "float16" if compact else "bfloat16",
+        "vae_precision": "float32" if compact else "bfloat16",
         "attention": "_native_efficient",
         "offload": "model_cpu",
     }
     if compact:
-        parameters["resolution"] = 512
+        parameters["resolution"] = 768
     return parameters

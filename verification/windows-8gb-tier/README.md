@@ -109,6 +109,14 @@ path (or an fp32 transform path), which is outside this change; the compact Z-Im
 identity stays implemented in the protocol for future hardware but is not offered by the
 catalog.
 
+A fourth attempt (2026-11-06) tested exactly that alternative: components loaded on the CPU with
+`llm_int8_enable_fp32_cpu_offload`, `float32` compute and an fp32 VAE, 512 square. It removes the
+NaN and does produce valid latents, but it still peaks at **7.88 GiB** and runs at **~96 s per
+step** (5/9 steps in 6.3 min), so nine steps alone would need ~14 min — well past the 900 s
+generation budget. The exclusion therefore holds for every configuration this runtime can
+express on the card, and it is memory-bound rather than only a dtype problem.
+
+
 Support summary after this round: **four of the five generative models** run in the compact tier
 on this machine (Qwen-Image 2.1-Turbo, Qwen-Image 2.1, MOSS-Image-SFT and FLUX.2 Klein 4B 文生图/编辑); Z-Image stays 12 GB.
 
