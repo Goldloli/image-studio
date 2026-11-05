@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "kind": "macos-ci-release-local-hardening",
+  "status": "passed_local_real_actions_pending",
+  "date": "2026-11-05",
+  "workflow_commit": "6c05edddcab203322fe95ced3b81fc35a81e9e0e",
+  "toolchain": {
+    "rustc": "1.99.1",
+    "cargo": "1.99.1",
+    "node_local": "24.12.0",
+    "node_ci": "24.19.0",
+    "npm": "11.17.0",
+    "openspec": "1.12.0",
+    "actionlint": "1.7.12"
+  },
+  "local_gates": {
+    "cargo_fmt": "passed",
+    "cargo_clippy_all_targets_deny_warnings": "passed",
+    "cargo_workspace_tests_default_parallel": "passed",
+    "cargo_workspace_tests_default_parallel_repeats": 5,
+    "frontend_tests": "58 passed in 7 files",
+    "frontend_typecheck": "passed",
+    "frontend_build": "passed with existing large-chunk advisory",
+    "npm_audit_high": "0 vulnerabilities",
+    "openspec_strict": "24 passed, 0 failed",
+    "actionlint": "passed",
+    "workflow_structure_validator": "passed",
+    "zizmor": "0 high/medium; 9 low/help remain for pinned global tool installation and local reusable-workflow syntax"
+  },
+  "macos_release": {
+    "runner_contract": "macos-15 arm64",
+    "host_architecture": "arm64",
+    "cargo_release_build": "passed",
+    "bundle_identifier": "io.github.goldloli.image-studio",
+    "minimum_system_version": "11.0",
+    "binary_architectures": {
+      "image-studio-desktop": "arm64",
+      "diagnostic-worker": "arm64",
+      "inference-supervisor": "arm64",
+      "realesrgan-worker": "arm64"
+    },
+    "archive": "Image-Studio-0.1.0-macos-arm64.zip",
+    "archive_bytes": 32457641,
+    "archive_sha256": "9f2753848846a7cccc85342c00ee3d8cd1d878d99df239762f93831ffd1667c5",
+    "release_zip_entries": 15,
+    "apple_double_entries": 0,
+    "embedded_licenses": [
+      "LICENSE",
+      "NOTICE",
+      "THIRD_PARTY_NOTICES.md",
+      "OFL.txt",
+      "PROMPT-LIBRARY-LICENSE.txt"
+    ],
+    "signed": false,
+    "notarized": false,
+    "signature_note": "linker ad-hoc signature only; documented Gatekeeper behavior remains applicable"
+  },
+  "security": {
+    "actions_pinned_to_full_sha": true,
+    "checkout_persists_credentials": false,
+    "quality_permissions": "contents: read",
+    "build_permissions": "contents: read",
+    "release_default_permissions": "contents: read",
+    "release_final_job_permissions": "contents: write",
+    "windows_download_hashes": "SHA-256",
+    "dependabot_config": "github-actions, cargo, npm weekly"
+  },
+  "pending_real_github_rows": [
+    "push the implementation commits",
+    "first quality workflow on windows and macos-15 arm64",
+    "manual build-artifacts workflow",
+    "download and independently recheck both artifacts",
+    "push v0.1.0 tag and verify the draft release",
+    "record run URLs and artifact checksums"
+  ]
+}

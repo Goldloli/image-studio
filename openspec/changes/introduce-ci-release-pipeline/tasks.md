@@ -32,30 +32,30 @@
 ## 6. 2026-11-05 Mac 审查阻断
 
 - [x] 6.1 记录本机审查证据：`macos-14` 已退役且为 x64；macOS Clippy 13 项告警失败；并行 workspace 测试偶发 execution-lease 失败；顺序执行通过。
-- [ ] 6.2 将 quality/build macOS runner 改为当前受支持的 arm64 `macos-15`，并在 job 中断言 `uname -m=arm64`。
-- [ ] 6.3 修复 macOS `-D warnings` 的平台条件编译、dead code 与无效 drop，确保 `cargo clippy --workspace --all-targets --locked -- -D warnings` 通过。
-- [ ] 6.4 修复 execution-lease 并行测试不稳定；默认并行 suite 连续至少 5 次通过。
+- [x] 6.2 将 quality/build macOS runner 改为当前受支持的 arm64 `macos-15`，并在 job 中断言 `uname -m=arm64`。
+- [x] 6.3 修复 macOS `-D warnings` 的平台条件编译、dead code 与无效 drop，确保 `cargo clippy --workspace --all-targets --locked -- -D warnings` 通过。
+- [x] 6.4 修复 execution-lease 并行测试不稳定；默认并行 suite 连续至少 5 次通过。
 
 ## 7. 公开仓库与 Actions 供应链
 
 - [x] 7.1 在 OpenSpec 修订展示后按用户授权把 `Goldloli/image-studio` 切为 public，并记录公开时间与确认无硬编码凭据。
-- [ ] 7.2 所有 actions 固定到完整 commit SHA；checkout `persist-credentials: false`；quality/build 只读。
-- [ ] 7.3 release workflow 默认只读，只有最终 draft Release job 获得 `contents: write`。
+- [x] 7.2 所有 actions 固定到完整 commit SHA；checkout `persist-credentials: false`；quality/build 只读。
+- [x] 7.3 release workflow 默认只读，只有最终 draft Release job 获得 `contents: write`。
 - [x] 7.4 在公开后检查 secret scanning、vulnerability alerts、main 分支保护与 Actions 权限；记录仍需人工配置的项。
-- [ ] 7.5 更新 README/CI 文档，移除“私有”和错误的 `macos-14 arm64` 描述；披露历史证据中的本机路径与无根 LICENSE 现状。
+- [x] 7.5 更新 README/CI 文档，移除“私有”和错误的 `macos-14 arm64` 描述；确立 Apache-2.0 并披露历史证据中的本机路径现状。
 
 ## 8. 首次 CI 与双平台 Release 生成
 
-- [ ] 8.1 在任何构建前校验 tag、Cargo workspace、Tauri 与前端 package version 一致，并确认 tag commit 属于 `main`。
-- [ ] 8.2 macOS build 验证四个 sidecar 的 Mach-O 架构、`Info.plist`、正式 bundle identifier `io.github.goldloli.image-studio`、zip 结构与 SHA-256。
-- [ ] 8.3 Windows build 验证 installer target、字节数和 internal-package SHA-256；NSIS/Tauri utils 下载改用固定 SHA-256。
-- [ ] 8.4 draft Release 附两平台产物、checksums、README、第三方许可摘要、未签名说明和简版 notes；不得自动 publish。
+- [x] 8.1 在任何构建前校验 tag、Cargo workspace、Tauri 与前端 package version 一致，并确认 tag commit 属于 `main`。
+- [x] 8.2 macOS build 验证四个 sidecar 的 Mach-O 架构、`Info.plist`、正式 bundle identifier `io.github.goldloli.image-studio`、zip 结构与 SHA-256。
+- [x] 8.3 Windows build 验证 installer target、字节数和 internal-package SHA-256；NSIS/Tauri utils 下载改用固定 SHA-256。
+- [x] 8.4 draft Release 附两平台产物、checksums、README、第三方许可摘要、未签名说明和简版 notes；不得自动 publish。
 - [ ] 8.5 运行首次 quality 与手动 build；下载两平台 artifact、复算 checksum、确认 macOS arm64，并把 run/artifact 记录落到 `verification/ci-release/`。
 - [ ] 8.6 推送与 `tauri.conf.json` 一致的 `v*` tag，确认 draft Release 内容；发布动作仍由用户人工完成。
 
 ## 9. 收口与归档
 
-- [ ] 9.1 全量本地质量门、actionlint、workflow 安全扫描、OpenSpec strict 全部通过。
+- [x] 9.1 全量本地质量门、actionlint、workflow 安全扫描、OpenSpec strict 全部通过。
 - [ ] 9.2 用 GitHub 真实 run URL、artifact checksum、draft Release URL 补齐验收证据。
 - [ ] 9.3 归档本 change，同步 `ci-release` 与 `product-identity` 主规格。
 - [ ] 9.4 关闭 Beads 实现 issue，并报告所有 user-gated 或仍需人工配置的项。

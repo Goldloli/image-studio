@@ -1,29 +1,43 @@
 # Cross-platform CI/release evidence
 
-Status: **implemented and locally validated; user-gated rows remain** (2026-11-04).
+Status: **local hardening passed; real GitHub Actions and draft Release pending**
+(2026-11-05).
 
-Change: `openspec/changes/introduce-ci-release-pipeline`. Workflow files:
-`.github/workflows/{quality,build,release}.yml`; docs: [doc/14-ci-release.md](../../doc/14-ci-release.md).
+Change: `openspec/changes/introduce-ci-release-pipeline`. Workflows:
+`.github/workflows/{quality,build,release}.yml`; operator guide:
+[doc/14-ci-release.md](../../doc/14-ci-release.md).
 
-## Locally verified (this machine)
+## Current local evidence
 
 | Item | Result | Evidence |
 |---|---|---|
-| Workflow YAML syntax/structure | PASS | PyYAML parse + jobs/steps checks (`target/parity-gates/validate-workflows.py`) |
-| rustfmt / clippy / workspace tests | PASS | [local-validation.json](local-validation.json) |
-| Frontend test / check / build | PASS | 52 tests, tsc, vite build |
-| `openspec validate --all --strict` | PASS | 24/24 |
-| Windows CI build command (`scripts/build-windows-internal.ps1 -SkipQualityGates`) | PASS | installer `fb37d774…` (245,021,486 B), [internal-package.json](internal-package.json), [checksums](windows-SHA256SUMS.sample) |
-| macOS packaging helper (`--profile release`) | static PASS | `py_compile`, `--help`; real build requires macOS |
+| Rust fmt / Clippy `-D warnings` / workspace tests | PASS | [local-hardening-2026-11-05.json](local-hardening-2026-11-05.json) |
+| Default parallel workspace tests | PASS, repeated 5 times | same evidence file |
+| Frontend test / check / build | PASS, 58 tests | same evidence file |
+| npm audit high threshold | PASS, 0 vulnerabilities | same evidence file |
+| OpenSpec strict | PASS, 24/24 | same evidence file |
+| actionlint / workflow structure | PASS | same evidence file |
+| zizmor | 0 high/medium; low/help only | same evidence file |
+| macOS runner contract | `macos-15` arm64 + runtime assertion | workflow |
+| macOS release bundle | arm64, stable identifier, 15 zip entries | same evidence file |
+| macOS archive | 32,457,641 B, SHA-256 `9f275384…` | same evidence file |
+| Windows installer command | previously PASS; new SHA-256 download change awaits Windows runner | [local-validation.json](local-validation.json) |
 
-## User-gated (needs owner action)
+The local Node runtime is `24.12.0`, while CI pins `24.19.0`; tests/build were
+run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
+24.19.0 check.
 
-1. `git push origin main` — local commits are ready but push needs explicit authorization.
-2. Enable GitHub Actions and run `quality` once (Windows + macOS).
-3. Manually run `build-artifacts`, download both artifacts, verify `SHA256SUMS-*.txt`.
-4. Push a `v*` tag → `release-draft` creates a **draft** Release; review and publish manually.
-5. Record the first run URLs and downloaded checksums here.
+## Pending real GitHub rows
 
-Until these are done the change stays un-archived and the rows must not be counted as
-passes. Unsigned-artifact behaviour is documented in
+1. Push implementation commits; quality runs on Windows and `macos-15` arm64.
+2. Manually run `build-artifacts`; download and independently verify both
+   artifacts and checksums.
+3. Confirm Windows installer identity/bytes and macOS arm64/package identity
+   from the downloaded files.
+4. Push tag `v0.1.0`; verify the draft Release contains both artifacts,
+   checksums, README, license/notice files and release notes.
+5. Record run URLs, artifact digests and draft Release URL here.
+
+These rows are not passes until the GitHub runs and downloaded artifacts have
+been checked. Unsigned/notarization limitations are documented in
 [doc/14-ci-release.md](../../doc/14-ci-release.md).

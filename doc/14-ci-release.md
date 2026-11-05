@@ -1,68 +1,98 @@
 # CI 与发布（GitHub Actions）
 
-本仓库的 CI/release 由三个 workflow 组成，面向私有仓库 `Goldloli/image-studio`。workflow 文件由本仓库维护；**首次启用、push 与 tag 发布需要仓库所有者授权**，代理不在本地自动 push。
+仓库 `Goldloli/image-studio` 为 public。CI/release 由三个 workflow 组成，所有第三方 action 固定到完整 commit SHA；quality/build 仅有 `contents: read`，只有最终 draft Release job 获得 `contents: write`。所有 checkout 设置 `persist-credentials: false`。
 
 ## Workflow 一览
 
-| 文件 | 触发 | 作用 | 产物 |
-|---|---|---|---|
-| `.github/workflows/quality.yml` | push `main`、PR、手动 | Windows + macOS 矩阵跑 rustfmt、clippy `-D warnings`、workspace 测试、前端 `npm ci/test/check/build`、`openspec validate --all --strict` | 无（质量信号） |
-| `.github/workflows/build.yml` | 手动、被 release 调用 | Windows：`scripts/build-windows-internal.ps1 -SkipQualityGates` 产出 NSIS；macOS：`cargo build --release` + `scripts/prepare-macos-dev-app.py --profile release` 打包 `.app` zip | `windows-installer`、`macos-app`（各含 `SHA256SUMS-*.txt`） |
-| `.github/workflows/release.yml` | tag `v*` | 调用 build workflow，校验 tag 与 `apps/desktop/tauri.conf.json` 版本一致，创建 **draft** GitHub Release | 两平台安装包/zip + checksums + 自动 release notes |
+| 文件 | 触发 | 作用 |
+|---|---|---|
+| `.github/workflows/quality.yml` | push `main`、PR、手动 | Windows x64 + macOS 15 arm64 的 fmt、Clippy `-D warnings`、workspace tests、前端 test/check/build、OpenSpec strict |
+| `.github/workflows/build.yml` | 手动、被 release 调用 | Windows NSIS 与 macOS `.app` zip、架构/包身份检查、SHA256SUMS artifact |
+| `.github/workflows/release.yml` | tag `v*` | 版本/tag/main 来源检查，复用双平台构建，创建 draft GitHub Release |
 
-所有 workflow 使用固定版本：Rust **1.99.1**、Node **24.19.0**、OpenSpec CLI **1.12.0**。质量 workflow 不下载模型权重、不跑 GPU 推理；模型与生成验收仍以 `verification/windows-parity-*`、`verification/windows-data-root-guard/` 等本机证据为准。
+固定工具版本为 Rust **1.99.1**、Node **24.19.0**、npm **11.17.0**、OpenSpec **1.12.0**。CI 不下载模型权重、不运行 GPU 推理；模型和真实生成验收继续以本机证据为准。
 
-## 干净检出与产物布局（review 修正）
+## macOS runner 与产物
 
-- **前端必须先构建**：`tauri::generate_context!` 在编译期嵌入 `apps/frontend/dist`，干净检出时该目录不存在会直接 panic。quality job 与 macOS build job 都在任何 cargo 步骤之前执行 `npm run build`；Windows build 由 `scripts/build-windows-internal.ps1` 内部先构建前端。
-- **artifact 必须是平铺目录**：`actions/upload-artifact` 以搜索路径的最近公共祖先作为 artifact 根；把仓库根文件与 `target/release/...` 混在一起会让下载结果包含目录，`gh release create ... artifacts/*` 会把目录当文件而失败。build job 现在先复制到 `target/ci-artifacts/{windows,macos}/` 再上传，release 用 `find artifacts -type f` 只传文件。
-- **校验和用 LF**：Windows job 用 `System.IO.File::WriteAllText` 写 `SHA256SUMS-windows.txt`（避免 CRLF 让 Ubuntu 的 `sha256sum -c` 找不到文件）；release job 在创建 draft 前执行 `sha256sum -c SHA256SUMS-{windows,macos}.txt`。
-- **先校验 tag 再构建**：release.yml 有独立的 `verify-version` job，版本不匹配在几分钟内失败，不会白跑两个 90 分钟构建。
-- **版本号不硬编码**：Windows 安装包文件名由 `apps/desktop/tauri.conf.json` 的 version 推导，版本升级不需要改 workflow。
-- 第三方 action 目前使用主版本 tag（私有仓库、无 secrets 的 v1）；升级为 commit SHA 固定作为后续加固项。
+- `macos-14` 是 Intel x64，并已于 2026-11-02 退役；workflow 使用官方 arm64 `macos-15`，并在 job 中执行 `uname -m=arm64`。
+- Windows 产物为目标 triple `x86_64-pc-windows-msvc`；macOS 产物为 Apple Silicon arm64，最低系统版本 macOS 11。
+- macOS bundle identifier 为 `io.github.goldloli.image-studio`。`.app` 包含桌面、诊断、监督与 Real-ESRGAN sidecar，以及项目许可证、字体/提示词库/第三方声明。
+- `.app` 先完整验证再 zip；发布 job 再次解包检查 `Info.plist`、四个 Mach-O、许可证资源和版本。
 
-## 未签名产物（v1 已知限制）
+## 版本与来源
+
+以下四项必须完全一致：
+
+1. Git tag 去掉前缀 `v`；
+2. 根 `Cargo.toml` 的 `[workspace.package].version`；
+3. `apps/desktop/tauri.conf.json` 的 `version`；
+4. `apps/frontend/package.json` 的 `version`。
+
+tag commit 还必须属于 `main`。任一条件不满足时，release 在 Windows/macOS 长构建前失败。
+
+## Artifact 与 draft Release
+
+- Windows artifact：NSIS current-user installer、LF `SHA256SUMS-windows.txt`、`internal-package.json`。
+- macOS artifact：`Image-Studio-<version>-macos-arm64.zip`、LF `SHA256SUMS-macos.txt`。
+- 发布 job 先执行两平台 checksum，再解包 macOS 包做身份/架构/资源检查。
+- draft Release 附两平台产物、checksums、README、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md` 与 `RELEASE-NOTES.md`。
+- 不自动 publish。同名 Release 已存在时，重跑会明确失败，避免生成部分 release。
+
+下载后应在对应页签执行：
+
+```bash
+sha256sum -c SHA256SUMS-windows.txt
+sha256sum -c SHA256SUMS-macos.txt
+```
+
+## 未签名产物
 
 当前 release 不包含代码签名与公证：
 
-- **Windows**：SmartScreen 会提示"Windows 已保护你的电脑"，选择"更多信息 → 仍要运行"。
-- **macOS**：Gatekeeper 会阻止直接打开；右键 → 打开，或执行
+- Windows SmartScreen 可能提示“Windows 已保护你的电脑”；核对 checksum 后使用“更多信息 → 仍要运行”。
+- macOS Gatekeeper 可能阻止首次启动；核对 checksum 后右键打开，或运行
   `xattr -dr com.apple.quarantine "Image Studio.app"`。
-- 签名/公证需要证书与 secrets，另行立项（不阻塞本流水线）。
 
-## 用户启用步骤（需要 push 授权）
+签名/公证需要证书与 secrets，应另立 change。
 
-1. 确认本地提交已就绪：`git status`、`git log --oneline origin/main..HEAD`。
-2. 授权并 push 到 GitHub（本仓库保守策略：push 需明确授权）：
-   `git push origin main`
-3. 在 GitHub 仓库打开 **Actions**，允许 workflow 运行；先手动跑一次：
-   - Actions → `quality` → Run workflow；
-   - Actions → `build-artifacts` → Run workflow，下载两平台 artifact 并核对 `SHA256SUMS-*.txt`。
-4. 检查 `apps/desktop/tauri.conf.json` 的 version 与计划 tag 一致，然后推送 tag：
-   `git tag v0.1.0 && git push origin v0.1.0`
-5. `release-draft` 会创建 **draft** Release；在 GitHub 上人工审阅 notes/产物后手动 Publish。
-6. 把首次 run 的 URL 与 artifact 记录写入 `verification/ci-release/`。
+## 公开仓库安全
 
-## 本地可验证项
+- Secret scanning、push protection、依赖漏洞告警与 Dependabot security updates 已启用；目标是把 Security 告警保持为 0。
+- quality/build 对 fork PR 只有只读 token，不接触 secrets。
+- Actions 缓存只用于 quality/build；发布 artifact 来自当前 tag run，并由 SHA-256 再次验证。
+- main 分支保护、首次真实 runs 和 draft Release URL 属于上线验证项，记录在 `verification/ci-release/`。
 
-- workflow YAML 结构与语法：`python scripts/ci/validate-workflows.py`（PyYAML 解析 + 触发/jobs/steps 结构检查；随仓库提交）。
-- 干净检出 blocker 已本机复现：移走 `apps/frontend/dist` 后 `cargo check -p image-studio-desktop` 报 `frontendDist … doesn't exist`；workflow 已把 `npm run build` 放到所有 cargo 步骤之前。
-- workflow 中的命令逐条在本机执行过：rustfmt、clippy、workspace 测试、前端 test/check/build、openspec strict、Windows 内部安装包构建（含 CI 同参数 `-SkipQualityGates`）。
-- Windows build job 的 staging/checksums 逻辑已在本机用相同 PowerShell 片段跑通（平铺目录 + LF checksums）。
-- macOS 打包脚本的 `--profile release` 参数在 Windows 上只能做编译/`--help` 静态验证；真实 macOS 构建与首次 Actions run 标记为 user-gated。
+## 本地验证
+
+```bash
+python3 scripts/ci/validate-workflows.py
+actionlint -no-color
+uvx zizmor .github/workflows
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo test --workspace --locked
+npm --prefix apps/frontend test
+npm --prefix apps/frontend run check
+npm --prefix apps/frontend run build
+openspec validate --all --strict
+```
+
+Zizmor 的固定版本提示应保持 0 high/medium；当前仅允许已有固定版本全局 npm/OpenSpec 安装与同仓库 workflow 引用产生 low/help。真实 GitHub run 是最终验收，不以本地 YAML 结构校验替代。
 
 ## 故障排查
 
 | 现象 | 处理 |
 |---|---|
-| Windows job 下载 NSIS/WebView2 失败 | `scripts/build-windows-internal.ps1` 内置重试；确认 runner 可访问 GitHub 与 Microsoft 下载源，重跑 job |
-| Rust 缓存导致旧工具链 | 检查 `rustc -V` 步骤输出；必要时清除 Actions cache |
-| clippy/测试在 runner 上失败但本机通过 | 检查 Windows/macOS 差异与路径大小写；保留 run 日志到 `verification/ci-release/` |
-| release job 版本校验失败 | 修改 `tauri.conf.json` version 或重打 tag，二者必须一致 |
-| macOS artifact 打不开 | 未签名预期行为；按上文右键打开/xattr 说明处理 |
+| macOS job 未调度 | 确认使用 `macos-15`；检查 GitHub runner 标签是否仍受支持 |
+| Clippy 只在 macOS 失败 | 重新跑两平台 `--all-targets`，检查 Windows-only cfg/dead code |
+| 版本校验失败 | 同步 tag、Cargo、Tauri 与前端 package version |
+| tag 不属于 main | 将 tag 移到已合入 main 的发布提交 |
+| macOS 产物非 arm64 | 检查 runner host、Cargo target 与四个 sidecar 的 `file` 输出 |
+| `gh release create` 提示已存在 | 审阅或删除同名 draft 后重跑；不要覆盖已发布版本 |
+| 下载包被系统拦截 | 校验 SHA-256；未签名限制见上文 |
 
-## 不在本流水线范围
+## 不在流水线范围
 
-- 代码签名、公证、公证后的自动更新。
-- 模型权重下载、GPU 推理、真实生成验收。
-- 自动 push、自动发布（release 始终 draft）。
+- 模型权重下载、GPU 推理、真实图片质量验收。
+- 代码签名、公证、自动更新、商店上架。
+- 自动 publish 或绕过人工 draft 审阅。

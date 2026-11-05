@@ -1,6 +1,6 @@
 # introduce-ci-release-pipeline
 
-**状态：2026-11-05 审查后修订，等待用户确认新增修复范围；尚未归档。** 原始 workflow 已提交，但首次真实 Actions run 仍为 0 次。2026-11-05 的 Mac 端全面审查发现 macOS runner 已退役且架构标注错误、macOS Clippy 必然失败、并行测试存在偶发失败、公开仓库 Actions 供应链与双平台发布元数据不足；本轮将这些修复并入现有 change。
+**状态：2026-11-05 本地实现完成，等待真实 GitHub Actions、artifact 下载和 draft Release 验收；尚未归档。** macOS Clippy、并行测试、退役 runner、公开仓库 Actions 供应链、正式 bundle identity 与双平台 Release 结构已修复；首次真实 quality/build/release run 仍未发生。
 
 边界：`macos-14` 已于 2026-11-02 退役且为 Intel x64；当前把其产物命名为 `macos-arm64` 不成立。用户已授权在文档完成后将仓库切换为 public；源码实现必须在本修订获确认后开始。首次 quality/build/release run、产物下载校验与 draft Release 人工审阅仍以 GitHub 真实结果为准，不得用本地模拟冒充上线通过。
 

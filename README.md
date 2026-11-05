@@ -1,6 +1,6 @@
 # Image Studio
 
-源码仓库：[Goldloli/image-studio](https://github.com/Goldloli/image-studio)（私有）。Windows 目标机已完成 Gate 0、产品安装与生成闭环、安装版 UI 验收和 NSIS 内部测试包；Windows 首轮交付已于 2026-11-03 由用户验收收口并归档 change、推送源码；收口记录见 [windows-final-acceptance.json](verification/windows-final-acceptance.json)，区分机器已验证项、用户 waive 的 I07/P06，以及按用户验收接受的人工/Mac 项。，明细和接力步骤见 [Windows 进度与接力](#windows-进度与接力)，完整交接见 [doc/12](doc/12-windows-handoff-2026-11-03.md)。
+公开源码仓库：[Goldloli/image-studio](https://github.com/Goldloli/image-studio)。Windows 目标机已完成 Gate 0、产品安装与生成闭环、安装版 UI 验收和 NSIS 内部测试包；Windows 首轮交付已于 2026-11-03 由用户验收收口并归档 change、推送源码；收口记录见 [windows-final-acceptance.json](verification/windows-final-acceptance.json)，区分机器已验证项、用户 waive 的 I07/P06，以及按用户验收接受的人工/Mac 项。明细和接力步骤见 [Windows 进度与接力](#windows-进度与接力)，完整交接见 [doc/12](doc/12-windows-handoff-2026-11-03.md)。
 
 Rust 本地图片创作工作台。桌面栈为 Rust core + Tauri 2 + React，工作区参考 Cherry Studio 绘图页。已接入七个精确型号：Z-Image Turbo、FLUX.2 Klein 4B distilled、BiRefNet general epoch_244、Real-ESRGAN x4plus、Qwen-Image 2.1 基础版、Qwen-Image 2.1 Turbo 与 MOSS-Image-SFT；覆盖文生图、Klein 单图编辑、CPU 去背景/RGBA/mask 和 ncnn 精确 4× 放大。Qwen/MOSS 默认从 ModelScope 固定文件 revision 下载，同时逐文件核对冻结上游快照。创作页以多会话组织多轮提示词和图片，发送后立即显示占位与真实阶段进度，正式结果在同一卡片原位出现。功能页只展示真实可执行能力，作品页跨会话浏览正式 AssetRef，任务中心提供宿主侧状态筛选、检索、稳定分页和可读制作记录。模型页由宿主目录驱动，可检索七个正式目标并分开展示接入、安装、运行时、设备与可执行状态；设置页提供持久外观偏好、显式新会话默认值、真实存储和诊断信息。M3 Max / 128 GiB 已完成七个型号的真实执行、禁网、原生导出、取消和恢复；完整证据见[七型号整批交接](verification/qwen-moss-20261101/moss-stage-report.md)、[Qwen 阶段报告](verification/qwen-moss-20261101/qwen-stage-report.md)与[前置计划模型阶段验收](verification/planned-models-20261031/results.md)。
 
@@ -74,7 +74,7 @@ bd prime
 
 ### CI 与发布（GitHub Actions，用户启用）
 
-仓库内置跨平台质量门、Windows/macOS 产物构建与 draft Release workflow；workflow 文件与本地验证见 [doc/14-ci-release.md](doc/14-ci-release.md)，本机验收记录在 [verification/ci-release/](verification/ci-release/README.md)。首次 push、Actions 启用与 tag 发布需要仓库所有者授权；v1 产物未签名/未公证。
+仓库内置跨平台质量门、Windows x64/macOS arm64 产物构建与 draft Release workflow；macOS 使用 `macos-15` arm64 runner，第三方 action 固定 commit SHA，release 写权限只授予最终发布 job。版本未在 Cargo、Tauri、前端与 tag 之间一致，或 tag 不属于 `main` 时，发布在长构建前失败。workflow 与本地验证见 [doc/14-ci-release.md](doc/14-ci-release.md)，验收记录在 [verification/ci-release/](verification/ci-release/README.md)。v1 产物未签名/未公证。
 
 [![quality](https://github.com/Goldloli/image-studio/actions/workflows/quality.yml/badge.svg)](https://github.com/Goldloli/image-studio/actions/workflows/quality.yml)
 

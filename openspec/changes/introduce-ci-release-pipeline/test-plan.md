@@ -35,6 +35,8 @@
 | R9 | 密钥扫描 | pass with disclosure | Git 历史未命中常见 GitHub/AWS/private-key 模式；当前树有 225 个 macOS 本机路径与 50 个 Windows 用户名路径 |
 | R10 | 前端/API/规格门 | pass | frontend 58 tests、typecheck、build；`npm audit` 0 vulnerabilities；OpenSpec strict 24/24 |
 
+R1–R3、R6 与 R8 已在本地修复：workflow 使用 `macos-15` arm64、macOS Clippy 全绿、默认并行测试连续 5 次通过、正式 bundle identity 已写入并验证、Actions 无 high/medium 安全发现。对应真实 GitHub runner 行仍待 C11–C19 验证。
+
 ## 修复后新增验收
 
 | ID | 场景 | 期望 | 证据 |
