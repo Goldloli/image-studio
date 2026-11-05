@@ -38,10 +38,10 @@
 
 ## 7. 公开仓库与 Actions 供应链
 
-- [ ] 7.1 在 OpenSpec 修订展示后按用户授权把 `Goldloli/image-studio` 切为 public，并记录公开时间与确认无硬编码凭据。
+- [x] 7.1 在 OpenSpec 修订展示后按用户授权把 `Goldloli/image-studio` 切为 public，并记录公开时间与确认无硬编码凭据。
 - [ ] 7.2 所有 actions 固定到完整 commit SHA；checkout `persist-credentials: false`；quality/build 只读。
 - [ ] 7.3 release workflow 默认只读，只有最终 draft Release job 获得 `contents: write`。
-- [ ] 7.4 在公开后检查 secret scanning、vulnerability alerts、main 分支保护与 Actions 权限；记录仍需人工配置的项。
+- [x] 7.4 在公开后检查 secret scanning、vulnerability alerts、main 分支保护与 Actions 权限；记录仍需人工配置的项。
 - [ ] 7.5 更新 README/CI 文档，移除“私有”和错误的 `macos-14 arm64` 描述；披露历史证据中的本机路径与无根 LICENSE 现状。
 
 ## 8. 首次 CI 与双平台 Release 生成

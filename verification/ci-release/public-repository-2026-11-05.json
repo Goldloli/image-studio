@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "kind": "public-repository-security-baseline",
+  "date": "2026-11-05",
+  "repository": "Goldloli/image-studio",
+  "visibility": "public",
+  "remote_main_commit_before_docs_push": "24a270111747af1e68297f62d23722c5b0be9aa7",
+  "local_docs_commit": "079bba6",
+  "push_performed": false,
+  "security_and_analysis": {
+    "dependabot_security_updates": "enabled",
+    "secret_scanning": "enabled",
+    "secret_scanning_push_protection": "enabled",
+    "secret_scanning_validity_checks": "disabled",
+    "secret_scanning_non_provider_patterns": "disabled"
+  },
+  "secret_scanning_alerts": 0,
+  "vulnerability_alerts": "enabled",
+  "main_branch_protection": "not_enabled",
+  "workflow_runs": {
+    "quality": 0,
+    "build_artifacts": 0
+  },
+  "disclosure_review": {
+    "known_secret_patterns_in_git_history": 0,
+    "tracked_files_with_macos_user_path": 225,
+    "tracked_files_with_windows_user_path": 50,
+    "known_hardcoded_credentials": 0,
+    "result": "no hardcoded credentials detected; local usernames and work-directory paths remain visible in repository history"
+  },
+  "pending": [
+    "enable main branch protection after selecting required checks and review policy",
+    "run first quality and manual build workflows",
+    "verify downloaded artifacts, checksums and macOS arm64 architecture",
+    "record tag-triggered draft Release URL"
+  ]
+}
