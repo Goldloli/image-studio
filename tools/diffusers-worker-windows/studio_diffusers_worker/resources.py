@@ -17,6 +17,15 @@ from ctypes import wintypes
 LOAD_LIMIT_SECONDS = 600.0
 GENERATION_LIMIT_SECONDS = 900.0
 CUDA_RESERVED_LIMIT_GIB = 10.5
+# The compact tier must fit an 8 GB card that also runs the desktop compositor.
+COMPACT_CUDA_LIMIT_GIB = 6.0
+
+
+def compute_torch_dtype(name):
+    """Map the frozen `compute_dtype` parameter to a torch dtype (fp16 on Turing)."""
+    import torch
+
+    return torch.float16 if name == "float16" else torch.bfloat16
 PRIVATE_COMMIT_LIMIT_GIB = 24.0
 AVAILABLE_RAM_MINIMUM_GIB = 2.0
 

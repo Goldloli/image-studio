@@ -20,6 +20,9 @@ import time
 from pathlib import Path
 
 from ..resources import (
+    COMPACT_CUDA_LIMIT_GIB,
+    CUDA_RESERVED_LIMIT_GIB,
+    compute_torch_dtype,
     BudgetExceeded,
     CudaPeaks,
     ResourceSampler,
@@ -84,7 +87,7 @@ def load_tokenizer(model_dir: Path):
     return AutoTokenizer.from_pretrained(str(model_dir), subfolder="tokenizer")
 
 
-def load_text_encoder(model_dir: Path, prepared_dir: Path):
+def load_text_encoder(model_dir: Path, prepared_dir: Path, compute_dtype=None):
     import torch
     from transformers import AutoModel
 
@@ -94,7 +97,7 @@ def load_text_encoder(model_dir: Path, prepared_dir: Path):
         )
     encoder = AutoModel.from_pretrained(
         str(prepared_dir),
-        dtype=torch.bfloat16,
+        dtype=compute_dtype or torch.bfloat16,
         device_map="cpu",
         low_cpu_mem_usage=True,
     )
@@ -124,14 +127,14 @@ def encode_prompt(tokenizer, text_encoder, prompt: str, max_sequence_length: int
     return row.cpu(), int(row.shape[0])
 
 
-def load_transformer(module, prepared_dir: Path):
+def load_transformer(module, prepared_dir: Path, compute_dtype=None):
     import torch
 
     if not (prepared_dir / "config.json").is_file():
         raise ValueError("prepared NF4 DiT cache is missing; run --prepare first")
     transformer = module.MOSSImageTransformer.from_pretrained(
         str(prepared_dir),
-        torch_dtype=torch.bfloat16,
+        torch_dtype=compute_dtype or torch.bfloat16,
         low_cpu_mem_usage=True,
     )
     transformer = transformer.to("cuda:0")
@@ -154,7 +157,7 @@ def _pad_prompt_rows(positive, negative):
     return pad(positive) + pad(negative)
 
 
-def _sample(module, transformer, positive, positive_mask, negative, negative_mask, request, progress, cancel):
+def _sample(module, transformer, positive, positive_mask, negative, negative_mask, request, progress, cancel, resolution=1024):
     import torch
     from diffusers.utils.torch_utils import randn_tensor
 
@@ -165,7 +168,7 @@ def _sample(module, transformer, positive, positive_mask, negative, negative_mas
     scheduler.set_timesteps(steps, device="cuda:0")
     generator = torch.Generator(device="cpu").manual_seed(request["seed"])
     latents = randn_tensor(
-        (1, transformer.config.latent_channels, HEIGHT // 16, WIDTH // 16),
+        (1, transformer.config.latent_channels, resolution // 16, resolution // 16),
         generator=generator,
         device="cuda:0",
         dtype=torch.float32,
@@ -235,14 +238,19 @@ def generate(request, progress, cancel):
     prepared = model_dir.with_name(model_dir.name + ".prepared")
     steps = int(request["parameters"]["steps"])
     token_budget = int(request["parameters"]["token_budget"])
+    resolution = int(request["parameters"].get("resolution", 1024))
+    compute_dtype = compute_torch_dtype(request["parameters"].get("compute_dtype"))
+    compact = resolution != 1024
     max_sequence_length = 4096
     try:
         require_available_ram("moss text stage")
-        device_index, properties = select_device()
+        device_index, properties = select_device(
+            8 if compact else 10, (7, 5) if compact else (8, 6)
+        )
         torch.cuda.set_device(device_index)
         torch.cuda.empty_cache()
         log(
-            f"moss device={properties.name} steps={steps} "
+            f"moss device={properties.name} steps={steps} resolution={resolution} "
             f"prepared={prepared.name}"
         )
         module = load_moss_pipeline()
@@ -253,7 +261,9 @@ def generate(request, progress, cancel):
         stage_started = time.perf_counter()
         tokenizer = load_tokenizer(model_dir)
         checkpoint(cancel)
-        text_encoder = load_text_encoder(model_dir, prepared / "text_encoder")
+        text_encoder = load_text_encoder(
+            model_dir, prepared / "text_encoder", compute_dtype
+        )
         text_load_seconds = time.perf_counter() - stage_started
         if text_load_seconds > LOAD_LIMIT_SECONDS:
             raise BudgetExceeded(
@@ -296,7 +306,7 @@ def generate(request, progress, cancel):
         require_available_ram("moss sampling stage")
         cuda.reset_phase()
         stage_started = time.perf_counter()
-        transformer = load_transformer(module, prepared / "transformer")
+        transformer = load_transformer(module, prepared / "transformer", compute_dtype)
         transformer_load_seconds = time.perf_counter() - stage_started
         if transformer_load_seconds > LOAD_LIMIT_SECONDS:
             raise BudgetExceeded(
@@ -316,6 +326,7 @@ def generate(request, progress, cancel):
             request,
             progress,
             cancel,
+            resolution,
         )
         cuda.record_phase()
         checkpoint(cancel)
@@ -344,11 +355,18 @@ def generate(request, progress, cancel):
         _release()
         _cleanup_check("vae")
         progress("writing")
-        candidate = save_primary_image(Path(request["output_dir"]), image)
+        candidate = save_primary_image(
+            Path(request["output_dir"]), image, width=resolution, height=resolution
+        )
         elapsed_seconds = time.monotonic() - started
         resources = resource_report(sampler, cuda, elapsed_seconds)
         log("moss resources=" + json.dumps(resources, ensure_ascii=False))
-        enforce_budget(sampler, cuda, elapsed_seconds)
+        enforce_budget(
+            sampler,
+            cuda,
+            elapsed_seconds,
+            COMPACT_CUDA_LIMIT_GIB if compact else CUDA_RESERVED_LIMIT_GIB,
+        )
         return candidate
     finally:
         sampler.stop()
