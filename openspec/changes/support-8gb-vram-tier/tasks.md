@@ -5,15 +5,15 @@
 ## 1. 文档与确认
 
 - [ ] 1.1 proposal / design / tasks / test-plan 与四个 spec delta 完成并展示；等待项目所有者确认。
-- [ ] 1.2 确认后在本仓库 bd 中建立 change 跟踪 issue，并把任务映射到 issue。
+- [x] 1.2 确认后在本仓库 bd 中建立 change 跟踪 issue，并把任务映射到 issue。
 
 ## 2. 设备事实与档位选择（无 GPU 依赖，先做）
 
-- [ ] 2.1 `DeviceFacts` 增加 `compute_capability`：Windows 用 `nvidia-smi --query-gpu=compute_cap` 读取，超时/缺失降级为未知；macOS 与无 NVIDIA 设备保持未知。单测覆盖 7.5、8.6、无法读取三种输入。
-- [ ] 2.2 新增档位选择：`standard`（显存 ≥ 条目 standard 门槛）/ `compact`（≥ 8 GB）/ 不可执行。单测覆盖 8 GB、12 GB、显存未知、内存不足四种组合。
-- [ ] 2.3 目录 schema 增加 `tiers[]`（id、minVramGb、minRamGb、resolution、computeDtype）与 `standardMinVramGb`；`hardwareEligible` 改为"任一档满足"，`canInstall` / `canUse` 随之调整。现有 `unsatisfied_hardware_disables_entry_points_with_a_chinese_reason` 需改写为"8 GB 机器可选择紧凑档，只有标准档被禁用"。
-- [ ] 2.4 模型页与发送区投影：显示当前档位、画幅、精度与降级原因（如"显存 8 GB < 12 GB，自动使用紧凑档 768²"）。前端 `model-catalog.test.ts` 增补 8 GB/12 GB 两组。
-- [ ] 2.5 验证：`cargo test -p image-studio-desktop` 相关用例、`npm test` 通过；无 GPU 依赖。
+- [x] 2.1 `DeviceFacts` 增加 `compute_capability`：Windows 用 `nvidia-smi --query-gpu=compute_cap` 读取，超时/缺失降级为未知；macOS 与无 NVIDIA 设备保持未知。单测覆盖 7.5、8.6、无法读取三种输入。
+- [x] 2.2 新增档位选择：`standard`（显存 ≥ 条目 standard 门槛）/ `compact`（≥ 8 GB）/ 不可执行。单测覆盖 8 GB、12 GB、显存未知、内存不足四种组合。
+- [x] 2.3 目录 schema 增加 `tiers[]`（id、minVramGb、minRamGb、resolution、computeDtype）与 `standardMinVramGb`；`hardwareEligible` 改为"任一档满足"，`canInstall` / `canUse` 随之调整。现有 `unsatisfied_hardware_disables_entry_points_with_a_chinese_reason` 需改写为"8 GB 机器可选择紧凑档，只有标准档被禁用"。
+- [x] 2.4 模型页与发送区投影：显示当前档位、画幅、精度与降级原因（如"显存 8 GB < 12 GB，自动使用紧凑档 768²"）。前端 `model-catalog.test.ts` 增补 8 GB/12 GB 两组。
+- [x] 2.5 验证：`cargo test -p image-studio-desktop` 相关用例、`npm test` 通过；无 GPU 依赖。
 
 ## 3. 协议与配方身份
 
