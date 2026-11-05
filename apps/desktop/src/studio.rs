@@ -480,11 +480,20 @@ impl StudioService {
             .as_ref()
             .map(|facts| facts.metadata.clone())
             .unwrap_or_default();
+        let tier = facts
+            .as_ref()
+            .map(|facts| facts.tier.clone())
+            .unwrap_or_default();
         let static_facts = json!({
             "hardwareEligible": hardware_eligible,
             "hardwareReason": hardware_reason,
             "minVramGb": metadata.min_vram_gb,
             "minRamGb": metadata.min_ram_gb,
+            "standardMinVramGb": tier.standard_min_vram_gb,
+            "tier": tier.id,
+            "resolution": tier.resolution,
+            "computeDtype": tier.compute_dtype,
+            "tierReason": tier.reason,
             "quantization": metadata.quantization,
             "licenseNotice": metadata.license_notice,
             "windowsStatus": metadata.windows_status,
@@ -644,6 +653,10 @@ impl StudioService {
                     .as_ref()
                     .map(|facts| facts.metadata.clone())
                     .unwrap_or_default();
+                let tier = facts
+                    .as_ref()
+                    .map(|facts| facts.tier.clone())
+                    .unwrap_or_default();
                 json!({
                     "installId": snapshot.install_id.clone(),
                     "label": install_display_name(&snapshot.install_id),
@@ -656,7 +669,12 @@ impl StudioService {
                     "hardwareEligible": hardware_eligible,
                     "hardwareReason": hardware_reason,
                     "minVramGb": metadata.min_vram_gb,
-                    "minRamGb": metadata.min_ram_gb
+                    "minRamGb": metadata.min_ram_gb,
+                    "standardMinVramGb": tier.standard_min_vram_gb,
+                    "tier": tier.id,
+                    "resolution": tier.resolution,
+                    "computeDtype": tier.compute_dtype,
+                    "tierReason": tier.reason
                 })
             })
             .collect::<Vec<_>>();
@@ -2060,6 +2078,7 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
         (root, service)
     }
@@ -2263,6 +2282,7 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
         let service = Arc::new(service);
         let typed = service
@@ -2971,8 +2991,11 @@ mod tests {
             studio_core::generation::WINDOWS_V2_RUNTIME
         );
         let klein = &models[1]["staticFacts"];
-        assert_eq!(klein["minVramGb"], 12);
+        assert_eq!(klein["minVramGb"], 8);
+        assert_eq!(klein["standardMinVramGb"], 12);
         assert_eq!(klein["minRamGb"], 32);
+        assert_eq!(klein["tier"], "standard");
+        assert_eq!(klein["resolution"], 1024);
         assert!(klein["licenseNotice"].as_str().unwrap().contains("Apache"));
         let qwen = &models[4]["staticFacts"];
         assert!(qwen["licenseNotice"].as_str().unwrap().contains("非商业"));
@@ -3140,14 +3163,12 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: Some(8),
             ram_gb: 16,
+            compute_capability: Some((7, 5)),
         };
         for model in [WINDOWS_KLEIN_MODEL, WINDOWS_MOSS_MODEL] {
             let error = service.install(model).unwrap_err();
             assert!(error.contains("当前设备不满足硬件门槛"), "{model}: {error}");
-            assert!(
-                error.contains("显存 ≥ 12 GB（当前 8 GB）"),
-                "{model}: {error}"
-            );
+            // At 8 GB the compact tier's VRAM requirement is met; the 16 GB RAM is what blocks it.
             assert!(
                 error.contains("内存 ≥ 32 GB（当前 16 GB）"),
                 "{model}: {error}"
@@ -3172,6 +3193,7 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: Some(8),
             ram_gb: 16,
+            compute_capability: Some((7, 5)),
         };
         let saved = save_gate_draft(
             &service,
@@ -3215,6 +3237,7 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: None,
             ram_gb: 0,
+            compute_capability: None,
         };
         let install_error = service.install(WINDOWS_QWEN_MODEL).unwrap_err();
         assert!(
@@ -3265,6 +3288,7 @@ mod tests {
         let at_threshold = DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
         for model in [
             WINDOWS_ZIMAGE_INSTALL_ID,
@@ -3278,20 +3302,30 @@ mod tests {
             enforce_hardware_gate(&catalog, model, &at_threshold)
                 .unwrap_or_else(|error| panic!("{model} must be allowed: {error}"));
         }
-        // One GiB below a registered VRAM/RAM threshold is rejected.
+        // Below the standard threshold the compact tier takes over instead of blocking.
         let low_vram = DeviceFacts {
             vram_gb: Some(11),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
-        let vram_error = enforce_hardware_gate(&catalog, WINDOWS_KLEIN_MODEL, &low_vram)
-            .expect_err("11 GB VRAM must not satisfy a 12 GB threshold");
+        enforce_hardware_gate(&catalog, WINDOWS_KLEIN_MODEL, &low_vram)
+            .expect("11 GB VRAM must fall back to the 8 GB compact tier");
+        // Below every tier the model is rejected with the compact requirement.
+        let tiny_vram = DeviceFacts {
+            vram_gb: Some(7),
+            ram_gb: 32,
+            compute_capability: Some((8, 6)),
+        };
+        let vram_error = enforce_hardware_gate(&catalog, WINDOWS_KLEIN_MODEL, &tiny_vram)
+            .expect_err("7 GB VRAM must not satisfy the 8 GB compact threshold");
         assert!(
-            vram_error.contains("显存 ≥ 12 GB（当前 11 GB）"),
+            vram_error.contains("显存 ≥ 8 GB（当前 7 GB）"),
             "{vram_error}"
         );
         let low_ram = DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 31,
+            compute_capability: Some((8, 6)),
         };
         let ram_error = enforce_hardware_gate(&catalog, WINDOWS_KLEIN_MODEL, &low_ram)
             .expect_err("31 GB RAM must not satisfy a 32 GB threshold");
@@ -3308,6 +3342,7 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
         // A parity model at exactly its registered threshold must pass both the host gate and the
         // library turn-input allowlist (the seven-model threshold matrix itself is covered by
@@ -3378,6 +3413,7 @@ mod tests {
         let unknown_facts = DeviceFacts {
             vram_gb: None,
             ram_gb: 0,
+            compute_capability: None,
         };
         // Unknown ids are rejected by the install/turn path itself; the gate must not invent a
         // hardware threshold for them.
