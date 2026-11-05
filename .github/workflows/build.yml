@@ -17,22 +17,27 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Install pinned Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           toolchain: 1.99.1
 
       - name: Cache Rust build
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
 
       - name: Install pinned Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24.19.0"
           cache: npm
           cache-dependency-path: apps/frontend/package-lock.json
+
+      - name: Install pinned npm
+        run: npm install --global npm@11.17.0
 
       - name: Build internal installer
         shell: pwsh
@@ -46,16 +51,22 @@ jobs:
           $installer = Join-Path "target/release/bundle/nsis" $installerName
           if (-not (Test-Path -LiteralPath $installer)) { throw "installer missing: $installer" }
           $hash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLower()
+          $bytes = (Get-Item -LiteralPath $installer).Length
+          $evidencePath = "verification/windows-installer/internal-package.json"
+          $evidence = Get-Content -LiteralPath $evidencePath -Raw | ConvertFrom-Json
+          if ($evidence.installer_sha256 -ne $hash) { throw "installer digest does not match internal-package.json" }
+          if ($evidence.installer_bytes -ne $bytes) { throw "installer byte count does not match internal-package.json" }
+          if ($evidence.target -ne "x86_64-pc-windows-msvc") { throw "unexpected Windows target: $($evidence.target)" }
           $stage = Join-Path "target" "ci-artifacts/windows"
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
           Copy-Item -LiteralPath $installer -Destination (Join-Path $stage $installerName)
           # LF line ending so the Ubuntu release job can run `sha256sum -c`.
           [System.IO.File]::WriteAllText((Join-Path $stage "SHA256SUMS-windows.txt"), "$hash  $installerName`n")
-          Copy-Item -LiteralPath "verification/windows-installer/internal-package.json" -Destination (Join-Path $stage "internal-package.json")
+          Copy-Item -LiteralPath $evidencePath -Destination (Join-Path $stage "internal-package.json")
           Get-ChildItem -LiteralPath $stage | Select-Object Name, Length
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: windows-installer
           if-no-files-found: error
@@ -64,25 +75,34 @@ jobs:
 
   macos:
     name: macOS app
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Verify macOS runner architecture
+        shell: bash
+        run: test "$(uname -m)" = "arm64"
 
       - name: Install pinned Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
         with:
           toolchain: 1.99.1
 
       - name: Cache Rust build
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
 
       - name: Install pinned Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24.19.0"
           cache: npm
           cache-dependency-path: apps/frontend/package-lock.json
+
+      - name: Install pinned npm
+        run: npm install --global npm@11.17.0
 
       - name: Install frontend dependencies
         working-directory: apps/frontend
@@ -99,11 +119,21 @@ jobs:
       - name: Package unsigned app
         run: |
           set -euo pipefail
+          test "$(uname -m)" = "arm64"
           VERSION=$(node -p "require('./apps/desktop/tauri.conf.json').version")
           python3 scripts/prepare-macos-dev-app.py --profile release --output "target/release/Image Studio.app"
+          APP="target/release/Image Studio.app"
+          for binary in image-studio-desktop diagnostic-worker inference-supervisor realesrgan-worker; do
+            file "$APP/Contents/MacOS/$binary" | grep -q 'arm64'
+          done
+          plutil -lint "$APP/Contents/Info.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Contents/Info.plist")" = "io.github.goldloli.image-studio"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")" = "$VERSION"
+          test -f "$APP/Contents/Resources/LICENSE"
+          test -f "$APP/Contents/Resources/THIRD_PARTY_NOTICES.md"
           ARCHIVE_NAME="Image-Studio-${VERSION}-macos-arm64.zip"
           ARCHIVE="target/release/${ARCHIVE_NAME}"
-          ditto -c -k --keepParent "target/release/Image Studio.app" "$ARCHIVE"
+          ditto -c -k --norsrc --noextattr --keepParent "$APP" "$ARCHIVE"
           STAGE="target/ci-artifacts/macos"
           mkdir -p "$STAGE"
           cp "$ARCHIVE" "$STAGE/$ARCHIVE_NAME"
@@ -111,7 +141,7 @@ jobs:
           ls -l "$STAGE"
 
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: macos-app
           if-no-files-found: error

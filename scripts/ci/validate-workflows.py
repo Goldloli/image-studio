@@ -10,6 +10,7 @@ shape and the workflow file inventory. Run from the repository root:
 Requires PyYAML (``python -m pip install PyYAML``).
 """
 import sys
+import re
 from pathlib import Path
 
 import yaml
@@ -17,6 +18,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent.parent
 WORKFLOWS = ROOT / ".github" / "workflows"
 EXPECTED = {"quality.yml", "build.yml", "release.yml"}
+PINNED_ACTION = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 
 
 def fail(errors: list[str], message: str) -> None:
@@ -66,9 +68,40 @@ def main() -> int:
                             errors,
                             f"{path.name}: job {job_name} step {index} has neither uses nor run",
                         )
+                    action = step.get("uses")
+                    if isinstance(action, str) and not action.startswith(("./", "$/")):
+                        if not PINNED_ACTION.fullmatch(action):
+                            fail(
+                                errors,
+                                f"{path.name}: job {job_name} step {index} action is not pinned: {action}",
+                            )
+                    if isinstance(action, str) and action.startswith("actions/checkout@"):
+                        with_values = step.get("with")
+                        if not (
+                            isinstance(with_values, dict)
+                            and with_values.get("persist-credentials") is False
+                        ):
+                            fail(
+                                errors,
+                                f"{path.name}: job {job_name} step {index} checkout persists credentials",
+                            )
     missing = EXPECTED - seen
     if missing:
         fail(errors, f"missing workflow files: {sorted(missing)}")
+    quality = yaml.safe_load((WORKFLOWS / "quality.yml").read_text(encoding="utf-8"))
+    quality_runners = quality["jobs"]["quality"]["strategy"]["matrix"]["os"]
+    if quality_runners != ["windows-latest", "macos-15"]:
+        fail(errors, f"quality runners must be Windows latest and macOS 15 arm64: {quality_runners}")
+    build = yaml.safe_load((WORKFLOWS / "build.yml").read_text(encoding="utf-8"))
+    if build["jobs"]["windows"].get("runs-on") != "windows-latest":
+        fail(errors, "Windows build must use windows-latest")
+    if build["jobs"]["macos"].get("runs-on") != "macos-15":
+        fail(errors, "macOS build must use macos-15 arm64")
+    release = yaml.safe_load((WORKFLOWS / "release.yml").read_text(encoding="utf-8"))
+    if release.get("permissions", {}).get("contents") != "read":
+        fail(errors, "release workflow must default to contents: read")
+    if release["jobs"]["release"].get("permissions", {}).get("contents") != "write":
+        fail(errors, "only the final release job may receive contents: write")
     if errors:
         print("\n".join(errors))
         return 1

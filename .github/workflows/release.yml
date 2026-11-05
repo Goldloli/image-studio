@@ -5,7 +5,7 @@ on:
     tags: ["v*"]
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref }}
@@ -17,21 +17,48 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install pinned Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          node-version: "24.19.0"
+          persist-credentials: false
 
-      - name: Compare tag and tauri version
+      - name: Compare tag, Cargo, Tauri and frontend versions
         shell: bash
         run: |
           set -euo pipefail
-          VERSION=$(node -p "require('./apps/desktop/tauri.conf.json').version")
-          TAG="${GITHUB_REF_NAME#v}"
-          echo "app version: $VERSION, tag: $TAG"
-          test "$VERSION" = "$TAG"
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import tomllib
+
+          root = pathlib.Path(".")
+          cargo = tomllib.loads((root / "Cargo.toml").read_text(encoding="utf-8"))
+          tauri = json.loads((root / "apps/desktop/tauri.conf.json").read_text(encoding="utf-8"))
+          frontend = json.loads((root / "apps/frontend/package.json").read_text(encoding="utf-8"))
+          cargo_version = cargo["workspace"]["package"]["version"]
+          tauri_version = tauri["version"]
+          package_version = frontend["version"]
+          tag = os.environ["GITHUB_REF_NAME"]
+          tag_version = tag.removeprefix("v")
+          versions = {
+              "tag": tag_version,
+              "cargo": cargo_version,
+              "tauri": tauri_version,
+              "frontend": package_version,
+          }
+          print(versions)
+          if len(set(versions.values())) != 1:
+              raise SystemExit(f"version mismatch: {versions}")
+          PY
+
+      - name: Require tag commit on main
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          STATUS=$(gh api "repos/${GITHUB_REPOSITORY}/compare/${GITHUB_SHA}...main" --jq '.status')
+          test "$STATUS" = "ahead" -o "$STATUS" = "identical"
 
   build:
     name: Build release artifacts
@@ -43,22 +70,82 @@ jobs:
     needs: [verify-version, build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: artifacts
           merge-multiple: true
 
-      - name: Verify checksums
+      - name: Verify artifact contents and checksums
         shell: bash
         run: |
           set -euo pipefail
           cd artifacts
           sha256sum -c SHA256SUMS-windows.txt
           sha256sum -c SHA256SUMS-macos.txt
+          test "$(find . -maxdepth 1 -name '*.exe' -type f | wc -l)" -eq 1
+          test "$(find . -maxdepth 1 -name '*.zip' -type f | wc -l)" -eq 1
+          MAC_ZIP=$(find . -maxdepth 1 -name '*.zip' -type f -print -quit)
+          unzip -q "$MAC_ZIP" -d ../macos-unpack-check
+          cd ..
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import plistlib
+
+          app = pathlib.Path("macos-unpack-check/Image Studio.app")
+          plist = app / "Contents/Info.plist"
+          with plist.open("rb") as stream:
+              metadata = plistlib.load(stream)
+          expected = json.loads(
+              pathlib.Path("apps/desktop/tauri.conf.json").read_text(encoding="utf-8")
+          )
+          assert metadata["CFBundleIdentifier"] == expected["identifier"]
+          assert metadata["CFBundleShortVersionString"] == expected["version"]
+          assert metadata["CFBundleVersion"] == expected["version"]
+          assert metadata["LSMinimumSystemVersion"] == "11.0"
+          for binary in (
+              "image-studio-desktop",
+              "diagnostic-worker",
+              "inference-supervisor",
+              "realesrgan-worker",
+          ):
+              path = app / "Contents/MacOS" / binary
+              assert path.is_file(), path
+              assert "arm64" in __import__("subprocess").check_output(
+                  ["file", str(path)], text=True
+              )
+          for resource in (
+              "LICENSE",
+              "NOTICE",
+              "THIRD_PARTY_NOTICES.md",
+              "OFL.txt",
+              "PROMPT-LIBRARY-LICENSE.txt",
+          ):
+              assert (app / "Contents/Resources" / resource).is_file(), resource
+          PY
+
+      - name: Prepare release documents
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp README.md LICENSE NOTICE THIRD_PARTY_NOTICES.md artifacts/
+          TAG="$GITHUB_REF_NAME" python3 - <<'PY'
+          import os
+          import pathlib
+
+          tag = os.environ["TAG"]
+          source = pathlib.Path("RELEASE_NOTES.md").read_text(encoding="utf-8")
+          rendered = source.replace("{{TAG}}", tag)
+          pathlib.Path("artifacts/RELEASE-NOTES.md").write_text(rendered, encoding="utf-8")
+          PY
 
       - name: Draft release with artifacts and checksums
         shell: bash
@@ -66,10 +153,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "::error::release $GITHUB_REF_NAME already exists; review or delete the draft before rerunning"
+            exit 1
+          fi
           mapfile -t files < <(find artifacts -type f -print)
           ls -l "${files[@]}"
           gh release create "$GITHUB_REF_NAME" \
             --draft \
             --title "Image Studio $GITHUB_REF_NAME" \
-            --generate-notes \
+            --notes-file artifacts/RELEASE-NOTES.md \
             "${files[@]}"

@@ -45,12 +45,12 @@ function Invoke-Checked {
 function Get-VerifiedDownload {
     param(
         [Parameter(Mandatory = $true)][string]$Target,
-        [Parameter(Mandatory = $true)][string]$Sha1,
+        [Parameter(Mandatory = $true)][string]$Sha256,
         [Parameter(Mandatory = $true)][string[]]$Urls
     )
     if (
         (Test-Path -LiteralPath $Target -PathType Leaf) -and
-        (Get-FileHash -LiteralPath $Target -Algorithm SHA1).Hash -eq $Sha1
+        (Get-FileHash -LiteralPath $Target -Algorithm SHA256).Hash -eq $Sha256
     ) {
         return
     }
@@ -60,7 +60,7 @@ function Get-VerifiedDownload {
         if (
             $LASTEXITCODE -eq 0 -and
             (Test-Path -LiteralPath $Target -PathType Leaf) -and
-            (Get-FileHash -LiteralPath $Target -Algorithm SHA1).Hash -eq $Sha1
+            (Get-FileHash -LiteralPath $Target -Algorithm SHA256).Hash -eq $Sha256
         ) {
             return
         }
@@ -109,7 +109,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $nsisRoot "makensis.exe") -PathType 
     $extractRoot = Join-Path ([System.IO.Path]::GetTempPath()) "image-studio-nsis-3.13-$PID-$([guid]::NewGuid())"
     Get-VerifiedDownload `
         -Target $nsisZip `
-        -Sha1 "DB14F8AF2EA346B786C6AE19343F61AAF5E09B8E" `
+        -Sha256 "BA63DFFC4410EE89193E1CB5A41989991BD77C61068DA17E3156D136B7B0B3D8" `
         -Urls @(
             "https://github.com/tauri-apps/binary-releases/releases/download/nsis-3.13/nsis-3.13.zip",
             "https://ghfast.top/https://github.com/tauri-apps/binary-releases/releases/download/nsis-3.13/nsis-3.13.zip",
@@ -124,7 +124,7 @@ if (-not (Test-Path -LiteralPath (Join-Path $nsisRoot "makensis.exe") -PathType 
 
 Get-VerifiedDownload `
     -Target $nsisUtils `
-    -Sha1 "75197FEE3C6A814FE035788D1C34EAD39349B860" `
+    -Sha256 "5BA143B5DB4A87D32D6E7802E033330AAE56CBCEABE0D1E3BA41948385AD4709" `
     -Urls @(
         "https://github.com/tauri-apps/nsis-tauri-utils/releases/download/nsis_tauri_utils-v0.5.3/nsis_tauri_utils.dll",
         "https://ghfast.top/https://github.com/tauri-apps/nsis-tauri-utils/releases/download/nsis_tauri_utils-v0.5.3/nsis_tauri_utils.dll",
