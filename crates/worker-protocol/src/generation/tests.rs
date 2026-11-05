@@ -379,6 +379,15 @@ fn windows_v2_request() -> ExecuteRequestV2 {
     }
 }
 
+fn windows_z_image_compact_v2_request() -> ExecuteRequestV2 {
+    let mut request = windows_v2_request();
+    request.recipe_id = Z_IMAGE_WINDOWS_COMPACT_RECIPE_ID.into();
+    request.parameters = windows_z_image_compact_parameters(42);
+    request.outputs[0].width = 768;
+    request.outputs[0].height = 768;
+    request
+}
+
 fn v2_envelope(sequence: u64, request_id: &str, message: Message) -> Envelope {
     Envelope {
         family: FAMILY.into(),
@@ -566,6 +575,38 @@ fn windows_z_image_v2_payload_requires_frozen_identity_and_parameters() {
                     .insert("truncation".into(), serde_json::json!(true));
             }
             5 => request.outputs[0].width = 768,
+            _ => request.seed = None,
+        }
+        assert!(request.validate().is_err(), "mutation {mutation}");
+    }
+}
+
+#[test]
+fn windows_z_image_compact_payload_requires_frozen_identity_and_parameters() {
+    let valid = windows_z_image_compact_v2_request();
+    valid.validate().unwrap();
+
+    for mutation in 0..9 {
+        let mut request = windows_z_image_compact_v2_request();
+        match mutation {
+            0 => request.capability_id = CAPABILITY.into(),
+            1 => request.recipe_id = Z_IMAGE_WINDOWS_RECIPE_ID.into(),
+            2 => request.runtime_lock_id = "mflux-0.24.0".into(),
+            3 => request.model_snapshot_id = "z-image-turbo-q4".into(),
+            4 => {
+                request
+                    .parameters
+                    .insert("truncation".into(), serde_json::json!(true));
+            }
+            5 => request.outputs[0].width = 1024,
+            6 => request.sampling_steps = Some(10),
+            7 => request.inputs.push(InputAssetDescriptor {
+                role: "source".into(),
+                path: managed_path("runs/windows-z-image/input.png"),
+                width: 768,
+                height: 768,
+                sha256: "a".repeat(64),
+            }),
             _ => request.seed = None,
         }
         assert!(request.validate().is_err(), "mutation {mutation}");
@@ -989,8 +1030,45 @@ fn windows_compact_recipe_parameter_helpers_extend_the_frozen_maps() {
         ])
     );
 
-    // Every compact map keeps every standard key; only load_strategy is overridden and the
-    // remaining additions are new. Standard maps themselves stay unchanged.
+    assert_eq!(
+        windows_z_image_compact_parameters(seed),
+        windows_map(&[
+            ("seed", serde_json::json!(seed)),
+            ("steps", serde_json::json!(9)),
+            ("quantization", serde_json::json!("nf4")),
+            ("guidance", serde_json::json!(0.0)),
+            (
+                "scheduler",
+                serde_json::json!("FlowMatchEulerDiscreteScheduler")
+            ),
+            (
+                "recipe",
+                serde_json::json!("z-image-turbo-nf4-cuda-compact-v1")
+            ),
+            ("recipe_version", serde_json::json!(1)),
+            ("token_budget", serde_json::json!(512)),
+            ("truncation", serde_json::json!(false)),
+            ("thinking", serde_json::json!(true)),
+            (
+                "quantized_components",
+                serde_json::json!(["transformer", "text_encoder"])
+            ),
+            ("compute_dtype", serde_json::json!("float16")),
+            ("vae_precision", serde_json::json!("float16")),
+            ("attention", serde_json::json!("_native_efficient")),
+            ("offload", serde_json::json!("model_cpu")),
+            ("resolution", serde_json::json!(768)),
+        ])
+    );
+    // The compact helper clones the standard map: its identity and bf16 defaults stay frozen.
+    let standard = windows_z_image_parameters(seed);
+    assert_eq!(standard["recipe"], "z-image-turbo-nf4-cuda-v1");
+    assert_eq!(standard["compute_dtype"], "bfloat16");
+    assert_eq!(standard["vae_precision"], "bfloat16");
+    assert!(!standard.contains_key("resolution"));
+
+    // Every compact map keeps every standard key; shared keys are overridden in place and the
+    // remaining entries are additions. Standard maps themselves stay unchanged.
     for (standard, compact, additions) in [
         (
             windows_klein_parameters(seed),
@@ -1016,6 +1094,11 @@ fn windows_compact_recipe_parameter_helpers_extend_the_frozen_maps() {
             windows_moss_parameters(seed),
             windows_moss_compact_parameters(seed),
             2,
+        ),
+        (
+            windows_z_image_parameters(seed),
+            windows_z_image_compact_parameters(seed),
+            1,
         ),
     ] {
         assert!(
@@ -1091,6 +1174,7 @@ fn windows_compact_v2_payloads_accept_the_frozen_identities() {
             windows_moss_compact_parameters(42),
             true,
         ),
+        windows_z_image_compact_v2_request(),
     ] {
         request.validate().unwrap();
     }
@@ -1144,6 +1228,11 @@ fn windows_compact_payloads_reject_cross_tier_parameters_and_output_drift() {
             ),
             MOSS_IMAGE_SFT_WINDOWS_RECIPE_ID,
             windows_moss_parameters(42),
+        ),
+        (
+            windows_z_image_compact_v2_request(),
+            Z_IMAGE_WINDOWS_RECIPE_ID,
+            windows_z_image_parameters(42),
         ),
     ];
     for (request, standard_recipe_id, standard_parameters) in cases {

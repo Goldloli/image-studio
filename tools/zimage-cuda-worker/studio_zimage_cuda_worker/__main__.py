@@ -7,7 +7,7 @@ import sys
 import threading
 from pathlib import Path
 
-from . import model_spec, worker_identity
+from . import COMPACT_RECIPE_ID, model_spec, worker_identity
 
 MAX_FRAME = 64 * 1024
 FAMILY = "image-studio.generation"
@@ -100,7 +100,7 @@ def validate_request(request, identity, spec):
     if (
         request["model_id"] != spec["model_id"]
         or request["capability_id"] != spec["capability"]
-        or request["recipe_id"] != spec["recipe"]
+        or request["recipe_id"] not in (spec["recipe"], COMPACT_RECIPE_ID)
         or request["recipe_version"] != 1
         or request["runtime_lock_id"] != identity["runtime_lock_id"]
         or request["model_snapshot_id"] != identity["model_snapshot_id"]
@@ -119,7 +119,8 @@ def validate_request(request, identity, spec):
         raise ValueError("prompt is empty or exceeds 16 KiB")
     from . import expected_parameters
 
-    if request["parameters"] != expected_parameters(request["seed"]):
+    compact = request["recipe_id"] == COMPACT_RECIPE_ID
+    if request["parameters"] != expected_parameters(request["seed"], request["recipe_id"]):
         raise ValueError("effective parameters differ from the frozen recipe")
     for name in ("model_path", "output_dir"):
         if not safe_directory(request[name]):
@@ -132,12 +133,13 @@ def validate_request(request, identity, spec):
         raise ValueError("output directory cannot be inside the model")
     if request["inputs"] != []:
         raise ValueError("Windows Z-Image accepts no source image")
+    edge = 768 if compact else 1024
     if request["outputs"] != [
         {
             "role": "primary",
             "data_type": "image_rgb",
-            "width": 1024,
-            "height": 1024,
+            "width": edge,
+            "height": edge,
             "max_bytes": 32 * 1024 * 1024,
         }
     ]:
@@ -176,25 +178,29 @@ def probe(identity, model_path=None):
         raise RuntimeError("private package identity mismatch")
     if not torch.cuda.is_available() or torch.version.cuda != "12.6":
         raise RuntimeError("CUDA 12.6 is unavailable")
+    # The probe certifies the lowest supported device (8 GiB, Turing) so an 8 GB machine can
+    # install the model; the frozen recipe then decides which tier it executes.
     selected = None
     for index in range(torch.cuda.device_count()):
         properties = torch.cuda.get_device_properties(index)
         if (
             "NVIDIA" in properties.name.upper()
-            and (properties.major, properties.minor) == (8, 6)
-            and properties.total_memory >= 10 * 1024**3
+            and (properties.major, properties.minor) >= (7, 5)
+            and round(properties.total_memory / 1024**3) >= 8
         ):
             selected = index
             break
     if selected is None:
-        raise RuntimeError("required NVIDIA sm86 device was not found")
+        raise RuntimeError("required NVIDIA Turing-or-newer device was not found")
     torch.cuda.set_device(selected)
-    left = torch.randn((32, 32), device="cuda", dtype=torch.bfloat16)
+    properties = torch.cuda.get_device_properties(selected)
+    compute_dtype = torch.bfloat16 if (properties.major, properties.minor) >= (8, 0) else torch.float16
+    left = torch.randn((32, 32), device="cuda", dtype=compute_dtype)
     product = left @ left
-    if product.dtype != torch.bfloat16 or not torch.isfinite(product).all():
-        raise RuntimeError("BF16 probe failed")
-    layer = Linear4bit(32, 16, quant_type="nf4", compute_dtype=torch.bfloat16).cuda()
-    output = layer(torch.randn((2, 32), device="cuda", dtype=torch.bfloat16))
+    if product.dtype != compute_dtype or not torch.isfinite(product).all():
+        raise RuntimeError(f"{compute_dtype} matmul probe failed")
+    layer = Linear4bit(32, 16, quant_type="nf4", compute_dtype=compute_dtype).cuda()
+    output = layer(torch.randn((2, 32), device="cuda", dtype=compute_dtype))
     if output.shape != (2, 16) or not torch.isfinite(output).all():
         raise RuntimeError("NF4 probe failed")
     if model_path is not None:

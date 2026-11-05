@@ -3,6 +3,7 @@ import json
 import pytest
 
 from studio_zimage_cuda_worker import (
+    COMPACT_RECIPE_ID,
     MODEL_ID,
     expected_parameters,
     model_spec,
@@ -90,3 +91,19 @@ def test_envelope_unknown_fields_are_rejected():
     }
     with pytest.raises(ValueError):
         validate_envelope(value)
+
+
+def test_compact_parameters_are_frozen():
+    standard = expected_parameters(7)
+    compact = expected_parameters(7, COMPACT_RECIPE_ID)
+    assert standard["compute_dtype"] == "bfloat16"
+    assert compact["recipe"] == COMPACT_RECIPE_ID
+    assert compact["resolution"] == 768
+    assert compact["compute_dtype"] == "float16"
+    assert compact["vae_precision"] == "float16"
+    assert compact["steps"] == 9
+    assert len(compact) == len(standard) + 1
+    for key, value in standard.items():
+        if key in ("recipe", "compute_dtype", "vae_precision"):
+            continue
+        assert compact[key] == value, key
