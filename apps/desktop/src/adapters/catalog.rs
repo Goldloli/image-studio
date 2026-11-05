@@ -736,16 +736,16 @@ mod tests {
         }
         assert_eq!(capability_pairs, 8);
 
+        // Z-Image keeps its original 12 GB contract: no compact tier was deliverable on 8 GB.
         let z = entry(&query, "z-image-turbo-diffusers-cuda-nf4-v1");
         assert_eq!(
             (z["minVramGb"].as_u64(), z["minRamGb"].as_u64()),
-            (Some(8), Some(32))
+            (Some(12), Some(32))
         );
-        assert_eq!(z["standardMinVramGb"], 12);
-        assert_eq!(z["tier"], "standard");
-        assert_eq!(z["resolution"], 1024);
-        assert_eq!(z["computeDtype"], "bfloat16");
-        assert_eq!(z["tiers"].as_array().unwrap().len(), 2);
+        assert_eq!(z["standardMinVramGb"], Value::Null);
+        assert_eq!(z["tier"], Value::Null);
+        assert_eq!(z["resolution"], Value::Null);
+        assert_eq!(z["tiers"].as_array().unwrap().len(), 0);
         let klein = entry(&query, "flux2-klein-4b-distilled-windows-v1");
         assert_eq!(
             (klein["minVramGb"].as_u64(), klein["minRamGb"].as_u64()),
@@ -846,7 +846,6 @@ mod tests {
         };
         let query = catalog.query(&[], None, &device).unwrap();
         for id in [
-            "z-image-turbo-diffusers-cuda-nf4-v1",
             "flux2-klein-4b-distilled-windows-v1",
             "qwen-image-2.1-windows-v1",
             "qwen-image-2.1-turbo-windows-v1",
@@ -862,7 +861,16 @@ mod tests {
             assert!(reason.contains("紧凑档"), "{id}: {reason}");
             assert!(reason.contains("768"), "{id}: {reason}");
         }
-        assert_eq!(query["counts"]["hardwareEligible"], 7);
+        // Z-Image has no compact profile: the 8 GB machine keeps it gated at 12 GB.
+        let zimage = entry(&query, "z-image-turbo-diffusers-cuda-nf4-v1");
+        assert_eq!(zimage["hardwareEligible"], false);
+        assert!(
+            zimage["hardwareReason"]
+                .as_str()
+                .unwrap()
+                .contains("显存 ≥ 12 GB")
+        );
+        assert_eq!(query["counts"]["hardwareEligible"], 6);
     }
 
     #[cfg(windows)]

@@ -38,27 +38,11 @@
       "recipe": "NF4 · 9 步 · guidance 0.0 · 1024 × 1024",
       "installId": "z-image-turbo-diffusers-cuda-nf4-v1",
       "installerSupported": true,
-      "minVramGb": 8,
+      "minVramGb": 12,
       "minRamGb": 32,
       "quantization": "nf4",
       "licenseNotice": "Apache-2.0 · 可商用（保留版权与许可声明）",
-      "windowsStatus": "已接入 · 独立 v1 运行时 NF4+组件卸载（Gate 0 实测 CUDA 8.87 GiB / commit 23.69 GiB）",
-      "tiers": [
-        {
-          "id": "standard",
-          "minVramGb": 12,
-          "minRamGb": 32,
-          "resolution": 1024,
-          "computeDtype": "bfloat16"
-        },
-        {
-          "id": "compact",
-          "minVramGb": 8,
-          "minRamGb": 32,
-          "resolution": 768,
-          "computeDtype": "float16"
-        }
-      ]
+      "windowsStatus": "已接入 · 独立 v1 运行时 NF4+组件卸载（Gate 0 实测 CUDA 8.87 GiB / commit 23.69 GiB）"
     },
     {
       "id": "flux2-klein-4b-distilled-windows-v1",

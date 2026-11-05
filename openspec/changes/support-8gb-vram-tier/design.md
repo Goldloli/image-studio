@@ -35,13 +35,13 @@
 | Qwen-Image 2.1 | 6.00 GiB | 同上（40 步） | 同上 | 待实测 | 中 |
 | MOSS-Image-SFT | 5.84 GiB | 文本编码器 + fp32 VAE 解码 | 768² + fp16 + VAE 分块 | 待实测 | 中 |
 | FLUX.2 Klein 4B | 9.21 GiB | 组件级 offload 下的单组件驻留与量化瞬时 | prepared 预量化 + 顺序 offload + 768² | ≤ 6.0 GiB | 中 |
-| Z-Image Turbo | 8.87 GiB | v1 运行时 NF4 全驻留 | 768² + 文本编码器 staged（v1 worker 改造） | ≤ 6.0 GiB | 高 |
+| Z-Image Turbo | 8.87 GiB | v1 运行时 NF4 全驻留 | 768²/512² + fp16 实测均失败（NaN 与加载峰值 7.8 GiB） | **不可行** | 已排除 |
 
 实现要点：
 
 - **Qwen / MOSS**：compact 沿用"单大组件驻留"的分阶段执行，但画幅降到 768²、计算精度改为 fp16。**2026-11-05 实测否定了逐层 offload**：bnb 检查点的 `Params4bit.quant_state` 不随 `.to()` 搬移（`mat2 is on cpu`），`device_map="auto"` 需要 `llm_int8_enable_fp32_cpu_offload` 而模型构造期会对 meta 张量调用 `Tensor.item()`，`accelerate.cpu_offload` 随后报 `Cannot copy out of meta tensor`。整块搬移在 8 GB 卡上实测 CUDA reserved **5.961 GiB**，落在 6.0 GiB 预算内。
 - **Klein**：`enable_model_cpu_offload` 仍是组件级；compact 改用逐层 offload，并复用安装期 prepared 量化缓存消除"bf16 分片在卡上量化"的瞬时。Klein 只有 4 步，逐层搬运的速度代价可以接受。
-- **Z-Image**：使用独立 v1 运行时（`windows-python31210-torch2100-cu126-bnb0482-v1`）与 `studio_zimage_cuda_worker`。compact 需要该 worker 支持 768² 与文本编码器 staged；若 v1 运行时在 sm75 上不可行，则本 change 必须把 Z-Image 迁到 v2 运行时并登记新的运行时身份（范围扩大，需另行确认）。
+- **Z-Image**：v1 运行时（`windows-python31210-torch2100-cu126-bnb0482-v1`）在 sm75 上探针通过，但 compact 实测不可行：768² fp16 出 NaN 黑图、512² bf16 无 bnb 内核、512² fp16+fp32 VAE 仍为黑图，且加载峰值恒为 ~7.8 GiB（v1 加载器先把组件物化到卡上再搬回 CPU）。因此本 change **不给 Z-Image 登记 compact 档**，它继续要求 12 GB；协议中的 compact 身份保留给未来硬件。
 - 画幅降级只改变画布与 token 数，不改变步数、guidance、调度器与种子语义；输出尺寸随档位变化，`accepts_output` 与输出规格必须按档位校验。
 
 ## 4. 计算精度：sm75 没有原生 BF16

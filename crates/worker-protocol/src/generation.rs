@@ -347,7 +347,8 @@ pub fn windows_z_image_compact_parameters(seed: u32) -> BTreeMap<String, serde_j
     );
     parameters.insert("resolution".into(), serde_json::json!(768));
     parameters.insert("compute_dtype".into(), serde_json::json!("float16"));
-    parameters.insert("vae_precision".into(), serde_json::json!("float16"));
+    // The Z-Image VAE overflows to NaN in fp16 on Turing; the compact tier decodes in fp32.
+    parameters.insert("vae_precision".into(), serde_json::json!("float32"));
     parameters
 }
 

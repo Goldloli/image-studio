@@ -133,7 +133,7 @@ def validate_request(request, identity, spec):
         raise ValueError("output directory cannot be inside the model")
     if request["inputs"] != []:
         raise ValueError("Windows Z-Image accepts no source image")
-    edge = 768 if compact else 1024
+    edge = int(request["parameters"].get("resolution", 1024))
     if request["outputs"] != [
         {
             "role": "primary",

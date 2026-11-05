@@ -72,7 +72,9 @@ def quant_config(module, compute_dtype):
     )
 
 
-def load_pipeline(model_path, device_index, cancel, progress, compute_dtype=None):
+def load_pipeline(
+    model_path, device_index, cancel, progress, compute_dtype=None, vae_dtype=None
+):
     import torch
     from diffusers import (
         AutoencoderKL,
@@ -122,7 +124,7 @@ def load_pipeline(model_path, device_index, cancel, progress, compute_dtype=None
         model_path,
         subfolder="vae",
         local_files_only=True,
-        torch_dtype=dtype,
+        torch_dtype=vae_dtype or dtype,
         low_cpu_mem_usage=True,
     )
     vae.eval()
@@ -153,6 +155,11 @@ def generate(request, progress, cancel):
         else torch.bfloat16
     )
     compact = resolution != 1024
+    vae_dtype = (
+        torch.float32
+        if request["parameters"].get("vae_precision") == "float32"
+        else compute_dtype
+    )
     device_index, properties = select_device(
         8 if compact else 10, (7, 5) if compact else (8, 6)
     )
@@ -162,7 +169,7 @@ def generate(request, progress, cancel):
         file=sys.stderr,
     )
     pipeline, tokenizer, device = load_pipeline(
-        request["model_path"], device_index, cancel, progress, compute_dtype
+        request["model_path"], device_index, cancel, progress, compute_dtype, vae_dtype
     )
     print("pipeline loaded", file=sys.stderr)
     actual_tokens = token_count(tokenizer, request["instruction"])
