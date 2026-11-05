@@ -1,6 +1,6 @@
 # support-8gb-vram-tier
 
-**状态：2026-11-05 提案文档完成，等待项目所有者确认后开始实现。**
+**状态：2026-11-05 已实现并在 RTX 2060 SUPER 8 GB 上完成全流程验收，归档同步主规格。**
 
 本 change 为 Image Studio 的 Windows 侧增加 **8 GB 显存执行档位（compact）**，并在本仓库当前的 8 GB 机器（Windows 11 Enterprise 22631 / i9-9900K / RTX 2060 SUPER 8192 MiB / sm75 Turing / 31.9 GiB RAM）上完成五个生成模型的全流程验收：安装、安装期量化准备、真实生成、取消与强杀恢复、界面发送/查看/导出。
 

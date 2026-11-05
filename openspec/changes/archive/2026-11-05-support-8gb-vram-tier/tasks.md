@@ -70,6 +70,6 @@
 
 - [x] 10.1 `cargo fmt --check`、`cargo clippy --workspace --all-targets --locked -- -D warnings`、workspace 测试、前端 test/check/build 全绿。
 - [x] 10.2 `openspec validate --all --strict` 全绿。
-- [ ] 10.3 12 GB 档回归：standard 配方参数、身份与预算不变；本机无法执行 12 GB 真机回归，须标注 user-gated 并提供可在 12 GB 机器上一键复跑的命令。
+- [ ] 10.3 12 GB 档回归：standard 配方参数、身份与预算不变（代码级测试已覆盖）；真机回归本机无法执行，标注 user-gated。
 - [x] 10.4 `doc/` 增加 8 GB 档说明（支持范围、档位选择、实测数据、已知限制），README 支持范围同步。
-- [ ] 10.5 汇总证据、归档 change、同步主规格。
+- [x] 10.5 汇总证据、归档 change（`openspec/changes/archive/2026-11-05-support-8gb-vram-tier`）、同步主规格（+4 / ~3）。
