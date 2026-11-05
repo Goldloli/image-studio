@@ -18,9 +18,12 @@ from pathlib import Path
 
 from .. import expected_parameters
 from ..resources import (
+    COMPACT_CUDA_LIMIT_GIB,
+    CUDA_RESERVED_LIMIT_GIB,
     BudgetExceeded,
     CudaPeaks,
     ResourceSampler,
+    compute_torch_dtype,
     enforce_budget,
     require_available_ram,
     resource_report,
@@ -36,7 +39,7 @@ BUDGET_LOAD_SECONDS = 600.0
 RESERVED_LIMIT_GIB = 10.5
 
 
-def quantized_pipeline_config():
+def quantized_pipeline_config(compute_dtype=None):
     import torch
     from diffusers import PipelineQuantizationConfig
 
@@ -45,22 +48,22 @@ def quantized_pipeline_config():
         quant_kwargs={
             "load_in_4bit": True,
             "bnb_4bit_quant_type": "nf4",
-            "bnb_4bit_compute_dtype": torch.bfloat16,
+            "bnb_4bit_compute_dtype": compute_dtype or torch.bfloat16,
             "bnb_4bit_use_double_quant": True,
         },
         components_to_quantize=["transformer", "text_encoder"],
     )
 
 
-def load_pipeline(model_path: Path, device_index: int):
+def load_pipeline(model_path: Path, device_index: int, compute_dtype=None):
     import torch
     from diffusers import Flux2KleinPipeline
 
     pipeline = Flux2KleinPipeline.from_pretrained(
         str(model_path),
-        torch_dtype=torch.bfloat16,
+        torch_dtype=compute_dtype or torch.bfloat16,
         low_cpu_mem_usage=True,
-        quantization_config=quantized_pipeline_config(),
+        quantization_config=quantized_pipeline_config(compute_dtype),
     )
     pipeline.enable_model_cpu_offload(device=torch.device("cuda", device_index))
     pipeline.set_progress_bar_config(disable=True)
@@ -80,16 +83,23 @@ def generate(request, progress, cancel):
     pipeline = None
     try:
         require_available_ram("klein load")
-        device_index, properties = select_device()
+        parameters = request["parameters"]
+        resolution = int(parameters.get("resolution", 1024))
+        compute_dtype = compute_torch_dtype(parameters.get("compute_dtype"))
+        compact = resolution != 1024
+        device_index, properties = select_device(
+            8 if compact else 10, (7, 5) if compact else (8, 6)
+        )
         torch.cuda.set_device(device_index)
         torch.cuda.empty_cache()
         log(
-            f"klein device={properties.name} cc={properties.major}.{properties.minor}"
+            f"klein device={properties.name} cc={properties.major}.{properties.minor} "
+            f"resolution={resolution}"
         )
         progress("loading")
         cuda.reset_phase()
         load_started = time.perf_counter()
-        pipeline = load_pipeline(Path(request["model_path"]), device_index)
+        pipeline = load_pipeline(Path(request["model_path"]), device_index, compute_dtype)
         load_seconds = time.perf_counter() - load_started
         load_phase = cuda.record_phase()
         log(
@@ -130,8 +140,8 @@ def generate(request, progress, cancel):
         result = pipeline(
             image=source,
             prompt=request["instruction"],
-            height=1024,
-            width=1024,
+            height=resolution,
+            width=resolution,
             num_inference_steps=steps,
             guidance_scale=float(request["parameters"]["guidance"]),
             generator=generator,
@@ -149,11 +159,18 @@ def generate(request, progress, cancel):
         progress("writing")
         if len(result.images) != 1:
             raise ValueError("pipeline did not return exactly one image")
-        candidate = save_primary_image(output_dir, result.images[0])
+        candidate = save_primary_image(
+            output_dir, result.images[0], width=resolution, height=resolution
+        )
         elapsed_seconds = time.monotonic() - started
         resources = resource_report(sampler, cuda, elapsed_seconds)
         log("klein resources=" + json.dumps(resources, ensure_ascii=False))
-        enforce_budget(sampler, cuda, elapsed_seconds)
+        enforce_budget(
+            sampler,
+            cuda,
+            elapsed_seconds,
+            COMPACT_CUDA_LIMIT_GIB if compact else CUDA_RESERVED_LIMIT_GIB,
+        )
         return candidate
     finally:
         sampler.stop()

@@ -31,6 +31,31 @@ Shanghai street corner with a pedestrian under an umbrella, matching the prompt.
 
 Machine-readable record: [qwen21-turbo-gate0.json](qwen21-turbo-gate0.json).
 
+## MOSS-Image-SFT compact — Gate 0 passed (2026-11-05)
+
+Same machine, same prompt and seed, 768 square, 50 steps, guidance 3.0, NF4 text encoder + NF4
+DiT with the documented dtype shim, fp32 VAE. Prepared cache built on this machine in 723 s.
+
+| Metric | Measured | Budget |
+|---|---|---|
+| CUDA reserved peak | **5.539 GiB** | ≤ 6.0 GiB |
+| CUDA allocated peak | 5.450 GiB | — |
+| Process private commit peak | 14.727 GiB | ≤ 24 GiB |
+| Available RAM minimum | 12.255 GiB | ≥ 2 GiB |
+| **Total elapsed** | **752.09 s** | ≤ 900 s (84 % of budget) |
+| Host-observed GPU used peak | 5,472 MiB during sampling | — |
+
+Output: [moss-image-sft-768.png](moss-image-sft-768.png), 768×768, 1,021,922 bytes, SHA-256
+`e7c4787b7222069bdf350754b11c59b4e7184e5fb8a2d6a5c52e25e4142271f1`; it renders the wet street,
+the pedestrian under an umbrella and the storefront signage, matching the prompt.
+
+Record: [moss-gate0.json](moss-gate0.json).
+
+Note: 752 s of 900 s leaves little headroom. A machine with a slower CPU or a second GPU
+consumer would exceed the generation budget, so the 50-step MOSS recipe is the first candidate
+for a documented speed expectation in the UI.
+
+
 ### What the measurement changed in the design
 
 The design expected the compact text stage to stream the NF4 encoder layer by layer. Measured
