@@ -442,12 +442,50 @@ impl StudioService {
             .map_err(|_| "本地库锁异常，请重启并检查数据".to_string())?;
         f(&mut guard).map_err(|error| error.to_string())
     }
+    /// Non-blocking variant for the watchdog: never waits for the library mutex.
+    pub fn try_with_library<T>(
+        &self,
+        f: impl FnOnce(&mut Library) -> crate::adapters::library::Result<T>,
+    ) -> Option<Result<T, String>> {
+        let library = self.library.as_ref()?;
+        let mut guard = library.try_lock().ok()?;
+        Some(f(&mut guard).map_err(|error| error.to_string()))
+    }
+
+    /// Fail turns that were accepted but never reached a job.
+    ///
+    /// Returns how many were reaped. Safe to call from a watchdog thread at any time: it never
+    /// blocks on the library lock and never touches an already-bound turn.
+    pub fn reap_stale_pending_turns(&self, older_than_ms: i64) -> usize {
+        let Some(Ok(ids)) =
+            self.try_with_library(|library| library.stale_pending_turns(older_than_ms))
+        else {
+            return 0;
+        };
+        let mut reaped = 0;
+        for id in ids {
+            let Ok(turn_id) = TurnId::new(&id) else {
+                continue;
+            };
+            let detail = format!(
+                "发送超时：{} 秒内未进入执行（等待提交阶段），请重试；若反复出现请重启应用",
+                older_than_ms / 1000
+            );
+            if matches!(
+                self.try_with_library(|library| library.reject_turn(&turn_id, &detail)),
+                Some(Ok(_))
+            ) {
+                reaped += 1;
+            }
+        }
+        reaped
+    }
+
     pub fn model_view(&self) -> Value {
         #[cfg(windows)]
         return self.model_view_for(WINDOWS_ZIMAGE_INSTALL_ID);
         #[cfg(not(windows))]
-        self.model_view_for(INSTALL_ID)
-    }
+        self.model_view_for(INSTALL_ID)    }
     pub fn model_views(&self) -> Vec<Value> {
         #[cfg(windows)]
         {

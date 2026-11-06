@@ -49,6 +49,23 @@ impl HostState {
                 "inference-supervisor"
             });
         let studio = Arc::new(StudioService::new(paths.clone(), supervisor));
+        // A send may strand a turn as `pending` while its submitting thread is blocked; the
+        // watchdog bounds that wait so the composer can never sit on "receiving prompt" forever.
+        let watchdog = Arc::downgrade(&studio);
+        let _ = std::thread::Builder::new()
+            .name("turn-watchdog".into())
+            .spawn(move || {
+                loop {
+                    std::thread::sleep(std::time::Duration::from_secs(5));
+                    let Some(studio) = watchdog.upgrade() else {
+                        break;
+                    };
+                    let reaped = studio.reap_stale_pending_turns(60_000);
+                    if reaped > 0 {
+                        eprintln!("[watchdog] 回收 {reaped} 个未进入执行的轮次");
+                    }
+                }
+            });
         let prompt_library = PromptLibraryStore::load(&paths).map(Arc::new);
         Self {
             paths,

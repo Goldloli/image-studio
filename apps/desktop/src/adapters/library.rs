@@ -297,6 +297,9 @@ impl Library {
             return Err(LibraryError::Schema("数据库不是普通文件".into()));
         }
         let mut db = Connection::open(db_path)?;
+        // A competing writer must surface as a recoverable `BUSY` instead of blocking a send
+        // forever; the desktop shell serialises its own writes, so five seconds is generous.
+        db.busy_timeout(std::time::Duration::from_secs(5))?;
         db.pragma_update(None, "foreign_keys", "ON")?;
         db.pragma_update(None, "journal_mode", "WAL")?;
         db.pragma_update(None, "synchronous", "FULL")?;

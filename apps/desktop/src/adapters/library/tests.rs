@@ -1466,6 +1466,31 @@ fn fresh_library_has_one_conversation_and_receive_is_fast_and_idempotent() {
 }
 
 #[test]
+fn stale_pending_turns_are_discoverable_and_failable() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let accepted = accept_prompt(&mut library, "卡住的发送", "stale-send");
+    // The row is written with the current millisecond clock, so a zero window already matches.
+    let stale = library.stale_pending_turns(0).unwrap();
+    assert_eq!(stale, vec![accepted.turn.id.to_string()]);
+    assert!(library.stale_pending_turns(3_600_000).unwrap().is_empty());
+
+    let failed = library
+        .reject_turn(&accepted.turn.id, "发送超时：60 秒内未进入执行")
+        .unwrap();
+    assert_eq!(failed.status, TurnStatus::Rejected);
+    assert!(library.stale_pending_turns(0).unwrap().is_empty());
+
+    // A bound turn must never be reaped by the watchdog.
+    let accepted = accept_prompt(&mut library, "已绑定", "bound-send");
+    let frozen = generation_for_turn("stale-bound", &accepted.turn);
+    library
+        .bind_turn_job(&accepted.turn.id, frozen.request, frozen.plan)
+        .unwrap();
+    assert!(library.stale_pending_turns(0).unwrap().is_empty());
+}
+
+#[test]
 fn pending_turn_cancel_recovery_and_job_binding_are_explicit() {
     let root = TempDir::new().unwrap();
     let mut library = open(root.path());
