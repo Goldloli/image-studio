@@ -1,5 +1,6 @@
 //! One background generation exchange. Durable state changes always pass through Library.
 //! A native candidate is still provisional until process exit, lease release and SQLite commit.
+use super::quiet_command;
 use super::{
     AppPaths,
     installation::{ReadyPaths, WINDOWS_ZIMAGE_WORKER_MODULE},
@@ -241,7 +242,7 @@ impl GenerationController {
                 .map_err(error)?;
             serde_json::to_writer(&mut file, &config).map_err(error)?;
             file.sync_all().map_err(error)?;
-            let mut command = std::process::Command::new(&self.inner.supervisor);
+            let mut command = quiet_command(&self.inner.supervisor);
             command
                 .arg("--config")
                 .arg(config_path)
@@ -261,7 +262,7 @@ impl GenerationController {
                 .map_err(error)?;
             serde_json::to_writer(&mut file, &config).map_err(error)?;
             file.sync_all().map_err(error)?;
-            let mut command = std::process::Command::new(&self.inner.supervisor);
+            let mut command = quiet_command(&self.inner.supervisor);
             command
                 .arg("--config")
                 .arg(config_path)
