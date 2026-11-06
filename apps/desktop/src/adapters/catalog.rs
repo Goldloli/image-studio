@@ -384,28 +384,21 @@ fn project_entry(
     installation_error: Option<&str>,
     device: &DeviceFacts,
 ) -> Value {
-    let installed = entry.install_id.as_ref().and_then(|id| {
-        installations.iter().find(|snapshot| {
-            snapshot.install_id == *id
-                && matches!(
-                    snapshot.phase.as_str(),
-                    "ready"
-                        | "preparing"
-                        | "downloading"
-                        | "verifying"
-                        | "installing_runtime"
-                        | "probing"
-                        | "unavailable"
-                        | "failed"
-                        | "cancelled"
-                        | "interrupted"
-                )
-        })
-    });
+    // Match by install id only: an installer phase this projection has not seen yet must surface
+    // as itself, never collapse into "not installed" while the install is actually running.
+    let installed = entry
+        .install_id
+        .as_ref()
+        .and_then(|id| installations.iter().find(|snapshot| snapshot.install_id == *id));
     let busy = installed.is_some_and(|snapshot| {
         matches!(
             snapshot.phase.as_str(),
-            "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
+            "preparing"
+                | "preparing_model"
+                | "downloading"
+                | "verifying"
+                | "installing_runtime"
+                | "probing"
         )
     });
     let executable = installed.is_some_and(|snapshot| {
@@ -579,6 +572,24 @@ mod tests {
             .iter()
             .find(|entry| entry["id"] == id)
             .unwrap_or_else(|| panic!("missing catalog entry {id}"))
+    }
+
+    #[test]
+    fn unknown_installer_phase_never_projects_as_not_installed() {
+        let catalog = ModelCatalog::load().unwrap();
+        // `preparing_model` is emitted while the worker builds the prepared cache; the model row
+        // must stay busy and report that phase instead of claiming nothing is installed.
+        let query = catalog
+            .query(&[z_snapshot("preparing_model")], None, &target_device())
+            .unwrap();
+        let entry = entry(&query, if cfg!(windows) {
+            "z-image-turbo-diffusers-cuda-nf4-v1"
+        } else {
+            "z-image-turbo-mflux-v1"
+        });
+        assert_eq!(entry["installPhase"], "preparing_model");
+        assert_eq!(entry["busy"], true);
+        assert_eq!(entry["executable"], false);
     }
 
     #[test]

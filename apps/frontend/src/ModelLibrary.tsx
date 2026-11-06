@@ -46,6 +46,7 @@ type Props = {
 const phaseLabels: Record<string, string> = {
   not_installed: '尚未安装',
   preparing: '准备安装',
+  preparing_model: '正在准备模型文件',
   downloading: '正在下载',
   verifying: '正在校验模型',
   installing_runtime: '准备隔离运行环境',
