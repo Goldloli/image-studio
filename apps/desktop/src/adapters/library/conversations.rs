@@ -987,6 +987,23 @@ impl Library {
         self.turn(turn_id)
     }
 
+    /// Pending turns that never received a job within `older_than_ms`.
+    ///
+    /// A send can only strand a turn this way while the submitting thread is blocked; the
+    /// watchdog uses this to turn an indefinite wait into an actionable failure.
+    pub fn stale_pending_turns(&self, older_than_ms: i64) -> Result<Vec<String>> {
+        let cutoff = now() - older_than_ms;
+        let mut statement = self.db.prepare(
+            "SELECT id FROM generation_turns WHERE status='pending' AND job_id IS NULL AND received_at <= ?1 ORDER BY received_at",
+        )?;
+        let rows = statement.query_map([cutoff], |row| row.get::<_, String>(0))?;
+        let mut ids = Vec::new();
+        for row in rows {
+            ids.push(row?);
+        }
+        Ok(ids)
+    }
+
     pub fn request_cancel_unbound_turn(&mut self, turn_id: &TurnId) -> Result<TurnRecord> {
         let changed = self.db.execute(
             "UPDATE generation_turns SET status='cancel_requested' WHERE id=? AND status='pending' AND job_id IS NULL",
