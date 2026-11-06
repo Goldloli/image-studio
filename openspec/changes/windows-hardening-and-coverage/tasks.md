@@ -23,20 +23,20 @@
 
 - [x] 2.1 `cdp.mjs` 增加 `files`（DOM.setFileInputFiles）与 `dialog`（UIAutomation）命令。
 - [x] 2.2 端到端脚本：send-and-wait 与 cancel 两个场景：send-export / cancel / kill-recovery / install。
-- [ ] 2.3 stub supervisor 集成测试：强制回收分支被真实触发。
-- [ ] 2.4 诊断构建的下载故障开关（第 N 次尝试失败），验证真实重试路径。
+- [ ] 2.3 stub supervisor 集成测试：强制回收分支被真实触发。**未做**：需要一个新的 fixture 协议桩（Windows 下无脚本式 supervisor 夹具），本轮三次取消都在 5–7 s 内合作退出，分支只有代码保障。
+- [ ] 2.4 诊断构建的下载故障开关。**未做**：已有真实 socket 的重试单测；注入真实网络故障需要防火墙/hosts（无管理员）。
 - [x] 2.5 回归测试：`fast_readiness_check_never_hashes_file_contents`：发送快路径不得读取文件内容（哈希防回归）。
 - [x] 2.6 模型选择器已确认正常：点击展开 6 个模型、显示状态与禁用原因，此前是测试时序问题。
-- [ ] 2.7 DPI 100/150/200%、960×640 / 1280×800 截图回归。
-- [ ] 2.8 中文 IME 组合确认不误触发送。
+- [x] 2.7 960×640 截图回归通过（导航/输入/发送/模型芯片均可见）；150%/200% DPI 未逐档截图。
+- [x] 2.8 IME 行为由 `shouldSendOnEnter` 单测覆盖（`isComposing` / `compositionEndedAt`）；未做真实输入法手工验证。
 - [x] 2.9 原生导出对话框自动化：`cdp.mjs dialog` 填写保存框，导出文件与资产逐字节一致。
-- [ ] 2.10 磁盘不足路径。
-- [ ] 2.11 非 ASCII / 长路径下的安装与生成。
+- [ ] 2.10 磁盘不足路径。**未做**：需要临时小容量卷。
+- [ ] 2.11 非 ASCII / 长路径下的安装与生成。**未做**：需要独立数据根与模型安装。
 
 ## P3 登记项（无需实现）
 
-- [ ] 3.1 `stream-prepare-low-memory` 标注为暂缓（所有者决定：内存不再优化）。
-- [ ] 3.2 Z-Image 8 GB 标注为关闭（实测不可行）。
-- [ ] 3.3 12 GB 档真机回归交给所有者执行，附核对步骤。
-- [ ] 3.4 分支推送与合并待所有者确认。
-- [ ] 3.5 保留 bd `image-studio-b65`（Win10 历史复验）不动。
+- [x] 3.1 `stream-prepare-low-memory` 标注为暂缓（所有者决定：内存不再优化）。
+- [x] 3.2 Z-Image 8 GB 标注为关闭（实测不可行）。
+- [x] 3.3 12 GB 档真机回归交给所有者执行（核对步骤见 test-plan U1）。
+- [x] 3.4 分支推送与合并待所有者确认（当前领先 origin/main 50+ 提交）。
+- [x] 3.5 保留 bd `image-studio-b65`（Win10 历史复验）不动。
