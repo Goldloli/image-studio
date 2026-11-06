@@ -147,6 +147,60 @@ def test_effective_parameters_match_design_section_11():
     assert moss["vae_precision"] == "float32"
 
 
+def test_compact_parameters_match_the_frozen_protocol_maps():
+    klein = expected_parameters(
+        KLEIN_SNAPSHOT, CAP_KLEIN_TEXT, 7, "klein4b-text-windows-compact-v1"
+    )
+    assert klein == {
+        "recipe": "klein4b-text-windows-compact-v1",
+        "recipe_version": 1,
+        "seed": 7,
+        "steps": 4,
+        "guidance": 1.0,
+        "scheduler": "flow_match_euler_discrete",
+        "token_budget": 512,
+        "thinking": False,
+        "truncation": False,
+        "quantization": "nf4",
+        "load_strategy": "nf4-sequential-offload-v1",
+        "resolution": 768,
+        "compute_dtype": "float16",
+        "vae_precision": "float16",
+    }
+    edit = expected_parameters(
+        KLEIN_SNAPSHOT, CAP_KLEIN_EDIT, 7, "klein4b-edit-windows-compact-v1"
+    )
+    assert edit["recipe"] == "klein4b-edit-windows-compact-v1"
+    qwen = expected_parameters(
+        QWEN_SNAPSHOT, CAP_QWEN, 7, "qwen21-windows-txt2img-nf4-40-compact-v1"
+    )
+    assert qwen["resolution"] == 768
+    assert qwen["compute_dtype"] == "float16"
+    assert qwen["load_strategy"] == "staged-nf4-sequential-v1"
+    assert len(qwen) == 11
+    turbo = expected_parameters(
+        QWEN_TURBO_SNAPSHOT,
+        CAP_QWEN_TURBO,
+        7,
+        "qwen21-turbo-windows-txt2img-nf4-8-compact-v1",
+    )
+    assert turbo["sampling_schedule"] == "qwen-turbo-model-index-v1"
+    assert len(turbo) == 12
+    moss = expected_parameters(
+        MOSS_SNAPSHOT, CAP_MOSS, 7, "moss-image-sft-windows-txt2img-nf4-50-compact-v1"
+    )
+    assert moss["vae_precision"] == "float32"
+    assert len(moss) == 16
+    # A compact-shaped id that does not match the frozen mapping is rejected instead of
+    # silently producing a standard map.
+    with pytest.raises(ValueError):
+        expected_parameters(
+            QWEN_SNAPSHOT, CAP_QWEN, 7, "qwen21-windows-txt2img-nf4-40-windows-compact-v1"
+        )
+    assert output_specs(QWEN_SNAPSHOT, 768)[0]["width"] == 768
+    assert output_specs(QWEN_SNAPSHOT)[0]["width"] == 1024
+
+
 @pytest.mark.parametrize(("snapshot_id", "capability"), SNAPSHOT_CAPABILITY)
 def test_frozen_requests_are_accepted(tmp_path, snapshot_id, capability):
     validate_request(request_for(tmp_path, snapshot_id, capability), snapshot_id)

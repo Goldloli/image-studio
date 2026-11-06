@@ -1,0 +1,44 @@
+{
+  "events": [
+    {
+      "module": "adaLN_modulation",
+      "finite": true,
+      "abs_max": 5.640625
+    },
+    {
+      "module": "attention_norm1",
+      "finite": true,
+      "abs_max": 48.875
+    },
+    {
+      "module": "attention",
+      "finite": true,
+      "abs_max": 8624.0
+    },
+    {
+      "module": "attention_norm2",
+      "finite": true,
+      "abs_max": 5.35546875
+    },
+    {
+      "module": "ffn_norm1",
+      "finite": true,
+      "abs_max": 56.84375
+    },
+    {
+      "module": "feed_forward",
+      "finite": false,
+      "abs_max": 3.4028234663852886e+38
+    },
+    {
+      "module": "ffn_norm2",
+      "finite": false,
+      "abs_max": 1000000000.0
+    }
+  ],
+  "first_non_finite": {
+    "module": "feed_forward",
+    "finite": false,
+    "abs_max": 3.4028234663852886e+38
+  }
+}

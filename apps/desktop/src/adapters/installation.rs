@@ -1,5 +1,6 @@
 //! Fixed-source installer. No URL, executable, or package selection crosses the IPC boundary.
 use super::paths::AppPaths;
+use super::quiet_command;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 #[cfg(windows)]
@@ -649,6 +650,7 @@ struct Inner {
     model: ModelManifest,
     runtime: RuntimeManifest,
     state: Mutex<InstallationSnapshot>,
+    verified: Mutex<Option<ReadyPaths>>,
     active: AtomicBool,
     cancelled: AtomicBool,
     aborted: AtomicBool,
@@ -970,6 +972,7 @@ fn prepared_cache_ready(dir: &Path) -> Result<(), String> {
     }
     Ok(())
 }
+
 /// Deterministic inventory of the prepared cache: recursive files, no symlinks,
 /// forward-slash relative paths, sorted for a stable digest.
 fn prepared_cache_inventory(dir: &Path) -> Result<Vec<PreparedFileRecord>, String> {
@@ -1092,6 +1095,7 @@ fn prepared_cache_matches(
     }
     Ok(())
 }
+
 fn prepare_worker_args(
     profile: InstallProfile,
     model_snapshot_id: &str,
@@ -1873,6 +1877,9 @@ impl Installation {
                 model,
                 runtime,
                 state: Mutex::new(state),
+                // Verification reads every installed byte; cache the result so a send does not
+                // re-hash tens of gigabytes. Cleared when a new install starts.
+                verified: Mutex::new(None),
                 active: AtomicBool::new(false),
                 cancelled: AtomicBool::new(false),
                 aborted: AtomicBool::new(false),
@@ -1903,6 +1910,12 @@ impl Installation {
         }
         self.inner.cancelled.store(false, Ordering::SeqCst);
         self.inner.aborted.store(false, Ordering::SeqCst);
+        // A fresh install invalidates the cached verification of the previous bytes.
+        *self
+            .inner
+            .verified
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner()) = None;
         self.update(|s| {
             s.phase = "preparing".into();
             s.error = None;
@@ -1937,7 +1950,23 @@ impl Installation {
         if self.inner.active.load(Ordering::SeqCst) {
             return Err("安装尚未完成。".into());
         }
-        let result = self.verify_ready();
+        if let Some(cached) = self
+            .inner
+            .verified
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .clone()
+        {
+            return Ok(cached);
+        }
+        let result = self.verify_ready_fast();
+        if let Ok(paths) = &result {
+            *self
+                .inner
+                .verified
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner()) = Some(paths.clone());
+        }
         if let Err(message) = &result {
             self.update(|s| {
                 s.phase = "unavailable".into();
@@ -2080,6 +2109,14 @@ impl Installation {
         }
     }
     fn verify_ready(&self) -> Result<ReadyPaths, String> {
+        self.verify_ready_inner(true)
+    }
+    /// Cheap readiness check for the send path: existence and size only.
+    fn verify_ready_fast(&self) -> Result<ReadyPaths, String> {
+        self.verify_ready_inner(false)
+    }
+    fn verify_ready_inner(&self, deep: bool) -> Result<ReadyPaths, String> {
+        super::logging::debug("install.verify.begin", &[("deep", deep.to_string())]);
         let record: ReadyRecord = serde_json::from_slice(
             &fs::read(
                 self.inner
@@ -2103,15 +2140,32 @@ impl Installation {
         ) {
             return Err("安装身份已变化，请重新安装。".into());
         }
-        prepared_cache_matches(
+        if deep {
+            prepared_cache_matches(
+                &self.inner.paths.data,
+                &self.inner.model.id,
+                self.inner.profile,
+                &record,
+            )?;
+        } else if !prepared_cache_metadata_matches(
             &self.inner.paths.data,
             &self.inner.model.id,
             self.inner.profile,
             &record,
-        )?;
-        for file in self.inner.model.installed_files() {
-            verify(&self.model_dir().join(&file.path), file.bytes, &file.sha256)?;
+        ) {
+            // Metadata and sizes only; the full digest runs once at install activation.
+            return Err("量化缓存内容与安装记录不符；请重新安装所选型号以重建量化缓存。".into());
         }
+        super::logging::debug("install.verify.prepared", &[]);
+        for file in self.inner.model.installed_files() {
+            check_installed(
+                &self.model_dir().join(&file.path),
+                file.bytes,
+                &file.sha256,
+                deep,
+            )?;
+        }
+        super::logging::debug("install.verify.model", &[]);
         if record.runtime_files.is_empty()
             || record.probe["device"] != self.inner.profile.probe_device
         {
@@ -2120,9 +2174,10 @@ impl Installation {
         for f in record.runtime_files {
             inventory_metadata_matches(&self.runtime_dir(), &f)?;
             if f.link_target.is_none() {
-                verify(&self.runtime_dir().join(f.path), f.bytes, &f.sha256)?;
+                check_installed(&self.runtime_dir().join(f.path), f.bytes, &f.sha256, deep)?;
             }
         }
+        super::logging::debug("install.verify.runtime", &[]);
         let license_root = license_root(&self.inner.paths.data, self.inner.profile);
         for license in license_records(self.inner.profile) {
             verify(
@@ -2325,6 +2380,9 @@ impl Installation {
                 .join(self.inner.profile.ready_relative),
             &record,
         )?;
+        // Verify the installed bytes once, while the install is still marked active; the send
+        // path only re-checks existence and sizes afterwards.
+        self.verify_ready()?;
         let _ = fs::remove_file(
             self.inner
                 .paths
@@ -2455,7 +2513,7 @@ impl Installation {
                 let base_python = work.join("python/bin/python3");
                 self.check_cancel()?;
                 self.command(
-                    Command::new(&base_python)
+                    quiet_command(&base_python)
                         .args(["-I", "-m", "venv", "--clear"])
                         .arg(work.join("venv")),
                 )?;
@@ -2475,7 +2533,7 @@ impl Installation {
                 )
                 .map_err(err)?;
                 self.command(
-                    Command::new(work.join("venv/bin/python3"))
+                    quiet_command(work.join("venv/bin/python3"))
                         .args([
                             "-I",
                             "-m",
@@ -2502,7 +2560,7 @@ impl Installation {
         self.check_cancel()?;
         self.update(|s| s.phase = "probing".into());
         let snapshot_id = self.snapshot_id();
-        let mut probe = Command::new(&python);
+        let mut probe = quiet_command(&python);
         probe.args(["-I", "-m", self.inner.profile.worker_module]);
         if self.inner.profile.worker_model_argument {
             probe.arg("--model-snapshot-id").arg(&snapshot_id);
@@ -2522,7 +2580,7 @@ impl Installation {
         {
             return Err("运行时探针版本或设备不符。".into());
         }
-        let versions=self.command(Command::new(&python).args(["-I","-c","import importlib.metadata,json;print(json.dumps({d.metadata['Name'].lower().replace('_','-'):d.version for d in importlib.metadata.distributions()}))"]))?;
+        let versions=self.command(quiet_command(&python).args(["-I","-c","import importlib.metadata,json;print(json.dumps({d.metadata['Name'].lower().replace('_','-'):d.version for d in importlib.metadata.distributions()}))"]))?;
         let versions: std::collections::BTreeMap<String, String> =
             serde_json::from_slice(&versions).map_err(err)?;
         for (name, version) in &self.inner.runtime.packages {
@@ -2640,7 +2698,7 @@ impl Installation {
         let output_arg = external_process_path(&output);
         let model_arg = external_process_path(&model);
         self.command(
-            Command::new(&ncnn)
+            quiet_command(&ncnn)
                 .args([
                     "-i",
                     input_arg.as_ref(),
@@ -2667,7 +2725,10 @@ impl Installation {
         if dimensions != (32, 24) {
             return Err(format!("ncnn 探针输出尺寸不符：{dimensions:?}"));
         }
-        let probe_log = fs::read_to_string(self.inner.paths.logs.join("installation-process.log"))
+        // The ncnn worker prints local paths in the OEM code page, so a non-ASCII data root makes
+        // the log invalid UTF-8; decoding lossily keeps the GPU identity line readable.
+        let probe_log = fs::read(self.inner.paths.logs.join("installation-process.log"))
+            .map(|bytes| String::from_utf8_lossy(&bytes).into_owned())
             .unwrap_or_default();
         let device_name = probe_log
             .lines()
@@ -2821,7 +2882,7 @@ impl Installation {
             fs::remove_dir_all(&prepared).map_err(err)?;
         }
         let model = self.model_dir();
-        let mut command = Command::new(self.private_python());
+        let mut command = quiet_command(self.private_python());
         command.args(prepare_worker_args(
             self.inner.profile,
             &self.snapshot_id(),
@@ -3053,11 +3114,62 @@ impl Installation {
         }
     }
     fn download(&self, a: &Artifact) -> Result<(), String> {
-        tokio::runtime::Builder::new_current_thread()
+        // Transient network failures used to abort a whole install on the first hiccup. Retry
+        // each artifact a bounded number of times, keeping the `.part` file so a resumed attempt
+        // continues where the previous one stopped.
+        const ATTEMPTS: u32 = 5;
+        let runtime = tokio::runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .map_err(err)?
-            .block_on(self.download_async(a))
+            .map_err(err)?;
+        let mut last = String::new();
+        let mut attempts_used = 0;
+        let mut digest_failure: Option<String> = None;
+        let mut digest_retried = false;
+        for attempt in 1..=ATTEMPTS {
+            attempts_used = attempt;
+            match runtime.block_on(self.download_async(a)) {
+                Ok(()) => return Ok(()),
+                Err(error) => {
+                    let cancelled =
+                        error.contains("安装已取消") || error.contains("本次安装已停止");
+                    if error.contains("SHA-256") {
+                        // The bad part was removed, so one fresh attempt is worth it before
+                        // concluding that the upstream bytes really differ from the manifest.
+                        if digest_retried {
+                            last = digest_failure.clone().unwrap_or(error);
+                            break;
+                        }
+                        digest_failure = Some(error.clone());
+                        digest_retried = true;
+                    }
+                    if cancelled || attempt == ATTEMPTS {
+                        last = error;
+                        break;
+                    }
+                    last = error;
+                    self.sleep_cancellable(Duration::from_secs(u64::from(attempt)))?;
+                }
+            }
+        }
+        let detail = match digest_failure {
+            Some(digest) if !last.contains("SHA-256") => {
+                format!("{digest}\n后续重试未取得有效文件：{last}")
+            }
+            _ => last,
+        };
+        Err(format!(
+            "下载失败（已尝试 {attempts_used} 次）：{detail}\n文件：{}\n可检查网络后重试安装；已下载的分片会继续使用。",
+            a.url
+        ))
+    }
+    fn sleep_cancellable(&self, total: Duration) -> Result<(), String> {
+        let started = std::time::Instant::now();
+        while started.elapsed() < total {
+            self.check_cancel()?;
+            std::thread::sleep(Duration::from_millis(100));
+        }
+        Ok(())
     }
     async fn cancellable<T>(
         &self,
@@ -3181,7 +3293,13 @@ impl Installation {
         }
         file.sync_all().map_err(err)?;
         drop(file);
-        verify(&part, a.bytes, &a.sha256)?;
+        if let Err(error) = verify(&part, a.bytes, &a.sha256) {
+            // A bad part must never poison later attempts: drop it and its resume metadata so a
+            // retry downloads the bytes again instead of resuming on top of them.
+            let _ = fs::remove_file(&part);
+            let _ = fs::remove_file(&meta);
+            return Err(error);
+        }
         fs::rename(&part, &final_path).map_err(err)?;
         fs::remove_file(&meta).ok();
         Ok(())
@@ -3728,6 +3846,46 @@ fn installation_space_available(
                     .saturating_add(runtime_budget)
                     .saturating_add(reserve))
 }
+
+#[test]
+fn disk_space_is_checked_per_volume_and_for_the_combined_plan() {
+    // 1 GiB of new downloads, 2 GiB of target files, 1 GiB runtime, 1 GiB reserve.
+    let (missing, target, runtime, reserve) = (1 << 30, 2 << 30, 1 << 30, 1 << 30);
+    let enough = 10u64 << 30;
+    assert!(installation_space_available(
+        enough, enough, missing, target, runtime, reserve, true
+    ));
+    // The same bytes cannot be counted twice when both roots share a volume.
+    assert!(!installation_space_available(
+        3 << 30,
+        3 << 30,
+        missing,
+        target,
+        runtime,
+        reserve,
+        true
+    ));
+    // Separate volumes only need their own share.
+    assert!(installation_space_available(
+        target + runtime + reserve,
+        missing + reserve,
+        missing,
+        target,
+        runtime,
+        reserve,
+        false
+    ));
+    assert!(!installation_space_available(
+        target + runtime + reserve - 1,
+        enough,
+        missing,
+        target,
+        runtime,
+        reserve,
+        false
+    ));
+}
+
 fn validate_archive(archive: &ArchiveArtifact) -> Result<(), String> {
     safe_relative(&archive.path)?;
     if !archive.path.ends_with(".zip") || archive.members.is_empty() {
@@ -3764,6 +3922,17 @@ fn valid_range(value: Option<&str>, offset: u64, total: u64, length: u64) -> boo
         && offset < total
         && value.is_some_and(|s| s == format!("bytes {offset}-{}/{total}", offset + length - 1))
 }
+fn check_installed(path: &Path, bytes: u64, sha256: &str, deep: bool) -> Result<(), String> {
+    if deep {
+        return verify(path, bytes, sha256);
+    }
+    let metadata = fs::metadata(path)
+        .map_err(|error| format!("安装文件不可读：{}：{error}", path.display()))?;
+    if metadata.len() != bytes {
+        return Err(format!("安装文件大小异常：{}", path.display()));
+    }
+    Ok(())
+}
 fn verify(path: &Path, bytes: u64, sha: &str) -> Result<(), String> {
     let metadata =
         fs::symlink_metadata(path).map_err(|_| format!("文件缺失：{}", path.display()))?;
@@ -3787,7 +3956,7 @@ fn verify(path: &Path, bytes: u64, sha: &str) -> Result<(), String> {
     }
     if format!("{:x}", digest.finalize()) != sha {
         return Err(format!(
-            "SHA-256 校验失败：{}；请继续以修复。",
+            "SHA-256 校验失败：{}；请重试安装以重新下载该文件。",
             path.display()
         ));
     }
@@ -4187,7 +4356,7 @@ mod tests {
         let protocol_output = repo.join("verification/windows-gate0/product-lifecycle-protocol");
         let protocol_report =
             repo.join("verification/windows-gate0/product-install-worker-protocol.json");
-        let protocol = Command::new(&ready.worker_program)
+        let protocol = quiet_command(&ready.worker_program)
             .arg("-I")
             .arg(repo.join("tools/zimage-cuda-worker/tests/run_real_protocol.py"))
             .arg("--python")
@@ -4393,7 +4562,7 @@ mod tests {
             serde_json::from_slice(&fs::read(&lifecycle).unwrap()).unwrap();
         let supervisor_pid = lifecycle_record["supervisor_pid"].as_u64().unwrap();
         let supervisor_pid_text = supervisor_pid.to_string();
-        let killed_status = Command::new("taskkill.exe")
+        let killed_status = quiet_command("taskkill.exe")
             .args(["/PID", supervisor_pid_text.as_str(), "/F"])
             .status()
             .unwrap();
@@ -5739,6 +5908,34 @@ mod tests {
         });
         (url, rx, task)
     }
+
+    /// Accepts one connection per response, so a test can fail an attempt and still serve the retry.
+    fn server_sequence(responses: Vec<Vec<u8>>) -> (String, std::thread::JoinHandle<()>) {
+        use std::net::TcpListener;
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let url = format!("http://{}/fixture", listener.local_addr().unwrap());
+        let task = std::thread::spawn(move || {
+            for response in responses {
+                let Ok((mut socket, _)) = listener.accept() else {
+                    return;
+                };
+                socket
+                    .set_read_timeout(Some(Duration::from_secs(3)))
+                    .unwrap();
+                let mut request = Vec::new();
+                let mut byte = [0];
+                while !request.ends_with(b"\r\n\r\n") {
+                    if socket.read_exact(&mut byte).is_err() {
+                        break;
+                    }
+                    request.push(byte[0]);
+                    assert!(request.len() < 8192);
+                }
+                let _ = socket.write_all(&response);
+            }
+        });
+        (url, task)
+    }
     fn test_artifact(url: String, bytes: &[u8]) -> Artifact {
         Artifact {
             path: "fixture.bin".into(),
@@ -5937,6 +6134,30 @@ mod tests {
         task.join().unwrap();
         assert_eq!(fs::read(dest).unwrap(), b"hello");
         assert_eq!(i.snapshot().received_bytes, 5);
+    }
+    #[test]
+    fn fast_readiness_check_never_hashes_file_contents() {
+        // A wrong digest of the right size must pass the metadata check and fail the deep
+        // one; this guards the send path against re-reading whole components.
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("weight.bin");
+        fs::write(&path, b"12345678").unwrap();
+        assert!(check_installed(&path, 8, &"a".repeat(64), false).is_ok());
+        assert!(check_installed(&path, 8, &"a".repeat(64), true).is_err());
+        assert!(check_installed(&path, 7, &"a".repeat(64), false).is_err());
+    }
+
+    #[test]
+    fn transient_download_failure_is_retried_before_failing() {
+        let (_temp, i) = fixture();
+        let (url, task) = server_sequence(vec![
+            b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\nConnection: close\r\n\r\nhe".to_vec(),
+            b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\nConnection: close\r\n\r\nhello".to_vec(),
+        ]);
+        let a = test_artifact(url, b"hello");
+        i.download(&a).unwrap();
+        task.join().unwrap();
+        assert_eq!(fs::read(i.cache().join(&a.sha256)).unwrap(), b"hello");
     }
     #[test]
     fn wrong_digest_never_becomes_a_completed_cache_file() {
@@ -6311,7 +6532,7 @@ mod tests {
         .unwrap();
         let output = installer
             .command(
-                Command::new(std::env::var_os("COMSPEC").unwrap())
+                quiet_command(std::env::var_os("COMSPEC").unwrap())
                     .args(["/D", "/C"])
                     .arg(script),
             )

@@ -11,6 +11,7 @@ import threading
 import time
 
 from studio_zimage_cuda_worker import (
+    COMPACT_RECIPE_ID,
     MODEL_ID,
     expected_parameters,
     model_spec,
@@ -50,6 +51,7 @@ def drain_stderr(stream, output, counter):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--python", type=Path, required=True)
+    parser.add_argument("--compact", action="store_true")
     parser.add_argument("--supervisor", type=Path)
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -72,6 +74,8 @@ def main():
     report_path = args.report.resolve()
     report_path.parent.mkdir(parents=True, exist_ok=True)
     environment = os.environ.copy()
+    # Make the worker package importable regardless of the caller's PYTHONPATH.
+    environment["PYTHONPATH"] = str(Path(__file__).resolve().parents[1]) + os.pathsep + environment.get("PYTHONPATH", "")
     for key in (
         "HF_HUB_OFFLINE",
         "TRANSFORMERS_OFFLINE",
@@ -185,21 +189,34 @@ def main():
                     "request": {
                         "model_id": MODEL_ID,
                         "capability_id": spec["capability"],
-                        "recipe_id": spec["recipe"],
+                        "recipe_id": COMPACT_RECIPE_ID if args.compact else spec["recipe"],
                         "recipe_version": 1,
                         "runtime_lock_id": identity["runtime_lock_id"],
                         "model_snapshot_id": MODEL_ID,
                         "instruction": args.prompt,
                         "seed": args.seed,
                         "sampling_steps": 9,
-                        "parameters": expected_parameters(args.seed),
+                        "parameters": expected_parameters(
+                            args.seed,
+                            COMPACT_RECIPE_ID if args.compact else spec["recipe"],
+                        ),
                         "inputs": [],
                         "outputs": [
                             {
                                 "role": "primary",
                                 "data_type": "image_rgb",
-                                "width": 1024,
-                                "height": 1024,
+                                "width": (
+                                    expected_parameters(
+                                        args.seed,
+                                        COMPACT_RECIPE_ID if args.compact else spec["recipe"],
+                                    ).get("resolution", 1024)
+                                ),
+                                "height": (
+                                    expected_parameters(
+                                        args.seed,
+                                        COMPACT_RECIPE_ID if args.compact else spec["recipe"],
+                                    ).get("resolution", 1024)
+                                ),
                                 "max_bytes": 32 * 1024 * 1024,
                             }
                         ],

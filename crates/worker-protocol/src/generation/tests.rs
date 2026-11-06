@@ -379,6 +379,15 @@ fn windows_v2_request() -> ExecuteRequestV2 {
     }
 }
 
+fn windows_z_image_compact_v2_request() -> ExecuteRequestV2 {
+    let mut request = windows_v2_request();
+    request.recipe_id = Z_IMAGE_WINDOWS_COMPACT_RECIPE_ID.into();
+    request.parameters = windows_z_image_compact_parameters(42);
+    request.outputs[0].width = 768;
+    request.outputs[0].height = 768;
+    request
+}
+
 fn v2_envelope(sequence: u64, request_id: &str, message: Message) -> Envelope {
     Envelope {
         family: FAMILY.into(),
@@ -573,6 +582,38 @@ fn windows_z_image_v2_payload_requires_frozen_identity_and_parameters() {
 }
 
 #[test]
+fn windows_z_image_compact_payload_requires_frozen_identity_and_parameters() {
+    let valid = windows_z_image_compact_v2_request();
+    valid.validate().unwrap();
+
+    for mutation in 0..9 {
+        let mut request = windows_z_image_compact_v2_request();
+        match mutation {
+            0 => request.capability_id = CAPABILITY.into(),
+            1 => request.recipe_id = Z_IMAGE_WINDOWS_RECIPE_ID.into(),
+            2 => request.runtime_lock_id = "mflux-0.24.0".into(),
+            3 => request.model_snapshot_id = "z-image-turbo-q4".into(),
+            4 => {
+                request
+                    .parameters
+                    .insert("truncation".into(), serde_json::json!(true));
+            }
+            5 => request.outputs[0].width = 1024,
+            6 => request.sampling_steps = Some(10),
+            7 => request.inputs.push(InputAssetDescriptor {
+                role: "source".into(),
+                path: managed_path("runs/windows-z-image/input.png"),
+                width: 768,
+                height: 768,
+                sha256: "a".repeat(64),
+            }),
+            _ => request.seed = None,
+        }
+        assert!(request.validate().is_err(), "mutation {mutation}");
+    }
+}
+
+#[test]
 fn v1_and_v2_messages_cannot_cross_protocol_boundaries() {
     let mut envelope = host_frames()[1].clone();
     envelope.version = Some(PROTOCOL_VERSION_V2);
@@ -596,20 +637,33 @@ fn windows_map(entries: &[(&str, serde_json::Value)]) -> BTreeMap<String, serde_
         .collect()
 }
 
-fn windows_klein_v2_request(edit: bool) -> ExecuteRequestV2 {
+fn windows_klein_v2_request(edit: bool, compact: bool) -> ExecuteRequestV2 {
     let seed = 42;
-    let (capability_id, recipe_id, parameters) = if edit {
-        (
+    let (capability_id, recipe_id, parameters, resolution) = match (edit, compact) {
+        (true, true) => (
+            KLEIN_WINDOWS_EDIT_CAPABILITY_ID,
+            KLEIN_WINDOWS_EDIT_COMPACT_RECIPE_ID,
+            windows_klein_edit_compact_parameters(seed),
+            768,
+        ),
+        (true, false) => (
             KLEIN_WINDOWS_EDIT_CAPABILITY_ID,
             KLEIN_WINDOWS_EDIT_RECIPE_ID,
             windows_klein_edit_parameters(seed),
-        )
-    } else {
-        (
+            1024,
+        ),
+        (false, true) => (
+            KLEIN_WINDOWS_TEXT_CAPABILITY_ID,
+            KLEIN_WINDOWS_TEXT_COMPACT_RECIPE_ID,
+            windows_klein_compact_parameters(seed),
+            768,
+        ),
+        (false, false) => (
             KLEIN_WINDOWS_TEXT_CAPABILITY_ID,
             KLEIN_WINDOWS_TEXT_RECIPE_ID,
             windows_klein_parameters(seed),
-        )
+            1024,
+        ),
     };
     ExecuteRequestV2 {
         model_id: KLEIN_WINDOWS_MODEL_ID.into(),
@@ -636,8 +690,8 @@ fn windows_klein_v2_request(edit: bool) -> ExecuteRequestV2 {
         outputs: vec![OutputSpec {
             role: "primary".into(),
             data_type: "image_rgb".into(),
-            width: 1024,
-            height: 1024,
+            width: resolution,
+            height: resolution,
             max_bytes: MAX_OUTPUT_BYTES,
         }],
         model_path: managed_path("models/windows-klein"),
@@ -722,8 +776,10 @@ fn windows_text_v2_request(
     recipe_id: &str,
     snapshot_id: &str,
     parameters: BTreeMap<String, serde_json::Value>,
+    compact: bool,
 ) -> ExecuteRequestV2 {
     let steps = parameters["steps"].as_u64().map(|value| value as u32);
+    let resolution = if compact { 768 } else { 1024 };
     ExecuteRequestV2 {
         model_id: model_id.into(),
         capability_id: capability_id.into(),
@@ -739,8 +795,8 @@ fn windows_text_v2_request(
         outputs: vec![OutputSpec {
             role: "primary".into(),
             data_type: "image_rgb".into(),
-            width: 1024,
-            height: 1024,
+            width: resolution,
+            height: resolution,
             max_bytes: MAX_OUTPUT_BYTES,
         }],
         model_path: managed_path(&format!("models/{snapshot_id}")),
@@ -843,10 +899,221 @@ fn windows_recipe_parameter_helpers_match_the_frozen_maps() {
 }
 
 #[test]
+fn windows_compact_recipe_parameter_helpers_extend_the_frozen_maps() {
+    let seed = 42;
+    assert_eq!(
+        windows_klein_compact_parameters(seed),
+        windows_map(&[
+            (
+                "recipe",
+                serde_json::json!("klein4b-text-windows-compact-v1")
+            ),
+            ("recipe_version", serde_json::json!(1)),
+            ("seed", serde_json::json!(seed)),
+            ("steps", serde_json::json!(4)),
+            ("guidance", serde_json::json!(1.0)),
+            ("scheduler", serde_json::json!("flow_match_euler_discrete")),
+            ("token_budget", serde_json::json!(512)),
+            ("thinking", serde_json::json!(false)),
+            ("truncation", serde_json::json!(false)),
+            ("quantization", serde_json::json!("nf4")),
+            (
+                "load_strategy",
+                serde_json::json!("nf4-sequential-offload-v1")
+            ),
+            ("resolution", serde_json::json!(768)),
+            ("compute_dtype", serde_json::json!("float16")),
+            ("vae_precision", serde_json::json!("float16")),
+        ])
+    );
+    assert_eq!(
+        windows_klein_edit_compact_parameters(seed),
+        windows_map(&[
+            (
+                "recipe",
+                serde_json::json!("klein4b-edit-windows-compact-v1")
+            ),
+            ("recipe_version", serde_json::json!(1)),
+            ("seed", serde_json::json!(seed)),
+            ("steps", serde_json::json!(4)),
+            ("guidance", serde_json::json!(1.0)),
+            ("scheduler", serde_json::json!("flow_match_euler_discrete")),
+            ("token_budget", serde_json::json!(512)),
+            ("thinking", serde_json::json!(false)),
+            ("truncation", serde_json::json!(false)),
+            ("quantization", serde_json::json!("nf4")),
+            (
+                "load_strategy",
+                serde_json::json!("nf4-sequential-offload-v1")
+            ),
+            ("resolution", serde_json::json!(768)),
+            ("compute_dtype", serde_json::json!("float16")),
+            ("vae_precision", serde_json::json!("float16")),
+        ])
+    );
+    assert_eq!(
+        windows_qwen21_compact_parameters(seed),
+        windows_map(&[
+            (
+                "recipe",
+                serde_json::json!("qwen21-windows-txt2img-nf4-40-compact-v1")
+            ),
+            ("recipe_version", serde_json::json!(1)),
+            ("seed", serde_json::json!(seed)),
+            ("steps", serde_json::json!(40)),
+            ("guidance", serde_json::json!(1.0)),
+            ("sampling", serde_json::json!("linear")),
+            ("token_budget", serde_json::json!(2048)),
+            ("quantization", serde_json::json!("nf4")),
+            (
+                "load_strategy",
+                serde_json::json!("staged-nf4-sequential-v1")
+            ),
+            ("resolution", serde_json::json!(768)),
+            ("compute_dtype", serde_json::json!("float16")),
+        ])
+    );
+    assert_eq!(
+        windows_qwen21_turbo_compact_parameters(seed),
+        windows_map(&[
+            (
+                "recipe",
+                serde_json::json!("qwen21-turbo-windows-txt2img-nf4-8-compact-v1")
+            ),
+            ("recipe_version", serde_json::json!(1)),
+            ("seed", serde_json::json!(seed)),
+            ("steps", serde_json::json!(8)),
+            ("guidance", serde_json::json!(1.0)),
+            ("sampling", serde_json::json!("linear")),
+            ("token_budget", serde_json::json!(2048)),
+            ("quantization", serde_json::json!("nf4")),
+            (
+                "sampling_schedule",
+                serde_json::json!("qwen-turbo-model-index-v1")
+            ),
+            (
+                "load_strategy",
+                serde_json::json!("staged-nf4-sequential-v1")
+            ),
+            ("resolution", serde_json::json!(768)),
+            ("compute_dtype", serde_json::json!("float16")),
+        ])
+    );
+    assert_eq!(
+        windows_moss_compact_parameters(seed),
+        windows_map(&[
+            (
+                "recipe",
+                serde_json::json!("moss-image-sft-windows-txt2img-nf4-50-compact-v1")
+            ),
+            ("recipe_version", serde_json::json!(1)),
+            ("seed", serde_json::json!(seed)),
+            ("steps", serde_json::json!(50)),
+            ("guidance", serde_json::json!(3.0)),
+            ("sampling", serde_json::json!("moss_image")),
+            ("token_budget", serde_json::json!(4096)),
+            ("thinking", serde_json::json!(true)),
+            ("negative_prompt", serde_json::json!("")),
+            ("uncond_skip_layers", serde_json::json!([22])),
+            (
+                "quantized_components",
+                serde_json::json!(["transformer", "text_encoder"])
+            ),
+            ("text_encoder_precision", serde_json::json!("nf4")),
+            ("vae_precision", serde_json::json!("float32")),
+            (
+                "load_strategy",
+                serde_json::json!("staged-nf4-sequential-v1")
+            ),
+            ("resolution", serde_json::json!(768)),
+            ("compute_dtype", serde_json::json!("float16")),
+        ])
+    );
+
+    assert_eq!(
+        windows_z_image_compact_parameters(seed),
+        windows_map(&[
+            ("seed", serde_json::json!(seed)),
+            ("steps", serde_json::json!(9)),
+            ("quantization", serde_json::json!("nf4")),
+            ("guidance", serde_json::json!(0.0)),
+            (
+                "scheduler",
+                serde_json::json!("FlowMatchEulerDiscreteScheduler")
+            ),
+            (
+                "recipe",
+                serde_json::json!("z-image-turbo-nf4-cuda-compact-v1")
+            ),
+            ("recipe_version", serde_json::json!(1)),
+            ("token_budget", serde_json::json!(512)),
+            ("truncation", serde_json::json!(false)),
+            ("thinking", serde_json::json!(true)),
+            (
+                "quantized_components",
+                serde_json::json!(["transformer", "text_encoder"])
+            ),
+            ("compute_dtype", serde_json::json!("float16")),
+            ("vae_precision", serde_json::json!("float32")),
+            ("attention", serde_json::json!("_native_efficient")),
+            ("offload", serde_json::json!("model_cpu")),
+            ("resolution", serde_json::json!(768)),
+        ])
+    );
+    // The compact helper clones the standard map: its identity and bf16 defaults stay frozen.
+    let standard = windows_z_image_parameters(seed);
+    assert_eq!(standard["recipe"], "z-image-turbo-nf4-cuda-v1");
+    assert_eq!(standard["compute_dtype"], "bfloat16");
+    assert_eq!(standard["vae_precision"], "bfloat16");
+    assert!(!standard.contains_key("resolution"));
+
+    // Every compact map keeps every standard key; shared keys are overridden in place and the
+    // remaining entries are additions. Standard maps themselves stay unchanged.
+    for (standard, compact, additions) in [
+        (
+            windows_klein_parameters(seed),
+            windows_klein_compact_parameters(seed),
+            3,
+        ),
+        (
+            windows_klein_edit_parameters(seed),
+            windows_klein_edit_compact_parameters(seed),
+            3,
+        ),
+        (
+            windows_qwen21_parameters(seed),
+            windows_qwen21_compact_parameters(seed),
+            2,
+        ),
+        (
+            windows_qwen21_turbo_parameters(seed),
+            windows_qwen21_turbo_compact_parameters(seed),
+            2,
+        ),
+        (
+            windows_moss_parameters(seed),
+            windows_moss_compact_parameters(seed),
+            2,
+        ),
+        (
+            windows_z_image_parameters(seed),
+            windows_z_image_compact_parameters(seed),
+            1,
+        ),
+    ] {
+        assert!(
+            standard.keys().all(|key| compact.contains_key(key)),
+            "compact map dropped a standard key"
+        );
+        assert_eq!(compact.len(), standard.len() + additions);
+    }
+}
+
+#[test]
 fn windows_v2_payloads_accept_the_frozen_identities() {
     for request in [
-        windows_klein_v2_request(false),
-        windows_klein_v2_request(true),
+        windows_klein_v2_request(false, false),
+        windows_klein_v2_request(true, false),
         windows_birefnet_v2_request(),
         windows_realesrgan_v2_request(),
         windows_text_v2_request(
@@ -855,6 +1122,7 @@ fn windows_v2_payloads_accept_the_frozen_identities() {
             QWEN_IMAGE_21_WINDOWS_RECIPE_ID,
             QWEN_IMAGE_21_WINDOWS_SNAPSHOT_ID,
             windows_qwen21_parameters(42),
+            false,
         ),
         windows_text_v2_request(
             QWEN_IMAGE_21_TURBO_WINDOWS_MODEL_ID,
@@ -862,6 +1130,7 @@ fn windows_v2_payloads_accept_the_frozen_identities() {
             QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE_ID,
             QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT_ID,
             windows_qwen21_turbo_parameters(42),
+            false,
         ),
         windows_text_v2_request(
             MOSS_IMAGE_SFT_WINDOWS_MODEL_ID,
@@ -869,6 +1138,7 @@ fn windows_v2_payloads_accept_the_frozen_identities() {
             MOSS_IMAGE_SFT_WINDOWS_RECIPE_ID,
             MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID,
             windows_moss_parameters(42),
+            false,
         ),
     ] {
         request.validate().unwrap();
@@ -876,10 +1146,138 @@ fn windows_v2_payloads_accept_the_frozen_identities() {
 }
 
 #[test]
+fn windows_compact_v2_payloads_accept_the_frozen_identities() {
+    for request in [
+        windows_klein_v2_request(false, true),
+        windows_klein_v2_request(true, true),
+        windows_text_v2_request(
+            QWEN_IMAGE_21_WINDOWS_MODEL_ID,
+            QWEN_IMAGE_21_WINDOWS_CAPABILITY_ID,
+            QWEN_IMAGE_21_WINDOWS_COMPACT_RECIPE_ID,
+            QWEN_IMAGE_21_WINDOWS_SNAPSHOT_ID,
+            windows_qwen21_compact_parameters(42),
+            true,
+        ),
+        windows_text_v2_request(
+            QWEN_IMAGE_21_TURBO_WINDOWS_MODEL_ID,
+            QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY_ID,
+            QWEN_IMAGE_21_TURBO_WINDOWS_COMPACT_RECIPE_ID,
+            QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT_ID,
+            windows_qwen21_turbo_compact_parameters(42),
+            true,
+        ),
+        windows_text_v2_request(
+            MOSS_IMAGE_SFT_WINDOWS_MODEL_ID,
+            MOSS_IMAGE_SFT_WINDOWS_CAPABILITY_ID,
+            MOSS_IMAGE_SFT_WINDOWS_COMPACT_RECIPE_ID,
+            MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID,
+            windows_moss_compact_parameters(42),
+            true,
+        ),
+        windows_z_image_compact_v2_request(),
+    ] {
+        request.validate().unwrap();
+    }
+}
+
+#[test]
+fn windows_compact_payloads_reject_cross_tier_parameters_and_output_drift() {
+    let cases = [
+        (
+            windows_klein_v2_request(false, true),
+            KLEIN_WINDOWS_TEXT_RECIPE_ID,
+            windows_klein_parameters(42),
+        ),
+        (
+            windows_klein_v2_request(true, true),
+            KLEIN_WINDOWS_EDIT_RECIPE_ID,
+            windows_klein_edit_parameters(42),
+        ),
+        (
+            windows_text_v2_request(
+                QWEN_IMAGE_21_WINDOWS_MODEL_ID,
+                QWEN_IMAGE_21_WINDOWS_CAPABILITY_ID,
+                QWEN_IMAGE_21_WINDOWS_COMPACT_RECIPE_ID,
+                QWEN_IMAGE_21_WINDOWS_SNAPSHOT_ID,
+                windows_qwen21_compact_parameters(42),
+                true,
+            ),
+            QWEN_IMAGE_21_WINDOWS_RECIPE_ID,
+            windows_qwen21_parameters(42),
+        ),
+        (
+            windows_text_v2_request(
+                QWEN_IMAGE_21_TURBO_WINDOWS_MODEL_ID,
+                QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY_ID,
+                QWEN_IMAGE_21_TURBO_WINDOWS_COMPACT_RECIPE_ID,
+                QWEN_IMAGE_21_TURBO_WINDOWS_SNAPSHOT_ID,
+                windows_qwen21_turbo_compact_parameters(42),
+                true,
+            ),
+            QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE_ID,
+            windows_qwen21_turbo_parameters(42),
+        ),
+        (
+            windows_text_v2_request(
+                MOSS_IMAGE_SFT_WINDOWS_MODEL_ID,
+                MOSS_IMAGE_SFT_WINDOWS_CAPABILITY_ID,
+                MOSS_IMAGE_SFT_WINDOWS_COMPACT_RECIPE_ID,
+                MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID,
+                windows_moss_compact_parameters(42),
+                true,
+            ),
+            MOSS_IMAGE_SFT_WINDOWS_RECIPE_ID,
+            windows_moss_parameters(42),
+        ),
+        (
+            windows_z_image_compact_v2_request(),
+            Z_IMAGE_WINDOWS_RECIPE_ID,
+            windows_z_image_parameters(42),
+        ),
+    ];
+    for (request, standard_recipe_id, standard_parameters) in cases {
+        request.validate().unwrap();
+
+        let mut wrong = request.clone();
+        wrong.parameters = standard_parameters;
+        assert!(
+            wrong.validate().is_err(),
+            "compact recipe accepted standard parameters"
+        );
+
+        let mut wrong = request.clone();
+        wrong.recipe_id = standard_recipe_id.into();
+        wrong.outputs[0].width = 1024;
+        wrong.outputs[0].height = 1024;
+        assert!(
+            wrong.validate().is_err(),
+            "standard recipe accepted compact parameters"
+        );
+
+        let mut wrong = request.clone();
+        wrong.outputs[0].width = 1024;
+        wrong.outputs[0].height = 1024;
+        assert!(
+            wrong.validate().is_err(),
+            "compact recipe accepted a 1024 output"
+        );
+
+        let mut wrong = request.clone();
+        wrong
+            .parameters
+            .insert("compute_dtype".into(), serde_json::json!("bfloat16"));
+        assert!(
+            wrong.validate().is_err(),
+            "compact recipe accepted bfloat16 compute"
+        );
+    }
+}
+
+#[test]
 fn windows_klein_payloads_reject_identity_parameter_and_shape_drift() {
     for edit in [false, true] {
         for mutation in 0..12 {
-            let mut request = windows_klein_v2_request(edit);
+            let mut request = windows_klein_v2_request(edit, false);
             match mutation {
                 0 => request.capability_id = "image.text-to-image.flux2-klein-4b.v1".into(),
                 1 => request.recipe_id = "klein4b-text-v1".into(),
@@ -1005,6 +1403,7 @@ fn windows_staged_text_payloads_require_exact_identities_and_parameter_maps() {
                 recipe_id,
                 snapshot_id,
                 parameters.clone(),
+                false,
             );
             match mutation {
                 0 => request.instruction.clear(),
@@ -1059,14 +1458,14 @@ fn macos_identities_with_windows_runtime_are_rejected() {
         ))
     ));
 
-    let mut request = windows_klein_v2_request(false);
+    let mut request = windows_klein_v2_request(false, false);
     request.model_id = "flux2-klein-4b-distilled".into();
     request.capability_id = "image.text-to-image.flux2-klein-4b.v1".into();
     request.recipe_id = "klein4b-text-v1".into();
     request.runtime_lock_id = WINDOWS_V2_RUNTIME_ID.into();
     assert!(request.validate().is_err());
 
-    let mut unknown = windows_klein_v2_request(false);
+    let mut unknown = windows_klein_v2_request(false, false);
     unknown.model_id = "unknown-model-v1".into();
     assert!(matches!(
         unknown.validate(),

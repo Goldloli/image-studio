@@ -1,0 +1,16 @@
+{
+  "status": "non_finite",
+  "dtype": "torch.float16",
+  "weights_dtype": "uint4",
+  "dequantize_fp32": true,
+  "fp32_attention": true,
+  "steps": 9,
+  "size": 512,
+  "elapsed_seconds": 317.41,
+  "sample_seconds": 19.39,
+  "cuda_reserved_peak_gib": 4.385,
+  "image_finite": false,
+  "image_min": NaN,
+  "image_max": NaN,
+  "image_mean": NaN
+}

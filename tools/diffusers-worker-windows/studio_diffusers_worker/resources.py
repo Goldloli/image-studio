@@ -17,6 +17,15 @@ from ctypes import wintypes
 LOAD_LIMIT_SECONDS = 600.0
 GENERATION_LIMIT_SECONDS = 900.0
 CUDA_RESERVED_LIMIT_GIB = 10.5
+# The compact tier must fit an 8 GB card that also runs the desktop compositor.
+COMPACT_CUDA_LIMIT_GIB = 6.0
+
+
+def compute_torch_dtype(name):
+    """Map the frozen `compute_dtype` parameter to a torch dtype (fp16 on Turing)."""
+    import torch
+
+    return torch.float16 if name == "float16" else torch.bfloat16
 PRIVATE_COMMIT_LIMIT_GIB = 24.0
 AVAILABLE_RAM_MINIMUM_GIB = 2.0
 
@@ -191,34 +200,44 @@ class BudgetExceeded(RuntimeError):
     """Raised when the measured generation exceeds the frozen Windows budget."""
 
 
-def enforce_budget(sampler: ResourceSampler, cuda: CudaPeaks, elapsed_seconds: float) -> None:
+def enforce_budget(
+    sampler: ResourceSampler,
+    cuda: CudaPeaks,
+    elapsed_seconds: float,
+    cuda_limit_gib: float = CUDA_RESERVED_LIMIT_GIB,
+) -> None:
     """Fail closed when the measured generation exceeds the frozen budget."""
     resources = sampler.snapshot()
     gpu = cuda.snapshot()
     problems = []
     if resources["process_private_commit_peak_gib"] > PRIVATE_COMMIT_LIMIT_GIB:
         problems.append(
-            "process private commit "
-            f"{resources['process_private_commit_peak_gib']} GiB > "
-            f"{PRIVATE_COMMIT_LIMIT_GIB} GiB"
+            "进程提交内存峰值 "
+            f"{resources['process_private_commit_peak_gib']:.2f} GiB，超过 "
+            f"{PRIVATE_COMMIT_LIMIT_GIB:.0f} GiB 上限"
         )
     if resources["system_available_ram_min_gib"] < AVAILABLE_RAM_MINIMUM_GIB:
         problems.append(
-            "available RAM "
-            f"{resources['system_available_ram_min_gib']} GiB < "
-            f"{AVAILABLE_RAM_MINIMUM_GIB} GiB"
+            "可用内存最低 "
+            f"{resources['system_available_ram_min_gib']:.2f} GiB，低于 "
+            f"{AVAILABLE_RAM_MINIMUM_GIB:.0f} GiB 门槛"
         )
-    if gpu["cuda_reserved_peak_gib"] > CUDA_RESERVED_LIMIT_GIB:
+    if gpu["cuda_reserved_peak_gib"] > cuda_limit_gib:
         problems.append(
-            f"CUDA reserved {gpu['cuda_reserved_peak_gib']} GiB > "
-            f"{CUDA_RESERVED_LIMIT_GIB} GiB"
+            f"显存占用 {gpu['cuda_reserved_peak_gib']:.2f} GiB，超过 "
+            f"{cuda_limit_gib:.1f} GiB 预算"
         )
     if elapsed_seconds > GENERATION_LIMIT_SECONDS:
         problems.append(
-            f"generation {elapsed_seconds:.1f} s > {GENERATION_LIMIT_SECONDS:.0f} s"
+            f"生成耗时 {elapsed_seconds:.0f} 秒，超过 "
+            f"{GENERATION_LIMIT_SECONDS:.0f} 秒预算"
         )
     if problems:
-        raise BudgetExceeded("budget exceeded: " + "; ".join(problems))
+        raise BudgetExceeded(
+            "生成超出资源预算："
+            + "；".join(problems)
+            + "。请关闭占用内存或显存的其他程序后重试。"
+        )
 
 
 def require_available_ram(phase: str, minimum_gib: float = AVAILABLE_RAM_MINIMUM_GIB) -> None:
@@ -226,7 +245,8 @@ def require_available_ram(phase: str, minimum_gib: float = AVAILABLE_RAM_MINIMUM
     available_gib = memory["physical_available_bytes"] / 1024**3
     if available_gib < minimum_gib:
         raise BudgetExceeded(
-            f"{phase}: available RAM {available_gib:.2f} GiB < {minimum_gib:.2f} GiB"
+            f"{phase}：可用内存 {available_gib:.2f} GiB，低于 {minimum_gib:.2f} GiB 门槛；"
+            "请关闭占用内存的程序后重试。"
         )
 
 

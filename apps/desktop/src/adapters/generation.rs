@@ -1,5 +1,6 @@
 //! One background generation exchange. Durable state changes always pass through Library.
 //! A native candidate is still provisional until process exit, lease release and SQLite commit.
+use super::quiet_command;
 use super::{
     AppPaths,
     installation::{ReadyPaths, WINDOWS_ZIMAGE_WORKER_MODULE},
@@ -72,6 +73,70 @@ struct Inner {
     library: Arc<Mutex<Library>>,
     supervisor: PathBuf,
     state: Mutex<State>,
+}
+/// True once a cancelled exchange has waited past the grace deadline without the child exiting.
+fn cancel_deadline_passed(cancel_since: Option<Instant>, deadline: Duration, exited: bool) -> bool {
+    !exited && cancel_since.is_some_and(|since| since.elapsed() > deadline)
+}
+
+#[cfg(test)]
+mod cancel_deadline_tests {
+    use super::*;
+
+    #[test]
+    fn only_a_past_deadline_on_a_live_child_forces_a_kill() {
+        let deadline = Duration::from_secs(5);
+        assert!(!cancel_deadline_passed(None, deadline, false));
+        assert!(!cancel_deadline_passed(
+            Some(Instant::now()),
+            deadline,
+            false
+        ));
+        assert!(!cancel_deadline_passed(
+            Some(Instant::now() - Duration::from_secs(30)),
+            deadline,
+            true
+        ));
+        assert!(cancel_deadline_passed(
+            Some(Instant::now() - Duration::from_secs(30)),
+            deadline,
+            false
+        ));
+    }
+}
+/// Available physical memory in GiB, for generation diagnostics.
+fn available_memory_gib() -> String {
+    #[cfg(windows)]
+    {
+        use std::mem::MaybeUninit;
+        #[repr(C)]
+        struct MemoryStatusEx {
+            length: u32,
+            memory_load: u32,
+            total_phys: u64,
+            avail_phys: u64,
+            total_page_file: u64,
+            avail_page_file: u64,
+            total_virtual: u64,
+            avail_virtual: u64,
+            avail_extended_virtual: u64,
+        }
+        unsafe extern "system" {
+            fn GlobalMemoryStatusEx(buffer: *mut MemoryStatusEx) -> i32;
+        }
+        let mut status = MaybeUninit::<MemoryStatusEx>::zeroed();
+        // SAFETY: writing the length field of a zeroed, correctly sized struct.
+        unsafe {
+            (*status.as_mut_ptr()).length = std::mem::size_of::<MemoryStatusEx>() as u32;
+        }
+        // SAFETY: the struct is initialised with the expected length before the call.
+        if unsafe { GlobalMemoryStatusEx(status.as_mut_ptr()) } != 0 {
+            // SAFETY: the call succeeded and filled the struct.
+            let status = unsafe { status.assume_init() };
+            return format!("{:.2}", status.avail_phys as f64 / 1024.0 / 1024.0 / 1024.0);
+        }
+    }
+    String::from("-")
 }
 #[derive(Clone)]
 pub struct GenerationController {
@@ -220,6 +285,14 @@ impl GenerationController {
         }
     }
     fn run(&self, job: JobRecord, ready: ReadyPaths) {
+        // Memory context helps explain an unexpected host exit during long generations.
+        super::logging::info(
+            "generation.start",
+            &[
+                ("job", job.job_id.to_string()),
+                ("available_gib", available_memory_gib()),
+            ],
+        );
         let result = self.prepare(&job, &ready);
         let (config, run_dir, control) = match result {
             Ok(value) => value,
@@ -241,7 +314,7 @@ impl GenerationController {
                 .map_err(error)?;
             serde_json::to_writer(&mut file, &config).map_err(error)?;
             file.sync_all().map_err(error)?;
-            let mut command = std::process::Command::new(&self.inner.supervisor);
+            let mut command = quiet_command(&self.inner.supervisor);
             command
                 .arg("--config")
                 .arg(config_path)
@@ -261,7 +334,7 @@ impl GenerationController {
                 .map_err(error)?;
             serde_json::to_writer(&mut file, &config).map_err(error)?;
             file.sync_all().map_err(error)?;
-            let mut command = std::process::Command::new(&self.inner.supervisor);
+            let mut command = quiet_command(&self.inner.supervisor);
             command
                 .arg("--config")
                 .arg(config_path)
@@ -374,8 +447,13 @@ impl GenerationController {
             | Recipe::MossImageSft
             | Recipe::QwenImage21Windows
             | Recipe::QwenImage21TurboWindows
-            | Recipe::MossImageSftWindows => Timeouts {
-                handshake_ms: 30_000,
+            | Recipe::MossImageSftWindows
+            | Recipe::QwenImage21WindowsCompact
+            | Recipe::QwenImage21TurboWindowsCompact
+            | Recipe::MossImageSftWindowsCompact => Timeouts {
+                // The installed runtime's first torch import can exceed 30 s on a cold cache,
+                // which used to abort the handshake before the worker answered.
+                handshake_ms: 120_000,
                 loading_ms: 600_000,
                 generation_ms: 1_920_000,
                 cancel_grace_ms: 5_000,
@@ -383,8 +461,11 @@ impl GenerationController {
             },
             // Klein's four-step Windows recipe runs in a fresh worker process with
             // NF4 + CPU offload; keep the product 900 s generation budget explicit.
-            Recipe::KleinTextWindows | Recipe::KleinEditWindows => Timeouts {
-                handshake_ms: 30_000,
+            Recipe::KleinTextWindows
+            | Recipe::KleinEditWindows
+            | Recipe::KleinTextWindowsCompact
+            | Recipe::KleinEditWindowsCompact => Timeouts {
+                handshake_ms: 120_000,
                 loading_ms: 600_000,
                 generation_ms: 900_000,
                 cancel_grace_ms: 5_000,
@@ -423,7 +504,10 @@ impl GenerationController {
                 Recipe::KleinText | Recipe::KleinEdit => {
                     vec![KLEIN_TEXT_CAPABILITY.into(), KLEIN_EDIT_CAPABILITY.into()]
                 }
-                Recipe::KleinTextWindows | Recipe::KleinEditWindows => vec![
+                Recipe::KleinTextWindows
+                | Recipe::KleinEditWindows
+                | Recipe::KleinTextWindowsCompact
+                | Recipe::KleinEditWindowsCompact => vec![
                     KLEIN_WINDOWS_TEXT_CAPABILITY.into(),
                     KLEIN_WINDOWS_EDIT_CAPABILITY.into(),
                 ],
@@ -432,13 +516,17 @@ impl GenerationController {
                 Recipe::RealEsrgan => vec![REALESRGAN_CAPABILITY.into()],
                 Recipe::RealEsrganWindows => vec![REALESRGAN_WINDOWS_CAPABILITY.into()],
                 Recipe::QwenImage21 => vec![QWEN_IMAGE_21_CAPABILITY.into()],
-                Recipe::QwenImage21Windows => vec![QWEN_IMAGE_21_WINDOWS_CAPABILITY.into()],
+                Recipe::QwenImage21Windows | Recipe::QwenImage21WindowsCompact => {
+                    vec![QWEN_IMAGE_21_WINDOWS_CAPABILITY.into()]
+                }
                 Recipe::QwenImage21Turbo => vec![QWEN_IMAGE_21_TURBO_CAPABILITY.into()],
-                Recipe::QwenImage21TurboWindows => {
+                Recipe::QwenImage21TurboWindows | Recipe::QwenImage21TurboWindowsCompact => {
                     vec![QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY.into()]
                 }
                 Recipe::MossImageSft => vec![MOSS_IMAGE_SFT_CAPABILITY.into()],
-                Recipe::MossImageSftWindows => vec![MOSS_IMAGE_SFT_WINDOWS_CAPABILITY.into()],
+                Recipe::MossImageSftWindows | Recipe::MossImageSftWindowsCompact => {
+                    vec![MOSS_IMAGE_SFT_WINDOWS_CAPABILITY.into()]
+                }
                 _ => vec![job.request.capability.capability_id.clone()],
             },
             timeouts,
@@ -545,14 +633,23 @@ impl GenerationController {
                     vec![MOSS_IMAGE_SFT_CAPABILITY.into()],
                 )
                 .map_err(error)
-            } else if recipe == Recipe::ZImageTurboCudaNf4 {
+            } else if matches!(
+                recipe,
+                Recipe::ZImageTurboCudaNf4 | Recipe::ZImageTurboCudaNf4Compact
+            ) {
                 HostSession::new_v2(
                     session_id,
                     config.expected_worker.clone(),
                     vec![job.request.capability.capability_id.clone()],
                 )
                 .map_err(error)
-            } else if recipe == Recipe::KleinTextWindows || recipe == Recipe::KleinEditWindows {
+            } else if matches!(
+                recipe,
+                Recipe::KleinTextWindows
+                    | Recipe::KleinEditWindows
+                    | Recipe::KleinTextWindowsCompact
+                    | Recipe::KleinEditWindowsCompact
+            ) {
                 HostSession::new_v2(
                     session_id,
                     config.expected_worker.clone(),
@@ -576,21 +673,30 @@ impl GenerationController {
                     vec![REALESRGAN_WINDOWS_CAPABILITY.into()],
                 )
                 .map_err(error)
-            } else if recipe == Recipe::QwenImage21Windows {
+            } else if matches!(
+                recipe,
+                Recipe::QwenImage21Windows | Recipe::QwenImage21WindowsCompact
+            ) {
                 HostSession::new_v2(
                     session_id,
                     config.expected_worker.clone(),
                     vec![QWEN_IMAGE_21_WINDOWS_CAPABILITY.into()],
                 )
                 .map_err(error)
-            } else if recipe == Recipe::QwenImage21TurboWindows {
+            } else if matches!(
+                recipe,
+                Recipe::QwenImage21TurboWindows | Recipe::QwenImage21TurboWindowsCompact
+            ) {
                 HostSession::new_v2(
                     session_id,
                     config.expected_worker.clone(),
                     vec![QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY.into()],
                 )
                 .map_err(error)
-            } else if recipe == Recipe::MossImageSftWindows {
+            } else if matches!(
+                recipe,
+                Recipe::MossImageSftWindows | Recipe::MossImageSftWindowsCompact
+            ) {
                 HostSession::new_v2(
                     session_id,
                     config.expected_worker.clone(),
@@ -628,6 +734,12 @@ impl GenerationController {
         let mut executed = false;
         let mut cancel_sent = false;
         let mut close_since = None;
+        // Cancellation is cooperative first, but a worker that keeps tearing down for minutes
+        // must not hold the turn in "cancelling": force the process group after the grace budget.
+        let cancel_hard_deadline =
+            Duration::from_millis(config.timeouts.cancel_grace_ms.saturating_add(5_000));
+        let mut cancel_since: Option<Instant> = None;
+        let mut force_killed = false;
         let mut status = None;
         let mut lifecycle_checked = false;
         let mut crashed_group = None;
@@ -651,6 +763,21 @@ impl GenerationController {
                             fatal = Some(e.to_string());
                         }
                     }
+                }
+            }
+            if control.cancel.load(Ordering::Acquire) && cancel_since.is_none() {
+                cancel_since = Some(Instant::now());
+            }
+            if !force_killed
+                && cancel_deadline_passed(cancel_since, cancel_hard_deadline, status.is_some())
+            {
+                force_killed = true;
+                let _ = child.kill();
+                if let Ok(record) =
+                    inference_supervisor::read_current_lifecycle(&config.working_dir, &child)
+                {
+                    let _ = record.terminate_group();
+                    crashed_group = Some(record);
                 }
             }
             match receiver.recv_timeout(Duration::from_millis(40)) {
@@ -923,7 +1050,12 @@ impl GenerationController {
 fn staged_windows_recipe(recipe: Recipe) -> bool {
     matches!(
         recipe,
-        Recipe::QwenImage21Windows | Recipe::QwenImage21TurboWindows | Recipe::MossImageSftWindows
+        Recipe::QwenImage21Windows
+            | Recipe::QwenImage21TurboWindows
+            | Recipe::MossImageSftWindows
+            | Recipe::QwenImage21WindowsCompact
+            | Recipe::QwenImage21TurboWindowsCompact
+            | Recipe::MossImageSftWindowsCompact
     )
 }
 /// The Windows diffusers worker derives the prepared cache by appending
@@ -937,9 +1069,14 @@ fn expected_worker_build(recipe: Recipe) -> Option<&'static str> {
     match recipe {
         Recipe::KleinTextWindows
         | Recipe::KleinEditWindows
+        | Recipe::KleinTextWindowsCompact
+        | Recipe::KleinEditWindowsCompact
         | Recipe::QwenImage21Windows
         | Recipe::QwenImage21TurboWindows
-        | Recipe::MossImageSftWindows => Some(WINDOWS_DIFFUSERS_WORKER),
+        | Recipe::MossImageSftWindows
+        | Recipe::QwenImage21WindowsCompact
+        | Recipe::QwenImage21TurboWindowsCompact
+        | Recipe::MossImageSftWindowsCompact => Some(WINDOWS_DIFFUSERS_WORKER),
         Recipe::BiRefNetWindows => Some(WINDOWS_ONNX_WORKER),
         Recipe::RealEsrganWindows => Some(WINDOWS_REALESRGAN_WORKER),
         _ => None,

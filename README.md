@@ -36,9 +36,32 @@ machine.
 | FLUX.2 Klein 4B distilled | Text to image, single-image edit | 4-bit loading, 4 steps, guidance 1.0 |
 | BiRefNet general epoch_244 | Remove background, RGBA + mask | ONNX Runtime CPU, float32 |
 | Real-ESRGAN x4plus | Exact 4× upscale | ncnn Vulkan, tile 128 |
-| Qwen-Image 2.1 | Text to image | 8-bit, 40 steps, guidance 1.0 |
-| Qwen-Image 2.1 Turbo | Text to image | 8-bit, 8 steps, official Turbo sampling |
-| MOSS-Image-SFT | Text to image | 8-bit, 50 steps, guidance 3.0 |
+| Qwen-Image 2.1 | Text to image | 4-bit NF4, 40 steps, guidance 1.0 |
+| Qwen-Image 2.1 Turbo | Text to image | 4-bit NF4, 8 steps, official Turbo sampling |
+| MOSS-Image-SFT | Text to image | 4-bit NF4, 50 steps, guidance 3.0 |
+
+**8 GB VRAM support (verified on an RTX 2060 SUPER)**: Qwen-Image 2.1, Qwen-Image 2.1 Turbo,
+MOSS-Image-SFT and FLUX.2 Klein 4B all run on 8 GB cards in the compact tier (768×768, fp16,
+measured peaks 5.44–5.96 GiB); BiRefNet and Real-ESRGAN were never VRAM-bound. A device that only
+meets the compact tier degrades automatically and the model page states "紧凑档 768×768".
+Z-Image Turbo keeps its 12 GB threshold because the model overflows in fp16 on BF16-less Turing
+architectures.
+
+**Performance on the reference card (RTX 2060 SUPER 8 GB, compact 768×768)**: every job starts a fresh
+worker, so the total includes component loading.
+
+| Model | Steps | Total | Sampling |
+|---|---|---|---|
+| Qwen-Image 2.1 Turbo | 8 | 84.5 s | 66.3 s |
+| Qwen-Image 2.1 | 40 | 391.3 s | 358.1 s |
+| MOSS-Image-SFT | 50 | 752.1 s | 733.8 s |
+| FLUX.2 Klein 4B text-to-image | 4 | 145.6 s | 9.8 s |
+| FLUX.2 Klein 4B edit | 4 | 166.1 s | 10.3 s |
+
+Verified environment and full evidence: Windows 11 / i9-9900K / **RTX 2060 SUPER 8 GB (sm75)** /
+31.9 GiB RAM — see [`doc/15-windows-8gb-tier.md`](doc/15-windows-8gb-tier.md),
+[`doc/16-zimage-quantization-investigation.md`](doc/16-zimage-quantization-investigation.md) and
+[`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md).
 
 The authoritative model catalog is
 [`resources/model-catalog/catalog.json`](resources/model-catalog/catalog.json).

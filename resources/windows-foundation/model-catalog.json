@@ -84,11 +84,27 @@
       "recipe": "NF4 + 组件卸载 · 4 步 · guidance 1.0 · 1024 × 1024",
       "installId": "flux2-klein-4b-distilled-windows-v1",
       "installerSupported": true,
-      "minVramGb": 12,
+      "minVramGb": 8,
       "minRamGb": 32,
       "quantization": "nf4",
       "licenseNotice": "Apache-2.0 · 可商用（保留版权与许可声明）",
-      "windowsStatus": "已接入 · NF4+组件 CPU offload fresh-process（Gate 0 实测 CUDA 9.21 GiB / commit 19.13 GiB）"
+      "windowsStatus": "已接入 · NF4+组件 CPU offload fresh-process（Gate 0 实测 CUDA 9.21 GiB / commit 19.13 GiB）",
+      "tiers": [
+        {
+          "id": "standard",
+          "minVramGb": 12,
+          "minRamGb": 32,
+          "resolution": 1024,
+          "computeDtype": "bfloat16"
+        },
+        {
+          "id": "compact",
+          "minVramGb": 8,
+          "minRamGb": 32,
+          "resolution": 768,
+          "computeDtype": "float16"
+        }
+      ]
     },
     {
       "id": "birefnet-general-epoch-244-windows-v1",
@@ -210,11 +226,27 @@
       "recipe": "staged NF4 · 40 步 · guidance 1.0 · 1024 × 1024",
       "installId": "qwen-image-2.1-windows-v1",
       "installerSupported": true,
-      "minVramGb": 12,
+      "minVramGb": 8,
       "minRamGb": 32,
       "quantization": "nf4",
       "licenseNotice": "Qwen Research License：仅限非商业用途；商用需另行取得授权。",
-      "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 6.00 GiB / commit 13.96 GiB）"
+      "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 6.00 GiB / commit 13.96 GiB）",
+      "tiers": [
+        {
+          "id": "standard",
+          "minVramGb": 12,
+          "minRamGb": 32,
+          "resolution": 1024,
+          "computeDtype": "bfloat16"
+        },
+        {
+          "id": "compact",
+          "minVramGb": 8,
+          "minRamGb": 32,
+          "resolution": 768,
+          "computeDtype": "float16"
+        }
+      ]
     },
     {
       "id": "qwen-image-2.1-turbo-windows-v1",
@@ -252,11 +284,27 @@
       "recipe": "staged NF4 · 8 步官方曲线 · 1024 × 1024",
       "installId": "qwen-image-2.1-turbo-windows-v1",
       "installerSupported": true,
-      "minVramGb": 12,
+      "minVramGb": 8,
       "minRamGb": 32,
       "quantization": "nf4",
       "licenseNotice": "Qwen Research License：仅限非商业用途；商用需另行取得授权。",
-      "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 6.00 GiB / commit 13.95 GiB）"
+      "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 6.00 GiB / commit 13.95 GiB）",
+      "tiers": [
+        {
+          "id": "standard",
+          "minVramGb": 12,
+          "minRamGb": 32,
+          "resolution": 1024,
+          "computeDtype": "bfloat16"
+        },
+        {
+          "id": "compact",
+          "minVramGb": 8,
+          "minRamGb": 32,
+          "resolution": 768,
+          "computeDtype": "float16"
+        }
+      ]
     },
     {
       "id": "moss-image-sft-windows-v1",
@@ -294,11 +342,27 @@
       "recipe": "staged NF4 · 50 步 · CFG 3.0 · 1024 × 1024",
       "installId": "moss-image-sft-windows-v1",
       "installerSupported": true,
-      "minVramGb": 12,
+      "minVramGb": 8,
       "minRamGb": 32,
       "quantization": "nf4",
       "licenseNotice": "Apache-2.0 · 可商用（保留版权与许可声明）",
-      "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 5.84 GiB / commit 9.20 GiB）"
+      "windowsStatus": "已接入 · staged NF4 + prepared cache（Gate 0 实测 CUDA 5.84 GiB / commit 9.20 GiB）",
+      "tiers": [
+        {
+          "id": "standard",
+          "minVramGb": 12,
+          "minRamGb": 32,
+          "resolution": 1024,
+          "computeDtype": "bfloat16"
+        },
+        {
+          "id": "compact",
+          "minVramGb": 8,
+          "minRamGb": 32,
+          "resolution": 768,
+          "computeDtype": "float16"
+        }
+      ]
     }
   ]
 }

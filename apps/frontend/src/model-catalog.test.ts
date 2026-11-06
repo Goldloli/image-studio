@@ -3,6 +3,7 @@ import {
   canInstallModel,
   canStartGeneration,
   filterCatalog,
+  executionTierLabel,
   hardwareBlocked,
   hardwareThresholdLabel,
   isNonCommercialLicense,
@@ -16,7 +17,8 @@ const base: ModelEntry = {
   productStatus: 'implemented', runtime: 'MFLUX / MLX', license: 'Apache-2.0', licenseNotice: 'Apache-2.0',
   source: '', revision: 'abc', modelBytes: 1, knownArtifactBytes: 1, requirements: [], exclusions: [],
   verifiedDevices: [], recipe: 'q4', installId: 'z-image-turbo-mflux-v1', installerSupported: true,
-  minVramGb: null, minRamGb: null, quantization: null, windowsStatus: null,
+  minVramGb: null, minRamGb: null, standardMinVramGb: null, tier: null, resolution: null,
+  computeDtype: null, tierReason: null, tiers: [], quantization: null, windowsStatus: null,
   installPhase: 'ready', componentsReady: true, runtimeReady: true, deviceVerified: true, executable: true,
   hardwareEligible: true, hardwareReason: null,
   busy: false, receivedBytes: 100, installTotalBytes: 100, runtimeBytes: 20, requiredBytes: 300, error: null,
@@ -43,7 +45,7 @@ describe('model catalog filtering', () => {
   it('filters by device eligibility without hiding the reason', () => {
     const blocked: ModelEntry = {
       ...base, id: 'qwen-image-2.1-windows-v1', displayName: 'Qwen-Image 2.1',
-      minVramGb: 12, minRamGb: 32, hardwareEligible: false,
+      minVramGb: 8, standardMinVramGb: 12, minRamGb: 32, hardwareEligible: false,
       hardwareReason: '当前设备不满足硬件门槛：显存 ≥ 12 GB（当前 8 GB）。安装与生成入口已禁用。',
     };
     expect(filterCatalog([base, blocked], '', 'eligible', 'all').map(entry => entry.id)).toEqual([base.id]);
@@ -53,7 +55,7 @@ describe('model catalog filtering', () => {
 describe('hardware gate projection', () => {
   const gated: ModelEntry = {
     ...base, id: 'flux2-klein-4b-distilled-windows-v1', displayName: 'FLUX.2 Klein 4B distilled',
-    minVramGb: 12, minRamGb: 32, quantization: 'nf4',
+    minVramGb: 8, standardMinVramGb: 12, minRamGb: 32, quantization: 'nf4',
     hardwareEligible: false,
     hardwareReason: '当前设备不满足硬件门槛：显存 ≥ 12 GB（当前 8 GB）、内存 ≥ 32 GB（当前 16 GB）。为避免安装或生成中途失败，安装与生成入口已禁用。',
     executable: false, canUse: false, canInstall: false,
@@ -63,7 +65,7 @@ describe('hardware gate projection', () => {
     expect(hardwareBlocked(gated)).toBe(true);
     expect(canStartGeneration(gated)).toBe(false);
     expect(canInstallModel(gated)).toBe(false);
-    expect(hardwareThresholdLabel(gated)).toBe('需要显存 ≥ 12 GB · 内存 ≥ 32 GB');
+    expect(hardwareThresholdLabel(gated)).toBe('需要显存 ≥ 8 GB（紧凑档）/ 12 GB（标准档） · 内存 ≥ 32 GB');
   });
 
   it('never re-enables a gated entry from a stale canUse flag', () => {
@@ -89,6 +91,23 @@ describe('hardware gate projection', () => {
 
   it('exposes the actionable reason for a blocked device', () => {
     expect(gated.hardwareReason).toContain('安装与生成入口已禁用');
+  });
+
+  it('labels the execution tier the device will run', () => {
+    const compact: ModelEntry = {
+      ...base, id: 'qwen-image-2.1-turbo-windows-v1', displayName: 'Qwen-Image 2.1 Turbo',
+      minVramGb: 8, standardMinVramGb: 12, minRamGb: 32, tier: 'compact', resolution: 768,
+      computeDtype: 'float16', hardwareEligible: true, executable: true, canUse: true,
+      tierReason: '显存 8 GB 低于标准档 12 GB 门槛，自动使用紧凑档 768×768（float16）',
+    };
+    expect(executionTierLabel(compact)).toBe('紧凑档 768×768 · float16');
+    expect(hardwareThresholdLabel(compact)).toContain('（紧凑档）');
+    expect(canStartGeneration(compact)).toBe(true);
+    const standard: ModelEntry = {
+      ...compact, tier: 'standard', resolution: 1024, computeDtype: 'bfloat16', tierReason: null,
+    };
+    expect(executionTierLabel(standard)).toBe('标准档 1024×1024 · bfloat16');
+    expect(executionTierLabel(base)).toBeNull();
   });
 });
 

@@ -24,7 +24,7 @@ def checkpoint(cancel):
         raise Cancelled()
 
 
-def select_device():
+def select_device(minimum_memory_gib: int = 10, minimum_capability=(8, 6)):
     import torch
 
     if not torch.cuda.is_available() or torch.version.cuda != "12.6":
@@ -33,11 +33,14 @@ def select_device():
         properties = torch.cuda.get_device_properties(index)
         if (
             "NVIDIA" in properties.name.upper()
-            and (properties.major, properties.minor) == (8, 6)
-            and properties.total_memory >= 10 * 1024**3
+            and (properties.major, properties.minor) >= minimum_capability
+            and round(properties.total_memory / 1024**3) >= minimum_memory_gib
         ):
             return index, properties
-    raise RuntimeError("required NVIDIA sm86 device was not found")
+    raise RuntimeError(
+        f"required NVIDIA compute capability {minimum_capability} with "
+        f">= {minimum_memory_gib} GiB was not found"
+    )
 
 
 def token_count(tokenizer, prompt):
@@ -61,6 +64,9 @@ def quant_config(module, compute_dtype):
         "bnb_4bit_compute_dtype": compute_dtype,
         "bnb_4bit_use_double_quant": True,
         "llm_int8_skip_modules": ["proj_out"],
+        # Components are built on the CPU and moved by the offload hooks; without this flag a
+        # quantized checkpoint refuses to be dispatched off the GPU.
+        "llm_int8_enable_fp32_cpu_offload": True,
     }
     return (
         TransformersBnB(**kwargs)
@@ -69,7 +75,9 @@ def quant_config(module, compute_dtype):
     )
 
 
-def load_pipeline(model_path, device_index, cancel, progress):
+def load_pipeline(
+    model_path, device_index, cancel, progress, compute_dtype=None, vae_dtype=None
+):
     import torch
     from diffusers import (
         AutoencoderKL,
@@ -79,6 +87,9 @@ def load_pipeline(model_path, device_index, cancel, progress):
     )
     from transformers import Qwen2Tokenizer, Qwen3Model
 
+    import torch as _torch
+
+    dtype = compute_dtype or _torch.bfloat16
     model_path = Path(model_path)
     device = f"cuda:{device_index}"
     checkpoint(cancel)
@@ -91,9 +102,9 @@ def load_pipeline(model_path, device_index, cancel, progress):
         model_path,
         subfolder="transformer",
         local_files_only=True,
-        torch_dtype=torch.bfloat16,
+        torch_dtype=dtype,
         low_cpu_mem_usage=True,
-        quantization_config=quant_config("transformer", torch.bfloat16),
+        quantization_config=quant_config("transformer", dtype),
         device_map={"": device},
     )
     transformer = transformer.to("cpu")
@@ -104,9 +115,9 @@ def load_pipeline(model_path, device_index, cancel, progress):
         model_path,
         subfolder="text_encoder",
         local_files_only=True,
-        torch_dtype=torch.bfloat16,
+        torch_dtype=dtype,
         low_cpu_mem_usage=True,
-        quantization_config=quant_config("text_encoder", torch.bfloat16),
+        quantization_config=quant_config("text_encoder", dtype),
         device_map={"": device},
     )
     text_encoder = text_encoder.to("cpu")
@@ -116,7 +127,7 @@ def load_pipeline(model_path, device_index, cancel, progress):
         model_path,
         subfolder="vae",
         local_files_only=True,
-        torch_dtype=torch.bfloat16,
+        torch_dtype=vae_dtype or dtype,
         low_cpu_mem_usage=True,
     )
     vae.eval()
@@ -140,14 +151,28 @@ def generate(request, progress, cancel):
 
     print("backend generation started", file=sys.stderr)
     checkpoint(cancel)
-    device_index, properties = select_device()
+    resolution = int(request["parameters"].get("resolution", 1024))
+    compute_dtype_name = request["parameters"].get("compute_dtype")
+    compute_dtype = {
+        "float16": torch.float16,
+        "float32": torch.float32,
+    }.get(compute_dtype_name, torch.bfloat16)
+    compact = resolution != 1024
+    vae_dtype = (
+        torch.float32
+        if request["parameters"].get("vae_precision") == "float32"
+        else compute_dtype
+    )
+    device_index, properties = select_device(
+        8 if compact else 10, (7, 5) if compact else (8, 6)
+    )
     torch.cuda.set_device(device_index)
     print(
         f"selected_cuda={device_index} name={properties.name} cc={properties.major}.{properties.minor}",
         file=sys.stderr,
     )
     pipeline, tokenizer, device = load_pipeline(
-        request["model_path"], device_index, cancel, progress
+        request["model_path"], device_index, cancel, progress, compute_dtype, vae_dtype
     )
     print("pipeline loaded", file=sys.stderr)
     actual_tokens = token_count(tokenizer, request["instruction"])
@@ -188,8 +213,8 @@ def generate(request, progress, cancel):
     result = pipeline(
         prompt=None,
         prompt_embeds=prompt_embeds,
-        height=1024,
-        width=1024,
+        height=resolution,
+        width=resolution,
         num_inference_steps=9,
         guidance_scale=0.0,
         generator=generator,
@@ -204,8 +229,10 @@ def generate(request, progress, cancel):
     if len(result.images) != 1:
         raise ValueError("pipeline did not return exactly one image")
     image = result.images[0]
-    if image.size != (1024, 1024) or image.mode != "RGB":
-        raise ValueError("pipeline did not return one 1024x1024 RGB image")
+    if image.size != (resolution, resolution) or image.mode != "RGB":
+        raise ValueError(
+            f"pipeline did not return one {resolution}x{resolution} RGB image"
+        )
     output = Path(request["output_dir"]) / "primary.png"
     if output.exists() or output.is_symlink():
         raise ValueError("Attempt output already exists")
@@ -221,8 +248,8 @@ def generate(request, progress, cancel):
         "role": "primary",
         "data_type": "image_rgb",
         "relative_path": "primary.png",
-        "width": 1024,
-        "height": 1024,
+        "width": resolution,
+        "height": resolution,
         "size_bytes": size,
         "sha256": digest,
     }

@@ -29,15 +29,16 @@ use std::{
 use studio_core::{
     domain::*,
     generation::{
-        GenerationInput, Z_IMAGE_WINDOWS_CAPABILITY, freeze_windows_z_image, freeze_z_image,
+        GenerationInput, Z_IMAGE_WINDOWS_CAPABILITY, freeze_windows_z_image,
+        freeze_windows_z_image_compact, freeze_z_image,
     },
     recipes::{
         BiRefNetInput, KleinInput, MOSS_IMAGE_SFT_CAPABILITY, MOSS_IMAGE_SFT_MODEL,
         QWEN_IMAGE_21_CAPABILITY, QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY,
         QWEN_IMAGE_21_TURBO_MODEL, RealEsrganInput, Recipe, SourceAsset, SourceFacts,
         TextModelInput, freeze_birefnet, freeze_klein, freeze_realesrgan, freeze_text_model,
-        freeze_windows_birefnet, freeze_windows_klein, freeze_windows_realesrgan,
-        freeze_windows_text_model,
+        freeze_windows_birefnet, freeze_windows_klein, freeze_windows_klein_compact,
+        freeze_windows_realesrgan, freeze_windows_text_model,
     },
 };
 use uuid::Uuid;
@@ -316,6 +317,22 @@ fn runtime_lock_id(install_id: &str) -> Option<&'static str> {
 ///
 /// Unknown model ids are not judged here: they are not registered in the catalog and the install
 /// or turn path reports its own unknown-id error.
+/// The output size for one aspect at the selected tier. The compact tier renders a 768 square
+/// and has no other registered aspect, so a 4:3 or 3:4 request must fail instead of silently
+/// falling back to the 1024 standard recipe.
+fn compact_aspect_size(aspect: &str, compact: bool) -> Result<(u32, u32), String> {
+    match (aspect, compact) {
+        ("1:1", true) => Ok((768, 768)),
+        (_, true) => {
+            Err("当前设备使用紧凑档（8 GB 显存），仅支持 1:1 方图；请把画幅改为 1:1。".into())
+        }
+        ("1:1", false) => Ok((1024, 1024)),
+        ("4:3", false) => Ok((1024, 768)),
+        ("3:4", false) => Ok((768, 1024)),
+        _ => Err("当前模型不支持此画幅，请明确修改参数".into()),
+    }
+}
+
 fn enforce_hardware_gate(
     catalog: &ModelCatalog,
     model_id: &str,
@@ -425,6 +442,45 @@ impl StudioService {
             .map_err(|_| "本地库锁异常，请重启并检查数据".to_string())?;
         f(&mut guard).map_err(|error| error.to_string())
     }
+    /// Non-blocking variant for the watchdog: never waits for the library mutex.
+    pub fn try_with_library<T>(
+        &self,
+        f: impl FnOnce(&mut Library) -> crate::adapters::library::Result<T>,
+    ) -> Option<Result<T, String>> {
+        let library = self.library.as_ref()?;
+        let mut guard = library.try_lock().ok()?;
+        Some(f(&mut guard).map_err(|error| error.to_string()))
+    }
+
+    /// Fail turns that were accepted but never reached a job.
+    ///
+    /// Returns how many were reaped. Safe to call from a watchdog thread at any time: it never
+    /// blocks on the library lock and never touches an already-bound turn.
+    pub fn reap_stale_pending_turns(&self, older_than_ms: i64) -> usize {
+        let Some(Ok(ids)) =
+            self.try_with_library(|library| library.stale_pending_turns(older_than_ms))
+        else {
+            return 0;
+        };
+        let mut reaped = 0;
+        for id in ids {
+            let Ok(turn_id) = TurnId::new(&id) else {
+                continue;
+            };
+            let detail = format!(
+                "发送超时：{} 秒内未进入执行（等待提交阶段），请重试；若反复出现请重启应用",
+                older_than_ms / 1000
+            );
+            if matches!(
+                self.try_with_library(|library| library.reject_turn(&turn_id, &detail)),
+                Some(Ok(_))
+            ) {
+                reaped += 1;
+            }
+        }
+        reaped
+    }
+
     pub fn model_view(&self) -> Value {
         #[cfg(windows)]
         return self.model_view_for(WINDOWS_ZIMAGE_INSTALL_ID);
@@ -480,11 +536,20 @@ impl StudioService {
             .as_ref()
             .map(|facts| facts.metadata.clone())
             .unwrap_or_default();
+        let tier = facts
+            .as_ref()
+            .map(|facts| facts.tier.clone())
+            .unwrap_or_default();
         let static_facts = json!({
             "hardwareEligible": hardware_eligible,
             "hardwareReason": hardware_reason,
             "minVramGb": metadata.min_vram_gb,
             "minRamGb": metadata.min_ram_gb,
+            "standardMinVramGb": tier.standard_min_vram_gb,
+            "tier": tier.id,
+            "resolution": tier.resolution,
+            "computeDtype": tier.compute_dtype,
+            "tierReason": tier.reason,
             "quantization": metadata.quantization,
             "licenseNotice": metadata.license_notice,
             "windowsStatus": metadata.windows_status,
@@ -644,6 +709,10 @@ impl StudioService {
                     .as_ref()
                     .map(|facts| facts.metadata.clone())
                     .unwrap_or_default();
+                let tier = facts
+                    .as_ref()
+                    .map(|facts| facts.tier.clone())
+                    .unwrap_or_default();
                 json!({
                     "installId": snapshot.install_id.clone(),
                     "label": install_display_name(&snapshot.install_id),
@@ -656,7 +725,12 @@ impl StudioService {
                     "hardwareEligible": hardware_eligible,
                     "hardwareReason": hardware_reason,
                     "minVramGb": metadata.min_vram_gb,
-                    "minRamGb": metadata.min_ram_gb
+                    "minRamGb": metadata.min_ram_gb,
+                    "standardMinVramGb": tier.standard_min_vram_gb,
+                    "tier": tier.id,
+                    "resolution": tier.resolution,
+                    "computeDtype": tier.compute_dtype,
+                    "tierReason": tier.reason
                 })
             })
             .collect::<Vec<_>>();
@@ -1350,8 +1424,29 @@ impl StudioService {
         }))
     }
     fn run_turn_preflight(self: Arc<Self>, turn: TurnRecord) {
-        if let Err(error) = self.prepare_turn(&turn) {
-            let _ = self.with_library(|library| library.reject_turn(&turn.id, &error));
+        // Stage traces: these are the only way to tell a stranded preflight from a slow one on
+        // a GUI process, whose stderr is not otherwise visible.
+        let started = std::time::Instant::now();
+        crate::adapters::logging::debug("turn.preflight.start", &[("turn", turn.id.to_string())]);
+        match self.prepare_turn(&turn) {
+            Ok(()) => crate::adapters::logging::info(
+                "turn.preflight.done",
+                &[
+                    ("turn", turn.id.to_string()),
+                    ("ms", started.elapsed().as_millis().to_string()),
+                ],
+            ),
+            Err(error) => {
+                crate::adapters::logging::warn(
+                    "turn.preflight.failed",
+                    &[
+                        ("turn", turn.id.to_string()),
+                        ("ms", started.elapsed().as_millis().to_string()),
+                        ("error", error.clone()),
+                    ],
+                );
+                let _ = self.with_library(|library| library.reject_turn(&turn.id, &error));
+            }
         }
     }
     fn prepare_turn(&self, turn: &TurnRecord) -> Result<(), String> {
@@ -1373,12 +1468,17 @@ impl StudioService {
             let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
             enforce_hardware_gate(catalog, &turn.model_id, &self.device_facts)?;
         }
-        let (width, height) = match turn.aspect.as_str() {
-            "1:1" => (1024, 1024),
-            "4:3" => (1024, 768),
-            "3:4" => (768, 1024),
-            _ => return Err("当前模型不支持此画幅，请明确修改参数".into()),
-        };
+        // A device that only satisfies the compact tier runs the model at 768 square; other
+        // aspects would silently fall back to the 1024 standard recipe, so reject them.
+        let compact_tier = self
+            .catalog
+            .as_ref()
+            .ok()
+            .and_then(|catalog| catalog.model_facts(&turn.model_id, &self.device_facts))
+            .and_then(|facts| facts.tier.id)
+            .is_some_and(|id| id == "compact");
+        crate::adapters::logging::debug("turn.preflight.gate", &[("turn", turn.id.to_string())]);
+        let (width, height) = compact_aspect_size(&turn.aspect, compact_tier)?;
         let seed = if turn.seed.is_empty() {
             None
         } else {
@@ -1388,9 +1488,36 @@ impl StudioService {
                     .map_err(|_| "种子须为 0–4294967295".to_string())?,
             )
         };
+        crate::adapters::logging::debug(
+            "turn.preflight.geometry",
+            &[
+                ("turn", turn.id.to_string()),
+                ("size", format!("{width}x{height}")),
+            ],
+        );
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
-        let ready = installation.ready_paths(&turn.model_id)?;
-        let environment = installation.plan_environment(&turn.model_id)?;
+        crate::adapters::logging::debug(
+            "turn.preflight.ready.begin",
+            &[("turn", turn.id.to_string())],
+        );
+        let ready = installation
+            .ready_paths(&turn.model_id)
+            .map_err(|error| format!("{error}（阶段：读取就绪记录）"))?;
+        crate::adapters::logging::debug(
+            "turn.preflight.ready.end",
+            &[("turn", turn.id.to_string())],
+        );
+        crate::adapters::logging::debug(
+            "turn.preflight.environment.begin",
+            &[("turn", turn.id.to_string())],
+        );
+        let environment = installation
+            .plan_environment(&turn.model_id)
+            .map_err(|error| format!("{error}（阶段：规划运行环境）"))?;
+        crate::adapters::logging::debug(
+            "turn.preflight.environment.end",
+            &[("turn", turn.id.to_string())],
+        );
         {
             let current = self.with_library(|library| library.turn(&turn.id))?;
             if current.status == TurnStatus::CancelRequested {
@@ -1401,6 +1528,10 @@ impl StudioService {
                 return Ok(());
             }
         }
+        crate::adapters::logging::debug(
+            "turn.preflight.freeze.begin",
+            &[("turn", turn.id.to_string())],
+        );
         let random = Uuid::new_v4();
         let bytes = random.as_bytes();
         let random_seed = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
@@ -1571,10 +1702,14 @@ impl StudioService {
             turn.model_id.as_str(),
             WINDOWS_QWEN_MODEL | WINDOWS_QWEN_TURBO_MODEL | WINDOWS_MOSS_MODEL
         ) {
-            let recipe = match turn.model_id.as_str() {
-                WINDOWS_QWEN_MODEL => Recipe::QwenImage21Windows,
-                WINDOWS_QWEN_TURBO_MODEL => Recipe::QwenImage21TurboWindows,
-                WINDOWS_MOSS_MODEL => Recipe::MossImageSftWindows,
+            // A compact-tier turn asks for 768 square, which selects the compact recipe identity.
+            let recipe = match (turn.model_id.as_str(), width == 768) {
+                (WINDOWS_QWEN_MODEL, false) => Recipe::QwenImage21Windows,
+                (WINDOWS_QWEN_MODEL, true) => Recipe::QwenImage21WindowsCompact,
+                (WINDOWS_QWEN_TURBO_MODEL, false) => Recipe::QwenImage21TurboWindows,
+                (WINDOWS_QWEN_TURBO_MODEL, true) => Recipe::QwenImage21TurboWindowsCompact,
+                (WINDOWS_MOSS_MODEL, false) => Recipe::MossImageSftWindows,
+                (WINDOWS_MOSS_MODEL, true) => Recipe::MossImageSftWindowsCompact,
                 _ => unreachable!(),
             };
             let frozen = freeze_windows_text_model(
@@ -1608,37 +1743,56 @@ impl StudioService {
                     })
                 })
                 .transpose()?;
-            let frozen = freeze_windows_klein(
-                KleinInput {
-                    request_id,
-                    project_id,
-                    idempotency_key,
-                    plan_id,
-                    prompt: turn.prompt.clone(),
-                    seed,
-                    source,
-                },
-                random_seed,
-                environment,
-            )
+            let input = KleinInput {
+                request_id,
+                project_id,
+                idempotency_key,
+                plan_id,
+                prompt: turn.prompt.clone(),
+                seed,
+                source,
+            };
+            let frozen = if compact_tier {
+                freeze_windows_klein_compact(input, random_seed, environment)
+            } else {
+                freeze_windows_klein(input, random_seed, environment)
+            }
             .map_err(|error| error.to_string())?;
             (frozen.request, frozen.plan)
         } else if turn.model_id == WINDOWS_ZIMAGE_INSTALL_ID {
-            let frozen = freeze_windows_z_image(
-                GenerationInput {
-                    request_id,
-                    project_id,
-                    idempotency_key,
-                    plan_id,
-                    prompt: turn.prompt.clone(),
-                    width,
-                    height,
-                    count: turn.count,
-                    seed,
-                },
-                random_seed,
-                environment,
-            )
+            let frozen = if compact_tier {
+                freeze_windows_z_image_compact(
+                    GenerationInput {
+                        request_id,
+                        project_id,
+                        idempotency_key,
+                        plan_id,
+                        prompt: turn.prompt.clone(),
+                        width,
+                        height,
+                        count: turn.count,
+                        seed,
+                    },
+                    random_seed,
+                    environment,
+                )
+            } else {
+                freeze_windows_z_image(
+                    GenerationInput {
+                        request_id: request_id.clone(),
+                        project_id: project_id.clone(),
+                        idempotency_key: idempotency_key.clone(),
+                        plan_id: plan_id.clone(),
+                        prompt: turn.prompt.clone(),
+                        width,
+                        height,
+                        count: turn.count,
+                        seed,
+                    },
+                    random_seed,
+                    environment,
+                )
+            }
             .map_err(|error| error.to_string())?;
             (frozen.request, frozen.plan)
         } else {
@@ -1660,12 +1814,16 @@ impl StudioService {
             .map_err(|error| error.to_string())?;
             (frozen.request, frozen.plan)
         };
+        crate::adapters::logging::debug("turn.preflight.frozen", &[("turn", turn.id.to_string())]);
         let _schedule = self
             .scheduling
             .lock()
             .map_err(|_| "提交锁异常".to_string())?;
-        let binding =
-            self.with_library(|library| library.bind_turn_job(&turn.id, request, plan))?;
+        crate::adapters::logging::debug("turn.preflight.lock", &[("turn", turn.id.to_string())]);
+        let binding = self
+            .with_library(|library| library.bind_turn_job(&turn.id, request, plan))
+            .map_err(|error| format!("{error}（阶段：绑定任务）"))?;
+        crate::adapters::logging::info("turn.preflight.bound", &[("turn", turn.id.to_string())]);
         if binding.job.state == studio_core::generation::AttemptState::CancelRequested {
             let cancelled = self.with_library(|library| {
                 library.finish_after_reap(
@@ -1689,7 +1847,10 @@ impl StudioService {
             return Err(error);
         }
         let controller = self.generation.as_ref().ok_or("生成控制器不可用")?;
-        if let Err(error) = controller.start(binding.job.clone(), ready) {
+        if let Err(error) = controller
+            .start(binding.job.clone(), ready)
+            .map_err(|error| format!("{error}（阶段：启动执行）"))
+        {
             let _ = self.with_library(|library| {
                 library.finish_after_reap(
                     &binding.job.attempt,
@@ -2060,6 +2221,7 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
         (root, service)
     }
@@ -2263,6 +2425,7 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
         let service = Arc::new(service);
         let typed = service
@@ -2971,8 +3134,11 @@ mod tests {
             studio_core::generation::WINDOWS_V2_RUNTIME
         );
         let klein = &models[1]["staticFacts"];
-        assert_eq!(klein["minVramGb"], 12);
+        assert_eq!(klein["minVramGb"], 8);
+        assert_eq!(klein["standardMinVramGb"], 12);
         assert_eq!(klein["minRamGb"], 32);
+        assert_eq!(klein["tier"], "standard");
+        assert_eq!(klein["resolution"], 1024);
         assert!(klein["licenseNotice"].as_str().unwrap().contains("Apache"));
         let qwen = &models[4]["staticFacts"];
         assert!(qwen["licenseNotice"].as_str().unwrap().contains("非商业"));
@@ -3133,6 +3299,17 @@ mod tests {
             .unwrap()
     }
 
+    #[test]
+    fn compact_tier_renders_768_square_and_rejects_other_aspects() {
+        assert_eq!(compact_aspect_size("1:1", true), Ok((768, 768)));
+        assert_eq!(compact_aspect_size("1:1", false), Ok((1024, 1024)));
+        assert_eq!(compact_aspect_size("4:3", false), Ok((1024, 768)));
+        assert_eq!(compact_aspect_size("3:4", false), Ok((768, 1024)));
+        let error = compact_aspect_size("4:3", true).unwrap_err();
+        assert!(error.contains("紧凑档"), "{error}");
+        assert!(compact_aspect_size("16:9", false).is_err());
+    }
+
     #[cfg(windows)]
     #[test]
     fn install_is_rejected_below_the_hardware_threshold_before_starting() {
@@ -3140,14 +3317,12 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: Some(8),
             ram_gb: 16,
+            compute_capability: Some((7, 5)),
         };
         for model in [WINDOWS_KLEIN_MODEL, WINDOWS_MOSS_MODEL] {
             let error = service.install(model).unwrap_err();
             assert!(error.contains("当前设备不满足硬件门槛"), "{model}: {error}");
-            assert!(
-                error.contains("显存 ≥ 12 GB（当前 8 GB）"),
-                "{model}: {error}"
-            );
+            // At 8 GB the compact tier's VRAM requirement is met; the 16 GB RAM is what blocks it.
             assert!(
                 error.contains("内存 ≥ 32 GB（当前 16 GB）"),
                 "{model}: {error}"
@@ -3172,6 +3347,7 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: Some(8),
             ram_gb: 16,
+            compute_capability: Some((7, 5)),
         };
         let saved = save_gate_draft(
             &service,
@@ -3215,6 +3391,7 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: None,
             ram_gb: 0,
+            compute_capability: None,
         };
         let install_error = service.install(WINDOWS_QWEN_MODEL).unwrap_err();
         assert!(
@@ -3265,6 +3442,7 @@ mod tests {
         let at_threshold = DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
         for model in [
             WINDOWS_ZIMAGE_INSTALL_ID,
@@ -3278,20 +3456,30 @@ mod tests {
             enforce_hardware_gate(&catalog, model, &at_threshold)
                 .unwrap_or_else(|error| panic!("{model} must be allowed: {error}"));
         }
-        // One GiB below a registered VRAM/RAM threshold is rejected.
+        // Below the standard threshold the compact tier takes over instead of blocking.
         let low_vram = DeviceFacts {
             vram_gb: Some(11),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
-        let vram_error = enforce_hardware_gate(&catalog, WINDOWS_KLEIN_MODEL, &low_vram)
-            .expect_err("11 GB VRAM must not satisfy a 12 GB threshold");
+        enforce_hardware_gate(&catalog, WINDOWS_KLEIN_MODEL, &low_vram)
+            .expect("11 GB VRAM must fall back to the 8 GB compact tier");
+        // Below every tier the model is rejected with the compact requirement.
+        let tiny_vram = DeviceFacts {
+            vram_gb: Some(7),
+            ram_gb: 32,
+            compute_capability: Some((8, 6)),
+        };
+        let vram_error = enforce_hardware_gate(&catalog, WINDOWS_KLEIN_MODEL, &tiny_vram)
+            .expect_err("7 GB VRAM must not satisfy the 8 GB compact threshold");
         assert!(
-            vram_error.contains("显存 ≥ 12 GB（当前 11 GB）"),
+            vram_error.contains("显存 ≥ 8 GB（当前 7 GB）"),
             "{vram_error}"
         );
         let low_ram = DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 31,
+            compute_capability: Some((8, 6)),
         };
         let ram_error = enforce_hardware_gate(&catalog, WINDOWS_KLEIN_MODEL, &low_ram)
             .expect_err("31 GB RAM must not satisfy a 32 GB threshold");
@@ -3308,6 +3496,7 @@ mod tests {
         service.device_facts = DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
         // A parity model at exactly its registered threshold must pass both the host gate and the
         // library turn-input allowlist (the seven-model threshold matrix itself is covered by
@@ -3378,6 +3567,7 @@ mod tests {
         let unknown_facts = DeviceFacts {
             vram_gb: None,
             ram_gb: 0,
+            compute_capability: None,
         };
         // Unknown ids are rejected by the install/turn path itself; the gate must not invent a
         // hardware threshold for them.

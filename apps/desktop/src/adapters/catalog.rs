@@ -53,6 +53,21 @@ struct RegisteredModel {
     license_notice: Option<String>,
     #[serde(default)]
     windows_status: Option<String>,
+    /// Per-tier hardware thresholds. Five Windows generative models register a `standard` (12 GB /
+    /// 1024² / bf16) and a `compact` (8 GB / 768² / fp16) tier; entries without tiers keep the
+    /// single `min_vram_gb`/`min_ram_gb` behaviour.
+    #[serde(default)]
+    tiers: Vec<TierThreshold>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct TierThreshold {
+    id: String,
+    min_vram_gb: u32,
+    min_ram_gb: u32,
+    resolution: u32,
+    compute_dtype: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -73,11 +88,22 @@ pub struct ModelMetadata {
     pub windows_status: Option<String>,
 }
 
+/// The tier a device will execute for one model, exposed to the model and settings views.
+#[derive(Clone, Debug, Default)]
+pub struct TierView {
+    pub id: Option<String>,
+    pub resolution: Option<u32>,
+    pub compute_dtype: Option<String>,
+    pub standard_min_vram_gb: Option<u32>,
+    pub reason: Option<String>,
+}
+
 /// The static metadata plus the device comparison for one model.
 #[derive(Clone, Debug)]
 pub struct ModelFacts {
     pub metadata: ModelMetadata,
     pub hardware: HardwareGate,
+    pub tier: TierView,
 }
 
 #[derive(Clone, Debug)]
@@ -117,6 +143,7 @@ impl ModelCatalog {
             if has_thresholds && !complete {
                 return Err(format!("模型 {} 的硬件门槛元数据不完整", entry.id));
             }
+            validate_tiers(entry)?;
         }
         Ok(Self {
             reviewed_date: document.reviewed_date,
@@ -145,9 +172,11 @@ impl ModelCatalog {
     /// Static hardware/license facts for a registered model, or `None` when the id is unknown.
     pub fn model_facts(&self, id: &str, device: &DeviceFacts) -> Option<ModelFacts> {
         let entry = self.entries.iter().find(|entry| entry.id == id)?;
+        let selection = select_tier(entry, device);
         Some(ModelFacts {
             metadata: entry_metadata(entry),
-            hardware: device.gate(entry.min_vram_gb, entry.min_ram_gb),
+            hardware: selection.gate,
+            tier: tier_view(entry, device, selection.tier),
         })
     }
 
@@ -229,34 +258,148 @@ fn entry_metadata(entry: &RegisteredModel) -> ModelMetadata {
     }
 }
 
+fn validate_tiers(entry: &RegisteredModel) -> Result<(), String> {
+    if entry.tiers.is_empty() {
+        return Ok(());
+    }
+    let mut ids = BTreeSet::new();
+    let mut lowest = u32::MAX;
+    for tier in &entry.tiers {
+        if !matches!(tier.id.as_str(), "standard" | "compact") {
+            return Err(format!("模型 {} 的执行档位无效：{}", entry.id, tier.id));
+        }
+        if !ids.insert(tier.id.as_str()) {
+            return Err(format!("模型 {} 重复登记执行档位：{}", entry.id, tier.id));
+        }
+        if tier.resolution == 0 || tier.compute_dtype.is_empty() {
+            return Err(format!(
+                "模型 {} 的档位 {} 缺少画幅或计算精度",
+                entry.id, tier.id
+            ));
+        }
+        lowest = lowest.min(tier.min_vram_gb);
+    }
+    if Some(lowest) != entry.min_vram_gb {
+        return Err(format!(
+            "模型 {} 的最低门槛与档位不一致：{} != {:?}",
+            entry.id, lowest, entry.min_vram_gb
+        ));
+    }
+    Ok(())
+}
+
+/// The execution tier a device should use for one entry, plus the gate that explains it.
+#[derive(Clone, Debug)]
+struct TierSelection<'a> {
+    tier: Option<&'a TierThreshold>,
+    gate: HardwareGate,
+}
+
+/// Picks the highest tier the device satisfies, falling back to the compact tier. An entry without
+/// tiers keeps the legacy single-threshold gate.
+fn select_tier<'a>(entry: &'a RegisteredModel, device: &DeviceFacts) -> TierSelection<'a> {
+    if entry.tiers.is_empty() {
+        return TierSelection {
+            tier: None,
+            gate: device.gate(entry.min_vram_gb, entry.min_ram_gb),
+        };
+    }
+    let mut ordered = entry.tiers.iter().collect::<Vec<_>>();
+    ordered.sort_by_key(|tier| std::cmp::Reverse(tier.min_vram_gb));
+    let mut considered = Vec::new();
+    for tier in &ordered {
+        let gate = device.gate(Some(tier.min_vram_gb), Some(tier.min_ram_gb));
+        if !gate.eligible {
+            considered.push((tier, gate));
+            continue;
+        }
+        if tier.id == "compact" && !device.meets_compact_compute_capability() {
+            considered.push((
+                tier,
+                HardwareGate::blocked(compact_capability_reason(device)),
+            ));
+            continue;
+        }
+        return TierSelection {
+            tier: Some(tier),
+            gate: HardwareGate::eligible(),
+        };
+    }
+    // Nothing qualifies: the lowest tier's reason describes the smallest outstanding requirement.
+    let (_, gate) = considered
+        .pop()
+        .expect("a registered entry always has at least one tier");
+    TierSelection { tier: None, gate }
+}
+
+fn compact_capability_reason(device: &DeviceFacts) -> String {
+    let capability = device
+        .compute_capability
+        .map(|(major, minor)| format!("{major}.{minor}"))
+        .unwrap_or_else(|| "未知".to_owned());
+    format!(
+        "当前设备不满足硬件门槛：紧凑档需要 NVIDIA 计算能力 ≥ 7.5（当前 {capability}）。为避免安装或生成中途失败，安装与生成入口已禁用。"
+    )
+}
+
+fn standard_min_vram(entry: &RegisteredModel) -> Option<u32> {
+    entry
+        .tiers
+        .iter()
+        .find(|tier| tier.id == "standard")
+        .map(|tier| tier.min_vram_gb)
+}
+
+fn compact_reason(tier: &TierThreshold, device: &DeviceFacts, standard_min: Option<u32>) -> String {
+    format!(
+        "显存 {} GB 低于标准档 {} GB 门槛，自动使用紧凑档 {}×{}（{}）",
+        device.vram_gb.unwrap_or(0),
+        standard_min.unwrap_or(12),
+        tier.resolution,
+        tier.resolution,
+        tier.compute_dtype
+    )
+}
+
+fn tier_view(
+    entry: &RegisteredModel,
+    device: &DeviceFacts,
+    tier: Option<&TierThreshold>,
+) -> TierView {
+    let standard_min = standard_min_vram(entry);
+    TierView {
+        id: tier.map(|tier| tier.id.clone()),
+        resolution: tier.map(|tier| tier.resolution),
+        compute_dtype: tier.map(|tier| tier.compute_dtype.clone()),
+        standard_min_vram_gb: standard_min,
+        reason: tier
+            .filter(|tier| tier.id == "compact")
+            .map(|tier| compact_reason(tier, device, standard_min)),
+    }
+}
+
 fn project_entry(
     entry: &RegisteredModel,
     installations: &[InstallationSnapshot],
     installation_error: Option<&str>,
     device: &DeviceFacts,
 ) -> Value {
+    // Match by install id only: an installer phase this projection has not seen yet must surface
+    // as itself, never collapse into "not installed" while the install is actually running.
     let installed = entry.install_id.as_ref().and_then(|id| {
-        installations.iter().find(|snapshot| {
-            snapshot.install_id == *id
-                && matches!(
-                    snapshot.phase.as_str(),
-                    "ready"
-                        | "preparing"
-                        | "downloading"
-                        | "verifying"
-                        | "installing_runtime"
-                        | "probing"
-                        | "unavailable"
-                        | "failed"
-                        | "cancelled"
-                        | "interrupted"
-                )
-        })
+        installations
+            .iter()
+            .find(|snapshot| snapshot.install_id == *id)
     });
     let busy = installed.is_some_and(|snapshot| {
         matches!(
             snapshot.phase.as_str(),
-            "preparing" | "downloading" | "verifying" | "installing_runtime" | "probing"
+            "preparing"
+                | "preparing_model"
+                | "downloading"
+                | "verifying"
+                | "installing_runtime"
+                | "probing"
         )
     });
     let executable = installed.is_some_and(|snapshot| {
@@ -291,9 +434,17 @@ fn project_entry(
     let required_bytes = installed.map_or(0, |snapshot| snapshot.required_bytes);
     let metadata = entry_metadata(entry);
     // A required threshold that is unmet (or cannot be proven) disables install and execution
-    // entry points with an actionable Chinese reason; it never silently passes.
-    let hardware = device.gate(entry.min_vram_gb, entry.min_ram_gb);
+    // entry points with an actionable Chinese reason; it never silently passes. When the device
+    // satisfies only the compact tier, that tier is selected instead of blocking the model.
+    let selection = select_tier(entry, device);
+    let hardware = selection.gate;
     let hardware_eligible = hardware.eligible;
+    let tier = tier_view(entry, device, selection.tier);
+    let active_tier = tier.id;
+    let resolution = tier.resolution;
+    let compute_dtype = tier.compute_dtype;
+    let standard_min_vram = tier.standard_min_vram_gb;
+    let tier_reason = tier.reason;
     // The projection is merged from several `json!` chunks: one literal with the full field set
     // would exceed serde_json's default macro recursion limit.
     let mut projected = json!({
@@ -347,7 +498,17 @@ fn project_entry(
             "licenseNotice": metadata.license_notice,
             "windowsStatus": metadata.windows_status,
             "hardwareEligible": hardware_eligible,
-            "hardwareReason": hardware.reason
+            // The gate is per model: say so, otherwise a blocked Z-Image reads like a global limit.
+            "hardwareReason": hardware.reason.map(|reason| format!(
+                "{reason}该限制只针对「{}」这个型号，其他模型的可用性不受影响。",
+                entry.display_name
+            )),
+            "tier": active_tier,
+            "resolution": resolution,
+            "computeDtype": compute_dtype,
+            "standardMinVramGb": standard_min_vram,
+            "tierReason": tier_reason,
+            "tiers": entry.tiers
         }),
     );
     projected
@@ -403,6 +564,7 @@ mod tests {
         return DeviceFacts {
             vram_gb: Some(12),
             ram_gb: 32,
+            compute_capability: Some((8, 6)),
         };
         #[cfg(not(windows))]
         DeviceFacts::default()
@@ -415,6 +577,27 @@ mod tests {
             .iter()
             .find(|entry| entry["id"] == id)
             .unwrap_or_else(|| panic!("missing catalog entry {id}"))
+    }
+
+    #[test]
+    fn unknown_installer_phase_never_projects_as_not_installed() {
+        let catalog = ModelCatalog::load().unwrap();
+        // `preparing_model` is emitted while the worker builds the prepared cache; the model row
+        // must stay busy and report that phase instead of claiming nothing is installed.
+        let query = catalog
+            .query(&[z_snapshot("preparing_model")], None, &target_device())
+            .unwrap();
+        let entry = entry(
+            &query,
+            if cfg!(windows) {
+                "z-image-turbo-diffusers-cuda-nf4-v1"
+            } else {
+                "z-image-turbo-mflux-v1"
+            },
+        );
+        assert_eq!(entry["installPhase"], "preparing_model");
+        assert_eq!(entry["busy"], true);
+        assert_eq!(entry["executable"], false);
     }
 
     #[test]
@@ -572,16 +755,23 @@ mod tests {
         }
         assert_eq!(capability_pairs, 8);
 
+        // Z-Image keeps its original 12 GB contract: no compact tier was deliverable on 8 GB.
         let z = entry(&query, "z-image-turbo-diffusers-cuda-nf4-v1");
         assert_eq!(
             (z["minVramGb"].as_u64(), z["minRamGb"].as_u64()),
             (Some(12), Some(32))
         );
+        assert_eq!(z["standardMinVramGb"], Value::Null);
+        assert_eq!(z["tier"], Value::Null);
+        assert_eq!(z["resolution"], Value::Null);
+        assert_eq!(z["tiers"].as_array().unwrap().len(), 0);
         let klein = entry(&query, "flux2-klein-4b-distilled-windows-v1");
         assert_eq!(
             (klein["minVramGb"].as_u64(), klein["minRamGb"].as_u64()),
-            (Some(12), Some(32))
+            (Some(8), Some(32))
         );
+        assert_eq!(klein["tier"], "standard");
+        assert_eq!(klein["resolution"], 1024);
         let birefnet = entry(&query, "birefnet-general-epoch-244-windows-v1");
         assert_eq!(
             (
@@ -613,8 +803,9 @@ mod tests {
             let qwen = entry(&query, id);
             assert_eq!(
                 (qwen["minVramGb"].as_u64(), qwen["minRamGb"].as_u64()),
-                (Some(12), Some(32))
+                (Some(8), Some(32))
             );
+            assert_eq!(qwen["standardMinVramGb"], 12);
             assert!(qwen["licenseNotice"].as_str().unwrap().contains("非商业"));
         }
         let moss = entry(&query, "moss-image-sft-windows-v1");
@@ -630,11 +821,13 @@ mod tests {
     #[test]
     fn unsatisfied_hardware_disables_entry_points_with_a_chinese_reason() {
         let catalog = ModelCatalog::load().unwrap();
-        // An 8 GB / 16 GB machine: the staged large models must be blocked while the CPU route
-        // and the small ncnn route stay eligible.
+        // An 8 GB / 16 GB machine cannot satisfy the compact tier's 32 GB RAM requirement, so the
+        // five generative models stay blocked while the CPU route and the small ncnn route are
+        // eligible.
         let device = DeviceFacts {
             vram_gb: Some(8),
             ram_gb: 16,
+            compute_capability: Some((7, 5)),
         };
         let query = catalog.query(&[], None, &device).unwrap();
         for id in [
@@ -651,6 +844,7 @@ mod tests {
             let reason = item["hardwareReason"].as_str().unwrap();
             assert!(reason.contains("硬件门槛"), "{id}: {reason}");
             assert!(reason.contains("安装与生成入口已禁用"), "{id}: {reason}");
+            assert!(reason.contains("内存 ≥ 32 GB"), "{id}: {reason}");
         }
         let birefnet = entry(&query, "birefnet-general-epoch-244-windows-v1");
         assert_eq!(birefnet["hardwareEligible"], true);
@@ -658,6 +852,71 @@ mod tests {
         let realesrgan = entry(&query, "realesrgan-x4plus-windows-v1");
         assert_eq!(realesrgan["hardwareEligible"], true);
         assert_eq!(realesrgan["canInstall"], true);
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn an_8gb_device_selects_the_compact_tier() {
+        let catalog = ModelCatalog::load().unwrap();
+        let device = DeviceFacts {
+            vram_gb: Some(8),
+            ram_gb: 32,
+            compute_capability: Some((7, 5)),
+        };
+        let query = catalog.query(&[], None, &device).unwrap();
+        for id in [
+            "flux2-klein-4b-distilled-windows-v1",
+            "qwen-image-2.1-windows-v1",
+            "qwen-image-2.1-turbo-windows-v1",
+            "moss-image-sft-windows-v1",
+        ] {
+            let item = entry(&query, id);
+            assert_eq!(item["hardwareEligible"], true, "{id}");
+            assert_eq!(item["canInstall"], true, "{id}");
+            assert_eq!(item["tier"], "compact", "{id}");
+            assert_eq!(item["resolution"], 768, "{id}");
+            assert_eq!(item["computeDtype"], "float16", "{id}");
+            let reason = item["tierReason"].as_str().unwrap();
+            assert!(reason.contains("紧凑档"), "{id}: {reason}");
+            assert!(reason.contains("768"), "{id}: {reason}");
+        }
+        // Z-Image has no compact profile: the 8 GB machine keeps it gated at 12 GB.
+        let zimage = entry(&query, "z-image-turbo-diffusers-cuda-nf4-v1");
+        assert_eq!(zimage["hardwareEligible"], false);
+        let zimage_reason = zimage["hardwareReason"].as_str().unwrap();
+        assert!(zimage_reason.contains("显存 ≥ 12 GB"), "{zimage_reason}");
+        // The gate must read as a per-model limit, not a global one.
+        assert!(
+            zimage_reason.contains("只针对「Z-Image Turbo」"),
+            "{zimage_reason}"
+        );
+        assert!(zimage_reason.contains("其他模型"), "{zimage_reason}");
+        assert_eq!(query["counts"]["hardwareEligible"], 6);
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn an_8gb_device_older_than_turing_is_blocked_by_compute_capability() {
+        let catalog = ModelCatalog::load().unwrap();
+        let device = DeviceFacts {
+            vram_gb: Some(8),
+            ram_gb: 32,
+            compute_capability: Some((6, 1)),
+        };
+        let query = catalog.query(&[], None, &device).unwrap();
+        let klein = entry(&query, "flux2-klein-4b-distilled-windows-v1");
+        assert_eq!(klein["hardwareEligible"], false);
+        let reason = klein["hardwareReason"].as_str().unwrap();
+        assert!(reason.contains("计算能力 ≥ 7.5"), "{reason}");
+        // The CPU and ncnn routes carry no tiers and stay eligible.
+        assert_eq!(
+            entry(&query, "birefnet-general-epoch-244-windows-v1")["hardwareEligible"],
+            true
+        );
+        assert_eq!(
+            entry(&query, "realesrgan-x4plus-windows-v1")["hardwareEligible"],
+            true
+        );
     }
 
     #[cfg(windows)]
@@ -671,6 +930,7 @@ mod tests {
                 &DeviceFacts {
                     vram_gb: None,
                     ram_gb: 0,
+                    compute_capability: None,
                 },
             )
             .unwrap();
@@ -699,6 +959,7 @@ mod tests {
                 &DeviceFacts {
                     vram_gb: None,
                     ram_gb: 0,
+                    compute_capability: None,
                 },
             )
             .unwrap();

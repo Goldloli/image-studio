@@ -19,6 +19,7 @@ import time
 from pathlib import Path
 
 from ..resources import (
+    CUDA_RESERVED_LIMIT_GIB,
     BudgetExceeded,
     CudaPeaks,
     ResourceSampler,
@@ -36,18 +37,31 @@ PROMPT_TEMPLATE_T2I = (
 )
 IMAGE_PAD_TOKEN = "<|image_pad|>"
 LOAD_LIMIT_SECONDS = 600.0
+# The compact tier must fit an 8 GB card that also runs the desktop compositor.
+COMPACT_CUDA_LIMIT_GIB = 6.0
 CLEANUP_RESERVED_LIMIT_GIB = 2.5
 CLEANUP_ALLOCATED_LIMIT_GIB = 0.25
 
 
-def quant_config():
+def compute_torch_dtype(name: str | None):
+    """Map the frozen `compute_dtype` parameter to a torch dtype.
+
+    The compact tier runs on 8 GB Turing cards, which have no native BF16 path, so the
+    protocol freezes `float16` there; the standard tier keeps `bfloat16`.
+    """
+    import torch
+
+    return torch.float16 if name == "float16" else torch.bfloat16
+
+
+def quant_config(compute_dtype=None):
     import torch
     from transformers import BitsAndBytesConfig
 
     return BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
+        bnb_4bit_compute_dtype=compute_dtype or torch.bfloat16,
         bnb_4bit_use_double_quant=True,
     )
 
@@ -58,7 +72,7 @@ def load_processor(model_dir: Path):
     return Qwen3VLProcessor.from_pretrained(str(model_dir), subfolder="processor")
 
 
-def load_text_encoder(prepared_dir: Path):
+def load_text_encoder(prepared_dir: Path, compute_dtype=None, sequential: bool = False):
     import torch
     from transformers import Qwen3VLForConditionalGeneration
 
@@ -66,16 +80,26 @@ def load_text_encoder(prepared_dir: Path):
         raise ValueError(
             "prepared NF4 text encoder cache is missing; run --prepare first"
         )
-    encoder = Qwen3VLForConditionalGeneration.from_pretrained(
-        str(prepared_dir),
-        torch_dtype=torch.bfloat16,
-        device_map="cpu",
-        low_cpu_mem_usage=True,
-    )
-    encoder = encoder.to("cuda:0")
+    dtype = compute_dtype or torch.bfloat16
+    if sequential:
+        # Compact measurement path: keep the whole NF4 encoder on the card and rely on the
+        # 768-square sampling stage plus staged release to stay inside the 8 GB budget.
+        encoder = Qwen3VLForConditionalGeneration.from_pretrained(
+            str(prepared_dir),
+            torch_dtype=dtype,
+            device_map="cpu",
+            low_cpu_mem_usage=True,
+        )
+        encoder = encoder.to("cuda:0")
+        log("qwen text encoder moved to the card as one component (compact)")
+    else:
+        encoder = Qwen3VLForConditionalGeneration.from_pretrained(
+            str(prepared_dir),
+            torch_dtype=dtype,
+        )
+        encoder = encoder.to("cuda:0")
     encoder.eval()
     return encoder
-
 
 def encode_prompt(processor, text_encoder, prompt: str):
     """Mirror of QwenImage21Pipeline._get_qwen_prompt_embeds for text-to-image."""
@@ -150,7 +174,7 @@ def encode_prompt(processor, text_encoder, prompt: str):
     return prompt_embeds.cpu(), encoder_attention_mask.cpu(), image_pad_mask.cpu()
 
 
-def load_transformer(prepared_dir: Path):
+def load_transformer(prepared_dir: Path, compute_dtype=None):
     import torch
     from diffusers import QwenImage21Transformer2DModel
 
@@ -160,7 +184,7 @@ def load_transformer(prepared_dir: Path):
         )
     transformer = QwenImage21Transformer2DModel.from_pretrained(
         str(prepared_dir),
-        torch_dtype=torch.bfloat16,
+        torch_dtype=compute_dtype or torch.bfloat16,
         device_map="cpu",
         low_cpu_mem_usage=True,
     )
@@ -209,9 +233,14 @@ def generate(request, progress, cancel):
     model_dir = Path(request["model_path"])
     steps = int(request["parameters"]["steps"])
     token_budget = int(request["parameters"]["token_budget"])
+    resolution = int(request["parameters"]["resolution"] if "resolution" in request["parameters"] else 1024)
+    compute_dtype = compute_torch_dtype(request["parameters"].get("compute_dtype"))
+    sequential = request["parameters"].get("load_strategy") == "staged-nf4-sequential-v1"
     try:
         require_available_ram("qwen text stage")
-        device_index, properties = select_device()
+        device_index, properties = select_device(
+            8 if sequential else 10, (7, 5) if sequential else (8, 6)
+        )
         torch.cuda.set_device(device_index)
         torch.cuda.empty_cache()
         log(
@@ -225,7 +254,9 @@ def generate(request, progress, cancel):
         stage_started = time.perf_counter()
         processor = load_processor(model_dir)
         checkpoint(cancel)
-        text_encoder = load_text_encoder(prepared / "text_encoder")
+        text_encoder = load_text_encoder(
+            prepared / "text_encoder", compute_dtype, sequential
+        )
         text_load_seconds = time.perf_counter() - stage_started
         if text_load_seconds > LOAD_LIMIT_SECONDS:
             raise BudgetExceeded(
@@ -259,7 +290,7 @@ def generate(request, progress, cancel):
         cuda.reset_phase()
         stage_started = time.perf_counter()
         scheduler = _load_scheduler(model_dir)
-        transformer = load_transformer(prepared / "transformer")
+        transformer = load_transformer(prepared / "transformer", compute_dtype)
         transformer_load_seconds = time.perf_counter() - stage_started
         if transformer_load_seconds > LOAD_LIMIT_SECONDS:
             raise BudgetExceeded(
@@ -279,6 +310,8 @@ def generate(request, progress, cancel):
             progress,
             cancel,
             cuda,
+            resolution,
+            compute_dtype,
         )
         checkpoint(cancel)
         del transformer
@@ -305,16 +338,23 @@ def generate(request, progress, cancel):
                 f"qwen VAE load {vae_load_seconds:.1f} s > {LOAD_LIMIT_SECONDS:.0f} s"
             )
         cuda.record_phase()
-        image = _decode_vae(vae, latents, 1024, 1024)
+        image = _decode_vae(vae, latents, resolution, resolution)
         del vae
         _release()
         _cleanup_check("vae")
         progress("writing")
-        candidate = save_primary_image(Path(request["output_dir"]), image)
+        candidate = save_primary_image(
+            Path(request["output_dir"]), image, width=resolution, height=resolution
+        )
         elapsed_seconds = time.monotonic() - started
         resources = resource_report(sampler, cuda, elapsed_seconds)
         log("qwen resources=" + json.dumps(resources, ensure_ascii=False))
-        enforce_budget(sampler, cuda, elapsed_seconds)
+        enforce_budget(
+            sampler,
+            cuda,
+            elapsed_seconds,
+            COMPACT_CUDA_LIMIT_GIB if sequential else CUDA_RESERVED_LIMIT_GIB,
+        )
         return candidate
     finally:
         sampler.stop()
@@ -346,6 +386,8 @@ def _sample(
     progress,
     cancel,
     cuda: CudaPeaks,
+    resolution: int = 1024,
+    dtype=None,
 ):
     import json as json_module
 
@@ -357,8 +399,9 @@ def _sample(
         retrieve_timesteps,
     )
 
-    height = 1024
-    width = 1024
+    height = resolution
+    width = resolution
+    dtype = dtype or torch.bfloat16
     embeds = embeds.to("cuda:0")
     embeds_mask = embeds_mask.to("cuda:0") if embeds_mask is not None else None
     if embeds_mask is not None and embeds_mask.all():
@@ -373,7 +416,7 @@ def _sample(
         (1, 1, num_channels, height_latent, width_latent),
         generator=generator,
         device="cuda:0",
-        dtype=torch.bfloat16,
+        dtype=dtype,
     )
     latents = latents.view(1, num_channels, height_latent * width_latent).transpose(1, 2)
     model_index = json_module.loads(

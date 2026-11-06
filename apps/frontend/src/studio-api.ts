@@ -8,6 +8,11 @@ export type ModelStaticFacts = {
   hardwareReason: string | null;
   minVramGb: number | null;
   minRamGb: number | null;
+  standardMinVramGb: number | null;
+  tier: 'standard' | 'compact' | null;
+  resolution: number | null;
+  computeDtype: string | null;
+  tierReason: string | null;
   quantization: string | null;
   licenseNotice: string | null;
   windowsStatus: string | null;
@@ -101,7 +106,7 @@ export const api = <T>(command: string, args?: Record<string, unknown>) => invok
 export const assetUrl = (id: string) => convertFileSrc(id, 'studio-asset');
 export const promptImageUrl = (sourceCaseId: number) => convertFileSrc(String(sourceCaseId), 'studio-prompt');
 export const bytesLabel = (value: number) => value >= 1e9 ? `${(value / 1e9).toFixed(2)} GB` : value >= 1e6 ? `${(value / 1e6).toFixed(1)} MB` : `${Math.round(value / 1e3)} KB`;
-export const stateLabel = (state: string): string => ({ Pending: '正在发送', Submitted: '已接收', Preparing: '准备中', Running: '生成中', Committing: '保存结果', CancelRequested: '正在取消', Succeeded: '已完成', Failed: '失败', Rejected: '未启动', Cancelled: '已取消', Interrupted: '已中断' }[state] ?? state);
+export const stateLabel = (state: string): string => ({ Pending: '正在发送', Submitted: '已接收', Preparing: '准备中', Running: '生成中', Committing: '保存结果', CancelRequested: '正在取消', Succeeded: '已完成', Failed: '失败', Rejected: '发送失败', Cancelled: '已取消', Interrupted: '已中断' }[state] ?? state);
 
 export const draftContent = (draft: Omit<StoredDraft, 'version'>) => ({ id: draft.id, name: draft.name, prompt: draft.prompt, collapsed: draft.collapsed, promptSourceId: draft.promptSourceId ?? null, params: { ...draft.params } });
 type SaveStatus = 'saved' | 'pending' | 'saving' | 'error';

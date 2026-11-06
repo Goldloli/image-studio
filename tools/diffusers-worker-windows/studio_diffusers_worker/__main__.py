@@ -142,9 +142,13 @@ def validate_request(request, snapshot_id):
     if capability not in spec["capabilities"]:
         raise ValueError("capability is not part of the selected model snapshot")
     recipe_id, steps = recipe_for(snapshot_id, capability)
+    requested_recipe = request["recipe_id"]
+    compact = isinstance(requested_recipe, str) and requested_recipe.endswith("-compact-v1")
+    if compact:
+        recipe_id = recipe_id[: -len("-v1")] + "-compact-v1"
     if (
         request["model_id"] != spec["model_id"]
-        or request["recipe_id"] != recipe_id
+        or requested_recipe != recipe_id
         or request["recipe_version"] != 1
         or request["runtime_lock_id"] != identity["runtime_lock_id"]
         or request["model_snapshot_id"] != identity["model_snapshot_id"]
@@ -156,7 +160,9 @@ def validate_request(request, snapshot_id):
         raise ValueError("seed must be a resolved 32-bit unsigned integer")
     from . import expected_parameters
 
-    if request["parameters"] != expected_parameters(snapshot_id, capability, seed):
+    if request["parameters"] != expected_parameters(
+        snapshot_id, capability, seed, requested_recipe
+    ):
         raise ValueError("effective parameters differ from the frozen recipe")
     prompt = request["instruction"]
     if (
@@ -205,7 +211,7 @@ def validate_request(request, snapshot_id):
             raise ValueError("source image hash mismatch")
     elif inputs:
         raise ValueError("this recipe accepts no source image")
-    if request["outputs"] != output_specs(snapshot_id):
+    if request["outputs"] != output_specs(snapshot_id, 768 if compact else 1024):
         raise ValueError("output specification differs from the frozen recipe")
 
 
@@ -233,16 +239,22 @@ def probe(snapshot_id, model_path=None):
             raise RuntimeError(f"private package identity mismatch: {name}")
     from .backends.common import select_device
 
-    index, properties = select_device()
+    # The probe runs during installation, before a tier is chosen, so it certifies the
+    # lowest supported device (8 GiB, Turing) and reports which tier that device gets.
+    index, properties = select_device(8, (7, 5))
     torch.cuda.set_device(index)
-    left = torch.randn((32, 32), device="cuda", dtype=torch.bfloat16)
+    # Turing (7.5) has no native BF16 path, so the compact tier runs fp16; probe the dtype the
+    # device will actually execute rather than assuming BF16.
+    capability = (properties.major, properties.minor)
+    compute_dtype = torch.bfloat16 if capability >= (8, 0) else torch.float16
+    left = torch.randn((32, 32), device="cuda", dtype=compute_dtype)
     product = left @ left
-    if product.dtype != torch.bfloat16 or not torch.isfinite(product).all():
-        raise RuntimeError("BF16 probe failed")
+    if product.dtype != compute_dtype or not torch.isfinite(product).all():
+        raise RuntimeError(f"{compute_dtype} matmul probe failed")
     from bitsandbytes.nn import Linear4bit
 
-    layer = Linear4bit(32, 16, quant_type="nf4", compute_dtype=torch.bfloat16).cuda()
-    output = layer(torch.randn((2, 32), device="cuda", dtype=torch.bfloat16))
+    layer = Linear4bit(32, 16, quant_type="nf4", compute_dtype=compute_dtype).cuda()
+    output = layer(torch.randn((2, 32), device="cuda", dtype=compute_dtype))
     if output.shape != (2, 16) or not torch.isfinite(output).all():
         raise RuntimeError("NF4 probe failed")
     if torch.cuda.is_available():
@@ -257,6 +269,7 @@ def probe(snapshot_id, model_path=None):
         "device": "gpu",
         "device_name": properties.name,
         "compute_capability": f"{properties.major}.{properties.minor}",
+        "compute_dtype": "float16" if capability < (8, 0) else "bfloat16",
         "packages": packages,
     }
 

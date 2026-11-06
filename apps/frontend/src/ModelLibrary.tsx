@@ -20,6 +20,7 @@ import {
   capabilityFilters,
   canInstallModel,
   canStartGeneration,
+  executionTierLabel,
   filterCatalog,
   hardwareBlocked,
   hardwareThresholdLabel,
@@ -45,6 +46,7 @@ type Props = {
 const phaseLabels: Record<string, string> = {
   not_installed: '尚未安装',
   preparing: '准备安装',
+  preparing_model: '正在准备模型文件',
   downloading: '正在下载',
   verifying: '正在校验模型',
   installing_runtime: '准备隔离运行环境',
@@ -294,13 +296,15 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                     <div className="catalog-hardware">
                       <strong>设备门槛</strong>
                       <span>{hardwareThresholdLabel(entry)}</span>
+                      {executionTierLabel(entry) && <span>当前执行：{executionTierLabel(entry)}</span>}
                       <span>{entry.hardwareEligible ? '当前设备满足门槛' : entry.hardwareReason ?? '当前设备不满足门槛'}</span>
+                      {entry.tierReason && <span>{entry.tierReason}</span>}
                     </div>
                     <div className="catalog-state-grid">
                       <StateFact label="产品接入" value={entry.productStatus === 'implemented' ? '已接入' : '计划中'} positive={entry.productStatus === 'implemented'}/>
                       <StateFact label="模型组件" value={entry.componentsReady ? '文件齐备' : entry.installerSupported ? '尚未齐备' : '未接入'} positive={entry.componentsReady}/>
                       <StateFact label="运行时" value={entry.runtimeReady ? '已就绪' : '未就绪'} positive={entry.runtimeReady}/>
-                      <StateFact label="设备满足" value={entry.hardwareEligible ? '满足' : '不满足'} positive={entry.hardwareEligible}/>
+                      <StateFact label="设备满足" value={entry.hardwareEligible ? (entry.tier === 'compact' ? '满足（紧凑档）' : entry.tier === 'standard' ? '满足（标准档）' : '满足') : '不满足'} positive={entry.hardwareEligible}/>
                       <StateFact label="设备探针" value={entry.deviceVerified ? '已通过' : '未通过'} positive={entry.deviceVerified}/>
                       <StateFact label="当前可执行" value={entry.executable ? '是' : '否'} positive={entry.executable}/>
                     </div>

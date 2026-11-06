@@ -48,7 +48,35 @@ impl HostState {
             } else {
                 "inference-supervisor"
             });
+        crate::adapters::logging::init(&paths.logs);
+        // A GUI process otherwise dies silently: capture panics in the same log as the rest.
+        std::panic::set_hook(Box::new(|info| {
+            crate::adapters::logging::warn(
+                "app.panic",
+                &[("detail", info.to_string().replace('\n', " "))],
+            );
+        }));
         let studio = Arc::new(StudioService::new(paths.clone(), supervisor));
+        // A send may strand a turn as `pending` while its submitting thread is blocked; the
+        // watchdog bounds that wait so the composer can never sit on "receiving prompt" forever.
+        let watchdog = Arc::downgrade(&studio);
+        let _ = std::thread::Builder::new()
+            .name("turn-watchdog".into())
+            .spawn(move || {
+                loop {
+                    std::thread::sleep(std::time::Duration::from_secs(5));
+                    let Some(studio) = watchdog.upgrade() else {
+                        break;
+                    };
+                    let reaped = studio.reap_stale_pending_turns(60_000);
+                    if reaped > 0 {
+                        crate::adapters::logging::warn(
+                            "turn.watchdog.reaped",
+                            &[("count", reaped.to_string())],
+                        );
+                    }
+                }
+            });
         let prompt_library = PromptLibraryStore::load(&paths).map(Arc::new);
         Self {
             paths,

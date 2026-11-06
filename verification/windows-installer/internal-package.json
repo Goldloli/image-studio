@@ -1,31 +1,31 @@
 {
-    "schema_version":  1,
-    "kind":  "windows-internal-nsis-package",
-    "status":  "built",
-    "installer":  "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
-    "installer_sha256":  "575927c5638be32678a18017b3835748fe5717a5cc25c8e0c2e496f7fcf6286a",
-    "installer_bytes":  245005175,
-    "target":  "x86_64-pc-windows-msvc",
-    "install_mode":  "currentUser",
-    "webview2_install_mode":  "offlineInstaller",
-    "signed":  false,
-    "model_weights_bundled":  false,
-    "private_python_bundled":  false,
-    "sidecars":  [
-                     {
-                         "name":  "diagnostic-worker-x86_64-pc-windows-msvc.exe",
-                         "sha256":  "906098812f9225f541b804ec28f1288b99bfada410eece4f8ac03da2e8a9e4d8",
-                         "bytes":  462848
-                     },
-                     {
-                         "name":  "inference-supervisor-x86_64-pc-windows-msvc.exe",
-                         "sha256":  "3b2eb51af37f7555de6ab40b5fe2fdeb779214cefc356e2af4b36abeb786e623",
-                         "bytes":  1050624
-                     },
-                     {
-                         "name":  "realesrgan-worker-x86_64-pc-windows-msvc.exe",
-                         "sha256":  "14789e96236c611485bc990d1570ae270a928719d39ee0894ace36962713030f",
-                         "bytes":  1115136
-                     }
-                 ]
+  "schema_version": 1,
+  "kind": "windows-internal-nsis-package",
+  "status": "built",
+  "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
+  "installer_sha256": "b843acd782c73d3166baf5d86d1d14df30253d3f561dd2eafeaec219250c1f2c",
+  "installer_bytes": 245061956,
+  "target": "x86_64-pc-windows-msvc",
+  "install_mode": "currentUser",
+  "webview2_install_mode": "offlineInstaller",
+  "signed": false,
+  "model_weights_bundled": false,
+  "private_python_bundled": false,
+  "sidecars": [
+    {
+      "name": "diagnostic-worker-x86_64-pc-windows-msvc.exe",
+      "sha256": "c3b3ac9b380433b298d9c2682644695613deddb883482f728666935112702a6b",
+      "bytes": 462848
+    },
+    {
+      "name": "inference-supervisor-x86_64-pc-windows-msvc.exe",
+      "sha256": "e8f95ae65ceb52b148503b473ad4ab125513b3a0a706baffdf18e9226da15e2e",
+      "bytes": 1059840
+    },
+    {
+      "name": "realesrgan-worker-x86_64-pc-windows-msvc.exe",
+      "sha256": "491e5a90ba7c17a2c0585762511b07e424833d955ef077647ffdeb1a38d90bb0",
+      "bytes": 1124352
+    }
+  ]
 }
