@@ -48,6 +48,7 @@ impl HostState {
             } else {
                 "inference-supervisor"
             });
+        crate::adapters::logging::init(&paths.data);
         let studio = Arc::new(StudioService::new(paths.clone(), supervisor));
         // A send may strand a turn as `pending` while its submitting thread is blocked; the
         // watchdog bounds that wait so the composer can never sit on "receiving prompt" forever.
@@ -62,7 +63,10 @@ impl HostState {
                     };
                     let reaped = studio.reap_stale_pending_turns(60_000);
                     if reaped > 0 {
-                        eprintln!("[watchdog] 回收 {reaped} 个未进入执行的轮次");
+                        crate::adapters::logging::warn(
+                            "turn.watchdog.reaped",
+                            &[("count", reaped.to_string())],
+                        );
                     }
                 }
             });

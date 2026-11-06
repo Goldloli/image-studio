@@ -1427,14 +1427,23 @@ impl StudioService {
         // Stage traces: these are the only way to tell a stranded preflight from a slow one on
         // a GUI process, whose stderr is not otherwise visible.
         let started = std::time::Instant::now();
-        eprintln!("[preflight] start {}", turn.id);
+        crate::adapters::logging::debug("turn.preflight.start", &[("turn", turn.id.to_string())]);
         match self.prepare_turn(&turn) {
-            Ok(()) => eprintln!("[preflight] done {} in {:?}", turn.id, started.elapsed()),
+            Ok(()) => crate::adapters::logging::info(
+                "turn.preflight.done",
+                &[
+                    ("turn", turn.id.to_string()),
+                    ("ms", started.elapsed().as_millis().to_string()),
+                ],
+            ),
             Err(error) => {
-                eprintln!(
-                    "[preflight] failed {} after {:?}: {error}",
-                    turn.id,
-                    started.elapsed()
+                crate::adapters::logging::warn(
+                    "turn.preflight.failed",
+                    &[
+                        ("turn", turn.id.to_string()),
+                        ("ms", started.elapsed().as_millis().to_string()),
+                        ("error", error.clone()),
+                    ],
                 );
                 let _ = self.with_library(|library| library.reject_turn(&turn.id, &error));
             }
@@ -1468,7 +1477,7 @@ impl StudioService {
             .and_then(|catalog| catalog.model_facts(&turn.model_id, &self.device_facts))
             .and_then(|facts| facts.tier.id)
             .is_some_and(|id| id == "compact");
-        eprintln!("[preflight] gate ok {}", turn.id);
+        crate::adapters::logging::debug("turn.preflight.gate", &[("turn", turn.id.to_string())]);
         let (width, height) = compact_aspect_size(&turn.aspect, compact_tier)?;
         let seed = if turn.seed.is_empty() {
             None
@@ -1479,14 +1488,36 @@ impl StudioService {
                     .map_err(|_| "种子须为 0–4294967295".to_string())?,
             )
         };
-        eprintln!("[preflight] geometry ok {} {width}x{height}", turn.id);
+        crate::adapters::logging::debug(
+            "turn.preflight.geometry",
+            &[
+                ("turn", turn.id.to_string()),
+                ("size", format!("{width}x{height}")),
+            ],
+        );
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
-        eprintln!("[preflight] ready paths begin {}", turn.id);
-        let ready = installation.ready_paths(&turn.model_id)?;
-        eprintln!("[preflight] ready paths end {}", turn.id);
-        eprintln!("[preflight] environment begin {}", turn.id);
-        let environment = installation.plan_environment(&turn.model_id)?;
-        eprintln!("[preflight] environment end {}", turn.id);
+        crate::adapters::logging::debug(
+            "turn.preflight.ready.begin",
+            &[("turn", turn.id.to_string())],
+        );
+        let ready = installation
+            .ready_paths(&turn.model_id)
+            .map_err(|error| format!("{error}（阶段：读取就绪记录）"))?;
+        crate::adapters::logging::debug(
+            "turn.preflight.ready.end",
+            &[("turn", turn.id.to_string())],
+        );
+        crate::adapters::logging::debug(
+            "turn.preflight.environment.begin",
+            &[("turn", turn.id.to_string())],
+        );
+        let environment = installation
+            .plan_environment(&turn.model_id)
+            .map_err(|error| format!("{error}（阶段：规划运行环境）"))?;
+        crate::adapters::logging::debug(
+            "turn.preflight.environment.end",
+            &[("turn", turn.id.to_string())],
+        );
         {
             let current = self.with_library(|library| library.turn(&turn.id))?;
             if current.status == TurnStatus::CancelRequested {
@@ -1497,7 +1528,10 @@ impl StudioService {
                 return Ok(());
             }
         }
-        eprintln!("[preflight] freeze start {}", turn.id);
+        crate::adapters::logging::debug(
+            "turn.preflight.freeze.begin",
+            &[("turn", turn.id.to_string())],
+        );
         let random = Uuid::new_v4();
         let bytes = random.as_bytes();
         let random_seed = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
@@ -1780,15 +1814,16 @@ impl StudioService {
             .map_err(|error| error.to_string())?;
             (frozen.request, frozen.plan)
         };
-        eprintln!("[preflight] frozen {}", turn.id);
+        crate::adapters::logging::debug("turn.preflight.frozen", &[("turn", turn.id.to_string())]);
         let _schedule = self
             .scheduling
             .lock()
             .map_err(|_| "提交锁异常".to_string())?;
-        eprintln!("[preflight] scheduling lock {}", turn.id);
-        let binding =
-            self.with_library(|library| library.bind_turn_job(&turn.id, request, plan))?;
-        eprintln!("[preflight] bound {}", turn.id);
+        crate::adapters::logging::debug("turn.preflight.lock", &[("turn", turn.id.to_string())]);
+        let binding = self
+            .with_library(|library| library.bind_turn_job(&turn.id, request, plan))
+            .map_err(|error| format!("{error}（阶段：绑定任务）"))?;
+        crate::adapters::logging::info("turn.preflight.bound", &[("turn", turn.id.to_string())]);
         if binding.job.state == studio_core::generation::AttemptState::CancelRequested {
             let cancelled = self.with_library(|library| {
                 library.finish_after_reap(
@@ -1812,7 +1847,10 @@ impl StudioService {
             return Err(error);
         }
         let controller = self.generation.as_ref().ok_or("生成控制器不可用")?;
-        if let Err(error) = controller.start(binding.job.clone(), ready) {
+        if let Err(error) = controller
+            .start(binding.job.clone(), ready)
+            .map_err(|error| format!("{error}（阶段：启动执行）"))
+        {
             let _ = self.with_library(|library| {
                 library.finish_after_reap(
                     &binding.job.attempt,
