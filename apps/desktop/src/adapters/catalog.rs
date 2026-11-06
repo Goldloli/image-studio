@@ -498,7 +498,11 @@ fn project_entry(
             "licenseNotice": metadata.license_notice,
             "windowsStatus": metadata.windows_status,
             "hardwareEligible": hardware_eligible,
-            "hardwareReason": hardware.reason,
+            // The gate is per model: say so, otherwise a blocked Z-Image reads like a global limit.
+            "hardwareReason": hardware.reason.map(|reason| format!(
+                "{reason}该限制只针对「{}」这个型号，其他模型的可用性不受影响。",
+                entry.display_name
+            )),
             "tier": active_tier,
             "resolution": resolution,
             "computeDtype": compute_dtype,
@@ -879,12 +883,14 @@ mod tests {
         // Z-Image has no compact profile: the 8 GB machine keeps it gated at 12 GB.
         let zimage = entry(&query, "z-image-turbo-diffusers-cuda-nf4-v1");
         assert_eq!(zimage["hardwareEligible"], false);
+        let zimage_reason = zimage["hardwareReason"].as_str().unwrap();
+        assert!(zimage_reason.contains("显存 ≥ 12 GB"), "{zimage_reason}");
+        // The gate must read as a per-model limit, not a global one.
         assert!(
-            zimage["hardwareReason"]
-                .as_str()
-                .unwrap()
-                .contains("显存 ≥ 12 GB")
+            zimage_reason.contains("只针对「Z-Image Turbo」"),
+            "{zimage_reason}"
         );
+        assert!(zimage_reason.contains("其他模型"), "{zimage_reason}");
         assert_eq!(query["counts"]["hardwareEligible"], 6);
     }
 
