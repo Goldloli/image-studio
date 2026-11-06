@@ -88,13 +88,14 @@ leaving no cache entries and no installation records; a retry reproduced it
 (`verification/windows-gate0/README.md`). This pass adds a unit test for the decision itself
 (`installation_space_available`): same-volume double counting and the per-volume split.
 
-**Forced reaping.** The cancel deadline predicate (`cancel_deadline_passed`) is extracted and unit
-tested (missing timestamp, fresh timestamp, exited child, overdue child). A full-process version
-still needs a Windows supervisor stub, because the existing generation fixture is Unix-only.
+**Forced reaping — now covered end to end.** `apps/desktop/tests/forced_reap.rs` spawns the real
+`GenerationController` against a test-only `stub-supervisor` binary that never handshakes, never
+reads stdin and never exits. The test waits for the stub to start (marker file), cancels, and
+asserts that:
 
-How to close it: add a tiny `[[bin]] stub-supervisor` that ignores stdin and sleeps for a minute,
-point `GenerationController::new` at `env!("CARGO_BIN_EXE_stub-supervisor")` inside a Windows-only
-integration test, start the fixture job, cancel it, and assert the controller leaves `busy` within
-`cancel_grace_ms + cleanup deadline + slack` (~15 s) and that the child process is gone. The app
-already spawns the supervisor suspended inside a job object, so the kill path is the same one
-production uses.
+- the controller leaves `busy` after **8.4 s** — Z-Image's 3 s cancel grace plus the 5 s cleanup
+  deadline, not an early cooperative exit (asserted: settle ≥ 6 s);
+- the attempt lands in `Cancelled`/`Failed`;
+- `stub-supervisor.exe` is no longer running afterwards.
+
+A faster `cancel_deadline_passed` unit test still covers the predicate itself.

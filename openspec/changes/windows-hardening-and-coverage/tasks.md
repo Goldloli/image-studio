@@ -23,7 +23,7 @@
 
 - [x] 2.1 `cdp.mjs` 增加 `files`（DOM.setFileInputFiles）与 `dialog`（UIAutomation）命令。
 - [x] 2.2 端到端脚本：send-and-wait 与 cancel 两个场景：send-export / cancel / kill-recovery / install。
-- [~] 2.3 强制回收：`cancel_deadline_passed` 已抽出并有单测（无时间戳/刚取消/已退出/超期四种）；整进程级验证仍需 Windows supervisor 桩（现有 fixture 仅 Unix）。
+- [x] 2.3 强制回收：整进程级已覆盖——`tests/forced_reap.rs` 用 `stub-supervisor` 二进制（不握手、不读 stdin、不退出）触发截止时间回收，实测 8.4 s 落定、进程消失、尝试为 Cancelled；判定逻辑另有单测。
 - [x] 2.4 真实网络故障：用 `HTTPS_PROXY=http://127.0.0.1:9` 启动应用即让下载全部失败，实测 5 次重试后给出明确错误，去掉代理后重装成功。
 - [x] 2.5 回归测试：`fast_readiness_check_never_hashes_file_contents`：发送快路径不得读取文件内容（哈希防回归）。
 - [x] 2.6 模型选择器已确认正常：点击展开 6 个模型、显示状态与禁用原因，此前是测试时序问题。

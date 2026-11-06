@@ -7,6 +7,13 @@ publish.workspace = true
 license.workspace = true
 default-run = "image-studio-desktop"
 
+# Test-only: a supervisor that ignores cancellation so the forced-reap path stays covered.
+[[bin]]
+name = "stub-supervisor"
+path = "src/bin/stub_supervisor.rs"
+test = false
+bench = false
+
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
