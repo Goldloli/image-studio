@@ -3053,11 +3053,39 @@ impl Installation {
         }
     }
     fn download(&self, a: &Artifact) -> Result<(), String> {
-        tokio::runtime::Builder::new_current_thread()
+        // Transient network failures used to abort a whole install on the first hiccup. Retry
+        // each artifact a bounded number of times, keeping the `.part` file so a resumed attempt
+        // continues where the previous one stopped.
+        const ATTEMPTS: u32 = 5;
+        let runtime = tokio::runtime::Builder::new_current_thread()
             .enable_all()
             .build()
-            .map_err(err)?
-            .block_on(self.download_async(a))
+            .map_err(err)?;
+        let mut last = String::new();
+        for attempt in 1..=ATTEMPTS {
+            match runtime.block_on(self.download_async(a)) {
+                Ok(()) => return Ok(()),
+                Err(error) => {
+                    last = error;
+                    if attempt == ATTEMPTS {
+                        break;
+                    }
+                    self.sleep_cancellable(Duration::from_secs(u64::from(attempt)))?;
+                }
+            }
+        }
+        Err(format!(
+            "下载失败（已尝试 {ATTEMPTS} 次）：{last}\n文件：{}\n可检查网络后重试安装；已下载的分片会继续使用。",
+            a.url
+        ))
+    }
+    fn sleep_cancellable(&self, total: Duration) -> Result<(), String> {
+        let started = std::time::Instant::now();
+        while started.elapsed() < total {
+            self.check_cancel()?;
+            std::thread::sleep(Duration::from_millis(100));
+        }
+        Ok(())
     }
     async fn cancellable<T>(
         &self,
