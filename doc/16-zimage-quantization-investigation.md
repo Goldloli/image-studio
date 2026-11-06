@@ -54,13 +54,30 @@ Z-Image Turbo 在 RTX 2060 SUPER（sm75，8 GB）上，用 bitsandbytes NF4 + fp
 **结论**：SDNQ 把显存问题解决了（4.4 GiB），但 Z-Image 的 fp16 数值问题遍布
 embedding 与主层（norm/FFN 等），不是单点 upcast 能修的。
 
+### 4.1 溢出点的精确定位
+
+在把 conditioning 路径改成 fp32 后，用逐子模块 hook 扫描 `layers[0]`：
+
+| 子模块 | 输出有限 | abs max |
+|---|---|---|
+| attention | 是 | 8,624 |
+| attention_norm2 | 是 | 5.36 |
+| ffn_norm1 | 是 | 56.8 |
+| **feed_forward** | **否** | 3.4e38（fp32 上限） |
+
+也就是**溢出发生在 SwiGLU 前馈网络**，不在 attention、也不在 embedding。attention 的 8,624
+虽然有限，但已经接近 fp16 上限 65,504。
+
+要把 FFN 救回来只有两条路：把它换成 fp32 计算——但 FFN 权重是量化的，fp32 输入会触发
+dtype 不匹配；改成不量化的 fp32 FFN 需要约 9 GB 权重，反而更不可行；或者等上游重做数值。
+这就是"8 GB 不可行"的最终证据。
 ## 5. 可行路线（按代价排序）
 
 1. **主层 FP32 计算 + SDNQ uint4 权重**：已知可出有效图像（fp32 全流程实测有效），
    但 512² 每步约 96 s，9 步约 14 min，超出 900 s 预算；768² 更慢。
 2. **selective upcast 到 norm/FFN**：需要逐模块定位（本次只做到"主层内部"），
    若命中，速度可能落在每步 10–30 s，值得一次有边界的调查。
-3. **SDNQ INT8 量化矩阵乘**：INT8 GEMM 的 int32 累加本身不溢出，但非矩阵乘算子仍是 fp16；
+3. **SDNQ INT8 量化矩阵乘**：INT8 GEMM 的 int32 累加本身不溢出，但非矩阵乘算子仍是 fp16（FFN 的 SwiGLU 乘法仍在 fp16）；
    且 Windows 需要手工安装 Triton。未实测。
 4. **等上游修复**：issue #15 仍开放。
 

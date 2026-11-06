@@ -45,9 +45,13 @@ Three measured attempts failed on the reference machine:
 3. 512², fp16 compute, fp32 VAE → still black; GPU peak 7,819 MiB.
 
 The peak is resolution-independent because the v1 backend loads each component with
-`device_map={"": "cuda"}` and then moves it back to the CPU. A future change would need a CPU-side
-loader plus an fp16-safe sampling path; the compact recipe identity exists in the protocol but the
-catalog deliberately does not offer it.
+`device_map={"": "cuda"}` and then moves it back to the CPU. The quantization investigation
+([doc/16](16-zimage-quantization-investigation.md)) went further: SDNQ `uint4` lowers the peak to
+**4.385 GiB**, but the fp16 NaN is a model-level overflow. With the conditioning path forced to
+fp32, a per-module scan places the first non-finite output in **`feed_forward`** (SwiGLU) of the
+first transformer layer; attention, norms and embeddings stay finite. Rescuing it would need an
+unquantized fp32 FFN (~9 GB of weights) or an upstream numeric fix, so the compact recipe identity
+stays in the protocol but the catalog deliberately does not offer it.
 
 ## Install-time preparation on 8 GB machines
 
