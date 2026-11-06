@@ -206,6 +206,29 @@ async function main() {
     } else if (command === "wait") {
       await new Promise((r) => setTimeout(r, Number(args[0] || 1000)));
       console.log("waited");
+    } else if (command === "files") {
+      // Sets files on a real <input type=file> through the DOM domain.
+      const [selector, ...rest] = args;
+      const path = rest.join(" ");
+      const document = await cdp.send("DOM.getDocument", { depth: -1 });
+      const found = await cdp.send("DOM.querySelector", {
+        nodeId: document.root.nodeId,
+        selector,
+      });
+      if (!found.nodeId) throw new Error(`selector not found: ${selector}`);
+      await cdp.send("DOM.setFileInputFiles", { nodeId: found.nodeId, files: [path] });
+      console.log(`files ${path}`);
+    } else if (command === "dialog") {
+      // Fills a native Windows file dialog (Tauri uses rfd, not an HTML input).
+      const [path, title] = args;
+      const { execFileSync } = await import("node:child_process");
+      const script = new URL("./file-dialog.ps1", import.meta.url).pathname.replace(/^\//, "");
+      const result = execFileSync(
+        "pwsh",
+        ["-NoProfile", "-File", script, "-Path", path, "-Title", title || ""],
+        { encoding: "utf8" },
+      );
+      console.log(result.trim());
     } else {
       throw new Error(`unknown command: ${command}`);
     }
