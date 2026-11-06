@@ -4,7 +4,7 @@
 
 ## 1. 文档与确认
 
-- [ ] 1.1 proposal / design / tasks / test-plan 与四个 spec delta 完成并展示；等待项目所有者确认。
+- [x] 1.1 proposal / design / tasks / test-plan 与四个 spec delta 完成并展示；等待项目所有者确认。
 - [x] 1.2 确认后在本仓库 bd 中建立 change 跟踪 issue，并把任务映射到 issue。
 
 ## 2. 设备事实与档位选择（无 GPU 依赖，先做）
@@ -55,7 +55,7 @@
 - [x] 8.1 先验证 v1 运行时 + bnb 0.48.2 在 sm75 上能否完成 NF4 自检与装载。
 - [x] 8.2 可行：改造 `studio_zimage_cuda_worker` 支持 768² 与文本编码器 staged。
 - [x] 8.3 不可行：停止并回报，由用户决定是否把 Z-Image 迁到 v2 运行时（新运行时身份，范围扩大）。
-- [ ] 8.4 结果：8 GB 下不可行（768² fp16 出 NaN、512² bf16 无 bnb 内核、加载峰值 ~7.8 GiB），Z-Image 继续按 12 GB 门槛禁用；证据见 `verification/windows-8gb-tier/README.md`。
+- [x] 8.4 结果：8 GB 下不可行（768² fp16 出 NaN、512² bf16 无 bnb 内核、加载峰值 ~7.8 GiB），Z-Image 继续按 12 GB 门槛禁用；证据见 `verification/windows-8gb-tier/README.md`。
 
 ## 9. 全流程界面验收（8 GB 机器）
 
