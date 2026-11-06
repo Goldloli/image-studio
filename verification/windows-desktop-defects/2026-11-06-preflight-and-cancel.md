@@ -61,19 +61,19 @@ returns it; the artifact download retries and completes
 (`installation::tests::transient_download_failure_is_retried_before_failing`). Digest mismatches,
 explicit cancellation and an aborted install are not retried.
 
-## Sequential sends
+## Sequential sends (20 total)
 
-Five sends issued one after another, each waiting for the image:
+Twenty sends issued one after another through the composer, each waiting for the outcome:
 
-| Send | Preflight | Wall clock |
-|---|---|---|
-| 1 | 4.48 s (cold) | 115.2 s |
-| 2 | 0.10 s | 110.7 s |
-| 3 | 0.12 s | 110.3 s |
-| 4 | 0.11 s | 105.8 s |
-| 5 | 0.14 s | 105.5 s |
+| Batch | Preflight | Wall clock per send | Outcome |
+|---|---|---|---|
+| first five | 4.48 s cold, then 98–136 ms | 105.5–115.2 s | 5/5 `图片已生成` |
+| next fifteen | warm | 101.1–105.6 s | 14/15 succeeded |
 
-Every send reached `图片已生成`; none stalled, none was rejected for a busy controller.
+The single failure was a clean refusal, not a stall: the worker's pre-generation budget check saw
+`available RAM 0.791 GiB < 2.0 GiB` (a transient low-memory moment right after the model switch
+finished) and the turn failed with that message; the next send succeeded. No turn ever sat in
+`正在接收提示词`, and no send was rejected for a busy controller.
 
 ## Console window on every generation
 
