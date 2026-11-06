@@ -74,6 +74,36 @@ struct Inner {
     supervisor: PathBuf,
     state: Mutex<State>,
 }
+/// True once a cancelled exchange has waited past the grace deadline without the child exiting.
+fn cancel_deadline_passed(cancel_since: Option<Instant>, deadline: Duration, exited: bool) -> bool {
+    !exited && cancel_since.is_some_and(|since| since.elapsed() > deadline)
+}
+
+#[cfg(test)]
+mod cancel_deadline_tests {
+    use super::*;
+
+    #[test]
+    fn only_a_past_deadline_on_a_live_child_forces_a_kill() {
+        let deadline = Duration::from_secs(5);
+        assert!(!cancel_deadline_passed(None, deadline, false));
+        assert!(!cancel_deadline_passed(
+            Some(Instant::now()),
+            deadline,
+            false
+        ));
+        assert!(!cancel_deadline_passed(
+            Some(Instant::now() - Duration::from_secs(30)),
+            deadline,
+            true
+        ));
+        assert!(cancel_deadline_passed(
+            Some(Instant::now() - Duration::from_secs(30)),
+            deadline,
+            false
+        ));
+    }
+}
 /// Available physical memory in GiB, for generation diagnostics.
 fn available_memory_gib() -> String {
     #[cfg(windows)]
@@ -739,8 +769,7 @@ impl GenerationController {
                 cancel_since = Some(Instant::now());
             }
             if !force_killed
-                && status.is_none()
-                && cancel_since.is_some_and(|since| since.elapsed() > cancel_hard_deadline)
+                && cancel_deadline_passed(cancel_since, cancel_hard_deadline, status.is_some())
             {
                 force_killed = true;
                 let _ = child.kill();

@@ -2725,7 +2725,10 @@ impl Installation {
         if dimensions != (32, 24) {
             return Err(format!("ncnn 探针输出尺寸不符：{dimensions:?}"));
         }
-        let probe_log = fs::read_to_string(self.inner.paths.logs.join("installation-process.log"))
+        // The ncnn worker prints local paths in the OEM code page, so a non-ASCII data root makes
+        // the log invalid UTF-8; decoding lossily keeps the GPU identity line readable.
+        let probe_log = fs::read(self.inner.paths.logs.join("installation-process.log"))
+            .map(|bytes| String::from_utf8_lossy(&bytes).into_owned())
             .unwrap_or_default();
         let device_name = probe_log
             .lines()
@@ -3843,6 +3846,46 @@ fn installation_space_available(
                     .saturating_add(runtime_budget)
                     .saturating_add(reserve))
 }
+
+#[test]
+fn disk_space_is_checked_per_volume_and_for_the_combined_plan() {
+    // 1 GiB of new downloads, 2 GiB of target files, 1 GiB runtime, 1 GiB reserve.
+    let (missing, target, runtime, reserve) = (1 << 30, 2 << 30, 1 << 30, 1 << 30);
+    let enough = 10u64 << 30;
+    assert!(installation_space_available(
+        enough, enough, missing, target, runtime, reserve, true
+    ));
+    // The same bytes cannot be counted twice when both roots share a volume.
+    assert!(!installation_space_available(
+        3 << 30,
+        3 << 30,
+        missing,
+        target,
+        runtime,
+        reserve,
+        true
+    ));
+    // Separate volumes only need their own share.
+    assert!(installation_space_available(
+        target + runtime + reserve,
+        missing + reserve,
+        missing,
+        target,
+        runtime,
+        reserve,
+        false
+    ));
+    assert!(!installation_space_available(
+        target + runtime + reserve - 1,
+        enough,
+        missing,
+        target,
+        runtime,
+        reserve,
+        false
+    ));
+}
+
 fn validate_archive(archive: &ArchiveArtifact) -> Result<(), String> {
     safe_relative(&archive.path)?;
     if !archive.path.ends_with(".zip") || archive.members.is_empty() {
