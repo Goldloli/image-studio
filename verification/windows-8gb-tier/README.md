@@ -55,6 +55,28 @@ Note: 752 s of 900 s leaves little headroom. A machine with a slower CPU or a se
 consumer would exceed the generation budget, so the 50-step MOSS recipe is the first candidate
 for a documented speed expectation in the UI.
 
+## Timings on the reference card (RTX 2060 SUPER 8 GB, 768 square)
+
+Every job loads its components in a fresh worker process, so the total includes the load phase.
+
+| Model | Steps | Load + encode + VAE | Sampling | Total |
+|---|---|---|---|---|
+| Qwen-Image 2.1-Turbo | 8 | 12.5 s + 0.7 s + 4.9 s | 66.3 s | **84.5 s** |
+| Qwen-Image 2.1 | 40 | 25.5 s + 2.3 s + 5.5 s | 358.1 s | **391.3 s** |
+| MOSS-Image-SFT | 50 | 12.5 s + 4.9 s + 0.8 s | 733.8 s | **752.1 s** |
+| FLUX.2 Klein 4B 文生图 | 4 | 135.8 s | 9.8 s | **145.6 s** |
+| FLUX.2 Klein 4B 编辑 | 4 | 155.4 s | 10.3 s | **166.1 s** |
+
+Load time is dominated by moving the NF4 components onto the card; sampling scales with steps and
+canvas. MOSS has the least headroom (752 s of the 900 s budget).
+## FLUX.2 Klein 4B edit — Gate 0 passed (2026-11-06)
+
+`image.edit.flux2-klein-4b.windows-v1`, compact recipe, 768 square, 4 steps, source image
+220×220 street photo. The edited output keeps the scene and applies the prompt.
+
+- CUDA reserved peak **5.623 GiB** (sampling peak 2.922 GiB), available RAM min 15.475 GiB
+- load 155.4 s, generation **10.3 s**, total 166.1 s
+- evidence: `klein-edit-gate0.json`, `klein-edit-768.png`
 ## FLUX.2 Klein 4B compact — Gate 0 passed (2026-11-05)
 
 Same machine, same prompt and seed, 768 square, 4 steps, guidance 1.0, NF4 text encoder and
