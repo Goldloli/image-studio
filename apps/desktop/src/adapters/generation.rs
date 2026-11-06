@@ -661,6 +661,12 @@ impl GenerationController {
         let mut executed = false;
         let mut cancel_sent = false;
         let mut close_since = None;
+        // Cancellation is cooperative first, but a worker that keeps tearing down for minutes
+        // must not hold the turn in "cancelling": force the process group after the grace budget.
+        let cancel_hard_deadline =
+            Duration::from_millis(config.timeouts.cancel_grace_ms.saturating_add(5_000));
+        let mut cancel_since: Option<Instant> = None;
+        let mut force_killed = false;
         let mut status = None;
         let mut lifecycle_checked = false;
         let mut crashed_group = None;
@@ -684,6 +690,22 @@ impl GenerationController {
                             fatal = Some(e.to_string());
                         }
                     }
+                }
+            }
+            if control.cancel.load(Ordering::Acquire) && cancel_since.is_none() {
+                cancel_since = Some(Instant::now());
+            }
+            if !force_killed
+                && status.is_none()
+                && cancel_since.is_some_and(|since| since.elapsed() > cancel_hard_deadline)
+            {
+                force_killed = true;
+                let _ = child.kill();
+                if let Ok(record) =
+                    inference_supervisor::read_current_lifecycle(&config.working_dir, &child)
+                {
+                    let _ = record.terminate_group();
+                    crashed_group = Some(record);
                 }
             }
             match receiver.recv_timeout(Duration::from_millis(40)) {
