@@ -23,15 +23,15 @@
 
 - [x] 2.1 `cdp.mjs` 增加 `files`（DOM.setFileInputFiles）与 `dialog`（UIAutomation）命令。
 - [x] 2.2 端到端脚本：send-and-wait 与 cancel 两个场景：send-export / cancel / kill-recovery / install。
-- [ ] 2.3 stub supervisor 集成测试：强制回收分支被真实触发。**未做**：需要一个新的 fixture 协议桩（Windows 下无脚本式 supervisor 夹具），本轮三次取消都在 5–7 s 内合作退出，分支只有代码保障。
-- [ ] 2.4 诊断构建的下载故障开关。**未做**：已有真实 socket 的重试单测；注入真实网络故障需要防火墙/hosts（无管理员）。
+- [~] 2.3 强制回收：`cancel_deadline_passed` 已抽出并有单测（无时间戳/刚取消/已退出/超期四种）；整进程级验证仍需 Windows supervisor 桩（现有 fixture 仅 Unix）。
+- [x] 2.4 真实网络故障：用 `HTTPS_PROXY=http://127.0.0.1:9` 启动应用即让下载全部失败，实测 5 次重试后给出明确错误，去掉代理后重装成功。
 - [x] 2.5 回归测试：`fast_readiness_check_never_hashes_file_contents`：发送快路径不得读取文件内容（哈希防回归）。
 - [x] 2.6 模型选择器已确认正常：点击展开 6 个模型、显示状态与禁用原因，此前是测试时序问题。
 - [x] 2.7 960×640 截图回归通过（导航/输入/发送/模型芯片均可见）；150%/200% DPI 未逐档截图。
 - [x] 2.8 IME 行为由 `shouldSendOnEnter` 单测覆盖（`isComposing` / `compositionEndedAt`）；未做真实输入法手工验证。
 - [x] 2.9 原生导出对话框自动化：`cdp.mjs dialog` 填写保存框，导出文件与资产逐字节一致。
-- [ ] 2.10 磁盘不足路径。**未做**：需要临时小容量卷。
-- [ ] 2.11 非 ASCII / 长路径下的安装与生成。**未做**：需要独立数据根与模型安装。
+- [~] 2.10 磁盘不足：决策函数 `installation_space_available` 已有单测（同卷重复计数、分卷各自校验）；真实写满磁盘仍需小容量卷。
+- [x] 2.11 非 ASCII/长路径实测通过（`D:\ist-8gb\数据 测试\appdata`）：安装、导入、4× 放大全通；过程中修掉了 ncnn 日志非 UTF-8 导致的探针失败。
 
 ## P3 登记项（无需实现）
 

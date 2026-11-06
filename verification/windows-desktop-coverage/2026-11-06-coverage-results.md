@@ -64,3 +64,27 @@ written file (1,085,419 bytes) matches the stored asset byte-for-byte:
 A concrete prompt (`一只橘色的猫坐在木桌上，写实摄影，自然光`) produced an orange cat on a wooden
 table, so the base model does follow instructions; the earlier lemur came from a meaningless test
 prompt, not from a prompt/asset mix-up.
+## Fault injection without administrator rights
+
+Two of the four "impossible" checks turned out to be testable once the app was launched with the
+right environment:
+
+**Network fault.** The installer's HTTP client honours `HTTP(S)_PROXY`, so starting the app with
+`HTTPS_PROXY=http://127.0.0.1:9` makes every download fail at the socket. Installing Real-ESRGAN in
+that state produced `下载失败（已尝试 5 次）：网络中断：…` — the retry budget ran and the error names
+the file. Relaunching without the proxy and installing again succeeded, so the failure is clean and
+recoverable. No firewall rule or hosts edit was needed.
+
+**Non-ASCII and long path.** A fresh data root at `D:\ist-8gb\数据 测试\appdata` (Chinese, spaces)
+exposed a real defect: the ncnn probe log is written in the OEM code page, so `read_to_string`
+failed, the GPU identity line was dropped, and *every* install in that root failed with
+`ncnn Vulkan 探针未报告 GPU 0`. Decoding the log lossily fixed it; the same root then completed a
+full install, a source import through the native dialog, and a 4× upscale (220→880).
+
+**Disk space.** The live "disk full" case still needs a small volume, but the decision itself
+(`installation_space_available`) now has a unit test covering the same-volume double-count and the
+per-volume split; the macOS acceptance run already recorded a full install-space sample.
+
+**Forced reaping.** The cancel deadline predicate (`cancel_deadline_passed`) is extracted and unit
+tested (missing timestamp, fresh timestamp, exited child, overdue child). A full-process version
+still needs a Windows supervisor stub, because the existing generation fixture is Unix-only.
