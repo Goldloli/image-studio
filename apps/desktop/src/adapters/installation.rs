@@ -1,5 +1,6 @@
 //! Fixed-source installer. No URL, executable, or package selection crosses the IPC boundary.
 use super::paths::AppPaths;
+use super::quiet_command;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 #[cfg(windows)]
@@ -2558,7 +2559,7 @@ impl Installation {
                 let base_python = work.join("python/bin/python3");
                 self.check_cancel()?;
                 self.command(
-                    Command::new(&base_python)
+                    quiet_command(&base_python)
                         .args(["-I", "-m", "venv", "--clear"])
                         .arg(work.join("venv")),
                 )?;
@@ -2578,7 +2579,7 @@ impl Installation {
                 )
                 .map_err(err)?;
                 self.command(
-                    Command::new(work.join("venv/bin/python3"))
+                    quiet_command(work.join("venv/bin/python3"))
                         .args([
                             "-I",
                             "-m",
@@ -2605,7 +2606,7 @@ impl Installation {
         self.check_cancel()?;
         self.update(|s| s.phase = "probing".into());
         let snapshot_id = self.snapshot_id();
-        let mut probe = Command::new(&python);
+        let mut probe = quiet_command(&python);
         probe.args(["-I", "-m", self.inner.profile.worker_module]);
         if self.inner.profile.worker_model_argument {
             probe.arg("--model-snapshot-id").arg(&snapshot_id);
@@ -2625,7 +2626,7 @@ impl Installation {
         {
             return Err("运行时探针版本或设备不符。".into());
         }
-        let versions=self.command(Command::new(&python).args(["-I","-c","import importlib.metadata,json;print(json.dumps({d.metadata['Name'].lower().replace('_','-'):d.version for d in importlib.metadata.distributions()}))"]))?;
+        let versions=self.command(quiet_command(&python).args(["-I","-c","import importlib.metadata,json;print(json.dumps({d.metadata['Name'].lower().replace('_','-'):d.version for d in importlib.metadata.distributions()}))"]))?;
         let versions: std::collections::BTreeMap<String, String> =
             serde_json::from_slice(&versions).map_err(err)?;
         for (name, version) in &self.inner.runtime.packages {
@@ -2743,7 +2744,7 @@ impl Installation {
         let output_arg = external_process_path(&output);
         let model_arg = external_process_path(&model);
         self.command(
-            Command::new(&ncnn)
+            quiet_command(&ncnn)
                 .args([
                     "-i",
                     input_arg.as_ref(),
@@ -2924,7 +2925,7 @@ impl Installation {
             fs::remove_dir_all(&prepared).map_err(err)?;
         }
         let model = self.model_dir();
-        let mut command = Command::new(self.private_python());
+        let mut command = quiet_command(self.private_python());
         command.args(prepare_worker_args(
             self.inner.profile,
             &self.snapshot_id(),
@@ -4336,7 +4337,7 @@ mod tests {
         let protocol_output = repo.join("verification/windows-gate0/product-lifecycle-protocol");
         let protocol_report =
             repo.join("verification/windows-gate0/product-install-worker-protocol.json");
-        let protocol = Command::new(&ready.worker_program)
+        let protocol = quiet_command(&ready.worker_program)
             .arg("-I")
             .arg(repo.join("tools/zimage-cuda-worker/tests/run_real_protocol.py"))
             .arg("--python")
@@ -4542,7 +4543,7 @@ mod tests {
             serde_json::from_slice(&fs::read(&lifecycle).unwrap()).unwrap();
         let supervisor_pid = lifecycle_record["supervisor_pid"].as_u64().unwrap();
         let supervisor_pid_text = supervisor_pid.to_string();
-        let killed_status = Command::new("taskkill.exe")
+        let killed_status = quiet_command("taskkill.exe")
             .args(["/PID", supervisor_pid_text.as_str(), "/F"])
             .status()
             .unwrap();
@@ -6500,7 +6501,7 @@ mod tests {
         .unwrap();
         let output = installer
             .command(
-                Command::new(std::env::var_os("COMSPEC").unwrap())
+                quiet_command(std::env::var_os("COMSPEC").unwrap())
                     .args(["/D", "/C"])
                     .arg(script),
             )
