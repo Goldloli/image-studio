@@ -972,23 +972,12 @@ fn prepared_cache_ready(dir: &Path) -> Result<(), String> {
     }
     Ok(())
 }
+
 /// Deterministic inventory of the prepared cache: recursive files, no symlinks,
 /// forward-slash relative paths, sorted for a stable digest.
 fn prepared_cache_inventory(dir: &Path) -> Result<Vec<PreparedFileRecord>, String> {
-    prepared_cache_inventory_inner(dir, true)
-}
-
-/// Inventory without reading file contents; used by the per-send readiness check.
-fn prepared_cache_inventory_fast(dir: &Path) -> Result<Vec<PreparedFileRecord>, String> {
-    prepared_cache_inventory_inner(dir, false)
-}
-
-fn prepared_cache_inventory_inner(
-    dir: &Path,
-    hash: bool,
-) -> Result<Vec<PreparedFileRecord>, String> {
     let mut files = Vec::new();
-    prepared_inventory_walk(dir, dir, &mut files, hash)?;
+    prepared_inventory_walk(dir, dir, &mut files)?;
     files.sort_by(|left, right| left.path.cmp(&right.path));
     if files.is_empty() {
         return Err("量化缓存为空；请重新安装该型号以重建量化缓存。".into());
@@ -999,7 +988,6 @@ fn prepared_inventory_walk(
     root: &Path,
     path: &Path,
     out: &mut Vec<PreparedFileRecord>,
-    hash: bool,
 ) -> Result<(), String> {
     for entry in fs::read_dir(path).map_err(err)? {
         let entry = entry.map_err(err)?;
@@ -1009,13 +997,11 @@ fn prepared_inventory_walk(
             return Err("量化缓存包含符号链接；请重新安装该型号。".into());
         }
         if metadata.is_dir() {
-            prepared_inventory_walk(root, &path, out, hash)?;
+            prepared_inventory_walk(root, &path, out)?;
         } else if metadata.is_file() {
+            let mut file = File::open(&path).map_err(err)?;
             let mut digest = Sha256::new();
-            if hash {
-                let mut file = File::open(&path).map_err(err)?;
-                std::io::copy(&mut file, &mut digest).map_err(err)?;
-            }
+            std::io::copy(&mut file, &mut digest).map_err(err)?;
             out.push(PreparedFileRecord {
                 path: path
                     .strip_prefix(root)
@@ -1110,38 +1096,6 @@ fn prepared_cache_matches(
     Ok(())
 }
 
-/// Size-only variant of `prepared_cache_matches` for the per-send readiness check.
-fn prepared_cache_matches_fast(
-    data: &Path,
-    model_snapshot_id: &str,
-    profile: InstallProfile,
-    record: &ReadyRecord,
-) -> Result<(), String> {
-    if !profile.prepare_with_model {
-        return Ok(());
-    }
-    let expected = prepared_cache_dir(data, model_snapshot_id);
-    let recorded = record
-        .prepared_dir
-        .as_deref()
-        .ok_or("就绪记录缺少量化缓存路径；请重新安装。")?;
-    if Path::new(recorded) != expected {
-        return Err("量化缓存路径与固定安装布局不符；请重新安装。".into());
-    }
-    prepared_cache_ready(&expected)?;
-    let files = prepared_cache_inventory_fast(&expected)?;
-    let same = files.len() == record.prepared_files.len()
-        && files
-            .iter()
-            .zip(&record.prepared_files)
-            .all(|(actual, expected)| {
-                actual.path == expected.path && actual.bytes == expected.bytes
-            });
-    if !same {
-        return Err("量化缓存内容与安装记录不符；请重新安装所选型号以重建量化缓存。".into());
-    }
-    Ok(())
-}
 fn prepare_worker_args(
     profile: InstallProfile,
     model_snapshot_id: &str,
@@ -2162,7 +2116,7 @@ impl Installation {
         self.verify_ready_inner(false)
     }
     fn verify_ready_inner(&self, deep: bool) -> Result<ReadyPaths, String> {
-        eprintln!("[verify] begin");
+        super::logging::debug("install.verify.begin", &[("deep", deep.to_string())]);
         let record: ReadyRecord = serde_json::from_slice(
             &fs::read(
                 self.inner
@@ -2193,16 +2147,16 @@ impl Installation {
                 self.inner.profile,
                 &record,
             )?;
-        } else {
-            eprintln!("[verify] identity ok");
-            prepared_cache_matches_fast(
-                &self.inner.paths.data,
-                &self.inner.model.id,
-                self.inner.profile,
-                &record,
-            )?;
+        } else if !prepared_cache_metadata_matches(
+            &self.inner.paths.data,
+            &self.inner.model.id,
+            self.inner.profile,
+            &record,
+        ) {
+            // Metadata and sizes only; the full digest runs once at install activation.
+            return Err("量化缓存内容与安装记录不符；请重新安装所选型号以重建量化缓存。".into());
         }
-        eprintln!("[verify] prepared ok");
+        super::logging::debug("install.verify.prepared", &[]);
         for file in self.inner.model.installed_files() {
             check_installed(
                 &self.model_dir().join(&file.path),
@@ -2211,7 +2165,7 @@ impl Installation {
                 deep,
             )?;
         }
-        eprintln!("[verify] model ok");
+        super::logging::debug("install.verify.model", &[]);
         if record.runtime_files.is_empty()
             || record.probe["device"] != self.inner.profile.probe_device
         {
@@ -2223,7 +2177,7 @@ impl Installation {
                 check_installed(&self.runtime_dir().join(f.path), f.bytes, &f.sha256, deep)?;
             }
         }
-        eprintln!("[verify] runtime ok");
+        super::logging::debug("install.verify.runtime", &[]);
         let license_root = license_root(&self.inner.paths.data, self.inner.profile);
         for license in license_records(self.inner.profile) {
             verify(
@@ -6116,6 +6070,18 @@ mod tests {
         assert_eq!(fs::read(dest).unwrap(), b"hello");
         assert_eq!(i.snapshot().received_bytes, 5);
     }
+    #[test]
+    fn fast_readiness_check_never_hashes_file_contents() {
+        // A wrong digest of the right size must pass the metadata check and fail the deep
+        // one; this guards the send path against re-reading whole components.
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("weight.bin");
+        fs::write(&path, b"12345678").unwrap();
+        assert!(check_installed(&path, 8, &"a".repeat(64), false).is_ok());
+        assert!(check_installed(&path, 8, &"a".repeat(64), true).is_err());
+        assert!(check_installed(&path, 7, &"a".repeat(64), false).is_err());
+    }
+
     #[test]
     fn transient_download_failure_is_retried_before_failing() {
         let (_temp, i) = fixture();

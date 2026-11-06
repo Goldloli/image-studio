@@ -5,6 +5,7 @@ pub mod feature_catalog;
 pub mod generation;
 pub mod installation;
 pub mod library;
+pub mod logging;
 pub mod paths;
 pub mod preferences;
 pub mod prompt_library;

@@ -91,7 +91,7 @@ export function progressForTurn(
   if (turn.state === 'Running') return { percent: 20, label: '正在生成' };
   if (turn.state === 'Committing') return { percent: 90, label: '正在保存结果' };
   if (turn.state === 'CancelRequested') return { percent: 8, label: '正在取消' };
-  return { percent: 0, label: turn.state === 'Rejected' ? '发送未启动' : '执行已结束' };
+  return { percent: 0, label: turn.state === 'Rejected' ? '发送失败' : '执行已结束' };
 }
 
 /** Cancel is cooperative plus a forced reap; show how long the user has waited. */
