@@ -75,10 +75,9 @@ impl DeviceFacts {
 
     /// Probes the local device without caching. Best effort, bounded, never panics.
     pub fn detect() -> Self {
-        #[cfg(windows)]
+        // The platform stub returns (None, None) off Windows, so the call can stay uniform and
+        // the stub is never dead code under `clippy -D warnings`.
         let (vram_gb, compute_capability) = detect_gpu_facts();
-        #[cfg(not(windows))]
-        let (vram_gb, compute_capability) = (None, None);
         Self {
             vram_gb,
             ram_gb: detect_ram_gb(),
