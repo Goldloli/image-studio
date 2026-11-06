@@ -81,9 +81,12 @@ failed, the GPU identity line was dropped, and *every* install in that root fail
 `ncnn Vulkan 探针未报告 GPU 0`. Decoding the log lossily fixed it; the same root then completed a
 full install, a source import through the native dialog, and a 4× upscale (220→880).
 
-**Disk space.** The live "disk full" case still needs a small volume, but the decision itself
-(`installation_space_available`) now has a unit test covering the same-volume double-count and the
-per-volume split; the macOS acceptance run already recorded a full install-space sample.
+**Disk space.** Already covered on the Windows target machine (RTX 3080 Ti / Windows 10): an empty
+isolated root on a removable volume with **27.74 GiB free** against an 88.99 GiB install budget
+failed in about 4 seconds with `磁盘空间不足；请释放安装计划所需空间后继续。`, before any download,
+leaving no cache entries and no installation records; a retry reproduced it
+(`verification/windows-gate0/README.md`). This pass adds a unit test for the decision itself
+(`installation_space_available`): same-volume double counting and the per-volume split.
 
 **Forced reaping.** The cancel deadline predicate (`cancel_deadline_passed`) is extracted and unit
 tested (missing timestamp, fresh timestamp, exited child, overdue child). A full-process version
