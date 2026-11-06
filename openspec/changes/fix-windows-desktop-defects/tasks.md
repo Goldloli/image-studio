@@ -22,19 +22,25 @@
 - [ ] 3.3 界面显示已等待秒数，超过 15 s 给出说明。
 - [~] 3.4 验证：Qwen Turbo 取消一次 6.69 s 落定、无残留进程；MOSS/Klein 未测，点击到 `cancelled` ≤ 15 s；无残留进程；无半成品资产。
 
+## 3b. 子进程不弹窗
+
+- [x] 3b.1 新增 `quiet_command()`，Windows 上统一 `CREATE_NO_WINDOW`。
+- [x] 3b.2 生成、安装、探针、ncnn 的所有子进程改用它。
+- [ ] 3b.3 验证：重新构建后生成一次，确认无新 `conhost`/`WindowsTerminal` 进程。
+
 ## 4. 安装期阶段投影
 
 - [x] 4.1 安装进行中由宿主维护当前 phase/receivedBytes，`model_catalog` 与 `model_view` 同源读取。
 - [x] 4.2 模型页在安装期有界轮询刷新，阶段文案覆盖 downloading / verifying / preparing / installing_runtime / probing。
 - [x] 4.3 单元测试：每个阶段都投影为对应文案，且不得为 `not_installed`。
-- [ ] 4.4 验证：真实安装一次，逐阶段截图/记录。
+- [x] 4.4 验证：真实安装一次（BiRefNet，观察到 downloading→verifying→probing→ready，行内显示"正在下载"），逐阶段截图/记录。
 
 ## 5. 下载重试
 
 - [x] 5.1 每个 artifact 失败后按 1/2/4 s 退避重试，最多 5 次，保留 `.part` 与 Range 续传。
 - [x] 5.2 失败信息包含 URL、尝试次数、最后错误与恢复建议；校验失败直接重下而非重试同一字节。
 - [x] 5.3 故障注入测试：连续失败 2 次后成功 → 安装继续；连续失败 5 次 → 可行动错误，进度保留。
-- [ ] 5.4 验证：真实安装一次（可用预置缓存缩短下载阶段，另用故障注入覆盖重试路径）。
+- [~] 5.4 验证：真实下载成功但未触发重试；重试路径由单测覆盖（可用预置缓存缩短下载阶段，另用故障注入覆盖重试路径）。
 
 ## 6. 质量门与归档
 

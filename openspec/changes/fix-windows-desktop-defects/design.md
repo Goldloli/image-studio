@@ -71,3 +71,13 @@
 - 发送看门狗可能误杀真正慢的轮次：阈值 60 s 远大于实测发送耗时（<1 s），且看门狗只作用于"pending 且无 job"的轮次。
 - 取消强制回收可能与正在写盘的 worker 竞争：回收后由既有 quarantine/事务校验兜底，半成品不进资产库。
 - 下载重试会放大日志与进度事件：沿用有界日志与节流。
+
+## 6. 每次生成弹出终端窗口
+
+**现象**：每次生成（以及安装）期间都会闪出一个黑色终端窗口。
+
+**原因**：宿主用 `std::process::Command` 直接拉起 `inference-supervisor.exe` 与私有 Python（两者都是控制台程序），没有设置 `CREATE_NO_WINDOW`。Windows 会为每个控制台子进程分配一个新的控制台宿主，实测生成期间出现新的 `conhost`、`OpenConsole`、`WindowsTerminal` 进程。
+
+**修复**：新增 `adapters::quiet_command()`，Windows 上统一加 `CREATE_NO_WINDOW`（0x0800_0000），生成、安装、探针、ncnn 等所有子进程都经由它创建；`tokio::process::Command`（通信诊断）保持原样，因为它是显式的开发诊断界面。
+
+**验证**：重新构建后发起一次生成，确认没有新的 `conhost`/`WindowsTerminal` 进程出现，且生成结果正常。
