@@ -36,10 +36,16 @@ No `生成、清理或模型安装仍在进行` rejection, no turn stranded in `
 
 ## Cancel latency
 
-A turn was cancelled during sampling by clicking the composer stop control:
+Cancelled through the composer stop control on three models:
 
-- click → `已取消` in **6.69 s** (previously ~120 s)
-- no `inference-supervisor` or `python` process left behind
+| Model | Stage at cancel | Click → `已取消` | Leftover processes |
+|---|---|---|---|
+| Qwen-Image 2.1 Turbo | sampling | 6.69 s | none |
+| MOSS-Image-SFT | sampling | 6.38 s | none |
+| MOSS-Image-SFT | loading | 6.68 s | none |
+| FLUX.2 Klein 4B | sampling | 5.13 s | none |
+
+Previously the same action took about 120 s.
 
 ## Install projection
 
@@ -85,8 +91,19 @@ The row moved through the phases the page now projects:
 - backend phases observed: `downloading` → `verifying` → `probing` → `ready`
 - finished `当前可执行` (`install-ready.png`)
 
-## Not yet verified on this machine
+## Install phases seen live (beyond BiRefNet)
 
-- A forced network failure during a real install: the retry path is covered by the unit test, the
-  real download did not need a retry.
-- Cancel timing for MOSS and Klein (only Qwen-Image 2.1 Turbo was measured).
+MOSS-Image-SFT (27 GB) and FLUX.2 Klein 4B (16 GB) were installed from a seeded cache while the
+model page was open:
+
+- `downloading` → `verifying` → `probing` → `preparing_model` (MOSS, ≈12 min) → `ready`
+- `downloading` → `verifying` → `probing` → `ready` (Klein, 9.2 min total)
+- the row read `正在下载` during the download, never `尚未安装`
+
+## Not verified on this machine
+
+- A forced network failure during a real install. Injecting one needs a firewall rule or a hosts
+  entry, both of which require administrator rights this session does not have. The retry runs
+  through the real download function in
+  `installation::tests::transient_download_failure_is_retried_before_failing`, which serves a
+  truncated body once and then the full body over a real socket.
