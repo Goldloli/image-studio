@@ -94,6 +94,13 @@ export function progressForTurn(
   return { percent: 0, label: turn.state === 'Rejected' ? '发送未启动' : '执行已结束' };
 }
 
+/** Cancel is cooperative plus a forced reap; show how long the user has waited. */
+export function cancelLabel(base: string, seconds: number): string {
+  if (seconds <= 0) return base;
+  return seconds >= 15
+    ? `${base}（已等待 ${seconds} 秒，进程可能仍在回收）`
+    : `${base}（已等待 ${seconds} 秒）`;
+}
 export function mergeTurns(serverTurns: TurnView[], optimistic: TurnView[]): TurnView[] {
   const accepted = new Set(serverTurns.map(turn => turn.submissionKey));
   return [
