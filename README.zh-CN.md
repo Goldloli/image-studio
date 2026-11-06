@@ -36,10 +36,16 @@ Image Studio 是面向 **macOS arm64** 与 **Windows x64** 的本地优先桌面
 | Qwen-Image 2.1 Turbo | 文生图 | 4-bit（NF4）、8 步、官方 Turbo 采样 |
 | MOSS-Image-SFT | 文生图 | 4-bit（NF4）、50 步、guidance 3.0 |
 
-**显存档位**：五个生成模型登记 `standard`（≥ 12 GB，1024²，bf16）与 `compact`（≥ 8 GB，768²，
-fp16）两档，同一份模型下载与 prepared 缓存共用；设备只满足紧凑档时自动降级并在模型页标明。
-Z-Image Turbo 实测无法在 8 GB 上运行，保持 12 GB 门槛。详见
-[`doc/15-windows-8gb-tier.md`](doc/15-windows-8gb-tier.md)。
+**8 GB 显存支持（已在 RTX 2060 SUPER 上实测）**：Qwen-Image 2.1、Qwen-Image 2.1 Turbo、
+MOSS-Image-SFT 与 FLUX.2 Klein 4B 均可在 8 GB 显卡上以紧凑档运行（768×768、fp16，
+实测显存峰值 5.44–5.96 GiB）；BiRefNet 与 Real-ESRGAN 本来就不受显存限制。设备只满足紧凑档
+时自动降级，并在模型页标注「紧凑档 768×768」。Z-Image Turbo 因模型在无 BF16 的 Turing 架构上
+存在 fp16 溢出，仍要求 12 GB 显存。
+
+验证环境与完整证据：Windows 11 / i9-9900K / **RTX 2060 SUPER 8 GB (sm75)** / 31.9 GiB RAM，
+见 [`doc/15-windows-8gb-tier.md`](doc/15-windows-8gb-tier.md)、
+[`doc/16-zimage-quantization-investigation.md`](doc/16-zimage-quantization-investigation.md) 与
+[`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)。
 
 权威模型目录位于
 [`resources/model-catalog/catalog.json`](resources/model-catalog/catalog.json)。

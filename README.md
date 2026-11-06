@@ -40,11 +40,17 @@ machine.
 | Qwen-Image 2.1 Turbo | Text to image | 4-bit NF4, 8 steps, official Turbo sampling |
 | MOSS-Image-SFT | Text to image | 4-bit NF4, 50 steps, guidance 3.0 |
 
-**VRAM tiers**: the five generative models register a `standard` tier (≥ 12 GB, 1024², bf16) and a
-`compact` tier (≥ 8 GB, 768², fp16) that share one model download and one prepared cache; a device
-that only meets the compact tier degrades automatically and the model page names the tier.
-Z-Image Turbo cannot run on 8 GB as measured and keeps its 12 GB threshold. See
-[`doc/15-windows-8gb-tier.md`](doc/15-windows-8gb-tier.md).
+**8 GB VRAM support (verified on an RTX 2060 SUPER)**: Qwen-Image 2.1, Qwen-Image 2.1 Turbo,
+MOSS-Image-SFT and FLUX.2 Klein 4B all run on 8 GB cards in the compact tier (768×768, fp16,
+measured peaks 5.44–5.96 GiB); BiRefNet and Real-ESRGAN were never VRAM-bound. A device that only
+meets the compact tier degrades automatically and the model page states "紧凑档 768×768".
+Z-Image Turbo keeps its 12 GB threshold because the model overflows in fp16 on BF16-less Turing
+architectures.
+
+Verified environment and full evidence: Windows 11 / i9-9900K / **RTX 2060 SUPER 8 GB (sm75)** /
+31.9 GiB RAM — see [`doc/15-windows-8gb-tier.md`](doc/15-windows-8gb-tier.md),
+[`doc/16-zimage-quantization-investigation.md`](doc/16-zimage-quantization-investigation.md) and
+[`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md).
 
 The authoritative model catalog is
 [`resources/model-catalog/catalog.json`](resources/model-catalog/catalog.json).
