@@ -47,7 +47,7 @@
 
 - [x] 7.1 Klein 增加 prepared 预量化（文本编码器 + transformer），消除卡上量化瞬时。
 - [x] 7.2 worker 改为顺序 offload（逐层）+ 768²；`vae_precision` 由实测决定（FLUX VAE 的 fp16 风险）。
-- [x] 7.3 下载 14.9 GB → prepare → Gate 0：文生图与单图编辑各一次，记录峰值与耗时。
+- [x] 7.3a 下载 14.9 GB → Gate 0 文生图一次：5.436 GiB、145.6 s。`- [ ] 7.3b 单图编辑（Klein edit）在 8 GB 上**未实测**：代码与协议已就绪，但没有跑过编辑路径。
 - [x] 7.4 编辑路径不得用 img2img 伪装；源图条件仍走 `source` 输入角色。
 
 ## 8. Z-Image Turbo compact（高风险，R1）
@@ -60,10 +60,10 @@
 ## 9. 全流程界面验收（8 GB 机器）
 
 - [x] 9.1 安装后启动应用，模型页对五个模型显示"紧凑档可用"，设置页显示 `显存 8 GB · 内存 32 GB`。
-- [x] 9.2 从界面发送五个模型的真实请求，分别查看结果与导出 PNG。
-- [x] 9.3 取消：每个模型至少一次在采样中取消，任务转 Cancelled，无残留进程。
-- [x] 9.4 强杀：宿主或 worker 被强杀后重启应用，恢复可用状态且不产生半个资产。
-- [x] 9.5 重启后 Ready 记录仍有效，不触发重新下载或重新 prepare。
+- [~] 9.2 界面发送：**仅 Qwen-Image 2.1 Turbo** 完成发送/查看/导出 PNG（字节一致）；其余四个模型未在界面上安装与发送。
+- [~] 9.3 取消：**仅 Qwen-Image 2.1 Turbo** 取消一次并落为 cancelled；其余模型未验证。
+- [~] 9.4 强杀：做过一次宿主强杀 → 重启后 pending 轮次转 interrupted、无残留 worker、随后生成成功；worker 级强杀未单独验证。
+- [~] 9.5 重启后 Qwen-Image 2.1 Turbo 仍为就绪；未逐一验证其他模型是否复用 Ready 记录。
 - [x] 9.6 证据：`verification/windows-8gb-tier/` README + 截图 + JSON。
 
 ## 10. 质量门、文档与归档
