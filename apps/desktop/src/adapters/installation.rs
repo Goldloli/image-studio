@@ -3062,12 +3062,19 @@ impl Installation {
             .build()
             .map_err(err)?;
         let mut last = String::new();
+        let mut attempts_used = 0;
         for attempt in 1..=ATTEMPTS {
+            attempts_used = attempt;
             match runtime.block_on(self.download_async(a)) {
                 Ok(()) => return Ok(()),
                 Err(error) => {
+                    // Digest mismatches and explicit cancellation are not transport hiccups:
+                    // repeating the attempt wastes the budget, so surface them immediately.
+                    let retryable = !error.contains("SHA-256")
+                        && !error.contains("安装已取消")
+                        && !error.contains("本次安装已停止");
                     last = error;
-                    if attempt == ATTEMPTS {
+                    if !retryable || attempt == ATTEMPTS {
                         break;
                     }
                     self.sleep_cancellable(Duration::from_secs(u64::from(attempt)))?;
@@ -3075,7 +3082,7 @@ impl Installation {
             }
         }
         Err(format!(
-            "下载失败（已尝试 {ATTEMPTS} 次）：{last}\n文件：{}\n可检查网络后重试安装；已下载的分片会继续使用。",
+            "下载失败（已尝试 {attempts_used} 次）：{last}\n文件：{}\n可检查网络后重试安装；已下载的分片会继续使用。",
             a.url
         ))
     }
@@ -5767,6 +5774,34 @@ mod tests {
         });
         (url, rx, task)
     }
+
+    /// Accepts one connection per response, so a test can fail an attempt and still serve the retry.
+    fn server_sequence(responses: Vec<Vec<u8>>) -> (String, std::thread::JoinHandle<()>) {
+        use std::net::TcpListener;
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let url = format!("http://{}/fixture", listener.local_addr().unwrap());
+        let task = std::thread::spawn(move || {
+            for response in responses {
+                let Ok((mut socket, _)) = listener.accept() else {
+                    return;
+                };
+                socket
+                    .set_read_timeout(Some(Duration::from_secs(3)))
+                    .unwrap();
+                let mut request = Vec::new();
+                let mut byte = [0];
+                while !request.ends_with(b"\r\n\r\n") {
+                    if socket.read_exact(&mut byte).is_err() {
+                        break;
+                    }
+                    request.push(byte[0]);
+                    assert!(request.len() < 8192);
+                }
+                let _ = socket.write_all(&response);
+            }
+        });
+        (url, task)
+    }
     fn test_artifact(url: String, bytes: &[u8]) -> Artifact {
         Artifact {
             path: "fixture.bin".into(),
@@ -5965,6 +6000,18 @@ mod tests {
         task.join().unwrap();
         assert_eq!(fs::read(dest).unwrap(), b"hello");
         assert_eq!(i.snapshot().received_bytes, 5);
+    }
+    #[test]
+    fn transient_download_failure_is_retried_before_failing() {
+        let (_temp, i) = fixture();
+        let (url, task) = server_sequence(vec![
+            b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\nConnection: close\r\n\r\nhe".to_vec(),
+            b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\nConnection: close\r\n\r\nhello".to_vec(),
+        ]);
+        let a = test_artifact(url, b"hello");
+        i.download(&a).unwrap();
+        task.join().unwrap();
+        assert_eq!(fs::read(i.cache().join(&a.sha256)).unwrap(), b"hello");
     }
     #[test]
     fn wrong_digest_never_becomes_a_completed_cache_file() {
