@@ -649,6 +649,7 @@ struct Inner {
     model: ModelManifest,
     runtime: RuntimeManifest,
     state: Mutex<InstallationSnapshot>,
+    verified: Mutex<Option<ReadyPaths>>,
     active: AtomicBool,
     cancelled: AtomicBool,
     aborted: AtomicBool,
@@ -973,8 +974,20 @@ fn prepared_cache_ready(dir: &Path) -> Result<(), String> {
 /// Deterministic inventory of the prepared cache: recursive files, no symlinks,
 /// forward-slash relative paths, sorted for a stable digest.
 fn prepared_cache_inventory(dir: &Path) -> Result<Vec<PreparedFileRecord>, String> {
+    prepared_cache_inventory_inner(dir, true)
+}
+
+/// Inventory without reading file contents; used by the per-send readiness check.
+fn prepared_cache_inventory_fast(dir: &Path) -> Result<Vec<PreparedFileRecord>, String> {
+    prepared_cache_inventory_inner(dir, false)
+}
+
+fn prepared_cache_inventory_inner(
+    dir: &Path,
+    hash: bool,
+) -> Result<Vec<PreparedFileRecord>, String> {
     let mut files = Vec::new();
-    prepared_inventory_walk(dir, dir, &mut files)?;
+    prepared_inventory_walk(dir, dir, &mut files, hash)?;
     files.sort_by(|left, right| left.path.cmp(&right.path));
     if files.is_empty() {
         return Err("量化缓存为空；请重新安装该型号以重建量化缓存。".into());
@@ -985,6 +998,7 @@ fn prepared_inventory_walk(
     root: &Path,
     path: &Path,
     out: &mut Vec<PreparedFileRecord>,
+    hash: bool,
 ) -> Result<(), String> {
     for entry in fs::read_dir(path).map_err(err)? {
         let entry = entry.map_err(err)?;
@@ -994,11 +1008,13 @@ fn prepared_inventory_walk(
             return Err("量化缓存包含符号链接；请重新安装该型号。".into());
         }
         if metadata.is_dir() {
-            prepared_inventory_walk(root, &path, out)?;
+            prepared_inventory_walk(root, &path, out, hash)?;
         } else if metadata.is_file() {
-            let mut file = File::open(&path).map_err(err)?;
             let mut digest = Sha256::new();
-            std::io::copy(&mut file, &mut digest).map_err(err)?;
+            if hash {
+                let mut file = File::open(&path).map_err(err)?;
+                std::io::copy(&mut file, &mut digest).map_err(err)?;
+            }
             out.push(PreparedFileRecord {
                 path: path
                     .strip_prefix(root)
@@ -1088,6 +1104,39 @@ fn prepared_cache_matches(
         .as_deref()
         .ok_or("就绪记录缺少量化缓存摘要；请重新安装所选型号以重建量化缓存。")?;
     if recorded_digest != digest || record.prepared_files != files {
+        return Err("量化缓存内容与安装记录不符；请重新安装所选型号以重建量化缓存。".into());
+    }
+    Ok(())
+}
+
+/// Size-only variant of `prepared_cache_matches` for the per-send readiness check.
+fn prepared_cache_matches_fast(
+    data: &Path,
+    model_snapshot_id: &str,
+    profile: InstallProfile,
+    record: &ReadyRecord,
+) -> Result<(), String> {
+    if !profile.prepare_with_model {
+        return Ok(());
+    }
+    let expected = prepared_cache_dir(data, model_snapshot_id);
+    let recorded = record
+        .prepared_dir
+        .as_deref()
+        .ok_or("就绪记录缺少量化缓存路径；请重新安装。")?;
+    if Path::new(recorded) != expected {
+        return Err("量化缓存路径与固定安装布局不符；请重新安装。".into());
+    }
+    prepared_cache_ready(&expected)?;
+    let files = prepared_cache_inventory_fast(&expected)?;
+    let same = files.len() == record.prepared_files.len()
+        && files
+            .iter()
+            .zip(&record.prepared_files)
+            .all(|(actual, expected)| {
+                actual.path == expected.path && actual.bytes == expected.bytes
+            });
+    if !same {
         return Err("量化缓存内容与安装记录不符；请重新安装所选型号以重建量化缓存。".into());
     }
     Ok(())
@@ -1873,6 +1922,9 @@ impl Installation {
                 model,
                 runtime,
                 state: Mutex::new(state),
+                // Verification reads every installed byte; cache the result so a send does not
+                // re-hash tens of gigabytes. Cleared when a new install starts.
+                verified: Mutex::new(None),
                 active: AtomicBool::new(false),
                 cancelled: AtomicBool::new(false),
                 aborted: AtomicBool::new(false),
@@ -1903,6 +1955,12 @@ impl Installation {
         }
         self.inner.cancelled.store(false, Ordering::SeqCst);
         self.inner.aborted.store(false, Ordering::SeqCst);
+        // A fresh install invalidates the cached verification of the previous bytes.
+        *self
+            .inner
+            .verified
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner()) = None;
         self.update(|s| {
             s.phase = "preparing".into();
             s.error = None;
@@ -1937,7 +1995,23 @@ impl Installation {
         if self.inner.active.load(Ordering::SeqCst) {
             return Err("安装尚未完成。".into());
         }
-        let result = self.verify_ready();
+        if let Some(cached) = self
+            .inner
+            .verified
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .clone()
+        {
+            return Ok(cached);
+        }
+        let result = self.verify_ready_fast();
+        if let Ok(paths) = &result {
+            *self
+                .inner
+                .verified
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner()) = Some(paths.clone());
+        }
         if let Err(message) = &result {
             self.update(|s| {
                 s.phase = "unavailable".into();
@@ -2080,6 +2154,14 @@ impl Installation {
         }
     }
     fn verify_ready(&self) -> Result<ReadyPaths, String> {
+        self.verify_ready_inner(true)
+    }
+    /// Cheap readiness check for the send path: existence and size only.
+    fn verify_ready_fast(&self) -> Result<ReadyPaths, String> {
+        self.verify_ready_inner(false)
+    }
+    fn verify_ready_inner(&self, deep: bool) -> Result<ReadyPaths, String> {
+        eprintln!("[verify] begin");
         let record: ReadyRecord = serde_json::from_slice(
             &fs::read(
                 self.inner
@@ -2103,15 +2185,32 @@ impl Installation {
         ) {
             return Err("安装身份已变化，请重新安装。".into());
         }
-        prepared_cache_matches(
-            &self.inner.paths.data,
-            &self.inner.model.id,
-            self.inner.profile,
-            &record,
-        )?;
-        for file in self.inner.model.installed_files() {
-            verify(&self.model_dir().join(&file.path), file.bytes, &file.sha256)?;
+        if deep {
+            prepared_cache_matches(
+                &self.inner.paths.data,
+                &self.inner.model.id,
+                self.inner.profile,
+                &record,
+            )?;
+        } else {
+            eprintln!("[verify] identity ok");
+            prepared_cache_matches_fast(
+                &self.inner.paths.data,
+                &self.inner.model.id,
+                self.inner.profile,
+                &record,
+            )?;
         }
+        eprintln!("[verify] prepared ok");
+        for file in self.inner.model.installed_files() {
+            check_installed(
+                &self.model_dir().join(&file.path),
+                file.bytes,
+                &file.sha256,
+                deep,
+            )?;
+        }
+        eprintln!("[verify] model ok");
         if record.runtime_files.is_empty()
             || record.probe["device"] != self.inner.profile.probe_device
         {
@@ -2120,9 +2219,10 @@ impl Installation {
         for f in record.runtime_files {
             inventory_metadata_matches(&self.runtime_dir(), &f)?;
             if f.link_target.is_none() {
-                verify(&self.runtime_dir().join(f.path), f.bytes, &f.sha256)?;
+                check_installed(&self.runtime_dir().join(f.path), f.bytes, &f.sha256, deep)?;
             }
         }
+        eprintln!("[verify] runtime ok");
         let license_root = license_root(&self.inner.paths.data, self.inner.profile);
         for license in license_records(self.inner.profile) {
             verify(
@@ -2325,6 +2425,9 @@ impl Installation {
                 .join(self.inner.profile.ready_relative),
             &record,
         )?;
+        // Verify the installed bytes once, while the install is still marked active; the send
+        // path only re-checks existence and sizes afterwards.
+        self.verify_ready()?;
         let _ = fs::remove_file(
             self.inner
                 .paths
@@ -3798,6 +3901,17 @@ fn valid_range(value: Option<&str>, offset: u64, total: u64, length: u64) -> boo
     length > 0
         && offset < total
         && value.is_some_and(|s| s == format!("bytes {offset}-{}/{total}", offset + length - 1))
+}
+fn check_installed(path: &Path, bytes: u64, sha256: &str, deep: bool) -> Result<(), String> {
+    if deep {
+        return verify(path, bytes, sha256);
+    }
+    let metadata = fs::metadata(path)
+        .map_err(|error| format!("安装文件不可读：{}：{error}", path.display()))?;
+    if metadata.len() != bytes {
+        return Err(format!("安装文件大小异常：{}", path.display()));
+    }
+    Ok(())
 }
 fn verify(path: &Path, bytes: u64, sha: &str) -> Result<(), String> {
     let metadata =

@@ -1424,8 +1424,20 @@ impl StudioService {
         }))
     }
     fn run_turn_preflight(self: Arc<Self>, turn: TurnRecord) {
-        if let Err(error) = self.prepare_turn(&turn) {
-            let _ = self.with_library(|library| library.reject_turn(&turn.id, &error));
+        // Stage traces: these are the only way to tell a stranded preflight from a slow one on
+        // a GUI process, whose stderr is not otherwise visible.
+        let started = std::time::Instant::now();
+        eprintln!("[preflight] start {}", turn.id);
+        match self.prepare_turn(&turn) {
+            Ok(()) => eprintln!("[preflight] done {} in {:?}", turn.id, started.elapsed()),
+            Err(error) => {
+                eprintln!(
+                    "[preflight] failed {} after {:?}: {error}",
+                    turn.id,
+                    started.elapsed()
+                );
+                let _ = self.with_library(|library| library.reject_turn(&turn.id, &error));
+            }
         }
     }
     fn prepare_turn(&self, turn: &TurnRecord) -> Result<(), String> {
@@ -1456,6 +1468,7 @@ impl StudioService {
             .and_then(|catalog| catalog.model_facts(&turn.model_id, &self.device_facts))
             .and_then(|facts| facts.tier.id)
             .is_some_and(|id| id == "compact");
+        eprintln!("[preflight] gate ok {}", turn.id);
         let (width, height) = compact_aspect_size(&turn.aspect, compact_tier)?;
         let seed = if turn.seed.is_empty() {
             None
@@ -1466,9 +1479,14 @@ impl StudioService {
                     .map_err(|_| "种子须为 0–4294967295".to_string())?,
             )
         };
+        eprintln!("[preflight] geometry ok {} {width}x{height}", turn.id);
         let installation = self.installation.as_ref().ok_or("安装器不可用")?;
+        eprintln!("[preflight] ready paths begin {}", turn.id);
         let ready = installation.ready_paths(&turn.model_id)?;
+        eprintln!("[preflight] ready paths end {}", turn.id);
+        eprintln!("[preflight] environment begin {}", turn.id);
         let environment = installation.plan_environment(&turn.model_id)?;
+        eprintln!("[preflight] environment end {}", turn.id);
         {
             let current = self.with_library(|library| library.turn(&turn.id))?;
             if current.status == TurnStatus::CancelRequested {
@@ -1479,6 +1497,7 @@ impl StudioService {
                 return Ok(());
             }
         }
+        eprintln!("[preflight] freeze start {}", turn.id);
         let random = Uuid::new_v4();
         let bytes = random.as_bytes();
         let random_seed = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
@@ -1761,12 +1780,15 @@ impl StudioService {
             .map_err(|error| error.to_string())?;
             (frozen.request, frozen.plan)
         };
+        eprintln!("[preflight] frozen {}", turn.id);
         let _schedule = self
             .scheduling
             .lock()
             .map_err(|_| "提交锁异常".to_string())?;
+        eprintln!("[preflight] scheduling lock {}", turn.id);
         let binding =
             self.with_library(|library| library.bind_turn_job(&turn.id, request, plan))?;
+        eprintln!("[preflight] bound {}", turn.id);
         if binding.job.state == studio_core::generation::AttemptState::CancelRequested {
             let cancelled = self.with_library(|library| {
                 library.finish_after_reap(
