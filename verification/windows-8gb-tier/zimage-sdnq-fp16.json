@@ -1,0 +1,13 @@
+{
+  "status": "non_finite",
+  "weights_dtype": "uint4",
+  "dequantize_fp32": true,
+  "steps": 2,
+  "size": 512,
+  "elapsed_seconds": 312.14,
+  "cuda_reserved_peak_gib": 4.385,
+  "image_finite": false,
+  "image_min": NaN,
+  "image_max": NaN,
+  "image_mean": NaN
+}
