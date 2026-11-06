@@ -485,7 +485,8 @@ impl StudioService {
         #[cfg(windows)]
         return self.model_view_for(WINDOWS_ZIMAGE_INSTALL_ID);
         #[cfg(not(windows))]
-        self.model_view_for(INSTALL_ID)    }
+        self.model_view_for(INSTALL_ID)
+    }
     pub fn model_views(&self) -> Vec<Value> {
         #[cfg(windows)]
         {

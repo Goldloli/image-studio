@@ -386,10 +386,11 @@ fn project_entry(
 ) -> Value {
     // Match by install id only: an installer phase this projection has not seen yet must surface
     // as itself, never collapse into "not installed" while the install is actually running.
-    let installed = entry
-        .install_id
-        .as_ref()
-        .and_then(|id| installations.iter().find(|snapshot| snapshot.install_id == *id));
+    let installed = entry.install_id.as_ref().and_then(|id| {
+        installations
+            .iter()
+            .find(|snapshot| snapshot.install_id == *id)
+    });
     let busy = installed.is_some_and(|snapshot| {
         matches!(
             snapshot.phase.as_str(),
@@ -582,11 +583,14 @@ mod tests {
         let query = catalog
             .query(&[z_snapshot("preparing_model")], None, &target_device())
             .unwrap();
-        let entry = entry(&query, if cfg!(windows) {
-            "z-image-turbo-diffusers-cuda-nf4-v1"
-        } else {
-            "z-image-turbo-mflux-v1"
-        });
+        let entry = entry(
+            &query,
+            if cfg!(windows) {
+                "z-image-turbo-diffusers-cuda-nf4-v1"
+            } else {
+                "z-image-turbo-mflux-v1"
+            },
+        );
         assert_eq!(entry["installPhase"], "preparing_model");
         assert_eq!(entry["busy"], true);
         assert_eq!(entry["executable"], false);
