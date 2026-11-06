@@ -3121,26 +3121,42 @@ impl Installation {
             .map_err(err)?;
         let mut last = String::new();
         let mut attempts_used = 0;
+        let mut digest_failure: Option<String> = None;
+        let mut digest_retried = false;
         for attempt in 1..=ATTEMPTS {
             attempts_used = attempt;
             match runtime.block_on(self.download_async(a)) {
                 Ok(()) => return Ok(()),
                 Err(error) => {
-                    // Digest mismatches and explicit cancellation are not transport hiccups:
-                    // repeating the attempt wastes the budget, so surface them immediately.
-                    let retryable = !error.contains("SHA-256")
-                        && !error.contains("安装已取消")
-                        && !error.contains("本次安装已停止");
-                    last = error;
-                    if !retryable || attempt == ATTEMPTS {
+                    let cancelled =
+                        error.contains("安装已取消") || error.contains("本次安装已停止");
+                    if error.contains("SHA-256") {
+                        // The bad part was removed, so one fresh attempt is worth it before
+                        // concluding that the upstream bytes really differ from the manifest.
+                        if digest_retried {
+                            last = digest_failure.clone().unwrap_or(error);
+                            break;
+                        }
+                        digest_failure = Some(error.clone());
+                        digest_retried = true;
+                    }
+                    if cancelled || attempt == ATTEMPTS {
+                        last = error;
                         break;
                     }
+                    last = error;
                     self.sleep_cancellable(Duration::from_secs(u64::from(attempt)))?;
                 }
             }
         }
+        let detail = match digest_failure {
+            Some(digest) if !last.contains("SHA-256") => {
+                format!("{digest}\n后续重试未取得有效文件：{last}")
+            }
+            _ => last,
+        };
         Err(format!(
-            "下载失败（已尝试 {attempts_used} 次）：{last}\n文件：{}\n可检查网络后重试安装；已下载的分片会继续使用。",
+            "下载失败（已尝试 {attempts_used} 次）：{detail}\n文件：{}\n可检查网络后重试安装；已下载的分片会继续使用。",
             a.url
         ))
     }
@@ -3274,7 +3290,13 @@ impl Installation {
         }
         file.sync_all().map_err(err)?;
         drop(file);
-        verify(&part, a.bytes, &a.sha256)?;
+        if let Err(error) = verify(&part, a.bytes, &a.sha256) {
+            // A bad part must never poison later attempts: drop it and its resume metadata so a
+            // retry downloads the bytes again instead of resuming on top of them.
+            let _ = fs::remove_file(&part);
+            let _ = fs::remove_file(&meta);
+            return Err(error);
+        }
         fs::rename(&part, &final_path).map_err(err)?;
         fs::remove_file(&meta).ok();
         Ok(())
@@ -3891,7 +3913,7 @@ fn verify(path: &Path, bytes: u64, sha: &str) -> Result<(), String> {
     }
     if format!("{:x}", digest.finalize()) != sha {
         return Err(format!(
-            "SHA-256 校验失败：{}；请继续以修复。",
+            "SHA-256 校验失败：{}；请重试安装以重新下载该文件。",
             path.display()
         ));
     }
