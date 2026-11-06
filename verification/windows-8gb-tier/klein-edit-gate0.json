@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "kind": "windows-diffusers-worker-real-protocol",
+  "status": "passed",
+  "protocol_version": 2,
+  "mode": "run",
+  "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+  "identity": {
+    "build_id": "studio-diffusers-worker-windows-0.1.0",
+    "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+    "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294"
+  },
+  "capability": "image.edit.flux2-klein-4b.windows-v1",
+  "request": {
+    "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+    "seed": 3148150817,
+    "steps": 4,
+    "model_path": "klein",
+    "output_dir": "klein-edit",
+    "prepared_dir": "D:\\ist-8gb\\models\\klein.prepared",
+    "inputs": [
+      {
+        "role": "source",
+        "width": 220,
+        "height": 220,
+        "sha256": "fd547d5c5c21986f13c1922cbdfdb8a5bbf64a314da5d357486ddd15d944bc01"
+      }
+    ]
+  },
+  "handshake": {
+    "type": "hello_accepted",
+    "versions": {
+      "min": 2,
+      "max": 2
+    },
+    "selected_version": 2,
+    "identity": {
+      "build_id": "studio-diffusers-worker-windows-0.1.0",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294"
+    },
+    "capabilities": [
+      "image.text-to-image.flux2-klein-4b.windows-v1",
+      "image.edit.flux2-klein-4b.windows-v1"
+    ]
+  },
+  "progress": [
+    {
+      "type": "progress",
+      "stage": "loading",
+      "completed": null,
+      "total": null
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 0,
+      "total": 4
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 1,
+      "total": 4
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 2,
+      "total": 4
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 3,
+      "total": 4
+    },
+    {
+      "type": "progress",
+      "stage": "sampling",
+      "completed": 4,
+      "total": 4
+    },
+    {
+      "type": "progress",
+      "stage": "writing",
+      "completed": null,
+      "total": null
+    }
+  ],
+  "terminal": {
+    "type": "output_candidate_v2",
+    "candidate": {
+      "role": "primary",
+      "data_type": "image_rgb",
+      "relative_path": "primary.png",
+      "width": 768,
+      "height": 768,
+      "size_bytes": 1171922,
+      "sha256": "d314af72ef42ca683294b5a919ec1cdda9f1d6bfc317710b5a019f31f082af73"
+    }
+  },
+  "worker_exit_code": 0,
+  "elapsed_seconds": 176.98,
+  "host_sampled_resources": {
+    "process_tree_private_commit_peak_gib": 14.953,
+    "system_available_ram_min_gib": 15.503,
+    "nvidia_used_peak_mib": 6680,
+    "sample_interval_seconds": 0.5
+  },
+  "worker_reported_resources": {
+    "elapsed_seconds": 166.05,
+    "process_private_commit_peak_gib": 14.952,
+    "system_available_ram_min_gib": 15.475,
+    "system_physical_total_gib": 31.909,
+    "sample_interval_seconds": 0.2,
+    "sample_count": 807,
+    "cuda_reserved_peak_gib": 5.623,
+    "cuda_allocated_peak_gib": 4.449
+  },
+  "worker_stderr": "worker request validated\r\nklein device=NVIDIA GeForce RTX 2060 SUPER cc=7.5 resolution=768\r\nD:\\ist-8gb\\venv\\Lib\\site-packages\\diffusers\\utils\\deprecation_utils.py:23: FutureWarning: `torch_dtype` is deprecated and will be removed in version 1.0.0. Please use `dtype` instead.\r\n  deprecate(\"torch_dtype\", \"1.0.0\", _TORCH_DTYPE_DEPRECATION_MESSAGE)\r\n\rLoading pipeline components...:   0%|          | 0/5 [00:00<?, ?it/s]\r\n\rLoading weights:   0%|          | 0/398 [00:00<?, ?it/s]\u001b[A\r\n\rLoading weights:   0%|          | 1/398 [00:28<3:05:47, 28.08s/it]\u001b[A\r\n\rLoading weights:   1%|          | 3/398 [00:35<1:05:59, 10.02s/it]\u001b[A\r\n\rLoading weights:   7%|��         | 26/398 [00:35<04:44,  1.31it/s] \u001b[A\r\n\rLoading weights:  13%|����        | 52/398 [00:35<01:47,  3.23it/s]\u001b[A\r\n\rLoading weights:  20%|����        | 80/398 [00:35<00:51,  6.14it/s]\u001b[A\r\n\rLoading weights:  40%|��������      | 158/398 [00:35<00:13, 17.60it/s]\u001b[A\r\n\rLoading weights:  51%|����������     | 201/398 [00:42<00:18, 10.92it/s]\u001b[A\r\n\rLoading weights:  58%|������������    | 230/398 [00:46<00:17,  9.81it/s]\u001b[A\r\n\rLoading weights:  63%|��������������   | 250/398 [00:50<00:17,  8.51it/s]\u001b[A\r\n\rLoading weights:  66%|��������������   | 264/398 [00:52<00:16,  8.34it/s]\u001b[A\r\n\rLoading weights:  69%|��������������   | 274/398 [00:53<00:16,  7.71it/s]\u001b[A\r\n\rLoading weights:  71%|��������������   | 281/398 [00:55<00:17,  6.80it/s]\u001b[A\r\n\rLoading weights:  73%|����������������  | 289/398 [00:57<00:17,  6.24it/s]\u001b[A\r\n\rLoading weights:  75%|����������������  | 298/398 [00:57<00:13,  7.69it/s]\u001b[A\r\n\rLoading weights:  76%|����������������  | 302/398 [00:59<00:15,  6.16it/s]\u001b[A\r\n\rLoading weights:  78%|����������������  | 311/398 [01:01<00:14,  5.86it/s]\u001b[A\r\n\rLoading weights:  81%|����������������  | 322/398 [01:02<00:12,  5.97it/s]\u001b[A\r\n\rLoading weights:  83%|������������������ | 331/398 [01:03<00:08,  7.90it/s]\u001b[A\r\n\rLoading weights:  84%|������������������ | 334/398 [01:04<00:11,  5.57it/s]\u001b[A\r\n\rLoading weights:  86%|������������������ | 344/398 [01:06<00:09,  5.58it/s]\u001b[A\r\n\rLoading weights:  89%|������������������ | 355/398 [01:08<00:07,  5.79it/s]\u001b[A\r\n\rLoading weights:  91%|��������������������| 364/398 [01:08<00:04,  7.79it/s]\u001b[A\r\n\rLoading weights:  92%|��������������������| 367/398 [01:10<00:05,  5.50it/s]\u001b[A\r\n\rLoading weights:  95%|��������������������| 377/398 [01:12<00:03,  5.53it/s]\u001b[A\r\n\rLoading weights:  97%|��������������������| 388/398 [01:13<00:01,  5.68it/s]\u001b[A\rLoading weights: 100%|��������������������| 398/398 [01:13<00:00,  5.38it/s]\r\n\rLoading pipeline components...:  20%|����        | 1/5 [01:15<05:01, 75.28s/it]\rLoading pipeline components...:  40%|��������      | 2/5 [02:26<03:39, 73.18s/it]The config attributes {'force_upcast': True} were passed to AutoencoderKLFlux2, but are not expected and will be ignored. Please verify your config.json configuration file.\r\n\rLoading pipeline components...:  60%|������������    | 3/5 [02:28<01:21, 40.54s/it]\rLoading pipeline components...: 100%|��������������������| 5/5 [02:29<00:00, 17.93s/it]\rLoading pipeline components...: 100%|��������������������| 5/5 [02:29<00:00, 29.98s/it]\r\nklein pipeline loaded (nf4 components, model cpu offload)\r\nklein load_seconds=155.40 cuda_reserved_peak_gib=5.623\r\nklein instruction_tokens=19 token_budget=512\r\nklein generation_seconds=10.30 kind=edit cuda_reserved_peak_gib=2.922\r\nklein resources={\"elapsed_seconds\": 166.05, \"process_private_commit_peak_gib\": 14.952, \"system_available_ram_min_gib\": 15.475, \"system_physical_total_gib\": 31.909, \"sample_interval_seconds\": 0.2, \"sample_count\": 807, \"cuda_reserved_peak_gib\": 5.623, \"cuda_allocated_peak_gib\": 4.449}\r\n",
+  "output_image": "D:\\ist-8gb\\evidence\\klein-edit\\primary.png"
+}

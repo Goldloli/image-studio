@@ -42,6 +42,16 @@ MOSS-Image-SFT 与 FLUX.2 Klein 4B 均可在 8 GB 显卡上以紧凑档运行（
 时自动降级，并在模型页标注「紧凑档 768×768」。Z-Image Turbo 因模型在无 BF16 的 Turing 架构上
 存在 fp16 溢出，仍要求 12 GB 显存。
 
+**性能参考（RTX 2060 SUPER 8 GB，紧凑档 768×768）**：每个任务都会新起 worker，总耗时包含组件加载。
+
+| 模型 | 步数 | 总耗时 | 其中采样 |
+|---|---|---|---|
+| Qwen-Image 2.1 Turbo | 8 | 84.5 s | 66.3 s |
+| Qwen-Image 2.1 | 40 | 391.3 s | 358.1 s |
+| MOSS-Image-SFT | 50 | 752.1 s | 733.8 s |
+| FLUX.2 Klein 4B 文生图 | 4 | 145.6 s | 9.8 s |
+| FLUX.2 Klein 4B 编辑 | 4 | 166.1 s | 10.3 s |
+
 验证环境与完整证据：Windows 11 / i9-9900K / **RTX 2060 SUPER 8 GB (sm75)** / 31.9 GiB RAM，
 见 [`doc/15-windows-8gb-tier.md`](doc/15-windows-8gb-tier.md)、
 [`doc/16-zimage-quantization-investigation.md`](doc/16-zimage-quantization-investigation.md) 与
