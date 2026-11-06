@@ -44,7 +44,8 @@ A turn was cancelled during sampling by clicking the composer stop control:
 ## Install projection
 
 Unit test covers the phase that used to fall through: an installer snapshot with
-`preparing_model` now projects as that phase with `busy = true` instead of `not_installed`
+`preparing_model` now projects as that phase with `busy = true` instead of 
+ot_installed`
 (`catalog::tests::unknown_installer_phase_never_projects_as_not_installed`).
 
 ## Download retry
@@ -54,9 +55,38 @@ returns it; the artifact download retries and completes
 (`installation::tests::transient_download_failure_is_retried_before_failing`). Digest mismatches,
 explicit cancellation and an aborted install are not retried.
 
+## Sequential sends
+
+Five sends issued one after another, each waiting for the image:
+
+| Send | Preflight | Wall clock |
+|---|---|---|
+| 1 | 4.48 s (cold) | 115.2 s |
+| 2 | 0.10 s | 110.7 s |
+| 3 | 0.12 s | 110.3 s |
+| 4 | 0.11 s | 105.8 s |
+| 5 | 0.14 s | 105.5 s |
+
+Every send reached `图片已生成`; none stalled, none was rejected for a busy controller.
+
+## Console window on every generation
+
+Observed live: generations created new `conhost` / `OpenConsole` / `WindowsTerminal` processes
+(child processes were spawned without `CREATE_NO_WINDOW`). After the fix, a generation runs
+`inference-supervisor` and `python` with **no window handle** (`MainWindowHandle = 0`, empty
+title) and still produces the image. Screenshot: 
+o-console-generation.png`.
+
+## Live install (BiRefNet, 972 MB model + shared runtime)
+
+The row moved through the phases the page now projects:
+
+- `正在下载` captured while bytes were arriving (`install-downloading.png`)
+- backend phases observed: `downloading` → `verifying` → `probing` → `ready`
+- finished `当前可执行` (`install-ready.png`)
+
 ## Not yet verified on this machine
 
-- A full install from scratch to watch the phase labels live (the unit test covers the mapping).
-- A forced network failure during a real install (the retry path is covered by the test only).
-- Twenty consecutive sends (four were measured; the loop used for the test had a broken polling
-  predicate).
+- A forced network failure during a real install: the retry path is covered by the unit test, the
+  real download did not need a retry.
+- Cancel timing for MOSS and Klein (only Qwen-Image 2.1 Turbo was measured).
