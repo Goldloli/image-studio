@@ -30,7 +30,7 @@
 - [x] 2.7 960×640 截图回归通过（导航/输入/发送/模型芯片均可见）；150%/200% DPI 未逐档截图。
 - [x] 2.8 IME 行为由 `shouldSendOnEnter` 单测覆盖（`isComposing` / `compositionEndedAt`）；未做真实输入法手工验证。
 - [x] 2.9 原生导出对话框自动化：`cdp.mjs dialog` 填写保存框，导出文件与资产逐字节一致。
-- [~] 2.10 磁盘不足：决策函数 `installation_space_available` 已有单测（同卷重复计数、分卷各自校验）；真实写满磁盘仍需小容量卷。
+- [x] 2.10 磁盘不足：Windows 目标机（RTX 3080 Ti）已实测——27.74 GiB 可用空间对 88.99 GiB 预算，约 4 s 内报 `磁盘空间不足`、不写缓存、不留安装记录，重试复现（`verification/windows-gate0/README.md`）；本轮另加决策函数单测（同卷重复计数、分卷各自校验）。
 - [x] 2.11 非 ASCII/长路径实测通过（`D:\ist-8gb\数据 测试\appdata`）：安装、导入、4× 放大全通；过程中修掉了 ncnn 日志非 UTF-8 导致的探针失败。
 
 ## P3 登记项（无需实现）
