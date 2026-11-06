@@ -1,0 +1,37 @@
+{
+  "blocks": 30,
+  "events": 30,
+  "first_non_finite": {
+    "index": 0,
+    "finite": false,
+    "abs_max": 1000000000.0
+  },
+  "block0_input": [
+    {
+      "finite": false,
+      "abs_max": 1000000000.0
+    }
+  ],
+  "sample": [
+    {
+      "index": 0,
+      "finite": false,
+      "abs_max": 1000000000.0
+    },
+    {
+      "index": 1,
+      "finite": false,
+      "abs_max": 1000000000.0
+    },
+    {
+      "index": 2,
+      "finite": false,
+      "abs_max": 1000000000.0
+    },
+    {
+      "index": 3,
+      "finite": false,
+      "abs_max": 1000000000.0
+    }
+  ]
+}
