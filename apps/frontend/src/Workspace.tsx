@@ -62,6 +62,7 @@ import {
   isPrimaryActivation,
   mergeTurns,
   progressForTurn,
+  cancelLabel,
   shouldSendOnEnter,
   supportedDraftParams,
 } from './conversation-state';
@@ -214,6 +215,18 @@ function TurnCard({
   const [detailsError, setDetailsError] = useState('');
   const [showMask, setShowMask] = useState(false);
   const progress = progressForTurn(turn, execution, imageReady);
+  const [cancelSeconds, setCancelSeconds] = useState(0);
+  useEffect(() => {
+    if (turn.state !== 'CancelRequested') {
+      setCancelSeconds(0);
+      return;
+    }
+    const since = Date.now();
+    setCancelSeconds(0);
+    const timer = window.setInterval(() => setCancelSeconds(Math.floor((Date.now() - since) / 1000)), 1000);
+    return () => window.clearInterval(timer);
+  }, [turn.state]);
+  const progressLabel = turn.state === 'CancelRequested' ? cancelLabel(progress.label, cancelSeconds) : progress.label;
   const active = activeStates.includes(turn.state);
   const displayedAssetId = showMask ? turn.maskAssetId : turn.assetId;
   const displayedAvailable = showMask ? turn.maskAssetAvailable : turn.assetAvailable;
@@ -242,7 +255,7 @@ function TurnCard({
           {turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) ? <><ImageIcon size={25}/><strong>任务已完成，图片无法显示</strong><span>{displayedError || 'PNG 可能已被移动、改写或无法解码。'}</span></> : active || turn.state === 'Succeeded' ? <><LoaderCircle size={25} className="spin"/><strong>{progress.label}</strong><span>{turn.state === 'Succeeded' ? '正在解码并校验 PNG' : '生成结果会在此处原位出现'}</span></> : <>{turn.state === 'Rejected' ? <X size={24}/> : <ImageIcon size={25}/>}<strong>{stateLabel(turn.state)}</strong><span>{turn.error || (turn.state === 'Cancelled' ? '本次生成已取消' : '本次执行没有可显示结果')}</span></>}
         </div>}
         {(active || turn.state === 'CancelRequested' || turn.state === 'Succeeded') && <div className="image-card-progress">
-          <div className="progress-copy" role="status"><span>{progress.label}</span>{progress.percent !== null && <strong>{progress.percent}%</strong>}</div>
+          <div className="progress-copy" role="status"><span>{progressLabel}</span>{progress.percent !== null && <strong>{progress.percent}%</strong>}</div>
           <div className={`progress-track ${progress.percent === null || turn.state === 'Succeeded' && !imageReady ? 'is-indeterminate' : ''}`}><span style={{ width: `${progress.percent ?? 40}%` }}/></div>
         </div>}
         </div>

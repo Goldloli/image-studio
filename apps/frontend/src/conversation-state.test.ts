@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  cancelLabel,
   claimOneShotNonce,
   composerActionFor,
   createSubmissionGate,
@@ -129,5 +130,13 @@ describe('one-shot navigation intents', () => {
     expect(claimOneShotNonce(100, first.processed)).toEqual({ claimed: false, processed: 100 });
     expect(claimOneShotNonce(101, first.processed)).toEqual({ claimed: true, processed: 101 });
     expect(claimOneShotNonce(null, 101)).toEqual({ claimed: false, processed: 101 });
+  });
+});
+
+describe('cancelLabel', () => {
+  it('counts the wait and explains a long one', () => {
+    expect(cancelLabel('正在取消', 0)).toBe('正在取消');
+    expect(cancelLabel('正在取消', 5)).toBe('正在取消（已等待 5 秒）');
+    expect(cancelLabel('正在取消', 16)).toBe('正在取消（已等待 16 秒，进程可能仍在回收）');
   });
 });
