@@ -74,6 +74,40 @@ struct Inner {
     supervisor: PathBuf,
     state: Mutex<State>,
 }
+/// Available physical memory in GiB, for generation diagnostics.
+fn available_memory_gib() -> String {
+    #[cfg(windows)]
+    {
+        use std::mem::MaybeUninit;
+        #[repr(C)]
+        struct MemoryStatusEx {
+            length: u32,
+            memory_load: u32,
+            total_phys: u64,
+            avail_phys: u64,
+            total_page_file: u64,
+            avail_page_file: u64,
+            total_virtual: u64,
+            avail_virtual: u64,
+            avail_extended_virtual: u64,
+        }
+        unsafe extern "system" {
+            fn GlobalMemoryStatusEx(buffer: *mut MemoryStatusEx) -> i32;
+        }
+        let mut status = MaybeUninit::<MemoryStatusEx>::zeroed();
+        // SAFETY: writing the length field of a zeroed, correctly sized struct.
+        unsafe {
+            (*status.as_mut_ptr()).length = std::mem::size_of::<MemoryStatusEx>() as u32;
+        }
+        // SAFETY: the struct is initialised with the expected length before the call.
+        if unsafe { GlobalMemoryStatusEx(status.as_mut_ptr()) } != 0 {
+            // SAFETY: the call succeeded and filled the struct.
+            let status = unsafe { status.assume_init() };
+            return format!("{:.2}", status.avail_phys as f64 / 1024.0 / 1024.0 / 1024.0);
+        }
+    }
+    String::from("-")
+}
 #[derive(Clone)]
 pub struct GenerationController {
     inner: Arc<Inner>,
@@ -221,6 +255,14 @@ impl GenerationController {
         }
     }
     fn run(&self, job: JobRecord, ready: ReadyPaths) {
+        // Memory context helps explain an unexpected host exit during long generations.
+        super::logging::info(
+            "generation.start",
+            &[
+                ("job", job.job_id.to_string()),
+                ("available_gib", available_memory_gib()),
+            ],
+        );
         let result = self.prepare(&job, &ready);
         let (config, run_dir, control) = match result {
             Ok(value) => value,
