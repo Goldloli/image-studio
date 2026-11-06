@@ -75,3 +75,15 @@ A shard-streaming prepare that would fit 16 GiB machines is an explicit follow-u
 
 The exact commands and captured JSON for the reference run are in
 [`verification/windows-8gb-tier/README.md`](../verification/windows-8gb-tier/README.md).
+
+## Measured through the product UI (2026-11-06)
+
+| Capability | Wall clock | Notes |
+|---|---|---|
+| Qwen-Image 2.1 Turbo 文生图 | 101–116 s | 20 consecutive sends, log shows preflight 50 ms warm |
+| Qwen-Image 2.1 文生图 | ~14 min | 40 steps, measured while two other apps held CPU cores |
+| MOSS-Image-SFT 文生图 | ~18.5 min | 50 steps, same contention; isolated Gate 0 was 752 s |
+| FLUX.2 Klein 4B 文生图 | 177 s | 155 s of it is component load |
+| FLUX.2 Klein 4B 编辑 | 36 s | warm component load |
+| BiRefNet 去背景 | 12 s | RGBA + mask |
+| Real-ESRGAN 4× 放大 | 4 s | 220×220 → 880×880 |
