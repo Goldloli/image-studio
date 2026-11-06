@@ -88,3 +88,10 @@ per-volume split; the macOS acceptance run already recorded a full install-space
 **Forced reaping.** The cancel deadline predicate (`cancel_deadline_passed`) is extracted and unit
 tested (missing timestamp, fresh timestamp, exited child, overdue child). A full-process version
 still needs a Windows supervisor stub, because the existing generation fixture is Unix-only.
+
+How to close it: add a tiny `[[bin]] stub-supervisor` that ignores stdin and sleeps for a minute,
+point `GenerationController::new` at `env!("CARGO_BIN_EXE_stub-supervisor")` inside a Windows-only
+integration test, start the fixture job, cancel it, and assert the controller leaves `busy` within
+`cancel_grace_ms + cleanup deadline + slack` (~15 s) and that the child process is gone. The app
+already spawns the supervisor suspended inside a job object, so the kill path is the same one
+production uses.
