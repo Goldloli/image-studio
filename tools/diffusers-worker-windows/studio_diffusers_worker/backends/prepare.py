@@ -1,4 +1,4 @@
-"""Install-time prepared-cache builder for the staged Qwen/MOSS models.
+﻿"""Install-time prepared-cache builder for the staged Qwen/MOSS models.
 
 ``--prepare`` quantizes the fixed upstream snapshot once on the CPU and persists
 the NF4 components next to the installed snapshot
@@ -21,6 +21,7 @@ from __future__ import annotations
 import gc
 import hashlib
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -30,18 +31,27 @@ from ..resources import ResourceSampler
 
 
 def _inventory(path: Path) -> dict:
+    """Hash the prepared cache without loading whole files into memory.
+
+    The prepared safetensors files are multi-GiB; ``read_bytes()`` would add a
+    full copy of the file to the process commit and break the low-memory target.
+    """
     files = sorted(item for item in path.rglob("*") if item.is_file())
     inventory = []
     total = 0
     for item in files:
-        data = item.read_bytes()
-        digest = hashlib.sha256(data).hexdigest()
-        total += len(data)
+        digest = hashlib.sha256()
+        size = 0
+        with open(item, "rb") as handle:
+            for chunk in iter(lambda: handle.read(8 << 20), b""):
+                digest.update(chunk)
+                size += len(chunk)
+        total += size
         inventory.append(
             {
                 "relative_path": item.relative_to(path).as_posix(),
-                "bytes": len(data),
-                "sha256": digest,
+                "bytes": size,
+                "sha256": digest.hexdigest(),
             }
         )
     return {
@@ -59,7 +69,13 @@ def _component_ready(path: Path) -> bool:
 
 
 def _build_component(
-    label: str, target: Path, loader, sampler: ResourceSampler, reuse: bool
+    label: str,
+    target: Path,
+    loader,
+    sampler: ResourceSampler,
+    reuse: bool,
+    component: str | None = None,
+    source_dir: Path | None = None,
 ) -> dict:
     if reuse and _component_ready(target):
         print(f"[prepare] {label} reuse", file=sys.stderr, flush=True)
@@ -69,6 +85,28 @@ def _build_component(
     sampler.start()
     record = None
     try:
+        legacy = os.environ.get("STUDIO_PREPARE_LEGACY") == "1"
+        if not legacy and component is not None and source_dir is not None:
+            from .low_memory import prepare_component_low_memory
+
+            low = prepare_component_low_memory("staged", component, source_dir, target)
+            record = {
+                "status": low["status"],
+                "quantization": low["quantization"],
+                "mode": low["mode"],
+                "groups": low["groups"],
+                "quantized_tensors": low["quantized_tensors"],
+                "elapsed_seconds": low["elapsed_seconds"],
+                "peak_commit_mib": low.get("peak_commit_mib"),
+                **low["inventory"],
+            }
+            print(
+                f"[prepare] {label} low_memory groups={low['groups']} "
+                f"elapsed={low['elapsed_seconds']}s",
+                file=sys.stderr,
+                flush=True,
+            )
+            return record
         load_started = time.perf_counter()
         model = loader()
         load_seconds = time.perf_counter() - load_started
@@ -85,6 +123,7 @@ def _build_component(
         record = {
             "status": "prepared",
             "quantization": "nf4",
+            "mode": "legacy_full_component",
             "load_seconds": round(load_seconds, 2),
             "save_seconds": round(save_seconds, 2),
             **_inventory(target),
@@ -151,6 +190,8 @@ def prepare_qwen(model_dir: Path, prepared_dir: Path, reuse: bool) -> dict:
             text_encoder_loader,
             sampler,
             reuse,
+            component="qwen_text_encoder",
+            source_dir=model_dir / "text_encoder",
         ),
         "transformer": _build_component(
             "qwen transformer",
@@ -158,6 +199,8 @@ def prepare_qwen(model_dir: Path, prepared_dir: Path, reuse: bool) -> dict:
             transformer_loader,
             sampler,
             reuse,
+            component="qwen_transformer",
+            source_dir=model_dir / "transformer",
         ),
     }
     record["prepared_cache"] = _inventory(prepared_dir)
@@ -202,6 +245,8 @@ def prepare_moss(model_dir: Path, prepared_dir: Path, reuse: bool) -> dict:
             text_encoder_loader,
             sampler,
             reuse,
+            component="moss_text_encoder",
+            source_dir=model_dir / "text_encoder",
         ),
         "transformer": _build_component(
             "moss transformer",
@@ -209,6 +254,8 @@ def prepare_moss(model_dir: Path, prepared_dir: Path, reuse: bool) -> dict:
             transformer_loader,
             sampler,
             reuse,
+            component="moss_transformer",
+            source_dir=model_dir / "transformer",
         ),
     }
     record["prepared_cache"] = _inventory(prepared_dir)
@@ -267,3 +314,5 @@ def prepare_cache(
         result["traceback"] = traceback.format_exc()
         result["elapsed_seconds"] = round(time.monotonic() - started, 2)
         return result
+
+

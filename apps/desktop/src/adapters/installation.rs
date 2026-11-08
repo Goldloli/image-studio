@@ -1463,13 +1463,17 @@ fn native_runtime_platform() -> &'static str {
     }
 }
 
-/// Install-time prepare memory gate (design.md section 10.2 item 3). Gate 0 measured
-/// the staged Qwen text-encoder quantization transient at about 23.4 GiB of process
-/// commit while system available RAM dropped as low as 0.58 GiB, so the installer
-/// requires either enough available physical RAM or enough commit headroom before
-/// it starts `--prepare`; otherwise the install fails before any quantization work.
-const PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES: u64 = 28 * 1024 * 1024 * 1024;
-const PREPARE_MIN_COMMIT_HEADROOM_BYTES: u64 = 26 * 1024 * 1024 * 1024;
+/// Install-time prepare memory gate (design.md section 10.2 item 3; relaxed by
+/// `stream-prepare-low-memory`). The low-memory prepare path quantizes the staged
+/// components in short-lived child processes, so the installer only needs enough
+/// memory to keep the runtime and one quantize child alive. Measured on the
+/// 2026-11-08 target machine: the legacy full-component path peaked at 23.0 GiB
+/// commit, while the child-based path peaks well below 10 GiB; the frozen gate is
+/// "available physical RAM >= 8 GiB and commit headroom >= 6 GiB", which admits
+/// 16 GiB machines while still refusing genuinely exhausted machines before any
+/// quantization work.
+const PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES: u64 = 8 * 1024 * 1024 * 1024;
+const PREPARE_MIN_COMMIT_HEADROOM_BYTES: u64 = 6 * 1024 * 1024 * 1024;
 const GIB_BYTES: u64 = 1024 * 1024 * 1024;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -1492,7 +1496,7 @@ fn gib_ratio(bytes: u64) -> f64 {
 }
 fn prepare_memory_error(facts: MemoryFacts) -> String {
     format!(
-        "可用内存不足，未开始构建 Qwen/MOSS 量化缓存（未激活任何安装文件）。当前可用物理内存 {:.1} GiB（要求 ≥{} GiB）或可用提交余量 {:.1} GiB（要求 ≥{} GiB）；请关闭其它占用内存的程序、确认系统虚拟内存/提交上限充足后重试安装。",
+        "可用内存不足，未开始构建 Qwen/MOSS 量化缓存（未激活任何安装文件）。当前可用物理内存 {:.1} GiB（要求 ≥{} GiB）且可用提交余量 {:.1} GiB（要求 ≥{} GiB）；请关闭其它占用内存的程序后重试安装。",
         gib_ratio(facts.available_physical_bytes),
         PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES / GIB_BYTES,
         gib_ratio(facts.available_commit_bytes),
@@ -1502,7 +1506,7 @@ fn prepare_memory_error(facts: MemoryFacts) -> String {
 /// Pure decision over measured values, unit-tested at both boundaries.
 fn prepare_memory_preflight(facts: MemoryFacts) -> Result<(), String> {
     if facts.available_physical_bytes >= PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES
-        || facts.available_commit_bytes >= PREPARE_MIN_COMMIT_HEADROOM_BYTES
+        && facts.available_commit_bytes >= PREPARE_MIN_COMMIT_HEADROOM_BYTES
     {
         Ok(())
     } else {
@@ -5741,32 +5745,38 @@ mod tests {
     }
     #[test]
     fn prepare_memory_preflight_boundaries_and_actionable_message() {
-        assert!(prepare_memory_preflight(memory_facts(28, 0)).is_ok());
-        assert!(prepare_memory_preflight(memory_facts(0, 26)).is_ok());
-        assert!(prepare_memory_preflight(memory_facts(28, 26)).is_ok());
-        assert!(prepare_memory_preflight(memory_facts(31, 27)).is_ok());
-        let below = memory_facts(27, 25);
+        // The low-memory prepare path requires both minima: enough available
+        // physical RAM and enough commit headroom for one quantize child.
+        assert!(prepare_memory_preflight(memory_facts(8, 6)).is_ok());
+        assert!(prepare_memory_preflight(memory_facts(12, 8)).is_ok());
+        assert!(prepare_memory_preflight(memory_facts(22, 24)).is_ok());
+        let below = memory_facts(7, 5);
         let error = prepare_memory_preflight(below).unwrap_err();
         assert!(error.contains("内存不足"), "{error}");
         assert!(error.contains("未开始构建"), "{error}");
         assert!(error.contains("未激活"), "{error}");
-        assert!(error.contains("27.0 GiB"), "{error}");
-        assert!(error.contains("25.0 GiB"), "{error}");
-        assert!(error.contains("28 GiB"), "{error}");
-        assert!(error.contains("26 GiB"), "{error}");
-        // Exact byte boundaries: one byte below both minima fails, one minimum met
-        // passes.
-        let just_below = MemoryFacts {
+        assert!(error.contains("7.0 GiB"), "{error}");
+        assert!(error.contains("5.0 GiB"), "{error}");
+        assert!(error.contains("8 GiB"), "{error}");
+        assert!(error.contains("6 GiB"), "{error}");
+        // Exact byte boundaries: one byte below either minimum fails, both at
+        // the minima pass.
+        let ram_below = MemoryFacts {
             available_physical_bytes: PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES - 1,
-            available_commit_bytes: PREPARE_MIN_COMMIT_HEADROOM_BYTES - 1,
-        };
-        assert!(prepare_memory_preflight(just_below).is_err());
-        let at_commit = MemoryFacts {
-            available_physical_bytes: 0,
             available_commit_bytes: PREPARE_MIN_COMMIT_HEADROOM_BYTES,
         };
-        assert!(prepare_memory_preflight(at_commit).is_ok());
-        let record = at_commit.preflight_record();
+        assert!(prepare_memory_preflight(ram_below).is_err());
+        let commit_below = MemoryFacts {
+            available_physical_bytes: PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES,
+            available_commit_bytes: PREPARE_MIN_COMMIT_HEADROOM_BYTES - 1,
+        };
+        assert!(prepare_memory_preflight(commit_below).is_err());
+        let at_minima = MemoryFacts {
+            available_physical_bytes: PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES,
+            available_commit_bytes: PREPARE_MIN_COMMIT_HEADROOM_BYTES,
+        };
+        assert!(prepare_memory_preflight(at_minima).is_ok());
+        let record = at_minima.preflight_record();
         assert_eq!(
             record.minimum_available_physical_bytes,
             PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES
@@ -5833,12 +5843,12 @@ mod tests {
     fn windows_prepare_ram_preflight_evidence_is_recorded() {
         let example_facts = memory_facts(12, 8);
         let boundaries = [
-            (28, 0, "pass_available_ram"),
-            (0, 26, "pass_commit_headroom"),
-            (28, 26, "pass_both"),
-            (27, 25, "fail_both_below"),
-            (28, 25, "pass_available_ram_with_low_commit"),
-            (27, 26, "pass_commit_headroom_with_low_ram"),
+            (8, 6, "pass_at_minima"),
+            (12, 8, "pass_typical_16gib_machine"),
+            (22, 24, "pass_target_machine"),
+            (7, 5, "fail_both_below"),
+            (7, 9, "fail_physical_below"),
+            (9, 5, "fail_commit_below"),
         ]
         .map(|(ram, commit, label)| {
             serde_json::json!({
@@ -5862,11 +5872,11 @@ mod tests {
                 "status": "unit_verified",
                 "thresholds": {
                     "minimum_available_physical_bytes": PREPARE_MIN_AVAILABLE_PHYSICAL_BYTES,
-                    "minimum_available_physical_gib": 28,
+                    "minimum_available_physical_gib": 8,
                     "minimum_commit_headroom_bytes": PREPARE_MIN_COMMIT_HEADROOM_BYTES,
-                    "minimum_commit_headroom_gib": 26,
+                    "minimum_commit_headroom_gib": 6,
                 },
-                "decision_rule": "available physical RAM >= 28 GiB OR available commit headroom >= 26 GiB",
+                "decision_rule": "available physical RAM >= 8 GiB AND available commit headroom >= 6 GiB",
                 "measurement_source": "installer-private GlobalMemoryStatusEx (ullAvailPhys / ullAvailPageFile); no new crate and no cross-stream helper",
                 "measured_values_recorded_in": [
                     "ReadyRecord.prepare_preflight",

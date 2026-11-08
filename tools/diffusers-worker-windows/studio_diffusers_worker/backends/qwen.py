@@ -93,9 +93,16 @@ def load_text_encoder(prepared_dir: Path, compute_dtype=None, sequential: bool =
         encoder = encoder.to("cuda:0")
         log("qwen text encoder moved to the card as one component (compact)")
     else:
+        # Standard tier: use the same CPU staging as the compact branch. Loading
+        # without ``device_map`` and then moving the NF4 modules to the card left
+        # ~5.83 GiB of CUDA reserved memory behind after the text forward even
+        # after ``empty_cache`` (the staged release check then failed); staging
+        # through CPU frees the reserved blocks as expected.
         encoder = Qwen3VLForConditionalGeneration.from_pretrained(
             str(prepared_dir),
             torch_dtype=dtype,
+            device_map="cpu",
+            low_cpu_mem_usage=True,
         )
         encoder = encoder.to("cuda:0")
     encoder.eval()
