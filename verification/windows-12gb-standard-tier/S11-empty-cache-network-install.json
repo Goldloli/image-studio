@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S11-empty-cache-real-network-install",
+  "status": "partial_pass",
+  "date": "2026-11-08T21:12:00+08:00",
+  "data_root": "C:/ist-验收 中文",
+  "scope": "Real-ESRGAN native package (90.9 MB) installed from an empty cache over the real network; the shared Python runtime/PyPI path (the historical I2-1 blocker) was not re-run",
+  "result": {
+    "elapsed_seconds": 53,
+    "state": "当前可执行",
+    "cache_before_bytes": 10597175,
+    "cache_after_bytes": 56277967
+  },
+  "evidence": [
+    "51-o7-network-install-ready.png"
+  ]
+}

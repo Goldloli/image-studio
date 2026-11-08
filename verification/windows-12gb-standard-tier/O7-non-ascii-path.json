@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "O7-non-ascii-path",
+  "status": "pass",
+  "date": "2026-11-08T21:12:00+08:00",
+  "data_root": "C:/ist-验收 中文",
+  "install": {
+    "model": "Real-ESRGAN x4plus",
+    "network": "real download",
+    "elapsed_seconds": 53
+  },
+  "upscale": {
+    "source": "C:/ist-accept/data/assets/asset-ab5cdaa5d44648ae82d68256e516450d.png",
+    "elapsed_seconds": 8.7,
+    "asset": "asset-6a1f918e82364f31861acaafd8ef1042.png",
+    "bytes": 25191208,
+    "width": 4096,
+    "height": 4096,
+    "sha256_prefix": "cd116553e3a59b32"
+  },
+  "note": "path with spaces and Chinese characters; no path/encoding error in install, import or output",
+  "evidence": [
+    "52-o7-upscale-non-ascii-root.png"
+  ]
+}

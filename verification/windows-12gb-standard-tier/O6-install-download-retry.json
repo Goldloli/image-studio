@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "O6-install-download-retry",
+  "status": "pass",
+  "date": "2026-11-08T21:10:00+08:00",
+  "data_root": "C:/ist-验收 中文",
+  "fault_injection": {
+    "method": "launch with HTTP_PROXY/HTTPS_PROXY/ALL_PROXY=http://127.0.0.1:9",
+    "model": "Real-ESRGAN x4plus (90.9 MB download)"
+  },
+  "observed": {
+    "phase": "正在下载 0 KB / 90.9 MB",
+    "failure_after_seconds": 21.2,
+    "ui_state": "安装失败，可修复重试",
+    "ready_record_after_failure": false
+  },
+  "retry_after_removing_fault": {
+    "method": "relaunch without proxy, click 继续安装",
+    "result": "当前可执行",
+    "elapsed_seconds": 53,
+    "downloaded": "90.9 MB / 90.9 MB"
+  },
+  "note": "The UI does not expose the internal retry count; the download retry loop is unit-tested (installation::tests::transient_download_failure_is_retried_before_failing) and this run proves the fault surfaces as an actionable error and a later retry succeeds.",
+  "evidence": [
+    "50-o6-proxy-download-failure.png",
+    "51-o7-network-install-ready.png"
+  ]
+}

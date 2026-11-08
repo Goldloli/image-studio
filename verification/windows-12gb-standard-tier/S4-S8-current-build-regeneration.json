@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S4-S8-current-build-regeneration",
+  "status": "pass",
+  "date": "2026-11-08T20:39:00+08:00",
+  "build": "2026-11-08 20:55 release build",
+  "results": [
+    {
+      "capability": "Z-Image Turbo text-to-image",
+      "elapsed_seconds": 59.2,
+      "asset": "asset-c427ececbd77448c8eb9f38dc6ba9ba7.png"
+    },
+    {
+      "capability": "FLUX.2 Klein 4B text-to-image",
+      "elapsed_seconds": 43.7,
+      "asset": "asset-c77fc6300d8d4d1ca94622fb746e8e4b.png"
+    },
+    {
+      "capability": "FLUX.2 Klein 4B single-image edit",
+      "elapsed_seconds": 28.1,
+      "asset": "asset-912aa15fdb02453b80f41537c66bbe68.png",
+      "source_asset": "asset-ab5cdaa5d44648ae82d68256e516450d.png"
+    },
+    {
+      "capability": "BiRefNet background removal",
+      "elapsed_seconds": 25.1,
+      "asset": "asset-abe8dc899009dcfd...png",
+      "outputs": "RGBA + mask"
+    },
+    {
+      "capability": "Real-ESRGAN 4x upscale",
+      "elapsed_seconds": 9.5,
+      "asset": "asset-e90528290088dc39...png",
+      "output": "4096x4096"
+    }
+  ],
+  "note": "re-ran every installed capability on the current build after the final rebuild; Qwen Turbo/base and MOSS are recorded in S3c/S14/S15",
+  "evidence": [
+    "40-zimage-current-build.png",
+    "41-klein-t2i-current-build.png",
+    "42-klein-edit-current-build.png",
+    "43-birefnet-current-build.png",
+    "44-realesrgan-current-build.png"
+  ]
+}

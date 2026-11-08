@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "W6-theme-review",
+  "status": "pass",
+  "date": "2026-11-08T21:28:00+08:00",
+  "method": "toggled through the rail theme button and the settings appearance group; captured both themes",
+  "observed": {
+    "light": {
+      "data_theme": "light",
+      "body_background": "rgb(244, 244, 244)"
+    },
+    "dark": {
+      "data_theme": "dark",
+      "body_background": "rgb(32, 32, 32)"
+    }
+  },
+  "note": "screenshots captured; aesthetic owner review was previously accepted to be skipped (optional item), behavior is verified",
+  "evidence": [
+    "62-w6-dark-theme.png",
+    "63-w6-light-theme.png"
+  ]
+}

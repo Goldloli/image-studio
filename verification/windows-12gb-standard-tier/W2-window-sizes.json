@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "W2-window-sizes",
+  "status": "pass",
+  "date": "2026-11-08T21:25:00+08:00",
+  "checks": [
+    {
+      "size": "960x640",
+      "viewport": "961x640",
+      "nav_labels": [
+        "返回创作",
+        "创作",
+        "灵感库",
+        "功能",
+        "模型",
+        "作品",
+        "任务",
+        "主题",
+        "关于",
+        "设置"
+      ],
+      "textarea": true,
+      "send": true,
+      "model_select": true
+    },
+    {
+      "size": "1280x800",
+      "viewport": "1281x800",
+      "textarea": true,
+      "send": true
+    }
+  ],
+  "evidence": [
+    "60-w2-960x640.png",
+    "61-w2-1280x800.png"
+  ]
+}

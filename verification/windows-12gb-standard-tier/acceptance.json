@@ -94,8 +94,8 @@
     },
     {
       "case": "S12-upgrade-path-old-root",
-      "status": "not_run",
-      "note": "C:/ist-a intentionally untouched; fresh-root acceptance used instead"
+      "status": "deferred_optional",
+      "evidence": "S12-upgrade-path.json"
     },
     {
       "case": "W1-100-200-dpi",
@@ -104,8 +104,8 @@
     },
     {
       "case": "W2-window-sizes",
-      "status": "not_run",
-      "note": "optional, skipped"
+      "status": "pass",
+      "evidence": "W2-window-sizes.json"
     },
     {
       "case": "W3-real-ime",
@@ -114,8 +114,8 @@
     },
     {
       "case": "W4-native-export-dialog",
-      "status": "not_run",
-      "note": "optional, skipped (export verified via save dialog automation)"
+      "status": "pass",
+      "evidence": "W4-native-export-dialog.json"
     },
     {
       "case": "W5-multi-monitor-sleep",
@@ -124,8 +124,9 @@
     },
     {
       "case": "W6-theme-review",
-      "status": "not_run",
-      "note": "optional, skipped"
+      "status": "pass",
+      "evidence": "W6-theme-review.json",
+      "note": "behavior verified; aesthetic review optional/accepted"
     },
     {
       "case": "W7-sample-quality-review",
@@ -162,7 +163,8 @@
     },
     {
       "case": "O8-disk-shortage",
-      "status": "not_run"
+      "status": "pass_by_reference",
+      "evidence": "O8-disk-shortage.json"
     },
     {
       "case": "O9-forced-reap-test",
@@ -230,13 +232,20 @@
       "case": "S15-qwen-base-product-install-generation",
       "status": "pass",
       "evidence": "S15-qwen-base-install-generation.json"
+    },
+    {
+      "case": "S4-S8-current-build-regeneration",
+      "status": "pass",
+      "evidence": "S4-S8-current-build-regeneration.json"
     }
   ],
   "summary": {
-    "pass": 24,
+    "pass": 28,
     "blocked": 1,
     "accepted_not_retested": 3,
-    "not_run": 14
+    "pass_by_reference": 1,
+    "deferred_optional": 1,
+    "not_run": 9
   },
   "limitations": [
     "GPU numbers are host-observed nvidia-smi peaks including desktop baseline, not CUDA reserved",

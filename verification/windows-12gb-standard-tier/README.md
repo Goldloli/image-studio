@@ -30,6 +30,16 @@ This round covers the 12 GB **standard tier** on the Windows 10 target machine. 
 | S15 Qwen-Image 2.1 product install + generation | **pass** | low-memory install 415 s (text encoder 122.2 s / 2.918 GiB, transformer 102.2 s / 2.902 GiB), 40-step generation **84 s**, 1024×1024 PNG 1,995,903 B `f92b0f93…`, host GPU peak 7,784 MiB |
 | S3b low-memory prepare under simulated 16 GiB | pass | Qwen Turbo install through the UI at 11.35 GiB available RAM: preflight 11.75/12.95 GiB, prepare peaks 2.9 GiB per worker, caches byte-identical |
 | S3c Qwen standard generation after cleanup fix | pass | Qwen Turbo 1024² 8 steps 40.7 s, PNG 2,010,413 B `92a9d4f8…` |
+| W2 window sizes | pass | 960×640 与 1280×800：导航/输入/发送/模型选择可见（`W2-window-sizes.json`） |
+| W4 native export dialog | pass | 导出 == 资产逐字节一致（`ff6109ab…`，`W4-native-export-dialog.json`） |
+| W6 theme | pass | 浅色/深色切换生效，截图 62/63 |
+| O2 watchdog | pass | 注入滞留 pending 回合，60 s 超时错误 + 重试入口（`O2-watchdog-injected-reap.json`） |
+| O3 cancel coverage | pass | Qwen Turbo 6.26 s / BiRefNet 3.8 s / Real-ESRGAN 3.32 s 落定，无残留进程 |
+| O4 preflight cancel | pass | 6.67 s 落定（bd ipw 可关闭） |
+| O5 console windows | pass | 修复后 supervisor/python `MainWindowHandle=0`，生成与安装均无窗口 |
+| O6 download retry | pass | 代理故障 21.2 s 失败并给出可重试错误；恢复后 53 s 安装成功 |
+| O7 non-ASCII path | pass | `C:\ist-验收 中文` 安装 + 4× 放大 8.7 s，输出 4096² |
+| O10 bad checksum | pass | 坏缓存被拒绝且无半成品；恢复缓存后 6.4 s 安装成功 |
 
 Notes:
 

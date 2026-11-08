@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "O8-disk-shortage",
+  "status": "pass_by_reference",
+  "date": "2026-11-08T21:30:00+08:00",
+  "reason": "Re-running needs a small fixed-size volume (admin rights). The same machine already recorded the behavior on 2026-11-01: 27.74 GiB available vs 88.99 GiB budget -> 磁盘空间不足 in about 4 s, no cache writes, no install record; decision-function unit tests cover same-volume double counting and per-volume checks.",
+  "references": [
+    "verification/windows-gate0/README.md",
+    "installation unit tests"
+  ]
+}

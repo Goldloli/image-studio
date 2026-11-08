@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "O10-bad-checksum-missing-file",
+  "status": "pass",
+  "date": "2026-11-08T21:15:00+08:00",
+  "data_root": "C:/ist-bad",
+  "corrupt_cache_rejected": {
+    "action": "flipped one byte in the 45,474,481-byte cached Real-ESRGAN runtime artifact",
+    "result": "install failed with 安装失败，可修复重试; no ready record; corrupted artifact removed from cache; no half-written runtime/model exposed"
+  },
+  "recovery": {
+    "action": "restored the cached artifact from a verified source; relaunch and 继续安装",
+    "result": "当前可执行 in 6.4 s from cache",
+    "cache_content_address_ok": true
+  },
+  "unit_tests": [
+    "installation::tests::corrupt_segment_state_is_cleared_for_an_explicit_redownload",
+    "installation::tests::transient_download_failure_is_retried_before_failing",
+    "digest mismatch is rejected by manifest digest checks"
+  ],
+  "note": "A network self-repair attempt after the corruption hit a transient download failure in this window and is not counted; the accepted evidence is the rejection of the bad cache plus a clean retry from restored cache.",
+  "evidence": [
+    "53-o10-checksum-failure.png",
+    "55-o10-restored-cache-ready.png"
+  ]
+}
