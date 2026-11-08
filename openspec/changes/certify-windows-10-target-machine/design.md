@@ -26,7 +26,7 @@
 
 - `main == origin/main == b861ae5`，工作区干净（仅未跟踪的 `.beads/interactions.jsonl`）；`openspec validate --all --strict` 26/26 通过（加入本 change 后为 **27/27**），但 `windows-hardening-and-coverage` 尚未归档，其 spec delta 未进入主规格。
 - 8 GB 参考机证据（`verification/windows-8gb-tier/`、`verification/windows-desktop-coverage/`）只覆盖 Win11 / 2060 SUPER / 紧凑档；本机需要的标准档证据不存在。
-- `C:\ist-a` 的 6 份就绪记录由 2026-11-04 构建写入，记录的 `worker_wheels` 与当前构建嵌入的 diffusers worker wheel 不同，因此当前构建启动后**预期会拒绝这些记录并提示重新安装**——这本身就是要验证的激活身份行为。
+- `C:\ist-a` 的 6 份就绪记录由 2026-11-04 构建写入。实测比对：5 个 Python 模型共用的 v2 运行时清单摘要已从 `0f1174a0…` 变为 `ecf0202b…`，内嵌 diffusers worker wheel 也从 41,530 B / `79799fd9…` 变为 43,526 B / `6c3cae91…`，因此当前构建启动后**预期拒绝这 5 份记录（Klein/BiRefNet/Qwen×2/MOSS）并提示重新安装**；Real-ESRGAN 的原生 ncnn 运行时清单摘要仍匹配（`819d5042…`），预期无需重装。这个拒绝行为本身就是要验证的激活身份证据。
 - v0.1.0 之后 76 个提交未发布（含本 change 文档提交）；CI 绿色记录未入库；`windows-hardening` test-plan 矩阵、`windows-8gb-tier` 的 known roughness、Real-ESRGAN asset-manifest 状态等仍是过时文本。
 
 ## 3. 证据类型与判定规则
@@ -44,7 +44,8 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 
 - 只承认**当前构建**（HEAD `b861ae5` 或执行时的 HEAD，记录 commit）在本机取得的证据；v0.1.0/2026-11-04 构建、8 GB 参考机、CI 结果只能作为对照，不能记 pass。
 - **种子缓存重装**与**空缓存真实联机安装**分开记录；种子缓存重装不得宣称验证了下载链路。
-- 未执行项一律 `not_run`，被内存预检阻止记 `blocked`，不得写成 pass；手工项（真实 IME、多显示器）由所有者参与时记录 `manual`。
+- 未执行项一律 `not_run`，被内存预检阻止记 `blocked`，不得写成 pass。
+- 历史 `user-accepted`/waived 项（W05 100%/200% DPI、W06 真实 IME、parity 4.4 样图复核等）保持 2026-11-03 / 归档时的原决定，本 change 不重开、不再询问；它们记 `not_run` 不算本轮缺口。
 - 资源口径沿用 `windows-local-generation` 标准档合同：CUDA reserved ≤ 10.5 GiB、受管生成进程 private commit 峰值 ≤ 24 GiB、可用物理内存最低 ≥ 2 GiB、加载 ≤ 600 s、单次生成 ≤ 900 s、无 WDDM 共享内存回退。
 - 证据写入 `verification/windows-12gb-standard-tier/` 并在 README 建立索引。
 
@@ -58,28 +59,30 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 ## 5. 标准档回归（S 系列）
 
 - **档位投影**：模型页 7 个型号、6 个已安装（Z-Image 未装）；期望 6 个可执行型号显示 `standard · 1024² · bfloat16`（Z-Image 显示满足 12 GB 门槛），不出现紧凑档投影。设备探针需报 12288 MiB / sm86。
-- **重装与激活**：当前构建拒绝 2026-11-04 就绪记录后，用 `C:\ist-a\cache\downloads` 的已验证缓存重装 Klein、BiRefNet、Real-ESRGAN（三者无安装期量化准备），记录 `seeded_cache` 安装的阶段、耗时、结果；清理旧的 `.prepared` 前先备份就绪记录。
-- **Qwen / MOSS 与内存预检**：这两个型号 `prepare_with_model = true`。本机可用物理内存 20.0 GiB、commit 余量 21.7 GiB，均低于规格双条件（≥28 GiB / ≥26 GiB），预期在量化前被拒并给出可行动错误（对应主规格 `model-installation` 的"门槛不足时提前失败"场景）。先按规格记录该 blocked 证据（错误文本、`prepare-preflight.json`、无半成品），再由所有者从 §9 的 A/B/C 中选择。
+- **重装与激活**：先在未重装状态启动当前构建，验证 5 个 Python 模型（Klein/BiRefNet/Qwen×2/MOSS）被激活身份校验拒绝并给出可行动错误；确认 Real-ESRGAN 记录仍匹配（预期无需重装）。随后用 `C:\ist-a\cache\downloads` 的已验证缓存重装被拒的无 prepare 型号（预期 Klein、BiRefNet），记录 `seeded_cache` 安装的阶段、耗时、结果；清理旧的 `.prepared` 前先备份就绪记录。
+- **Qwen / MOSS 与内存预检**：这两个型号 `prepare_with_model = true`，安装期在 CPU 上构建 NF4 量化缓存，**与显存无关**。本机可用物理内存 20.0 GiB、commit 余量 21.7 GiB，均低于规格双条件（≥28 GiB / ≥26 GiB），预期在量化前被拒并给出可行动错误（对应主规格 `model-installation` 的"门槛不足时提前失败"场景）。先按规格记录该 blocked 证据（错误文本、`prepare-preflight.json`、无半成品），再由所有者从 §9 的 A/B/C 中选择。
 - **逐能力标准档生成**：Klein 文生图、Klein 单图编辑、BiRefNet 去背景、Real-ESRGAN 4×（每项至少一次产品内真实生成/编辑/处理）；若 Qwen/MOSS 解锁则补 Qwen Turbo（8 步）与 Qwen base/MOSS（40/50 步，时间预算见下）。每项记录：墙钟耗时、阶段（加载/编码/采样/解码）、CUDA reserved/allocated 峰值、进程 commit、可用内存最低值、输出 PNG 尺寸（标准档文生图为 **1024²**；Klein 编辑按源图规则；Real-ESRGAN 为 4×）、资产字节数与 SHA-256。
 - **资源采样方法**：生成期间以 1 s 间隔轮询 `nvidia-smi --query-gpu=memory.used,memory.total --format=csv`，同时读应用 `app.log` 的生成期内存事件与 worker 资源报告（若产品提供）；进程 commit 峰值用 `Get-Counter`（`\Process(<name>)\...`）或 Windows 性能计数器采样。方法写入证据 JSON 的 `method` 字段，避免口径歧义。
 - **导出与重启**：作品页导出 PNG，与资产逐字节一致；关闭应用重开，模型仍就绪，历史作品可打开并再次导出。
-- **Z-Image 标准档（可选，决策见 §9）**：本机未安装 Z-Image，需 ~32.85 GB 下载（ModelScope）；其 profile 无安装期 prepare，可走真实联机安装。若执行，作为标准档 12 GB 门槛（Z-Image 仅 12 GB 档）的关键证据；不执行则记 `not_run` 并说明。
+- **Z-Image 标准档（可选，决策见 §9）**：本机未安装 Z-Image，但 Gate 0 的全部本地 artifact 仍在位（`target/windows-gate0/model` 20 个模型文件 + `target/windows-gate0/downloads` 的 Python 运行时与 38 个 wheel），可用 `target/seed-windows-cache.ps1` 按当前 manifest 校验后**种子安装，零下载**；只有哈希不匹配时才需要从 ModelScope 下载 ~32.85 GB。其 profile `prepare_with_model = false`，不触发 Qwen/MOSS 的内存预检。若执行，作为"仅 12 GB 档"型号的关键标准档证据；不执行则记 `not_run` 并说明。
 - **不要**用 `C:\ist-a` 旧记录的 2026-11-04 生成结果替代本轮生成；旧结果只作对照。
-- **空缓存真实联机安装**：本机本轮不承诺完整的空缓存安装（历史 I2-1 因 PyPI 吞吐被记为 blocked）。若执行 Z-Image 联机安装，可作为"模型/运行时下载链路"的部分旁证，但仍记 `not_run`，不得声称 I2-1 已通过（S11）。
+- **空缓存真实联机安装**：本机本轮不承诺完整的空缓存安装（历史 I2-1 因 PyPI 吞吐被记为 blocked）。Z-Image 若走种子安装则与下载链路无关；若联机安装可作为"模型/运行时下载链路"的部分旁证，但完整空缓存安装仍记 `not_run`，不得声称 I2-1 已通过（S11）。
 
 时间预算（本机 RTX 3080 Ti 比 2060 SUPER 快，仍按保守估计登记）：Klein 加载约 30–60 s + 采样 <10 s；BiRefNet ~10 s；Real-ESRGAN ~4 s；Qwen Turbo 若解锁约 1–2 min；Qwen base 40 步约 5–10 min；MOSS 50 步约 10–20 min；Z-Image 9 步约 1–2 min（含加载）。
 
 ## 6. Windows 桌面遗留项（W 系列）
 
-| 项 | 方法 | 判定 |
+历史手工项已由所有者接受，**不重测、不再询问**；下表只保留廉价可选检查（默认跳过）。
+
+| 项 | 状态 | 说明 |
 |---|---|---|
-| W1 DPI 100%/150%/200% | 系统设置切换缩放后 `cdp.mjs shot` + 可见性 eval；每档至少主界面+对话页两张截图，另用 `resize-window.ps1` 固定逻辑尺寸 | 导航/输入/发送/模型状态/主要动作可见可点，无遮挡 |
-| W2 960×640 / 1280×800 | `resize-window.ps1` + 截图 | 同上 |
-| W3 真实中文 IME | 所有者用 Microsoft 拼音实际输入，确认候选回车不发送、组合结束后显式发送；代理只做观察与记录 | 按 `windows-desktop` 规格判断；手工项，需所有者配合 |
-| W4 原生导出对话框 | `save-ui-dialog.ps1` 填名保存，与资产逐字节比对 | 文件名/路径正确，旧文件不被破坏，覆盖确认仍生效 |
-| W5 多显示器/睡眠唤醒 | 接第二台显示器/切换显示器后截图；睡眠唤醒后发送一次冒烟 | 归位、模型状态与发送正常；不做则 `not_run` |
-| W6 主题人工审阅 | 暗/亮主题各一张主要页面截图，所有者目测 | 记录所有者结论，不冒充自动判定 |
-| W7 7 型号样图人工复核 | 打开 parity 轮 7 型号样图（`verification/windows-parity-app/not-run.json` 4.4 `pending_user`），所有者逐张确认质量 | 记录所有者结论；不平衡、伪影等问题单独登记，不改写历史证据 |
+| W1 DPI 100%/150%/200% | user-accepted（2026-11-03） | 100%/200% 无本机证据但已接受；150% 旧证据保留；本轮不重测 |
+| W2 960×640 / 1280×800 | optional（默认跳过） | 此前已有机器证据；如执行只需一次截图检查 |
+| W3 真实中文 IME | user-accepted（2026-11-03） | 仅有单测/合成组合保护；本轮不重测 |
+| W4 原生导出对话框 | optional（默认跳过） | 此前已有机器证据；如执行则与资产逐字节比对 |
+| W5 多显示器/睡眠唤醒 | optional（默认跳过） | 未执行过，但非本轮缺口 |
+| W6 暗/亮主题人工审阅 | optional（默认跳过） | 所有者目测，不阻塞 |
+| W7 7 型号样图人工复核 | user-accepted（parity 归档） | 归档时已接受 4.4 `pending_user`，不重做 |
 
 ## 7. 可观测性与故障分支（O 系列）
 
@@ -100,15 +103,16 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 - **C2**：登记"v0.1.0 之后 76 个提交未发布、标签/发布需要所有者授权远程操作"，不做推送/tag。
 - **C3（可选）**：下载公开发布的 v0.1.0 NSIS 包，在本机安装/启动/卸载一次，验证发布产物在 Win10 可安装；因它是旧代码，只作为"发布产物可用性"证据，不替代标准档回归。若执行需 2026-11-04 已安装版本的升级路径记录。
 
-## 9. 需要所有者决策的三点
+## 9. 需要所有者决策的两点
 
-1. **prepare 内存预检（关键）**。本机当前页面文件 4.8 GiB，commit 余量 21.7 GiB，双条件都不满足。选项：
-   - **A（推荐，若需要 Qwen/MOSS 标准档证据）**：所有者把系统虚拟内存调到初始 ≥40 GiB / 最大 ≥64 GiB（参考 8 GB 机的 75.9 GiB commit 上限），重启后复测。属系统配置变更，需管理员并显式批准；验收后不自动改回，由所有者决定。
+1. **prepare 内存预检（关键，CPU 内存而非显存）**。本机当前页面文件 4.8 GiB，commit 余量 21.7 GiB，双条件都不满足。选项：
+   - **A（若需要 Qwen/MOSS 在当前构建上的标准档证据）**：所有者把系统虚拟内存调到初始 ≥40 GiB / 最大 ≥64 GiB（参考 8 GB 机的 75.9 GiB commit 上限），重启后复测。属系统配置变更，需管理员并显式批准；验收后不自动改回，由所有者决定。
    - **B（不改系统配置）**：用一个临时内存提交压力程序迫使 Windows 自动扩大页面文件，释放后 commit 上限保持扩大，再执行安装。可脚本化、可逆性弱（页面文件可能保持较大），需要在批准后作为实验执行，失败即回退 C。
-   - **C（不冒系统风险）**：把 Qwen/MOSS 标准档生成记 `blocked`（预检证据完整），标准档回归证据由 Klein（文生图/编辑）、BiRefNet、Real-ESRGAN（+可选 Z-Image）承载；另立 change 讨论"可复用 prepared 缓存时预检是否仍应拦截"的产品问题。
-   默认建议：先执行 C 的记录，若所有者同意 A 再补 Qwen/MOSS。**不得**在未批准时改系统设置。
-2. **Z-Image 标准档可选回归**：需 ~32.85 GB 下载与约 1–2 min 生成；建议执行（12 GB 门槛的关键型号），但可跳过。
-3. **手工项配合窗口**：真实 IME、100%/200% 缩放（切换时屏幕会闪、可能要求重新登录）、多显示器/睡眠唤醒，需要所有者本人在场；代理无法替代真实 IME 判定。
+   - **C（不冒系统风险，默认建议）**：把 Qwen/MOSS 标准档生成记 `blocked`（预检证据完整），标准档回归证据由 Klein（文生图/编辑）、BiRefNet、Real-ESRGAN（+可选 Z-Image）承载；另立 change 讨论"可复用 prepared 缓存时预检是否仍应拦截"的产品问题。
+   **不得**在未批准时改系统设置。若只需要"当前主分支能跑标准档"的证据，C 已足够。
+2. **Z-Image 标准档可选回归**：本机已有 Gate 0 全部 artifact，可种子安装、零下载，约 1–2 min 生成；它是唯一仅 12 GB 档的型号，建议执行但可跳过（跳过后标准档证据由 Klein/BiRefNet/Real-ESRGAN 承载，Z-Image 记 `not_run`）。
+
+> 历史手工项（W05 100%/200% 缩放、W06 真实 IME、parity 4.4 样图复核）已由所有者在 2026-11-03 / 归档时接受，本 change 不把它们列为决策，也不重测。
 
 ## 10. 文档、规格与 bd 收口（D 系列）
 
@@ -125,10 +129,10 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 
 | 风险 | 影响 | 缓解 |
 |---|---|---|
-| 新构建拒绝 2026-11-04 就绪记录 | 需要重装，耗时 | 先记录拒绝行为作为证据；重装用本地种子缓存，不依赖外网 |
-| prepare 预检阻止 Qwen/MOSS | 无法取得这两个型号标准档证据 | §9 决策 A/B/C；先记录 blocked 证据 |
+| 当前构建拒绝 2026-11-04 的 5 份 Python 模型就绪记录 | 需要种子缓存重装（Klein/BiRefNet），Qwen/MOSS 另受内存预检限制 | 先记录拒绝行为作为证据；重装用本地种子缓存，不依赖外网 |
+| prepare 预检阻止 Qwen/MOSS | 无法取得这两个型号在当前构建上的标准档证据 | §9 决策 A/B/C；默认 C 并先记录 blocked 证据 |
 | 页面文件/commit 上限变化 | 预检数值不稳定 | 每次安装前重新测量并写入证据 |
-| 真实 IME/缩放需人工 | 无法自动判定 | 明确 `manual` 状态，由所有者确认；不冒充通过 |
+| 历史手工项被误当作本轮缺口 | 重复劳动、重复询问 | 文档与判定规则明确 user-accepted 项不重开 |
 | 长时间生成占用机器 | 会话中断风险 | 按模型串行执行，先快后慢；每步写 JSON 断点 |
 | CDP 端口被 Hyper-V 保留占用 | 自动化失败 | 启动前检查 `netsh` 排除区间并记录实际端口 |
 | 数据根被误用为默认根 | 污染用户数据 | 全程 `--data-dir C:\ist-a` 或新建隔离根，验收后不写默认根 |
@@ -136,6 +140,7 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 ## 12. 明确不做
 
 - 不实现 `stream-prepare-low-memory` 的分片量化（所有者已决定暂缓）。
+- 不重开已接受的历史手工项（W05 100%/200% 缩放、W06 真实 IME、parity 4.4 样图复核），也不再询问。
 - 不对 8 GB 参考机 / 2060 SUPER 的紧凑档做任何重测（本机硬件不可替代）。
 - 不做 macOS 用户门控项（R02–R04、跨平台 M1/M2）。
 - 不做被 waive 的整树禁网 I07/P06，不做 D02/D03（干净 Win10 用户、缺失 WebView2）——需要管理员/VM 或所有者另行安排。

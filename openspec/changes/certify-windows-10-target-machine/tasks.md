@@ -4,7 +4,7 @@
 
 ## 0. 批准与准备
 
-- [ ] 0.1 取得所有者对本 change 的明确实施确认，并记录 §9 三个决策（prepare 预检 A/B/C、Z-Image 可选回归、手工项配合安排）。
+- [ ] 0.1 取得所有者对本 change 的明确实施确认，并记录 §9 两个决策（prepare 预检 A/B/C、Z-Image 可选回归）；历史手工项沿用既有接受状态，不再询问。
 - [ ] 0.2 记录本机环境 JSON（OS/CPU/RAM/GPU/驱动/显示缩放/WebView2/页面文件 commit 上限/可用内存/磁盘/网络可达性/工具链版本），确认与 proposal 事实一致。
 - [ ] 0.3 备份 `C:\ist-a\data\installations\models\*.json` 与 `C:\ist-a\logs\*` 为"2026-11-04 旧构建状态"证据，再开始任何重装。
 - [ ] 0.4 `pwsh -File scripts/build-windows-internal.ps1`（或先 `-SkipBundle`）构建 HEAD 并保存构建日志、exe/安装包 SHA-256 与 commit。
@@ -12,26 +12,28 @@
 
 ## 1. 12 GB 标准档回归（P0）
 
-- [ ] 1.1 以当前构建 + `--data-dir C:\ist-a` 启动，确认旧就绪记录被激活身份校验拒绝并给出可行动错误；保存截图、错误文本与日志（S1）。
+- [ ] 1.1 以当前构建 + `--data-dir C:\ist-a` 启动：预期 5 个 Python 模型（Klein/BiRefNet/Qwen×2/MOSS）因运行时清单摘要与内嵌 diffusers worker wheel 身份变化被拒并给出可行动错误；确认 Real-ESRGAN 记录仍匹配或记录其拒绝原因。保存截图、错误文本与日志（S1）。
 - [ ] 1.2 确认设备探针与档位投影：12288 MiB / sm86；模型页 7 型号、已安装 6 个显示 `standard · 1024² · bfloat16`；Z-Image 显示满足 12 GB 门槛；不出现 compact 投影（截图 + DOM 文本 JSON）。
-- [ ] 1.3 用种子缓存重装 Klein、BiRefNet、Real-ESRGAN（无安装期 prepare），记录阶段、耗时、缓存命中、`seeded_cache` 类型；确认不使用网络下载（S2）。
+- [ ] 1.3 用种子缓存重装被拒的无 prepare 型号（预期 Klein、BiRefNet； Real-ESRGAN 若记录匹配则跳过），记录阶段、耗时、缓存命中、`seeded_cache` 类型；确认不使用网络下载（S2）。
 - [ ] 1.4 对 Qwen-Image 2.1-Turbo 触发安装，验证 prepare 内存预检在量化前以可行动错误阻止：记录 `prepare-preflight.json`、`installation-process.log` 片段、错误文本、无半成品缓存/安装记录（S3，`blocked` 预期）。
 - [ ] 1.5 如所有者选择 A/B 且环境准备成功，重跑 1.4 并完成 Qwen Turbo（8 步）标准档生成；否则记录 `blocked` 并把 1.6 的范围限定为已解锁型号（S8）。
 - [ ] 1.6 逐能力产品内标准档生成：Klein 文生图、Klein 单图编辑、BiRefNet 去背景、Real-ESRGAN 4×；每项记录墙钟、阶段、CUDA reserved/allocated、进程 commit、可用内存最低值、PNG 尺寸/字节/SHA-256（S4–S7）。
 - [ ] 1.7 若 1.5 解锁：补 Qwen-Image 2.1 Turbo、Qwen-Image 2.1、MOSS-Image-SFT 标准档生成（串行、按预算）；失败/超预算如实记录（S8）。
-- [ ] 1.8 （可选，按决策）Z-Image Turbo 真实联机安装（~32.85 GB，ModelScope）与 1024² 9 步标准档生成；记录安装阶段与资源（S9）。
+- [ ] 1.8 （可选，按决策）Z-Image Turbo 标准档：优先用本地 Gate 0 已验证 artifact 种子缓存安装（`target/windows-gate0/model` + `target/windows-gate0/downloads`，`target/seed-windows-cache.ps1` 会按当前 manifest 校验 SHA；本机已确认 20 个模型文件与运行时 artifact 全部在位，可避免 ~32.85 GB 下载），哈希不匹配时才联机下载；随后做 1024² 9 步标准档生成，记录安装类型与资源（S9）。
 - [ ] 1.9 导出 PNG 与资产逐字节比对；重启应用确认 6/7 型号仍就绪、旧作品可重开并再次导出（S10）。
 - [ ] 1.10 汇总标准档资源口径，与 `windows-local-generation` 合同（CUDA ≤10.5 GiB、commit ≤24 GiB、可用内存 ≥2 GiB、加载 ≤600 s、生成 ≤900 s、无共享内存回退）逐项对照；写 `verification/windows-12gb-standard-tier/` README 与 acceptance JSON。
 
-## 2. Windows 桌面遗留项（P0/P1）
+## 2. Windows 桌面遗留项（历史手工项已由所有者接受，不重测；仅保留廉价可选检查）
 
-- [ ] 2.1 100%/150%/200% DPI：每档主界面 + 对话页截图 + 元素可见性检查；记录切换方式与是否需要重新登录（W1）。
-- [ ] 2.2 960×640 与 1280×800 布局截图与可操作性检查（W2）。
-- [ ] 2.3 真实 Microsoft 中文 IME：所有者实际输入并向候选后按 Enter，确认不发送；组合结束后显式发送才创建任务；记录为 `manual` 并附所有者结论（W3）。
-- [ ] 2.4 原生导出对话框：`save-ui-dialog.ps1` 保存并与资产逐字节比对；覆盖确认与旧文件保护分支（W4）。
-- [ ] 2.5 （可选）多显示器/睡眠唤醒：切换显示器/睡眠唤醒后截图与一次冒烟发送（W5）。
-- [ ] 2.6 暗/亮主题截图与所有者目测结论（W6）。
-- [ ] 2.7 所有者对 7 型号样图做一次质量人工复核（来源 `verification/windows-parity-app/not-run.json` 的 4.4 项 `pending_user`），记录结论（W7）。
+> `[x]` 表示"已由所有者决定接受/不执行"的登记项，不是本轮实测结果。
+
+- [x] 2.1 100%/150%/200% DPI：所有者 2026-11-03 已接受 W05 的 100%/200%（无本机证据），150% 沿用旧证据；本轮不重测（W1）。
+- [ ] 2.2 （可选）960×640 与 1280×800 布局截图与可操作性检查（W2，默认跳过）。
+- [x] 2.3 真实 Microsoft 中文 IME：所有者 2026-11-03 已接受 W06（仅有单测/合成组合保护）；本轮不重测（W3）。
+- [ ] 2.4 （可选）原生导出对话框：`save-ui-dialog.ps1` 保存并与资产逐字节比对；覆盖确认与旧文件保护分支（W4，默认跳过）。
+- [ ] 2.5 （可选）多显示器/睡眠唤醒：切换显示器/睡眠唤醒后截图与一次冒烟发送（W5，默认跳过）。
+- [ ] 2.6 （可选）暗/亮主题截图与所有者目测结论（W6，默认跳过）。
+- [x] 2.7 7 型号样图质量人工复核：parity 轮归档时所有者已接受 not-run 行（4.4 `pending_user`）；本轮不重做（W7）。
 
 ## 3. 可观测性与故障分支（P1）
 

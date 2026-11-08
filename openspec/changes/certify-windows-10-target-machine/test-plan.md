@@ -9,24 +9,24 @@
 | ID | 能力/项 | 当前状态 | 判定方式 | 证据 |
 |---|---|---|---|---|
 | S0 | 环境、构建、质量门禁 | pending | 质量门禁全绿 + HEAD 记录 | `verification/windows-12gb-standard-tier/quality/` |
-| S1 | 旧就绪记录激活身份拒绝 | pending | 当前构建拒绝 2026-11-04 记录并给可行动错误 | 截图 + 错误 JSON |
-| S2 | 种子缓存重装（Klein/BiRefNet/Real-ESRGAN） | pending | 安装阶段完整、无下载、记录 `seeded_cache` | install JSON |
+| S1 | 旧就绪记录激活身份拒绝 | pending | 5 个 Python 模型（Klein/BiRefNet/Qwen×2/MOSS）被拒并给可行动错误；Real-ESRGAN 记录仍匹配 | 截图 + 错误 JSON |
+| S2 | 种子缓存重装（预期 Klein/BiRefNet；Real-ESRGAN 视记录是否匹配） | pending | 安装阶段完整、无下载、记录 `seeded_cache` | install JSON |
 | S3 | Qwen/MOSS prepare 预检 blocked | pending | 量化前失败、错误可行动、无半成品；数值入证据 | `prepare-preflight.json` + 错误文本 |
 | S4 | 标准档生成：Klein t2i | pending | 1024² 输出、资源合同、PNG/SHA-256 | generate JSON + PNG |
 | S5 | 标准档生成：Klein 编辑 | pending | 源图导入 → 编辑出图、场景保留 | generate JSON + PNG |
 | S6 | 标准档生成：BiRefNet | pending | RGBA + mask，双输出 | JSON + PNG |
 | S7 | 标准档生成：Real-ESRGAN | pending | 220×220 → 880×880（4×） | JSON + PNG |
 | S8 | 标准档生成：Qwen Turbo / Qwen base / MOSS（按决策） | pending | 若解锁：1024² 输出 + 资源合同；否则 `blocked` | JSON + PNG |
-| S9 | Z-Image 标准档（可选） | pending | 1024² 9 步、12 GB 门槛、资源合同 | JSON + PNG |
+| S9 | Z-Image 标准档（可选） | pending | 优选本地 Gate 0 artifact 种子安装（零下载，需哈希匹配），否则联机下载；1024² 9 步、资源合同 | JSON + PNG |
 | S10 | 导出逐字节 + 重启恢复 | pending | 导出 == 资产；重启后就绪且可重开旧作品 | JSON + SHA-256 |
 | S11 | 空缓存真实联机安装（历史 I2-1） | not_run（历史 blocked：PyPI 吞吐） | 若执行 Z-Image 联机安装则作为部分旁证，仍不得替代完整空缓存安装 | 引用 `verification/windows-parity-app/not-run.json` |
-| W1 | 100%/150%/200% DPI | pending | 每档截图 + 元素可见性 | screenshots + JSON |
-| W2 | 960×640 / 1280×800 | pending | 布局与可操作性 | screenshots + JSON |
-| W3 | 真实中文 IME | pending（manual） | 候选确认不发送、显式发送才创建任务 | 所有者确认记录 |
-| W4 | 原生导出对话框 | pending | 文件写出、覆盖确认、旧文件不损坏 | JSON + 截图 |
-| W5 | 多显示器/睡眠唤醒 | pending（optional） | 归位与冒烟发送正常 | JSON |
-| W6 | 暗/亮主题人工审阅 | pending（manual） | 所有者目测结论 | screenshots + 记录 |
-| W7 | 7 型号样图质量人工复核 | pending（manual） | 所有者结论；承接 parity 轮 4.4 `pending_user` | 记录 + 引用样图 |
+| W1 | 100%/150%/200% DPI | user-accepted（2026-11-03，不重测） | 100%/200% 无本机证据但已由所有者接受；150% 旧证据保留 | 引用 `windows-final-acceptance.json` |
+| W2 | 960×640 / 1280×800 | optional（默认跳过） | 此前已有机器证据；如执行则布局与可操作性 | screenshots + JSON |
+| W3 | 真实中文 IME | user-accepted（2026-11-03，不重测） | 所有者已接受 W06（仅单测/合成保护证据） | 引用 `windows-final-acceptance.json` |
+| W4 | 原生导出对话框 | optional（默认跳过） | 此前已有机器证据；如执行则文件写出、覆盖确认 | JSON + 截图 |
+| W5 | 多显示器/睡眠唤醒 | optional（默认跳过） | 如执行则归位与冒烟发送正常 | JSON |
+| W6 | 暗/亮主题人工审阅 | optional（默认跳过） | 如执行则所有者目测结论 | screenshots + 记录 |
+| W7 | 7 型号样图质量人工复核 | user-accepted（parity 归档，不重做） | 归档时所有者已接受 4.4 `pending_user` | 引用 `windows-parity-app/not-run.json` |
 | O1 | app.log 结构化与阶段耗时 | pending | 日志存在、字段齐全、失败可定位 | 日志摘录 |
 | O2 | 看门狗 60 s 卡单 | pending | 60 s 内 failed + 阶段/原因；释放锁后重试成功 | JSON + 日志 |
 | O3 | 取消（BiRefNet/Real-ESRGAN/Python 型号） | pending | ≤15 s 落定、无残留进程 | JSON |
@@ -57,7 +57,8 @@
 - 不得用旧构建（v0.1.0/2026-11-04）、8 GB 参考机、CI 结果替代本机标准档证据。
 - 种子缓存重装与空缓存真实联机安装分开记录；后者若未执行，下载链路在本轮记 `not_run`。
 - 每项证据包含：命令/脚本、JSON（含机器身份与构建 commit）、截图或日志、耗时；时间以墙钟为准并标注是否包含组件加载。
-- 手工项（真实 IME、主题审阅、多显示器）必须由所有者确认；代理只能记录与整理，不代替判定。
+- 历史 `user-accepted`/waived 项（W05 100%/200% DPI、W06 真实 IME、parity 4.4 样图复核等）保持 2026-11-03 / 归档时的原决定，本 change 不重开、不再询问；这些项记 `not_run` 不算本轮缺口。
+- 可选检查（W2/W4/W5/W6）默认跳过；如所有者临时要求才执行，并只作为补充证据。
 - 数据根与非 ASCII 用例的产物位置、进程组残留、导出哈希必须可复核。
 
 ## 执行顺序
