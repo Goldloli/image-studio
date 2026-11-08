@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S1-fresh-root-initial-state",
+  "status": "pass",
+  "date": "2026-11-08T17:24:00+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 build 19045 x64",
+    "cpu": "13th Gen Intel Core i7-13700K (16C/24T)",
+    "ram_gib": 31.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "vram_mib": 12288,
+    "compute_capability": "8.6",
+    "driver": "596.49",
+    "cuda": "13.2",
+    "display": "3840x2160 @150% (AppliedDPI=144)",
+    "webview2": "157.0.4341.42"
+  },
+  "build": {
+    "commit": "4fb982bda6a15c0b1daeec70757cb4e8fbf313f9",
+    "exe": "target/release/image-studio-desktop.exe",
+    "exe_sha256": "5c7a4394407e06462387563216ae5366cec313529675a4a4429a6c4d8ab77d6b",
+    "frontend_dist_built_at": "2026-11-08T17:15:31+08:00",
+    "quality_gate_log": "build-quality-gates.log",
+    "note": "docs-only commits after b861ae5; no code delta"
+  },
+  "data_root": "C:/ist-accept",
+  "install_type": "none (fresh root, new-user simulation)",
+  "observed": {
+    "catalog_entries": 7,
+    "installed": 0,
+    "executable": 0,
+    "device_meets_threshold": 7,
+    "compact_vs_standard": "Klein detail: 当前执行：标准档 1024×1024 · bfloat16",
+    "device_probe_after_install": "RTX 3080 Ti, compute 8.6, torch 2.10.0+cu126, python 3.12.10 (ready records)"
+  },
+  "evidence": [
+    "01-model-page-klein-expanded.png"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S10-export-and-restart",
+  "status": "pass",
+  "date": "2026-11-08T17:52:00+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 build 19045 x64",
+    "cpu": "13th Gen Intel Core i7-13700K (16C/24T)",
+    "ram_gib": 31.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "vram_mib": 12288,
+    "compute_capability": "8.6",
+    "driver": "596.49",
+    "cuda": "13.2",
+    "display": "3840x2160 @150% (AppliedDPI=144)",
+    "webview2": "157.0.4341.42"
+  },
+  "build": {
+    "commit": "4fb982bda6a15c0b1daeec70757cb4e8fbf313f9",
+    "exe": "target/release/image-studio-desktop.exe",
+    "exe_sha256": "5c7a4394407e06462387563216ae5366cec313529675a4a4429a6c4d8ab77d6b",
+    "frontend_dist_built_at": "2026-11-08T17:15:31+08:00",
+    "quality_gate_log": "build-quality-gates.log",
+    "note": "docs-only commits after b861ae5; no code delta"
+  },
+  "data_root": "C:/ist-accept",
+  "export": {
+    "asset": {
+      "file": "asset-03599e34eb144019b66ef0f8863b7866.png",
+      "bytes": 2051314,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "ad9fdf9ccd650dc69c5850b72aebfeac6b983a9308554441a2cb45afe129b930"
+    },
+    "exported": {
+      "file": "export-klein-t2i.png",
+      "bytes": 2051314,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "ad9fdf9ccd650dc69c5850b72aebfeac6b983a9308554441a2cb45afe129b930"
+    },
+    "byte_identical": true
+  },
+  "restart": {
+    "ready_models": 4,
+    "device_meets_threshold": 7,
+    "catalog_entries": 7,
+    "conversation_turns_persisted": 5,
+    "model_page_note": "Qwen-Image 2.1 Turbo: 安装已中断，可继续"
+  },
+  "evidence": [
+    "16-restart-model-state.png"
+  ]
+}

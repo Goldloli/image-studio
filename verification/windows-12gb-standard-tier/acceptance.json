@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-acceptance",
+  "date": "2026-11-08",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 build 19045 x64",
+    "cpu": "13th Gen Intel Core i7-13700K (16C/24T)",
+    "ram_gib": 31.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "vram_mib": 12288,
+    "compute_capability": "8.6",
+    "driver": "596.49",
+    "cuda": "13.2",
+    "display": "3840x2160 @150% (AppliedDPI=144)",
+    "webview2": "157.0.4341.42"
+  },
+  "build": {
+    "commit": "4fb982bda6a15c0b1daeec70757cb4e8fbf313f9",
+    "exe": "target/release/image-studio-desktop.exe",
+    "exe_sha256": "5c7a4394407e06462387563216ae5366cec313529675a4a4429a6c4d8ab77d6b",
+    "frontend_dist_built_at": "2026-11-08T17:15:31+08:00",
+    "quality_gate_log": "build-quality-gates.log",
+    "note": "docs-only commits after b861ae5; no code delta"
+  },
+  "data_root": "C:/ist-accept",
+  "scope": "Windows 10 12 GB standard tier on current main build (fresh-root new-user install)",
+  "cases": [
+    {
+      "case": "S0-environment-and-build",
+      "status": "pass",
+      "evidence": "S0-environment-build.json"
+    },
+    {
+      "case": "S1-fresh-root-initial-state",
+      "status": "pass",
+      "evidence": "S1-fresh-root-initial.json"
+    },
+    {
+      "case": "S2-seeded-cache-installs",
+      "status": "pass",
+      "evidence": "S2-seeded-install-timings.json"
+    },
+    {
+      "case": "S3-qwen-prepare-preflight-blocked",
+      "status": "blocked",
+      "evidence": "S3-qwen-prepare-preflight.json"
+    },
+    {
+      "case": "S4-klein-t2i",
+      "status": "pass",
+      "evidence": "S4-klein-t2i.json"
+    },
+    {
+      "case": "S5-zimage-t2i",
+      "status": "pass",
+      "evidence": "S5-zimage-t2i.json"
+    },
+    {
+      "case": "S6-birefnet",
+      "status": "pass",
+      "evidence": "S6-birefnet.json"
+    },
+    {
+      "case": "S7-realesrgan",
+      "status": "pass",
+      "evidence": "S7-realesrgan.json"
+    },
+    {
+      "case": "S8-klein-edit",
+      "status": "pass",
+      "evidence": "S8-klein-edit.json"
+    },
+    {
+      "case": "S10-export-and-restart",
+      "status": "pass",
+      "evidence": "S10-export-restart.json"
+    },
+    {
+      "case": "O1-runtime-log",
+      "status": "pass",
+      "evidence": "O1-app-log.json"
+    },
+    {
+      "case": "S9-zimage-standard-tier",
+      "status": "pass",
+      "note": "covered by S5 (Z-Image Turbo, minimum 12 GiB, no 8 GB compact tier)",
+      "evidence": "S5-zimage-t2i.json"
+    },
+    {
+      "case": "S11-empty-cache-real-network-install",
+      "status": "not_run",
+      "note": "historically blocked (I2-1, PyPI throughput); not re-run"
+    },
+    {
+      "case": "S12-upgrade-path-old-root",
+      "status": "not_run",
+      "note": "C:/ist-a intentionally untouched; fresh-root acceptance used instead"
+    },
+    {
+      "case": "W1-100-200-dpi",
+      "status": "accepted-not-retested",
+      "note": "owner accepted 2026-11-03 (W05)"
+    },
+    {
+      "case": "W2-window-sizes",
+      "status": "not_run",
+      "note": "optional, skipped"
+    },
+    {
+      "case": "W3-real-ime",
+      "status": "accepted-not-retested",
+      "note": "owner accepted 2026-11-03 (W06)"
+    },
+    {
+      "case": "W4-native-export-dialog",
+      "status": "not_run",
+      "note": "optional, skipped (export verified via save dialog automation)"
+    },
+    {
+      "case": "W5-multi-monitor-sleep",
+      "status": "not_run",
+      "note": "optional, skipped"
+    },
+    {
+      "case": "W6-theme-review",
+      "status": "not_run",
+      "note": "optional, skipped"
+    },
+    {
+      "case": "W7-sample-quality-review",
+      "status": "accepted-not-retested",
+      "note": "accepted at parity archive (4.4 pending_user)"
+    },
+    {
+      "case": "O2-watchdog-60s",
+      "status": "not_run"
+    },
+    {
+      "case": "O3-cancel-coverage",
+      "status": "not_run"
+    },
+    {
+      "case": "O4-preflight-cancel-ipw",
+      "status": "not_run"
+    },
+    {
+      "case": "O5-console-window",
+      "status": "not_run"
+    },
+    {
+      "case": "O6-install-download-retry",
+      "status": "not_run"
+    },
+    {
+      "case": "O7-non-ascii-path",
+      "status": "not_run"
+    },
+    {
+      "case": "O8-disk-shortage",
+      "status": "not_run"
+    },
+    {
+      "case": "O9-forced-reap-test",
+      "status": "not_run"
+    },
+    {
+      "case": "O10-bad-checksum",
+      "status": "not_run"
+    },
+    {
+      "case": "C1-current-ci-run",
+      "status": "not_run",
+      "note": "CI run #35 at b861ae5 verified via API earlier; not yet written into verification/ci-release"
+    },
+    {
+      "case": "C2-unreleased-commits",
+      "status": "pass",
+      "note": "recorded: 76 commits after v0.1.0; tag/release needs owner authorization"
+    },
+    {
+      "case": "C3-release-artifact-install",
+      "status": "not_run"
+    },
+    {
+      "case": "D1..D7-doc-close-out",
+      "status": "not_run"
+    },
+    {
+      "case": "B1..B3-bd-close-out",
+      "status": "not_run"
+    }
+  ],
+  "summary": {
+    "pass": 11,
+    "blocked": 1,
+    "accepted_not_retested": 3,
+    "not_run": 19
+  },
+  "limitations": [
+    "GPU numbers are host-observed nvidia-smi peaks including desktop baseline, not CUDA reserved",
+    "Qwen/MOSS blocked by machine pagefile/commit state; a new user hits the same gate",
+    "real network download path not re-run; seeded cache used"
+  ],
+  "notes": "covers the new change requirement: current-main standard-tier product evidence on the Win10 12 GB target machine"
+}

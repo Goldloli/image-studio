@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S8-klein-edit",
+  "status": "pass",
+  "date": "2026-11-08T17:50:00+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 build 19045 x64",
+    "cpu": "13th Gen Intel Core i7-13700K (16C/24T)",
+    "ram_gib": 31.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "vram_mib": 12288,
+    "compute_capability": "8.6",
+    "driver": "596.49",
+    "cuda": "13.2",
+    "display": "3840x2160 @150% (AppliedDPI=144)",
+    "webview2": "157.0.4341.42"
+  },
+  "build": {
+    "commit": "4fb982bda6a15c0b1daeec70757cb4e8fbf313f9",
+    "exe": "target/release/image-studio-desktop.exe",
+    "exe_sha256": "5c7a4394407e06462387563216ae5366cec313529675a4a4429a6c4d8ab77d6b",
+    "frontend_dist_built_at": "2026-11-08T17:15:31+08:00",
+    "quality_gate_log": "build-quality-gates.log",
+    "note": "docs-only commits after b861ae5; no code delta"
+  },
+  "data_root": "C:/ist-accept",
+  "install_type": "seeded_cache",
+  "model": "FLUX.2 Klein 4B (single image edit)",
+  "capability": "standard tier 1024x1024",
+  "elapsed_seconds": 46.6,
+  "stages": [
+    "导入源图",
+    "正在准备生成",
+    "正在加载模型",
+    "正在采样 0/4..4/4",
+    "正在处理"
+  ],
+  "asset": {
+    "file": "asset-14a8d7d5bd34478690b8c2264f670c54.png",
+    "bytes": 1771418,
+    "width": 1024,
+    "height": 1024,
+    "sha256": "acf721ac0d237a3d2a56cf0ca5869f03a38a74218e6330fe635c4126f599f965"
+  },
+  "gpu": null,
+  "notes": "保留原场景，改为黄昏暖色；输出 1024x1024",
+  "evidence": [
+    "15-klein-edit-result.png"
+  ]
+}

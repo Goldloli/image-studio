@@ -1,0 +1,51 @@
+# Windows 12 GB standard-tier acceptance (2026-11-08)
+
+Machine: Windows 10 Pro 22H2 (19045) / i7-13700K / **RTX 3080 Ti 12,288 MiB (sm86, driver 596.49)** /
+31.7 GiB RAM / 3840×2160 @150% / WebView2 157.0.4341.42.
+Build: current `main` (`b861ae5`; local docs-only commits do not change code) via
+`scripts/build-windows-internal.ps1 -SkipBundle` + `cargo build --release -p image-studio-desktop`.
+Data root: **`C:\ist-accept`** — a brand-new isolated root that simulates a new user's first install
+(the 2026-11-04 root `C:\ist-a` was not used and not modified).
+
+This round covers the 12 GB **standard tier** on the Windows 10 target machine. Evidence files use the
+`S*`/`O1` case ids from `openspec/changes/certify-windows-10-target-machine/test-plan.md`.
+
+## Result summary
+
+| Case | Result | Measured |
+|---|---|---|
+| S0 environment/build/quality gates | pass | cargo fmt/clippy/test (199 desktop + 46 protocol, 0 failed), frontend test/check/build, exe SHA-256 in [S0-environment-build.json](S0-environment-build.json) |
+| S0 seed cache (`C:\ist-accept`) | pass | parity seed 132 artifacts / 123 unique / 0 missing / 0 mismatch, 112.5 GB hard-linked; Z-Image Gate 0 seed 25 links; cache total 135.4 GB, **zero download** |
+| S1 fresh-root initial state | pass | 7 models, 0 installed, device meets thresholds for 7; Klein detail shows **标准档 1024×1024 · bfloat16** |
+| S2 seeded-cache installs | pass | Klein ≈110 s (18.7 GB), BiRefNet ≈32 s, Real-ESRGAN ≈12 s, Z-Image ≈172 s (35.56 GB) |
+| S3 Qwen-Turbo install (fresh user) | **blocked** | install-time NF4 prepare refused before quantization: available RAM 22.6 GiB (<28), commit headroom 24.8 GiB (<26). No ready record, no `.prepared` directory. See [S3-qwen-prepare-preflight.json](S3-qwen-prepare-preflight.json) |
+| S4 Klein text-to-image | pass | 50.1 s total; 1024×1024 PNG 2,051,314 B `ad9fdf9c…`; host GPU used peak 11,008 MiB of 12,288 |
+| S5 Z-Image text-to-image (≥12 GB-only model) | pass | 55.1 s total, 9 steps; 1024×1024 PNG 1,850,011 B `ac2c725d…`; host GPU used peak 10,707 MiB |
+| S6 BiRefNet background removal | pass | 25.6 s; RGBA 1024×1024 1,987,389 B + 8-bit mask 10,375 B; CPU route |
+| S7 Real-ESRGAN 4× | pass | 8.6 s; 1024→4096, 23,760,930 B `e9052829…`; ncnn Vulkan |
+| S8 Klein single-image edit | pass | 46.6 s; 1024×1024 PNG 1,771,418 B `acf721ac…`; scene preserved, prompt applied |
+| S10 export + restart | pass | exported PNG byte-identical to asset (SHA-256 `ad9fdf9c…`); after restart 4/7 models ready, 5 conversation turns persist |
+| O1 runtime log | pass | `C:\ist-accept\logs\app.log` structured events incl. `install.verify.*`, `turn.preflight.done ms=…`, `generation.start available_gib=…` |
+
+Notes:
+
+- GPU numbers are host-observed `nvidia-smi` samples (1 s interval) and include the ~1.4 GiB desktop
+  baseline; they are not the worker's CUDA reserved figure.
+- Qwen-Image 2.1 / MOSS-Image-SFT standard generation is **blocked** on this machine's current default
+  pagefile state, not by an old install: a new user on the same machine hits the same gate. On
+  2026-11-04 the same machine passed the gate via a 29.05 GiB commit headroom (pagefile had grown);
+  today the auto-managed pagefile is 4.8 GiB and commit headroom is ~24–25 GiB. The environment
+  experiment that grew the commit limit to 43.2 GiB (31.4 GiB headroom) is recorded in
+  [S3-qwen-prepare-preflight.json](S3-qwen-prepare-preflight.json); Windows shrank it back before the
+  retry, so a stable fix needs the owner to set a larger virtual memory size (admin + reboot).
+- The Real-ESRGAN install used the seeded cache; the real-network download/retry path was not re-run.
+- No console-window, watchdog, cancel, disk-full or network-fault cases were executed in this round;
+  see the change test plan for their `not_run` status.
+
+## Screenshots
+
+`01-model-page-klein-expanded.png`, `03-klein-ready.png`, `04-birefnet-ready.png`,
+`05-realesrgan-ready.png`, `06-zimage-ready.png`, `07-qwen-preflight.png`,
+`10-klein-t2i-result.png`, `11-zimage-t2i-result.png`, `13-birefnet-result.png`,
+`14-realesrgan-result.png`, `15-klein-edit-result.png`, `16-restart-model-state.png`,
+`17-settings-runtime-probe.png`.

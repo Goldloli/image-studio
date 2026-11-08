@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "O1-runtime-log",
+  "status": "pass",
+  "date": "2026-11-08T17:52:00+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 build 19045 x64",
+    "cpu": "13th Gen Intel Core i7-13700K (16C/24T)",
+    "ram_gib": 31.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "vram_mib": 12288,
+    "compute_capability": "8.6",
+    "driver": "596.49",
+    "cuda": "13.2",
+    "display": "3840x2160 @150% (AppliedDPI=144)",
+    "webview2": "157.0.4341.42"
+  },
+  "build": {
+    "commit": "4fb982bda6a15c0b1daeec70757cb4e8fbf313f9",
+    "exe": "target/release/image-studio-desktop.exe",
+    "exe_sha256": "5c7a4394407e06462387563216ae5366cec313529675a4a4429a6c4d8ab77d6b",
+    "frontend_dist_built_at": "2026-11-08T17:15:31+08:00",
+    "quality_gate_log": "build-quality-gates.log",
+    "note": "docs-only commits after b861ae5; no code delta"
+  },
+  "log_file": "C:/ist-accept/logs/app.log",
+  "line_count": 97,
+  "bytes": 7262,
+  "structured_events_found": [
+    "install.verify.begin/prepared/model/runtime",
+    "turn.preflight.geometry/ready/environment/freeze/lock/bound/done ms=...",
+    "generation.start available_gib=..."
+  ],
+  "sample_lines": [
+    "1794131190906 INFO turn.preflight.done turn=turn-60b90ab831c5410c954ca6c5a1a37c7b ms=28",
+    "1794131190906 INFO generation.start job=job-db6bff7e47ea42be979036cf6dc523a9 available_gib=21.40",
+    "1794131214415 INFO turn.preflight.done turn=turn-39d7f797b2e74cdfad3e8779e6ea0693 ms=69",
+    "1794131214416 INFO generation.start job=job-c8d180b4c9c649db96398a342c310a19 available_gib=20.87"
+  ],
+  "rotation": "8 MiB x 3 kept by logging adapter (code + unit tests); not filled in this round"
+}

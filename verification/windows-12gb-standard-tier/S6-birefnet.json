@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S6-birefnet",
+  "status": "pass",
+  "date": "2026-11-08T17:50:00+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 build 19045 x64",
+    "cpu": "13th Gen Intel Core i7-13700K (16C/24T)",
+    "ram_gib": 31.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "vram_mib": 12288,
+    "compute_capability": "8.6",
+    "driver": "596.49",
+    "cuda": "13.2",
+    "display": "3840x2160 @150% (AppliedDPI=144)",
+    "webview2": "157.0.4341.42"
+  },
+  "build": {
+    "commit": "4fb982bda6a15c0b1daeec70757cb4e8fbf313f9",
+    "exe": "target/release/image-studio-desktop.exe",
+    "exe_sha256": "5c7a4394407e06462387563216ae5366cec313529675a4a4429a6c4d8ab77d6b",
+    "frontend_dist_built_at": "2026-11-08T17:15:31+08:00",
+    "quality_gate_log": "build-quality-gates.log",
+    "note": "docs-only commits after b861ae5; no code delta"
+  },
+  "data_root": "C:/ist-accept",
+  "model": "BiRefNet general epoch_244",
+  "capability": "background removal (CPU) standard tier",
+  "elapsed_seconds": 25.6,
+  "outputs": [
+    {
+      "file": "asset-34e7d19eded64ef2a6d6195e0d1852ea.png",
+      "bytes": 1987389,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "b98bdd0599744404fbfe01ce70e164befe57fb79f03563dfb06aa1afccdada1f"
+    },
+    {
+      "file": "asset-a2deb08131ac4642bb98f129045240cc.png",
+      "bytes": 10375,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "abe8dc899009dcfd97e39af2d6fa910181a59a306ae2808b1edcddd02084d83c"
+    }
+  ],
+  "notes": "RGBA 1024x1024 + 8-bit mask 1024x1024",
+  "evidence": [
+    "13-birefnet-result.png"
+  ]
+}

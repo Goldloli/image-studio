@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S0-environment-and-build",
+  "status": "pass",
+  "date": "2026-11-08T17:20:00+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 build 19045 x64",
+    "cpu": "13th Gen Intel Core i7-13700K (16C/24T)",
+    "ram_gib": 31.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "vram_mib": 12288,
+    "compute_capability": "8.6",
+    "driver": "596.49",
+    "cuda": "13.2",
+    "display": "3840x2160 @150% (AppliedDPI=144)",
+    "webview2": "157.0.4341.42"
+  },
+  "build": {
+    "commit": "4fb982bda6a15c0b1daeec70757cb4e8fbf313f9",
+    "exe": "target/release/image-studio-desktop.exe",
+    "exe_sha256": "5c7a4394407e06462387563216ae5366cec313529675a4a4429a6c4d8ab77d6b",
+    "frontend_dist_built_at": "2026-11-08T17:15:31+08:00",
+    "quality_gate_log": "build-quality-gates.log",
+    "note": "docs-only commits after b861ae5; no code delta"
+  },
+  "data_root": "C:/ist-accept",
+  "quality_gates": {
+    "cargo_fmt": "pass",
+    "cargo_clippy": "pass",
+    "cargo_test_workspace": "pass (199 desktop + 46 protocol + others, 0 failed)",
+    "frontend_test": "pass",
+    "frontend_check": "pass (tsc --noEmit)",
+    "frontend_build": "pass (vite 8.3.5, built in 317ms)"
+  },
+  "seed_cache": {
+    "script": "scripts/windows-parity/seed-parity-cache.ps1",
+    "artifacts": 132,
+    "unique_shas": 123,
+    "linked": 123,
+    "missing": 0,
+    "hash_mismatch": 0,
+    "unique_bytes": 112508722670,
+    "plus_zimage_gate0": {
+      "artifacts": 59,
+      "hard_links": 25,
+      "cache_hits": 34
+    },
+    "cache_total_gib": 135.4,
+    "network_used": false
+  }
+}

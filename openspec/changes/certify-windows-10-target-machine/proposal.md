@@ -13,8 +13,8 @@
 
 ## What Changes
 
-- **在本机当前主分支构建上做 12 GB 标准档产品级回归**：设备探针（12288 MiB / sm86）、档位投影（standard 1024²/bfloat16，Z-Image 12 GB 门槛）、模型重新安装/激活身份变化、逐能力真实生成（Klein 文生图/编辑、BiRefNet、Real-ESRGAN；Qwen/MOSS 视内存预检决策而定）、资源口径、导出逐字节一致、重启后就绪。
-- **记录并验证本机特有的安装期量化准备门槛**：本机自动管理页面文件仅 4.8 GiB，commit 上限 36.5 GiB、余量 21.7 GiB，可用物理内存 20.0 GiB，低于规格的"≥28 GiB 物理或 ≥26 GiB commit 余量"双条件；Qwen/MOSS 的（重新）安装会在量化前被预检拒绝。按规格场景记录该可行动失败，并由所有者决定是否调整系统虚拟内存后重试；不得静默改系统配置。
+- **在本机当前主分支构建上，用全新隔离数据根做 12 GB 标准档产品级回归（新用户视角）**：全新根 `C:\ist-accept` 等价于新用户首次安装，不依赖 `C:\ist-a` 的旧安装状态；种子缓存来自本地已验证 artifact（同盘硬链接，dry-run 已确认 132 artifacts / 0 missing / 0 mismatch，约 112.5 GB 零下载）。覆盖：设备探针（12288 MiB / sm86）、档位投影（standard 1024²/bfloat16，Z-Image ≥12 GB 门槛）、首次安装、逐能力真实生成（Klein 文生图/编辑、BiRefNet、Real-ESRGAN、Z-Image；Qwen/MOSS 视内存预检而定）、资源口径、导出逐字节一致、重启后就绪。旧根 `C:\ist-a` 仅作升级路径对照保留，不删除。
+- **记录并验证本机特有的安装期量化准备门槛**：这是**机器级内存状态问题，不是旧安装残留**。2026-11-04 本机首次安装 Qwen/MOSS 时 `prepare-preflight.json` 实测可用物理内存 22.3 GiB、commit 余量 29.05 GiB，以 commit 余量 ≥26 GiB 通过；今天（重启后自动页面文件仅 4.8 GiB）commit 余量 21.7–24.7 GiB，低于规格双条件（≥28 GiB 物理或 ≥26 GiB commit 余量）。因此新用户在内存状态较差时同样会在量化前被拒并看到可行动错误，这是规格要求的行为；本轮先按全新安装实测记录，再由所有者决定是否调整系统虚拟内存后重试。
 - **Windows 桌面遗留项按既有决定处理**：W05 100%/200% DPI、W06 真实 IME、parity 4.4 样图复核已在 2026-11-03 / parity 归档时由所有者接受，本轮不重测、不再询问；仅保留 960×640/1280×800、原生导出对话框、主题、多显示器等廉价可选检查（默认跳过）。
 - **复测并留证**：`<data>/logs/app.log` 结构化日志与阶段耗时、看门狗 60 s 卡单、取消（BiRefNet/Real-ESRGAN 补齐 T12 5/5 + 预检期取消 ipw）、生成/安装不弹控制台、安装下载重试（代理故障注入）、坏校验/缺失文件拒绝（I2-2）、非 ASCII/长路径、磁盘不足快速回归。
 - **CI/发布记录与文档收口**：记录 HEAD run #35 证据；登记未发布提交与发布决策（需所有者授权远程操作）；更新 `windows-hardening-and-coverage` test-plan 矩阵、`windows-8gb-tier` 过时表述、Real-ESRGAN asset-manifest 状态，同步其 spec delta 并归档该 change；清理 `verification/` 中已被取代的 `not_run` 行；bd 过时 issue 收口（06k/q2y/ipw），ba1 保留。
@@ -34,11 +34,15 @@
 
 - **代码**：无产品代码改动。可能新增/修订验收脚本（`scripts/windows-ui/` 场景、资源采样与证据生成脚本），脚本仅用于验收，不进入产品运行时。
 - **证据**：新增 `verification/windows-12gb-standard-tier/`（环境、逐用例 JSON、截图、日志、质量门禁日志）；更新 `verification/ci-release/`、`verification/windows-desktop-coverage/` 的过时矩阵。
-- **数据根**：沿用隔离根 `C:\ist-a`（已有 104.9 GiB 缓存与 6 个已安装型号），先备份 2026-11-04 的就绪记录作为"旧构建状态"证据；不使用默认用户数据根。
+- **数据根**：主证据使用**全新隔离根 `C:\ist-accept`**（模拟新用户首次安装，不读取旧状态）；种子缓存由本地 Gate 0 / parity 已验证 artifact 硬链接生成，零下载。旧根 `C:\ist-a`（2026-11-04 状态，238 GB）保留作升级路径对照，不删除；默认用户数据根不参与验收。
 - **系统**：若所有者选择提高虚拟内存以满足 prepare 预检，需要管理员权限并重启一次；这是本 change 唯一可能改变系统配置的操作，必须显式批准。
 - **文档/流程**：`doc/15-windows-8gb-tier.md` 增补 12 GB 标准档实测表；`openspec/specs/windows-desktop` 新增证据要求；归档 `windows-hardening-and-coverage`；bd 状态更新。
 - **远程操作**：仅"记录已有 CI run"属于只读网络访问；打 tag、推送、`bd dolt pull` 等远程写操作不在本 change 自动执行范围内，需另行授权。
 
+## 执行状态（2026-11-08）
+
+按所有者要求改用全新数据根 `C:\ist-accept`（模拟新用户）执行：标准档 4 型号种子安装 + 5 项生成/编辑/去背景/放大全部通过，导出逐字节一致、重启恢复；Qwen/MOSS 安装被 prepare 内存预检 blocked（新用户同样命中），证据在 `verification/windows-12gb-standard-tier/`，结果摘要见 [design.md](design.md) §13 与 [tasks.md](tasks.md)。剩余 O/C/D/B 收口项未执行；Qwen/MOSS 生成等待所有者决定是否采用 A（调大虚拟内存）后补测。
+
 ## 批准状态
 
-**待项目所有者确认。** 确认时请给出 design.md §9 的两个决策：内存预检处理方式（A/B/C）与是否做 Z-Image 标准档可选回归（本机可零下载种子安装）。历史手工项（W05/W06/样图复核）沿用既有接受状态，本 change 不再询问。
+**已获实施确认（2026-11-08，所有者指示继续并按新用户方式验收）。** 仍待所有者决定：是否为取得 Qwen/MOSS 标准档证据而采用 A（调大系统虚拟内存，需管理员+重启）；历史手工项不再询问。

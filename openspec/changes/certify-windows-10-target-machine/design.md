@@ -16,7 +16,7 @@
 | 磁盘 | C: 1,087 GiB 空闲；D: 283 GiB；E: 298 GiB；G: 207 GiB | `Win32_LogicalDisk` |
 | 网络 | `github.com`、`modelscope.cn`、`hf-mirror.com` 可达；**`huggingface.co:443` 不可达**（模型正式源为 ModelScope，不受影响） | `Test-NetConnection` |
 | 已安装应用 | `%LOCALAPPDATA%\Image Studio\image-studio-desktop.exe`，v0.1.0，**2026-11-04 23:57** 构建，不含 11-06 修复 | 文件时间戳 |
-| 隔离数据根 | `C:\ist-a`：cache 104.9 GiB / models 6 个 + 3 份 prepared / runtimes 2 份 / 就绪记录 6 份（2026-11-04） | `C:\ist-a` 目录与 `data/installations/models/*.json` |
+| 隔离数据根 | 本轮新建 `C:\ist-accept`（全新根，模拟新用户首次安装；cache 135.4 GiB / 148 条已验证 artifact，零下载）。旧根 `C:\ist-a`（2026-11-04 状态：cache 104.9 GiB / 6 型号 + 3 份 prepared / 6 份就绪记录）原样保留、不作本轮证据来源 | 目录检查与 seed 报告 |
 | 默认数据根 | `%LOCALAPPDATA%\ImageStudio`：仅 prompts/WebView2 缓存，无模型（不使用） | 目录检查 |
 | CI | HEAD `b861ae5` 的 quality run **#35 success**（Windows + macOS arm64） | GitHub Actions API |
 
@@ -26,7 +26,7 @@
 
 - `main == origin/main == b861ae5`，工作区干净（仅未跟踪的 `.beads/interactions.jsonl`）；`openspec validate --all --strict` 26/26 通过（加入本 change 后为 **27/27**），但 `windows-hardening-and-coverage` 尚未归档，其 spec delta 未进入主规格。
 - 8 GB 参考机证据（`verification/windows-8gb-tier/`、`verification/windows-desktop-coverage/`）只覆盖 Win11 / 2060 SUPER / 紧凑档；本机需要的标准档证据不存在。
-- `C:\ist-a` 的 6 份就绪记录由 2026-11-04 构建写入。实测比对：5 个 Python 模型共用的 v2 运行时清单摘要已从 `0f1174a0…` 变为 `ecf0202b…`，内嵌 diffusers worker wheel 也从 41,530 B / `79799fd9…` 变为 43,526 B / `6c3cae91…`，因此当前构建启动后**预期拒绝这 5 份记录（Klein/BiRefNet/Qwen×2/MOSS）并提示重新安装**；Real-ESRGAN 的原生 ncnn 运行时清单摘要仍匹配（`819d5042…`），预期无需重装。这个拒绝行为本身就是要验证的激活身份证据。
+- `C:\ist-a` 的 6 份就绪记录由 2026-11-04 构建写入。实测比对（仅作升级路径对照，本轮改用全新根）：5 个 Python 模型共用的 v2 运行时清单摘要已从 `0f1174a0…` 变为 `ecf0202b…`，内嵌 diffusers worker wheel 也从 41,530 B / `79799fd9…` 变为 43,526 B / `6c3cae91…`，因此当前构建启动后**预期拒绝这 5 份记录（Klein/BiRefNet/Qwen×2/MOSS）并提示重新安装**；Real-ESRGAN 的原生 ncnn 运行时清单摘要仍匹配（`819d5042…`），预期无需重装。
 - v0.1.0 之后 76 个提交未发布（含本 change 文档提交）；CI 绿色记录未入库；`windows-hardening` test-plan 矩阵、`windows-8gb-tier` 的 known roughness、Real-ESRGAN asset-manifest 状态等仍是过时文本。
 
 ## 3. 证据类型与判定规则
@@ -52,19 +52,19 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 ## 4. 构建与运行方式
 
 1. **质量门禁 + 构建**：`pwsh -File scripts/build-windows-internal.ps1`（内部 NSIS + release 二进制 + sidecars，并写入 `verification/windows-installer/internal-package.json`）；只想先跑产品回归可用 `-SkipBundle` 得到 `target/release/image-studio-desktop.exe` 与 sidecars。构建日志另存证据目录。
-2. **运行隔离根**：从源码验收时直接跑 `target\release\image-studio-desktop.exe --data-dir C:\ist-a`；若安装了内部 NSIS 包，则用 `%LOCALAPPDATA%\Image Studio\image-studio-desktop.exe --data-dir C:\ist-a`。默认数据根不参与验收。
+2. **运行隔离根**：从源码验收时直接跑 `target\release\image-studio-desktop.exe --data-dir C:\ist-accept`；若安装了内部 NSIS 包，则用 `%LOCALAPPDATA%\Image Studio\image-studio-desktop.exe --data-dir C:\ist-accept`。默认数据根与旧根 `C:\ist-a` 不参与验收。
 3. **CDP 驱动**：按 `scripts/windows-ui/README.md` 用 `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=<port>` 启动，本机 Hyper-V 保留端口需重新确认（2026-11-08 的 `netsh int ipv4 show excludedportrange` 未列出 9259–9358，候选 9222/9333；被占用时记录实际端口）。
 4. **反例**：先在未重新安装的状态启动当前构建，验证旧就绪记录被拒（激活身份变化 → 可行动错误），再执行重装；这解决"旧缓存与新构建是否兼容"的疑问并留下证据。
 
 ## 5. 标准档回归（S 系列）
 
 - **档位投影**：模型页 7 个型号、6 个已安装（Z-Image 未装）；期望 6 个可执行型号显示 `standard · 1024² · bfloat16`（Z-Image 显示满足 12 GB 门槛），不出现紧凑档投影。设备探针需报 12288 MiB / sm86。
-- **重装与激活**：先在未重装状态启动当前构建，验证 5 个 Python 模型（Klein/BiRefNet/Qwen×2/MOSS）被激活身份校验拒绝并给出可行动错误；确认 Real-ESRGAN 记录仍匹配（预期无需重装）。随后用 `C:\ist-a\cache\downloads` 的已验证缓存重装被拒的无 prepare 型号（预期 Klein、BiRefNet），记录 `seeded_cache` 安装的阶段、耗时、结果；清理旧的 `.prepared` 前先备份就绪记录。
+- **首次安装（已完成，S2）**：全新根不读取任何旧记录，Klein/BiRefNet/Real-ESRGAN/Z-Image 直接用本地种子缓存首次安装，记录 `seeded_cache` 安装的阶段与耗时（Klein ≈110 s、BiRefNet ≈32 s、Real-ESRGAN ≈12 s、Z-Image ≈172 s）。旧根的激活身份差异（运行时清单 `0f1174a0…` → `ecf0202b…`、diffusers wheel `79799fd9…` → `6c3cae91…`）只作升级路径对照，本轮未使用旧根。
 - **Qwen / MOSS 与内存预检**：这两个型号 `prepare_with_model = true`，安装期在 CPU 上构建 NF4 量化缓存，**与显存无关**。本机可用物理内存 20.0 GiB、commit 余量 21.7 GiB，均低于规格双条件（≥28 GiB / ≥26 GiB），预期在量化前被拒并给出可行动错误（对应主规格 `model-installation` 的"门槛不足时提前失败"场景）。先按规格记录该 blocked 证据（错误文本、`prepare-preflight.json`、无半成品），再由所有者从 §9 的 A/B/C 中选择。
 - **逐能力标准档生成**：Klein 文生图、Klein 单图编辑、BiRefNet 去背景、Real-ESRGAN 4×（每项至少一次产品内真实生成/编辑/处理）；若 Qwen/MOSS 解锁则补 Qwen Turbo（8 步）与 Qwen base/MOSS（40/50 步，时间预算见下）。每项记录：墙钟耗时、阶段（加载/编码/采样/解码）、CUDA reserved/allocated 峰值、进程 commit、可用内存最低值、输出 PNG 尺寸（标准档文生图为 **1024²**；Klein 编辑按源图规则；Real-ESRGAN 为 4×）、资产字节数与 SHA-256。
 - **资源采样方法**：生成期间以 1 s 间隔轮询 `nvidia-smi --query-gpu=memory.used,memory.total --format=csv`，同时读应用 `app.log` 的生成期内存事件与 worker 资源报告（若产品提供）；进程 commit 峰值用 `Get-Counter`（`\Process(<name>)\...`）或 Windows 性能计数器采样。方法写入证据 JSON 的 `method` 字段，避免口径歧义。
 - **导出与重启**：作品页导出 PNG，与资产逐字节一致；关闭应用重开，模型仍就绪，历史作品可打开并再次导出。
-- **Z-Image 标准档（可选，决策见 §9）**：本机未安装 Z-Image，但 Gate 0 的全部本地 artifact 仍在位（`target/windows-gate0/model` 20 个模型文件 + `target/windows-gate0/downloads` 的 Python 运行时与 38 个 wheel），可用 `target/seed-windows-cache.ps1` 按当前 manifest 校验后**种子安装，零下载**；只有哈希不匹配时才需要从 ModelScope 下载 ~32.85 GB。其 profile `prepare_with_model = false`，不触发 Qwen/MOSS 的内存预检。若执行，作为"仅 12 GB 档"型号的关键标准档证据；不执行则记 `not_run` 并说明。
+- **Z-Image 标准档（可选，决策见 §9）**：本轮已执行——用 Gate 0 全部本地 artifact 种子安装（35.56 GB，零下载，约 172 s），随后 1024² 9 步标准档生成 55.1 s、PNG 1,850,011 B。Z-Image 是**唯一没有 8 GB 紧凑档、最低门槛 12 GB（≥12 GB 均可执行）**的型号，因此是 12 GB 标准档最有代表性的证据。
 - **不要**用 `C:\ist-a` 旧记录的 2026-11-04 生成结果替代本轮生成；旧结果只作对照。
 - **空缓存真实联机安装**：本机本轮不承诺完整的空缓存安装（历史 I2-1 因 PyPI 吞吐被记为 blocked）。Z-Image 若走种子安装则与下载链路无关；若联机安装可作为"模型/运行时下载链路"的部分旁证，但完整空缓存安装仍记 `not_run`，不得声称 I2-1 已通过（S11）。
 
@@ -86,7 +86,7 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 
 ## 7. 可观测性与故障分支（O 系列）
 
-- **O1 日志**：在 `C:\ist-a\logs\app.log` 验证新构建产生结构化行（时间、级别、事件、字段），发送链路有 `preflight`/`bind` 阶段耗时；轮转上限按代码与单测记录（8 MiB × 3），不在本轮人为写满 8 MiB。
+- **O1 日志**：在 `C:\ist-accept\logs\app.log` 验证新构建产生结构化行（时间、级别、事件、字段），发送链路有 `preflight`/`bind` 阶段耗时；轮转上限按代码与单测记录（8 MiB × 3），不在本轮人为写满 8 MiB。
 - **O2 看门狗 60 s**：独占占用 `<data>\data\execution.lock` 后发起发送，断言 60 s 内轮次变为"发送失败"、错误含阶段与原因、界面不无限停留"正在接收提示词"；释放锁后重试成功。
 - **O3 取消**：对 BiRefNet、Real-ESRGAN 与一个 Python 型号各发一次并中途取消，记录落定时间（规格 ≤15 s，强制回收另记原因）与残留进程数；补齐 T12 5/5。
 - **O4 预检期取消（bd ipw）**：在接收提示词/预检阶段点停止，记录落定时间；验证发送快路径不再重复哈希（`38cb6fd`）后是否满足"取消等待可接受"。若通过则取得关闭 ipw 的证据，否则记录剩余延迟并保留 issue。
@@ -103,14 +103,14 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 - **C2**：登记"v0.1.0 之后 76 个提交未发布、标签/发布需要所有者授权远程操作"，不做推送/tag。
 - **C3（可选）**：下载公开发布的 v0.1.0 NSIS 包，在本机安装/启动/卸载一次，验证发布产物在 Win10 可安装；因它是旧代码，只作为"发布产物可用性"证据，不替代标准档回归。若执行需 2026-11-04 已安装版本的升级路径记录。
 
-## 9. 需要所有者决策的两点
+## 9. 执行结论与剩余决策
 
-1. **prepare 内存预检（关键，CPU 内存而非显存）**。本机当前页面文件 4.8 GiB，commit 余量 21.7 GiB，双条件都不满足。选项：
+1. **prepare 内存预检（关键，CPU 内存而非显存）**。本轮已在全新根实测：新用户首次安装 Qwen Turbo 同样被拒（可用物理内存 22.6 GiB、commit 余量 24.8 GiB）。本机默认页面文件 4.8 GiB，双条件都不满足。选项：
    - **A（若需要 Qwen/MOSS 在当前构建上的标准档证据）**：所有者把系统虚拟内存调到初始 ≥40 GiB / 最大 ≥64 GiB（参考 8 GB 机的 75.9 GiB commit 上限），重启后复测。属系统配置变更，需管理员并显式批准；验收后不自动改回，由所有者决定。
-   - **B（不改系统配置）**：用一个临时内存提交压力程序迫使 Windows 自动扩大页面文件，释放后 commit 上限保持扩大，再执行安装。可脚本化、可逆性弱（页面文件可能保持较大），需要在批准后作为实验执行，失败即回退 C。
-   - **C（不冒系统风险，默认建议）**：把 Qwen/MOSS 标准档生成记 `blocked`（预检证据完整），标准档回归证据由 Klein（文生图/编辑）、BiRefNet、Real-ESRGAN（+可选 Z-Image）承载；另立 change 讨论"可复用 prepared 缓存时预检是否仍应拦截"的产品问题。
+   - **B（不改系统配置）**：用一个临时内存提交压力程序迫使 Windows 自动扩大页面文件，释放后 commit 上限保持扩大，再执行安装。**本轮实测（2026-11-08）**：VirtualAlloc 提交 26 GiB 使 commit 上限 36.5 → 43.2 GiB（余量 31.4 GiB），但释放后 Windows 在几秒内回落到 36.5 GiB，重试安装仍被拒——B 在本机不可靠，不作为默认路径。
+   - **C（不冒系统风险，本轮采用）**：把 Qwen/MOSS 标准档生成记 `blocked`（预检证据完整），标准档回归证据由 Klein（文生图/编辑）、BiRefNet、Real-ESRGAN 与 Z-Image 承载；A 仍可随后由所有者决定后补测。
    **不得**在未批准时改系统设置。若只需要"当前主分支能跑标准档"的证据，C 已足够。
-2. **Z-Image 标准档可选回归**：本机已有 Gate 0 全部 artifact，可种子安装、零下载，约 1–2 min 生成；它是唯一仅 12 GB 档的型号，建议执行但可跳过（跳过后标准档证据由 Klein/BiRefNet/Real-ESRGAN 承载，Z-Image 记 `not_run`）。
+2. **Z-Image 标准档可选回归**：**已执行**——本机 Gate 0 artifact 全在位，种子安装零下载（约 172 s），1024² 9 步生成 55.1 s。它是唯一没有 8 GB 紧凑档、最低 12 GB 的型号（≥12 GB 均可执行），已作为标准档的关键证据。
 
 > 历史手工项（W05 100%/200% 缩放、W06 真实 IME、parity 4.4 样图复核）已由所有者在 2026-11-03 / 归档时接受，本 change 不把它们列为决策，也不重测。
 
@@ -135,7 +135,7 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 | 历史手工项被误当作本轮缺口 | 重复劳动、重复询问 | 文档与判定规则明确 user-accepted 项不重开 |
 | 长时间生成占用机器 | 会话中断风险 | 按模型串行执行，先快后慢；每步写 JSON 断点 |
 | CDP 端口被 Hyper-V 保留占用 | 自动化失败 | 启动前检查 `netsh` 排除区间并记录实际端口 |
-| 数据根被误用为默认根 | 污染用户数据 | 全程 `--data-dir C:\ist-a` 或新建隔离根，验收后不写默认根 |
+| 数据根被误用为默认根 | 污染用户数据 | 全程 `--data-dir C:\ist-accept`，验收后不写默认根 |
 
 ## 12. 明确不做
 
@@ -146,3 +146,24 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 - 不做被 waive 的整树禁网 I07/P06，不做 D02/D03（干净 Win10 用户、缺失 WebView2）——需要管理员/VM 或所有者另行安排。
 - 不做签名/公证发布，不自动打 tag、推送或 `bd dolt push/pull`。
 - 不把测试发现的缺陷顺手修掉：先登记 bd，按影响面另立 change。
+
+## 13. 2026-11-08 执行结果（本轮实测）
+
+全新根 `C:\ist-accept`，当前 main 构建（exe SHA-256 见证据），零下载种子缓存。
+
+| 项 | 结果 |
+|---|---|
+| 质量门禁（cargo fmt/clippy/test + 前端 test/check/build） | 全绿（Rust 199 desktop / 46 protocol 等 0 failed） |
+| 种子缓存 | parity 132 artifacts / 0 missing / 0 mismatch，112.5 GB 硬链接；Z-Image Gate 0 额外 25 links；缓存合计 135.4 GB |
+| 新用户初始状态 | 7 型号 / 0 已安装 / 设备满足 7；Klein 显示 standard 1024² · bfloat16 |
+| 首次安装（种子缓存） | Klein ≈110 s、BiRefNet ≈32 s、Real-ESRGAN ≈12 s、Z-Image ≈172 s（35.56 GB） |
+| Qwen Turbo（新用户） | **blocked**：prepare 预检可用内存 22.6 GiB <28、commit 余量 24.8 GiB <26；无 ready/prepared 残留。B 实验可把上限抬到 43.2 GiB 但 Windows 回落，故维持 C |
+| Klein 文生图 | 50.1 s，1024²，2,051,314 B，SHA-256 `ad9fdf9c…`，host GPU used peak 11,008 MiB / 12,288 |
+| Z-Image 文生图 | 55.1 s（9 步），1024²，1,850,011 B， SHA-256 `ac2c725d…`，host GPU used peak 10,707 MiB |
+| BiRefNet 去背景 | 25.6 s，RGBA 1024² 1,987,389 B + mask 10,375 B |
+| Real-ESRGAN 4× | 8.6 s，1024² → 4096²，23,760,930 B |
+| Klein 单图编辑 | 46.6 s，1024²，1,771,418 B |
+| 导出/重启 | 导出与资产逐字节一致；重启后 4/7 就绪、5 轮对话保留 |
+| app.log | 结构化事件齐全（install.verify / turn.preflight.done ms / generation.start） |
+
+未执行（记 `not_run`）：空缓存真实联机安装、旧根升级对照、看门狗、取消、预检期取消、控制台轮询、下载重试、非 ASCII、磁盘不足、坏校验、强制回收引用、CI 记录写入、发布包安装、D/B 收口项。Qwen/MOSS 生成等待所有者决定是否走 A（调大虚拟内存）后补测。

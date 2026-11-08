@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S7-realesrgan",
+  "status": "pass",
+  "date": "2026-11-08T17:50:00+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 build 19045 x64",
+    "cpu": "13th Gen Intel Core i7-13700K (16C/24T)",
+    "ram_gib": 31.7,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti",
+    "vram_mib": 12288,
+    "compute_capability": "8.6",
+    "driver": "596.49",
+    "cuda": "13.2",
+    "display": "3840x2160 @150% (AppliedDPI=144)",
+    "webview2": "157.0.4341.42"
+  },
+  "build": {
+    "commit": "4fb982bda6a15c0b1daeec70757cb4e8fbf313f9",
+    "exe": "target/release/image-studio-desktop.exe",
+    "exe_sha256": "5c7a4394407e06462387563216ae5366cec313529675a4a4429a6c4d8ab77d6b",
+    "frontend_dist_built_at": "2026-11-08T17:15:31+08:00",
+    "quality_gate_log": "build-quality-gates.log",
+    "note": "docs-only commits after b861ae5; no code delta"
+  },
+  "data_root": "C:/ist-accept",
+  "install_type": "seeded_cache",
+  "model": "Real-ESRGAN x4plus",
+  "capability": "standard tier 1024x1024",
+  "elapsed_seconds": 8.6,
+  "stages": [
+    "导入源图",
+    "正在执行本地推理",
+    "正在显示图片"
+  ],
+  "asset": {
+    "file": "asset-74918c6eaa0e48ce95e27109b86564a4.png",
+    "bytes": 23760930,
+    "width": 4096,
+    "height": 4096,
+    "sha256": "e90528290088dc39a33913bc8a7cae54c24e586ee946dd21608734cd7f382e6a"
+  },
+  "gpu": null,
+  "notes": "1024x1024 -> 4096x4096 精确 4x；ncnn Vulkan",
+  "evidence": [
+    "14-realesrgan-result.png"
+  ]
+}

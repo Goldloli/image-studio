@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S3-qwen-prepare-preflight-blocked",
+  "status": "blocked",
+  "date": "2026-11-08T17:41:33+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 19045",
+    "cpu": "i7-13700K",
+    "ram_gib": 31.7,
+    "gpu": "RTX 3080 Ti",
+    "vram_mib": 12288,
+    "driver": "596.49"
+  },
+  "build": {
+    "commit": "4fb982bda6a15c0b1daeec70757cb4e8fbf313f9",
+    "exe_sha256": "5c7a4394407e06462387563216ae5366cec313529675a4a4429a6c4d8ab77d6b"
+  },
+  "data_root": "C:/ist-accept",
+  "install_type": "seeded_cache",
+  "measured": {
+    "available_physical_bytes": 24229167104,
+    "available_commit_bytes": 26656104448,
+    "minimum_available_physical_bytes": 30064771072,
+    "minimum_commit_headroom_bytes": 27917287424
+  },
+  "measurement_note": "新用户全新数据根首次安装 Qwen-Image 2.1 Turbo；量化前预检被拒，未激活 ready 记录、无 prepared 缓存目录",
+  "error_text": "可用内存不足，未开始构建 Qwen/MOSS 量化缓存（未激活任何安装文件）。当前可用物理内存 22.6 GiB（要求 ≥28 GiB）或可用提交余量 24.8 GiB（要求 ≥26 GiB）；请关闭其它占用内存的程序、确认系统虚拟内存/提交上限充足后重试安装。",
+  "evidence": [
+    "07-qwen-preflight.png",
+    "C:/ist-accept/logs/prepare-preflight.json",
+    "C:/ist-accept/logs/installation-process.log"
+  ]
+}
