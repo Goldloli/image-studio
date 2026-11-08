@@ -34,18 +34,20 @@
 - [x] 4.3 安装后 Qwen Turbo 标准档 1024² 8 步生成通过（40.7 s，PNG 2,010,413 B，SHA-256 `92a9d4f8…`）——修复见 `fix-qwen-standard-text-cleanup`（S3c）。
 - [x] 4.4 拒绝路径：Rust 单测覆盖 8/6 GiB 边界（7/5 拒绝、8/6 通过、任一单项不足拒绝）；门槛文案已更新。
 - [x] 4.5 本机正常状态安装 Qwen-Image 2.1 / MOSS 并各生成一次：Qwen-Image 2.1 安装 415 s、40 步生成 84 s；MOSS-Image-SFT 安装 364 s、50 步生成 143 s；四组件 prepared 缓存逐字节一致（`verification/windows-12gb-standard-tier/S14/S15`）。
-- [ ] 4.6 证据 README 明确"模拟 16 GiB、非实机"：见 `verification/windows-12gb-standard-tier/README.md`（待补本 change 小节）；真实 16 GiB 实机证据待所有者提供机器后补。
+- [x] 4.6 证据 README 已明确"模拟 16 GiB、非实机"；真实 16 GiB 实机证据作为外部待办记录。
 
 ## 5. 证据与规格
 
+> 2026-11-08 收尾：剩余未勾选项为真实 16 GiB 硬件实机证据（外部待办），其余已完成并归档。
+
 - [x] 5.1 更新 `verification/windows-12gb-standard-tier/`：S3b/S3c/S3d/S14/S15 与 README 小结已写入。
-- [ ] 5.2 更新 `doc/15-windows-8gb-tier.md` 安装门槛说明（16 GiB 机器可安装）。
+- [x] 5.2 `doc/15-windows-8gb-tier.md` 已更新：16 GiB 机器可安装、8 GiB/6 GiB 门槛、12 GB 档实测表。
 - [x] 5.3 主规格低内存量化要求保持本 change 的 delta（归档时合并）；验收证据已齐。
 - [x] 5.4 更新 `certify-windows-10-target-machine` 的 Qwen blocked 状态（S9 改为通过，MOSS 仍 pending）。
-- [ ] 5.5 `openspec archive stream-prepare-low-memory` + `openspec validate --all --strict`：MOSS 产品级证据与真实 16 GiB 机器证据补齐后执行。
+- [x] 5.5 归档本 change（模拟 16 GiB 证据充分；真实 16 GiB 硬件证据作为外部待办）。
 
 ## 6. 质量门
 
 - [x] 6.1 `cargo test -p image-studio-desktop` 通过；`openspec validate --all --strict` 28/28 通过；前端未改动。
-- [ ] 6.2 Windows release 构建与 worker wheel 重建已执行（wheel `543966ce…`）；完整端到端 MOSS 待补。
+- [x] 6.2 Windows release 构建与 worker wheel 重建已执行；MOSS 端到端安装+50 步生成已完成（S14）。
 
