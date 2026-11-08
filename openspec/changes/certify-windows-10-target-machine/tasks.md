@@ -31,6 +31,7 @@
 - [ ] 2.4 原生导出对话框：`save-ui-dialog.ps1` 保存并与资产逐字节比对；覆盖确认与旧文件保护分支（W4）。
 - [ ] 2.5 （可选）多显示器/睡眠唤醒：切换显示器/睡眠唤醒后截图与一次冒烟发送（W5）。
 - [ ] 2.6 暗/亮主题截图与所有者目测结论（W6）。
+- [ ] 2.7 所有者对 7 型号样图做一次质量人工复核（来源 `verification/windows-parity-app/not-run.json` 的 4.4 项 `pending_user`），记录结论（W7）。
 
 ## 3. 可观测性与故障分支（P1）
 
@@ -43,6 +44,7 @@
 - [ ] 3.7 非 ASCII/长路径：`D:\ist-12gb\数据 测试\appdata` 新根完成 Real-ESRGAN 安装+放大（O7）。
 - [ ] 3.8 磁盘不足快速回归：受限卷/配额下安装预检约 4 s 报错、不写缓存/安装记录（O8）。
 - [ ] 3.9 本地运行 `cargo test -p image-studio-desktop --test forced_reap` 并保存日志，作为强制回收证据引用（O9）。
+- [ ] 3.10 坏校验/缺失文件拒绝回归（I2-2）：在隔离根缓存中放入损坏 artifact 或删缺失文件后安装，验证明确错误、可重试、不写半成品（O10）。
 
 ## 4. CI 与发布记录（P1）
 
@@ -58,6 +60,7 @@
 - [ ] 5.4 同步 `windows-hardening-and-coverage` spec delta（桌面运行日志与失败诊断）到 `openspec/specs/windows-desktop/spec.md`，按 OpenSpec 流程归档该 change，并 `openspec validate --all --strict`（D4）。
 - [ ] 5.5 `doc/15-windows-8gb-tier.md` 增补 12 GB 标准档本机实测表（明确机器与档位不同）（D5）。
 - [ ] 5.6 写 `verification/windows-12gb-standard-tier/README.md` + `acceptance.json`，汇总所有 pass/blocked/not_run/manual 行，归档本 change（D6）。
+- [ ] 5.7 清理 `verification/` 中已被后续证据取代的 `not_run`/过时行（`windows-ui-projection/README.md`、`windows-parity-worker/README.md`、`windows-parity-app/test-plan-matrix.md`、`windows-parity-review` 审计 R16/R19 遗留），标注取代关系（D7）。
 
 ## 6. bd 收口（P2）
 

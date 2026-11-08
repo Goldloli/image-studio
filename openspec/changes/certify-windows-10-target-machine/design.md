@@ -24,10 +24,10 @@
 
 ## 2. 当前仓库与证据缺口
 
-- `main == origin/main == b861ae5`，工作区干净（仅未跟踪的 `.beads/interactions.jsonl`）；`openspec validate --all --strict` 26/26 通过，但 `windows-hardening-and-coverage` 尚未归档，其 spec delta 未进入主规格。
+- `main == origin/main == b861ae5`，工作区干净（仅未跟踪的 `.beads/interactions.jsonl`）；`openspec validate --all --strict` 26/26 通过（加入本 change 后为 **27/27**），但 `windows-hardening-and-coverage` 尚未归档，其 spec delta 未进入主规格。
 - 8 GB 参考机证据（`verification/windows-8gb-tier/`、`verification/windows-desktop-coverage/`）只覆盖 Win11 / 2060 SUPER / 紧凑档；本机需要的标准档证据不存在。
 - `C:\ist-a` 的 6 份就绪记录由 2026-11-04 构建写入，记录的 `worker_wheels` 与当前构建嵌入的 diffusers worker wheel 不同，因此当前构建启动后**预期会拒绝这些记录并提示重新安装**——这本身就是要验证的激活身份行为。
-- v0.1.0 之后 75 个提交未发布；CI 绿色记录未入库；`windows-hardening` test-plan 矩阵、`windows-8gb-tier` 的 known roughness、Real-ESRGAN asset-manifest 状态等仍是过时文本。
+- v0.1.0 之后 76 个提交未发布（含本 change 文档提交）；CI 绿色记录未入库；`windows-hardening` test-plan 矩阵、`windows-8gb-tier` 的 known roughness、Real-ESRGAN asset-manifest 状态等仍是过时文本。
 
 ## 3. 证据类型与判定规则
 
@@ -51,7 +51,7 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 ## 4. 构建与运行方式
 
 1. **质量门禁 + 构建**：`pwsh -File scripts/build-windows-internal.ps1`（内部 NSIS + release 二进制 + sidecars，并写入 `verification/windows-installer/internal-package.json`）；只想先跑产品回归可用 `-SkipBundle` 得到 `target/release/image-studio-desktop.exe` 与 sidecars。构建日志另存证据目录。
-2. **运行隔离根**：`& "C:\Program Files\...\image-studio-desktop.exe" --data-dir C:\ist-a`（实际路径以构建产物为准）；默认数据根不参与验收。
+2. **运行隔离根**：从源码验收时直接跑 `target\release\image-studio-desktop.exe --data-dir C:\ist-a`；若安装了内部 NSIS 包，则用 `%LOCALAPPDATA%\Image Studio\image-studio-desktop.exe --data-dir C:\ist-a`。默认数据根不参与验收。
 3. **CDP 驱动**：按 `scripts/windows-ui/README.md` 用 `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=<port>` 启动，本机 Hyper-V 保留端口需重新确认（2026-11-08 的 `netsh int ipv4 show excludedportrange` 未列出 9259–9358，候选 9222/9333；被占用时记录实际端口）。
 4. **反例**：先在未重新安装的状态启动当前构建，验证旧就绪记录被拒（激活身份变化 → 可行动错误），再执行重装；这解决"旧缓存与新构建是否兼容"的疑问并留下证据。
 
@@ -65,6 +65,7 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 - **导出与重启**：作品页导出 PNG，与资产逐字节一致；关闭应用重开，模型仍就绪，历史作品可打开并再次导出。
 - **Z-Image 标准档（可选，决策见 §9）**：本机未安装 Z-Image，需 ~32.85 GB 下载（ModelScope）；其 profile 无安装期 prepare，可走真实联机安装。若执行，作为标准档 12 GB 门槛（Z-Image 仅 12 GB 档）的关键证据；不执行则记 `not_run` 并说明。
 - **不要**用 `C:\ist-a` 旧记录的 2026-11-04 生成结果替代本轮生成；旧结果只作对照。
+- **空缓存真实联机安装**：本机本轮不承诺完整的空缓存安装（历史 I2-1 因 PyPI 吞吐被记为 blocked）。若执行 Z-Image 联机安装，可作为"模型/运行时下载链路"的部分旁证，但仍记 `not_run`，不得声称 I2-1 已通过（S11）。
 
 时间预算（本机 RTX 3080 Ti 比 2060 SUPER 快，仍按保守估计登记）：Klein 加载约 30–60 s + 采样 <10 s；BiRefNet ~10 s；Real-ESRGAN ~4 s；Qwen Turbo 若解锁约 1–2 min；Qwen base 40 步约 5–10 min；MOSS 50 步约 10–20 min；Z-Image 9 步约 1–2 min（含加载）。
 
@@ -78,6 +79,7 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 | W4 原生导出对话框 | `save-ui-dialog.ps1` 填名保存，与资产逐字节比对 | 文件名/路径正确，旧文件不被破坏，覆盖确认仍生效 |
 | W5 多显示器/睡眠唤醒 | 接第二台显示器/切换显示器后截图；睡眠唤醒后发送一次冒烟 | 归位、模型状态与发送正常；不做则 `not_run` |
 | W6 主题人工审阅 | 暗/亮主题各一张主要页面截图，所有者目测 | 记录所有者结论，不冒充自动判定 |
+| W7 7 型号样图人工复核 | 打开 parity 轮 7 型号样图（`verification/windows-parity-app/not-run.json` 4.4 `pending_user`），所有者逐张确认质量 | 记录所有者结论；不平衡、伪影等问题单独登记，不改写历史证据 |
 
 ## 7. 可观测性与故障分支（O 系列）
 
@@ -86,15 +88,16 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 - **O3 取消**：对 BiRefNet、Real-ESRGAN 与一个 Python 型号各发一次并中途取消，记录落定时间（规格 ≤15 s，强制回收另记原因）与残留进程数；补齐 T12 5/5。
 - **O4 预检期取消（bd ipw）**：在接收提示词/预检阶段点停止，记录落定时间；验证发送快路径不再重复哈希（`38cb6fd`）后是否满足"取消等待可接受"。若通过则取得关闭 ipw 的证据，否则记录剩余延迟并保留 issue。
 - **O5 控制台窗口**：生成与安装期间轮询 `conhost`/`OpenConsole`/`WindowsTerminal` 进程增量，应为 0。
-- **O6 安装重试**：以 `HTTPS_PROXY=http://127.0.0.1:9` 启动应用，安装 Real-ESRGAN（45 MB，种子缓存不命中才能触发下载；可先删该 artifact 的缓存条目或换新缓存根），验证 5 次重试后给出明确错误；去掉代理后重装成功。记录退出码/错误文本。
+- **O6 安装重试**：以 `HTTPS_PROXY=http://127.0.0.1:9` 启动应用，安装 Real-ESRGAN（45,474,481 B，种子缓存不命中才能触发下载；可先删该 artifact 的缓存条目或换新缓存根），验证 5 次重试后给出明确错误；去掉代理后重装成功。记录退出码/错误文本。
 - **O7 非 ASCII/长路径**：在 `D:\ist-12gb\数据 测试\appdata` 建新根，用 Real-ESRGAN 做一次安装+放大，验证 ncnn 探针在非 ASCII 根下不再失败（`8fce281` 修复）。
 - **O8 磁盘不足**：在剩余空间受限的卷/配额下触发预检，快速回归"约 4 s 内报磁盘空间不足、不写缓存"（已有 2026-11-01 证据，本机复测一次即可）。
 - **O9 强制回收与进程树**：引用本地 `cargo test -p image-studio-desktop --test forced_reap` 结果（CI 已绿），不重复人工构造；作为证据 JSON 的引用项。
+- **O10 坏校验/缺失文件拒绝（I2-2）**：在隔离根缓存里放入损坏的 artifact（或删除已声明的文件）后安装，验证给出明确错误、可重试、不写半成品；同时记录恢复后重装成功。
 
 ## 8. CI / 发布记录（C 系列）
 
 - **C1**：通过 GitHub API 记录 HEAD `b861ae5` 的 quality run #35（Windows + macOS 成功），写入 `verification/ci-release/` 并更新 README 表。
-- **C2**：登记"v0.1.0 之后 75 个提交未发布、标签/发布需要所有者授权远程操作"，不做推送/tag。
+- **C2**：登记"v0.1.0 之后 76 个提交未发布、标签/发布需要所有者授权远程操作"，不做推送/tag。
 - **C3（可选）**：下载公开发布的 v0.1.0 NSIS 包，在本机安装/启动/卸载一次，验证发布产物在 Win10 可安装；因它是旧代码，只作为"发布产物可用性"证据，不替代标准档回归。若执行需 2026-11-04 已安装版本的升级路径记录。
 
 ## 9. 需要所有者决策的三点
@@ -115,6 +118,7 @@ install_type(seeded_cache|empty_cache|none), command, metrics{}, evidence[]
 - 同步 `windows-hardening-and-coverage` 的 spec delta（桌面运行日志与失败诊断）到主规格并归档该 change（其 3.3/U1 由本 change 的 S 系列证据满足；其 3.4 分支合并已由 `main == origin/main` 解决，远端 `feat/support-8gb-2060s-vram` 为内容等价旧分支，删除需所有者批准）。
 - `doc/15-windows-8gb-tier.md` 增补 12 GB 标准档本机实测表（与 8 GB 表并列，明确机器不同）。
 - bd：`06k`（uses 已全部 pin 到 SHA）、`q2y`（pipeline 已归档、v0.1.0 已发布）可带证据关闭；`ipw` 由 O4 结果决定关闭或保留；`ba1` 保留（原生窗口级截图/坐标点击仍需人工/工具探索）；`b65` 本地 DB 不存在，需 `bd dolt pull`（远程同步需授权）后确认。
+- 清理 `verification/` 中已被取代的 `not_run`/过时行：`windows-ui-projection/README.md`、`windows-parity-worker/README.md`、`windows-parity-app/test-plan-matrix.md`、`windows-parity-review` 的 R16/R19 遗留，统一标注"被后续证据取代"（D7）。
 - 本 change 完成后：写 `verification/windows-12gb-standard-tier/README.md` + `acceptance.json`，`openspec validate --all --strict` 通过后归档。
 
 ## 11. 风险与缓解

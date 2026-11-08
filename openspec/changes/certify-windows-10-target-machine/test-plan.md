@@ -19,12 +19,14 @@
 | S8 | 标准档生成：Qwen Turbo / Qwen base / MOSS（按决策） | pending | 若解锁：1024² 输出 + 资源合同；否则 `blocked` | JSON + PNG |
 | S9 | Z-Image 标准档（可选） | pending | 1024² 9 步、12 GB 门槛、资源合同 | JSON + PNG |
 | S10 | 导出逐字节 + 重启恢复 | pending | 导出 == 资产；重启后就绪且可重开旧作品 | JSON + SHA-256 |
+| S11 | 空缓存真实联机安装（历史 I2-1） | not_run（历史 blocked：PyPI 吞吐） | 若执行 Z-Image 联机安装则作为部分旁证，仍不得替代完整空缓存安装 | 引用 `verification/windows-parity-app/not-run.json` |
 | W1 | 100%/150%/200% DPI | pending | 每档截图 + 元素可见性 | screenshots + JSON |
 | W2 | 960×640 / 1280×800 | pending | 布局与可操作性 | screenshots + JSON |
 | W3 | 真实中文 IME | pending（manual） | 候选确认不发送、显式发送才创建任务 | 所有者确认记录 |
 | W4 | 原生导出对话框 | pending | 文件写出、覆盖确认、旧文件不损坏 | JSON + 截图 |
 | W5 | 多显示器/睡眠唤醒 | pending（optional） | 归位与冒烟发送正常 | JSON |
 | W6 | 暗/亮主题人工审阅 | pending（manual） | 所有者目测结论 | screenshots + 记录 |
+| W7 | 7 型号样图质量人工复核 | pending（manual） | 所有者结论；承接 parity 轮 4.4 `pending_user` | 记录 + 引用样图 |
 | O1 | app.log 结构化与阶段耗时 | pending | 日志存在、字段齐全、失败可定位 | 日志摘录 |
 | O2 | 看门狗 60 s 卡单 | pending | 60 s 内 failed + 阶段/原因；释放锁后重试成功 | JSON + 日志 |
 | O3 | 取消（BiRefNet/Real-ESRGAN/Python 型号） | pending | ≤15 s 落定、无残留进程 | JSON |
@@ -34,8 +36,9 @@
 | O7 | 非 ASCII/长路径 | pending | 中文+空格数据根安装+放大正常 | JSON + 截图 |
 | O8 | 磁盘不足快速回归 | pending | 约 4 s 报错、无缓存/安装记录 | JSON |
 | O9 | 强制回收测试引用 | pending | `forced_reap` 本地测试通过 | 测试日志 |
+| O10 | 坏校验/缺失文件拒绝（I2-2） | pending | 明确错误、可重试、无半成品 | JSON + 日志 |
 | C1 | HEAD CI run #35 记录 | pending | Windows + macOS 均 success | `verification/ci-release/` |
-| C2 | 未发布提交/发布决策登记 | pending | 记录 75 commits、owner-gated | README 更新 |
+| C2 | 未发布提交/发布决策登记 | pending | 记录 76 commits、owner-gated | README 更新 |
 | C3 | v0.1.0 发布包本机安装（可选） | pending | 安装/启动/卸载成功，标签为旧代码 | JSON |
 | D1 | windows-hardening test-plan 矩阵更新 | pending | C3–C7 状态与事实一致 | diff |
 | D2 | windows-8gb-tier known roughness 更新 | pending | 表述与 11-06 测量一致 | diff |
@@ -43,6 +46,7 @@
 | D4 | windows-hardening spec delta 同步并归档 | pending | 主规格含日志要求；change 归档；strict 通过 | openspec 输出 |
 | D5 | doc/15 增补 12 GB 标准档表 | pending | 表格含本机实测 | diff |
 | D6 | 本 change 证据 README + acceptance.json + 归档 | pending | strict 通过、归档完成 | `openspec list` |
+| D7 | 已被取代的 not_run/过时行清理 | pending | `verification/` 各行与后续证据一致 | diff |
 | B1 | bd 06k/q2y 关闭证据 | pending | uses 全 SHA、pipeline 已归档 | bd 输出 |
 | B2 | bd ipw 验证/关闭 | pending | O4 证据；通过则关闭，否则保留 | bd 输出 |
 | B3 | bd b65 缺失与 dolt 同步登记 | pending | 记录本地 DB 无 b65；同步需授权 | bd 输出 |
