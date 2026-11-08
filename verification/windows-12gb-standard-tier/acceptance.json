@@ -175,10 +175,6 @@
       "evidence": "target/o9-forced-reap.log (cargo test)"
     },
     {
-      "case": "O10-bad-checksum",
-      "status": "not_run"
-    },
-    {
       "case": "C1-current-ci-run",
       "status": "pass",
       "evidence": "verification/ci-release/current-head-run.json"
@@ -257,7 +253,7 @@
     "pass_by_reference": 1,
     "partial_pass": 1,
     "deferred_optional": 3,
-    "not_run": 2
+    "not_run": 1
   },
   "limitations": [
     "GPU numbers are host-observed nvidia-smi peaks including desktop baseline, not CUDA reserved",
