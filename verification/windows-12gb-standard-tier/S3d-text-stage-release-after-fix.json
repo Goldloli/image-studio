@@ -19,6 +19,9 @@
   "change": "openspec/changes/fix-qwen-standard-text-cleanup",
   "evidence": [
     "21-sim16-qwen-generation-before-fix-failed.png",
+    "probe-qwen-text-before-fix.log",
+    "probe-qwen-text-after-fix.log",
+    "probe-qwen-sequential-branch.log",
     "S3c-qwen-generation-after-cleanup-fix.json"
   ]
 }
