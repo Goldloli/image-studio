@@ -25,6 +25,19 @@ use windows_sys::Win32::{
     },
 };
 
+/// Console children started by the GUI host must not get a visible console window.
+/// `CommandExt::creation_flags` *overwrites* the previous flags, so the suspend helper
+/// has to re-apply this bit instead of relying on `quiet_command()`.
+const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+
+/// Creation flags shared by the suspended job spawn helpers.
+///
+/// `creation_flags` overwrites instead of merging, so this is the single place that
+/// combines the suspend bit with the no-console bit.
+fn suspended_creation_flags() -> u32 {
+    CREATE_SUSPENDED | CREATE_NO_WINDOW
+}
+
 /// The desktop host's outer lifetime boundary for a native supervisor and all descendants.
 pub(crate) struct WindowsProcessJob {
     handle: OwnedHandle,
@@ -35,7 +48,7 @@ pub(crate) fn spawn_suspended_in_job(
     command: &mut Command,
 ) -> io::Result<(Child, WindowsProcessJob)> {
     let job = WindowsProcessJob::create()?;
-    command.creation_flags(CREATE_SUSPENDED);
+    command.creation_flags(suspended_creation_flags());
     let mut child = command.spawn()?;
     let startup = (|| -> io::Result<()> {
         job.assign(child.as_raw_handle())?;
@@ -54,7 +67,7 @@ pub(crate) async fn spawn_suspended_tokio(
     command: &mut tokio::process::Command,
 ) -> io::Result<(tokio::process::Child, WindowsProcessJob)> {
     let job = WindowsProcessJob::create()?;
-    command.creation_flags(CREATE_SUSPENDED);
+    command.creation_flags(suspended_creation_flags());
     let mut child = command.spawn()?;
     let startup = (|| -> io::Result<()> {
         job.assign(child.raw_handle().ok_or_else(|| {
@@ -272,4 +285,16 @@ mod tests {
             }
         });
     }
+
+    #[test]
+    fn suspended_job_spawn_combines_suspend_and_no_window_flags() {
+        let flags = suspended_creation_flags();
+        assert_eq!(flags & CREATE_SUSPENDED, CREATE_SUSPENDED);
+        assert_eq!(flags & CREATE_NO_WINDOW, CREATE_NO_WINDOW);
+    }
+
+    // A behavioral window-handle assertion is not meaningful from the console test binary:
+    // a console child spawned from an existing console inherits it instead of receiving a
+    // new visible window. The product-level check (supervisor/python MainWindowHandle == 0
+    // during generation and install) is recorded under verification/windows-12gb-standard-tier/.
 }
