@@ -1,4 +1,4 @@
-# Design: stream-prepare-low-memory
+﻿# Design: stream-prepare-low-memory
 
 ## 1. 现状为什么吃满内存
 
@@ -99,3 +99,79 @@ accelerate 的 `set_module_tensor_to_device`），在 Qwen transformer 上实测
 
 - 参考机器上现有 prepare 约 723 s；流式路径预计相近（瓶颈是量化计算而非 IO），允许最长 2 倍。
 - 回滚策略：`prepare.py` 保留现有 `_build_component`，通过显式开关或自动降级选择；任一组件流式失败时可用旧路径重试并记录原因。
+
+## 7. 2026-11-08 修订：子进程分片量化（真正降到 16 GiB 级别）
+
+### 7.1 为什么单靠分片装配不够
+
+§4.2 的原型证明：meta 骨架 + 逐张量 bnb 量化能产出与现有缓存**逐字节一致**的产物，但 commit 峰值只从 19.82 GiB 降到 19.79 GiB。原因是单张 64 MB bf16 张量在 bnb CPU 量化过程中会产生约 1 GiB 的临时内存，且 Windows 不把该内存归还系统——内存峰值由"一次处理的张量 + bnb 临时量"决定，而不由组件总量决定。
+因此必须让每一次量化的临时内存**随进程退出被回收**：把量化工作拆到子进程，父进程只做编排与字节拼装。
+
+### 7.2 目标架构
+
+```
+worker --prepare（coordinator 进程）
+  ├─ 读取 source component 的 config / safetensors 张量清单
+  ├─ 按源字节预算分组（默认 512 MiB/组，单并发）
+  ├─ 对每组派生 prepare_shard 子进程：
+  │    - safe_open(...).get_tensor() 只取本组张量
+  │    - bnb.functional.quantize_4bit（NF4，double quant，nf4 quant map）
+  │    - 非量化参数（embedding/norm/buffer）直通 BF16
+  │    - 写 fragment safetensors（与 bnb save_pretrained 相同的键集合）
+  │    - 退出，内存全部归还
+  └─ 校验 fragment 键覆盖 ≥ 源张量集合
+     → 流式拼装最终 component safetensors（自写 safetensors writer：header + 原字节拷贝，不 materialize 张量）
+     → 写 config.json（source config + quantization_config）与 generation_config.json
+     → 计算 prepared inventory digest
+```
+
+峰值预期：
+
+| 进程 | 峰值来源 | 目标 |
+|---|---|---|
+| prepare_shard 子进程 | 组内源张量 + bnb 量化临时量（实测约 1 GiB/64 MB 张量） | 512 MiB 组约 2–4 GiB |
+| coordinator | 流式拼接缓冲（<256 MiB）+ 张量索引 | <1 GiB |
+| 合计 | 串行单子进程，不叠加 | **commit ≤ 10 GiB**（验收实测冻结） |
+
+组大小与并发度作为内部参数（默认 512 MiB / 单并发），按实测下调；并发只为性能，默认不开启以避免峰值叠加。
+
+### 7.3 缓存格式、身份与确定性
+
+现有 prepared 缓存是 bnb `save_pretrained` 的合并 safetensors（已核对 Qwen Turbo text encoder：2590 keys；quantized 键含 `.weight`(U8)、`.absmax`、`.nested_absmax`、`.nested_quant_map`、`.quant_map`、`.quant_state.bitsandbytes__nf4`；非量化参数为 BF16；配套 `config.json` 带 `quantization_config`）。
+
+- 子进程产出的 fragment 必须使用同一键名与 dtype 约定；父进程只做字节级拼装，不做数值变换。
+- **优先目标**：拼装结果与现有 prepared 缓存逐字节一致（先以 Qwen transformer 的已知 SHA-256 `533cede7…` 做门禁），此时复用现有缓存身份。
+- 若无法逐字节一致：登记新的 prepared 缓存身份（模型清单/缓存摘要不再是旧值），必须给出逐参数比较（抽样 1%，bit-identical 或相对误差 < 1e-6）与相同提示词/种子的输出图 PSNR/目视对比；旧缓存与新缓存不得混用。
+- 确定性：每个张量独立量化；fragment 按源张量顺序拼接；header JSON 由固定规则生成。多次运行 SHA-256 必须一致。
+
+### 7.4 预检、回退与失败路径
+
+- 低内存路径预检：**可用物理内存 ≥ 8 GiB 且 commit 余量 ≥ 6 GiB**（实测后冻结；若实测峰值更低/更高则按证据调整）。
+- 预检失败：量化前失败，给出可行动错误，不留半成品。
+- 子进程失败/超时（单组 1800 s 总预算）：终止整棵树，删除未完成 prepared 目录，保留原快照；记录失败组与峰值。
+- 旧整体构造路径保留为降级选项：低内存路径失败且当前内存满足旧门槛（28 GiB/26 GiB）时可显式回退并记录原因。
+- 取消：沿用现有受管理进程树回收，子进程必须随 prepare 取消被整树回收。
+
+### 7.5 验收（无 16 GiB 实机时的模拟口径）
+
+本机（32 GiB）没有 16 GiB 实机，采用可复核的模拟：
+
+1. **可用内存模拟**：以独立进程提交并驻留内存，把系统可用物理内存压到约 8 GiB（记录前后 `Get-Counter` 值）；
+2. **commit 上限模拟**：prepare 进程放入 Windows Job Object（JOB_OBJECT_LIMIT_PROCESS_MEMORY / commit 限制 ≈10 GiB），超出即失败；
+3. 在模拟条件下完成 Qwen Turbo 全新安装 → prepare → 标准档生成；记录 prepare 进程 commit 峰值、可用物理内存最低值、耗时、产物 SHA-256；
+4. 拒绝路径：把可用内存压到 ~7 GiB 重跑，确认量化前失败、无半成品；
+5. 记录限制：这是模拟证据，不是 16 GiB 实机证据；所有者提供 16 GiB 实机后再补端到端实机记录。
+
+同时在本机正常状态（无模拟）跑一次安装 → 生成，确保行为与旧路径一致。
+
+### 7.6 风险
+
+| 风险 | 缓解 |
+|---|---|
+| bnb 单张量临时量仍偏大（~1 GiB） | 组按源字节预算切小、单张量极端情况一组一张量；实测后冻结组大小 |
+| 子进程启动开销（每组 ~5–10 s，约 20–30 组） | 允许 prepare 总时长 ≤ 现状 2 倍；记录耗时 |
+| safetensors 拼装错误/键不完整 | 键覆盖校验 + 与现有缓存逐字节比对 + `from_pretrained` 加载测试 |
+| 缓存身份变化导致所有机器需重新 prepare | 优先逐字节一致；否则登记新身份并写迁移说明；不静默混用 |
+| 取消/崩溃留下子进程 | 受管理进程树 + Job Object 回收；失败清理 prepared 目录 |
+| 模拟口径与真实 16 GiB 有差异 | 证据中明确标注模拟；补实机验证为后续项 |
+

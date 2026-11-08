@@ -1,12 +1,20 @@
 # stream-prepare-low-memory
 
-**状态：2026-11-06 提案文档完成，等待项目所有者确认后开始实现。**
+**状态（2026-11-08）：项目所有者明确要求"真支持 16 GiB 内存"，本提案按子进程分片量化路线重写，等待所有者确认后实现。未确认前不写实现代码。**
 
-安装期 NF4 量化准备目前以整组件为单位在 CPU 上构造模型，实测 commit 峰值 16.4–23.1 GiB，可用物理内存可降到接近 0。`2026-11-05-support-8gb-vram-tier` 归档时曾把"按 safetensors 分片流式量化、可用内存 ≥ 8 GiB"写成要求；`2026-11-05-fix-prepare-memory-contract` 已把该要求在规格中纠正为现状，并把流式量化登记为独立后续项。本 change 就是那个后续项：让可用物理内存 ≥ 8 GiB 的机器（典型为 16 GiB 内存 + 8 GB 显存）也能完成安装期的 Qwen/MOSS 量化准备。
+安装期 NF4 量化准备目前以整组件为单位在 CPU 上构造模型，实测 commit 峰值 16.4–23.1 GiB、可用物理内存最低接近 0，安装预检因此要求 28 GiB 物理内存或 26 GiB commit 余量——32 GiB 内存 + 默认页面文件的 Windows 机器全新安装会被误拒，16 GiB 内存机器更无法安装 Qwen/MOSS。
+
+本 change 交付真正的低内存量化路径：
+
+- 量化工作按分片/分块拆到**独立子进程**（进程退出即归还内存），任一进程不持有完整 bf16 组件；
+- 目标：可用物理内存 ≥ 8 GiB、commit 峰值 ≤ 10 GiB 能完成安装；
+- 产物与现有 `models/<snapshot>.prepared` 格式兼容（可被现有 worker 直接加载），优先做到与现有缓存逐字节一致，否则登记新缓存身份并给出数值等价证据；
+- 预检阈值按实测冻结为"可用物理内存 ≥ 8 GiB 且 commit 余量 ≥ 6 GiB"；
+- 在没有 16 GiB 实机的情况下，用"预留内存到只剩 ~8 GiB 可用 + Job Object commit 限制"模拟验收并记录限制。
 
 | 文档 | 内容 |
 |---|---|
 | [proposal.md](proposal.md) | 为什么做、范围、成功标准、不做项 |
-| [design.md](design.md) | 分片流式量化的技术路线、逐架构适配、预算与证据 |
-| [specs/model-installation/spec.md](specs/model-installation/spec.md) | 修正后的量化准备要求（把 8 GiB 门槛真正交付） |
+| [design.md](design.md) | 现状证据、子进程分片方案、格式兼容、验收与风险 |
+| [specs/model-installation/spec.md](specs/model-installation/spec.md) | 修正后的量化准备要求（真正交付低内存门槛） |
 | [tasks.md](tasks.md) | 实现与验收任务 |
