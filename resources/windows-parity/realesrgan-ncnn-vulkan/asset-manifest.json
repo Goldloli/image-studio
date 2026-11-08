@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
   "kind": "native-windows-vulkan-bundle",
-  "status": "content_verified_pending_gate0",
+  "status": "verified",
   "platform": "windows-amd64",
   "model": {
     "name": "realesrgan-x4plus",
@@ -37,23 +37,91 @@
     }
   ],
   "archive_members": [
-    {"archive_path": "realesrgan-ncnn-vulkan.exe", "bytes": 6161408, "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c"},
-    {"archive_path": "vcomp140.dll", "bytes": 182704, "sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b"},
-    {"archive_path": "vcomp140d.dll", "bytes": 207736, "sha256": "34980f5a28002967d4f2659b10a417b1b9a242e240195947c89195083d146c53"},
-    {"archive_path": "models/realesrgan-x4plus.bin", "bytes": 33424520, "sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf"},
-    {"archive_path": "models/realesrgan-x4plus.param", "bytes": 116029, "sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"},
-    {"archive_path": "models/realesrgan-x4plus-anime.bin", "bytes": 8943500, "sha256": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc"},
-    {"archive_path": "models/realesrgan-x4plus-anime.param", "bytes": 30290, "sha256": "2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4"},
-    {"archive_path": "models/realesr-animevideov3-x2.bin", "bytes": 1247368, "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"},
-    {"archive_path": "models/realesr-animevideov3-x2.param", "bytes": 3173, "sha256": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04"},
-    {"archive_path": "models/realesr-animevideov3-x3.bin", "bytes": 1247368, "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"},
-    {"archive_path": "models/realesr-animevideov3-x3.param", "bytes": 3173, "sha256": "d1a5755008791d09b57e3425fc9dd0bd26b00fdf79c606210bc0e693f8230881"},
-    {"archive_path": "models/realesr-animevideov3-x4.bin", "bytes": 1247368, "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"},
-    {"archive_path": "models/realesr-animevideov3-x4.param", "bytes": 3077, "sha256": "850a248e7c14c27e5bd8cf7265113a9441036a7db63963bb8aa5169d788a435e"},
-    {"archive_path": "README_windows.md", "bytes": 1859, "sha256": "2b882314a0c7a9f17a347b9b04f909939f6274aa96cf5b2ebba2f7ab75987480"},
-    {"archive_path": "input.jpg", "bytes": 11985, "sha256": "2f49c8cf6249940408fff736f394a4f8a228a6488bcc2fe9f92bdfb90b54a504"},
-    {"archive_path": "input2.jpg", "bytes": 10286, "sha256": "ebf8662783a1a5f5d97c893f7257e46f59738a5f3848c7a1d05cd16d5670dc6b"},
-    {"archive_path": "onepiece_demo.mp4", "bytes": 592566, "sha256": "2f2084db2ca6b363b0857758ac99084775c7f40cd074bf7e23c35e2ce0477778"}
+    {
+      "archive_path": "realesrgan-ncnn-vulkan.exe",
+      "bytes": 6161408,
+      "sha256": "07e49f7cbb4ede01ae4dd4c399d3a7e5846e3d2085c3128eff881e55cb7b1a0c"
+    },
+    {
+      "archive_path": "vcomp140.dll",
+      "bytes": 182704,
+      "sha256": "8f72ef2e483465444b2059fc6744d6cb22cd8d8a27f6fa56befd2a42dcd0f78b"
+    },
+    {
+      "archive_path": "vcomp140d.dll",
+      "bytes": 207736,
+      "sha256": "34980f5a28002967d4f2659b10a417b1b9a242e240195947c89195083d146c53"
+    },
+    {
+      "archive_path": "models/realesrgan-x4plus.bin",
+      "bytes": 33424520,
+      "sha256": "713ee713b0353afaa27976f0563a64a5043bd70b9bd8936c2e26e25ebcdbcddf"
+    },
+    {
+      "archive_path": "models/realesrgan-x4plus.param",
+      "bytes": 116029,
+      "sha256": "35330ececcea33b6c397a72548e788d5d53becee4734c50b7fada36e89f10a86"
+    },
+    {
+      "archive_path": "models/realesrgan-x4plus-anime.bin",
+      "bytes": 8943500,
+      "sha256": "fe01c269cfd10cdef8e018ab66ebe750cf79c7af4d1f9c16c737e1295229bacc"
+    },
+    {
+      "archive_path": "models/realesrgan-x4plus-anime.param",
+      "bytes": 30290,
+      "sha256": "2b8fb6e0ae4d2d85704ca08c119a2f5ea40add4f2ecd512eb7f4cd44b6127ed4"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x2.bin",
+      "bytes": 1247368,
+      "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x2.param",
+      "bytes": 3173,
+      "sha256": "b88ff4f00ebf019a7fdac17fdd45a7fd3665d37509efc5baf2e4da2e24420a04"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x3.bin",
+      "bytes": 1247368,
+      "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x3.param",
+      "bytes": 3173,
+      "sha256": "d1a5755008791d09b57e3425fc9dd0bd26b00fdf79c606210bc0e693f8230881"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x4.bin",
+      "bytes": 1247368,
+      "sha256": "548a36f9c3f4ab8da56cd3b13badf23968bee207b396dad14d04b830e5f2ab2d"
+    },
+    {
+      "archive_path": "models/realesr-animevideov3-x4.param",
+      "bytes": 3077,
+      "sha256": "850a248e7c14c27e5bd8cf7265113a9441036a7db63963bb8aa5169d788a435e"
+    },
+    {
+      "archive_path": "README_windows.md",
+      "bytes": 1859,
+      "sha256": "2b882314a0c7a9f17a347b9b04f909939f6274aa96cf5b2ebba2f7ab75987480"
+    },
+    {
+      "archive_path": "input.jpg",
+      "bytes": 11985,
+      "sha256": "2f49c8cf6249940408fff736f394a4f8a228a6488bcc2fe9f92bdfb90b54a504"
+    },
+    {
+      "archive_path": "input2.jpg",
+      "bytes": 10286,
+      "sha256": "ebf8662783a1a5f5d97c893f7257e46f59738a5f3848c7a1d05cd16d5670dc6b"
+    },
+    {
+      "archive_path": "onepiece_demo.mp4",
+      "bytes": 592566,
+      "sha256": "2f2084db2ca6b363b0857758ac99084775c7f40cd074bf7e23c35e2ce0477778"
+    }
   ],
   "install_members": [
     {
@@ -148,7 +216,9 @@
     "model": "realesrgan-x4plus",
     "scale": 4,
     "tile_size": 128,
-    "gpu_ids": [0],
+    "gpu_ids": [
+      0
+    ],
     "single_gpu": true,
     "threads_load_proc_save": "1:1:1",
     "tta": false,
@@ -168,22 +238,40 @@
       {
         "label": "official release sample image (220x220)",
         "wall_seconds": 4.863,
-        "input_dims": [220, 220],
-        "output_dims": [880, 880],
+        "input_dims": [
+          220,
+          220
+        ],
+        "output_dims": [
+          880,
+          880
+        ],
         "exact_4x": true
       },
       {
         "label": "controlled gradient/checker image (97x61)",
         "wall_seconds": 2.207,
-        "input_dims": [97, 61],
-        "output_dims": [388, 244],
+        "input_dims": [
+          97,
+          61
+        ],
+        "output_dims": [
+          388,
+          244
+        ],
         "exact_4x": true
       },
       {
         "label": "NASA public-domain real photograph (Apollo 17 view of Africa, 384x288)",
         "wall_seconds": 2.337,
-        "input_dims": [384, 288],
-        "output_dims": [1536, 1152],
+        "input_dims": [
+          384,
+          288
+        ],
+        "output_dims": [
+          1536,
+          1152
+        ],
         "exact_4x": true
       }
     ],
@@ -199,5 +287,6 @@
     "The executable is not Authenticode-signed; integrity rests on the fixed SHA-256 and the official release URL.",
     "This release predates newer GPU architectures and carries no vendor support statement beyond the upstream portable build.",
     "ncnn tiles the input, so block-boundary differences from the PyTorch implementation are expected and accepted by the frozen contract."
-  ]
+  ],
+  "status_note": "Gate 0 G2-R1 and two real 4x runs (2026-11-05) plus Windows 10 product runs on 2026-11-08 (install + 1024->4096 upscale) verified the bundle; see verification/windows-parity-realesrgan/."
 }

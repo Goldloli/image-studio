@@ -196,5 +196,9 @@ compositor still resident.
 the text encoder and 20.275 GiB for the transformer, and available physical RAM fell to
 **0.003 GiB**, so the run only completed by paging. The installer preflight accepts either
 ≥ 28 GiB available physical RAM or ≥ 26 GiB commit headroom; this machine qualifies through
-commit headroom (75.9 GiB limit). A genuinely low-memory prepare path is still required before
-16 GiB machines can install these models; that work is tracked as a follow-up in the change.
+commit headroom (75.9 GiB limit). The low-memory prepare path has since been implemented
+(child-process sharding; worker commit peaks 1.95–3.6 GiB, installer gate available physical RAM
+≥ 8 GiB AND commit headroom ≥ 6 GiB), so 16 GiB machines can install these models. The 2026-11-08
+acceptance on the 12 GB standard-tier machine exercised the installer with available physical RAM
+≈ 11.35 GiB and commit headroom ≈ 13.6 GiB; evidence is under
+`verification/windows-12gb-standard-tier/` (S3b).

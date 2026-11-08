@@ -55,14 +55,19 @@ stays in the protocol but the catalog deliberately does not offer it.
 
 ## Install-time preparation on 8 GB machines
 
-The 8 GB tier does **not** lower the install-time quantization cost. Preparing a Qwen/MOSS cache
-takes a whole component in memory: measured commit peaks 16.4–23.1 GiB and available physical RAM
-can fall to ~0 GiB, so the installer requires **available physical RAM ≥ 28 GiB or commit headroom
-≥ 26 GiB**. On the reference machine (75.9 GiB commit limit) the commit branch passes and the
-prepare completes in 723 s.
+The 8 GB tier does **not** lower the install-time quantization cost; the shared low-memory
+prepare path is used by every Windows machine. Historically the installer loaded a whole component
+on the CPU (measured commit peaks 16.4–23.1 GiB, available physical RAM falling to ~0 GiB) and
+required **available physical RAM ≥ 28 GiB or commit headroom ≥ 26 GiB**.
 
-A shard-streaming prepare that would fit 16 GiB machines is an explicit follow-up; see
-`openspec/specs/model-installation/spec.md` (安装期量化准备使用低内存分片路径).
+The shard-streaming prepare is now implemented (`openspec/changes/archive/…-stream-prepare-low-memory`
+after archival, spec requirement 安装期量化准备使用低内存分片路径): each ~1 GiB tensor group is
+quantized in a short-lived child process, the worker commit peak is **1.95–3.6 GiB**, and the
+installer requires **available physical RAM ≥ 8 GiB AND commit headroom ≥ 6 GiB**. A 16 GiB
+machine therefore installs Qwen/MOSS; the 2026-11-08 acceptance on the 12 GB standard-tier
+machine ran the installer with available physical RAM ≈ 11.35 GiB and commit headroom ≈ 13.6 GiB
+and measured 2.93 GiB / 2.91 GiB worker peaks with byte-identical caches
+(`verification/windows-12gb-standard-tier/S3b-low-memory-prepare-simulated-16gib.json`).
 
 ## Verifying on another 8 GB machine
 
@@ -87,3 +92,20 @@ The exact commands and captured JSON for the reference run are in
 | FLUX.2 Klein 4B 编辑 | 36 s | warm component load |
 | BiRefNet 去背景 | 12 s | RGBA + mask |
 | Real-ESRGAN 4× 放大 | 4 s | 220×220 → 880×880 |
+
+## Measured on the 12 GB standard tier (2026-11-08)
+
+| Capability | Wall clock | Notes |
+|---|---|---|
+| Qwen-Image 2.1 Turbo 文生图 | 40.7 s | 1024², 8 steps, CUDA-reserved stage budget passed |
+| Qwen-Image 2.1 文生图 | 84 s | 1024², 40 steps |
+| MOSS-Image-SFT 文生图 | 143 s | 1024², 50 steps |
+| Z-Image Turbo 文生图 | 59.2 s | 1024², 9 steps |
+| FLUX.2 Klein 4B 文生图 | 43.7 s | 1024² |
+| FLUX.2 Klein 4B 编辑 | 28.1 s | 源图导入 → 编辑 |
+| BiRefNet 去背景 | 25.1 s | RGBA + mask |
+| Real-ESRGAN 4× 放大 | 9.5 s | 1024² → 4096² |
+
+Install (seeded cache, low-memory prepare): Qwen Turbo 395 s under the simulated-16-GiB state
+(179 s when reusing the prepared cache), Qwen base 415 s, MOSS 364 s. Details and evidence under
+`verification/windows-12gb-standard-tier/`.
