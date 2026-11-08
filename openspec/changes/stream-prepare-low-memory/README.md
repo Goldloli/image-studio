@@ -1,6 +1,6 @@
 # stream-prepare-low-memory
 
-**状态（2026-11-08）：低内存 prepare 已实现并完成产品内验收（模拟 16 GiB 环境）；剩余 MOSS 产品级安装/生成与真实 16 GiB 实机证据，规格归档待这些证据补齐。**
+**状态（2026-11-08）：低内存 prepare 已实现并完成产品内验收（模拟 16 GiB 环境），Qwen Turbo / Qwen base / MOSS 均已安装并完成 1024² 标准档生成；剩余真实 16 GiB 实机证据与规格归档。**
 
 安装期 NF4 量化准备目前以整组件为单位在 CPU 上构造模型，实测 commit 峰值 16.4–23.1 GiB、可用物理内存最低接近 0，安装预检因此要求 28 GiB 物理内存或 26 GiB commit 余量——32 GiB 内存 + 默认页面文件的 Windows 机器全新安装会被误拒，16 GiB 内存机器更无法安装 Qwen/MOSS。
 

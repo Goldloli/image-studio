@@ -18,7 +18,7 @@
 - [x] 1.4 种子缓存首次安装：Klein ≈110 s（18.7 GB）、BiRefNet ≈32 s、Real-ESRGAN ≈12 s、Z-Image ≈172 s（35.56 GB）；无网络下载（[S2-seeded-install-timings.json](../../../verification/windows-12gb-standard-tier/S2-seeded-install-timings.json)）。
 - [x] 1.5 （历史记录，已被低内存 prepare 取代）Qwen-Image 2.1 Turbo 安装曾被 prepare 内存预检拒绝；2026-11-08 已实现低内存量化并在模拟 16 GiB 条件下安装通过（S3b），见 [stream-prepare-low-memory](../stream-prepare-low-memory/tasks.md)。
 - [x] 1.6 标准档逐能力生成：Klein 文生图 50.1 s / 1024²、Z-Image 文生图 55.1 s / 1024²（9 步）、BiRefNet 25.6 s（RGBA+mask 1024²）、Real-ESRGAN 8.6 s（1024²→4096²）、Klein 单图编辑 46.6 s / 1024²；输出 PNG 字节/尺寸/SHA-256 均在 S4–S8 JSON。
-- [x] 1.7 Qwen 标准档生成：Qwen-Image 2.1 Turbo 1024² 8 步已通过（40.7 s，PNG 2,010,413 B，SHA-256 `92a9d4f8…`；依赖 `fix-qwen-standard-text-cleanup`）；Qwen-Image 2.1 与 MOSS 的产品级安装/生成本轮未跑（MOSS 低内存 prepare 组件已逐字节验证）。
+- [x] 1.7 Qwen 全系与 MOSS 标准档生成：Qwen-Image 2.1 Turbo 1024² 8 步 40.7 s（PNG `92a9d4f8…`）、Qwen-Image 2.1 40 步 84 s（PNG `f92b0f93…`）、MOSS-Image-SFT 50 步 143 s（PNG `1e7bc1ac…`）；三者在低内存 prepare 安装后全部通过，证据 S14/S15 与 S3c。
 - [x] 1.8 导出 PNG 与资产逐字节一致（SHA-256 `ad9fdf9c…`）；重启后 4/7 型号仍就绪、5 轮对话与作品全部保留（[S10-export-restart.json](../../../verification/windows-12gb-standard-tier/S10-export-restart.json)）。
 - [x] 1.9 汇总标准档资源口径并写 `verification/windows-12gb-standard-tier/` README + acceptance.json（GPU 为 host 采样含桌面基线，方法已在证据中标注）。
 - [ ] 1.10 （可选）旧根升级路径对照：本轮未执行；`C:\ist-a` 保持原样，未删除。

@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S14-moss-product-install-and-generation",
+  "status": "pass",
+  "date": "2026-11-08T20:17:40+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 19045",
+    "cpu": "i7-13700K",
+    "ram_gib": 31.7,
+    "gpu": "RTX 3080 Ti",
+    "vram_mib": 12288
+  },
+  "model": "MOSS-Image-SFT (standard tier 1024x1024, 50 steps)",
+  "install": {
+    "wall_seconds_click_to_ready": 364,
+    "model_bytes": 29940000000,
+    "preflight": {
+      "available_physical_bytes": 24587935744,
+      "available_commit_bytes": 25712672768
+    },
+    "prepare": {
+      "mode": "low_memory_children",
+      "transformer": {
+        "elapsed_seconds": 79.59,
+        "worker_private_commit_peak_gib": 1.952,
+        "system_available_ram_min_gib": 20.009,
+        "safetensors_sha256": "fe8c7bcbf4c63366f4ea7099231519fe36650c3c0b8ef1437240fdbb844acd60"
+      },
+      "text_encoder": {
+        "standalone_component_elapsed_seconds": 125.83,
+        "standalone_parent_peak_commit_gib": 3.641,
+        "safetensors_sha256": "de9b3f5f02e69270468ed8b8096ab81f1017776f4c16561a145db00449f7dc68",
+        "note": "product log line overwritten by the next install; standalone component test recorded in target/lowmem-moss.log (same low_memory path)"
+      }
+    },
+    "phases": [
+      "正在下载",
+      "正在校验模型",
+      "检查运行环境与设备",
+      "正在准备模型文件",
+      "当前可执行"
+    ]
+  },
+  "generation": {
+    "wall_seconds": 143.0,
+    "stages": [
+      "正在接收提示词",
+      "正在准备生成",
+      "正在加载模型",
+      "正在采样 0/50..49/50",
+      "图片已生成"
+    ],
+    "asset": {
+      "file": "asset-1e25d322882d4b2b81f6a422ec1d3a0e.png",
+      "bytes": 1855587,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "1e7bc1ac986383a0cbf14d4ea76c262d56fa4e9c3be2836384e4b6c448642745"
+    },
+    "gpu": {
+      "host_gpu_used_peak_mib": 7606,
+      "total_mib": 12288,
+      "note": "host nvidia-smi 1 s sampling, includes desktop baseline"
+    }
+  },
+  "evidence": [
+    "30-moss-install.png",
+    "31-moss-generation.png",
+    "moss-gpu-sample.csv"
+  ]
+}

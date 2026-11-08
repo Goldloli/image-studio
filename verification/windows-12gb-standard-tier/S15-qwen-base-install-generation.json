@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S15-qwen-base-product-install-and-generation",
+  "status": "pass",
+  "date": "2026-11-08T20:26:22+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 19045",
+    "gpu": "RTX 3080 Ti",
+    "vram_mib": 12288
+  },
+  "model": "Qwen-Image 2.1 (standard tier 1024x1024, 40 steps)",
+  "install": {
+    "wall_seconds_click_to_ready": 415,
+    "model_bytes": 35860000000,
+    "prepare": {
+      "mode": "low_memory_children",
+      "text_encoder": {
+        "elapsed_seconds": 122.19,
+        "worker_private_commit_peak_gib": 2.918,
+        "system_available_ram_min_gib": 19.866,
+        "safetensors_sha256": "13c2f7cdb087b336125a993489543a30df574aa94d4cfad029b8a01b0596e6f7"
+      },
+      "transformer": {
+        "elapsed_seconds": 102.16,
+        "worker_private_commit_peak_gib": 2.902,
+        "system_available_ram_min_gib": 19.704,
+        "safetensors_sha256": "352aa5dbaf79196b"
+      }
+    }
+  },
+  "generation": {
+    "wall_seconds": 84.0,
+    "stages": [
+      "正在接收提示词",
+      "正在准备生成",
+      "正在加载模型",
+      "正在采样 3/40..40/40",
+      "正在解码图片",
+      "图片已生成"
+    ],
+    "asset": {
+      "file": "asset-ab5cdaa5d44648ae82d68256e516450d.png",
+      "bytes": 1995903,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "f92b0f938c4903229acd7437637e5d5687150d934571ec009823f421df2cb578"
+    },
+    "gpu": {
+      "host_gpu_used_peak_mib": 7784,
+      "total_mib": 12288
+    }
+  },
+  "evidence": [
+    "32-qwen-base-install.png",
+    "33-qwen-base-generation.png",
+    "qwen-base-gpu-sample.csv"
+  ]
+}

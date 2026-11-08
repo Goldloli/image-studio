@@ -26,6 +26,10 @@ This round covers the 12 GB **standard tier** on the Windows 10 target machine. 
 | S8 Klein single-image edit | pass | 46.6 s; 1024×1024 PNG 1,771,418 B `acf721ac…`; scene preserved, prompt applied |
 | S10 export + restart | pass | exported PNG byte-identical to asset (SHA-256 `ad9fdf9c…`); after restart 4/7 models ready, 5 conversation turns persist |
 | O1 runtime log | pass | `C:\ist-accept\logs\app.log` structured events incl. `install.verify.*`, `turn.preflight.done ms=…`, `generation.start available_gib=…` |
+| S14 MOSS product install + generation | **pass** | low-memory install 364 s (transformer prepare 79.6 s, worker commit peak 1.952 GiB; cache `fe8c7bcb…`), 50-step generation **143 s**, 1024×1024 PNG 1,855,587 B `1e7bc1ac…`, host GPU peak 7,606 MiB |
+| S15 Qwen-Image 2.1 product install + generation | **pass** | low-memory install 415 s (text encoder 122.2 s / 2.918 GiB, transformer 102.2 s / 2.902 GiB), 40-step generation **84 s**, 1024×1024 PNG 1,995,903 B `f92b0f93…`, host GPU peak 7,784 MiB |
+| S3b low-memory prepare under simulated 16 GiB | pass | Qwen Turbo install through the UI at 11.35 GiB available RAM: preflight 11.75/12.95 GiB, prepare peaks 2.9 GiB per worker, caches byte-identical |
+| S3c Qwen standard generation after cleanup fix | pass | Qwen Turbo 1024² 8 steps 40.7 s, PNG 2,010,413 B `92a9d4f8…` |
 
 Notes:
 

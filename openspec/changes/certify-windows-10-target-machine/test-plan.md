@@ -1,4 +1,4 @@
-﻿# Test plan: certify-windows-10-target-machine
+# Test plan: certify-windows-10-target-machine
 
 环境（本机，2026-11-08 实测）：Windows 10 Pro 22H2 19045 / i7-13700K / **RTX 3080 Ti 12 GB（sm86，驱动 596.49）** / 31.7 GiB RAM / 3840×2160 @150% / WebView2 157.0.4341.42。
 数据根：**`C:\ist-accept`**（全新，模拟新用户首次安装；旧根 `C:\ist-a` 保留未动，仅作可选升级对照）。
@@ -18,7 +18,7 @@
 | S6 | 标准档生成：BiRefNet 去背景 | **pass** | RGBA + mask 双输出 1024² | `S6-birefnet.json` |
 | S7 | 标准档生成：Real-ESRGAN 4× | **pass** | 1024² → 4096²（精确 4×） | `S7-realesrgan.json` |
 | S8 | 标准档生成：Klein 单图编辑 | **pass** | 源图导入 → 编辑出图、场景保留 | `S8-klein-edit.json` |
-| S9 | Qwen Turbo / Qwen base / MOSS 标准档生成 | Qwen Turbo **pass**（40.7 s，2026-11-08）；Qwen base/MOSS not_run | 低内存安装 + 文本阶段释放修复后标准档生成通过 | `S3c-qwen-generation-after-cleanup-fix.json` |
+| S9 | Qwen Turbo / Qwen base / MOSS 标准档生成 | **全 pass**：Turbo 40.7 s、Qwen base 84 s、MOSS 143 s（2026-11-08） | 低内存安装 + 文本阶段释放修复后标准档生成通过 | `S3c-*.json`, `S14-moss-install-generation.json`, `S15-qwen-base-install-generation.json` |
 | S10 | 导出逐字节 + 重启恢复 | **pass** | 导出 == 资产（SHA-256）；重启后 4/7 就绪、5 轮对话保留 | `S10-export-restart.json` |
 | S11 | 空缓存真实联机安装（历史 I2-1） | not_run（历史 blocked） | 若执行 Z-Image 联机安装仅作部分旁证 | 引用 `verification/windows-parity-app/not-run.json` |
 | S12 | 旧根升级路径对照（可选） | not_run | `C:\ist-a` 未动，本轮用全新根 | — |

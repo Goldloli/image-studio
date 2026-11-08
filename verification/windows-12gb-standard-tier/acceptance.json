@@ -213,20 +213,25 @@
     },
     {
       "case": "S14-moss-product-install-generation",
-      "status": "not_run",
-      "note": "MOSS low-memory prepare components verified byte-identical; app-level install/generation not run yet"
+      "status": "pass",
+      "evidence": "S14-moss-install-generation.json"
     },
     {
       "case": "S15-real-16gib-machine",
       "status": "not_run",
       "note": "simulated with reserved memory; real 16 GiB hardware evidence pending"
+    },
+    {
+      "case": "S15-qwen-base-product-install-generation",
+      "status": "pass",
+      "evidence": "S15-qwen-base-install-generation.json"
     }
   ],
   "summary": {
-    "pass": 16,
+    "pass": 18,
     "blocked": 1,
     "accepted_not_retested": 3,
-    "not_run": 21
+    "not_run": 20
   },
   "limitations": [
     "GPU numbers are host-observed nvidia-smi peaks including desktop baseline, not CUDA reserved",
