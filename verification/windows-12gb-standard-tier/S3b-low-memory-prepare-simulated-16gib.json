@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S3b-low-memory-prepare-simulated-16gib",
+  "status": "pass",
+  "date": "2026-11-08T19:43:00+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 19045",
+    "cpu": "i7-13700K",
+    "ram_gib": 31.7,
+    "gpu": "RTX 3080 Ti",
+    "vram_mib": 12288
+  },
+  "build": {
+    "commit": "working-tree",
+    "note": "low-memory prepare + 8/6 GiB preflight + fixed worker wheel"
+  },
+  "data_root": "C:/ist-accept",
+  "simulation": {
+    "method": "python reserve_memory.py 11 GiB touched; app launched with available physical RAM ~11.35 GiB and commit headroom ~13.59 GiB",
+    "note": "no physical 16 GiB machine available; simulated with a separate reserved process"
+  },
+  "preflight": {
+    "available_physical_bytes": 12615077888,
+    "available_commit_bytes": 13908418560,
+    "minimum_available_physical_bytes": 8589934592,
+    "minimum_commit_headroom_bytes": 6442450944,
+    "verdict": "passed (11.75 GiB >= 8 GiB and 12.95 GiB >= 6 GiB)"
+  },
+  "prepare": {
+    "mode": "low_memory_children",
+    "text_encoder": {
+      "elapsed_seconds": 125.17,
+      "worker_private_commit_peak_gib": 2.927,
+      "system_available_ram_min_gib": 9.353,
+      "safetensors_sha256": "13c2f7cdb087b336125a993489543a30df574aa94d4cfad029b8a01b0596e6f7"
+    },
+    "transformer": {
+      "elapsed_seconds": 105.32,
+      "worker_private_commit_peak_gib": 2.911,
+      "system_available_ram_min_gib": 9.223,
+      "safetensors_sha256": "010c2c3bfd1101797c63c874560243dcf770db7b68473e5693acfacefc26615d"
+    },
+    "byte_identical_to_2026_11_04_reference": true
+  },
+  "install": {
+    "wall_seconds_click_to_ready": 395,
+    "phases": [
+      "正在下载(generic cache)",
+      "正在校验模型",
+      "准备隔离运行环境",
+      "检查运行环境与设备",
+      "正在准备模型文件",
+      "当前可执行"
+    ]
+  },
+  "evidence": [
+    "sim16-app.stderr.log",
+    "../logs/installation-process.log",
+    "../logs/prepare-preflight.json",
+    "20-sim16-qwen-install.png"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S3d-text-stage-release-after-fix",
+  "status": "pass",
+  "date": "2026-11-08T19:49:00+08:00",
+  "before_fix": {
+    "reserved_after_release_gib": 5.83,
+    "error": "cleanup failed after text: CUDA reserved 5.83 GiB > 2.5 GiB"
+  },
+  "after_fix": {
+    "reference_cache": {
+      "reserved_after_release_gib": 0.02
+    },
+    "rebuilt_cache": {
+      "reserved_after_release_gib": 0.02
+    }
+  },
+  "change": "openspec/changes/fix-qwen-standard-text-cleanup",
+  "evidence": [
+    "21-sim16-qwen-generation-before-fix-failed.png",
+    "S3c-qwen-generation-after-cleanup-fix.json"
+  ]
+}

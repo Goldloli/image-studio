@@ -43,7 +43,8 @@
     {
       "case": "S3-qwen-prepare-preflight-blocked",
       "status": "blocked",
-      "evidence": "S3-qwen-prepare-preflight.json"
+      "evidence": "S3-qwen-prepare-preflight.json",
+      "note": "historical: superseded by S3b (low-memory prepare passed under simulated 16 GiB)"
     },
     {
       "case": "S4-klein-t2i",
@@ -188,18 +189,49 @@
     {
       "case": "B1..B3-bd-close-out",
       "status": "not_run"
+    },
+    {
+      "case": "S3b-low-memory-prepare-simulated-16gib",
+      "status": "pass",
+      "evidence": "S3b-low-memory-prepare-simulated-16gib.json"
+    },
+    {
+      "case": "S3c-qwen-generation-after-cleanup-fix",
+      "status": "pass",
+      "evidence": "S3c-qwen-generation-after-cleanup-fix.json"
+    },
+    {
+      "case": "S3d-text-stage-release-after-fix",
+      "status": "pass",
+      "evidence": "S3d-text-stage-release-after-fix.json"
+    },
+    {
+      "case": "S9-qwen-standard-generation",
+      "status": "pass",
+      "note": "Qwen-Image 2.1 Turbo standard 1024x1024 8 steps under fixed worker",
+      "evidence": "S3c-qwen-generation-after-cleanup-fix.json"
+    },
+    {
+      "case": "S14-moss-product-install-generation",
+      "status": "not_run",
+      "note": "MOSS low-memory prepare components verified byte-identical; app-level install/generation not run yet"
+    },
+    {
+      "case": "S15-real-16gib-machine",
+      "status": "not_run",
+      "note": "simulated with reserved memory; real 16 GiB hardware evidence pending"
     }
   ],
   "summary": {
-    "pass": 11,
+    "pass": 16,
     "blocked": 1,
     "accepted_not_retested": 3,
-    "not_run": 19
+    "not_run": 21
   },
   "limitations": [
     "GPU numbers are host-observed nvidia-smi peaks including desktop baseline, not CUDA reserved",
     "Qwen/MOSS blocked by machine pagefile/commit state; a new user hits the same gate",
     "real network download path not re-run; seeded cache used"
   ],
-  "notes": "covers the new change requirement: current-main standard-tier product evidence on the Win10 12 GB target machine"
+  "notes": "covers the new change requirement: current-main standard-tier product evidence on the Win10 12 GB target machine 2026-11-08: low-memory prepare implemented; Qwen Turbo install passed under simulated 16 GiB and standard generation passed after the text-release cleanup fix; MOSS app-level and real 16 GiB hardware evidence still pending."
 }

@@ -16,9 +16,9 @@
 - [x] 1.2 种子缓存：parity seed 132 artifacts / 123 unique / 0 missing / 0 mismatch / 112.5 GB 硬链接；Z-Image Gate 0 seed 25 links；总缓存 135.4 GB，**零下载**（[seed-parity-cache.json](../../../verification/windows-12gb-standard-tier/seed-parity-cache.json)）。
 - [x] 1.3 新用户初始状态：7 型号、0 已安装、设备满足 7；Klein 详情显示**标准档 1024×1024 · bfloat16**；设备探针（安装后）RTX 3080 Ti / 12,288 MiB / compute 8.6（[S1-fresh-root-initial.json](../../../verification/windows-12gb-standard-tier/S1-fresh-root-initial.json)）。
 - [x] 1.4 种子缓存首次安装：Klein ≈110 s（18.7 GB）、BiRefNet ≈32 s、Real-ESRGAN ≈12 s、Z-Image ≈172 s（35.56 GB）；无网络下载（[S2-seeded-install-timings.json](../../../verification/windows-12gb-standard-tier/S2-seeded-install-timings.json)）。
-- [x] 1.5 Qwen-Image 2.1 Turbo 全新安装：prepare 内存在量化前拒绝——可用物理内存 22.6 GiB（<28）、commit 余量 24.8 GiB（<26），无 ready 记录、无 `.prepared` 目录；证据 [S3-qwen-prepare-preflight.json](../../../verification/windows-12gb-standard-tier/S3-qwen-prepare-preflight.json)。另做提交压力实验：commit 上限 36.5→43.2 GiB（余量 31.4 GiB），但 Windows 在重试前回落，B 不稳定；稳定通过需所有者调大虚拟内存（A）。
+- [x] 1.5 （历史记录，已被低内存 prepare 取代）Qwen-Image 2.1 Turbo 安装曾被 prepare 内存预检拒绝；2026-11-08 已实现低内存量化并在模拟 16 GiB 条件下安装通过（S3b），见 [stream-prepare-low-memory](../stream-prepare-low-memory/tasks.md)。
 - [x] 1.6 标准档逐能力生成：Klein 文生图 50.1 s / 1024²、Z-Image 文生图 55.1 s / 1024²（9 步）、BiRefNet 25.6 s（RGBA+mask 1024²）、Real-ESRGAN 8.6 s（1024²→4096²）、Klein 单图编辑 46.6 s / 1024²；输出 PNG 字节/尺寸/SHA-256 均在 S4–S8 JSON。
-- [ ] 1.7 Qwen-Image 2.1 Turbo / Qwen-Image 2.1 / MOSS-Image-SFT 标准档生成：**blocked（not_run）**，待所有者决定是否调大虚拟内存（A）后补测。
+- [x] 1.7 Qwen 标准档生成：Qwen-Image 2.1 Turbo 1024² 8 步已通过（40.7 s，PNG 2,010,413 B，SHA-256 `92a9d4f8…`；依赖 `fix-qwen-standard-text-cleanup`）；Qwen-Image 2.1 与 MOSS 的产品级安装/生成本轮未跑（MOSS 低内存 prepare 组件已逐字节验证）。
 - [x] 1.8 导出 PNG 与资产逐字节一致（SHA-256 `ad9fdf9c…`）；重启后 4/7 型号仍就绪、5 轮对话与作品全部保留（[S10-export-restart.json](../../../verification/windows-12gb-standard-tier/S10-export-restart.json)）。
 - [x] 1.9 汇总标准档资源口径并写 `verification/windows-12gb-standard-tier/` README + acceptance.json（GPU 为 host 采样含桌面基线，方法已在证据中标注）。
 - [ ] 1.10 （可选）旧根升级路径对照：本轮未执行；`C:\ist-a` 保持原样，未删除。

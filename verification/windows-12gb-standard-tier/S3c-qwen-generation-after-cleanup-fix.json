@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "S3c-qwen-generation-after-cleanup-fix",
+  "status": "pass",
+  "date": "2026-11-08T19:54:40+08:00",
+  "machine": {
+    "os": "Windows 10 Pro 22H2 19045",
+    "gpu": "RTX 3080 Ti",
+    "vram_mib": 12288
+  },
+  "model": "Qwen-Image 2.1 Turbo (standard tier 1024x1024, 8 steps)",
+  "elapsed_seconds": 40.7,
+  "stages": [
+    "正在准备生成",
+    "正在加载模型",
+    "正在采样 2/8..7/8",
+    "正在解码图片",
+    "图片已生成"
+  ],
+  "asset": {
+    "file": "asset-cfa6423e96124acab466bb58bd49319e.png",
+    "bytes": 2010413,
+    "width": 1024,
+    "height": 1024,
+    "sha256": "92a9d4f8c4264ccf131723ba543f855f1951d4a7e1731db25aceb4ffdad68faf"
+  },
+  "gpu": {
+    "host_gpu_used_peak_mib": 7849,
+    "total_mib": 12288,
+    "note": "host nvidia-smi 1 s sampling, includes desktop baseline"
+  },
+  "evidence": [
+    "22-qwen-turbo-generation-after-fix.png",
+    "qwen-turbo-gpu-sample.csv"
+  ]
+}

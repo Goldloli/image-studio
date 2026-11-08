@@ -1,4 +1,4 @@
-# Test plan: certify-windows-10-target-machine
+﻿# Test plan: certify-windows-10-target-machine
 
 环境（本机，2026-11-08 实测）：Windows 10 Pro 22H2 19045 / i7-13700K / **RTX 3080 Ti 12 GB（sm86，驱动 596.49）** / 31.7 GiB RAM / 3840×2160 @150% / WebView2 157.0.4341.42。
 数据根：**`C:\ist-accept`**（全新，模拟新用户首次安装；旧根 `C:\ist-a` 保留未动，仅作可选升级对照）。
@@ -12,13 +12,13 @@
 | S0 | 环境、构建、质量门禁、种子缓存 | **pass** | 质量门禁全绿；132 artifacts / 0 missing / 0 mismatch；零下载 | `S0-environment-build.json`, `build-quality-gates.log`, `seed-parity-cache.json` |
 | S1 | 新用户初始状态与档位投影 | **pass** | 7 型号 / 0 已安装 / 设备满足 7；Klein 显示 standard 1024²/bfloat16 | `S1-fresh-root-initial.json` |
 | S2 | 种子缓存安装（Klein/BiRefNet/Real-ESRGAN/Z-Image） | **pass** | 安装阶段完整、无下载、记录耗时 | `S2-seeded-install-timings.json` |
-| S3 | Qwen/MOSS prepare 预检 | **blocked** | 量化前失败、错误可行动、无 prepared/ready；数值入证据 | `S3-qwen-prepare-preflight.json`, `07-qwen-preflight.png` |
+| S3 | Qwen/MOSS prepare 预检 | blocked（历史）→ 已被低内存 prepare 取代 | 低内存路径在模拟 16 GiB 下通过（S3b） | `S3-qwen-prepare-preflight.json`（历史）, `S3b-low-memory-prepare-simulated-16gib.json` |
 | S4 | 标准档生成：Klein 文生图 | **pass** | 1024²、50.1 s、PNG/SHA-256、host GPU 峰值 | `S4-klein-t2i.json` |
 | S5 | 标准档生成：Z-Image 文生图（≥12 GiB、无 8 GB 紧凑档） | **pass** | 1024²、55.1 s（9 步）、PNG/SHA-256、host GPU 峰值 | `S5-zimage-t2i.json` |
 | S6 | 标准档生成：BiRefNet 去背景 | **pass** | RGBA + mask 双输出 1024² | `S6-birefnet.json` |
 | S7 | 标准档生成：Real-ESRGAN 4× | **pass** | 1024² → 4096²（精确 4×） | `S7-realesrgan.json` |
 | S8 | 标准档生成：Klein 单图编辑 | **pass** | 源图导入 → 编辑出图、场景保留 | `S8-klein-edit.json` |
-| S9 | Qwen Turbo / Qwen base / MOSS 标准档生成 | **not_run（blocked by S3）** | 待所有者决定是否调大虚拟内存（A）后补测 | 引用 S3 |
+| S9 | Qwen Turbo / Qwen base / MOSS 标准档生成 | Qwen Turbo **pass**（40.7 s，2026-11-08）；Qwen base/MOSS not_run | 低内存安装 + 文本阶段释放修复后标准档生成通过 | `S3c-qwen-generation-after-cleanup-fix.json` |
 | S10 | 导出逐字节 + 重启恢复 | **pass** | 导出 == 资产（SHA-256）；重启后 4/7 就绪、5 轮对话保留 | `S10-export-restart.json` |
 | S11 | 空缓存真实联机安装（历史 I2-1） | not_run（历史 blocked） | 若执行 Z-Image 联机安装仅作部分旁证 | 引用 `verification/windows-parity-app/not-run.json` |
 | S12 | 旧根升级路径对照（可选） | not_run | `C:\ist-a` 未动，本轮用全新根 | — |
@@ -58,3 +58,4 @@
 ## 执行顺序
 
 已完成：S0 → S1 → S2 → S3 → S4–S8 → S9（blocked 记录）→ S10 → O1。剩余：O2–O10、C1/C3、D、B 收口项，以及（若所有者选择 A）Qwen/MOSS 补测后再归档。
+
