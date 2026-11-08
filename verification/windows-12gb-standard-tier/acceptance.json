@@ -89,8 +89,9 @@
     },
     {
       "case": "S11-empty-cache-real-network-install",
-      "status": "not_run",
-      "note": "historically blocked (I2-1, PyPI throughput); not re-run"
+      "status": "partial_pass",
+      "evidence": "S11-empty-cache-network-install.json",
+      "note": "Real-ESRGAN installed from an empty cache over the real network (53 s); shared Python runtime/PyPI path not re-run"
     },
     {
       "case": "S12-upgrade-path-old-root",
@@ -119,8 +120,8 @@
     },
     {
       "case": "W5-multi-monitor-sleep",
-      "status": "not_run",
-      "note": "optional, skipped"
+      "status": "deferred_optional",
+      "note": "single-monitor machine; sleep/wake not exercised"
     },
     {
       "case": "W6-theme-review",
@@ -155,11 +156,13 @@
     },
     {
       "case": "O6-install-download-retry",
-      "status": "not_run"
+      "status": "pass",
+      "evidence": "O6-install-download-retry.json"
     },
     {
       "case": "O7-non-ascii-path",
-      "status": "not_run"
+      "status": "pass",
+      "evidence": "O7-non-ascii-path.json"
     },
     {
       "case": "O8-disk-shortage",
@@ -187,15 +190,18 @@
     },
     {
       "case": "C3-release-artifact-install",
-      "status": "not_run"
+      "status": "deferred_optional",
+      "note": "optional; would overwrite the installed package, skipped"
     },
     {
       "case": "D1..D7-doc-close-out",
-      "status": "not_run"
+      "status": "pass",
+      "note": "doc/15, windows-8gb-tier README, Real-ESRGAN manifest, hardening matrix, archives and evidence README updated"
     },
     {
       "case": "B1..B3-bd-close-out",
-      "status": "not_run"
+      "status": "pass",
+      "note": "06k/q2y/ipw/2f5/nur closed with evidence; ba1 kept (external capture tool limitation, CDP workaround documented); real-16-GiB follow-up created"
     },
     {
       "case": "S3b-low-memory-prepare-simulated-16gib",
@@ -237,15 +243,21 @@
       "case": "S4-S8-current-build-regeneration",
       "status": "pass",
       "evidence": "S4-S8-current-build-regeneration.json"
+    },
+    {
+      "case": "O10-bad-checksum-missing-file",
+      "status": "pass",
+      "evidence": "O10-bad-checksum-missing-file.json"
     }
   ],
   "summary": {
-    "pass": 28,
+    "pass": 33,
     "blocked": 1,
     "accepted_not_retested": 3,
     "pass_by_reference": 1,
-    "deferred_optional": 1,
-    "not_run": 9
+    "partial_pass": 1,
+    "deferred_optional": 3,
+    "not_run": 2
   },
   "limitations": [
     "GPU numbers are host-observed nvidia-smi peaks including desktop baseline, not CUDA reserved",
