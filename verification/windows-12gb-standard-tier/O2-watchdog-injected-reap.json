@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "O2-watchdog-60s",
+  "status": "pass",
+  "date": "2026-11-08T20:49:30+08:00",
+  "build": "target/release/image-studio-desktop.exe 2026-11-08 19:50",
+  "method": {
+    "note": "The execution.lock file is opened by the host with share semantics that our exclusive handle did not block, so the first attempt (occupying the lock) did not strand a real send. The watchdog was instead exercised deterministically by inserting one pending turn with received_at 120 s in the past into the running library, then observing the app's 5 s watchdog tick.",
+    "lock_attempt": {
+      "result": "send still entered execution; test inconclusive",
+      "screenshot": "45-watchdog-lock-inconclusive.png"
+    }
+  },
+  "injected_turn": {
+    "id": "turn-watchdog-simulated",
+    "status_before": "pending",
+    "received_at_offset_ms": -120000
+  },
+  "observed": {
+    "app_log": "turn.watchdog.reaped count=1",
+    "turn_status_after": "rejected",
+    "error": "发送超时：60 秒内未进入执行（等待提交阶段），请重试；若反复出现请重启应用",
+    "ui": "发送失败 + 阶段原因 + 重试/编辑后重发入口"
+  },
+  "retry_after_failure": "subsequent sends in the same app completed normally (image generated)",
+  "evidence": [
+    "46-watchdog-injected-reap.png",
+    "C:/ist-accept/logs/app.log"
+  ]
+}

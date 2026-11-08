@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "O5-console-window-current-build",
+  "status": "pass",
+  "date": "2026-11-08T20:59:00+08:00",
+  "build": "target/release/image-studio-desktop.exe 2026-11-08 20:55 + fix-spawned-child-console-window",
+  "before_fix": {
+    "observation": "during a generation inference-supervisor had a visible window",
+    "inference_supervisor": {
+      "pid": 15380,
+      "main_window_handle": 1443114,
+      "main_window_title": "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\target\\release\\inference-supervisor.exe"
+    },
+    "root_cause": "spawn_suspended_in_job/tokio overwrote CREATE_NO_WINDOW with creation_flags(CREATE_SUSPENDED)"
+  },
+  "after_fix": {
+    "generation": {
+      "model": "Z-Image Turbo",
+      "result": "ok",
+      "inference_supervisor": {
+        "pid": 11636,
+        "main_window_handle": 0,
+        "title": ""
+      },
+      "python_workers": [
+        {
+          "pid": 25012,
+          "handle": 0
+        },
+        {
+          "pid": 13332,
+          "handle": 0
+        },
+        {
+          "pid": 5552,
+          "handle": 0
+        }
+      ]
+    },
+    "install": {
+      "model": "BiRefNet epoch_244",
+      "wall_seconds": 66,
+      "result": "当前可执行",
+      "windows": 0
+    },
+    "console_processes": {
+      "new_conhosts_parent": "powershell.exe -> DeepSeek Harness.exe (acceptance tooling), not the app tree",
+      "app_attributed_new_conhosts": 0
+    },
+    "unit_test": "adapters::windows_process::tests::suspended_job_spawn_combines_suspend_and_no_window_flags ok"
+  },
+  "evidence": [
+    "47-o5-generation-after-fix.png",
+    "48-o5-install-after-fix.png"
+  ],
+  "note": "console test binary cannot reproduce the GUI-parent case (child inherits test console); product-level MainWindowHandle==0 is the acceptance"
+}

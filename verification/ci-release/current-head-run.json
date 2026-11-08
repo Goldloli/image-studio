@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "kind": "ci-current-head-run",
+  "status": "pass",
+  "fetched_at": "2026-11-08T20:45:00+08:00",
+  "run_id": 42463163134,
+  "run_number": 35,
+  "name": "quality",
+  "head_sha": "b861ae54258ec5bbf6c6153993e02c3e9d22bb05",
+  "head_branch": "main",
+  "status_field": "completed",
+  "conclusion": "success",
+  "created_at": "2026-11-08T08:29:42Z",
+  "updated_at": "2026-11-08T08:33:50Z",
+  "url": "https://github.com/Goldloli/image-studio/actions/runs/42463163134",
+  "jobs": [
+    {
+      "name": "quality (windows-latest)",
+      "status": "completed",
+      "conclusion": "success",
+      "runner": "GitHub Actions 1000002334",
+      "started_at": "2026-11-08T08:29:48Z",
+      "completed_at": "2026-11-08T08:33:49Z"
+    },
+    {
+      "name": "quality (macos-15)",
+      "status": "completed",
+      "conclusion": "success",
+      "runner": "GitHub Actions 1000002335",
+      "started_at": "2026-11-08T08:29:48Z",
+      "completed_at": "2026-11-08T08:32:17Z"
+    }
+  ]
+}

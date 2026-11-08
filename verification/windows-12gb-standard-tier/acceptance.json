@@ -134,19 +134,23 @@
     },
     {
       "case": "O2-watchdog-60s",
-      "status": "not_run"
+      "status": "pass",
+      "evidence": "O2-watchdog-injected-reap.json"
     },
     {
       "case": "O3-cancel-coverage",
-      "status": "not_run"
+      "status": "pass",
+      "evidence": "O3-cancel-current-build.json"
     },
     {
       "case": "O4-preflight-cancel-ipw",
-      "status": "not_run"
+      "status": "pass",
+      "evidence": "O4-preflight-cancel.json"
     },
     {
       "case": "O5-console-window",
-      "status": "not_run"
+      "status": "pass",
+      "evidence": "O5-console-window-current-build.json"
     },
     {
       "case": "O6-install-download-retry",
@@ -162,7 +166,8 @@
     },
     {
       "case": "O9-forced-reap-test",
-      "status": "not_run"
+      "status": "pass",
+      "evidence": "target/o9-forced-reap.log (cargo test)"
     },
     {
       "case": "O10-bad-checksum",
@@ -170,8 +175,8 @@
     },
     {
       "case": "C1-current-ci-run",
-      "status": "not_run",
-      "note": "CI run #35 at b861ae5 verified via API earlier; not yet written into verification/ci-release"
+      "status": "pass",
+      "evidence": "verification/ci-release/current-head-run.json"
     },
     {
       "case": "C2-unreleased-commits",
@@ -228,10 +233,10 @@
     }
   ],
   "summary": {
-    "pass": 18,
+    "pass": 24,
     "blocked": 1,
     "accepted_not_retested": 3,
-    "not_run": 20
+    "not_run": 14
   },
   "limitations": [
     "GPU numbers are host-observed nvidia-smi peaks including desktop baseline, not CUDA reserved",

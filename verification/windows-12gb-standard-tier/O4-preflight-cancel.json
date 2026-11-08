@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "O4-preflight-cancel-ipw",
+  "status": "pass",
+  "date": "2026-11-08T20:45:00+08:00",
+  "method": "Qwen-Image 2.1 Turbo send followed by stop within 300 ms during the preflight window",
+  "result": {
+    "final": "cancelled",
+    "settle_seconds": 6.67,
+    "leftover_processes": 0,
+    "previous_behavior": "about 90-120 s before the fast readiness check was introduced"
+  },
+  "note": "bd image-studio-ipw can be closed with this evidence",
+  "evidence": [
+    "../logs/app.log"
+  ]
+}

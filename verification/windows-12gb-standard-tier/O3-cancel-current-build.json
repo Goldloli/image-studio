@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-standard-tier-case",
+  "case": "O3-cancel-coverage",
+  "status": "pass",
+  "date": "2026-11-08T20:45:00+08:00",
+  "results": [
+    {
+      "model": "Qwen-Image 2.1 Turbo",
+      "stage": "正在加载模型",
+      "settle_seconds": 6.26,
+      "leftover_processes": 0
+    },
+    {
+      "model": "BiRefNet epoch_244",
+      "stage": "正在加载模型",
+      "settle_seconds": 3.8,
+      "leftover_processes": 0
+    },
+    {
+      "model": "Real-ESRGAN x4plus",
+      "stage": "send + 1.2 s",
+      "settle_seconds": 3.32,
+      "leftover_processes": 0
+    }
+  ],
+  "criterion": "click to 已取消 ≤ 15 s and no leftover inference-supervisor/python processes",
+  "evidence": [
+    "../logs/app.log"
+  ]
+}
