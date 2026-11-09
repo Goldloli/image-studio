@@ -118,6 +118,7 @@ Prerequisites:
 
 - Rust **1.99.1** from [`rust-toolchain.toml`](rust-toolchain.toml)
 - Node.js **24.19.0** and npm **11.17.0**
+- Python **3.11 or newer** for repository verification scripts; **3.13 recommended**. Model workers use their own pinned private Python runtimes, not the system interpreter.
 - Tauri system prerequisites for the target platform
 
 ```bash

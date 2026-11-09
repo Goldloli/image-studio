@@ -106,6 +106,7 @@ macOS 产物需要 Apple Silicon 与 macOS 11 或更高版本。模型权重和�
 
 - Rust **1.99.1**，由 [`rust-toolchain.toml`](rust-toolchain.toml) 固定
 - Node.js **24.19.0**、npm **11.17.0**
+- Python **≥3.11**（建议 **3.13**），用于运行仓库验证脚本；模型 worker 使用各自固定的私有 Python 运行时，不依赖系统 Python 版本。
 - 目标平台所需的 Tauri 系统依赖
 
 ```bash
