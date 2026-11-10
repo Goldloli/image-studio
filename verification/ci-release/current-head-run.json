@@ -2,33 +2,33 @@
   "schema_version": 1,
   "kind": "ci-current-head-run",
   "status": "pass",
-  "fetched_at": "2026-11-08T20:45:00+08:00",
-  "run_id": 42463163134,
-  "run_number": 35,
+  "fetched_at": "2026-11-10T13:47:00+08:00",
+  "run_id": 42763466161,
+  "run_number": 37,
   "name": "quality",
-  "head_sha": "b861ae54258ec5bbf6c6153993e02c3e9d22bb05",
+  "head_sha": "069c6e219820126a2185a28073fd29f4a6f01154",
   "head_branch": "main",
   "status_field": "completed",
   "conclusion": "success",
-  "created_at": "2026-11-08T08:29:42Z",
-  "updated_at": "2026-11-08T08:33:50Z",
-  "url": "https://github.com/Goldloli/image-studio/actions/runs/42463163134",
+  "created_at": "2026-11-10T05:39:12Z",
+  "updated_at": "2026-11-10T05:43:26Z",
+  "url": "https://github.com/Goldloli/image-studio/actions/runs/42763466161",
   "jobs": [
     {
       "name": "quality (windows-latest)",
       "status": "completed",
       "conclusion": "success",
-      "runner": "GitHub Actions 1000002334",
-      "started_at": "2026-11-08T08:29:48Z",
-      "completed_at": "2026-11-08T08:33:49Z"
+      "runner": "GitHub Actions 1000002413",
+      "started_at": "2026-11-10T05:39:14Z",
+      "completed_at": "2026-11-10T05:43:25Z"
     },
     {
       "name": "quality (macos-15)",
       "status": "completed",
       "conclusion": "success",
-      "runner": "GitHub Actions 1000002335",
-      "started_at": "2026-11-08T08:29:48Z",
-      "completed_at": "2026-11-08T08:32:17Z"
+      "runner": "GitHub Actions 1000002414",
+      "started_at": "2026-11-10T05:39:14Z",
+      "completed_at": "2026-11-10T05:41:55Z"
     }
   ]
 }

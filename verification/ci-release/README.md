@@ -1,7 +1,8 @@
 # Cross-platform CI/release evidence
 
-Status: **local and real GitHub Actions acceptance passed; `v0.1.0` is
-publicly published** (2026-11-05).
+Status: **local and real GitHub Actions acceptance passed; `v0.1.1` is
+publicly published** (2026-11-10). `v0.1.0` remains the previous public
+release (2026-11-05).
 
 Change: `openspec/changes/archive/2026-11-05-introduce-ci-release-pipeline`.
 Workflows:
@@ -26,6 +27,9 @@ Workflows:
 | Manual post-upgrade dual-platform build | PASS; both artifacts downloaded and rechecked | same evidence file |
 | Dependabot PRs | PASS; 7/7 merged, 0 open PRs | same evidence file |
 | `v0.1.0` public Release | PASS; 10 assets, checksums and bilingual notes present | same evidence file |
+| `v0.1.1` quality on the release commit | PASS on Windows + macOS arm64 (run 37) | [v0.1.1/acceptance.json](v0.1.1/acceptance.json) |
+| `v0.1.1` release workflow | PASS; version provenance, both platform builds, draft release | same `v0.1.1` record |
+| `v0.1.1` public Release | PASS; 10 assets, both platform packages, checksums re-verified after download | [v0.1.1/README.md](v0.1.1/README.md) |
 
 The local Node runtime is `24.12.0`, while CI pins `24.19.0`; tests/build were
 run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
@@ -42,6 +46,18 @@ run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
 4. `v0.1.0` tag: version/main provenance check passed.
 5. Public Release: PASS with 10 assets and bilingual install/release notes:
    <https://github.com/Goldloli/image-studio/releases/tag/v0.1.0>.
+6. `v0.1.1` tag: version/main provenance check passed on `069c6e2`; the
+   Windows installer, macOS arm64 `.app` zip and draft release jobs all
+   succeeded (release run 3).
+7. Public `v0.1.1` Release: PASS with 10 assets; the Windows NSIS installer
+   (`245,148,864 B`) and macOS arm64 zip (`32,516,275 B`) checksums were
+   re-verified after download, the installer SHA-256 matches the CI
+   `internal-package.json`, and the release body matches the rendered
+   bilingual notes:
+   <https://github.com/Goldloli/image-studio/releases/tag/v0.1.1>.
+8. `v0.1.1` acceptance archive: [v0.1.1/](v0.1.1/) with the machine-readable
+   record, the CI-built Windows package evidence and both published
+   checksum files.
 
 Unsigned/notarization limitations are documented in
 [doc/14-ci-release.md](../../doc/14-ci-release.md).

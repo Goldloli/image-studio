@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "kind": "github-actions-and-public-release-acceptance",
+  "date": "2026-11-10",
+  "status": "passed",
+  "tag": "v0.1.1",
+  "tag_commit": "069c6e219820126a2185a28073fd29f4a6f01154",
+  "previous_release": {
+    "tag": "v0.1.0",
+    "tag_commit": "91b4c03b248f0b29d8ba88bfd2357c93d0366437",
+    "record": "../github-actions-acceptance-2026-11-05.json"
+  },
+  "quality": {
+    "run": 42763466161,
+    "run_number": 37,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/42763466161",
+    "result": "success",
+    "head_sha": "069c6e219820126a2185a28073fd29f4a6f01154",
+    "created_at": "2026-11-10T05:39:12Z",
+    "updated_at": "2026-11-10T05:43:26Z",
+    "jobs": [
+      {
+        "name": "quality (windows-latest)",
+        "result": "success",
+        "runner": "GitHub Actions 1000002413",
+        "started_at": "2026-11-10T05:39:14Z",
+        "completed_at": "2026-11-10T05:43:25Z",
+        "duration": "4m11s"
+      },
+      {
+        "name": "quality (macos-15)",
+        "result": "success",
+        "runner": "GitHub Actions 1000002414",
+        "started_at": "2026-11-10T05:39:14Z",
+        "completed_at": "2026-11-10T05:41:55Z",
+        "duration": "2m41s"
+      }
+    ],
+    "note": "Push to main with the 0.1.1 version bump, release notes and README; the release tag points at the same commit."
+  },
+  "release_workflow": {
+    "run": 42763614051,
+    "run_number": 3,
+    "name": "release-draft",
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/42763614051",
+    "result": "success",
+    "tag": "v0.1.1",
+    "tag_commit": "069c6e219820126a2185a28073fd29f4a6f01154",
+    "created_at": "2026-11-10T05:40:39Z",
+    "updated_at": "2026-11-10T05:47:44Z",
+    "jobs": [
+      {
+        "name": "Verify tag matches application version",
+        "result": "success",
+        "started_at": "2026-11-10T05:40:42Z",
+        "completed_at": "2026-11-10T05:40:59Z",
+        "duration": "0m17s"
+      },
+      {
+        "name": "Build release artifacts / macOS app",
+        "result": "success",
+        "started_at": "2026-11-10T05:41:02Z",
+        "completed_at": "2026-11-10T05:44:04Z",
+        "duration": "3m02s"
+      },
+      {
+        "name": "Build release artifacts / Windows installer",
+        "result": "success",
+        "started_at": "2026-11-10T05:41:03Z",
+        "completed_at": "2026-11-10T05:47:08Z",
+        "duration": "6m05s"
+      },
+      {
+        "name": "Draft GitHub release",
+        "result": "success",
+        "started_at": "2026-11-10T05:47:11Z",
+        "completed_at": "2026-11-10T05:47:43Z",
+        "duration": "0m32s"
+      }
+    ],
+    "version_provenance": "passed: tag, workspace Cargo, Tauri and frontend versions all 0.1.1; tag commit on main"
+  },
+  "public_release": {
+    "release_id": 439991970,
+    "release_url": "https://github.com/Goldloli/image-studio/releases/tag/v0.1.1",
+    "api_created_at": "2026-11-10T05:40:35Z",
+    "workflow_draft_completed_at": "2026-11-10T05:47:43Z",
+    "published_at": "2026-11-10T05:48:51Z",
+    "is_draft": false,
+    "is_prerelease": false,
+    "anonymous_api_verified": true,
+    "asset_count": 10,
+    "windows_asset": {
+      "name": "Image.Studio_0.1.1_x64-setup.exe",
+      "bytes": 245148864,
+      "sha256": "c749588356d14b01509adfd99e5bf3d8ccb70d54626a9e307ffe6ed1bac50a1e",
+      "file_type": "PE32 executable (GUI), Nullsoft Installer self-extracting archive"
+    },
+    "macos_asset": {
+      "name": "Image-Studio-0.1.1-macos-arm64.zip",
+      "bytes": 32516275,
+      "sha256": "7f4981d3419a118415307bac9d1a7460a846ec342bb63cd06cee8fc0a84d2520",
+      "zip_entries": 15,
+      "embedded_legal_resources": 5
+    },
+    "included_documents": [
+      "README.md",
+      "LICENSE",
+      "NOTICE",
+      "THIRD_PARTY_NOTICES.md",
+      "RELEASE-NOTES.md"
+    ],
+    "assets": {
+      "Image-Studio-0.1.1-macos-arm64.zip": {
+        "bytes": 32516275,
+        "sha256": "7f4981d3419a118415307bac9d1a7460a846ec342bb63cd06cee8fc0a84d2520"
+      },
+      "Image.Studio_0.1.1_x64-setup.exe": {
+        "bytes": 245148864,
+        "sha256": "c749588356d14b01509adfd99e5bf3d8ccb70d54626a9e307ffe6ed1bac50a1e"
+      },
+      "LICENSE": {
+        "bytes": 11358,
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      "NOTICE": {
+        "bytes": 226,
+        "sha256": "cd51f4edbbefb0c1bbcda340aa1aeddcc1c44b66cb4eb896ad013330a3ff4c43"
+      },
+      "README.md": {
+        "bytes": 15698,
+        "sha256": "d3c14bb217a12a296ca22f1b0437ec94d38eb2c691e27e41ccbd0a5c14e40749"
+      },
+      "RELEASE-NOTES.md": {
+        "bytes": 12694,
+        "sha256": "e7c33dfd5529f4cfa87e53191fec8126ec40d03ff30014e74ca6bdb90a83cbe6"
+      },
+      "SHA256SUMS-macos.txt": {
+        "bytes": 101,
+        "sha256": "6cc9c857898dce9ca70d7ec5bc284903f024420e554258f86b9aae6bca1ac1b3"
+      },
+      "SHA256SUMS-windows.txt": {
+        "bytes": 99,
+        "sha256": "183db24938873cdf2f5bdc887b6e61445cc4fcd42699b9f3becb5055ecc54a14"
+      },
+      "THIRD_PARTY_NOTICES.md": {
+        "bytes": 2440,
+        "sha256": "d0f9f41b9c66bf2357a8fed71d64aa7ea5b093ad7b0c90678eda2d16c7dbc123"
+      },
+      "internal-package.json": {
+        "bytes": 1094,
+        "sha256": "b84fd41837b56e157ae3b867ba7b9306e22220aafc9dde41c54bb9f6d181167b"
+      }
+    }
+  },
+  "download_recheck": {
+    "assets_downloaded": 10,
+    "windows_checksum": "passed",
+    "macos_checksum": "passed",
+    "windows_installer_sha256_matches_internal_package": true,
+    "internal_package_installer": "target/release/bundle/nsis/Image Studio_0.1.1_x64-setup.exe",
+    "internal_package_installer_sha256": "c749588356d14b01509adfd99e5bf3d8ccb70d54626a9e307ffe6ed1bac50a1e",
+    "internal_package_installer_bytes": 245148864,
+    "macos_bundle": {
+      "identifier": "io.github.goldloli.image-studio",
+      "CFBundleShortVersionString": "0.1.1",
+      "CFBundleVersion": "0.1.1",
+      "LSMinimumSystemVersion": "11.0",
+      "architectures": {
+        "image-studio-desktop": "arm64",
+        "diagnostic-worker": "arm64",
+        "inference-supervisor": "arm64",
+        "realesrgan-worker": "arm64"
+      }
+    },
+    "release_notes_body_matches_rendered_notes": true,
+    "release_notes_placeholders_rendered": true
+  },
+  "remaining_risks": [
+    "Windows and macOS installers are unsigned; macOS is not notarized.",
+    "Model weights and private Python runtimes are downloaded separately and are not bundled in the installers.",
+    "The 8 GB compact tier is certified on Turing sm75 (RTX 2060 SUPER); other 8 GB architectures are not certified in this release.",
+    "Z-Image Turbo remains gated at 12 GB VRAM.",
+    "Windows install-time quantization requires at least 8 GiB available physical RAM and 6 GiB commit headroom."
+  ]
+}

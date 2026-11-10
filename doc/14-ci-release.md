@@ -43,6 +43,17 @@ tag commit 还必须属于 `main`。任一条件不满足时，release 在 Windo
 NSIS 安装包、macOS arm64 zip、两平台 checksum、双语 `RELEASE-NOTES.md` 与许可文件。
 workflow 后续仍默认创建 draft，由维护者检查后发布。
 
+`v0.1.1` 已于 2026-11-10 人工审阅并公开：
+<https://github.com/Goldloli/image-studio/releases/tag/v0.1.1>。tag 提交 `069c6e2`，
+同一提交上的 quality run 37 双平台通过，release run 3（版本来源检查、双平台构建、
+draft 发布）全部成功。公开页包含 Windows x64 NSIS 安装包
+`Image.Studio_0.1.1_x64-setup.exe`（245,148,864 B）、macOS arm64 zip
+`Image-Studio-0.1.1-macos-arm64.zip`（32,516,275 B）、两平台 checksum、双语
+`RELEASE-NOTES.md` 与许可文件。下载复验通过：两个 checksum 文件均 OK，Windows
+安装包 SHA-256 与 CI 生成的 `internal-package.json` 一致，macOS `.app` 的
+identifier、版本、最低系统版本与 arm64 架构均正确。验收记录见
+[`verification/ci-release/v0.1.1/`](../verification/ci-release/v0.1.1/README.md)。
+
 下载后应在对应页签执行：
 
 ```bash
