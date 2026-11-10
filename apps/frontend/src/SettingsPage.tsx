@@ -332,7 +332,7 @@ export function SettingsPage({
 
           {group === 'about' && <div className="settings-section about-v2">
             <div className="about-brand">
-              <div className="about-copy"><span className="neutral-badge">{snapshot?.about.version ?? '0.1.0'} · Preview</span><h2>Image Studio</h2><p>本地图片创作工作台</p></div>
+              <div className="about-copy"><span className="neutral-badge">{snapshot?.about.version ?? '0.1.1'} · Preview</span><h2>Image Studio</h2><p>本地图片创作工作台</p></div>
             </div>
             <InfoRow label="平台" value={`${snapshot?.about.productName ?? 'Image Studio'} · ${snapshot?.environment.platform ?? '—'}`}/>
             <InfoRow label="处理方式" value={snapshot?.about.localProcessing ? '模型推理在本机受管 worker 中执行' : '状态未知'}/>
