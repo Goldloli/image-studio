@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { clampZoom, createDraft, initialWorkspace, validSeed, workspaceReducer as reduce, workspaceReducer } from './workspace-state';
+import { clampZoom, createDraft, initialWorkspace, normalizeDraftParams, validSeed, workspaceReducer as reduce, workspaceReducer } from './workspace-state';
+import type { DraftParams } from './workspace-state';
+import { aspectsForCapability, KLEIN_EDIT_CAPABILITY, KLEIN_MODEL_ID, KLEIN_TEXT_CAPABILITY, Z_IMAGE_MODEL_ID } from './model-recipes';
 
 describe('workspace draft isolation',()=>{
   it('persists separate prompts, source images and parameters across capability switches and tool sends',()=>{
@@ -122,10 +124,10 @@ describe('workspace draft isolation',()=>{
     }
     expect(reduce(state,{type:'select',id:99})).toBe(state);
   });
-  it('preserves an incompatible aspect when selecting Qwen until the user changes it',()=>{
+  it('converges an incompatible aspect when selecting a 1:1-only model',()=>{
     let state=reduce(initialWorkspace(),{type:'params',patch:{aspect:'4:3'}});
     state=reduce(state,{type:'params',patch:{modelId:'qwen-image-2.1-mflux-v1',capabilityId:'image.text-to-image.qwen-image-2.1.v1'}});
-    expect(state.drafts[0].params.aspect).toBe('4:3');
+    expect(state.drafts[0].params.aspect).toBe('1:1');
     expect(state.drafts[0].prompt).toBe('');
     state=reduce(state,{type:'params',patch:{aspect:'1:1'}});
     expect(state.drafts[0].params.aspect).toBe('1:1');
@@ -157,5 +159,45 @@ describe('conversation deletion state',()=>{
     expect(state.activeId).toBe(1);
     expect(state.drafts).toHaveLength(1);
     expect(state.drafts[0]).toBe(before.drafts[0]);
+  });
+});
+
+describe('capability switches produce host-valid draft slots',()=>{
+  const zImageCapability = 'image.text-to-image.z-image-turbo.v1';
+  it('converges a 4:3 draft to 1:1 for a 1:1-only model and keeps every stored slot valid',()=>{
+    let state = workspaceReducer(initialWorkspace(), {type:'params',patch:{modelId:Z_IMAGE_MODEL_ID,capabilityId:zImageCapability,aspect:'4:3',seed:'20261031'}});
+    expect(state.drafts[0].params.aspect).toBe('4:3');
+    state = workspaceReducer(state, {type:'params',patch:{modelId:KLEIN_MODEL_ID,capabilityId:KLEIN_TEXT_CAPABILITY}});
+    expect(state.drafts[0].params.aspect).toBe('1:1');
+    state = workspaceReducer(state, {type:'params',patch:{modelId:KLEIN_MODEL_ID,capabilityId:KLEIN_EDIT_CAPABILITY,sourceAssetId:'asset-00000000000000000000000000000000',aspect:'1:1'}});
+    expect(state.drafts[0].params.aspect).toBe('1:1');
+    state = workspaceReducer(state, {type:'params',patch:{modelId:Z_IMAGE_MODEL_ID,capabilityId:zImageCapability}});
+    const slots = state.drafts[0].params.capabilityDrafts ?? {};
+    for (const [capability, slot] of Object.entries(slots)) expect(aspectsForCapability(capability)).toContain(slot.aspect);
+    expect(slots[KLEIN_EDIT_CAPABILITY]?.aspect).toBe('1:1');
+    expect(state.drafts[0].params.aspect).toBe('4:3');
+    expect(slots[zImageCapability]?.aspect).toBe('4:3');
+  });
+  it('keeps a supported same-capability aspect untouched',()=>{
+    const state = workspaceReducer(initialWorkspace(), {type:'params',patch:{modelId:Z_IMAGE_MODEL_ID,capabilityId:zImageCapability,aspect:'3:4'}});
+    expect(state.drafts[0].params.aspect).toBe('3:4');
+  });
+  it('repairs legacy invalid params and slots when a draft is loaded',()=>{
+    const legacy: DraftParams = {
+      modelId: KLEIN_MODEL_ID,
+      capabilityId: KLEIN_TEXT_CAPABILITY,
+      aspect: '4:3',
+      count: 1,
+      seed: '7',
+      sourceAssetId: null,
+      capabilityDrafts: {
+        [KLEIN_TEXT_CAPABILITY]: {prompt:'',aspect:'4:3',seed:'7',sourceAssetId:null,promptSourceId:null},
+        [zImageCapability]: {prompt:'',aspect:'3:4',seed:'',sourceAssetId:null,promptSourceId:null},
+      },
+    };
+    const normalized = normalizeDraftParams(legacy);
+    expect(normalized.aspect).toBe('1:1');
+    expect(normalized.capabilityDrafts?.[KLEIN_TEXT_CAPABILITY]?.aspect).toBe('1:1');
+    expect(normalized.capabilityDrafts?.[zImageCapability]?.aspect).toBe('3:4');
   });
 });

@@ -54,6 +54,7 @@ import {
   confirmedDraft,
   createDraft,
   initialWorkspace,
+  normalizeDraftParams,
   validSeed,
   workspaceReducer,
 } from './workspace-state';
@@ -143,7 +144,7 @@ function storedDraft(record: StoredDraft): Draft {
     prompt: record.prompt,
     collapsed: record.collapsed,
     promptSourceId: record.promptSourceId ?? null,
-    params: { ...record.params },
+    params: normalizeDraftParams({ ...record.params }),
     past: [],
     future: [],
   };

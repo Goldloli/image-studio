@@ -222,6 +222,15 @@ export const squareOnlyTextModel = (modelId: string): boolean => {
   return Boolean(recipe && !recipe.aspects.includes('4:3'));
 };
 
+/** Aspect ratios accepted by a capability; the host rejects slots using others. */
+export const aspectsForCapability = (capabilityId: string): readonly string[] =>
+  capabilityId === Z_IMAGE_MAC_CAPABILITY ? ['1:1', '4:3', '3:4'] : ['1:1'];
+
+export const normalizeAspectForCapability = (capabilityId: string, aspect: string): string => {
+  const supported = aspectsForCapability(capabilityId);
+  return supported.includes(aspect) ? aspect : supported[0];
+};
+
 /** The capability a text recipe/model selects, falling back to the tool models. */
 export const capabilityForModel = (modelId: string): string =>
   textRecipeForModel(modelId)?.capabilityId

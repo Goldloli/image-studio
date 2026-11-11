@@ -1,4 +1,4 @@
-import { textRecipeForModel, Z_IMAGE_CAPABILITY_FALLBACK, Z_IMAGE_MODEL_ID } from './model-recipes';
+import { normalizeAspectForCapability, textRecipeForModel, Z_IMAGE_CAPABILITY_FALLBACK, Z_IMAGE_MODEL_ID } from './model-recipes';
 
 export type CapabilityDraft = {
   prompt: string;
@@ -28,6 +28,20 @@ export const createDraft = (id: number, name = '新会话'): Draft => ({id, name
 export const initialWorkspace = (): WorkspaceState => ({drafts:[createDraft(1)], activeId:1, sample:null, nextId:2});
 export const validSeed = (seed: string): boolean => seed === '' || (/^\d+$/.test(seed) && Number(seed) <= 4294967295);
 export const clampZoom = (zoom: number): number => Math.min(4, Math.max(.25, Math.round(zoom * 4) / 4));
+
+/** Repairs a persisted draft: capability switches must never keep an aspect the host rejects. */
+export const normalizeDraftParams = (params: DraftParams): DraftParams => {
+  const capability = params.capabilityId ?? defaultCapabilityId(params.modelId);
+  const normalized: DraftParams = { ...params, aspect: normalizeAspectForCapability(capability, params.aspect) };
+  if (params.capabilityDrafts) {
+    const slots: NonNullable<DraftParams['capabilityDrafts']> = {};
+    for (const [slotCapability, slot] of Object.entries(params.capabilityDrafts)) {
+      slots[slotCapability] = { ...slot, aspect: normalizeAspectForCapability(slotCapability, slot.aspect) };
+    }
+    normalized.capabilityDrafts = slots;
+  }
+  return normalized;
+};
 export const confirmedDraft = (draft:Draft, composing:ReadonlyMap<number,string>):Draft => composing.has(draft.id)?{...draft,prompt:composing.get(draft.id)!}:draft;
 export type WorkspaceAction =
   | {type:'new'} | {type:'select'; id:number} | {type:'sample'; index:number | null}
@@ -74,15 +88,20 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
       if(!/^[A-Za-z0-9._:-]{1,128}$/.test(params.modelId)||!['1:1','4:3','3:4'].includes(params.aspect)||params.count!==1) return d;
       const current=d.params.capabilityId??defaultCapabilityId(d.params.modelId);
       const next=params.capabilityId??defaultCapabilityId(params.modelId);
-      if(current!==next) {
-        const slots={...d.params.capabilityDrafts,[current]:{prompt:d.prompt,aspect:d.params.aspect,seed:d.params.seed,sourceAssetId:d.params.sourceAssetId??null,promptSourceId:d.promptSourceId??null}};
-        const saved=slots[next];
-        const tool=next.includes('.remove-background.')||next.includes('.upscale.');
-        params={...d.params,seed:tool?'':d.params.seed,sourceAssetId:null,...(saved?{aspect:saved.aspect,seed:saved.seed,sourceAssetId:saved.sourceAssetId}:{}),...action.patch,capabilityDrafts:slots};
-        if(tool) params.aspect='1:1';
-        return {...d,params,prompt:saved?.prompt??(tool?'':d.prompt),promptSourceId:saved?.promptSourceId??null,past:[],future:[]};
+      if(current===next) {
+        // Same capability: keep the chosen aspect unless the capability rejects it.
+        return {...d,params:{...params,aspect:normalizeAspectForCapability(next,params.aspect)}};
       }
-      return {...d,params};
+      // Switching capability: the stored slot and the incoming parameters must both
+      // satisfy their own capability, otherwise the host rejects every later save.
+      const slots={...d.params.capabilityDrafts,[current]:{prompt:d.prompt,aspect:normalizeAspectForCapability(current,d.params.aspect),seed:d.params.seed,sourceAssetId:d.params.sourceAssetId??null,promptSourceId:d.promptSourceId??null}};
+      for(const [slotCapability,slot] of Object.entries(slots)) slots[slotCapability]={...slot,aspect:normalizeAspectForCapability(slotCapability,slot.aspect)};
+      const saved=slots[next];
+      const tool=next.includes('.remove-background.')||next.includes('.upscale.');
+      params={...d.params,seed:tool?'':d.params.seed,sourceAssetId:null,...(saved?{aspect:saved.aspect,seed:saved.seed,sourceAssetId:saved.sourceAssetId}:{}),...action.patch,capabilityDrafts:slots};
+      if(tool) params.aspect='1:1';
+      params={...params,aspect:normalizeAspectForCapability(next,params.aspect)};
+      return {...d,params,prompt:saved?.prompt??(tool?'':d.prompt),promptSourceId:saved?.promptSourceId??null,past:[],future:[]};
     }
     return d;
   })};
