@@ -109,7 +109,6 @@
 .info-row:last-child{border-bottom:0}
 .info-row>span{color:var(--muted)}
 .info-row>strong{font-weight:500;overflow-wrap:anywhere}
-.runtime-actions{margin-top:13px}
 .about-v2 .about-brand{padding:0 0 15px}
 .about-copy h2{font-size:24px;margin-top:9px}
 .about-copy p{font-size:12px;color:var(--muted);margin-top:3px}

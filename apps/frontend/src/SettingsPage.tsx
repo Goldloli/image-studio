@@ -34,7 +34,7 @@ const groups: { id: Group; label: string; icon: typeof Sun }[] = [
   { id: 'appearance', label: '通用与外观', icon: Sun },
   { id: 'defaults', label: '创作默认值', icon: SlidersHorizontal },
   { id: 'storage', label: '存储', icon: HardDrive },
-  { id: 'runtime', label: '运行环境与诊断', icon: Cpu },
+  { id: 'runtime', label: '运行环境', icon: Cpu },
   { id: 'about', label: '关于', icon: CircleHelp },
 ];
 
@@ -45,22 +45,18 @@ export function SettingsPage({
   appearance,
   saveStatus,
   saveError,
-  diagnosticsOpen,
   onBack,
   onAppearanceChange,
   onPreferencesReload,
-  onOpenDiagnostics,
   onError,
 }: {
   initialGroup?: Group;
   appearance: AppearancePreferences;
   saveStatus: SaveStatus;
   saveError: string;
-  diagnosticsOpen: boolean;
   onBack: () => void;
   onAppearanceChange: (value: AppearancePreferences) => void;
   onPreferencesReload: () => Promise<void>;
-  onOpenDiagnostics: () => void;
   onError: (value: string) => void;
 }) {
   const [group, setGroup] = useState<Group>(initialGroup);
@@ -306,7 +302,7 @@ export function SettingsPage({
           </div>}
 
           {group === 'runtime' && <div className="settings-section">
-            <SectionHeading title="运行环境与诊断" text="设备探针、整模型运行与实机验收是不同事实。" />
+            <SectionHeading title="运行环境" text="设备探针、整模型运行与实机验收是不同事实。" />
             <div className="runtime-summary">
               <InfoRow label="平台" value={`${snapshot?.environment.platform ?? '—'} · ${snapshot?.environment.architecture ?? '—'}`}/>
               <InfoRow label="运行时" value={`${snapshot?.environment.runtimeName ?? '—'} ${snapshot?.environment.runtimeVersion ?? ''} · Python ${snapshot?.environment.pythonVersion ?? '—'}`}/>
@@ -315,7 +311,6 @@ export function SettingsPage({
               <InfoRow label="运行时就绪" value={snapshot?.environment.runtime.runtimeReady ? '是' : '否'}/>
               <InfoRow label="设备探针" value={snapshot?.environment.runtime.deviceVerified ? '已通过' : '尚未通过'}/>
               <InfoRow label="最后错误" value={snapshot?.environment.runtime.lastError ?? '无已知错误'}/>
-              <InfoRow label="通信诊断" value={diagnosticsOpen ? '诊断面板已打开' : '尚未主动运行'}/>
             </div>
             <div className="runtime-summary">
               {(snapshot?.environment.runtimes ?? []).map(entry => <InfoRow
@@ -324,10 +319,7 @@ export function SettingsPage({
                 value={`${entry.phase} · 模型${entry.modelReady ? '就绪' : '未就绪'} · 环境${entry.runtimeReady ? '就绪' : '未就绪'} · 设备${entry.deviceVerified ? '已验证' : '未验证'} · 硬件门槛${entry.hardwareEligible ? '满足' : `不满足（${entry.hardwareReason ?? '显存或内存不足'}）`}${entry.lastError ? ` · ${entry.lastError}` : ''}`}
               />)}
             </div>
-            <div className="runtime-actions">
-              <button className="secondary" onClick={onOpenDiagnostics}><Monitor size={13}/>{diagnosticsOpen ? '查看诊断面板' : '打开通信诊断'}</button>
-            </div>
-            <p className="settings-boundary">打开本页不会启动诊断进程，也不会生成性能排名。诊断只验证宿主与 worker 通信。</p>
+            <p className="settings-boundary">打开本页不会启动后台进程，也不会生成性能排名；这里只展示宿主实际报告的运行环境事实。</p>
           </div>}
 
           {group === 'about' && <div className="settings-section about-v2">

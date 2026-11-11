@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Palette, Boxes, Settings2, Sun, Moon, X, CircleHelp, Image, Images, Terminal, Play, Square, LoaderCircle, Lightbulb } from 'lucide-react';
+import { Palette, Boxes, Settings2, Sun, Moon, X, CircleHelp, Image, Images, Lightbulb } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Workspace from './Workspace';
 import { AssetLibrary } from './AssetLibrary';
@@ -26,7 +26,6 @@ type RequestedAsset = {
   returnPage: Page | null;
 };
 type HostStatus = { inferenceAvailable: boolean; status: string; supportedModels: number; diagnosticsEnabled: boolean; developmentBuild: boolean; version: string; platform: string };
-type DiagnosticState = { enabled: boolean; mode: string; modes: string[]; snapshot: null | { phase: string; summary: string; probePassed: boolean; isRunning: boolean; pid: number | null; errorCode: string | null; logs: string; progressEvents: number } };
 const pages: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: 'create', label: '创作', icon: Palette },
   { id: 'inspiration', label: '灵感库', icon: Lightbulb },
@@ -53,11 +52,6 @@ export default function App() {
   const [host, setHost] = useState<HostStatus | null>(null);
   const [hostError, setHostError] = useState('');
   const [settingsInitialGroup, setSettingsInitialGroup] = useState<SettingsGroup>('appearance');
-  const [diagOpen, setDiagOpen] = useState(false);
-  const [diag, setDiag] = useState<DiagnosticState | null>(null);
-  const [mode, setMode] = useState('normal');
-  const [diagError, setDiagError] = useState('');
-  const [devMenu, setDevMenu] = useState(false);
   const [studio, setStudio] = useState<StudioSnapshot|null>(null);
   const [requestedAsset, setRequestedAsset] = useState<RequestedAsset | null>(null);
   const [requestedModel, setRequestedModel] = useState<RequestedModel | null>(null);
@@ -128,7 +122,7 @@ export default function App() {
     return () => { disposed = true; };
   }, []);
   useEffect(() => {
-    if (native) invoke<HostStatus>('workspace_status').then(status => { setHost(status); if (status.diagnosticsEnabled) setDiagOpen(true); }).catch(error => setHostError(String(error)));
+    if (native) invoke<HostStatus>('workspace_status').then(status => setHost(status)).catch(error => setHostError(String(error)));
   }, []);
   useEffect(() => {
     if (!native) return;
@@ -144,37 +138,9 @@ export default function App() {
     refreshStudio.current=()=>{window.clearTimeout(timer);void poll();};void poll();
     return()=>{disposed=true;window.clearTimeout(timer);};
   },[]);
-  useEffect(() => {
-    if (!diagOpen || !native) return;
-    let disposed = false;
-    let initial = true;
-    let timer: number | undefined;
-    const poll = async () => {
-      try {
-        const value = await invoke<DiagnosticState>('diagnostic_snapshot');
-        if (!disposed) { setDiag(value); if (initial) { setMode(value.mode); initial = false; } }
-      } catch (error) { if (!disposed) setDiagError(String(error)); }
-      finally { if (!disposed) timer = window.setTimeout(() => void poll(), 500); }
-    };
-    void poll();
-    return () => { disposed = true; window.clearTimeout(timer); };
-  }, [diagOpen]);
-  useEffect(() => {
-    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setDevMenu(false); };
-    window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close);
-  }, []);
   const openAsset = (asset: AssetView, conversationTitle: string, draftId: number | null, turnSequence: number | null, returnPage: Page | null) => {
     setRequestedAsset({ asset, conversationTitle, draftId, turnSequence, returnPage, nonce: ++requestNonce.current });
     navigate('create');
-  };
-  const enableDiagnostics = async () => {
-    setDevMenu(false); setDiagError('');
-    if (!native) { setHostError('通信诊断仅在桌面应用中可用。'); return; }
-    try { await invoke('diagnostic_enable'); setDiagOpen(true); } catch (error) { setHostError(String(error)); }
-  };
-  const diagnosticAction = async (command: 'diagnostic_start' | 'diagnostic_stop') => {
-    setDiagError('');
-    try { setDiag(await invoke<DiagnosticState>(command, command === 'diagnostic_start' ? { mode } : undefined)); } catch (error) { setDiagError(String(error)); }
   };
   const platform = host?.platform ?? (navigator.userAgent.includes('Mac') ? 'macos' : 'other');
   const resolvedTheme = resolveTheme(appearance.theme);
@@ -182,7 +148,6 @@ export default function App() {
     <header className="titlebar">
       <div className="window-drag" data-tauri-drag-region />
       {!native && <span className="preview-label">界面预览</span>}
-      {(host?.developmentBuild || !native) && <div className="dev-menu"><button className="quiet tiny" onClick={() => setDevMenu(!devMenu)} aria-expanded={devMenu}>开发</button>{devMenu && <div className="popover dev-popover"><button onClick={() => void enableDiagnostics()}><Terminal size={14}/>启用通信诊断</button></div>}</div>}
     </header>
     <div className="app-body">
       <nav className="icon-rail" aria-label="主导航">
@@ -205,15 +170,12 @@ export default function App() {
           appearance={appearance}
           saveStatus={appearanceStatus}
           saveError={appearanceError}
-          diagnosticsOpen={diagOpen}
           onBack={() => navigate('create')}
           onAppearanceChange={commitAppearance}
           onPreferencesReload={reloadPreferences}
-          onOpenDiagnostics={() => void enableDiagnostics()}
           onError={setHostError}
         />}
       </main>
-      {diagOpen && <aside className="diagnostic-panel"><div className="diag-title"><Terminal size={16}/><strong>开发诊断</strong><button className="icon-button" aria-label="收起通信诊断" onClick={() => setDiagOpen(false)}><X size={15}/></button></div><p className="muted">通信诊断，不执行图片生成</p><label>故障模式<select value={mode} disabled={diag?.snapshot?.isRunning} onChange={event => setMode(event.target.value)}>{(diag?.modes ?? ['normal']).map(value => <option key={value}>{value}</option>)}</select></label><div className="diag-actions"><button className="secondary" disabled={diag?.snapshot?.isRunning} onClick={() => void diagnosticAction('diagnostic_start')}><Play size={13}/>启动诊断</button><button className="secondary" disabled={!diag?.snapshot?.isRunning} onClick={() => void diagnosticAction('diagnostic_stop')}><Square size={12}/>停止</button></div>{diagError && <p role="alert" className="error-text">{diagError}</p>}<div className="diag-status">{diag?.snapshot?.isRunning && <LoaderCircle size={15} className="spin"/>}<strong>{diag?.snapshot?.summary ?? '尚未启动'}</strong></div>{diag?.snapshot && <><p className="muted">状态 {diag.snapshot.phase}<br/>进度事件 {diag.snapshot.progressEvents}<br/>{diag.snapshot.errorCode}</p>{diag.snapshot.probePassed && <span className="success-text">通信探针已通过</span>}<details><summary>诊断日志</summary><pre>{diag.snapshot.logs || '无日志'}</pre></details></>}<div className="viewport-controls"><span>开发窗口</span>{[[960, 640], [1280, 800]].map(([width, height]) => <button key={width} className="secondary" onClick={() => void invoke('diagnostic_viewport', { width, height, scale: 1 }).catch(error => setDiagError(String(error)))}>{width} × {height}</button>)}</div></aside>}
     </div>
   </div>;
 }
