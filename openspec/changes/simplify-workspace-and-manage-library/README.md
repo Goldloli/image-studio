@@ -23,3 +23,12 @@ Change：`simplify-workspace-and-manage-library`
 - `openspec validate simplify-workspace-and-manage-library --strict`：通过。
 - 9 份 capability 与 delta 一一对应，19 项实施任务均未开始；test-plan.md 包含 31 个编号验收场景，功能验收均未运行。
 - `openspec validate --all --strict`：21 项通过，4 份既有正式规格因需求正文超过 500 字符触发 strict 警告而未通过，分别是 generation-worker-protocol、model-installation、windows-desktop、windows-local-generation。本次未修改这些文件；已记录为 `image-studio-6g2` 单独跟踪。
+
+## 归档计划（原生验收通过后执行）
+
+1. 先完成 `verification/simplify-workspace-20261111/CHECKLIST.md` 的原生项，写 `RESULTS.md` 并保存截图/文件证据；Windows 未测项保持“未验收”。
+2. 在真实工作区执行 `openspec archive simplify-workspace-and-manage-library --yes`。本机已用临时副本演练：9 份 delta 合并为 `+15 / ~16 / -13`，`openspec list` 归零，除既有 4 份规格长度警告外无新增校验失败；演练不修改工作区、不代表已归档。
+3. 归档后修正两份正式规格的 Purpose，使其描述保留职责而非退役页面：
+   - `feature-catalog`：维护宿主真实能力登记与当前可执行性，让创作页按已接入能力提供统一、可追溯的提交链路；不提供独立功能目录或功能页。
+   - `task-center`：让用户在原会话卡与作品预览中查看可读制作记录、状态、失败原因与下一步，并保持执行身份一致地停止或显式重试；不提供独立任务列表或任务详情页。
+4. 提交归档与 Purpose 修正，更新 tasks.md/README 状态，关闭 bd `image-studio-i6`。
