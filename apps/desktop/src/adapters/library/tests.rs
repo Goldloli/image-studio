@@ -2482,3 +2482,78 @@ fn conversation_deletion_requires_the_confirmed_draft_version() {
     assert_eq!(library.draft(draft_id).unwrap().version, version);
     library.delete_conversation(&conversation, version).unwrap();
 }
+
+#[test]
+fn asset_favorites_are_explicit_persisted_and_queryable_beyond_the_loaded_page() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let mut ids = Vec::new();
+    for key in ["fav-a", "fav-b", "fav-c"] {
+        let job = submit(&mut library, key);
+        let done = commit(&mut library, &job);
+        ids.push(done.manifest.unwrap().outputs[0].asset_id.clone());
+    }
+    assert_eq!(library.set_asset_favorite(&ids[0], true).unwrap(), true);
+    assert_eq!(library.set_asset_favorite(&ids[0], true).unwrap(), true);
+    let favorites = library
+        .asset_library_query(AssetLibraryQuery {
+            favorites_only: true,
+            limit: Some(1),
+            ..Default::default()
+        })
+        .unwrap();
+    assert_eq!(favorites.total, 1);
+    assert_eq!(favorites.items.len(), 1);
+    assert_eq!(favorites.items[0].id, ids[0].to_string());
+    assert!(favorites.items[0].is_favorite);
+    assert_eq!(
+        library
+            .asset_library_query(AssetLibraryQuery::default())
+            .unwrap()
+            .total,
+        3
+    );
+    let intersection = library
+        .asset_library_query(AssetLibraryQuery {
+            favorites_only: true,
+            width: Some(999),
+            ..Default::default()
+        })
+        .unwrap();
+    assert_eq!(intersection.total, 0);
+    assert!(intersection.items.is_empty());
+
+    drop(library);
+    let mut library = open(root.path());
+    assert!(library.asset_library_item(&ids[0]).unwrap().is_favorite);
+    assert!(!library.asset_library_item(&ids[2]).unwrap().is_favorite);
+    assert_eq!(library.set_asset_favorite(&ids[0], false).unwrap(), false);
+    let after = library
+        .asset_library_query(AssetLibraryQuery {
+            favorites_only: true,
+            ..Default::default()
+        })
+        .unwrap();
+    assert_eq!(after.total, 0);
+    assert!(after.items.is_empty());
+}
+
+#[test]
+fn asset_favorite_rejects_unknown_and_non_work_targets() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let unknown = AssetId::new(format!("asset-{}", "0".repeat(32))).unwrap();
+    assert!(matches!(
+        library.set_asset_favorite(&unknown, true),
+        Err(LibraryError::NotFound(_))
+    ));
+    let input_root = tempfile::tempdir().unwrap();
+    let input_path = input_root.path().join("source.png");
+    fs::write(&input_path, png_bytes_for(64, 64)).unwrap();
+    let imported = library.import_source(&input_path).unwrap();
+    assert!(
+        library
+            .set_asset_favorite(&imported.asset_id, true)
+            .is_err()
+    );
+}

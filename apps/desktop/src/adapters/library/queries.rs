@@ -24,6 +24,10 @@ pub struct AssetLibraryQuery {
     pub created_from: Option<u64>,
     #[serde(default)]
     pub created_to: Option<u64>,
+    /// "All works" (default) versus "favourites only"; combined with every
+    /// other filter inside the host query so counts and paging share it.
+    #[serde(default)]
+    pub favorites_only: bool,
     #[serde(default)]
     pub cursor: Option<StableCursor>,
     #[serde(default)]
@@ -57,6 +61,7 @@ pub struct AssetLibraryItem {
     pub created_at: u64,
     pub available: bool,
     pub availability_error: Option<String>,
+    pub is_favorite: bool,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -243,7 +248,7 @@ impl Library {
         let row = self
             .db
             .query_row(
-                "SELECT a.id,a.job_id,a.attempt_id,t.id,t.sequence,t.conversation_id,coalesce(c.title,'历史生成'),c.draft_id,coalesce(t.prompt,json_extract(j.request_json,'$.instruction'),'生成图片'),coalesce(t.model_id,?2),a.width,a.height,json_extract(at.plan_json,'$.effective_parameters.seed'),a.byte_count,a.created_at FROM assets a JOIN jobs j ON j.id=a.job_id JOIN attempts at ON at.id=a.attempt_id LEFT JOIN generation_turns t ON t.job_id=j.id LEFT JOIN conversations c ON c.id=t.conversation_id WHERE a.id=?1 AND j.project_id='default'",
+                "SELECT a.id,a.job_id,a.attempt_id,t.id,t.sequence,t.conversation_id,coalesce(c.title,'历史生成'),c.draft_id,coalesce(t.prompt,json_extract(j.request_json,'$.instruction'),'生成图片'),coalesce(t.model_id,?2),a.width,a.height,json_extract(at.plan_json,'$.effective_parameters.seed'),a.byte_count,a.created_at,a.is_favorite FROM assets a JOIN jobs j ON j.id=a.job_id JOIN attempts at ON at.id=a.attempt_id LEFT JOIN generation_turns t ON t.job_id=j.id LEFT JOIN conversations c ON c.id=t.conversation_id WHERE a.id=?1 AND j.project_id='default'",
                 params![id.as_str(), DEFAULT_MODEL_ID],
                 |row| {
                     Ok((
@@ -263,6 +268,7 @@ impl Library {
                             .map(|value| value.max(0) as u64),
                         read_unsigned(row, 13)?,
                         read_unsigned(row, 14)?,
+                        row.get::<_, bool>(15)?,
                     ))
                 },
             )
@@ -287,6 +293,7 @@ impl Library {
             created_at: row.14,
             available: record.available,
             availability_error: record.availability_error,
+            is_favorite: row.15,
         })
     }
 
@@ -608,6 +615,9 @@ fn asset_filters(query: &AssetLibraryQuery) -> Result<(String, Vec<SqlValue>)> {
     if let Some(to) = query.created_to {
         clauses.push("a.created_at<=?".into());
         args.push(SqlValue::Integer(sqlite_integer(to)?));
+    }
+    if query.favorites_only {
+        clauses.push("a.is_favorite=1".into());
     }
     Ok((clauses.join(" AND "), args))
 }

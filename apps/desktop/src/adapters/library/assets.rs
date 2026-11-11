@@ -355,6 +355,39 @@ impl Library {
             .collect()
     }
 
+    /// Explicit favourite assignment by stable work identity. Only an active
+    /// primary work may be favourite, and the caller sends the wanted value so
+    /// replaying a request can never toggle it. Execution evidence, timestamps
+    /// and ordering identities are untouched.
+    pub fn set_asset_favorite(&mut self, id: &AssetId, favorite: bool) -> Result<bool> {
+        let changed = self.db.execute(
+            "UPDATE assets SET is_favorite=? WHERE id=? AND output_role='primary' AND deletion_state='active' AND job_id IN (SELECT id FROM jobs WHERE project_id='default')",
+            params![i64::from(favorite), id.as_str()],
+        )?;
+        if changed == 1 {
+            return Ok(favorite);
+        }
+        let row: Option<(String, String, bool)> = self
+            .db
+            .query_row(
+                "SELECT a.output_role,a.deletion_state,j.project_id='default' FROM assets a JOIN jobs j ON j.id=a.job_id WHERE a.id=?",
+                [id.as_str()],
+                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+            )
+            .optional()?;
+        match row {
+            None => Err(LibraryError::NotFound(id.to_string())),
+            Some((_, _, false)) => Err(LibraryError::Invalid("资产不属于默认项目".into())),
+            Some((role, _, _)) if role != "primary" => {
+                Err(LibraryError::Invalid("只有作品主图可收藏".into()))
+            }
+            Some((_, state, _)) if state != "active" => {
+                Err(LibraryError::Invalid("清理中或已删除的作品不可收藏".into()))
+            }
+            Some(_) => Err(LibraryError::Invalid("收藏未保存".into())),
+        }
+    }
+
     /// Controlled asset URI handlers receive bytes by registered ID, never a client path.
     pub fn read_asset_png(&self, id: &AssetId) -> Result<Vec<u8>> {
         let imported: bool = self.db.query_row(
