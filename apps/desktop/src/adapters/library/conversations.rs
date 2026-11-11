@@ -108,6 +108,9 @@ pub struct ConversationDeleteResult {
     pub deleted: bool,
     pub active_conversation_id: ConversationId,
     pub active_draft_id: u64,
+    /// The freshly created default draft when deleting the last visible
+    /// conversation; the frontend appends it without re-reading a snapshot.
+    pub replacement_draft: Option<DraftRecord>,
 }
 
 /// Title, draft and tombstone state of a conversation, readable even after the
@@ -479,6 +482,7 @@ impl Library {
                 deleted: false,
                 active_conversation_id,
                 active_draft_id,
+                replacement_draft: None,
             });
         }
         let busy: bool = tx.query_row(
@@ -518,6 +522,7 @@ impl Library {
             [],
             |row| Ok((row.get(0)?, row.get(1)?)),
         )?;
+        let mut replacement_draft_id: Option<u64> = None;
         if active_id.as_deref() == Some(id.as_str()) {
             let next: Option<(String, i64)> = tx
                 .query_row(
@@ -532,6 +537,7 @@ impl Library {
                     // The last visible conversation was deleted: create exactly
                     // one default conversation inside the same transaction.
                     let (created_id, created_draft) = insert_default_conversation(&tx)?;
+                    replacement_draft_id = Some(created_draft);
                     (created_id.to_string(), sqlite_integer(created_draft)?)
                 }
             };
@@ -542,11 +548,15 @@ impl Library {
         }
         tx.commit()?;
         let (active_conversation_id, active_draft_id) = self.active_selection()?;
+        let replacement_draft = replacement_draft_id
+            .map(|draft_id| self.draft(draft_id))
+            .transpose()?;
         Ok(ConversationDeleteResult {
             conversation_id: id.clone(),
             deleted: true,
             active_conversation_id,
             active_draft_id,
+            replacement_draft,
         })
     }
 

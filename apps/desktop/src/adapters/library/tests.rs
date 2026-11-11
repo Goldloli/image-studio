@@ -2407,7 +2407,8 @@ fn deleting_the_last_conversation_creates_exactly_one_default_conversation() {
     assert_ne!(first.active_conversation_id, only);
     let replacement = library.conversation(&first.active_conversation_id).unwrap();
     assert_eq!(replacement.title, "新会话");
-    let draft = library.draft(replacement.draft_id).unwrap();
+    let draft = first.replacement_draft.clone().unwrap();
+    assert_eq!(draft.id, replacement.draft_id);
     assert_eq!(draft.prompt, "");
     assert_eq!(draft.version, 1);
     assert_eq!(
