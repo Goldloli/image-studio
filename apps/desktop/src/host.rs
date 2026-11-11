@@ -343,6 +343,15 @@ async fn conversation_rename(
     blocking(move || studio.conversation_rename(&conversation_id, &title)).await
 }
 #[tauri::command]
+async fn conversation_delete(
+    state: State<'_, HostState>,
+    conversation_id: String,
+    expected_draft_version: u64,
+) -> Result<serde_json::Value, String> {
+    let studio = state.studio.clone();
+    blocking(move || studio.conversation_delete(&conversation_id, expected_draft_version)).await
+}
+#[tauri::command]
 async fn conversation_history(
     state: State<'_, HostState>,
     conversation_id: String,
@@ -449,6 +458,23 @@ async fn asset_library_item(
 ) -> Result<serde_json::Value, String> {
     let studio = state.studio.clone();
     blocking(move || studio.asset_library_item(&asset_id)).await
+}
+#[tauri::command]
+async fn asset_set_favorite(
+    state: State<'_, HostState>,
+    asset_id: String,
+    favorite: bool,
+) -> Result<serde_json::Value, String> {
+    let studio = state.studio.clone();
+    blocking(move || studio.asset_set_favorite(&asset_id, favorite)).await
+}
+#[tauri::command]
+async fn asset_delete(
+    state: State<'_, HostState>,
+    asset_id: String,
+) -> Result<serde_json::Value, String> {
+    let studio = state.studio.clone();
+    blocking(move || studio.asset_delete(&asset_id)).await
 }
 #[tauri::command]
 async fn task_center_query(
@@ -774,7 +800,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 eprintln!("DIAGNOSTIC_DESKTOP_READY tauri=2 requested_scale={requested_scale:?} native_dpr=webview window={initial_size:?}; image inference unavailable");
             }
         })
-        .invoke_handler(tauri::generate_handler![workspace_status, diagnostic_enable, diagnostic_start, diagnostic_stop, diagnostic_snapshot, diagnostic_viewport, studio_snapshot, model_catalog, feature_catalog, prompt_library_snapshot, prompt_library_favorite, prompt_library_image, prompt_library_clear_cache, preferences_snapshot, preferences_reload, preferences_save, creation_defaults_save, settings_snapshot, storage_open, model_install, model_cancel, draft_save, draft_create, conversation_list, conversation_create, conversation_apply_model, conversation_select, conversation_rename, conversation_history, conversation_turn_detail, conversation_send, conversation_cancel_turn, workspace_select, generation_submit, generation_cancel, generation_retry, task_list, asset_library_query, asset_library_item, task_center_query, task_center_detail, asset_export, source_import, source_list, app_close])
+        .invoke_handler(tauri::generate_handler![workspace_status, diagnostic_enable, diagnostic_start, diagnostic_stop, diagnostic_snapshot, diagnostic_viewport, studio_snapshot, model_catalog, feature_catalog, prompt_library_snapshot, prompt_library_favorite, prompt_library_image, prompt_library_clear_cache, preferences_snapshot, preferences_reload, preferences_save, creation_defaults_save, settings_snapshot, storage_open, model_install, model_cancel, draft_save, draft_create, conversation_list, conversation_create, conversation_apply_model, conversation_select, conversation_rename, conversation_delete, conversation_history, conversation_turn_detail, conversation_send, conversation_cancel_turn, workspace_select, generation_submit, generation_cancel, generation_retry, task_list, asset_library_query, asset_library_item, asset_set_favorite, asset_delete, task_center_query, task_center_detail, asset_export, source_import, source_list, app_close])
         .build(tauri::generate_context!())?;
     app.run(|app, event| {
         if let tauri::RunEvent::ExitRequested { api, .. } = &event

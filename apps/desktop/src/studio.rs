@@ -620,6 +620,44 @@ impl StudioService {
         self.with_library(|library| library.asset_library_item(&id))
             .and_then(|value| serde_json::to_value(value).map_err(|error| error.to_string()))
     }
+    /// Explicit favourite assignment; only an active primary work qualifies and
+    /// the host returns the confirmed persisted value.
+    pub fn asset_set_favorite(&self, asset_id: &str, favorite: bool) -> Result<Value, String> {
+        let id = AssetId::new(asset_id).map_err(|error| error.to_string())?;
+        let confirmed = self.with_library(|library| library.set_asset_favorite(&id, favorite))?;
+        Ok(json!({"assetId": asset_id, "favorite": confirmed}))
+    }
+    /// Confirmed work deletion: reference check, persisted intent, controlled
+    /// file cleanup and completion, serialized on the library boundary so a
+    /// concurrent export or read cannot interleave with the removal.
+    pub fn asset_delete(&self, asset_id: &str) -> Result<Value, String> {
+        let id = AssetId::new(asset_id).map_err(|error| error.to_string())?;
+        self.with_library(|library| {
+            let group = library.asset_deletion_group(&id)?;
+            if group.all_deleted() {
+                return Ok(json!({"assetId": asset_id, "state": "deleted"}));
+            }
+            let conflicts = library.asset_reference_conflicts(&id)?;
+            if !conflicts.is_empty() {
+                return Ok(json!({
+                    "assetId": asset_id,
+                    "state": "conflict",
+                    "conflicts": conflicts
+                }));
+            }
+            library.begin_asset_deletion(&id)?;
+            if let Err(error) = library.remove_asset_deletion_files(&id) {
+                library.fail_asset_deletion(&id, &error.to_string())?;
+                return Ok(json!({
+                    "assetId": asset_id,
+                    "state": "failed",
+                    "error": error.to_string()
+                }));
+            }
+            library.finish_asset_deletion(&id)?;
+            Ok(json!({"assetId": asset_id, "state": "deleted"}))
+        })
+    }
     pub fn import_source(&self, path: &Path) -> Result<Value, String> {
         let record = self.with_library(|library| library.import_source(path))?;
         serde_json::to_value(record).map_err(|error| error.to_string())
@@ -1112,7 +1150,10 @@ impl StudioService {
                             AssetKind::Depth | AssetKind::StructuredData => "other",
                         },
                         "available": asset.available,
-                        "error": asset.availability_error
+                        "error": asset.availability_error,
+                        "isFavorite": asset.is_favorite,
+                        "deletionState": asset.deletion_state,
+                        "deletionError": asset.deletion_error
                     })
                 })
                 .collect::<Vec<_>>();
@@ -1294,6 +1335,36 @@ impl StudioService {
             library.conversation(&id)
         })?;
         Ok(json!({"conversation": conversation}))
+    }
+    /// Confirmed conversation deletion. A target that still owns the active
+    /// execution or its cleanup is refused before the library transaction, so
+    /// deleting never implicitly cancels a running send.
+    pub fn conversation_delete(
+        &self,
+        conversation_id: &str,
+        expected_draft_version: u64,
+    ) -> Result<Value, String> {
+        let id = ConversationId::new(conversation_id).map_err(|error| error.to_string())?;
+        if let Some(generation) = self.generation.as_ref() {
+            let view = generation.snapshot();
+            if view.busy
+                && let Some(job_id) = view
+                    .job_id
+                    .as_deref()
+                    .and_then(|value| JobId::new(value).ok())
+            {
+                let owner = self
+                    .try_with_library(|library| library.job(&job_id).map(|job| job.conversation_id))
+                    .and_then(|result| result.ok())
+                    .flatten();
+                if owner.as_ref() == Some(&id) {
+                    return Err("目标会话仍在生成或清理，请先停止并等待清理结束".into());
+                }
+            }
+        }
+        let result =
+            self.with_library(|library| library.delete_conversation(&id, expected_draft_version))?;
+        serde_json::to_value(result).map_err(|error| error.to_string())
     }
     pub fn conversation_rename(&self, conversation_id: &str, title: &str) -> Result<Value, String> {
         let id = ConversationId::new(conversation_id).map_err(|error| error.to_string())?;
@@ -3596,5 +3667,48 @@ mod tests {
                 "macOS model must keep its ungated path: {id}"
             );
         }
+    }
+
+    #[test]
+    fn conversation_delete_through_the_service_returns_the_successor_and_replays_safely() {
+        let (_root, service) = fixture();
+        let before = service.snapshot().unwrap();
+        let conversation_id = before["activeConversationId"].as_str().unwrap().to_string();
+        let draft_id = before["activeId"].as_u64().unwrap();
+        let version = before["drafts"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|draft| draft["id"].as_u64() == Some(draft_id))
+            .and_then(|draft| draft["version"].as_u64())
+            .unwrap();
+        let result = service
+            .conversation_delete(&conversation_id, version)
+            .unwrap();
+        assert_eq!(result["deleted"], true);
+        let successor = result["activeConversationId"].as_str().unwrap().to_string();
+        assert_ne!(successor, conversation_id);
+        let after = service.snapshot().unwrap();
+        assert_eq!(after["conversations"].as_array().unwrap().len(), 1);
+        assert_eq!(
+            after["activeConversationId"].as_str().unwrap(),
+            successor.as_str()
+        );
+        // replaying the old confirmation returns the existing state without a second replacement
+        let replay = service
+            .conversation_delete(&conversation_id, version)
+            .unwrap();
+        assert_eq!(replay["deleted"], false);
+        assert_eq!(
+            replay["activeConversationId"].as_str().unwrap(),
+            successor.as_str()
+        );
+        assert_eq!(
+            service.snapshot().unwrap()["conversations"]
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
     }
 }
