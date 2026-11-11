@@ -73,4 +73,19 @@ Rust 编译与单元测试均通过，但桌面 WebView 调用会被 Tauri ACL �
 - 切换深色主题成功（`data-theme=dark`），全程 `window.onerror`/`unhandledrejection` 为 0 条。
 
 截图：`browser-works-1280-light.png`、`browser-create-1280-dark.png`。
-仍缺：原生窗口按钮/拖动、960×640、键盘焦点、hover/focus 发现性、真实生成与文件核验（见 `CHECKLIST.md`）。
+
+### 交互 smoke（浏览器预览，C01/C02/C04 的部分证据）
+
+- 会话行：悬停/焦点进入时同时出现“重命名/删除”两个独立按钮；键盘聚焦删除按钮后
+  `.conversation-item-actions` 由 opacity 0 变为 1（`:focus-within` 生效），按钮可命中且不切换会话。
+- 删除确认框：`role=alertdialog`，标题绑定当前会话名；说明文案为“会话记录及未发送内容将移除；
+  已生成作品会保留在作品库。此操作不可撤销。”；初始焦点在“取消”。
+- Escape 与“取消”均关闭确认框，焦点回到原行的删除按钮，会话与行数不变。
+- “删除会话”确认后本次预览内移除会话并选中剩余会话；删除最后一个会话时自动出现且只出现一个
+  默认空会话（提示词为空）。全程 `onerror`/`unhandledrejection` 为 0。
+- **限制**：浏览器预览走的是本地 fallback，并未经过宿主持久化与文件清理；宿主命令的等价行为由
+  Rust 测试覆盖，但原生 UI 点击仍必须在桌面应用里复验（C04/C05/C06 的持久化与忙碌门禁）。
+
+截图：`browser-delete-confirm-1280-dark.png`、`browser-session-actions-1280-dark.png`。
+
+仍缺：原生窗口按钮/拖动、960×640、真实键盘/输入法、hover 在真实 WebView 中的表现、真实生成与文件核验（见 `CHECKLIST.md`）。
