@@ -2929,3 +2929,92 @@ fn cleanup_refuses_a_link_replacement_and_keeps_the_link_target() {
     assert_eq!(fs::read(&target).unwrap(), b"outside bytes");
     assert_eq!(fs::read_link(&path).unwrap(), target);
 }
+
+#[test]
+fn pending_cleanup_blocks_external_reads_and_exports_before_success() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let job = submit(&mut library, "pending-guard");
+    let done = commit(&mut library, &job);
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+    library.begin_asset_deletion(&primary).unwrap();
+    assert!(library.read_asset_png(&primary).is_err());
+    assert!(library.resolve_source(&primary).is_err());
+    let outside = tempfile::tempdir().unwrap();
+    assert!(
+        library
+            .export_asset_png(&primary, &outside.path().join("out.png"), false)
+            .is_err()
+    );
+    assert_eq!(library.asset(&primary).unwrap().deletion_state, "pending");
+    library.remove_asset_deletion_files(&primary).unwrap();
+    library.finish_asset_deletion(&primary).unwrap();
+    assert_eq!(library.asset(&primary).unwrap().deletion_state, "deleted");
+}
+
+#[cfg(unix)]
+#[test]
+fn an_unwritable_asset_directory_keeps_cleanup_failed_until_permissions_return() {
+    use std::os::unix::fs::PermissionsExt;
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let job = submit(&mut library, "cleanup-permission");
+    let done = commit(&mut library, &job);
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+    library.begin_asset_deletion(&primary).unwrap();
+    let assets_directory = library.root.join("assets");
+    fs::set_permissions(&assets_directory, fs::Permissions::from_mode(0o500)).unwrap();
+    drop(library);
+
+    let mut library = open(root.path());
+    let failed = library.asset(&primary).unwrap();
+    assert_eq!(failed.deletion_state, "failed");
+    assert!(failed.deletion_error.is_some());
+    assert_eq!(
+        library
+            .asset_library_query(AssetLibraryQuery::default())
+            .unwrap()
+            .total,
+        1
+    );
+
+    fs::set_permissions(
+        library.root.join("assets"),
+        fs::Permissions::from_mode(0o700),
+    )
+    .unwrap();
+    library.begin_asset_deletion(&primary).unwrap();
+    library.remove_asset_deletion_files(&primary).unwrap();
+    library.finish_asset_deletion(&primary).unwrap();
+    assert_eq!(library.asset(&primary).unwrap().deletion_state, "deleted");
+}
+
+#[test]
+fn a_conversation_with_a_bound_active_job_cannot_be_deleted() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let busy = library.active_conversation_id().unwrap();
+    let accepted = accept_prompt(&mut library, "绑定执行中的会话", "busy-bound");
+    let frozen = generation_for_turn("busy-bound", &accepted.turn);
+    let binding = library
+        .bind_turn_job(&accepted.turn.id, frozen.request, frozen.plan)
+        .unwrap();
+    assert_eq!(binding.job.state, AttemptState::Submitted);
+    let version = library
+        .draft(library.conversation(&busy).unwrap().draft_id)
+        .unwrap()
+        .version;
+    assert!(matches!(
+        library.delete_conversation(&busy, version),
+        Err(LibraryError::Busy)
+    ));
+    library
+        .finish_after_reap(
+            &binding.job.attempt,
+            Completion::Failed {
+                code: "test".into(),
+                detail: "结束测试执行".into(),
+            },
+        )
+        .unwrap();
+}
