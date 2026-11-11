@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BIREFNET_CAPABILITY,
+  KLEIN_EDIT_CAPABILITY,
   KLEIN_TEXT_CAPABILITY,
   MODEL_IDS,
   MODEL_PLATFORM,
@@ -185,6 +186,7 @@ describe('capability display names', () => {
   it('maps known capabilities to their model display names', () => {
     expect(capabilityDisplayName(Z_IMAGE_CAPABILITY_FALLBACK)).toBe('Z-Image Turbo');
     expect(capabilityDisplayName(KLEIN_TEXT_CAPABILITY)).toContain('Klein');
+    expect(capabilityDisplayName(KLEIN_EDIT_CAPABILITY)).toContain('单图编辑');
     expect(capabilityDisplayName(BIREFNET_CAPABILITY)).toBe('BiRefNet 去背景');
   });
   it('falls back to the raw id for unknown capabilities', () => {

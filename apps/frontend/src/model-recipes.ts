@@ -222,6 +222,9 @@ export const textRecipeForModel = (modelId: string): TextRecipe | null => textRe
 export const capabilityDisplayName = (capabilityId: string): string => {
   const recipe = Object.values(textRecipes).find(value => value.capabilityId === capabilityId);
   if (recipe) return recipe.displayName;
+  if (capabilityId === KLEIN_EDIT_CAPABILITY) {
+    return `${textRecipeForModel(KLEIN_MODEL_ID)?.displayName ?? 'FLUX.2 Klein 4B'} 单图编辑`;
+  }
   if (capabilityId === BIREFNET_CAPABILITY) return 'BiRefNet 去背景';
   if (capabilityId === REALESRGAN_CAPABILITY) return 'Real-ESRGAN 4× 放大';
   return capabilityId;
