@@ -50,6 +50,30 @@ export type PromptLibrarySnapshot = {
   favoritesSaveError: string | null;
   cache: { bytes: number; count: number; limitBytes: number };
 };
+export const PROMPT_LIBRARY_UPSTREAM_REPOSITORY = 'https://github.com/freestylefly/awesome-gpt-image-2';
+export const PROMPT_LIBRARY_UPSTREAM_COMMIT = '63e6176fa01be51c000108dacd72716d3e46784b';
+
+export type PromptLicenseLinks = {
+  repository: string;
+  commit: string;
+  licenseUrl: string;
+  disclaimerUrl: string;
+};
+
+/** Pinned upstream license facts shared by the about page. */
+export function promptLicenseLinks(catalog: Pick<PromptCatalog, 'upstreamRepository' | 'upstreamCommit'>): PromptLicenseLinks {
+  return {
+    repository: catalog.upstreamRepository,
+    commit: catalog.upstreamCommit,
+    licenseUrl: `${catalog.upstreamRepository}/blob/${catalog.upstreamCommit}/LICENSE`,
+    disclaimerUrl: `${catalog.upstreamRepository}/blob/${catalog.upstreamCommit}/docs/disclaimer.md`,
+  };
+}
+
+export function shortCommit(commit: string): string {
+  return commit.slice(0, 8);
+}
+
 export type PromptView = 'all' | 'featured' | 'favorites';
 export type PromptSort = 'default' | 'id-asc' | 'id-desc';
 export type PromptQuery = {

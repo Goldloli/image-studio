@@ -157,3 +157,44 @@
 @media(prefers-reduced-motion:reduce){
   .catalog-model{transition:none}
 }
+
+.about-licenses {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: .5px solid var(--border);
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.about-licenses h3 {
+  margin: 0 0 4px;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 550;
+}
+
+.about-licenses p {
+  max-width: 720px;
+  overflow-wrap: anywhere;
+}
+
+.about-licenses code { font-size: 9px; }
+
+.about-license-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 7px;
+}
+
+.about-license-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+
+.about-licenses .error-text { margin-top: 6px; }
+.about-licenses .error-text button { margin-left: 8px; padding: 0; color: var(--accent); font-size: 9px; }

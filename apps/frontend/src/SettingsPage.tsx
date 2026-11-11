@@ -4,6 +4,7 @@ import {
   CircleHelp,
   Cpu,
   Database,
+  ExternalLink,
   FolderOpen,
   HardDrive,
   LoaderCircle,
@@ -25,6 +26,14 @@ import {
 } from './settings-types';
 import { textRecipeForModel } from './model-recipes';
 import { isNonCommercialLicense } from './model-catalog';
+import {
+  PROMPT_LIBRARY_UPSTREAM_COMMIT,
+  PROMPT_LIBRARY_UPSTREAM_REPOSITORY,
+  promptLicenseLinks,
+  shortCommit,
+  type PromptLicenseLinks,
+  type PromptLibrarySnapshot,
+} from './prompt-library-state';
 import './model-settings.css';
 
 type Group = 'appearance' | 'defaults' | 'storage' | 'runtime' | 'about';
@@ -332,6 +341,7 @@ export function SettingsPage({
             <InfoRow label="示例来源" value={snapshot?.about.examples ?? '正在读取'}/>
             <InfoRow label="字体许可" value={snapshot?.about.fontLicense ?? '正在读取'}/>
             <div className="about-sources"><strong>模型与依赖来源</strong>{snapshot?.about.modelSources.map(source => <code key={source}>{source}</code>)}</div>
+            <PromptLicenseSources/>
             <div className="about-boundaries">
               <span>自动更新：{snapshot?.about.autoUpdateSupported ? '可用' : '未提供'}</span>
               <span>在线模型服务：{snapshot?.about.onlineProviderSupported ? '可用' : '未提供'}</span>
@@ -406,6 +416,37 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 function CheckIcon() {
   return <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+}
+
+function PromptLicenseSources() {
+  const [links, setLinks] = useState<PromptLicenseLinks>(() => promptLicenseLinks({
+    upstreamRepository: PROMPT_LIBRARY_UPSTREAM_REPOSITORY,
+    upstreamCommit: PROMPT_LIBRARY_UPSTREAM_COMMIT,
+  }));
+  const [loadError, setLoadError] = useState('');
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    if (!native) return;
+    let disposed = false;
+    api<PromptLibrarySnapshot>('prompt_library_snapshot')
+      .then(value => {
+        if (disposed) return;
+        setLinks(promptLicenseLinks(value.catalog));
+        setLoadError('');
+      })
+      .catch(cause => { if (!disposed) setLoadError(String(cause)); });
+    return () => { disposed = true; };
+  }, [revision]);
+  return <div className="about-licenses">
+    <h3>灵感库来源与许可</h3>
+    <p>目录固定自上游 <code>{shortCommit(links.commit)}</code> 的只读快照；上游代码与目录采用 MIT 许可，第三方示例图片和提示词的商业使用、再分发条件独立且未统一验证。</p>
+    <div className="about-license-links">
+      <a href={links.licenseUrl} target="_blank" rel="noreferrer">上游 MIT 许可<ExternalLink size={10}/></a>
+      <a href={links.disclaimerUrl} target="_blank" rel="noreferrer">第三方内容声明<ExternalLink size={10}/></a>
+      <a href={links.repository} target="_blank" rel="noreferrer">上游仓库<ExternalLink size={10}/></a>
+    </div>
+    {loadError && <p className="error-text" role="alert">许可来源刷新失败：{loadError}<button type="button" onClick={() => setRevision(value => value + 1)}>重试</button></p>}
+  </div>;
 }
 
 function modelAvailabilityNote(snapshot: SettingsSnapshot | null, modelId: string): string {

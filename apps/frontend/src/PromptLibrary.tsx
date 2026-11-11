@@ -7,8 +7,8 @@ import {
 import { api, bytesLabel, native, promptImageUrl } from './studio-api';
 import {
   emptyPromptQuery, filterPromptCases, missingFavoriteIds, promptUsageLabel,
-  toggleSelection, type PromptCase, type PromptCatalog, type PromptLibrarySnapshot,
-  type PromptQuery,
+  toggleSelection, PROMPT_LIBRARY_UPSTREAM_COMMIT, PROMPT_LIBRARY_UPSTREAM_REPOSITORY,
+  type PromptCase, type PromptCatalog, type PromptLibrarySnapshot, type PromptQuery,
 } from './prompt-library-state';
 import './prompt-library.css';
 
@@ -22,12 +22,11 @@ export type PromptUseRequest = {
 type ImageState = { status: 'idle' | 'loading' | 'loaded' | 'error'; error?: string };
 type PromptTab = PromptQuery['view'];
 
-const UPSTREAM_COMMIT = '63e6176fa01be51c000108dacd72716d3e46784b';
 const emptyCatalog: PromptCatalog = {
   schemaVersion: 1,
   catalogVersion: '',
-  upstreamRepository: 'https://github.com/freestylefly/awesome-gpt-image-2',
-  upstreamCommit: UPSTREAM_COMMIT,
+  upstreamRepository: PROMPT_LIBRARY_UPSTREAM_REPOSITORY,
+  upstreamCommit: PROMPT_LIBRARY_UPSTREAM_COMMIT,
   importedAt: '',
   sourceCount: 0,
   importedCount: 0,
@@ -61,7 +60,7 @@ function writePreviewFavorites(ids: string[]) {
 }
 
 function previewImageUrl(item: PromptCase) {
-  return `https://raw.githubusercontent.com/freestylefly/awesome-gpt-image-2/${UPSTREAM_COMMIT}/${item.image.path}`;
+  return `https://raw.githubusercontent.com/freestylefly/awesome-gpt-image-2/${PROMPT_LIBRARY_UPSTREAM_COMMIT}/${item.image.path}`;
 }
 
 function PromptImage({
@@ -303,15 +302,6 @@ export function PromptLibrary({
         </button>
       </div>
     </header>
-    <details className="prompt-license-disclosure">
-      <summary>来源与内容许可</summary>
-      <p>目录数据固定自 {catalog.upstreamRepository} 的只读快照。上游代码与目录采用 MIT 许可，但第三方示例图片和提示词的商业使用、再分发条件独立且未统一验证。</p>
-      <div>
-        <a href={`${catalog.upstreamRepository}/blob/${catalog.upstreamCommit}/LICENSE`} target="_blank" rel="noreferrer">上游 MIT 许可<ExternalLink size={10}/></a>
-        <a href={`${catalog.upstreamRepository}/blob/${catalog.upstreamCommit}/docs/disclaimer.md`} target="_blank" rel="noreferrer">第三方内容声明<ExternalLink size={10}/></a>
-      </div>
-    </details>
-
     {(loadError || snapshot.favoritesLoadError || snapshot.favoritesSaveError) && <div className="prompt-error" role="alert"><span>{loadError || snapshot.favoritesLoadError || snapshot.favoritesSaveError}</span><button type="button" onClick={() => setLoadError('')} aria-label="关闭提示"><X size={12}/></button></div>}
     {!native && <div className="prompt-preview-note">界面预览：收藏保存在浏览器本地；桌面应用会使用受限宿主缓存。</div>}
 
@@ -359,7 +349,6 @@ export function PromptLibrary({
           <div className="prompt-copy-heading"><strong>完整提示词</strong><button type="button" onClick={() => void copyPrompt(selected)}>{copied ? <Check size={12}/> : <Copy size={12}/>}{copied ? '已复制' : '复制原文'}</button></div>
           <pre className="prompt-full-text">{selected.prompt}</pre>
           <div className="prompt-sources"><span>来源 {selected.source.label}</span>{selected.source.url ? <a href={selected.source.url} target="_blank" rel="noreferrer">原帖<ExternalLink size={11}/></a> : <span>未提供原帖</span>}<a href={selected.source.githubUrl} target="_blank" rel="noreferrer">上游案例<ExternalLink size={11}/></a></div>
-          <p className="prompt-rights-note">第三方内容的商业使用与再分发条件未验证；请先核对原作者及来源条件。</p>
           <div className="prompt-detail-actions">
             <button className="primary-action" type="button" onClick={() => onUsePrompt({ caseId: selected.id, title: selected.title, prompt: selected.prompt, target: 'new' })}><ArrowUp size={13}/>新建会话并填入</button>
             <button className="secondary" type="button" onClick={() => onUsePrompt({ caseId: selected.id, title: selected.title, prompt: selected.prompt, target: 'current' })}>用于当前会话</button>

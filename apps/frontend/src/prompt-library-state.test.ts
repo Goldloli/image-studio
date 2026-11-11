@@ -3,7 +3,10 @@ import {
   emptyPromptQuery,
   filterPromptCases,
   missingFavoriteIds,
+  promptLicenseLinks,
   promptUsageLabel,
+  PROMPT_LIBRARY_UPSTREAM_COMMIT,
+  shortCommit,
   toggleSelection,
   type PromptCase,
   type PromptCatalog,
@@ -75,5 +78,17 @@ describe('prompt library query', () => {
     expect(promptUsageLabel(makeCase(4, {
       usage: { inputKind: 'reference-image', hasVariables: true, notes: [], reviewStatus: 'reviewed' },
     }))).toBe('需要参考图');
+  });
+
+  it('keeps the pinned upstream license links available for the about entry', () => {
+    const links = promptLicenseLinks({
+      upstreamRepository: 'https://example.test/catalog',
+      upstreamCommit: 'abc123def4567890',
+    });
+    expect(links.licenseUrl).toBe('https://example.test/catalog/blob/abc123def4567890/LICENSE');
+    expect(links.disclaimerUrl).toBe('https://example.test/catalog/blob/abc123def4567890/docs/disclaimer.md');
+    expect(links.repository).toBe('https://example.test/catalog');
+    expect(shortCommit('abc123def4567890')).toBe('abc123de');
+    expect(shortCommit(PROMPT_LIBRARY_UPSTREAM_COMMIT)).toHaveLength(8);
   });
 });
