@@ -6,6 +6,7 @@ import {
   hasAssetFilters,
   localDateEnd,
   localDateStart,
+  workDeleteTitle,
 } from './library-state';
 
 const filters = { modelId: '', conversationId: '', size: '', from: '', to: '', favorite: 'all' as const };
@@ -75,5 +76,20 @@ describe('favourite filtering', () => {
     expect(query.modelId).toBe('z-image-turbo-mflux-v1');
     expect(query.width).toBe(1024);
     expect(query.height).toBe(768);
+  });
+});
+
+describe('work delete confirmation title', () => {
+  it('uses a readable prompt and truncates long ones', () => {
+    expect(workDeleteTitle({ prompt: '一只橘猫', conversationTitle: '会话' })).toBe('一只橘猫');
+    const long = '一'.repeat(30);
+    expect(workDeleteTitle({ prompt: long, conversationTitle: '会话' })).toBe(`${'一'.repeat(24)}…`);
+  });
+  it('falls back to the source conversation for empty prompts', () => {
+    expect(workDeleteTitle({ prompt: '', conversationTitle: '去背景' })).toBe('去背景');
+    expect(workDeleteTitle({ prompt: '   ', conversationTitle: '  去背景  ' })).toBe('去背景');
+  });
+  it('uses a generic label when both are empty', () => {
+    expect(workDeleteTitle({ prompt: '', conversationTitle: '' })).toBe('该作品');
   });
 });

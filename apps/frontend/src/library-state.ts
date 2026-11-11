@@ -79,6 +79,14 @@ export function assetItemToView(item: AssetLibraryItem): AssetView {
   };
 }
 
+/** Human-identifiable target for the destructive confirmation; empty prompts fall back. */
+export function workDeleteTitle(item: Pick<AssetLibraryItem, 'prompt' | 'conversationTitle'>): string {
+  const prompt = item.prompt.trim();
+  if (prompt) return prompt.length > 24 ? `${prompt.slice(0, 24)}…` : prompt;
+  const conversation = item.conversationTitle.trim();
+  return conversation || '该作品';
+}
+
 export function formatTime(value: number | null): string {
   if (value === null || !Number.isFinite(value)) return '时间未记录';
   return new Intl.DateTimeFormat('zh-CN', {

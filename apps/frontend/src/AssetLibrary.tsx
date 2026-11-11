@@ -26,6 +26,7 @@ import {
   formatTime,
   hasAssetFilters,
   modelLabel,
+  workDeleteTitle,
   type AssetLibraryFilters,
 } from './library-state';
 
@@ -286,7 +287,7 @@ export function AssetLibrary({ active, onBack, onOpenAsset, onError }: Props) {
       </div>
     </div>}
     {deleteTarget && <ConfirmDialog
-      title={`删除作品「${deleteTarget.prompt.length > 24 ? `${deleteTarget.prompt.slice(0, 24)}…` : deleteTarget.prompt}」？`}
+      title={`删除作品「${workDeleteTitle(deleteTarget)}」？`}
       description="应用内原图、同次生成的配套蒙版及专用预览缓存会删除；已导出的外部副本保留。此操作不可撤销。"
       confirmLabel="删除作品"
       busy={deleting}
