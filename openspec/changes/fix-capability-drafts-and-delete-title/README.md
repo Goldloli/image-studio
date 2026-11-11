@@ -2,7 +2,7 @@
 
 Change：`fix-capability-drafts-and-delete-title`
 
-**状态：提案待确认，未开始实施。**
+**状态：已实现并通过 macOS 原生验收（2026-11-11）；证据见 `verification/capability-drafts-fix-20261111/RESULTS.md`。**
 
 | 文档 | 内容 |
 | --- | --- |
