@@ -555,6 +555,59 @@ impl Library {
             .collect()
     }
 
+    /// Removes exactly the registered files of a confirmed deletion unit. The
+    /// relative path of each record is re-validated before removal, links and
+    /// special files are refused, a missing file counts as already cleaned, and
+    /// nothing outside the registered unit is touched.
+    pub fn remove_asset_deletion_files(&self, primary: &AssetId) -> Result<()> {
+        let group = self.asset_deletion_group(primary)?;
+        if group.all_deleted() {
+            return Ok(());
+        }
+        if group.state() != "pending" {
+            return Err(LibraryError::Invalid("删除意图尚未确认".into()));
+        }
+        for record in &group.assets {
+            let path = self.asset_path(&record.asset)?;
+            match fs::symlink_metadata(&path) {
+                Ok(metadata) if metadata.file_type().is_file() => {
+                    remove_registered_file(&path)?;
+                    sync_directory(
+                        path.parent()
+                            .ok_or_else(|| LibraryError::Invalid("资产目录无效".into()))?,
+                    )?;
+                }
+                Ok(metadata) if metadata.file_type().is_symlink() => {
+                    return Err(LibraryError::Invalid("拒绝删除链接形式的资产".into()));
+                }
+                Ok(_) => return Err(LibraryError::Invalid("登记产物不是普通文件".into())),
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+                Err(error) => return Err(error.into()),
+            }
+        }
+        Ok(())
+    }
+
+    /// Bounded startup recovery for confirmed cleanups interrupted by a crash.
+    /// A resumed cleanup reuses the persisted scope; failures stay visible and
+    /// retryable instead of silently restoring the work.
+    pub(super) fn recover_asset_deletions(&mut self) -> Result<()> {
+        let pending = self.pending_asset_deletions()?;
+        for primary in pending.into_iter().take(64) {
+            match self.remove_asset_deletion_files(&primary) {
+                Ok(()) => {
+                    if let Err(error) = self.finish_asset_deletion(&primary) {
+                        let _ = self.fail_asset_deletion(&primary, &error.to_string());
+                    }
+                }
+                Err(error) => {
+                    let _ = self.fail_asset_deletion(&primary, &error.to_string());
+                }
+            }
+        }
+        Ok(())
+    }
+
     /// Controlled asset URI handlers receive bytes by registered ID, never a client path.
     pub fn read_asset_png(&self, id: &AssetId) -> Result<Vec<u8>> {
         let imported: bool = self.db.query_row(
@@ -753,6 +806,24 @@ impl Library {
             }
         }
         Ok(())
+    }
+}
+
+fn remove_registered_file(path: &Path) -> Result<()> {
+    match fs::remove_file(path) {
+        Ok(()) => Ok(()),
+        Err(error) => {
+            #[cfg(windows)]
+            {
+                if error.kind() == std::io::ErrorKind::PermissionDenied {
+                    let mut permissions = fs::metadata(path)?.permissions();
+                    permissions.set_readonly(false);
+                    fs::set_permissions(path, permissions)?;
+                    return fs::remove_file(path).map_err(Into::into);
+                }
+            }
+            Err(error.into())
+        }
     }
 }
 

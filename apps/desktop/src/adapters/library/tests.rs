@@ -2493,8 +2493,8 @@ fn asset_favorites_are_explicit_persisted_and_queryable_beyond_the_loaded_page()
         let done = commit(&mut library, &job);
         ids.push(done.manifest.unwrap().outputs[0].asset_id.clone());
     }
-    assert_eq!(library.set_asset_favorite(&ids[0], true).unwrap(), true);
-    assert_eq!(library.set_asset_favorite(&ids[0], true).unwrap(), true);
+    assert!(library.set_asset_favorite(&ids[0], true).unwrap());
+    assert!(library.set_asset_favorite(&ids[0], true).unwrap());
     let favorites = library
         .asset_library_query(AssetLibraryQuery {
             favorites_only: true,
@@ -2527,7 +2527,7 @@ fn asset_favorites_are_explicit_persisted_and_queryable_beyond_the_loaded_page()
     let mut library = open(root.path());
     assert!(library.asset_library_item(&ids[0]).unwrap().is_favorite);
     assert!(!library.asset_library_item(&ids[2]).unwrap().is_favorite);
-    assert_eq!(library.set_asset_favorite(&ids[0], false).unwrap(), false);
+    assert!(!library.set_asset_favorite(&ids[0], false).unwrap());
     let after = library
         .asset_library_query(AssetLibraryQuery {
             favorites_only: true,
@@ -2732,5 +2732,175 @@ fn deleting_the_source_conversation_keeps_retained_works_with_a_tombstone_marker
             .asset_library_item(&primary)
             .unwrap()
             .conversation_deleted
+    );
+}
+
+#[test]
+fn confirmed_work_deletion_removes_only_registered_files_and_tolerates_missing_ones() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let job = submit(&mut library, "cleanup-a");
+    let done = commit(&mut library, &job);
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+    let group = library.begin_asset_deletion(&primary).unwrap();
+    let paths = group
+        .relative_paths()
+        .into_iter()
+        .map(|relative| library.root.join(relative))
+        .collect::<Vec<_>>();
+    assert!(paths.iter().all(|path| path.exists()));
+    // a file already removed by external action counts as cleaned
+    fs::remove_file(&paths[0]).unwrap();
+    library.remove_asset_deletion_files(&primary).unwrap();
+    assert!(paths.iter().all(|path| !path.exists()));
+    library.finish_asset_deletion(&primary).unwrap();
+    assert_eq!(library.asset(&primary).unwrap().deletion_state, "deleted");
+    // unrelated library files are untouched
+    assert!(library.root.join("library.sqlite3").exists());
+}
+
+#[test]
+fn interrupted_cleanup_resumes_from_the_persisted_intent_on_restart() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let job = submit(&mut library, "cleanup-crash");
+    let done = commit(&mut library, &job);
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+    let group = library.begin_asset_deletion(&primary).unwrap();
+    let paths = group
+        .relative_paths()
+        .into_iter()
+        .map(|relative| library.root.join(relative))
+        .collect::<Vec<_>>();
+    drop(library);
+    let library = open(root.path());
+    assert!(paths.iter().all(|path| !path.exists()));
+    assert_eq!(library.asset(&primary).unwrap().deletion_state, "deleted");
+    assert_eq!(
+        library
+            .asset_library_query(AssetLibraryQuery::default())
+            .unwrap()
+            .total,
+        0
+    );
+}
+
+#[test]
+fn unrecoverable_cleanup_stays_failed_and_visible_after_restart() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let job = submit(&mut library, "cleanup-blocked");
+    let done = commit(&mut library, &job);
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+    let group = library.begin_asset_deletion(&primary).unwrap();
+    let path = library.root.join(group.relative_paths()[0].clone());
+    fs::remove_file(&path).unwrap();
+    fs::create_dir(&path).unwrap();
+    drop(library);
+    let library = open(root.path());
+    let record = library.asset(&primary).unwrap();
+    assert_eq!(record.deletion_state, "failed");
+    assert!(record.deletion_error.is_some());
+    assert_eq!(
+        library
+            .asset_library_query(AssetLibraryQuery::default())
+            .unwrap()
+            .total,
+        1
+    );
+    library.read_asset_png(&primary).unwrap_err();
+}
+
+#[test]
+fn works_referenced_by_unsent_or_active_requests_cannot_be_deleted() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let accepted = accept_prompt(&mut library, "源图作品", "conflict-work");
+    let frozen = generation_for_turn("conflict-work", &accepted.turn);
+    let binding = library
+        .bind_turn_job(&accepted.turn.id, frozen.request, frozen.plan)
+        .unwrap();
+    let done = commit(&mut library, &binding.job);
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+
+    let other = library.create_conversation().unwrap();
+    let mut draft = library.draft(other.draft.id).unwrap();
+    draft.prompt = "编辑该图".into();
+    draft.params = serde_json::json!({
+        "modelId": studio_core::recipes::KLEIN_MODEL,
+        "capabilityId": KLEIN_EDIT_CAPABILITY,
+        "sourceAssetId": primary,
+        "aspect": "1:1",
+        "count": 1,
+        "seed": "42"
+    });
+    library.save_draft(draft.clone(), draft.version).unwrap();
+    let conflicts = library.asset_reference_conflicts(&primary).unwrap();
+    assert_eq!(conflicts.len(), 1);
+    assert_eq!(conflicts[0].kind, "draft");
+    assert_eq!(
+        conflicts[0].conversation_id,
+        other.conversation.id.to_string()
+    );
+
+    let draft = library.draft(other.draft.id).unwrap();
+    let send = library
+        .accept_turn(AcceptTurnInput {
+            conversation_id: other.conversation.id.clone(),
+            draft_id: draft.id,
+            expected_version: draft.version,
+            submission_key: IdempotencyKey::new("conflict-send").unwrap(),
+            prompt: draft.prompt.clone(),
+            model_id: studio_core::recipes::KLEIN_MODEL.into(),
+            capability_id: KLEIN_EDIT_CAPABILITY.into(),
+            source_asset_id: Some(primary.clone()),
+            aspect: "1:1".into(),
+            count: 1,
+            seed: "42".into(),
+        })
+        .unwrap();
+    let conflicts = library.asset_reference_conflicts(&primary).unwrap();
+    assert!(conflicts.iter().any(|conflict| conflict.kind == "active"));
+
+    library.reject_turn(&send.turn.id, "测试解除").unwrap();
+    let mut draft = library.draft(other.draft.id).unwrap();
+    draft.params = serde_json::json!({
+        "modelId": DEFAULT_MODEL_ID,
+        "aspect": "1:1",
+        "count": 1,
+        "seed": ""
+    });
+    library.save_draft(draft.clone(), draft.version).unwrap();
+    assert!(
+        library
+            .asset_reference_conflicts(&primary)
+            .unwrap()
+            .is_empty()
+    );
+}
+
+#[test]
+fn deleted_works_cannot_be_reused_as_sources_or_exported() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let job = submit(&mut library, "source-gate");
+    let done = commit(&mut library, &job);
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+    library.begin_asset_deletion(&primary).unwrap();
+    library.remove_asset_deletion_files(&primary).unwrap();
+    library.finish_asset_deletion(&primary).unwrap();
+
+    assert!(library.resolve_source(&primary).is_err());
+    assert!(library.read_source_png(&primary).is_err());
+    let outside = tempfile::tempdir().unwrap();
+    assert!(
+        library
+            .copy_source_snapshot(&primary, outside.path())
+            .is_err()
+    );
+    assert!(
+        library
+            .export_asset_png(&primary, &outside.path().join("out.png"), false)
+            .is_err()
     );
 }

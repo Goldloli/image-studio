@@ -8,6 +8,16 @@ use std::io::{Cursor, Read, Write};
 use studio_core::recipes::SourceFacts;
 use studio_core::recipes::{MAX_SOURCE_BYTES, MAX_SOURCE_EDGE, MAX_SOURCE_PIXELS};
 
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AssetReferenceConflict {
+    pub conversation_id: String,
+    pub conversation_title: String,
+    /// `draft` (unsent reference) or `active` (pending/active request).
+    pub kind: String,
+    pub detail: String,
+}
+
 const SOURCE_PROCESSING_VERSION: &str = "source-normalize-v1";
 const SOURCE_DECODE_LIMIT: u64 = 64 * 1024 * 1024;
 
@@ -238,6 +248,7 @@ impl Library {
             });
         }
         let record = self.asset(id)?;
+        super::ensure_asset_active(&record)?;
         self.verify_asset(&record)?;
         let bytes = self.read_asset_png(id)?;
         let facts = inspect_normalized_png(&bytes)?;
@@ -293,6 +304,82 @@ impl Library {
         file.sync_all()?;
         sync_directory(run)?;
         Ok(())
+    }
+
+    /// Works still referenced by an unsent draft or by a pending/active request
+    /// must not be deleted: removing their files would leave a dangling source.
+    /// Completed historical references are facts, not blockers.
+    pub fn asset_reference_conflicts(
+        &self,
+        primary: &AssetId,
+    ) -> Result<Vec<AssetReferenceConflict>> {
+        let group = self.asset_deletion_group(primary)?;
+        let ids = group
+            .assets
+            .iter()
+            .map(|record| record.asset.asset_id.to_string())
+            .collect::<Vec<_>>();
+        let mut conflicts = Vec::new();
+        let mut seen = HashSet::new();
+        {
+            let mut statement = self.db.prepare(
+                "SELECT c.id,c.title,d.params_json FROM drafts d JOIN conversations c ON c.draft_id=d.id WHERE c.project_id='default' AND c.deleted_at IS NULL ORDER BY c.activity_seq DESC,c.id",
+            )?;
+            let rows = statement
+                .query_map([], |row| {
+                    Ok((
+                        row.get::<_, String>(0)?,
+                        row.get::<_, String>(1)?,
+                        row.get::<_, String>(2)?,
+                    ))
+                })?
+                .collect::<std::result::Result<Vec<_>, _>>()?;
+            for (conversation_id, title, params_json) in rows {
+                let params: Value = serde_json::from_str(&params_json).unwrap_or(Value::Null);
+                let mut referenced = params
+                    .get("sourceAssetId")
+                    .and_then(Value::as_str)
+                    .is_some_and(|value| ids.iter().any(|id| id == value));
+                if !referenced
+                    && let Some(slots) = params.get("capabilityDrafts").and_then(Value::as_object)
+                {
+                    referenced = slots.values().any(|slot| {
+                        slot.get("sourceAssetId")
+                            .and_then(Value::as_str)
+                            .is_some_and(|value| ids.iter().any(|id| id == value))
+                    });
+                }
+                if referenced && seen.insert(format!("draft:{conversation_id}")) {
+                    conflicts.push(AssetReferenceConflict {
+                        conversation_id,
+                        conversation_title: title,
+                        kind: "draft".into(),
+                        detail: "待发送草稿仍把该作品作为源图".into(),
+                    });
+                }
+            }
+        }
+        for id in &ids {
+            let mut statement = self.db.prepare(
+                "SELECT DISTINCT t.conversation_id,coalesce(c.title,'历史生成') FROM generation_turns t LEFT JOIN conversations c ON c.id=t.conversation_id LEFT JOIN jobs j ON j.id=t.job_id LEFT JOIN attempts a ON a.id=j.current_attempt_id WHERE t.source_asset_id=? AND (t.status IN ('pending','cancel_requested') OR a.state IN ('submitted','preparing','running','committing','cancel_requested'))",
+            )?;
+            let rows = statement
+                .query_map([id], |row| {
+                    Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+                })?
+                .collect::<std::result::Result<Vec<_>, _>>()?;
+            for (conversation_id, title) in rows {
+                if seen.insert(format!("active:{conversation_id}")) {
+                    conflicts.push(AssetReferenceConflict {
+                        conversation_id,
+                        conversation_title: title,
+                        kind: "active".into(),
+                        detail: "活动中的请求仍把该作品作为源图".into(),
+                    });
+                }
+            }
+        }
+        Ok(conflicts)
     }
 
     fn source_path(&self, asset: &AssetRef) -> Result<PathBuf> {

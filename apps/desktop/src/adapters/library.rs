@@ -6,6 +6,7 @@ mod queries;
 mod schema;
 mod sources;
 
+pub use assets::{AssetDeletionGroup, AssetDeletionStatus};
 pub use conversations::{
     AcceptTurnInput, AcceptedTurn, ConversationDeleteResult, ConversationIdentity,
     ConversationListPage, ConversationRecord, CreatedConversation, DEFAULT_MODEL_ID, TurnPage,
@@ -16,7 +17,7 @@ pub use queries::{
     AssetLibraryQuery, AssetModelFacet, AssetSizeFacet, StableCursor, TaskAdvancedView,
     TaskAttemptView, TaskCenterDetail, TaskCenterItem, TaskCenterPage, TaskCenterQuery, TaskCounts,
 };
-pub use sources::{ImportedSourceRecord, ResolvedSource};
+pub use sources::{AssetReferenceConflict, ImportedSourceRecord, ResolvedSource};
 
 use fs2::FileExt;
 use rusqlite::{Connection, OptionalExtension, TransactionBehavior, params};
@@ -820,6 +821,7 @@ impl Library {
     fn recover(&mut self) -> Result<()> {
         self.recover_pending_turns()?;
         self.repair_active_conversation()?;
+        self.recover_asset_deletions()?;
         let ids = {
             let mut s=self.db.prepare("SELECT id FROM attempts WHERE state IN ('submitted','preparing','running','committing','cancel_requested')")?;
             s.query_map([], |r| r.get::<_, String>(0))?
