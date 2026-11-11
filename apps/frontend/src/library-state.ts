@@ -14,8 +14,18 @@ export function localDateEnd(value: string): number | null {
   return Number.isFinite(date.getTime()) ? date.getTime() : null;
 }
 
+export type AssetLibraryFilters = {
+  modelId: string;
+  conversationId: string;
+  size: string;
+  from: string;
+  to: string;
+  /** "all" (default) or "favorites"; always combined with the other filters. */
+  favorite: 'all' | 'favorites';
+};
+
 export function buildAssetQuery(
-  filters: { modelId: string; conversationId: string; size: string; from: string; to: string },
+  filters: AssetLibraryFilters,
   cursor: import('./studio-api').StableCursor | null = null,
   limit = 24,
 ): AssetLibraryQuery {
@@ -29,13 +39,14 @@ export function buildAssetQuery(
     height: Number.isInteger(height) && height > 0 ? height : null,
     createdFrom: localDateStart(filters.from),
     createdTo: localDateEnd(filters.to),
+    favoritesOnly: filters.favorite === 'favorites',
     cursor,
     limit,
   };
 }
 
-export function hasAssetFilters(filters: { modelId: string; conversationId: string; size: string; from: string; to: string }): boolean {
-  return Boolean(filters.modelId || filters.conversationId || filters.size || filters.from || filters.to);
+export function hasAssetFilters(filters: AssetLibraryFilters): boolean {
+  return Boolean(filters.modelId || filters.conversationId || filters.size || filters.from || filters.to || filters.favorite === 'favorites');
 }
 
 export function assetLibraryRequestKey(active: boolean, filterKey: string, refreshNonce: number): string | null {
@@ -51,6 +62,9 @@ export function assetCountLabel(active: boolean, loading: boolean, total: number
 
 export function assetItemToView(item: AssetLibraryItem): AssetView {
   return {
+    isFavorite: item.isFavorite,
+    deletionState: item.deletionState,
+    deletionError: item.deletionError,
     id: item.id,
     jobId: item.jobId,
     conversationId: item.conversationId,

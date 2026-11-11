@@ -710,3 +710,14 @@ code {
 .record-advanced > div { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
 .record-advanced code { color: var(--text); font-size: 9px; overflow-wrap: anywhere; }
 .record-advanced pre { margin: 0 0 10px; max-height: 190px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 9px; }
+
+.work-card-body{position:relative}
+.work-card-actions{padding-right:52px}
+.work-card-manage{position:absolute;right:8px;bottom:8px;display:flex;gap:2px}
+.work-card-manage button{width:22px;height:22px;padding:0;border-radius:6px;color:var(--muted)}
+.work-card-manage button:not(:disabled):hover{background:var(--hover)}
+.work-card-manage .is-favorite{color:var(--accent)}
+.work-card-manage .work-delete:not(:disabled):hover{color:var(--danger)}
+.work-card.is-managing .work-card-image{cursor:default}
+.work-deletion-state{color:var(--danger)!important;font-size:9px!important;margin-top:3px;line-height:1.5}
+.works-favorite-filter{flex:none;margin-left:2px}
