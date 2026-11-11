@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { clampZoom, createDraft, initialWorkspace, normalizeDraftParams, validSeed, workspaceReducer as reduce, workspaceReducer } from './workspace-state';
 import type { DraftParams } from './workspace-state';
-import { aspectsForCapability, KLEIN_EDIT_CAPABILITY, KLEIN_MODEL_ID, KLEIN_TEXT_CAPABILITY, Z_IMAGE_MODEL_ID } from './model-recipes';
+import { aspectsForCapability, BIREFNET_CAPABILITY, BIREFNET_MODEL_ID, KLEIN_EDIT_CAPABILITY, KLEIN_MODEL_ID, KLEIN_TEXT_CAPABILITY, Z_IMAGE_MODEL_ID } from './model-recipes';
 
 describe('workspace draft isolation',()=>{
   it('persists separate prompts, source images and parameters across capability switches and tool sends',()=>{
@@ -199,5 +199,27 @@ describe('capability switches produce host-valid draft slots',()=>{
     expect(normalized.aspect).toBe('1:1');
     expect(normalized.capabilityDrafts?.[KLEIN_TEXT_CAPABILITY]?.aspect).toBe('1:1');
     expect(normalized.capabilityDrafts?.[zImageCapability]?.aspect).toBe('3:4');
+  });
+  it('clears the outgoing slot source when the user explicitly removes it',()=>{
+    let state = workspaceReducer(initialWorkspace(), {type:'params',patch:{modelId:KLEIN_MODEL_ID,capabilityId:KLEIN_EDIT_CAPABILITY,sourceAssetId:'asset-A',aspect:'1:1'}});
+    expect(state.drafts[0].params.sourceAssetId).toBe('asset-A');
+    state = workspaceReducer(state, {type:'params',patch:{sourceAssetId:null,capabilityId:KLEIN_TEXT_CAPABILITY}});
+    expect(state.drafts[0].params.sourceAssetId).toBeNull();
+    expect(state.drafts[0].params.capabilityDrafts?.[KLEIN_EDIT_CAPABILITY]?.sourceAssetId).toBeNull();
+    expect(JSON.stringify(state.drafts[0].params)).not.toContain('asset-A');
+  });
+  it('keeps the outgoing slot source on a plain model switch',()=>{
+    let state = workspaceReducer(initialWorkspace(), {type:'params',patch:{modelId:KLEIN_MODEL_ID,capabilityId:KLEIN_EDIT_CAPABILITY,sourceAssetId:'asset-A',aspect:'1:1'}});
+    state = workspaceReducer(state, {type:'params',patch:{modelId:Z_IMAGE_MODEL_ID,capabilityId:zImageCapability}});
+    expect(state.drafts[0].params.sourceAssetId).toBeNull();
+    expect(state.drafts[0].params.capabilityDrafts?.[KLEIN_EDIT_CAPABILITY]?.sourceAssetId).toBe('asset-A');
+  });
+  it('keeps unrelated slots untouched when a new source is selected',()=>{
+    let state = workspaceReducer(initialWorkspace(), {type:'params',patch:{modelId:KLEIN_MODEL_ID,capabilityId:KLEIN_EDIT_CAPABILITY,sourceAssetId:'asset-B',aspect:'1:1'}});
+    state = workspaceReducer(state, {type:'params',patch:{modelId:BIREFNET_MODEL_ID,capabilityId:BIREFNET_CAPABILITY}});
+    const slots = state.drafts[0].params.capabilityDrafts ?? {};
+    expect(slots[KLEIN_EDIT_CAPABILITY]?.sourceAssetId).toBe('asset-B');
+    expect(slots[zImageCapability]?.sourceAssetId ?? null).toBeNull();
+    expect(state.drafts[0].params.sourceAssetId).toBeNull();
   });
 });

@@ -94,7 +94,10 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
       }
       // Switching capability: the stored slot and the incoming parameters must both
       // satisfy their own capability, otherwise the host rejects every later save.
-      const slots={...d.params.capabilityDrafts,[current]:{prompt:d.prompt,aspect:normalizeAspectForCapability(current,d.params.aspect),seed:d.params.seed,sourceAssetId:d.params.sourceAssetId??null,promptSourceId:d.promptSourceId??null}};
+      // An explicit source removal must clear the outgoing capability too, otherwise the
+      // removed work stays referenced by an invisible slot and blocks its deletion.
+      const outgoingSource=action.patch.sourceAssetId===null?null:d.params.sourceAssetId??null;
+      const slots={...d.params.capabilityDrafts,[current]:{prompt:d.prompt,aspect:normalizeAspectForCapability(current,d.params.aspect),seed:d.params.seed,sourceAssetId:outgoingSource,promptSourceId:d.promptSourceId??null}};
       for(const [slotCapability,slot] of Object.entries(slots)) slots[slotCapability]={...slot,aspect:normalizeAspectForCapability(slotCapability,slot.aspect)};
       const saved=slots[next];
       const tool=next.includes('.remove-background.')||next.includes('.upscale.');
