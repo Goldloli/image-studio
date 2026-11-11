@@ -2904,3 +2904,27 @@ fn deleted_works_cannot_be_reused_as_sources_or_exported() {
             .is_err()
     );
 }
+
+#[cfg(unix)]
+#[test]
+fn cleanup_refuses_a_link_replacement_and_keeps_the_link_target() {
+    use std::os::unix::fs::symlink;
+    let root = TempDir::new().unwrap();
+    let outside = TempDir::new().unwrap();
+    let target = outside.path().join("untouched.png");
+    fs::write(&target, b"outside bytes").unwrap();
+    let mut library = open(root.path());
+    let job = submit(&mut library, "cleanup-link");
+    let done = commit(&mut library, &job);
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+    let group = library.begin_asset_deletion(&primary).unwrap();
+    let path = library.root.join(group.relative_paths()[0].clone());
+    fs::remove_file(&path).unwrap();
+    symlink(&target, &path).unwrap();
+    drop(library);
+    let library = open(root.path());
+    let record = library.asset(&primary).unwrap();
+    assert_eq!(record.deletion_state, "failed");
+    assert_eq!(fs::read(&target).unwrap(), b"outside bytes");
+    assert_eq!(fs::read_link(&path).unwrap(), target);
+}
