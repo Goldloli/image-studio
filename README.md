@@ -52,7 +52,11 @@ for the complete change list and known limitations.
   device facts.
 - **Local execution**: no hosted image API or cloud project storage.
 - **Conversation workspace**: drafts, prompts, parameters, progress, results,
-  retries, and cancellation remain grouped by conversation.
+  retries, and cancellation remain grouped by conversation; sessions can be
+  deleted while their generated works are retained.
+- **Work management**: favourites, a favourites-only filter, and controlled
+  deletion that removes only application-managed originals, companion masks and
+  dedicated caches while exports and execution history stay intact.
 - **Deterministic model identities**: pinned revisions, per-file SHA-256,
   fixed runtimes, recipes, and worker protocol identities.
 - **Durable local library**: SQLite-backed drafts, jobs, attempts, assets, task
@@ -164,17 +168,17 @@ macOS builds require Apple Silicon and macOS 11 or newer.
 
 - **Create**: multi-conversation image generation, source-image workflows,
   immediate placeholders, real worker progress, cancellation, and retry.
-- **Inspiration**: a searchable prompt library with source attribution.
-- **Features**: only capabilities backed by an installed, executable model
-  are exposed as startable.
+  Session rows support rename and delete; deleting a session keeps its works.
+- **Inspiration**: a searchable prompt library with source attribution; licence
+  details live in Settings → About.
 - **Models**: installation, runtime, device eligibility, hardware thresholds,
   execution tier, and license information from the host catalog.
-- **Works**: immutable formal assets across conversations, filters, preview,
-  provenance, and native PNG/RGBA/mask export.
-- **Tasks**: host-side filtering, search, stable pagination, attempt history,
-  errors, stages, logs, and recovery instructions.
+- **Works**: immutable formal assets across conversations with favourites, a
+  favourites-only filter, preview, inline provenance, and native PNG/RGBA/mask
+  export. Deleting a work removes its originals, companion mask and dedicated
+  caches only.
 - **Settings**: persistent appearance, explicit new-conversation defaults,
-  storage inspection, diagnostic status, runtime inventory, and a bounded log.
+  storage inspection, runtime facts, runtime inventory, and a bounded log.
 
 ## Build From Source
 
@@ -233,7 +237,7 @@ Desktop host / StudioService
 | Workspace area | Responsibility |
 |---|---|
 | `apps/desktop` | Tauri host, constrained IPC, installers, storage, diagnostics, and process adapters |
-| `apps/frontend` | React workspace, libraries, settings, task views, and canvas |
+| `apps/frontend` | React workspace, create/inspiration/models/works/settings pages, and canvas |
 | `crates/studio-core` | Typed identities, plans, recipes, attempt state, and validation |
 | `crates/worker-protocol` | Framing, handshakes, identity checks, and generation protocol |
 | `tools/inference-supervisor` | Host EOF, execution leases, worker/descendant supervision |
@@ -259,8 +263,9 @@ are created under it). One host owns a data root at a time. On Windows the data
 path must stay short enough for the private Python runtime to open its longest
 files, and the host validates that budget before starting.
 
-SQLite schema v5 stores projects, conversations, draft revisions, turns, jobs,
-attempts, formal assets, and provenance. Model installation and worker
+SQLite schema v6 stores projects, conversations, draft revisions, turns, jobs,
+attempts, formal assets, and provenance, plus conversation deletion, work
+favourites and deletion-cleanup state. Model installation and worker
 activation bind fixed manifests, runtime inventories, and SHA-256 contents.
 
 Image generation succeeds only after output validation and an atomic database
@@ -270,7 +275,8 @@ remain visible as unavailable without deleting their historical records.
 
 ## Diagnostics and Verification
 
-Development builds can open **Development → Communication diagnostics** or run:
+The product UI has no communication-diagnostics entry (development builds
+included). Run the internal probe from the command line when debugging:
 
 ```bash
 cargo run -p image-studio-desktop --locked -- --diagnostics
