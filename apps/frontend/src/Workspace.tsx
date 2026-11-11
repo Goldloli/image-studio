@@ -1170,7 +1170,6 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
         </div>)}
         {conversationsHasMore && <button className="load-conversations" disabled={loadingConversations} onClick={() => void loadMoreConversations()}>{loadingConversations ? <LoaderCircle size={12} className="spin"/> : <ChevronDown size={12}/>}加载更多会话</button>}
       </div>
-      <div className="conversation-sidebar-footer"><button className="quiet" onClick={() => setViewer({ kind: 'sample', index: 0 })}><ImageIcon size={14}/>示例灵感</button></div>
     </aside>
     <main className="conversation-main">
       <header className="conversation-header">
