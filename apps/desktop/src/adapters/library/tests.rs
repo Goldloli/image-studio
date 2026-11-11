@@ -2312,3 +2312,173 @@ PRAGMA user_version=1;
         "keep"
     );
 }
+
+#[test]
+fn conversation_deletion_retires_unsent_state_and_selects_a_visible_successor() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let first = library.active_conversation_id().unwrap();
+    let first_draft = library.conversation(&first).unwrap().draft_id;
+    draft_with_prompt(&mut library, first_draft, "未发送的草稿");
+    let second = library.create_conversation().unwrap().conversation.id;
+    let third = library.create_conversation().unwrap().conversation.id;
+    library.select_conversation(&first).unwrap();
+    let first_version = library.draft(first_draft).unwrap().version;
+
+    let result = library.delete_conversation(&first, first_version).unwrap();
+    assert!(result.deleted);
+    assert_eq!(result.active_conversation_id, third);
+    assert_eq!(
+        result.active_draft_id,
+        library.conversation(&third).unwrap().draft_id
+    );
+
+    let page = library.conversations(10, None).unwrap();
+    assert_eq!(page.conversations.len(), 2);
+    assert!(
+        page.conversations
+            .iter()
+            .all(|conversation| conversation.id != first)
+    );
+    assert!(
+        page.conversations
+            .iter()
+            .any(|conversation| conversation.id == second)
+    );
+
+    assert!(matches!(
+        library.conversation(&first),
+        Err(LibraryError::NotFound(_))
+    ));
+    assert!(matches!(
+        library.draft(first_draft),
+        Err(LibraryError::NotFound(_))
+    ));
+    assert!(matches!(
+        library.select_conversation(&first),
+        Err(LibraryError::NotFound(_))
+    ));
+    assert!(matches!(
+        library.rename_conversation(&first, "复活"),
+        Err(LibraryError::NotFound(_))
+    ));
+    assert!(matches!(
+        library.turns(&first, 10, None),
+        Err(LibraryError::NotFound(_))
+    ));
+    let stale = DraftRecord {
+        id: first_draft,
+        name: "已删除会话".into(),
+        prompt: "复活".into(),
+        params: serde_json::json!({}),
+        collapsed: false,
+        version: first_version,
+        prompt_source: None,
+    };
+    assert!(matches!(
+        library.save_draft(stale, first_version),
+        Err(LibraryError::NotFound(_))
+    ));
+
+    drop(library);
+    let library = open(root.path());
+    assert_eq!(library.active_conversation_id().unwrap(), third);
+    assert_eq!(
+        library.conversations(10, None).unwrap().conversations.len(),
+        2
+    );
+    assert!(matches!(
+        library.conversation(&first),
+        Err(LibraryError::NotFound(_))
+    ));
+    assert_eq!(library.snapshot().unwrap().drafts.len(), 2);
+}
+
+#[test]
+fn deleting_the_last_conversation_creates_exactly_one_default_conversation() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let only = library.active_conversation_id().unwrap();
+    let draft_id = library.conversation(&only).unwrap().draft_id;
+    let version = library.draft(draft_id).unwrap().version;
+
+    let first = library.delete_conversation(&only, version).unwrap();
+    assert!(first.deleted);
+    assert_ne!(first.active_conversation_id, only);
+    let replacement = library.conversation(&first.active_conversation_id).unwrap();
+    assert_eq!(replacement.title, "新会话");
+    let draft = library.draft(replacement.draft_id).unwrap();
+    assert_eq!(draft.prompt, "");
+    assert_eq!(draft.version, 1);
+    assert_eq!(
+        draft.params,
+        serde_json::json!({
+            "modelId": DEFAULT_MODEL_ID,
+            "aspect": "1:1",
+            "count": 1,
+            "seed": ""
+        })
+    );
+
+    let replay = library.delete_conversation(&only, version).unwrap();
+    assert!(!replay.deleted);
+    assert_eq!(replay.active_conversation_id, first.active_conversation_id);
+    assert_eq!(
+        library.conversations(10, None).unwrap().conversations.len(),
+        1
+    );
+
+    drop(library);
+    let library = open(root.path());
+    assert!(matches!(
+        library.conversation(&only),
+        Err(LibraryError::NotFound(_))
+    ));
+    assert_eq!(
+        library.conversations(10, None).unwrap().conversations.len(),
+        1
+    );
+}
+
+#[test]
+fn a_busy_conversation_is_refused_while_idle_conversations_stay_deletable() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let busy = library.active_conversation_id().unwrap();
+    accept_prompt(&mut library, "一只中文测试小猫", "busy-send");
+    let idle = library.create_conversation().unwrap().conversation.id;
+    let busy_version = library
+        .draft(library.conversation(&busy).unwrap().draft_id)
+        .unwrap()
+        .version;
+    assert!(matches!(
+        library.delete_conversation(&busy, busy_version),
+        Err(LibraryError::Busy)
+    ));
+    let idle_version = library
+        .draft(library.conversation(&idle).unwrap().draft_id)
+        .unwrap()
+        .version;
+    let result = library.delete_conversation(&idle, idle_version).unwrap();
+    assert!(result.deleted);
+    let page = library.conversations(10, None).unwrap();
+    assert_eq!(page.conversations.len(), 1);
+    assert_eq!(page.conversations[0].id, busy);
+    assert!(page.conversations[0].running);
+}
+
+#[test]
+fn conversation_deletion_requires_the_confirmed_draft_version() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let conversation = library.active_conversation_id().unwrap();
+    let draft_id = library.conversation(&conversation).unwrap().draft_id;
+    let version = library.draft(draft_id).unwrap().version;
+    assert!(matches!(
+        library.delete_conversation(&conversation, version + 1),
+        Err(LibraryError::DraftConflict)
+    ));
+    library.conversation(&conversation).unwrap();
+    assert_eq!(library.draft(draft_id).unwrap().version, version);
+    library.delete_conversation(&conversation, version).unwrap();
+}

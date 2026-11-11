@@ -98,6 +98,36 @@ pub struct CreatedConversation {
     pub draft: DraftRecord,
 }
 
+/// Result of a confirmed conversation deletion. `deleted` is false when the
+/// target was already tombstoned, so a replayed request never creates a second
+/// replacement conversation.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConversationDeleteResult {
+    pub conversation_id: ConversationId,
+    pub deleted: bool,
+    pub active_conversation_id: ConversationId,
+    pub active_draft_id: u64,
+}
+
+/// Title, draft and tombstone state of a conversation, readable even after the
+/// user deleted it so historical assets and task records keep their source.
+#[derive(Clone, Debug)]
+pub struct ConversationIdentity {
+    pub title: String,
+    pub draft_id: u64,
+    pub deleted: bool,
+}
+
+fn default_conversation_params() -> Value {
+    serde_json::json!({
+        "modelId": DEFAULT_MODEL_ID,
+        "aspect": "1:1",
+        "count": 1,
+        "seed": ""
+    })
+}
+
 #[derive(Clone, Debug)]
 pub struct AcceptedTurn {
     pub turn: TurnRecord,
@@ -281,14 +311,14 @@ impl Library {
         let fetch = i64::from(limit) + 1;
         let rows = if let Some(before) = before_activity {
             let mut statement = self.db.prepare(
-                "SELECT c.id,c.draft_id,c.title,c.title_source,c.created_at,c.activity_seq, EXISTS(SELECT 1 FROM generation_turns t LEFT JOIN jobs j ON j.id=t.job_id LEFT JOIN attempts a ON a.id=j.current_attempt_id WHERE t.conversation_id=c.id AND (t.status IN ('pending','cancel_requested') OR a.state IN ('submitted','preparing','running','committing','cancel_requested'))) FROM conversations c WHERE c.project_id='default' AND c.activity_seq<? ORDER BY c.activity_seq DESC,c.id DESC LIMIT ?",
+                "SELECT c.id,c.draft_id,c.title,c.title_source,c.created_at,c.activity_seq, EXISTS(SELECT 1 FROM generation_turns t LEFT JOIN jobs j ON j.id=t.job_id LEFT JOIN attempts a ON a.id=j.current_attempt_id WHERE t.conversation_id=c.id AND (t.status IN ('pending','cancel_requested') OR a.state IN ('submitted','preparing','running','committing','cancel_requested'))) FROM conversations c WHERE c.project_id='default' AND c.deleted_at IS NULL AND c.activity_seq<? ORDER BY c.activity_seq DESC,c.id DESC LIMIT ?",
             )?;
             statement
                 .query_map(params![sqlite_integer(before)?, fetch], conversation_row)?
                 .collect::<std::result::Result<Vec<_>, _>>()?
         } else {
             let mut statement = self.db.prepare(
-                "SELECT c.id,c.draft_id,c.title,c.title_source,c.created_at,c.activity_seq, EXISTS(SELECT 1 FROM generation_turns t LEFT JOIN jobs j ON j.id=t.job_id LEFT JOIN attempts a ON a.id=j.current_attempt_id WHERE t.conversation_id=c.id AND (t.status IN ('pending','cancel_requested') OR a.state IN ('submitted','preparing','running','committing','cancel_requested'))) FROM conversations c WHERE c.project_id='default' ORDER BY c.activity_seq DESC,c.id DESC LIMIT ?",
+                "SELECT c.id,c.draft_id,c.title,c.title_source,c.created_at,c.activity_seq, EXISTS(SELECT 1 FROM generation_turns t LEFT JOIN jobs j ON j.id=t.job_id LEFT JOIN attempts a ON a.id=j.current_attempt_id WHERE t.conversation_id=c.id AND (t.status IN ('pending','cancel_requested') OR a.state IN ('submitted','preparing','running','committing','cancel_requested'))) FROM conversations c WHERE c.project_id='default' AND c.deleted_at IS NULL ORDER BY c.activity_seq DESC,c.id DESC LIMIT ?",
             )?;
             statement
                 .query_map([fetch], conversation_row)?
@@ -312,7 +342,7 @@ impl Library {
     pub fn conversation(&self, id: &ConversationId) -> Result<ConversationRecord> {
         self.db
             .query_row(
-                "SELECT c.id,c.draft_id,c.title,c.title_source,c.created_at,c.activity_seq, EXISTS(SELECT 1 FROM generation_turns t LEFT JOIN jobs j ON j.id=t.job_id LEFT JOIN attempts a ON a.id=j.current_attempt_id WHERE t.conversation_id=c.id AND (t.status IN ('pending','cancel_requested') OR a.state IN ('submitted','preparing','running','committing','cancel_requested'))) FROM conversations c WHERE c.id=? AND c.project_id='default'",
+                "SELECT c.id,c.draft_id,c.title,c.title_source,c.created_at,c.activity_seq, EXISTS(SELECT 1 FROM generation_turns t LEFT JOIN jobs j ON j.id=t.job_id LEFT JOIN attempts a ON a.id=j.current_attempt_id WHERE t.conversation_id=c.id AND (t.status IN ('pending','cancel_requested') OR a.state IN ('submitted','preparing','running','committing','cancel_requested'))) FROM conversations c WHERE c.id=? AND c.project_id='default' AND c.deleted_at IS NULL",
                 [id.as_str()],
                 conversation_row,
             )
@@ -321,12 +351,7 @@ impl Library {
     }
 
     pub fn create_conversation(&mut self) -> Result<CreatedConversation> {
-        self.create_conversation_with_params(serde_json::json!({
-            "modelId": DEFAULT_MODEL_ID,
-            "aspect": "1:1",
-            "count": 1,
-            "seed": ""
-        }))
+        self.create_conversation_with_params(default_conversation_params())
     }
 
     pub fn create_conversation_with_params(
@@ -402,11 +427,187 @@ impl Library {
         })
     }
 
+    /// Title, draft and tombstone state for historical source display. This is
+    /// the only conversation read that tolerates a tombstone.
+    pub fn conversation_identity(
+        &self,
+        id: &ConversationId,
+    ) -> Result<Option<ConversationIdentity>> {
+        Ok(self
+            .db
+            .query_row(
+                "SELECT title,draft_id,deleted_at IS NOT NULL FROM conversations WHERE id=? AND project_id='default'",
+                [id.as_str()],
+                |row| {
+                    Ok(ConversationIdentity {
+                        title: row.get(0)?,
+                        draft_id: read_unsigned(row, 1)?,
+                        deleted: row.get(2)?,
+                    })
+                },
+            )
+            .optional()?)
+    }
+
+    /// Confirmed deletion is a single transaction: tombstone the conversation,
+    /// retire its unsent draft and repair the active selection. Busy targets are
+    /// refused instead of implicitly cancelled; a replay returns the existing
+    /// state without creating a second replacement conversation.
+    pub fn delete_conversation(
+        &mut self,
+        id: &ConversationId,
+        expected_draft_version: u64,
+    ) -> Result<ConversationDeleteResult> {
+        let tx = self
+            .db
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let target: Option<(i64, Option<i64>)> = tx
+            .query_row(
+                "SELECT draft_id,deleted_at FROM conversations WHERE id=? AND project_id='default'",
+                [id.as_str()],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .optional()?;
+        let Some((draft_id, deleted_at)) = target else {
+            return Err(LibraryError::NotFound(format!("conversation {id}")));
+        };
+        if deleted_at.is_some() {
+            drop(tx);
+            let (active_conversation_id, active_draft_id) = self.active_selection()?;
+            return Ok(ConversationDeleteResult {
+                conversation_id: id.clone(),
+                deleted: false,
+                active_conversation_id,
+                active_draft_id,
+            });
+        }
+        let busy: bool = tx.query_row(
+            "SELECT EXISTS(SELECT 1 FROM generation_turns t LEFT JOIN jobs j ON j.id=t.job_id LEFT JOIN attempts a ON a.id=j.current_attempt_id WHERE t.conversation_id=? AND (t.status IN ('pending','cancel_requested') OR a.state IN ('submitted','preparing','running','committing','cancel_requested')))",
+            [id.as_str()],
+            |row| row.get(0),
+        )?;
+        if busy {
+            return Err(LibraryError::Busy);
+        }
+        let version: u64 =
+            tx.query_row("SELECT version FROM drafts WHERE id=?", [draft_id], |row| {
+                read_unsigned(row, 0)
+            })?;
+        if version != expected_draft_version {
+            return Err(LibraryError::DraftConflict);
+        }
+        let next_version = version
+            .checked_add(1)
+            .ok_or_else(|| LibraryError::Invalid("草稿版本溢出".into()))?;
+        tx.execute(
+            "UPDATE conversations SET deleted_at=? WHERE id=?",
+            params![now(), id.as_str()],
+        )?;
+        // Retire unsent text, prompt attribution and every capability source
+        // selection in one version bump so a stale save cannot restore them.
+        tx.execute(
+            "UPDATE drafts SET prompt='',prompt_source=NULL,params_json=?,version=? WHERE id=?",
+            params![
+                serde_json::to_string(&default_conversation_params())?,
+                sqlite_integer(next_version)?,
+                draft_id
+            ],
+        )?;
+        let (active_id, _): (Option<String>, Option<i64>) = tx.query_row(
+            "SELECT active_conversation_id,active_draft_id FROM projects WHERE id='default'",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )?;
+        if active_id.as_deref() == Some(id.as_str()) {
+            let next: Option<(String, i64)> = tx
+                .query_row(
+                    "SELECT id,draft_id FROM conversations WHERE project_id='default' AND deleted_at IS NULL ORDER BY activity_seq DESC,id DESC LIMIT 1",
+                    [],
+                    |row| Ok((row.get(0)?, row.get(1)?)),
+                )
+                .optional()?;
+            let (next_id, next_draft) = match next {
+                Some(value) => value,
+                None => {
+                    // The last visible conversation was deleted: create exactly
+                    // one default conversation inside the same transaction.
+                    let (created_id, created_draft) = insert_default_conversation(&tx)?;
+                    (created_id.to_string(), sqlite_integer(created_draft)?)
+                }
+            };
+            tx.execute(
+                "UPDATE projects SET active_conversation_id=?,active_draft_id=?,selected_asset_id=NULL WHERE id='default'",
+                params![next_id, next_draft],
+            )?;
+        }
+        tx.commit()?;
+        let (active_conversation_id, active_draft_id) = self.active_selection()?;
+        Ok(ConversationDeleteResult {
+            conversation_id: id.clone(),
+            deleted: true,
+            active_conversation_id,
+            active_draft_id,
+        })
+    }
+
+    pub(super) fn active_selection(&self) -> Result<(ConversationId, u64)> {
+        let (id, draft): (Option<String>, Option<i64>) = self.db.query_row(
+            "SELECT active_conversation_id,active_draft_id FROM projects WHERE id='default'",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )?;
+        let id = id.ok_or_else(|| LibraryError::Schema("活动会话缺失".into()))?;
+        let draft = draft.ok_or_else(|| LibraryError::Schema("活动草稿缺失".into()))?;
+        let draft =
+            u64::try_from(draft).map_err(|_| LibraryError::Schema("活动草稿 ID 为负数".into()))?;
+        Ok((ConversationId::new(id)?, draft))
+    }
+
+    /// Startup repair for tombstones left by a crash or an older build: the
+    /// active selection must point at a visible conversation, otherwise the
+    /// most recent visible one is selected or a default conversation created.
+    pub(super) fn repair_active_conversation(&mut self) -> Result<()> {
+        let valid = match self.active_selection() {
+            Ok((id, draft)) => self.db.query_row(
+                "SELECT EXISTS(SELECT 1 FROM conversations WHERE id=? AND draft_id=? AND project_id='default' AND deleted_at IS NULL)",
+                params![id.as_str(), sqlite_integer(draft)?],
+                |row| row.get::<_, bool>(0),
+            )?,
+            Err(_) => false,
+        };
+        if valid {
+            return Ok(());
+        }
+        let tx = self
+            .db
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let next: Option<(String, i64)> = tx
+            .query_row(
+                "SELECT id,draft_id FROM conversations WHERE project_id='default' AND deleted_at IS NULL ORDER BY activity_seq DESC,id DESC LIMIT 1",
+                [],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .optional()?;
+        let (next_id, next_draft) = match next {
+            Some(value) => value,
+            None => {
+                let (created_id, created_draft) = insert_default_conversation(&tx)?;
+                (created_id.to_string(), sqlite_integer(created_draft)?)
+            }
+        };
+        tx.execute(
+            "UPDATE projects SET active_conversation_id=?,active_draft_id=?,selected_asset_id=NULL WHERE id='default'",
+            params![next_id, next_draft],
+        )?;
+        tx.commit()?;
+        Ok(())
+    }
+
     pub fn select_conversation(&mut self, id: &ConversationId) -> Result<()> {
         let draft_id: i64 = self
             .db
             .query_row(
-                "SELECT draft_id FROM conversations WHERE id=? AND project_id='default'",
+                "SELECT draft_id FROM conversations WHERE id=? AND project_id='default' AND deleted_at IS NULL",
                 [id.as_str()],
                 |row| row.get(0),
             )
@@ -546,7 +747,7 @@ impl Library {
             |row| row.get(0),
         )?;
         let changed = tx.execute(
-            "UPDATE conversations SET title=?,title_source='manual',activity_seq=? WHERE id=? AND project_id='default'",
+            "UPDATE conversations SET title=?,title_source='manual',activity_seq=? WHERE id=? AND project_id='default' AND deleted_at IS NULL",
             params![title, activity, id.as_str()],
         )?;
         if changed != 1 {
@@ -693,6 +894,18 @@ impl Library {
         let tx = self
             .db
             .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        // A tombstoned conversation cannot accept new input or replay an old send.
+        let visible: bool = tx.query_row(
+            "SELECT EXISTS(SELECT 1 FROM conversations WHERE id=? AND project_id='default' AND deleted_at IS NULL)",
+            [input.conversation_id.as_str()],
+            |row| row.get(0),
+        )?;
+        if !visible {
+            return Err(LibraryError::NotFound(format!(
+                "conversation {}",
+                input.conversation_id
+            )));
+        }
         if let Some(existing) = tx
             .query_row(
                 "SELECT id,conversation_id,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,count,seed FROM generation_turns WHERE project_id='default' AND submission_key=?",
@@ -735,7 +948,7 @@ impl Library {
         }
         let conversation = tx
             .query_row(
-                "SELECT draft_id FROM conversations WHERE id=? AND project_id='default'",
+                "SELECT draft_id FROM conversations WHERE id=? AND project_id='default' AND deleted_at IS NULL",
                 [input.conversation_id.as_str()],
                 |row| row.get::<_, i64>(0),
             )
@@ -1055,7 +1268,7 @@ impl Library {
         let (name, prompt, prompt_source, params, collapsed, version) = self
             .db
             .query_row(
-                "SELECT name,prompt,prompt_source,params_json,collapsed,version FROM drafts WHERE id=? AND project_id='default'",
+                "SELECT name,prompt,prompt_source,params_json,collapsed,version FROM drafts d WHERE d.id=? AND d.project_id='default' AND NOT EXISTS(SELECT 1 FROM conversations c WHERE c.draft_id=d.id AND c.deleted_at IS NOT NULL)",
                 [sqlite_integer(id)?],
                 |row| {
                     Ok((
@@ -1092,6 +1305,31 @@ impl Library {
         )?;
         Ok(())
     }
+}
+
+fn insert_default_conversation(tx: &Connection) -> Result<(ConversationId, u64)> {
+    tx.execute(
+        "INSERT INTO drafts(project_id,name,prompt,prompt_source,params_json,collapsed,version) VALUES('default','新会话','',NULL,?,0,1)",
+        [serde_json::to_string(&default_conversation_params())?],
+    )?;
+    let draft_id = u64::try_from(tx.last_insert_rowid())
+        .map_err(|_| LibraryError::Schema("新草稿 ID 为负数".into()))?;
+    let conversation_id = ConversationId::new(new_key("conv"))?;
+    let activity: i64 = tx.query_row(
+        "SELECT coalesce(max(activity_seq),0)+1 FROM conversations WHERE project_id='default'",
+        [],
+        |row| row.get(0),
+    )?;
+    tx.execute(
+        "INSERT INTO conversations(id,project_id,draft_id,title,title_source,created_at,activity_seq) VALUES(?,'default',?,'新会话','auto',?,?)",
+        params![
+            conversation_id.as_str(),
+            sqlite_integer(draft_id)?,
+            now(),
+            activity
+        ],
+    )?;
+    Ok((conversation_id, draft_id))
 }
 
 fn conversation_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<ConversationRecord> {

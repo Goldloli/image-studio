@@ -7,8 +7,9 @@ mod schema;
 mod sources;
 
 pub use conversations::{
-    AcceptTurnInput, AcceptedTurn, ConversationListPage, ConversationRecord, CreatedConversation,
-    DEFAULT_MODEL_ID, TurnPage, TurnRecord, TurnStatus,
+    AcceptTurnInput, AcceptedTurn, ConversationDeleteResult, ConversationIdentity,
+    ConversationListPage, ConversationRecord, CreatedConversation, DEFAULT_MODEL_ID, TurnPage,
+    TurnRecord, TurnStatus,
 };
 pub use queries::{
     AssetConversationFacet, AssetLibraryFacets, AssetLibraryItem, AssetLibraryPage,
@@ -416,7 +417,7 @@ impl Library {
     }
 
     pub fn drafts(&self) -> Result<Vec<DraftRecord>> {
-        let mut statement = self.db.prepare("SELECT id,name,prompt,prompt_source,params_json,collapsed,version FROM drafts WHERE project_id='default' ORDER BY id")?;
+        let mut statement = self.db.prepare("SELECT d.id,d.name,d.prompt,d.prompt_source,d.params_json,d.collapsed,d.version FROM drafts d WHERE d.project_id='default' AND NOT EXISTS(SELECT 1 FROM conversations c WHERE c.draft_id=d.id AND c.deleted_at IS NOT NULL) ORDER BY d.id")?;
         let rows = statement.query_map([], |r| {
             Ok((
                 read_unsigned(r, 0)?,
@@ -464,7 +465,15 @@ impl Library {
         let version = expected_version
             .checked_add(1)
             .ok_or_else(|| LibraryError::Invalid("草稿版本溢出".into()))?;
-        let changed=self.db.execute("UPDATE drafts SET name=?,prompt=?,prompt_source=?,params_json=?,collapsed=?,version=? WHERE id=? AND project_id='default' AND version=?",params![draft.name,draft.prompt,draft.prompt_source,serde_json::to_string(&draft.params)?,draft.collapsed,sqlite_integer(version)?,sqlite_integer(draft.id)?,sqlite_integer(expected_version)?])?;
+        let retired: bool = self.db.query_row(
+            "SELECT EXISTS(SELECT 1 FROM conversations WHERE draft_id=? AND project_id='default' AND deleted_at IS NOT NULL)",
+            [sqlite_integer(draft.id)?],
+            |row| row.get(0),
+        )?;
+        if retired {
+            return Err(LibraryError::NotFound(format!("draft {}", draft.id)));
+        }
+        let changed=self.db.execute("UPDATE drafts SET name=?,prompt=?,prompt_source=?,params_json=?,collapsed=?,version=? WHERE id=? AND project_id='default' AND version=? AND NOT EXISTS(SELECT 1 FROM conversations c WHERE c.draft_id=drafts.id AND c.deleted_at IS NOT NULL)",params![draft.name,draft.prompt,draft.prompt_source,serde_json::to_string(&draft.params)?,draft.collapsed,sqlite_integer(version)?,sqlite_integer(draft.id)?,sqlite_integer(expected_version)?])?;
         if changed != 1 {
             return Err(LibraryError::DraftConflict);
         }
@@ -473,7 +482,7 @@ impl Library {
 
     pub fn select_draft(&mut self, id: u64) -> Result<()> {
         let id = sqlite_integer(id)?;
-        let changed=self.db.execute("UPDATE projects SET active_draft_id=?,active_conversation_id=(SELECT id FROM conversations WHERE draft_id=?),selected_asset_id=NULL WHERE id='default' AND EXISTS(SELECT 1 FROM drafts WHERE id=? AND project_id='default')",params![id,id,id])?;
+        let changed=self.db.execute("UPDATE projects SET active_draft_id=?,active_conversation_id=(SELECT id FROM conversations WHERE draft_id=? AND deleted_at IS NULL),selected_asset_id=NULL WHERE id='default' AND EXISTS(SELECT 1 FROM drafts WHERE id=? AND project_id='default') AND EXISTS(SELECT 1 FROM conversations WHERE draft_id=? AND project_id='default' AND deleted_at IS NULL)",params![id,id,id,id])?;
         if changed != 1 {
             return Err(LibraryError::NotFound(format!("draft {id}")));
         }
@@ -804,6 +813,7 @@ impl Library {
 
     fn recover(&mut self) -> Result<()> {
         self.recover_pending_turns()?;
+        self.repair_active_conversation()?;
         let ids = {
             let mut s=self.db.prepare("SELECT id FROM attempts WHERE state IN ('submitted','preparing','running','committing','cancel_requested')")?;
             s.query_map([], |r| r.get::<_, String>(0))?

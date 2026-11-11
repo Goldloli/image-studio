@@ -351,12 +351,17 @@ impl Library {
                     ))
                 },
             )?;
+        // Deleted conversations keep their title so historical job records stay
+        // readable; only live conversation entry points are closed.
         let (conversation_title, draft_id) = job
             .conversation_id
             .as_ref()
             .map(|conversation_id| {
-                self.conversation(conversation_id)
-                    .map(|conversation| (conversation.title, Some(conversation.draft_id)))
+                self.conversation_identity(conversation_id).map(|identity| {
+                    identity
+                        .map(|value| (value.title, Some(value.draft_id)))
+                        .unwrap_or_else(|| ("历史生成".into(), None))
+                })
             })
             .transpose()?
             .unwrap_or_else(|| ("历史生成".into(), None));
