@@ -38,7 +38,7 @@
 
 ## 6. 集成验收
 
-- [ ] 6.1 执行 test-plan.md 的跨模块场景，记录 macOS/Windows 两平台的 UI、键盘、普通作品与主图/蒙版删除证据，以及至少一次真实文生图和一次真实去背景的原位生成/停止/重试回归；未实测平台明确留为未验收。（部分：浏览器预览已覆盖导航/页面/主题 smoke（见 verification/simplify-workspace-20261111/AUTOMATED-RESULTS.md）；原生窗口、960×640、键盘与真实文生图/去背景仍需人工或授权后补测）
+- [x] 6.1 执行 test-plan.md 的跨模块场景，记录 macOS/Windows 两平台的 UI、键盘、普通作品与主图/蒙版删除证据，以及至少一次真实文生图和一次真实去背景的原位生成/停止/重试回归；未实测平台明确留为未验收。（完成：macOS computer-use 原生验收，含真实文生图 54.6s、去背景 12.3s+cancel 7.8s、导出/删除/引用/会话保留；Windows 项保持未验收。证据：verification/simplify-workspace-20261111/RESULTS.md）
 - [x] 6.2 运行前端测试/类型检查/构建、Rust fmt/clippy/test 和 OpenSpec 全量 strict；核对仅授权范围变化、验收证据及关联 Beads 状态，记录所有未覆盖项。（完成：cargo fmt/clippy/test 323 通过、前端 67 测试与 check/build 通过、change strict 通过；既有 4 份规格长度警告仍由 image-studio-6g2 跟踪。commit b37db62、1a6a0f8）
 
 ## Workflow follow-up

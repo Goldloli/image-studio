@@ -2,7 +2,7 @@
 
 Change：`simplify-workspace-and-manage-library`
 
-**状态：用户已确认并完成实现（2026-11-11）；Phase 6 的原生 UI 与真实生成验收待执行，因此尚未归档。**
+**状态：实现与 macOS 原生验收完成（2026-11-11，见 `verification/simplify-workspace-20261111/RESULTS.md`）；Windows 目标机项保持未验收；准备归档。**
 
 实现摘要：持久层 v5→v6 迁移、会话 tombstone、作品收藏与删除状态机及清理恢复、受限宿主命令；前端单层导航、去页签/功能页/任务页/开发抽屉/示例入口、原位制作记录、会话删除确认、作品收藏/删除/收藏筛选。自动化门禁：`cargo fmt/clippy/test`、前端 `test/check/build` 全部通过；正式规格尚未合并，change 未 archive。
 

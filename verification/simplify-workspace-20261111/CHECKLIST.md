@@ -1,8 +1,7 @@
 # 界面精简与会话、作品管理 —— 原生验收清单
 
 对应 OpenSpec change：`simplify-workspace-and-manage-library`。
-状态：**待执行（原生 UI 与真实模型验收）**。自动化门禁已通过，证据见本目录后续 `RESULTS.md`
-与截图；Windows 验收需在目标机单独执行并注明未在本机覆盖。
+状态：**已在 macOS 执行（2026-11-11，computer use），结果见同目录 `RESULTS.md`**；Windows 项保持未验收，需在目标机单独执行。
 
 ## 1. 准备
 
