@@ -75,6 +75,27 @@
 - 删除文件证据：记录删除前后的数据根路径与 `ls`/`shasum` 输出（外部导出副本散列不变）。
 - 结果写入同目录 `RESULTS.md`：日期、机器、数据根、每项通过/失败/未覆盖、失败现象与截图名。
 
-## 4. Windows
+## 4. 隔离验收根（推荐：不动真实库，仍可验证升级与删除）
+
+在 macOS APFS 上克隆真实数据根的作品与库（秒级完成，不复制模型）：
+
+```bash
+SRC="$HOME/Library/Application Support/ImageStudio"
+DST="/tmp/image-studio-accept"
+rm -rf "$DST" && mkdir -p "$DST/data"
+cp -c "$SRC/library.sqlite3" "$DST/data/library.sqlite3" 2>/dev/null || cp "$SRC/library.sqlite3" "$DST/data/library.sqlite3"
+for suffix in -wal -shm; do
+  [ -f "$SRC/library.sqlite3$suffix" ] && cp -c "$SRC/library.sqlite3$suffix" "$DST/data/library.sqlite3$suffix" 2>/dev/null || true
+done
+[ -d "$SRC/assets" ] && cp -cR "$SRC/assets" "$DST/data/assets"
+[ -d "$SRC/inputs" ] && cp -cR "$SRC/inputs" "$DST/data/inputs"
+"target/dev/Image Studio.app/Contents/MacOS/image-studio-desktop" --data-dir "$DST"
+```
+
+- 克隆库仍是 v5，首次启动即原生验证 S01 升级；作品/会话/收藏来自真实数据副本，删除操作只影响副本。
+- 模型目录不克隆，生成入口会显示“未就绪”；**真实生成/去背景验收仍在真实数据根执行**（先按第 1 节备份库）。
+- 验收后删除 `$DST` 即可；真实数据根未被新构建打开过时保持 v5。
+
+## 5. Windows
 
 本机为 macOS，Windows 项保持**未验收**：需在 Windows 10/11 目标机用对应构建重复 A、B、C 关键项与窗口/键盘项，并单独记录。不得以 macOS 结果代替。
