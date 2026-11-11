@@ -44,7 +44,6 @@ function BrandArt({ size, decorative = false }: { size: number; decorative?: boo
 
 export default function App() {
   const [page, setPage] = useState<Page>('create');
-  const [tabs, setTabs] = useState<Page[]>(['create']);
   const [appearance, setAppearance] = useState<AppearancePreferences>(defaultAppearance);
   const [appearanceStatus, setAppearanceStatus] = useState<AppearanceSaveStatus>('saved');
   const [appearanceError, setAppearanceError] = useState('');
@@ -66,7 +65,7 @@ export default function App() {
   const requestNonce = useRef(0);
   const refreshStudio = useRef<()=>void>(()=>{});
   const refresh = () => refreshStudio.current();
-  const navigate = (next: Page) => { setTabs(old => old.includes(next) ? old : [...old, next]); setPage(next); };
+  const navigate = (next: Page) => setPage(next);
   const commitAppearance = (next: AppearancePreferences) => {
     appearanceRef.current = next;
     setAppearance(next);
@@ -164,7 +163,6 @@ export default function App() {
     const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setDevMenu(false); };
     window.addEventListener('keydown', close); return () => window.removeEventListener('keydown', close);
   }, []);
-  const closeTab = (target: Page) => { setTabs(old => old.filter(tab => tab !== target)); if (page === target) setPage('create'); };
   const openAsset = (asset: AssetView, conversationTitle: string, draftId: number | null, turnSequence: number | null, returnPage: Page | null) => {
     setRequestedAsset({ asset, conversationTitle, draftId, turnSequence, returnPage, nonce: ++requestNonce.current });
     navigate('create');
@@ -182,12 +180,6 @@ export default function App() {
   const resolvedTheme = resolveTheme(appearance.theme);
   return <div className="app" data-platform={platform}>
     <header className="titlebar">
-      <div className="tabs" role="tablist" aria-label="打开的页面">
-        {tabs.map(id => { const item = pages.find(item => item.id === id)!; const Icon = item.icon; return <div className={`page-tab ${page === id ? 'active' : ''}`} key={id}>
-          <button role="tab" aria-selected={page === id} onClick={() => navigate(id)}><Icon size={15}/><span>{item.label}</span></button>
-          {id !== 'create' && <button className="tab-close" aria-label={`关闭${item.label}标签`} onClick={() => closeTab(id)}><X size={12}/></button>}
-        </div>; })}
-      </div>
       <div className="window-drag" data-tauri-drag-region />
       {!native && <span className="preview-label">界面预览</span>}
       {(host?.developmentBuild || !native) && <div className="dev-menu"><button className="quiet tiny" onClick={() => setDevMenu(!devMenu)} aria-expanded={devMenu}>开发</button>{devMenu && <div className="popover dev-popover"><button onClick={() => void enableDiagnostics()}><Terminal size={14}/>启用通信诊断</button></div>}</div>}
