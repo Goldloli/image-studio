@@ -2,7 +2,7 @@
 
 Change：`clarify-work-reference-guidance`
 
-**状态：提案待确认，未开始实施。**
+**状态：已实现并通过 macOS 原生验收（2026-11-12）；证据见 `verification/reference-guidance-20261112/RESULTS.md`。**
 
 | 文档 | 内容 |
 | --- | --- |
