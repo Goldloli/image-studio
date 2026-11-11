@@ -2238,6 +2238,12 @@ fn turn_view(library: &Library, turn: &TurnRecord) -> crate::adapters::library::
         .map(|asset| asset.asset.asset_id.to_string());
     let asset_record = primary_record;
     let asset_available = asset_record.as_ref().is_some_and(|asset| asset.available);
+    let asset_deletion_state = asset_record
+        .as_ref()
+        .map(|asset| asset.deletion_state.clone());
+    let mask_deletion_state = mask_record
+        .as_ref()
+        .map(|asset| asset.deletion_state.clone());
     Ok(json!({
         "id": turn.id,
         "conversationId": turn.conversation_id,
@@ -2260,9 +2266,11 @@ fn turn_view(library: &Library, turn: &TurnRecord) -> crate::adapters::library::
         "assetId": asset_id,
         "assetAvailable": asset_available,
         "assetError": asset_record.and_then(|asset| asset.availability_error),
+        "assetDeletionState": asset_deletion_state,
         "maskAssetId": mask_asset_id,
         "maskAssetAvailable": mask_record.as_ref().is_some_and(|asset| asset.available),
         "maskAssetError": mask_record.and_then(|asset| asset.availability_error),
+        "maskAssetDeletionState": mask_deletion_state,
         "error": turn.error.as_ref().or_else(|| turn.job.as_ref().and_then(|job| job.error.as_ref())),
         "progressStage": turn.progress_stage,
         "progressStep": turn.progress_step,

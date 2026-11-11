@@ -222,6 +222,9 @@ function TurnCard({
   const displayedAssetId = showMask ? turn.maskAssetId : turn.assetId;
   const displayedAvailable = showMask ? turn.maskAssetAvailable : turn.assetAvailable;
   const displayedError = showMask ? turn.maskAssetError : turn.assetError;
+  const displayedDeletionState = (showMask ? turn.maskAssetDeletionState : turn.assetDeletionState) ?? null;
+  const workRemoved = turn.state === 'Succeeded' && displayedDeletionState !== null && displayedDeletionState !== 'active';
+  const removalLabel = displayedDeletionState === 'pending' ? '作品正在删除' : displayedDeletionState === 'failed' ? '删除未完成' : '作品已删除';
   const complete = turn.state === 'Succeeded' && displayedAssetId && displayedAvailable && !imageFailed;
   const cardStyle = { '--turn-aspect': `${turn.width} / ${turn.height}` } as CSSProperties;
   const toggleMask = () => {
@@ -243,7 +246,7 @@ function TurnCard({
         <div className="image-card-media">
         {complete && <button className="image-card-open" type="button" onClick={() => onOpen(showMask)} aria-label={showMask ? '放大查看前景蒙版' : '放大查看生成图片'}><img src={assetUrl(displayedAssetId!)} alt={showMask ? '前景蒙版' : turn.prompt} draggable={false} onLoad={() => setImageReady(true)} onError={() => setImageFailed(true)}/>{imageReady && <span className="image-open-hint"><Expand size={14}/>查看大图</span>}</button>}
         {(!complete || !imageReady) && <div className="image-card-placeholder">
-          {turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) ? <><ImageIcon size={25}/><strong>任务已完成，图片无法显示</strong><span>{displayedError || 'PNG 可能已被移动、改写或无法解码。'}</span></> : active || turn.state === 'Succeeded' ? <><LoaderCircle size={25} className="spin"/><strong>{progress.label}</strong><span>{turn.state === 'Succeeded' ? '正在解码并校验 PNG' : '生成结果会在此处原位出现'}</span></> : <>{turn.state === 'Rejected' ? <X size={24}/> : <ImageIcon size={25}/>}<strong>{stateLabel(turn.state)}</strong><span>{turn.error || (turn.state === 'Cancelled' ? '本次生成已取消' : '本次执行没有可显示结果')}</span></>}
+          {workRemoved ? <><ImageIcon size={25}/><strong>{removalLabel}</strong><span>{displayedDeletionState === 'failed' ? (displayedError || '清理未完成，可在作品页重试删除。') : '图片及配套产物已移除；原制作记录仍可查看。'}</span></> : turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) ? <><ImageIcon size={25}/><strong>任务已完成，图片无法显示</strong><span>{displayedError || 'PNG 可能已被移动、改写或无法解码。'}</span></> : active || turn.state === 'Succeeded' ? <><LoaderCircle size={25} className="spin"/><strong>{progress.label}</strong><span>{turn.state === 'Succeeded' ? '正在解码并校验 PNG' : '生成结果会在此处原位出现'}</span></> : <>{turn.state === 'Rejected' ? <X size={24}/> : <ImageIcon size={25}/>}<strong>{stateLabel(turn.state)}</strong><span>{turn.error || (turn.state === 'Cancelled' ? '本次生成已取消' : '本次执行没有可显示结果')}</span></>}
         </div>}
         {(active || turn.state === 'CancelRequested' || turn.state === 'Succeeded') && <div className="image-card-progress">
           <div className="progress-copy" role="status"><span>{progressLabel}</span>{progress.percent !== null && <strong>{progress.percent}%</strong>}</div>
@@ -256,8 +259,8 @@ function TurnCard({
           {turn.jobId && retryStates.includes(turn.state) && <button onClick={onRetry}><RefreshCw size={12}/>重试</button>}
           {!active && !turn.capabilityId.includes('.remove-background.') && !turn.capabilityId.includes('.upscale.') && <button onClick={onEdit}><Pencil size={12}/>编辑后重发</button>}
           {turn.maskAssetId && <button aria-pressed={showMask} onClick={toggleMask}><ImageIcon size={12}/>{showMask ? '查看透明图' : '查看蒙版'}</button>}
-          {displayedAssetId && <><button onClick={() => onOpen(showMask)}><Expand size={12}/>查看</button><button disabled={!displayedAvailable} onClick={() => onExport(showMask)}><Download size={12}/>{showMask ? '导出蒙版' : '导出 PNG'}</button></>}
-          {turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) && <button onClick={() => { setImageFailed(false); setImageReady(false); onReload(); }}><RefreshCw size={12}/>重新加载</button>}
+          {displayedAssetId && <><button disabled={workRemoved} onClick={() => onOpen(showMask)}><Expand size={12}/>查看</button><button disabled={!displayedAvailable || workRemoved} onClick={() => onExport(showMask)}><Download size={12}/>{showMask ? '导出蒙版' : '导出 PNG'}</button></>}
+          {turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) && !workRemoved && <button onClick={() => { setImageFailed(false); setImageReady(false); onReload(); }}><RefreshCw size={12}/>重新加载</button>}
           {turn.prompt && <button onClick={onCopy}><Copy size={12}/>复制提示词</button>}
           <button aria-expanded={recordOpen} onClick={() => setRecordOpen(value => !value)}><FileText size={12}/>{recordOpen ? '收起记录' : '制作记录'}</button>
         </div>

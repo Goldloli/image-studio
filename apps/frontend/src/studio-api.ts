@@ -80,7 +80,9 @@ export type TurnView = {
   capabilityId: string; sourceAssetId: string | null;
   aspect: string; count: number; seed: number | null; requestedSeed: string; status: string; state: string;
   jobId: string | null; attemptId: string | null; width: number; height: number; assetId: string | null;
-  assetAvailable: boolean; assetError: string | null; maskAssetId?: string | null; maskAssetAvailable?: boolean; maskAssetError?: string | null;
+  assetAvailable: boolean; assetError: string | null; assetDeletionState?: 'active' | 'pending' | 'failed' | 'deleted' | null;
+  maskAssetId?: string | null; maskAssetAvailable?: boolean; maskAssetError?: string | null;
+  maskAssetDeletionState?: 'active' | 'pending' | 'failed' | 'deleted' | null;
   error: string | null; progressStage: string | null; progressStep: number | null;
   progressTotal: number | null; receivedAt: number;
 };
