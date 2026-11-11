@@ -58,17 +58,6 @@ export type TaskCenterDetail = {
   attempts: TaskAttemptView[]; errorCategory: string; nextAction: string;
   advanced: { manifest: unknown | null; outputHash: string | null; logs: string };
 };
-export type FeatureCatalogEntry = {
-  featureId: string; title: string; category: string; summary: string; description: string;
-  inputs: string[]; outputs: string[]; productStatus: 'implemented' | 'planned'; scope: string;
-  action: 'open-composer' | null; modelId: string | null; dependencies: { kind: string; label: string }[];
-  state: 'available' | 'planned' | 'busy' | 'blocked' | 'model-missing' | 'runtime-not-ready' | 'device-not-ready' | 'hardware-ineligible';
-  stateLabel: string; blockingReason: string | null; canStart: boolean;
-};
-export type FeatureCatalog = {
-  schemaVersion: number; reviewedDate: string; entries: FeatureCatalogEntry[];
-  counts: { total: number; available: number; planned: number };
-};
 export type ExecutionView = { busy: boolean; jobId: string | null; attemptId: string | null; stage: string; summary: string; step: number | null; total: number | null; logs: string; cleanupError: string | null };
 export type ConversationView = { id: string; draftId: number; title: string; titleSource: 'auto' | 'manual'; createdAt: number; activitySeq: number; running: boolean };
 export type TurnView = {

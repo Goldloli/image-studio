@@ -321,7 +321,7 @@ function ImageViewer({ title, prompt, source, isAsset, backLabel = '返回会话
   </div>;
 }
 
-export default function Workspace({ onModels, studio, requestedAsset, requestedComposer, requestedModel, requestedPrompt, sidebarCollapsed, onSidebarCollapsedChange, onRefresh, onAssetReturn }: { onModels: () => void; studio: StudioSnapshot | null; requestedAsset: RequestedAsset | null; requestedComposer: { modelId: string; capabilityId: string; nonce: number } | null; requestedModel: { draft: StoredDraft; conversationId: string; nonce: number } | null; requestedPrompt: RequestedPrompt | null; sidebarCollapsed: boolean; onSidebarCollapsedChange: (value: boolean) => void; onRefresh: () => void; onAssetReturn: () => void }) {
+export default function Workspace({ onModels, studio, requestedAsset, requestedModel, requestedPrompt, sidebarCollapsed, onSidebarCollapsedChange, onRefresh, onAssetReturn }: { onModels: () => void; studio: StudioSnapshot | null; requestedAsset: RequestedAsset | null; requestedModel: { draft: StoredDraft; conversationId: string; nonce: number } | null; requestedPrompt: RequestedPrompt | null; sidebarCollapsed: boolean; onSidebarCollapsedChange: (value: boolean) => void; onRefresh: () => void; onAssetReturn: () => void }) {
   const [state, setState] = useState(initialWorkspace);
   const [conversations, setConversations] = useState<ConversationView[]>([]);
   const [conversationsHasMore, setConversationsHasMore] = useState(false);
@@ -1073,23 +1073,6 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
     };
     void open();
   }, [requestedAsset?.nonce, loaded, studioAvailable]);
-
-  useEffect(() => {
-    if (!requestedComposer || !loaded) return;
-    setViewer(null);
-    setPopup(null);
-    dispatch({
-      type: 'params',
-      patch: {
-        modelId: requestedComposer.modelId,
-        capabilityId: requestedComposer.capabilityId,
-      },
-    });
-    if (requestedComposer.capabilityId !== BIREFNET_CAPABILITY
-      && requestedComposer.capabilityId !== REALESRGAN_CAPABILITY) {
-      requestAnimationFrame(() => textarea.current?.focus());
-    }
-  }, [requestedComposer?.nonce, loaded]);
 
   useEffect(() => {
     if (!requestedModel || !loaded) return;
