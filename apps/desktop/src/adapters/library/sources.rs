@@ -13,8 +13,12 @@ use studio_core::recipes::{MAX_SOURCE_BYTES, MAX_SOURCE_EDGE, MAX_SOURCE_PIXELS}
 pub struct AssetReferenceConflict {
     pub conversation_id: String,
     pub conversation_title: String,
-    /// `draft` (unsent reference) or `active` (pending/active request).
+    /// `draft` (active unsent reference), `retained` (inactive capability
+    /// slot) or `active` (pending/active request).
     pub kind: String,
+    /// For `retained` entries: the capability whose stored slot still
+    /// references the work.
+    pub capability_id: Option<String>,
     pub detail: String,
 }
 
@@ -336,26 +340,37 @@ impl Library {
                 .collect::<std::result::Result<Vec<_>, _>>()?;
             for (conversation_id, title, params_json) in rows {
                 let params: Value = serde_json::from_str(&params_json).unwrap_or(Value::Null);
-                let mut referenced = params
+                let active_source = params
                     .get("sourceAssetId")
                     .and_then(Value::as_str)
                     .is_some_and(|value| ids.iter().any(|id| id == value));
-                if !referenced
-                    && let Some(slots) = params.get("capabilityDrafts").and_then(Value::as_object)
-                {
-                    referenced = slots.values().any(|slot| {
-                        slot.get("sourceAssetId")
-                            .and_then(Value::as_str)
-                            .is_some_and(|value| ids.iter().any(|id| id == value))
+                if active_source && seen.insert(format!("draft:{conversation_id}")) {
+                    conflicts.push(AssetReferenceConflict {
+                        conversation_id: conversation_id.clone(),
+                        conversation_title: title.clone(),
+                        kind: "draft".into(),
+                        capability_id: None,
+                        detail: "请在对应会话中移除源图或更换源图后重试".into(),
                     });
                 }
-                if referenced && seen.insert(format!("draft:{conversation_id}")) {
-                    conflicts.push(AssetReferenceConflict {
-                        conversation_id,
-                        conversation_title: title,
-                        kind: "draft".into(),
-                        detail: "待发送草稿仍把该作品作为源图".into(),
-                    });
+                let Some(slots) = params.get("capabilityDrafts").and_then(Value::as_object) else {
+                    continue;
+                };
+                for (capability, slot) in slots {
+                    let referenced = slot
+                        .get("sourceAssetId")
+                        .and_then(Value::as_str)
+                        .is_some_and(|value| ids.iter().any(|id| id == value));
+                    if referenced && seen.insert(format!("retained:{conversation_id}:{capability}"))
+                    {
+                        conflicts.push(AssetReferenceConflict {
+                            conversation_id: conversation_id.clone(),
+                            conversation_title: title.clone(),
+                            kind: "retained".into(),
+                            capability_id: Some(capability.clone()),
+                            detail: "请在对应会话切回该能力后移除源图，或更换源图后重试".into(),
+                        });
+                    }
                 }
             }
         }
@@ -374,7 +389,8 @@ impl Library {
                         conversation_id,
                         conversation_title: title,
                         kind: "active".into(),
-                        detail: "活动中的请求仍把该作品作为源图".into(),
+                        capability_id: None,
+                        detail: "请等待该请求完成或取消后再试".into(),
                     });
                 }
             }

@@ -2839,12 +2839,71 @@ fn works_referenced_by_unsent_or_active_requests_cannot_be_deleted() {
     let conflicts = library.asset_reference_conflicts(&primary).unwrap();
     assert_eq!(conflicts.len(), 1);
     assert_eq!(conflicts[0].kind, "draft");
+    assert_eq!(conflicts[0].capability_id, None);
+    assert!(
+        conflicts[0].detail.contains("移除源图或更换源图"),
+        "{}",
+        conflicts[0].detail
+    );
     assert_eq!(
         conflicts[0].conversation_id,
         other.conversation.id.to_string()
     );
 
-    let draft = library.draft(other.draft.id).unwrap();
+    // A retained slot for an inactive capability must be a distinct, identified conflict.
+    let mut draft = library.draft(other.draft.id).unwrap();
+    draft.params = serde_json::json!({
+        "modelId": DEFAULT_MODEL_ID,
+        "capabilityId": default_capability_id(),
+        "sourceAssetId": null,
+        "aspect": "1:1",
+        "count": 1,
+        "seed": "",
+        "capabilityDrafts": {
+            default_capability_id(): {
+                "prompt": "",
+                "aspect": "1:1",
+                "seed": "",
+                "sourceAssetId": primary,
+                "promptSourceId": null
+            }
+        }
+    });
+    library.save_draft(draft.clone(), draft.version).unwrap();
+    let conflicts = library.asset_reference_conflicts(&primary).unwrap();
+    assert_eq!(conflicts.len(), 1);
+    assert_eq!(conflicts[0].kind, "retained");
+    assert_eq!(
+        conflicts[0].capability_id.as_deref(),
+        Some(default_capability_id())
+    );
+    assert!(
+        conflicts[0].detail.contains("切回该能力"),
+        "{}",
+        conflicts[0].detail
+    );
+
+    // An active request reports its own kind and the wait/cancel guidance.
+    let mut draft = library.draft(other.draft.id).unwrap();
+    draft.prompt = "编辑该图".into();
+    draft.params = serde_json::json!({
+        "modelId": studio_core::recipes::KLEIN_MODEL,
+        "capabilityId": KLEIN_EDIT_CAPABILITY,
+        "sourceAssetId": primary,
+        "aspect": "1:1",
+        "count": 1,
+        "seed": "42",
+        "capabilityDrafts": {
+            default_capability_id(): {
+                "prompt": "",
+                "aspect": "1:1",
+                "seed": "",
+                "sourceAssetId": primary,
+                "promptSourceId": null
+            }
+        }
+    });
+    let draft = library.save_draft(draft.clone(), draft.version).unwrap();
     let send = library
         .accept_turn(AcceptTurnInput {
             conversation_id: other.conversation.id.clone(),
@@ -2861,7 +2920,11 @@ fn works_referenced_by_unsent_or_active_requests_cannot_be_deleted() {
         })
         .unwrap();
     let conflicts = library.asset_reference_conflicts(&primary).unwrap();
-    assert!(conflicts.iter().any(|conflict| conflict.kind == "active"));
+    assert!(
+        conflicts
+            .iter()
+            .any(|conflict| conflict.kind == "active" && conflict.detail.contains("等待"))
+    );
 
     library.reject_turn(&send.turn.id, "测试解除").unwrap();
     let mut draft = library.draft(other.draft.id).unwrap();
