@@ -630,7 +630,7 @@ fn v4_to_v5_preserves_legacy_records_and_adds_output_role() {
             .db
             .pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
             .unwrap(),
-        5
+        6
     );
     let asset: (String, String, String) = library
         .db
@@ -657,6 +657,123 @@ fn v4_to_v5_preserves_legacy_records_and_adds_output_role() {
         )
         .unwrap();
     assert_eq!(turn, ("image.text-to-image.z-image-turbo.v1".into(), None));
+}
+
+#[test]
+fn v5_to_v6_attaches_user_state_without_rewriting_execution_evidence() {
+    let root = TempDir::new().unwrap();
+    let db_path = root.path().join("library.sqlite3");
+    let mut db = Connection::open(&db_path).unwrap();
+    db.pragma_update(None, "foreign_keys", "ON").unwrap();
+    db.execute_batch(SCHEMA_V3).unwrap();
+    schema::migrate_v4_to_v5(&mut db).unwrap();
+    db.execute_batch(
+        "
+        INSERT INTO projects(id) VALUES('default');
+        INSERT INTO drafts(
+            id,project_id,name,prompt,prompt_source,params_json,collapsed,version
+        ) VALUES(
+            1,'default','legacy','prompt',NULL,
+            '{\"modelId\":\"z-image-turbo-mflux-v1\",\"aspect\":\"1:1\",\"count\":1,\"seed\":\"\"}',
+            0,1
+        );
+        INSERT INTO conversations(
+            id,project_id,draft_id,title,title_source,created_at,activity_seq
+        ) VALUES('conv-legacy','default',1,'legacy','manual',1,1);
+        INSERT INTO jobs(
+            id,project_id,submission_key,request_json,current_attempt_id,created_at
+        ) VALUES('job-legacy','default','submit-legacy','{}','attempt-legacy',1);
+        INSERT INTO attempts(
+            id,job_id,token,storage_key,state,plan_json,manifest_json,error,
+            created_at,completed_at
+        ) VALUES(
+            'attempt-legacy','job-legacy','token-legacy','run-legacy','succeeded',
+            '{}','{}',NULL,1,2
+        );
+        INSERT INTO assets(
+            id,job_id,attempt_id,output_role,asset_json,relative_path,width,height,
+            byte_count,created_at
+        ) VALUES(
+            'asset-legacy','job-legacy','attempt-legacy','primary','{\"legacy\":true}',
+            'assets/asset-legacy.png',8,8,64,2
+        );
+        INSERT INTO generation_turns(
+            id,project_id,conversation_id,sequence,submission_key,source_draft_id,
+            prompt,model_id,aspect,count,seed,status,job_id,received_at
+        ) VALUES(
+            'turn-legacy','default','conv-legacy',1,'submit-legacy',1,
+            'prompt','z-image-turbo-mflux-v1','1:1',1,'','job','job-legacy',1
+        );
+        ",
+    )
+    .unwrap();
+    drop(db);
+
+    let library = open(root.path());
+    assert_eq!(
+        library
+            .db
+            .pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
+            .unwrap(),
+        schema::CURRENT_USER_VERSION
+    );
+    let conversation: (String, Option<i64>) = library
+        .db
+        .query_row(
+            "SELECT id,deleted_at FROM conversations WHERE id='conv-legacy'",
+            [],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .unwrap();
+    assert_eq!(conversation, ("conv-legacy".into(), None));
+    let asset: (String, String, i64, String, Option<i64>, Option<i64>, Option<String>) = library
+        .db
+        .query_row(
+            "SELECT id,asset_json,is_favorite,deletion_state,delete_requested_at,deleted_at,deletion_error FROM assets WHERE id='asset-legacy'",
+            [],
+            |row| {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                    row.get(6)?,
+                ))
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        asset,
+        (
+            "asset-legacy".into(),
+            "{\"legacy\":true}".into(),
+            0,
+            "active".into(),
+            None,
+            None,
+            None
+        )
+    );
+    assert!(
+        library
+            .db
+            .execute(
+                "INSERT INTO assets(id,job_id,attempt_id,output_role,asset_json,relative_path,width,height,byte_count,created_at,is_favorite) VALUES('bad','job-legacy','attempt-legacy','mask','{}','assets/bad.png',1,1,1,3,2)",
+                [],
+            )
+            .is_err()
+    );
+    assert!(
+        library
+            .db
+            .execute(
+                "INSERT INTO assets(id,job_id,attempt_id,output_role,asset_json,relative_path,width,height,byte_count,created_at,deletion_state) VALUES('bad2','job-legacy','attempt-legacy','mask','{}','assets/bad2.png',1,1,1,3,'bogus')",
+                [],
+            )
+            .is_err()
+    );
 }
 
 #[test]
@@ -1830,7 +1947,7 @@ PRAGMA user_version=1;
             .db
             .pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
             .unwrap(),
-        5
+        schema::CURRENT_USER_VERSION
     );
     assert_eq!(snapshot.drafts.len(), 3);
     assert_eq!(snapshot.drafts[0].params["modelId"], DEFAULT_MODEL_ID);
@@ -1884,7 +2001,7 @@ fn v3_migration_preserves_drafts_and_adds_prompt_source() {
         .db
         .pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
         .unwrap();
-    assert_eq!(version, 5);
+    assert_eq!(version, schema::CURRENT_USER_VERSION);
     let draft = library.drafts().unwrap().remove(0);
     assert_eq!(draft.prompt, "");
     assert_eq!(draft.prompt_source, None);

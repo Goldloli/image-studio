@@ -1,12 +1,16 @@
 use super::*;
 
-pub(super) const CURRENT_USER_VERSION: u32 = 5;
+pub(super) const CURRENT_USER_VERSION: u32 = 6;
+
+/// The schema version introduced by the first-generation single-output
+/// migration; `migrate_v5_to_v6` builds on exactly this version.
+pub(super) const V5_USER_VERSION: u32 = 5;
 
 /// Migrates the first-generation single-output schema without rewriting IDs,
 /// paths, requests, plans, manifests, or image bytes.
 pub(super) fn migrate_v4_to_v5(db: &mut Connection) -> Result<()> {
     let version: u32 = db.pragma_query_value(None, "user_version", |row| row.get(0))?;
-    if version == CURRENT_USER_VERSION {
+    if matches!(version, V5_USER_VERSION | CURRENT_USER_VERSION) {
         return Ok(());
     }
     if version != 4 {
@@ -82,6 +86,56 @@ pub(super) fn migrate_v4_to_v5(db: &mut Connection) -> Result<()> {
     Ok(())
 }
 
+/// Adds the user-managed state (conversation deletion, asset favourites and
+/// asset deletion intent) as attached columns. Immutable request/plan/manifest
+/// JSON, image bytes, IDs and paths are not rewritten; every existing row keeps
+/// its original visibility and an unset favourite.
+pub(super) fn migrate_v5_to_v6(db: &mut Connection) -> Result<()> {
+    let version: u32 = db.pragma_query_value(None, "user_version", |row| row.get(0))?;
+    if version == CURRENT_USER_VERSION {
+        return Ok(());
+    }
+    if version != V5_USER_VERSION {
+        return Err(LibraryError::Schema(format!(
+            "v5 migration cannot upgrade user_version={version}"
+        )));
+    }
+    let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    tx.execute_batch(
+        "
+        ALTER TABLE conversations ADD COLUMN deleted_at INTEGER;
+
+        ALTER TABLE assets ADD COLUMN is_favorite INTEGER NOT NULL DEFAULT 0
+            CHECK(is_favorite IN (0,1));
+        ALTER TABLE assets ADD COLUMN deletion_state TEXT NOT NULL DEFAULT 'active'
+            CHECK(deletion_state IN ('active','pending','failed','deleted'));
+        ALTER TABLE assets ADD COLUMN delete_requested_at INTEGER;
+        ALTER TABLE assets ADD COLUMN deleted_at INTEGER;
+        ALTER TABLE assets ADD COLUMN deletion_error TEXT;
+
+        CREATE INDEX conversations_visible
+            ON conversations(project_id, activity_seq DESC, id)
+            WHERE deleted_at IS NULL;
+        CREATE INDEX assets_favorite
+            ON assets(is_favorite, created_at DESC, id DESC)
+            WHERE is_favorite = 1;
+        CREATE INDEX assets_deletion_state ON assets(deletion_state);
+        PRAGMA user_version=6;
+        ",
+    )?;
+    let violations: u32 =
+        tx.query_row("SELECT count(*) FROM pragma_foreign_key_check", [], |row| {
+            row.get(0)
+        })?;
+    if violations != 0 {
+        return Err(LibraryError::Schema(format!(
+            "v5 to v6 migration found {violations} foreign-key violations"
+        )));
+    }
+    tx.commit()?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -91,5 +145,21 @@ mod tests {
         let mut db = Connection::open_in_memory().unwrap();
         db.pragma_update(None, "user_version", 3).unwrap();
         assert!(migrate_v4_to_v5(&mut db).is_err());
+        let mut db = Connection::open_in_memory().unwrap();
+        db.pragma_update(None, "user_version", 4).unwrap();
+        assert!(migrate_v5_to_v6(&mut db).is_err());
+    }
+
+    #[test]
+    fn v5_migration_is_idempotent() {
+        let mut db = Connection::open_in_memory().unwrap();
+        db.pragma_update(None, "user_version", CURRENT_USER_VERSION)
+            .unwrap();
+        migrate_v5_to_v6(&mut db).unwrap();
+        assert_eq!(
+            db.pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
+                .unwrap(),
+            CURRENT_USER_VERSION
+        );
     }
 }

@@ -337,18 +337,21 @@ impl Library {
             conversations::migrate_v3_to_v4(&mut db)?;
         } else if version == 3 {
             conversations::migrate_v3_to_v4(&mut db)?;
-        } else if version > 5 {
+        } else if version > schema::CURRENT_USER_VERSION {
             return Err(LibraryError::Schema(format!("user_version={version}")));
         }
         if version <= 4 {
             schema::migrate_v4_to_v5(&mut db)?;
+        }
+        if version <= schema::V5_USER_VERSION {
+            schema::migrate_v5_to_v6(&mut db)?;
         }
         let integrity: String = db.query_row("PRAGMA quick_check(1)", [], |r| r.get(0))?;
         if integrity != "ok" {
             return Err(LibraryError::Schema(integrity));
         }
         // Preparing these queries also detects a version-number-only or incomplete schema.
-        db.prepare("SELECT p.id,p.active_conversation_id,d.version,c.title,t.status,j.request_json,a.plan_json,s.asset_json,i.record_json FROM projects p LEFT JOIN drafts d ON d.project_id=p.id LEFT JOIN conversations c ON c.project_id=p.id LEFT JOIN generation_turns t ON t.conversation_id=c.id LEFT JOIN jobs j ON j.project_id=p.id LEFT JOIN attempts a ON a.job_id=j.id LEFT JOIN assets s ON s.attempt_id=a.id LEFT JOIN installations i ON 0 LIMIT 0")?;
+        db.prepare("SELECT p.id,p.active_conversation_id,d.version,c.title,c.deleted_at,t.status,j.request_json,a.plan_json,s.asset_json,s.is_favorite,s.deletion_state,i.record_json FROM projects p LEFT JOIN drafts d ON d.project_id=p.id LEFT JOIN conversations c ON c.project_id=p.id LEFT JOIN generation_turns t ON t.conversation_id=c.id LEFT JOIN jobs j ON j.project_id=p.id LEFT JOIN attempts a ON a.job_id=j.id LEFT JOIN assets s ON s.attempt_id=a.id LEFT JOIN installations i ON 0 LIMIT 0")?;
         let mut protected = vec![root.clone()];
         for path in protected_roots {
             fs::create_dir_all(&path)?;
