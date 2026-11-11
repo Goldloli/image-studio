@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  BIREFNET_CAPABILITY,
+  KLEIN_TEXT_CAPABILITY,
   MODEL_IDS,
   MODEL_PLATFORM,
+  Z_IMAGE_CAPABILITY_FALLBACK,
+  capabilityDisplayName,
   capabilityForModel,
   crossPlatformModelAdvice,
   crossPlatformTextModelAdvice,
@@ -174,5 +178,16 @@ describe('cross-platform text model selection', () => {
     );
     expect(crossPlatformModelAdvice('windows', WINDOWS.qwenTurbo.model)).toBeNull();
     expect(crossPlatformModelAdvice('windows', 'removed-model')).toBeNull();
+  });
+});
+
+describe('capability display names', () => {
+  it('maps known capabilities to their model display names', () => {
+    expect(capabilityDisplayName(Z_IMAGE_CAPABILITY_FALLBACK)).toBe('Z-Image Turbo');
+    expect(capabilityDisplayName(KLEIN_TEXT_CAPABILITY)).toContain('Klein');
+    expect(capabilityDisplayName(BIREFNET_CAPABILITY)).toBe('BiRefNet 去背景');
+  });
+  it('falls back to the raw id for unknown capabilities', () => {
+    expect(capabilityDisplayName('image.future.unknown.v1')).toBe('image.future.unknown.v1');
   });
 });

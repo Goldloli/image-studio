@@ -6,6 +6,7 @@ import {
   hasAssetFilters,
   localDateEnd,
   localDateStart,
+  referenceConflictsMessage,
   workDeleteTitle,
 } from './library-state';
 
@@ -91,5 +92,33 @@ describe('work delete confirmation title', () => {
   });
   it('uses a generic label when both are empty', () => {
     expect(workDeleteTitle({ prompt: '', conversationTitle: '' })).toBe('该作品');
+  });
+});
+
+describe('reference conflict guidance', () => {
+  const base = { conversationId: 'c1', conversationTitle: '会话 A', capabilityId: null };
+  it('renders each kind with its own actionable detail', () => {
+    const message = referenceConflictsMessage([
+      { ...base, kind: 'draft', detail: '请在对应会话中移除源图或更换源图后重试' },
+      { ...base, conversationId: 'c2', conversationTitle: '会话 B', kind: 'active', detail: '请等待该请求完成或取消后再试' },
+    ]);
+    expect(message).toContain('请先解除后重试');
+    expect(message).toContain('「会话 A」请在对应会话中移除源图或更换源图后重试');
+    expect(message).toContain('「会话 B」请等待该请求完成或取消后再试');
+  });
+  it('labels retained slots with the capability display name and falls back for unknown ids', () => {
+    const known = referenceConflictsMessage([{
+      ...base, kind: 'retained', capabilityId: 'image.text-to-image.z-image-turbo.v1',
+      detail: '请在对应会话切回该能力后移除源图，或更换源图后重试',
+    }]);
+    expect(known).toContain('对应能力：Z-Image Turbo');
+    const unknown = referenceConflictsMessage([{
+      ...base, kind: 'retained', capabilityId: 'image.future.unknown.v1',
+      detail: '请在对应会话切回该能力后移除源图，或更换源图后重试',
+    }]);
+    expect(unknown).toContain('对应能力：image.future.unknown.v1');
+  });
+  it('answers with the guidance header for an empty list instead of crashing', () => {
+    expect(referenceConflictsMessage([])).toContain('请先解除后重试');
   });
 });

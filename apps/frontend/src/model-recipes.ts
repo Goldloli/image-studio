@@ -217,6 +217,15 @@ const textRecipes: Record<string, TextRecipe> = {
 };
 
 export const textRecipeForModel = (modelId: string): TextRecipe | null => textRecipes[modelId] ?? null;
+
+/** Display name for a capability id, falling back to the raw id for unknown ones. */
+export const capabilityDisplayName = (capabilityId: string): string => {
+  const recipe = Object.values(textRecipes).find(value => value.capabilityId === capabilityId);
+  if (recipe) return recipe.displayName;
+  if (capabilityId === BIREFNET_CAPABILITY) return 'BiRefNet 去背景';
+  if (capabilityId === REALESRGAN_CAPABILITY) return 'Real-ESRGAN 4× 放大';
+  return capabilityId;
+};
 export const squareOnlyTextModel = (modelId: string): boolean => {
   const recipe = textRecipeForModel(modelId);
   return Boolean(recipe && !recipe.aspects.includes('4:3'));

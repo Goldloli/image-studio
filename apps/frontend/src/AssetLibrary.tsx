@@ -26,6 +26,7 @@ import {
   formatTime,
   hasAssetFilters,
   modelLabel,
+  referenceConflictsMessage,
   workDeleteTitle,
   type AssetLibraryFilters,
 } from './library-state';
@@ -186,8 +187,6 @@ export function AssetLibrary({ active, onBack, onOpenAsset, onError }: Props) {
     setViewing(current => current && current.id === id ? null : current);
     refresh();
   };
-  const readConflicts = (result: AssetDeleteAck) =>
-    (result.conflicts ?? []).map(conflict => `「${conflict.conversationTitle}」${conflict.detail}`).join('；');
   // Retrying an unfinished cleanup reuses the originally confirmed scope, so it
   // never asks again and never widens what is removed.
   const retryDelete = async (item: AssetLibraryItem) => {
@@ -201,7 +200,7 @@ export function AssetLibrary({ active, onBack, onOpenAsset, onError }: Props) {
         return;
       }
       const message = result.state === 'conflict'
-        ? `仍被以下位置用作源图：${readConflicts(result)}`
+        ? referenceConflictsMessage(result.conflicts ?? [])
         : (result.error ?? '删除未完成，请稍后重试');
       setError(message);
       onError(message);
@@ -235,7 +234,7 @@ export function AssetLibrary({ active, onBack, onOpenAsset, onError }: Props) {
         return;
       }
       if (result.state === 'conflict') {
-        setDeleteError(`仍被以下位置用作源图：${readConflicts(result)}`);
+        setDeleteError(referenceConflictsMessage(result.conflicts ?? []));
         return;
       }
       setDeleteError(result.error ?? '删除未完成，请稍后重试');

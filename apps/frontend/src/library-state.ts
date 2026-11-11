@@ -1,6 +1,6 @@
-import type { AssetLibraryItem, AssetLibraryQuery } from './studio-api';
+import type { AssetLibraryItem, AssetLibraryQuery, AssetReferenceConflict } from './studio-api';
 import type { AssetView } from './studio-api';
-import { modelDisplayName } from './model-recipes';
+import { capabilityDisplayName, modelDisplayName } from './model-recipes';
 
 export function localDateStart(value: string): number | null {
   if (!value) return null;
@@ -77,6 +77,17 @@ export function assetItemToView(item: AssetLibraryItem): AssetView {
     available: item.available,
     error: item.availabilityError,
   };
+}
+
+/** Actionable message for a refused deletion; each entry explains its own resolution. */
+export function referenceConflictsMessage(conflicts: AssetReferenceConflict[]): string {
+  const entries = conflicts.map(conflict => {
+    const capability = conflict.kind === 'retained' && conflict.capabilityId
+      ? `（对应能力：${capabilityDisplayName(conflict.capabilityId)}）`
+      : '';
+    return `「${conflict.conversationTitle}」${conflict.detail}${capability}`;
+  });
+  return `仍被以下位置用作源图，请先解除后重试：${entries.join('；')}`;
 }
 
 /** Human-identifiable target for the destructive confirmation; empty prompts fall back. */

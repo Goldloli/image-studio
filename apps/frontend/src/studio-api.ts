@@ -55,7 +55,8 @@ export type ConversationDeleteAck = {
   replacementDraft: StoredDraft | null;
 };
 export type AssetReferenceConflict = {
-  conversationId: string; conversationTitle: string; kind: 'draft' | 'active'; detail: string;
+  conversationId: string; conversationTitle: string;
+  kind: 'draft' | 'retained' | 'active'; capabilityId?: string | null; detail: string;
 };
 export type AssetDeleteAck = {
   assetId: string; state: 'deleted' | 'conflict' | 'failed';
