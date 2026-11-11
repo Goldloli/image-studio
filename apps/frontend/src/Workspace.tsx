@@ -42,10 +42,10 @@ import {
   type StudioSnapshot,
   type SourceImportAck,
   type ImportedSource,
-  type TurnDetail,
   type TurnPage,
   type TurnView,
 } from './studio-api';
+import { ProductionRecord } from './ProductionRecord';
 import {
   clampZoom,
   confirmedDraft,
@@ -103,14 +103,6 @@ type RequestedAsset = {
   turnSequence: number | null;
   nonce: number;
   returnPage: string | null;
-};
-type RequestedConversation = {
-  conversationId: string;
-  conversationTitle: string;
-  draftId: number | null;
-  turnId: string | null;
-  turnSequence: number | null;
-  nonce: number;
 };
 type RequestedPrompt = {
   caseId: string;
@@ -195,7 +187,6 @@ function TurnCard({
   onCopy,
   onEdit,
   onReload,
-  onLoadDetails,
 }: {
   turn: TurnView;
   execution: StudioSnapshot['execution'] | null | undefined;
@@ -206,13 +197,10 @@ function TurnCard({
   onCopy: () => void;
   onEdit: () => void;
   onReload: () => void;
-  onLoadDetails: () => Promise<TurnDetail | null>;
 }) {
   const [imageReady, setImageReady] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [details, setDetails] = useState<TurnDetail | null>(null);
-  const [detailsError, setDetailsError] = useState('');
+  const [recordOpen, setRecordOpen] = useState(false);
   const [showMask, setShowMask] = useState(false);
   const progress = progressForTurn(turn, execution, imageReady);
   const [cancelSeconds, setCancelSeconds] = useState(0);
@@ -268,15 +256,9 @@ function TurnCard({
           {displayedAssetId && <><button onClick={() => onOpen(showMask)}><Expand size={12}/>查看</button><button disabled={!displayedAvailable} onClick={() => onExport(showMask)}><Download size={12}/>{showMask ? '导出蒙版' : '导出 PNG'}</button></>}
           {turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) && <button onClick={() => { setImageFailed(false); setImageReady(false); onReload(); }}><RefreshCw size={12}/>重新加载</button>}
           {turn.prompt && <button onClick={onCopy}><Copy size={12}/>复制提示词</button>}
-          <button aria-expanded={detailsOpen} onClick={async () => {
-            const next = !detailsOpen;
-            setDetailsOpen(next);
-            if (next && !details && turn.jobId) {
-              try { setDetails(await onLoadDetails()); } catch (error) { setDetailsError(String(error)); }
-            }
-          }}><FileText size={12}/>{detailsOpen ? '收起记录' : '制作记录'}</button>
+          <button aria-expanded={recordOpen} onClick={() => setRecordOpen(value => !value)}><FileText size={12}/>{recordOpen ? '收起记录' : '制作记录'}</button>
         </div>
-        {detailsOpen && <div className="turn-details"><p>轮次 {turn.id}<br/>任务 {turn.jobId ?? '尚未创建'}<br/>执行 {turn.attemptId ?? '等待预检'}</p>{details?.attempts.map(attempt => <section key={attempt.attemptId}><strong>{stateLabel(attempt.state)} · {attempt.attemptId}</strong>{attempt.error && <p>{attempt.error}</p>}{attempt.manifest ? <pre>{JSON.stringify(attempt.manifest, null, 2)}</pre> : <p>该 Attempt 尚无完整制作记录。</p>}</section>)}{detailsError && <p className="error-text">{detailsError}</p>}{!turn.jobId && <p>{turn.error || '请求尚未创建任务。'}</p>}</div>}
+        {recordOpen && <ProductionRecord jobId={turn.jobId} fallback={turn.error || '请求尚未创建任务。'}/>}
       </div>
     </div>
   </article>;
@@ -339,7 +321,7 @@ function ImageViewer({ title, prompt, source, isAsset, backLabel = '返回会话
   </div>;
 }
 
-export default function Workspace({ onModels, studio, requestedAsset, requestedConversation, requestedComposer, requestedModel, requestedPrompt, sidebarCollapsed, onSidebarCollapsedChange, onRefresh, onAssetReturn }: { onModels: () => void; studio: StudioSnapshot | null; requestedAsset: RequestedAsset | null; requestedConversation: RequestedConversation | null; requestedComposer: { modelId: string; capabilityId: string; nonce: number } | null; requestedModel: { draft: StoredDraft; conversationId: string; nonce: number } | null; requestedPrompt: RequestedPrompt | null; sidebarCollapsed: boolean; onSidebarCollapsedChange: (value: boolean) => void; onRefresh: () => void; onAssetReturn: () => void }) {
+export default function Workspace({ onModels, studio, requestedAsset, requestedComposer, requestedModel, requestedPrompt, sidebarCollapsed, onSidebarCollapsedChange, onRefresh, onAssetReturn }: { onModels: () => void; studio: StudioSnapshot | null; requestedAsset: RequestedAsset | null; requestedComposer: { modelId: string; capabilityId: string; nonce: number } | null; requestedModel: { draft: StoredDraft; conversationId: string; nonce: number } | null; requestedPrompt: RequestedPrompt | null; sidebarCollapsed: boolean; onSidebarCollapsedChange: (value: boolean) => void; onRefresh: () => void; onAssetReturn: () => void }) {
   const [state, setState] = useState(initialWorkspace);
   const [conversations, setConversations] = useState<ConversationView[]>([]);
   const [conversationsHasMore, setConversationsHasMore] = useState(false);
@@ -1093,27 +1075,6 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
   }, [requestedAsset?.nonce, loaded, studioAvailable]);
 
   useEffect(() => {
-    if (!requestedConversation || !loaded) return;
-    const open = async () => {
-      try {
-        setViewer(null);
-        setViewerReturnsToPage(false);
-        await revealConversation(
-          requestedConversation.conversationId,
-          requestedConversation.conversationTitle,
-          requestedConversation.draftId,
-          requestedConversation.turnId,
-          requestedConversation.turnSequence,
-        );
-        requestAnimationFrame(() => textarea.current?.focus());
-      } catch (error) {
-        setActionError(String(error));
-      }
-    };
-    void open();
-  }, [requestedConversation?.nonce, loaded]);
-
-  useEffect(() => {
     if (!requestedComposer || !loaded) return;
     setViewer(null);
     setPopup(null);
@@ -1252,7 +1213,6 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedC
           onCopy={() => void copyText(turn.prompt, `turn-${turn.id}`)}
           onEdit={() => requestEdit(turn)}
           onReload={onRefresh}
-          onLoadDetails={() => turn.jobId ? api<TurnDetail>('conversation_turn_detail', { turnId: turn.id }) : Promise.resolve(null)}
         />)}
         {(actionError || studio?.execution.cleanupError) && <div className="conversation-action-error" role="alert"><span>{actionError || studio?.execution.cleanupError}</span><button aria-label="关闭错误" onClick={() => setActionError('')}><X size={12}/></button></div>}
       </div>

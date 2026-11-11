@@ -81,11 +81,6 @@
 .image-card-actions button{height:24px;padding:0 6px;border-radius:5px;font-size:9px;color:var(--muted)}
 .image-card-actions button:hover:not(:disabled){background:var(--hover);color:var(--text)}
 .image-card-actions .danger-quiet{color:var(--danger)}
-.turn-details{margin:0;padding:10px 12px;border-top:.5px solid var(--border);background:var(--input);font-size:9px;color:var(--muted);max-height:260px;overflow:auto}
-.turn-details section{padding:8px 0;border-top:.5px solid var(--border);margin-top:8px}
-.turn-details section strong{font-size:9px;color:var(--text);font-weight:550}
-.turn-details section p{margin:4px 0}
-.turn-details pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:9px;margin:8px 0 0;max-height:190px}
 .conversation-action-error{margin:10px auto 18px;max-width:780px;display:flex;align-items:flex-start;gap:10px;border:1px solid color-mix(in srgb,var(--danger) 25%,var(--border));background:color-mix(in srgb,var(--danger) 6%,var(--surface));color:var(--danger);border-radius:9px;padding:8px 10px;font-size:10px;line-height:1.6;overflow-wrap:anywhere}
 .conversation-action-error button{margin-left:auto;width:22px;height:22px;flex:none;border-radius:5px}
 .conversation-composer-area{position:relative;z-index:8;padding:7px clamp(20px,7vw,92px) 8px;background:linear-gradient(transparent,var(--surface) 14%);min-width:0}

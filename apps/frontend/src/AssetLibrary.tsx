@@ -15,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { api, assetUrl, native, type AssetLibraryItem, type AssetLibraryPage } from './studio-api';
+import { ProductionRecord } from './ProductionRecord';
 import {
   assetCountLabel,
   assetLibraryRequestKey,
@@ -28,13 +29,12 @@ type Props = {
   active: boolean;
   onBack: () => void;
   onOpenAsset: (item: AssetLibraryItem) => void;
-  onOpenTask: (jobId: string) => void;
   onError: (value: string) => void;
 };
 
 const emptyFilters = { modelId: '', conversationId: '', size: '', from: '', to: '' };
 
-export function AssetLibrary({ active, onBack, onOpenAsset, onOpenTask, onError }: Props) {
+export function AssetLibrary({ active, onBack, onOpenAsset, onError }: Props) {
   const [filters, setFilters] = useState(emptyFilters);
   const [page, setPage] = useState<AssetLibraryPage | null>(null);
   const [items, setItems] = useState<AssetLibraryItem[]>([]);
@@ -44,6 +44,7 @@ export function AssetLibrary({ active, onBack, onOpenAsset, onOpenTask, onError 
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [viewing, setViewing] = useState<AssetLibraryItem | null>(null);
+  const [recordOpen, setRecordOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
   const [exportMessage, setExportMessage] = useState('');
@@ -164,12 +165,13 @@ export function AssetLibrary({ active, onBack, onOpenAsset, onOpenTask, onError 
     {page?.hasMore && <div className="library-pagination"><button className="secondary" disabled={loadingMore} onClick={() => void loadMore()}>{loadingMore ? <LoaderCircle size={13} className="spin"/> : null}加载更多较早作品</button></div>}
 
     {viewing && <div className="works-preview" role="dialog" aria-modal="true" aria-label="作品预览">
-      <header><div><span>{viewing.conversationTitle}</span><strong>{formatTime(viewing.createdAt)}</strong></div><button aria-label="关闭作品预览" onClick={() => setViewing(null)}><X size={17}/></button></header>
+      <header><div><span>{viewing.conversationTitle}</span><strong>{formatTime(viewing.createdAt)}</strong></div><button aria-label="关闭作品预览" onClick={() => { setViewing(null); setRecordOpen(false); }}><X size={17}/></button></header>
       <div className="works-preview-body">
         <div className="works-preview-image">{viewing.available ? <img src={assetUrl(viewing.id)} alt={viewing.prompt}/> : <div className="resource-error"><ImageIcon size={28}/><h3>图片资源不可用</h3><p>{viewing.availabilityError || 'PNG 可能已被移动、改写或无法解码。'}</p></div>}</div>
         <aside><span className="library-kicker">制作信息</span><h2>{viewing.prompt}</h2><dl><div><dt>会话</dt><dd>{viewing.conversationTitle}</dd></div><div><dt>型号</dt><dd>{modelLabel(viewing.modelId)}</dd></div><div><dt>尺寸</dt><dd>{viewing.width}×{viewing.height}</dd></div><div><dt>种子</dt><dd>{viewing.seed ?? '随机'}</dd></div><div><dt>完成时间</dt><dd>{formatTime(viewing.createdAt)}</dd></div><div><dt>AssetRef</dt><dd className="mono">{viewing.id}</dd></div></dl>
           {exportMessage && <p className="export-message" role="status">{exportMessage}</p>}
-          <div className="preview-actions"><button className="primary-action" disabled={!viewing.available || exporting} onClick={() => void exportItem(viewing)}>{exporting ? <LoaderCircle size={14} className="spin"/> : <Download size={14}/>}导出 PNG</button><button className="secondary" onClick={() => onOpenTask(viewing.jobId)}><FileText size={14}/>制作记录</button>{viewing.conversationId ? <button className="secondary" onClick={() => onOpenAsset(viewing)}><MessageCircle size={14}/>返回来源会话</button> : <span className="historical-source">历史生成 · 无可靠来源会话</span>}</div>
+          <div className="preview-actions"><button className="primary-action" disabled={!viewing.available || exporting} onClick={() => void exportItem(viewing)}>{exporting ? <LoaderCircle size={14} className="spin"/> : <Download size={14}/>}导出 PNG</button><button className="secondary" aria-expanded={recordOpen} onClick={() => setRecordOpen(value => !value)}><FileText size={14}/>{recordOpen ? '收起记录' : '制作记录'}</button>{viewing.conversationId ? <button className="secondary" onClick={() => onOpenAsset(viewing)}><MessageCircle size={14}/>返回来源会话</button> : <span className="historical-source">历史生成 · 无可靠来源会话</span>}</div>
+          {recordOpen && <ProductionRecord jobId={viewing.jobId} onError={onError}/>}
         </aside>
       </div>
     </div>}

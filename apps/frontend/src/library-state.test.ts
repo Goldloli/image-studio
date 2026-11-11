@@ -6,9 +6,7 @@ import {
   hasAssetFilters,
   localDateEnd,
   localDateStart,
-  taskItemToAsset,
 } from './library-state';
-import type { TaskCenterItem } from './studio-api';
 
 const filters = { modelId: '', conversationId: '', size: '', from: '', to: '' };
 
@@ -60,29 +58,4 @@ describe('library query state', () => {
     expect(hasAssetFilters({ modelId: 'model', conversationId: '', size: '', from: '', to: '' })).toBe(true);
   });
 
-  it('only converts a task into a viewer asset when a formal asset id exists', () => {
-    const task: TaskCenterItem = {
-      id: 'job-a',
-      turnId: 'turn-a',
-      turnSequence: 1,
-      conversationId: 'conv-a',
-      conversationTitle: '会话 A',
-      draftId: 2,
-      attemptId: 'attempt-a',
-      state: 'Succeeded',
-      prompt: '提示词',
-      modelId: 'z-image-turbo-mflux-v1',
-      width: 1024,
-      height: 1024,
-      seed: 42,
-      createdAt: 1,
-      completedAt: 2,
-      error: null,
-      assetId: null,
-      assetAvailable: false,
-      assetError: null,
-    };
-    expect(taskItemToAsset(task)).toBeNull();
-    expect(taskItemToAsset({ ...task, assetId: 'asset-a', assetAvailable: true })?.id).toBe('asset-a');
-  });
 });

@@ -1,15 +1,6 @@
-import type { AssetLibraryItem, AssetLibraryQuery, TaskCenterItem, TaskStatus } from './studio-api';
+import type { AssetLibraryItem, AssetLibraryQuery } from './studio-api';
 import type { AssetView } from './studio-api';
 import { modelDisplayName } from './model-recipes';
-
-export const taskStatusOptions: { id: TaskStatus; label: string; count: keyof import('./studio-api').TaskCounts }[] = [
-  { id: 'all', label: '全部', count: 'total' },
-  { id: 'active', label: '进行中', count: 'active' },
-  { id: 'succeeded', label: '已完成', count: 'succeeded' },
-  { id: 'failed', label: '失败', count: 'failed' },
-  { id: 'cancelled', label: '已取消', count: 'cancelled' },
-  { id: 'interrupted', label: '已中断', count: 'interrupted' },
-];
 
 export function localDateStart(value: string): number | null {
   if (!value) return null;
@@ -71,23 +62,6 @@ export function assetItemToView(item: AssetLibraryItem): AssetView {
     bytes: item.byteCount,
     available: item.available,
     error: item.availabilityError,
-  };
-}
-
-export function taskItemToAsset(item: TaskCenterItem): AssetView | null {
-  if (!item.assetId) return null;
-  return {
-    id: item.assetId,
-    jobId: item.id,
-    conversationId: item.conversationId,
-    turnId: item.turnId,
-    prompt: item.prompt,
-    width: item.width,
-    height: item.height,
-    seed: item.seed,
-    bytes: 0,
-    available: item.assetAvailable,
-    error: item.assetError,
   };
 }
 

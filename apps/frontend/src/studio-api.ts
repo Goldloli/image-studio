@@ -46,18 +46,11 @@ export type AssetLibraryQuery = {
   modelId?: string | null; conversationId?: string | null; width?: number | null; height?: number | null;
   createdFrom?: number | null; createdTo?: number | null; cursor?: StableCursor | null; limit?: number;
 };
-export type TaskStatus = 'all' | 'active' | 'succeeded' | 'failed' | 'cancelled' | 'interrupted';
-export type TaskCounts = { total: number; active: number; succeeded: number; failed: number; cancelled: number; interrupted: number };
 export type TaskCenterItem = {
   id: string; turnId: string | null; turnSequence: number | null; conversationId: string | null; conversationTitle: string; draftId: number | null;
   attemptId: string; state: string; prompt: string; modelId: string; width: number; height: number; seed: number | null;
   createdAt: number; completedAt: number | null; error: string | null; assetId: string | null;
   assetAvailable: boolean; assetError: string | null;
-};
-export type TaskCenterPage = { items: TaskCenterItem[]; counts: TaskCounts; hasMore: boolean; nextCursor: StableCursor | null };
-export type TaskCenterQuery = {
-  status: TaskStatus; search?: string; conversationId?: string | null; modelId?: string | null;
-  cursor?: StableCursor | null; limit?: number;
 };
 export type TaskAttemptView = { attemptId: string; state: string; startedAt: number; completedAt: number | null; phase: string | null; error: string | null };
 export type TaskCenterDetail = {

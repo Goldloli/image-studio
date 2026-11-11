@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Palette, Boxes, ListTodo, Settings2, Sun, Moon, X, CircleHelp, Image, Images, Sparkles, Terminal, Play, Square, LoaderCircle, Lightbulb } from 'lucide-react';
+import { Palette, Boxes, Settings2, Sun, Moon, X, CircleHelp, Image, Images, Sparkles, Terminal, Play, Square, LoaderCircle, Lightbulb } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Workspace from './Workspace';
-import { TaskLibrary } from './LibraryPages';
 import { AssetLibrary } from './AssetLibrary';
 import { FeatureLibrary } from './FeatureLibrary';
 import { ModelLibrary } from './ModelLibrary';
@@ -14,7 +13,7 @@ import { defaultAppearance, resolveTheme, type AppearancePreferences, type Prefe
 import './local-generation.css';
 import './library-pages.css';
 
-type Page = 'create' | 'inspiration' | 'features' | 'models' | 'works' | 'tasks' | 'settings';
+type Page = 'create' | 'inspiration' | 'features' | 'models' | 'works' | 'settings';
 type SettingsGroup = 'appearance' | 'defaults' | 'storage' | 'runtime' | 'about';
 type AppearanceSaveStatus = 'saved' | 'saving' | 'error';
 type RequestedModel = { draft: StoredDraft; conversationId: string; nonce: number };
@@ -27,14 +26,6 @@ type RequestedAsset = {
   nonce: number;
   returnPage: Page | null;
 };
-type RequestedConversation = {
-  conversationId: string;
-  conversationTitle: string;
-  draftId: number | null;
-  turnId: string | null;
-  turnSequence: number | null;
-  nonce: number;
-};
 type HostStatus = { inferenceAvailable: boolean; status: string; supportedModels: number; diagnosticsEnabled: boolean; developmentBuild: boolean; version: string; platform: string };
 type DiagnosticState = { enabled: boolean; mode: string; modes: string[]; snapshot: null | { phase: string; summary: string; probePassed: boolean; isRunning: boolean; pid: number | null; errorCode: string | null; logs: string; progressEvents: number } };
 const pages: { id: Page; label: string; icon: LucideIcon }[] = [
@@ -43,7 +34,6 @@ const pages: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: 'features', label: '功能', icon: Sparkles },
   { id: 'models', label: '模型', icon: Boxes },
   { id: 'works', label: '作品', icon: Images },
-  { id: 'tasks', label: '任务', icon: ListTodo },
   { id: 'settings', label: '设置', icon: Settings2 },
 ];
 
@@ -73,11 +63,9 @@ export default function App() {
   const [devMenu, setDevMenu] = useState(false);
   const [studio, setStudio] = useState<StudioSnapshot|null>(null);
   const [requestedAsset, setRequestedAsset] = useState<RequestedAsset | null>(null);
-  const [requestedConversation, setRequestedConversation] = useState<RequestedConversation | null>(null);
   const [requestedComposer, setRequestedComposer] = useState<{ modelId: string; capabilityId: string; nonce: number } | null>(null);
   const [requestedModel, setRequestedModel] = useState<RequestedModel | null>(null);
   const [requestedPrompt, setRequestedPrompt] = useState<RequestedPrompt | null>(null);
-  const [focusJob, setFocusJob] = useState<{ id: string; nonce: number } | null>(null);
   const requestNonce = useRef(0);
   const refreshStudio = useRef<()=>void>(()=>{});
   const refresh = () => refreshStudio.current();
@@ -184,10 +172,6 @@ export default function App() {
     setRequestedAsset({ asset, conversationTitle, draftId, turnSequence, returnPage, nonce: ++requestNonce.current });
     navigate('create');
   };
-  const openConversation = (conversationId: string, conversationTitle: string, draftId: number | null, turnId: string | null, turnSequence: number | null) => {
-    setRequestedConversation({ conversationId, conversationTitle, draftId, turnId, turnSequence, nonce: Date.now() });
-    navigate('create');
-  };
   const enableDiagnostics = async () => {
     setDevMenu(false); setDiagError('');
     if (!native) { setHostError('通信诊断仅在桌面应用中可用。'); return; }
@@ -223,12 +207,11 @@ export default function App() {
       </nav>
       <main className="main-surface">
         {hostError && <div className="host-error" role="status">{hostError}<button aria-label="关闭提示" onClick={() => setHostError('')}><X size={12}/></button></div>}
-        <div className="workspace-page" hidden={page !== 'create'}><Workspace onModels={() => navigate('models')} studio={studio} requestedAsset={requestedAsset} requestedConversation={requestedConversation} requestedComposer={requestedComposer} requestedModel={requestedModel} requestedPrompt={requestedPrompt} sidebarCollapsed={appearance.sidebarCollapsed} onSidebarCollapsedChange={collapsed => commitAppearance({ ...appearanceRef.current, sidebarCollapsed: collapsed })} onRefresh={refresh} onAssetReturn={() => { const returnPage = requestedAsset?.returnPage ?? 'create'; setRequestedAsset(null); navigate(returnPage); }}/></div>
+        <div className="workspace-page" hidden={page !== 'create'}><Workspace onModels={() => navigate('models')} studio={studio} requestedAsset={requestedAsset} requestedComposer={requestedComposer} requestedModel={requestedModel} requestedPrompt={requestedPrompt} sidebarCollapsed={appearance.sidebarCollapsed} onSidebarCollapsedChange={collapsed => commitAppearance({ ...appearanceRef.current, sidebarCollapsed: collapsed })} onRefresh={refresh} onAssetReturn={() => { const returnPage = requestedAsset?.returnPage ?? 'create'; setRequestedAsset(null); navigate(returnPage); }}/></div>
         <div className="workspace-page" hidden={page !== 'inspiration'}><PromptLibrary active={page === 'inspiration'} onBack={() => navigate('create')} onUsePrompt={request => { setRequestedPrompt({ ...request, nonce: ++requestNonce.current }); navigate('create'); }} onError={setHostError}/></div>
         <div className="workspace-page" hidden={page !== 'features'}><FeatureLibrary studio={studio} onBack={() => navigate('create')} onModels={() => navigate('models')} onStart={(modelId, capabilityId) => { setRequestedComposer({ modelId, capabilityId, nonce: Date.now() }); navigate('create'); }} onError={setHostError}/></div>
         {page === 'models' && <ModelLibrary studio={studio} onRefresh={refresh} onBack={()=>navigate('create')} onError={setHostError} onUseModel={(draft, conversationId) => { setRequestedModel({ draft, conversationId, nonce: Date.now() }); navigate('create'); }}/>}
-        <div className="workspace-page" hidden={page !== 'works'}><AssetLibrary active={page === 'works'} onBack={() => navigate('create')} onOpenAsset={item => openAsset({ id: item.id, jobId: item.jobId, conversationId: item.conversationId, turnId: item.turnId, prompt: item.prompt, width: item.width, height: item.height, seed: item.seed, bytes: item.byteCount, available: item.available, error: item.availabilityError }, item.conversationTitle, item.draftId, item.turnSequence, 'works')} onOpenTask={jobId => { setFocusJob({ id: jobId, nonce: Date.now() }); navigate('tasks'); }} onError={setHostError}/></div>
-        <div className="workspace-page" hidden={page !== 'tasks'}><TaskLibrary studio={studio} focusJob={focusJob} onRefresh={refresh} onBack={() => navigate('create')} onError={setHostError} onOpenAsset={task => { if (!task.assetId) return; openAsset({ id: task.assetId, jobId: task.id, conversationId: task.conversationId, turnId: task.turnId, prompt: task.prompt, width: task.width, height: task.height, seed: task.seed, bytes: 0, available: task.assetAvailable, error: task.assetError }, task.conversationTitle, task.draftId, task.turnSequence, 'tasks'); }} onOpenConversation={task => task.conversationId && openConversation(task.conversationId, task.conversationTitle, task.draftId, task.turnId, task.turnSequence)}/></div>
+        <div className="workspace-page" hidden={page !== 'works'}><AssetLibrary active={page === 'works'} onBack={() => navigate('create')} onOpenAsset={item => openAsset({ id: item.id, jobId: item.jobId, conversationId: item.conversationId, turnId: item.turnId, prompt: item.prompt, width: item.width, height: item.height, seed: item.seed, bytes: item.byteCount, available: item.available, error: item.availabilityError }, item.conversationTitle, item.draftId, item.turnSequence, 'works')} onError={setHostError}/></div>
         {page === 'settings' && <SettingsPage
           initialGroup={settingsInitialGroup}
           appearance={appearance}
