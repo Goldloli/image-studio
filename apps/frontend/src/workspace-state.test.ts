@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clampZoom, initialWorkspace, validSeed, workspaceReducer as reduce } from './workspace-state';
+import { clampZoom, createDraft, initialWorkspace, validSeed, workspaceReducer as reduce, workspaceReducer } from './workspace-state';
 
 describe('workspace draft isolation',()=>{
   it('persists separate prompts, source images and parameters across capability switches and tool sends',()=>{
@@ -141,5 +141,21 @@ describe('canvas and input boundaries',()=>{
   it('validates optional integer seed over the full u32 range',()=>{
     for(const seed of ['', '0', '4294967295']) expect(validSeed(seed)).toBe(true);
     for(const seed of ['-1','4294967296','1.5','1e3',' ', 'seed']) expect(validSeed(seed)).toBe(false);
+  });
+});
+
+describe('conversation deletion state',()=>{
+  it('removes only the confirmed draft and selects the host successor',()=>{
+    const state = workspaceReducer({...initialWorkspace(),drafts:[createDraft(1,'A'),createDraft(2,'B'),createDraft(3,'C')],activeId:2}, {type:'remove',draftId:2,successorId:3});
+    expect(state.drafts.map(draft=>draft.id)).toEqual([1,3]);
+    expect(state.activeId).toBe(3);
+    expect(state.drafts.map(draft=>draft.name)).toEqual(['A','C']);
+  });
+  it('keeps other drafts untouched when the deleted target was not active',()=>{
+    const before = {...initialWorkspace(),drafts:[createDraft(1,'A'),createDraft(2,'B')],activeId:1};
+    const state = workspaceReducer(before, {type:'remove',draftId:2,successorId:1});
+    expect(state.activeId).toBe(1);
+    expect(state.drafts).toHaveLength(1);
+    expect(state.drafts[0]).toBe(before.drafts[0]);
   });
 });

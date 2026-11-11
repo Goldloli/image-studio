@@ -26,25 +26,40 @@ export type ModelView = {
   error: string | null; busy: boolean; staticFacts: ModelStaticFacts;
 };
 export type JobView = { id: string; turnId: string | null; conversationId: string | null; attemptId: string; state: string; prompt: string; width: number; height: number; seed: number | null; error: string | null; assetId: string | null; manifest: unknown | null };
-export type AssetView = { id: string; jobId: string; conversationId: string | null; turnId: string | null; prompt: string; width: number; height: number; seed: number | null; bytes: number; outputRole?: 'primary' | 'mask'; dataType?: 'image_rgb' | 'image_rgba' | 'mask'; available: boolean; error: string | null };
+export type AssetView = { id: string; jobId: string; conversationId: string | null; turnId: string | null; prompt: string; width: number; height: number; seed: number | null; bytes: number; outputRole?: 'primary' | 'mask'; dataType?: 'image_rgb' | 'image_rgba' | 'mask'; available: boolean; error: string | null; isFavorite?: boolean; deletionState?: 'active' | 'pending' | 'failed' | 'deleted'; deletionError?: string | null };
 export type StableCursor = { createdAt: number; id: string };
 export type AssetLibraryItem = {
   id: string; jobId: string; attemptId: string; turnId: string | null; turnSequence: number | null;
   conversationId: string | null; conversationTitle: string; draftId: number | null; prompt: string;
   modelId: string; width: number; height: number; seed: number | null; byteCount: number;
   createdAt: number; available: boolean; availabilityError: string | null;
+  isFavorite: boolean; deletionState: 'active' | 'pending' | 'failed'; deletionError: string | null;
+  conversationDeleted: boolean;
 };
 export type AssetLibraryFacets = {
   models: { id: string; count: number }[];
   sizes: { width: number; height: number; count: number }[];
-  conversations: { id: string; title: string; count: number }[];
+  conversations: { id: string; title: string; count: number; deleted: boolean }[];
 };
 export type AssetLibraryPage = {
   items: AssetLibraryItem[]; total: number; hasMore: boolean; nextCursor: StableCursor | null; facets: AssetLibraryFacets;
 };
 export type AssetLibraryQuery = {
   modelId?: string | null; conversationId?: string | null; width?: number | null; height?: number | null;
-  createdFrom?: number | null; createdTo?: number | null; cursor?: StableCursor | null; limit?: number;
+  createdFrom?: number | null; createdTo?: number | null; favoritesOnly?: boolean;
+  cursor?: StableCursor | null; limit?: number;
+};
+export type ConversationDeleteAck = {
+  conversationId: string; deleted: boolean;
+  activeConversationId: string; activeDraftId: number;
+  replacementDraft: StoredDraft | null;
+};
+export type AssetReferenceConflict = {
+  conversationId: string; conversationTitle: string; kind: 'draft' | 'active'; detail: string;
+};
+export type AssetDeleteAck = {
+  assetId: string; state: 'deleted' | 'conflict' | 'failed';
+  conflicts?: AssetReferenceConflict[]; error?: string;
 };
 export type TaskCenterItem = {
   id: string; turnId: string | null; turnSequence: number | null; conversationId: string | null; conversationTitle: string; draftId: number | null;
@@ -111,6 +126,7 @@ export class DraftSaveQueue {
     this.status('pending');
   }
   hasPending() { return this.pending.size > 0; }
+  forget(id: number) { this.versions.delete(id); this.saved.delete(id); this.pending.delete(id); }
   flush(): Promise<void> {
     if (this.flight) return this.flight;
     this.flight = this.drain().finally(() => { this.flight = null; });

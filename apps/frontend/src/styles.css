@@ -8,3 +8,11 @@
 @media(max-width:1000px){.section-sidebar{width:190px}.detail-page{padding:24px}.settings-detail{padding:24px}.page-heading{gap:8px}.theme-option{width:160px}.theme-miniature{height:94px}.primary-navigation{margin-top:7px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 .workspace-page>.workspace{flex:1;width:100%;min-width:0}
+.modal-overlay{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:24px;background:#00000059}
+.confirm-dialog{width:min(420px,100%);padding:22px;border:1px solid var(--border);border-radius:14px;background:var(--popover);box-shadow:0 18px 48px #00000033}
+.confirm-dialog h2{font-size:15px;margin:0 0 9px}
+.confirm-description{font-size:12px;color:var(--muted);line-height:1.9}
+.confirm-error{margin-top:12px;color:var(--danger);font-size:12px;line-height:1.7}
+.confirm-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.confirm-actions .danger{min-height:32px;padding:7px 14px;border-radius:8px;background:var(--danger);color:#fff;font-size:12px;font-weight:550}
+.confirm-actions .danger:not(:disabled):hover{filter:brightness(.94)}

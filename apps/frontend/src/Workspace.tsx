@@ -24,6 +24,7 @@ import {
   RotateCw,
   SlidersHorizontal,
   Square,
+  Trash2,
   X,
   ZoomIn,
   ZoomOut,
@@ -37,6 +38,7 @@ import {
   native,
   stateLabel,
   type AssetView,
+  type ConversationDeleteAck,
   type ConversationView,
   type StoredDraft,
   type StudioSnapshot,
@@ -45,6 +47,7 @@ import {
   type TurnPage,
   type TurnView,
 } from './studio-api';
+import { ConfirmDialog } from './ConfirmDialog';
 import { ProductionRecord } from './ProductionRecord';
 import {
   clampZoom,
@@ -343,6 +346,9 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
   const [viewerReturnsToPage, setViewerReturnsToPage] = useState(false);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<ConversationView | null>(null);
+  const [deletingConversation, setDeletingConversation] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const [replacePromptTurn, setReplacePromptTurn] = useState<TurnView | null>(null);
   const [replaceLibraryPrompt, setReplaceLibraryPrompt] = useState<PendingLibraryPrompt | null>(null);
   const [promptActionBusy, setPromptActionBusy] = useState(false);
@@ -788,6 +794,87 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
     }
   };
 
+  const requestConversationDelete = (conversation: ConversationView) => {
+    if (!loaded || switching || submittingDraftId !== null || conversation.running) return;
+    setRenamingId(null);
+    setDeleteError('');
+    setDeleteTarget(conversation);
+  };
+  const cancelConversationDelete = () => {
+    if (deletingConversation) return;
+    const target = deleteTarget;
+    setDeleteTarget(null);
+    setDeleteError('');
+    if (target) requestAnimationFrame(() => document.getElementById(`conversation-delete-${target.id}`)?.focus());
+  };
+  const confirmConversationDelete = async () => {
+    const target = deleteTarget;
+    if (!target || deletingConversation) return;
+    setDeletingConversation(true);
+    setDeleteError('');
+    try {
+      if (!native) {
+        // Browser preview keeps the same local-only semantics without persistence.
+        const remaining = visibleConversations.filter(conversation => conversation.id !== target.id);
+        saveQueue.current!.forget(target.draftId);
+        if (remaining.length) {
+          dispatch({ type: 'remove', draftId: target.draftId, successorId: remaining[0].draftId });
+          selectConversationLocally(remaining[0].id);
+        } else {
+          const draft = createDraft(Math.max(0, ...state.drafts.map(value => value.id)) + 1);
+          dispatch({ type: 'remove', draftId: target.draftId, successorId: draft.id });
+          dispatch({ type: 'append', draft });
+          const conversation = { ...previewConversation, id: `local-conversation-${draft.id}`, draftId: draft.id, title: '新会话', activitySeq: 0 };
+          remaining.push(conversation);
+          selectConversationLocally(conversation.id);
+          setTurnPages(previous => ({ ...previous, [conversation.id]: { turns: [], hasMore: false, nextCursor: null } }));
+        }
+        setConversations(remaining);
+        setTurnPages(previous => { const next = { ...previous }; delete next[target.id]; return next; });
+        setOptimistic(previous => previous.filter(turn => turn.conversationId !== target.id));
+        setDeleteTarget(null);
+        setViewer(null);
+        setPopup(null);
+        requestAnimationFrame(() => textarea.current?.focus());
+        return;
+      }
+      await flushAll();
+      const expectedDraftVersion = saveQueue.current!.version(target.draftId);
+      const result = await api<ConversationDeleteAck>('conversation_delete', { conversationId: target.id, expectedDraftVersion });
+      saveQueue.current!.forget(target.draftId);
+      if (result.replacementDraft) saveQueue.current!.remember(result.replacementDraft);
+      dispatch({ type: 'remove', draftId: target.draftId, successorId: result.activeDraftId });
+      if (result.replacementDraft) dispatch({ type: 'append', draft: storedDraft(result.replacementDraft) });
+      setConversations(previous => previous.filter(conversation => conversation.id !== target.id));
+      setTurnPages(previous => {
+        const next = { ...previous };
+        delete next[target.id];
+        if (result.replacementDraft) next[result.activeConversationId] = { turns: [], hasMore: false, nextCursor: null };
+        return next;
+      });
+      setOptimistic(previous => previous.filter(turn => turn.conversationId !== target.id));
+      selectConversationLocally(result.activeConversationId);
+      setDeleteTarget(null);
+      setViewer(null);
+      setPopup(null);
+      nearBottom.current = true;
+      void ensureHistory(result.activeConversationId);
+      onRefresh();
+      requestAnimationFrame(() => textarea.current?.focus());
+    } catch (cause) {
+      const message = String(cause);
+      setDeleteError(message);
+      setActionError(message);
+      // A changed draft or busy target invalidates this confirmation; refresh the
+      // target state instead of forcing the stale confirmation through.
+      if (message.includes('版本') || message.includes('已更新') || message.includes('已变化') || message.includes('即将') || message.includes('正在')) {
+        setDeleteTarget(null);
+        onRefresh();
+      }
+    } finally {
+      setDeletingConversation(false);
+    }
+  };
   const setDraftParams = (patch: Partial<DraftParams>) => dispatch({ type: 'params', patch });
   const importSource = async () => {
     setSourceImporting(true);
@@ -1166,7 +1253,10 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
           {renamingId === conversation.id
             ? <input autoFocus value={renameValue} maxLength={128} aria-label="会话名称" onChange={event => setRenameValue(event.target.value)} onBlur={() => void saveRename()} onKeyDown={event => { if (event.key === 'Enter' && !event.nativeEvent.isComposing) { event.preventDefault(); void saveRename(); } if (event.key === 'Escape') { setRenamingId(null); } }}/>
             : <button className="conversation-open" disabled={!loaded || switching || submittingDraftId !== null} onClick={() => void switchConversation(conversation)}><MessageCircle size={15}/><span>{conversation.title}</span>{conversation.running && <i className="running-dot" title="正在生成"/>}</button>}
-          {renamingId !== conversation.id && <button className="conversation-rename" disabled={!loaded} aria-label={`重命名${conversation.title}`} title="重命名会话" onClick={() => beginRename(conversation)}><Pencil size={12}/></button>}
+          {renamingId !== conversation.id && <div className="conversation-item-actions">
+            <button className="conversation-rename" disabled={!loaded || switching || submittingDraftId !== null} aria-label={`重命名${conversation.title}`} title="重命名会话" onClick={() => beginRename(conversation)}><Pencil size={12}/></button>
+            <button id={`conversation-delete-${conversation.id}`} className="conversation-delete" disabled={!loaded || switching || submittingDraftId !== null || conversation.running} aria-label={`删除会话 ${conversation.title}`} title={conversation.running ? '会话正在生成，请先停止并等待清理' : '删除会话'} onClick={() => requestConversationDelete(conversation)}><Trash2 size={12}/></button>
+          </div>}
         </div>)}
         {conversationsHasMore && <button className="load-conversations" disabled={loadingConversations} onClick={() => void loadMoreConversations()}>{loadingConversations ? <LoaderCircle size={12} className="spin"/> : <ChevronDown size={12}/>}加载更多会话</button>}
       </div>
@@ -1265,6 +1355,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
         <div className={`composer-save-note ${saveStatus === 'error' ? 'error-text' : ''}`} role="status">{!native ? '浏览器预览 · 草稿保留于本次页面' : !loaded ? '正在恢复本地会话' : saveStatus === 'error' ? `保存失败：${saveError}` : saveStatus === 'saved' ? '草稿已保存到本机' : '正在保存草稿…'}{saveStatus === 'error' && <button onClick={() => void flushAll().catch(() => {})}>重试</button>}</div>
       </section>
     </main>
+    {deleteTarget && <ConfirmDialog title={`删除会话「${deleteTarget.title}」？`} description="会话记录及未发送内容将移除；已生成作品会保留在作品库。此操作不可撤销。" confirmLabel="删除会话" busy={deletingConversation} error={deleteError} onCancel={cancelConversationDelete} onConfirm={() => void confirmConversationDelete()}/>}
     {selectedAsset && <ImageViewer title={selectedAsset.outputRole === 'mask' ? '前景蒙版' : '生成结果'} prompt={selectedAsset.outputRole === 'mask' ? '8-bit 前景蒙版' : selectedAsset.prompt} source={assetUrl(selectedAsset.id)} isAsset backLabel={viewerReturnsToPage ? '返回来源页' : '返回会话'} onClose={closeViewer} onUsePrompt={selectedAsset.outputRole === 'mask' ? undefined : () => applyPrompt(selectedAsset.prompt)} onExport={() => void exportAsset(selectedAsset)}/>}
     {selectedSample && <ImageViewer title={selectedSample.title} prompt={selectedSample.prompt} source={selectedSample.src} isAsset={false} onClose={closeViewer} onUsePrompt={() => applyPrompt(selectedSample.prompt)}/>}
   </div>;

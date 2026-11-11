@@ -35,6 +35,7 @@ export type WorkspaceAction =
   | {type:'consume'; draftId:number; name:string; params:DraftParams}
   | {type:'applyPrompt'; id:number; value:string; sourceId:string; expected:string}
   | {type:'rename'; draftId:number; name:string}
+  | {type:'remove'; draftId:number; successorId:number}
   | {type:'edit'; value:string; record?:boolean; before?:string; id?:number}
   | {type:'undo'} | {type:'redo'} | {type:'collapse'}
   | {type:'params'; patch:Partial<DraftParams>; id?:number};
@@ -43,6 +44,7 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
   if(action.type==='append') return {...state,drafts:[...state.drafts,action.draft],activeId:action.draft.id,sample:null,nextId:Math.max(state.nextId,action.draft.id+1)};
   if(action.type==='consume') return {...state,drafts:state.drafts.map(draft=>draft.id===action.draftId?{...draft,name:action.name,prompt:'',promptSourceId:null,params:action.params,past:[],future:[]}:draft)};
   if(action.type==='rename') return {...state,drafts:state.drafts.map(draft=>draft.id===action.draftId?{...draft,name:action.name}:draft)};
+  if(action.type==='remove') return {...state,drafts:state.drafts.filter(draft=>draft.id!==action.draftId),activeId:action.successorId};
   if(action.type==='new') return {...state,drafts:[...state.drafts,createDraft(state.nextId)],activeId:state.nextId,nextId:state.nextId+1,sample:null};
   if(action.type==='select') return state.drafts.some(d=>d.id===action.id)?{...state,activeId:action.id,sample:null}:state;
   if(action.type==='sample') return {...state,sample:action.index};
