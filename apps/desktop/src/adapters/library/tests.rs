@@ -2557,3 +2557,180 @@ fn asset_favorite_rejects_unknown_and_non_work_targets() {
             .is_err()
     );
 }
+
+#[test]
+fn asset_deletion_state_is_visible_retryable_and_never_fakes_success() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let job = submit(&mut library, "delete-a");
+    let done = commit(&mut library, &job);
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+    library.set_asset_favorite(&primary, true).unwrap();
+    library.select_asset(Some(primary.clone())).unwrap();
+
+    let group = library.begin_asset_deletion(&primary).unwrap();
+    assert_eq!(group.state(), "pending");
+    assert_eq!(group.assets.len(), 1);
+    let item = library.asset_library_item(&primary).unwrap();
+    assert_eq!(item.deletion_state, "pending");
+    assert!(!item.available);
+    assert!(item.is_favorite);
+    // unfinished cleanups stay addressable in the same management set
+    let page = library
+        .asset_library_query(AssetLibraryQuery::default())
+        .unwrap();
+    assert_eq!(page.total, 1);
+    assert!(library.read_asset_png(&primary).is_err());
+    assert!(library.select_asset(Some(primary.clone())).is_err());
+
+    library.fail_asset_deletion(&primary, "文件被占用").unwrap();
+    let failed = library.asset_library_item(&primary).unwrap();
+    assert_eq!(failed.deletion_state, "failed");
+    assert_eq!(failed.availability_error.as_deref(), Some("文件被占用"));
+    assert_eq!(failed.deletion_error.as_deref(), Some("文件被占用"));
+
+    let retried = library.begin_asset_deletion(&primary).unwrap();
+    assert_eq!(retried.state(), "pending");
+    assert!(retried.primary().deletion_error.is_none());
+
+    library.finish_asset_deletion(&primary).unwrap();
+    let page = library
+        .asset_library_query(AssetLibraryQuery::default())
+        .unwrap();
+    assert_eq!(page.total, 0);
+    assert!(page.items.is_empty());
+    assert!(page.facets.models.is_empty());
+    assert!(page.facets.sizes.is_empty());
+    let favorites = library
+        .asset_library_query(AssetLibraryQuery {
+            favorites_only: true,
+            ..Default::default()
+        })
+        .unwrap();
+    assert_eq!(favorites.total, 0);
+    let tombstone = library.asset(&primary).unwrap();
+    assert_eq!(tombstone.deletion_state, "deleted");
+    assert!(!tombstone.available);
+    assert!(!tombstone.is_favorite);
+    assert!(library.read_asset_png(&primary).is_err());
+    assert!(library.select_asset(Some(primary.clone())).is_err());
+    let selected: Option<String> = library
+        .db
+        .query_row(
+            "SELECT selected_asset_id FROM projects WHERE id='default'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap();
+    assert_eq!(selected, None);
+    // the canvas history keeps an explicit tombstone instead of an unexplained miss
+    let assets = library.assets(100, 0).unwrap();
+    assert_eq!(assets.len(), 1);
+    assert_eq!(assets[0].deletion_state, "deleted");
+}
+
+#[test]
+fn a_two_output_work_is_deleted_as_one_unit() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let job = birefnet_job(&mut library, "delete-mask", 10, 12);
+    let run = library.attempt_run_dir(&job.attempt).unwrap();
+    let primary_bytes = rgba_png_bytes_for(10, 12);
+    let mask_bytes = mask_png_bytes_for(10, 12);
+    fs::write(run.join("primary.png"), &primary_bytes).unwrap();
+    fs::write(run.join("mask.png"), &mask_bytes).unwrap();
+    let done = library
+        .commit_outputs_after_reap(
+            &job.attempt,
+            vec![
+                RoleCandidate {
+                    role: "primary".into(),
+                    candidate: CandidateDescriptor {
+                        relative_path: "primary.png".into(),
+                        width: 10,
+                        height: 12,
+                        byte_count: primary_bytes.len() as u64,
+                        sha256: format!("{:x}", Sha256::digest(&primary_bytes)),
+                    },
+                },
+                RoleCandidate {
+                    role: "mask".into(),
+                    candidate: CandidateDescriptor {
+                        relative_path: "mask.png".into(),
+                        width: 10,
+                        height: 12,
+                        byte_count: mask_bytes.len() as u64,
+                        sha256: format!("{:x}", Sha256::digest(&mask_bytes)),
+                    },
+                },
+            ],
+        )
+        .unwrap();
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+    let mask = done.manifest.as_ref().unwrap().outputs[1].asset_id.clone();
+    assert!(library.asset_deletion_group(&mask).is_err());
+    let group = library.begin_asset_deletion(&primary).unwrap();
+    assert_eq!(group.assets.len(), 2);
+    assert_eq!(group.primary().asset.asset_id, primary);
+    assert_eq!(group.relative_paths().len(), 2);
+    library.finish_asset_deletion(&primary).unwrap();
+    for id in [&primary, &mask] {
+        let record = library.asset(id).unwrap();
+        assert_eq!(record.deletion_state, "deleted");
+        assert!(!record.available);
+        assert!(library.read_asset_png(id).is_err());
+    }
+    assert_eq!(
+        library
+            .asset_library_query(AssetLibraryQuery::default())
+            .unwrap()
+            .total,
+        0
+    );
+}
+
+#[test]
+fn deleting_the_source_conversation_keeps_retained_works_with_a_tombstone_marker() {
+    let root = TempDir::new().unwrap();
+    let mut library = open(root.path());
+    let accepted = accept_prompt(&mut library, "保留作品", "keep-after-conversation-delete");
+    let frozen = generation_for_turn("keep-after-conversation-delete", &accepted.turn);
+    let binding = library
+        .bind_turn_job(&accepted.turn.id, frozen.request, frozen.plan)
+        .unwrap();
+    let done = commit(&mut library, &binding.job);
+    let primary = done.manifest.as_ref().unwrap().outputs[0].asset_id.clone();
+    let conversation = library.active_conversation_id().unwrap();
+    let title = library.conversation(&conversation).unwrap().title;
+    let version = library
+        .draft(library.conversation(&conversation).unwrap().draft_id)
+        .unwrap()
+        .version;
+    library.delete_conversation(&conversation, version).unwrap();
+
+    let item = library.asset_library_item(&primary).unwrap();
+    assert!(item.conversation_deleted);
+    assert!(item.available);
+    assert_eq!(item.conversation_id.as_deref(), Some(conversation.as_str()));
+    let page = library
+        .asset_library_query(AssetLibraryQuery::default())
+        .unwrap();
+    assert_eq!(page.total, 1);
+    let facet = page
+        .facets
+        .conversations
+        .iter()
+        .find(|facet| facet.id == conversation.to_string())
+        .unwrap();
+    assert!(facet.deleted);
+    assert_eq!(facet.title, title);
+
+    drop(library);
+    let library = open(root.path());
+    assert!(
+        library
+            .asset_library_item(&primary)
+            .unwrap()
+            .conversation_deleted
+    );
+}

@@ -62,6 +62,13 @@ pub struct AssetLibraryItem {
     pub available: bool,
     pub availability_error: Option<String>,
     pub is_favorite: bool,
+    /// `active | pending | failed`; deleted works are excluded from the library
+    /// query, while pending/failed rows stay visible as retryable management
+    /// entries sharing the same total and cursor set.
+    pub deletion_state: String,
+    pub deletion_error: Option<String>,
+    /// The source conversation was deleted but the work itself is retained.
+    pub conversation_deleted: bool,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -85,6 +92,8 @@ pub struct AssetConversationFacet {
     pub id: String,
     pub title: String,
     pub count: u64,
+    /// The conversation was deleted; its retained works still filter by it.
+    pub deleted: bool,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -248,7 +257,7 @@ impl Library {
         let row = self
             .db
             .query_row(
-                "SELECT a.id,a.job_id,a.attempt_id,t.id,t.sequence,t.conversation_id,coalesce(c.title,'历史生成'),c.draft_id,coalesce(t.prompt,json_extract(j.request_json,'$.instruction'),'生成图片'),coalesce(t.model_id,?2),a.width,a.height,json_extract(at.plan_json,'$.effective_parameters.seed'),a.byte_count,a.created_at,a.is_favorite FROM assets a JOIN jobs j ON j.id=a.job_id JOIN attempts at ON at.id=a.attempt_id LEFT JOIN generation_turns t ON t.job_id=j.id LEFT JOIN conversations c ON c.id=t.conversation_id WHERE a.id=?1 AND j.project_id='default'",
+                "SELECT a.id,a.job_id,a.attempt_id,t.id,t.sequence,t.conversation_id,coalesce(c.title,'历史生成'),c.draft_id,coalesce(t.prompt,json_extract(j.request_json,'$.instruction'),'生成图片'),coalesce(t.model_id,?2),a.width,a.height,json_extract(at.plan_json,'$.effective_parameters.seed'),a.byte_count,a.created_at,a.is_favorite,a.deletion_state,a.deletion_error,(c.deleted_at IS NOT NULL) FROM assets a JOIN jobs j ON j.id=a.job_id JOIN attempts at ON at.id=a.attempt_id LEFT JOIN generation_turns t ON t.job_id=j.id LEFT JOIN conversations c ON c.id=t.conversation_id WHERE a.id=?1 AND j.project_id='default'",
                 params![id.as_str(), DEFAULT_MODEL_ID],
                 |row| {
                     Ok((
@@ -269,12 +278,30 @@ impl Library {
                         read_unsigned(row, 13)?,
                         read_unsigned(row, 14)?,
                         row.get::<_, bool>(15)?,
+                        row.get::<_, String>(16)?,
+                        row.get::<_, Option<String>>(17)?,
+                        row.get::<_, bool>(18)?,
                     ))
                 },
             )
             .optional()?
             .ok_or_else(|| LibraryError::NotFound(format!("asset {id}")))?;
         let record = self.asset(id)?;
+        let usable = row.16 == "active";
+        let availability_error = if usable {
+            record.availability_error
+        } else {
+            row.17.clone().or_else(|| {
+                Some(
+                    match row.16.as_str() {
+                        "pending" => "作品正在删除",
+                        "failed" => "删除未完成",
+                        _ => "作品已删除",
+                    }
+                    .into(),
+                )
+            })
+        };
         Ok(AssetLibraryItem {
             id: row.0,
             job_id: row.1,
@@ -291,9 +318,12 @@ impl Library {
             seed: row.12,
             byte_count: row.13,
             created_at: row.14,
-            available: record.available,
-            availability_error: record.availability_error,
+            available: usable && record.available,
+            availability_error,
             is_favorite: row.15,
+            deletion_state: row.16,
+            deletion_error: row.17,
+            conversation_deleted: row.18,
         })
     }
 
@@ -500,7 +530,7 @@ impl Library {
     fn asset_library_facets(&self) -> Result<AssetLibraryFacets> {
         let models = {
             let mut statement = self.db.prepare(
-                "SELECT coalesce(t.model_id,?1),count(*) FROM assets a JOIN jobs j ON j.id=a.job_id LEFT JOIN generation_turns t ON t.job_id=j.id WHERE j.project_id='default' AND a.output_role='primary' GROUP BY coalesce(t.model_id,?1) ORDER BY count(*) DESC,coalesce(t.model_id,?1)",
+                "SELECT coalesce(t.model_id,?1),count(*) FROM assets a JOIN jobs j ON j.id=a.job_id LEFT JOIN generation_turns t ON t.job_id=j.id WHERE j.project_id='default' AND a.output_role='primary' AND a.deletion_state!='deleted' GROUP BY coalesce(t.model_id,?1) ORDER BY count(*) DESC,coalesce(t.model_id,?1)",
             )?;
             statement
                 .query_map([DEFAULT_MODEL_ID], |row| {
@@ -513,7 +543,7 @@ impl Library {
         };
         let sizes = {
             let mut statement = self.db.prepare(
-                "SELECT a.width,a.height,count(*) FROM assets a JOIN jobs j ON j.id=a.job_id WHERE j.project_id='default' AND a.output_role='primary' GROUP BY a.width,a.height ORDER BY a.width*a.height DESC,a.width DESC",
+                "SELECT a.width,a.height,count(*) FROM assets a JOIN jobs j ON j.id=a.job_id WHERE j.project_id='default' AND a.output_role='primary' AND a.deletion_state!='deleted' GROUP BY a.width,a.height ORDER BY a.width*a.height DESC,a.width DESC",
             )?;
             statement
                 .query_map([], |row| {
@@ -527,7 +557,7 @@ impl Library {
         };
         let conversations = {
             let mut statement = self.db.prepare(
-                "SELECT c.id,c.title,count(*) FROM assets a JOIN jobs j ON j.id=a.job_id JOIN generation_turns t ON t.job_id=j.id JOIN conversations c ON c.id=t.conversation_id WHERE j.project_id='default' AND a.output_role='primary' GROUP BY c.id,c.title ORDER BY count(*) DESC,c.title",
+                "SELECT c.id,c.title,count(*),(c.deleted_at IS NOT NULL) FROM assets a JOIN jobs j ON j.id=a.job_id JOIN generation_turns t ON t.job_id=j.id JOIN conversations c ON c.id=t.conversation_id WHERE j.project_id='default' AND a.output_role='primary' AND a.deletion_state!='deleted' GROUP BY c.id,c.title,c.deleted_at ORDER BY count(*) DESC,c.title",
             )?;
             statement
                 .query_map([], |row| {
@@ -535,6 +565,7 @@ impl Library {
                         id: row.get(0)?,
                         title: row.get(1)?,
                         count: read_unsigned(row, 2)?,
+                        deleted: row.get(3)?,
                     })
                 })?
                 .collect::<std::result::Result<Vec<_>, _>>()?
@@ -589,6 +620,7 @@ fn asset_filters(query: &AssetLibraryQuery) -> Result<(String, Vec<SqlValue>)> {
     let mut clauses = vec![
         "j.project_id='default'".to_string(),
         "a.output_role='primary'".to_string(),
+        "a.deletion_state IN ('active','pending','failed')".to_string(),
     ];
     let mut args = Vec::new();
     if let Some(model_id) = nonempty_filter(&query.model_id) {

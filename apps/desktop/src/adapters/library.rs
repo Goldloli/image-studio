@@ -118,6 +118,11 @@ pub struct AssetRecord {
     pub byte_count: u64,
     pub available: bool,
     pub availability_error: Option<String>,
+    pub is_favorite: bool,
+    /// `active | pending | failed | deleted`; user deletion never rewrites the
+    /// immutable execution record, only this attached state.
+    pub deletion_state: String,
+    pub deletion_error: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -491,7 +496,8 @@ impl Library {
 
     pub fn select_asset(&mut self, id: Option<AssetId>) -> Result<()> {
         if let Some(id) = &id {
-            self.asset(id)?;
+            let record = self.asset(id)?;
+            ensure_asset_active(&record)?;
         }
         self.db.execute(
             "UPDATE projects SET selected_asset_id=? WHERE id='default'",
@@ -878,6 +884,20 @@ fn now() -> i64 {
 fn bound_detail(value: &str) -> String {
     value.chars().take(4096).collect()
 }
+fn ensure_asset_active(record: &AssetRecord) -> Result<()> {
+    if record.deletion_state == "active" {
+        return Ok(());
+    }
+    Err(LibraryError::Invalid(
+        match record.deletion_state.as_str() {
+            "pending" => "作品正在删除，暂不可读取或导出",
+            "failed" => "删除未完成，请先重试删除",
+            _ => "作品已删除",
+        }
+        .into(),
+    ))
+}
+
 fn validate_storage_key(key: &str) -> Result<()> {
     if key.is_empty()
         || key.len() > 128
