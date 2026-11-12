@@ -2,6 +2,7 @@
 pub mod adapters;
 pub mod host;
 pub mod options;
+pub mod single_instance;
 pub mod startup;
 pub mod studio;
 

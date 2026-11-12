@@ -12,7 +12,7 @@ use crate::adapters::{
     },
     library::{
         AcceptTurnInput, AssetLibraryQuery, DEFAULT_MODEL_ID, DraftRecord, JobRecord, Library,
-        TaskCenterQuery, TurnRecord, TurnStatus,
+        LibraryError, TaskCenterQuery, TurnRecord, TurnStatus,
     },
     preferences::{AppearancePreferences, CreationDefaults, PreferencesStore, valid_seed},
     storage,
@@ -62,6 +62,10 @@ pub struct StudioService {
     pub installation: Option<Installations>,
     pub generation: Option<GenerationController>,
     pub startup_error: Option<String>,
+    /// True when the local library refused to open because another host owns
+    /// the data root; the caller may exit with an explanation instead of
+    /// building a window that cannot work.
+    pub startup_in_use: bool,
     pub closing: AtomicBool,
     /// Local device facts used by every hardware gate (catalog projection, install start and
     /// generation send). Probed once per host process via `DeviceFacts::cached`; tests inject
@@ -402,6 +406,7 @@ impl StudioService {
                 installation: None,
                 generation: None,
                 startup_error: Some(error.to_string()),
+                startup_in_use: matches!(error, LibraryError::InUse),
                 closing: AtomicBool::new(false),
                 device_facts: DeviceFacts::cached(),
                 scheduling: Mutex::new(()),
@@ -421,6 +426,7 @@ impl StudioService {
                     installation: installation.ok(),
                     generation: Some(generation),
                     startup_error,
+                    startup_in_use: false,
                     closing: AtomicBool::new(false),
                     device_facts: DeviceFacts::cached(),
                     scheduling: Mutex::new(()),

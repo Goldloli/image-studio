@@ -134,11 +134,19 @@ fn civil_from_days(days: i64) -> (i64, u32, u32) {
 
 #[cfg(windows)]
 fn show_failure_dialog(report: &str) {
+    show_message("Image Studio 启动失败", report);
+}
+
+/// Shows a native explanation dialog. Non-Windows builds keep printing to
+/// stderr because the platforms there surface their own windows/dialogs.
+#[cfg(windows)]
+pub fn show_message(caption_text: &str, body_text: &str) {
     use windows_sys::Win32::UI::WindowsAndMessaging::{
         MB_ICONERROR, MB_OK, MB_SETFOREGROUND, MessageBoxW,
     };
-    let caption: Vec<u16> = "Image Studio 启动失败\0".encode_utf16().collect();
-    let body: Vec<u16> = format!("{report}\0").encode_utf16().collect();
+
+    let caption: Vec<u16> = format!("{caption_text}\0").encode_utf16().collect();
+    let body: Vec<u16> = format!("{body_text}\0").encode_utf16().collect();
     // SAFETY: both strings are NUL terminated and outlive the call; a null owner
     // window is valid for a standalone message box.
     unsafe {
@@ -149,6 +157,12 @@ fn show_failure_dialog(report: &str) {
             MB_OK | MB_ICONERROR | MB_SETFOREGROUND,
         );
     }
+}
+
+/// Non-Windows builds have no message box helper here.
+#[cfg(not(windows))]
+pub fn show_message(caption_text: &str, body_text: &str) {
+    eprintln!("{caption_text}\n{body_text}");
 }
 
 /// Other platforms keep the previous behaviour: the log is written by the

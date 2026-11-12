@@ -682,6 +682,49 @@ fn diagnostic_viewport(
         .map_err(|error| error.to_string())
 }
 
+/// Raises the main window for a second launch and reports what actually
+/// happened. Windows can refuse `SetForegroundWindow` (foreground lock); the
+/// fallback flashes the taskbar instead of forcing the focus.
+#[cfg(windows)]
+fn activate_main_window(app: &tauri::AppHandle) -> &'static str {
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        FLASHW_ALL, FLASHW_TIMERNOFG, FLASHWINFO, FlashWindowEx, GetForegroundWindow,
+        SetForegroundWindow,
+    };
+
+    let Some(window) = app.get_webview_window("main") else {
+        return "missing-window";
+    };
+    let _ = window.unminimize();
+    let _ = window.show();
+    let _ = window.set_focus();
+    let Ok(hwnd) = window.hwnd() else {
+        return "focused";
+    };
+    let raw: HWND = hwnd.0;
+    // SAFETY: the handle belongs to this process's main window.
+    unsafe { SetForegroundWindow(raw) };
+    if unsafe { GetForegroundWindow() } == raw {
+        return "focused";
+    }
+    let info = FLASHWINFO {
+        cbSize: std::mem::size_of::<FLASHWINFO>() as u32,
+        hwnd: raw,
+        dwFlags: FLASHW_ALL | FLASHW_TIMERNOFG,
+        uCount: 3,
+        dwTimeout: 0,
+    };
+    // SAFETY: `info` describes the same live window.
+    unsafe { FlashWindowEx(&info) };
+    "flashed"
+}
+
+#[cfg(not(windows))]
+fn activate_main_window(_app: &tauri::AppHandle) -> &'static str {
+    "unsupported"
+}
+
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let options = LaunchOptions::parse_from(std::env::args_os().skip(1))
         .map_err(|message| std::io::Error::new(std::io::ErrorKind::InvalidInput, message))?;
@@ -704,6 +747,40 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 crate::startup::fail_startup(&logs, &error.to_string());
             }
             return Err(error.into());
+        }
+    };
+    // A second launch for the same data root hands the window back to the
+    // instance that owns it instead of building another host and colliding on
+    // the WebView2 profile. The guard keeps the named objects alive for the
+    // rest of the process; losing them early would let a later launch become a
+    // second primary.
+    let (_single_instance, activation) = match crate::single_instance::claim(&paths.data) {
+        crate::single_instance::Claim::Primary(primary) => {
+            let receiver = primary.receiver();
+            (Some(primary), Some(receiver))
+        }
+        crate::single_instance::Claim::Secondary(secondary) => {
+            match secondary.request_activation() {
+                crate::single_instance::Activation::Activated => std::process::exit(0),
+                crate::single_instance::Activation::TimedOut => {
+                    crate::startup::show_message(
+                        "Image Studio 已在运行",
+                        "已有一个 Image Studio 窗口在使用该数据目录，但 5 秒内没有响应。\n\
+                         请切换到该窗口；如果看不到窗口，请先在任务管理器中结束残留的 \
+                         image-studio-desktop.exe，然后重试。",
+                    );
+                    std::process::exit(0);
+                }
+                crate::single_instance::Activation::Unavailable => {
+                    crate::startup::show_message(
+                        "Image Studio 已在运行",
+                        "该数据目录正由另一个 Image Studio 实例使用（可能属于另一个 Windows \
+                         登录会话），无法在本会话中激活它的窗口。\n\
+                         请改用另一个 --data-dir 启动，或先结束该实例。",
+                    );
+                    std::process::exit(0);
+                }
+            }
         }
     };
     crate::startup::install_panic_hook(paths.logs.clone());
@@ -729,7 +806,22 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 "diagnostic-worker"
             })
     });
+    let data_root_display = paths.data.display().to_string();
     let host = HostState::new(&options, paths, worker);
+    // The single-instance objects cover the same login session. Another session
+    // can still hold the root; explain that before Tauri builds a window whose
+    // WebView2 profile could not be created either.
+    if host.studio.startup_in_use {
+        crate::startup::show_message(
+            "Image Studio 已在运行",
+            &format!(
+                "数据目录正在由另一个 Image Studio 实例使用：\n{data_root_display}\n\n\
+                 请在该窗口继续使用；如果确认没有窗口，请先在任务管理器中结束残留的 \
+                 image-studio-desktop.exe，然后重试。"
+            ),
+        );
+        std::process::exit(0);
+    }
     let initial_size = options.diagnostic_size;
     let diagnostics = options.diagnostics;
     let requested_scale = options.diagnostic_scale;
@@ -787,6 +879,29 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
             if let Some(window) = app.get_webview_window("main")
                 && let Some([width, height]) = initial_size {
                 window.set_size(tauri::LogicalSize::new(width, height))?;
+            }
+            // Serve activation requests on a dedicated thread: blocking the
+            // window thread here would stall the acknowledgement it produces.
+            if let Some(receiver) = activation {
+                let handle = app.handle().clone();
+                match std::thread::Builder::new()
+                    .name("single-instance".into())
+                    .spawn(move || {
+                        while receiver.wait() {
+                            let outcome = activate_main_window(&handle);
+                            crate::adapters::logging::info(
+                                "app.activate",
+                                &[("outcome", outcome.to_string())],
+                            );
+                            receiver.acknowledge();
+                        }
+                    }) {
+                    Ok(_) => {}
+                    Err(error) => crate::adapters::logging::warn(
+                        "app.activate.listener",
+                        &[("error", error.to_string())],
+                    ),
+                }
             }
             Ok(())
         })
