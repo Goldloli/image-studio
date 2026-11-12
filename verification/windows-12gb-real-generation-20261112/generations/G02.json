@@ -1,0 +1,89 @@
+{
+  "model": "Z-Image",
+  "kind": "text",
+  "prompt": "雪山下的湖泊与晨雾，远景，超广角风景摄影 [G02]",
+  "source": "",
+  "startedAt": "2026-11-12T13:52:35.941Z",
+  "status": "succeeded",
+  "stages": [
+    {
+      "at": "2026-11-12T13:52:38.209Z",
+      "elapsedSeconds": 2,
+      "stage": "正在准备生成"
+    },
+    {
+      "at": "2026-11-12T13:52:47.257Z",
+      "elapsedSeconds": 11,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:53:12.902Z",
+      "elapsedSeconds": 36,
+      "stage": "正在编码提示词"
+    },
+    {
+      "at": "2026-11-12T13:53:14.409Z",
+      "elapsedSeconds": 38,
+      "stage": "正在采样 0/9"
+    },
+    {
+      "at": "2026-11-12T13:53:17.428Z",
+      "elapsedSeconds": 41,
+      "stage": "正在采样 2/9"
+    },
+    {
+      "at": "2026-11-12T13:53:18.937Z",
+      "elapsedSeconds": 42,
+      "stage": "正在采样 4/9"
+    },
+    {
+      "at": "2026-11-12T13:53:20.446Z",
+      "elapsedSeconds": 44,
+      "stage": "正在采样 5/9"
+    },
+    {
+      "at": "2026-11-12T13:53:21.951Z",
+      "elapsedSeconds": 45,
+      "stage": "正在采样 6/9"
+    },
+    {
+      "at": "2026-11-12T13:53:23.457Z",
+      "elapsedSeconds": 47,
+      "stage": "正在采样 7/9"
+    },
+    {
+      "at": "2026-11-12T13:53:24.965Z",
+      "elapsedSeconds": 48,
+      "stage": "正在采样 8/9"
+    },
+    {
+      "at": "2026-11-12T13:53:26.470Z",
+      "elapsedSeconds": 50,
+      "stage": "正在解码图片"
+    },
+    {
+      "at": "2026-11-12T13:53:29.487Z",
+      "elapsedSeconds": 53,
+      "stage": "正在验证并保存"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT"
+  ],
+  "selectedModel": "Z-Image Turbo",
+  "turnsBefore": {
+    "turns": 21,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T13:52:36.706Z",
+  "turnId": "turn-7a73b6ac8d764a12b039f4c74c530109",
+  "turnText": "雪山下的湖泊与晨雾，远景，超广角风景摄影 [G02]\n\n你\nImage Studio\nZ-Image Turbo · 1:1 · 种子 4266351009\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+  "elapsedSeconds": 54,
+  "endedAt": "2026-11-12T13:53:31.149Z"
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-data-safety",
+  "source_roots_read_only": [
+    "C:/ist-accept",
+    "C:/ist-a"
+  ],
+  "upgrade_copy": {
+    "source": "C:/ist-accept/data",
+    "target": "C:/ist-rg/r-v5",
+    "copied": [
+      "library.sqlite3",
+      "library.sqlite3-wal",
+      "library.sqlite3-shm",
+      "assets/",
+      "inputs/",
+      "licenses/",
+      "application-preferences.json"
+    ],
+    "excluded": [
+      "models/",
+      "runtimes/",
+      "installations/",
+      "runs/",
+      "commits/",
+      "quarantine/",
+      "work/"
+    ],
+    "v5_counts_before": {
+      "assets": 20,
+      "jobs": 23,
+      "conversations": 1,
+      "drafts": 1,
+      "imported_sources": 6
+    },
+    "pre_upgrade_user_version": 5,
+    "layout_note": "the first copy landed at the root instead of <root>/data; it was relocated before the upgrade launch, and the empty data root created by the mistaken launch was discarded",
+    "copied_bytes": 92360704
+  },
+  "fresh_root": "C:/ist-rg/r-fresh",
+  "network_root": "C:/ist-rg/r-net",
+  "source_verification": {
+    "assets_files": 20,
+    "inputs_files": 6
+  },
+  "export_dir": "verification/windows-12gb-real-generation-20261112/exports"
+}

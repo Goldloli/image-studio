@@ -1,0 +1,314 @@
+{
+  "model": "MOSS",
+  "kind": "text",
+  "prompt": "璧涘崥鏈嬪厠椋庢牸鐨勯洦澶滆閬擄紝闇撹櫣鐏墝锛岀數褰辨劅 [G05]",
+  "source": "",
+  "startedAt": "2026-11-12T13:35:45.889Z",
+  "status": "succeeded",
+  "stages": [
+    {
+      "at": "2026-11-12T13:35:48.154Z",
+      "elapsedSeconds": 2,
+      "stage": "正在接收提示词"
+    },
+    {
+      "at": "2026-11-12T13:35:49.667Z",
+      "elapsedSeconds": 3,
+      "stage": "正在准备生成"
+    },
+    {
+      "at": "2026-11-12T13:35:57.202Z",
+      "elapsedSeconds": 11,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:36:04.749Z",
+      "elapsedSeconds": 18,
+      "stage": "正在编码提示词"
+    },
+    {
+      "at": "2026-11-12T13:36:06.256Z",
+      "elapsedSeconds": 20,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:36:09.272Z",
+      "elapsedSeconds": 23,
+      "stage": "正在采样 0/50"
+    },
+    {
+      "at": "2026-11-12T13:36:12.291Z",
+      "elapsedSeconds": 26,
+      "stage": "正在采样 1/50"
+    },
+    {
+      "at": "2026-11-12T13:36:13.797Z",
+      "elapsedSeconds": 27,
+      "stage": "正在采样 2/50"
+    },
+    {
+      "at": "2026-11-12T13:36:15.308Z",
+      "elapsedSeconds": 29,
+      "stage": "正在采样 3/50"
+    },
+    {
+      "at": "2026-11-12T13:36:18.327Z",
+      "elapsedSeconds": 32,
+      "stage": "正在采样 4/50"
+    },
+    {
+      "at": "2026-11-12T13:36:19.835Z",
+      "elapsedSeconds": 33,
+      "stage": "正在采样 5/50"
+    },
+    {
+      "at": "2026-11-12T13:36:22.852Z",
+      "elapsedSeconds": 36,
+      "stage": "正在采样 6/50"
+    },
+    {
+      "at": "2026-11-12T13:36:25.858Z",
+      "elapsedSeconds": 39,
+      "stage": "正在采样 7/50"
+    },
+    {
+      "at": "2026-11-12T13:36:27.366Z",
+      "elapsedSeconds": 41,
+      "stage": "正在采样 8/50"
+    },
+    {
+      "at": "2026-11-12T13:36:28.869Z",
+      "elapsedSeconds": 42,
+      "stage": "正在采样 9/50"
+    },
+    {
+      "at": "2026-11-12T13:36:31.887Z",
+      "elapsedSeconds": 45,
+      "stage": "正在采样 10/50"
+    },
+    {
+      "at": "2026-11-12T13:36:34.897Z",
+      "elapsedSeconds": 48,
+      "stage": "正在采样 11/50"
+    },
+    {
+      "at": "2026-11-12T13:36:36.409Z",
+      "elapsedSeconds": 50,
+      "stage": "正在采样 12/50"
+    },
+    {
+      "at": "2026-11-12T13:36:39.426Z",
+      "elapsedSeconds": 53,
+      "stage": "正在采样 13/50"
+    },
+    {
+      "at": "2026-11-12T13:36:42.448Z",
+      "elapsedSeconds": 56,
+      "stage": "正在采样 14/50"
+    },
+    {
+      "at": "2026-11-12T13:36:43.954Z",
+      "elapsedSeconds": 57,
+      "stage": "正在采样 15/50"
+    },
+    {
+      "at": "2026-11-12T13:36:45.461Z",
+      "elapsedSeconds": 59,
+      "stage": "正在采样 16/50"
+    },
+    {
+      "at": "2026-11-12T13:36:48.478Z",
+      "elapsedSeconds": 62,
+      "stage": "正在采样 17/50"
+    },
+    {
+      "at": "2026-11-12T13:36:51.496Z",
+      "elapsedSeconds": 65,
+      "stage": "正在采样 18/50"
+    },
+    {
+      "at": "2026-11-12T13:36:53.005Z",
+      "elapsedSeconds": 66,
+      "stage": "正在采样 19/50"
+    },
+    {
+      "at": "2026-11-12T13:36:56.025Z",
+      "elapsedSeconds": 69,
+      "stage": "正在采样 20/50"
+    },
+    {
+      "at": "2026-11-12T13:36:57.532Z",
+      "elapsedSeconds": 71,
+      "stage": "正在采样 21/50"
+    },
+    {
+      "at": "2026-11-12T13:37:00.546Z",
+      "elapsedSeconds": 74,
+      "stage": "正在采样 22/50"
+    },
+    {
+      "at": "2026-11-12T13:37:03.567Z",
+      "elapsedSeconds": 77,
+      "stage": "正在采样 23/50"
+    },
+    {
+      "at": "2026-11-12T13:37:05.079Z",
+      "elapsedSeconds": 78,
+      "stage": "正在采样 24/50"
+    },
+    {
+      "at": "2026-11-12T13:37:08.097Z",
+      "elapsedSeconds": 81,
+      "stage": "正在采样 25/50"
+    },
+    {
+      "at": "2026-11-12T13:37:09.607Z",
+      "elapsedSeconds": 83,
+      "stage": "正在采样 26/50"
+    },
+    {
+      "at": "2026-11-12T13:37:12.632Z",
+      "elapsedSeconds": 86,
+      "stage": "正在采样 27/50"
+    },
+    {
+      "at": "2026-11-12T13:37:14.144Z",
+      "elapsedSeconds": 87,
+      "stage": "正在采样 28/50"
+    },
+    {
+      "at": "2026-11-12T13:37:17.158Z",
+      "elapsedSeconds": 91,
+      "stage": "正在采样 29/50"
+    },
+    {
+      "at": "2026-11-12T13:37:20.179Z",
+      "elapsedSeconds": 94,
+      "stage": "正在采样 30/50"
+    },
+    {
+      "at": "2026-11-12T13:37:21.686Z",
+      "elapsedSeconds": 95,
+      "stage": "正在采样 31/50"
+    },
+    {
+      "at": "2026-11-12T13:37:23.189Z",
+      "elapsedSeconds": 97,
+      "stage": "正在采样 32/50"
+    },
+    {
+      "at": "2026-11-12T13:37:26.209Z",
+      "elapsedSeconds": 100,
+      "stage": "正在采样 33/50"
+    },
+    {
+      "at": "2026-11-12T13:37:29.225Z",
+      "elapsedSeconds": 103,
+      "stage": "正在采样 34/50"
+    },
+    {
+      "at": "2026-11-12T13:37:30.733Z",
+      "elapsedSeconds": 104,
+      "stage": "正在采样 35/50"
+    },
+    {
+      "at": "2026-11-12T13:37:33.755Z",
+      "elapsedSeconds": 107,
+      "stage": "正在采样 36/50"
+    },
+    {
+      "at": "2026-11-12T13:37:36.768Z",
+      "elapsedSeconds": 110,
+      "stage": "正在采样 37/50"
+    },
+    {
+      "at": "2026-11-12T13:37:38.278Z",
+      "elapsedSeconds": 112,
+      "stage": "正在采样 38/50"
+    },
+    {
+      "at": "2026-11-12T13:37:41.299Z",
+      "elapsedSeconds": 115,
+      "stage": "正在采样 39/50"
+    },
+    {
+      "at": "2026-11-12T13:37:42.808Z",
+      "elapsedSeconds": 116,
+      "stage": "正在采样 40/50"
+    },
+    {
+      "at": "2026-11-12T13:37:45.817Z",
+      "elapsedSeconds": 119,
+      "stage": "正在采样 41/50"
+    },
+    {
+      "at": "2026-11-12T13:37:48.838Z",
+      "elapsedSeconds": 122,
+      "stage": "正在采样 42/50"
+    },
+    {
+      "at": "2026-11-12T13:37:50.348Z",
+      "elapsedSeconds": 124,
+      "stage": "正在采样 43/50"
+    },
+    {
+      "at": "2026-11-12T13:37:53.362Z",
+      "elapsedSeconds": 127,
+      "stage": "正在采样 44/50"
+    },
+    {
+      "at": "2026-11-12T13:37:56.376Z",
+      "elapsedSeconds": 130,
+      "stage": "正在采样 45/50"
+    },
+    {
+      "at": "2026-11-12T13:37:57.880Z",
+      "elapsedSeconds": 131,
+      "stage": "正在采样 46/50"
+    },
+    {
+      "at": "2026-11-12T13:37:59.389Z",
+      "elapsedSeconds": 133,
+      "stage": "正在采样 47/50"
+    },
+    {
+      "at": "2026-11-12T13:38:02.406Z",
+      "elapsedSeconds": 136,
+      "stage": "正在采样 48/50"
+    },
+    {
+      "at": "2026-11-12T13:38:05.425Z",
+      "elapsedSeconds": 139,
+      "stage": "正在采样 49/50"
+    },
+    {
+      "at": "2026-11-12T13:38:06.930Z",
+      "elapsedSeconds": 140,
+      "stage": "采样 50/50 · 正在处理"
+    },
+    {
+      "at": "2026-11-12T13:38:08.441Z",
+      "elapsedSeconds": 142,
+      "stage": "正在解码图片"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT"
+  ],
+  "selectedModel": "MOSS-Image-SFT",
+  "turnsBefore": {
+    "turns": 6,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T13:35:46.647Z",
+  "turnId": "turn-9106afa807e54b8e87edebf2ba8f07f4",
+  "turnText": "璧涘崥鏈嬪厠椋庢牸鐨勯洦澶滆閬擄紝闇撹櫣鐏墝锛岀數褰辨劅 [G05]\n\n你\nImage Studio\nMOSS-Image-SFT · 1:1 · 种子 2322651177\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+  "elapsedSeconds": 143,
+  "endedAt": "2026-11-12T13:38:10.122Z"
+}

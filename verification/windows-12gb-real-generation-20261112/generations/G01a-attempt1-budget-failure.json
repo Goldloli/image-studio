@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-case",
+  "case": "G01a",
+  "attempt": 1,
+  "model": "FLUX.2 Klein 4B distilled",
+  "kind_capability": "text-to-image",
+  "prompt": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]",
+  "started_at": "2026-11-12T21:22:38+08:00",
+  "data_root": "C:/ist-rg/r-fresh",
+  "build_commit": "159a0e89d80ca896140d3854fcf2a3c6acecb17e",
+  "status": "failed",
+  "terminal_state": "Failed",
+  "seed": 2252350066,
+  "job_id": "job-6c7e7da7785546b5bb8296ea975473ef",
+  "attempt_id": "attempt-5b1e757bd73c4cacbb24587e4374f160",
+  "error": "生成超出资源预算：进程提交内存峰值 24.18 GiB，超过 24 GiB 上限。请关闭占用内存或显存的其他程序后重试。",
+  "available_gib_at_start": 19.46,
+  "environment_note": "three app instances were running during this attempt (r-fresh generation, r-net real-network install, r-v5 upgrade instance); the r-v5 instance was closed before the retry",
+  "evidence": [
+    "screenshots/g01a-budget-failure.png",
+    "logs-g01a-budget-failure-app.log"
+  ]
+}

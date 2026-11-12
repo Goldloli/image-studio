@@ -1,0 +1,209 @@
+{
+  "model": "Qwen-Image 2.1",
+  "kind": "text",
+  "prompt": "一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]",
+  "source": "",
+  "startedAt": "2026-11-12T13:53:35.542Z",
+  "status": "succeeded",
+  "stages": [
+    {
+      "at": "2026-11-12T13:53:37.801Z",
+      "elapsedSeconds": 2,
+      "stage": "正在准备生成"
+    },
+    {
+      "at": "2026-11-12T13:53:45.330Z",
+      "elapsedSeconds": 9,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:54:00.394Z",
+      "elapsedSeconds": 24,
+      "stage": "正在采样 1/40"
+    },
+    {
+      "at": "2026-11-12T13:54:01.899Z",
+      "elapsedSeconds": 26,
+      "stage": "正在采样 2/40"
+    },
+    {
+      "at": "2026-11-12T13:54:03.406Z",
+      "elapsedSeconds": 27,
+      "stage": "正在采样 3/40"
+    },
+    {
+      "at": "2026-11-12T13:54:04.910Z",
+      "elapsedSeconds": 29,
+      "stage": "正在采样 5/40"
+    },
+    {
+      "at": "2026-11-12T13:54:07.924Z",
+      "elapsedSeconds": 32,
+      "stage": "正在采样 6/40"
+    },
+    {
+      "at": "2026-11-12T13:54:09.438Z",
+      "elapsedSeconds": 33,
+      "stage": "正在采样 8/40"
+    },
+    {
+      "at": "2026-11-12T13:54:10.954Z",
+      "elapsedSeconds": 35,
+      "stage": "正在采样 9/40"
+    },
+    {
+      "at": "2026-11-12T13:54:13.975Z",
+      "elapsedSeconds": 38,
+      "stage": "正在采样 11/40"
+    },
+    {
+      "at": "2026-11-12T13:54:15.483Z",
+      "elapsedSeconds": 39,
+      "stage": "正在采样 12/40"
+    },
+    {
+      "at": "2026-11-12T13:54:16.987Z",
+      "elapsedSeconds": 41,
+      "stage": "正在采样 13/40"
+    },
+    {
+      "at": "2026-11-12T13:54:18.493Z",
+      "elapsedSeconds": 42,
+      "stage": "正在采样 14/40"
+    },
+    {
+      "at": "2026-11-12T13:54:19.998Z",
+      "elapsedSeconds": 44,
+      "stage": "正在采样 15/40"
+    },
+    {
+      "at": "2026-11-12T13:54:21.502Z",
+      "elapsedSeconds": 45,
+      "stage": "正在采样 16/40"
+    },
+    {
+      "at": "2026-11-12T13:54:23.005Z",
+      "elapsedSeconds": 47,
+      "stage": "正在采样 17/40"
+    },
+    {
+      "at": "2026-11-12T13:54:24.510Z",
+      "elapsedSeconds": 48,
+      "stage": "正在采样 18/40"
+    },
+    {
+      "at": "2026-11-12T13:54:26.016Z",
+      "elapsedSeconds": 50,
+      "stage": "正在采样 19/40"
+    },
+    {
+      "at": "2026-11-12T13:54:27.522Z",
+      "elapsedSeconds": 51,
+      "stage": "正在采样 21/40"
+    },
+    {
+      "at": "2026-11-12T13:54:30.536Z",
+      "elapsedSeconds": 54,
+      "stage": "正在采样 22/40"
+    },
+    {
+      "at": "2026-11-12T13:54:32.041Z",
+      "elapsedSeconds": 56,
+      "stage": "正在采样 24/40"
+    },
+    {
+      "at": "2026-11-12T13:54:33.549Z",
+      "elapsedSeconds": 57,
+      "stage": "正在采样 25/40"
+    },
+    {
+      "at": "2026-11-12T13:54:36.565Z",
+      "elapsedSeconds": 60,
+      "stage": "正在采样 27/40"
+    },
+    {
+      "at": "2026-11-12T13:54:38.070Z",
+      "elapsedSeconds": 62,
+      "stage": "正在采样 28/40"
+    },
+    {
+      "at": "2026-11-12T13:54:39.576Z",
+      "elapsedSeconds": 63,
+      "stage": "正在采样 29/40"
+    },
+    {
+      "at": "2026-11-12T13:54:41.086Z",
+      "elapsedSeconds": 65,
+      "stage": "正在采样 30/40"
+    },
+    {
+      "at": "2026-11-12T13:54:42.594Z",
+      "elapsedSeconds": 66,
+      "stage": "正在采样 31/40"
+    },
+    {
+      "at": "2026-11-12T13:54:44.098Z",
+      "elapsedSeconds": 68,
+      "stage": "正在采样 32/40"
+    },
+    {
+      "at": "2026-11-12T13:54:45.604Z",
+      "elapsedSeconds": 69,
+      "stage": "正在采样 33/40"
+    },
+    {
+      "at": "2026-11-12T13:54:47.111Z",
+      "elapsedSeconds": 71,
+      "stage": "正在采样 34/40"
+    },
+    {
+      "at": "2026-11-12T13:54:48.624Z",
+      "elapsedSeconds": 72,
+      "stage": "正在采样 35/40"
+    },
+    {
+      "at": "2026-11-12T13:54:50.132Z",
+      "elapsedSeconds": 74,
+      "stage": "正在采样 37/40"
+    },
+    {
+      "at": "2026-11-12T13:54:53.149Z",
+      "elapsedSeconds": 77,
+      "stage": "正在采样 38/40"
+    },
+    {
+      "at": "2026-11-12T13:54:54.658Z",
+      "elapsedSeconds": 78,
+      "stage": "采样 40/40 · 正在处理"
+    },
+    {
+      "at": "2026-11-12T13:54:59.196Z",
+      "elapsedSeconds": 83,
+      "stage": "正在解码图片"
+    },
+    {
+      "at": "2026-11-12T13:55:00.699Z",
+      "elapsedSeconds": 84,
+      "stage": "正在验证并保存"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT"
+  ],
+  "selectedModel": "Qwen-Image 2.1",
+  "turnsBefore": {
+    "turns": 22,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T13:53:36.295Z",
+  "turnId": "turn-dd5e4f4b137445b69fc20bd6bdf38a60",
+  "turnText": "一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]\n\n你\nImage Studio\nQwen-Image 2.1 · 1:1 · 种子 2892712778\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+  "elapsedSeconds": 86,
+  "endedAt": "2026-11-12T13:55:02.367Z"
+}

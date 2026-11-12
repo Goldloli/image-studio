@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-network-model-install",
+  "model": "Z-Image Turbo",
+  "data_root": "C:/ist-rg/r-net",
+  "source": "ModelScope (https://www.modelscope.cn/models/Tongyi-MAI/Z-Image-Turbo/resolve/master/...)",
+  "artifact_count": 62,
+  "declared_total_bytes": 35555700000,
+  "cache_files": 59,
+  "cache_bytes": 35562182040,
+  "attempts": [
+    {
+      "attempt": 1,
+      "started_at": "2026-11-12T20:58:00+08:00",
+      "downloaded_gb": 33.17,
+      "outcome": "download stalled at 33.17/35.56 GB; app restarted"
+    },
+    {
+      "attempt": 2,
+      "started_at": "2026-11-12T21:41:08+08:00",
+      "resumed_via": "继续安装",
+      "elapsed_seconds": 1012,
+      "phases": [
+        {
+          "at": "2026-11-12T13:41:11.327Z",
+          "elapsedSeconds": 3,
+          "status": "正在下载",
+          "progress": "正在下载223.1 MB / 35.56 GB"
+        },
+        {
+          "at": "2026-11-12T13:55:10.738Z",
+          "elapsedSeconds": 842,
+          "status": "正在校验模型",
+          "progress": "正在校验模型35.56 GB / 35.56 GB"
+        },
+        {
+          "at": "2026-11-12T13:56:31.165Z",
+          "elapsedSeconds": 923,
+          "status": "准备隔离运行环境",
+          "progress": "准备隔离运行环境35.56 GB / 35.56 GB"
+        },
+        {
+          "at": "2026-11-12T13:57:01.394Z",
+          "elapsedSeconds": 953,
+          "status": "检查运行环境与设备",
+          "progress": "检查运行环境与设备35.56 GB / 35.56 GB"
+        },
+        {
+          "at": "2026-11-12T13:57:59.739Z",
+          "elapsedSeconds": 1011,
+          "status": "当前可执行",
+          "progress": ""
+        }
+      ],
+      "outcome": "ready"
+    }
+  ],
+  "download_phase_seconds": 842,
+  "ready_record_written_at": "2026-11-12T21:57:27+08:00",
+  "proxy": "127.0.0.1:7897 enabled; ModelScope also reachable directly",
+  "evidence": [
+    "install-network.json",
+    "install-network-attempt1.json",
+    "logs-r-net-app.log",
+    "logs-r-net-installation.log"
+  ]
+}

@@ -1,0 +1,219 @@
+{
+  "model": "Qwen-Image 2.1",
+  "kind": "text",
+  "prompt": "涓€鐩嗙矇鑹叉ū鑺辨斁鍦ㄦ湪璐ㄧ獥鍙颁笂锛屾櫒鍏夛紝娴呮櫙娣?[G03]",
+  "source": "",
+  "startedAt": "2026-11-12T13:33:32.079Z",
+  "status": "succeeded",
+  "stages": [
+    {
+      "at": "2026-11-12T13:33:34.348Z",
+      "elapsedSeconds": 2,
+      "stage": "正在接收提示词"
+    },
+    {
+      "at": "2026-11-12T13:33:37.369Z",
+      "elapsedSeconds": 5,
+      "stage": "正在准备生成"
+    },
+    {
+      "at": "2026-11-12T13:33:43.406Z",
+      "elapsedSeconds": 11,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:33:53.955Z",
+      "elapsedSeconds": 21,
+      "stage": "正在编码提示词"
+    },
+    {
+      "at": "2026-11-12T13:33:55.461Z",
+      "elapsedSeconds": 23,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:33:59.995Z",
+      "elapsedSeconds": 27,
+      "stage": "正在采样 2/40"
+    },
+    {
+      "at": "2026-11-12T13:34:01.507Z",
+      "elapsedSeconds": 29,
+      "stage": "正在采样 3/40"
+    },
+    {
+      "at": "2026-11-12T13:34:03.018Z",
+      "elapsedSeconds": 30,
+      "stage": "正在采样 4/40"
+    },
+    {
+      "at": "2026-11-12T13:34:04.522Z",
+      "elapsedSeconds": 32,
+      "stage": "正在采样 5/40"
+    },
+    {
+      "at": "2026-11-12T13:34:06.024Z",
+      "elapsedSeconds": 33,
+      "stage": "正在采样 6/40"
+    },
+    {
+      "at": "2026-11-12T13:34:07.541Z",
+      "elapsedSeconds": 35,
+      "stage": "正在采样 8/40"
+    },
+    {
+      "at": "2026-11-12T13:34:10.571Z",
+      "elapsedSeconds": 38,
+      "stage": "正在采样 10/40"
+    },
+    {
+      "at": "2026-11-12T13:34:13.590Z",
+      "elapsedSeconds": 41,
+      "stage": "正在采样 12/40"
+    },
+    {
+      "at": "2026-11-12T13:34:15.097Z",
+      "elapsedSeconds": 42,
+      "stage": "正在采样 13/40"
+    },
+    {
+      "at": "2026-11-12T13:34:16.611Z",
+      "elapsedSeconds": 44,
+      "stage": "正在采样 14/40"
+    },
+    {
+      "at": "2026-11-12T13:34:18.117Z",
+      "elapsedSeconds": 45,
+      "stage": "正在采样 15/40"
+    },
+    {
+      "at": "2026-11-12T13:34:19.626Z",
+      "elapsedSeconds": 47,
+      "stage": "正在采样 16/40"
+    },
+    {
+      "at": "2026-11-12T13:34:21.134Z",
+      "elapsedSeconds": 48,
+      "stage": "正在采样 17/40"
+    },
+    {
+      "at": "2026-11-12T13:34:22.647Z",
+      "elapsedSeconds": 50,
+      "stage": "正在采样 18/40"
+    },
+    {
+      "at": "2026-11-12T13:34:24.157Z",
+      "elapsedSeconds": 51,
+      "stage": "正在采样 19/40"
+    },
+    {
+      "at": "2026-11-12T13:34:25.669Z",
+      "elapsedSeconds": 53,
+      "stage": "正在采样 20/40"
+    },
+    {
+      "at": "2026-11-12T13:34:27.176Z",
+      "elapsedSeconds": 54,
+      "stage": "正在采样 21/40"
+    },
+    {
+      "at": "2026-11-12T13:34:28.682Z",
+      "elapsedSeconds": 56,
+      "stage": "正在采样 22/40"
+    },
+    {
+      "at": "2026-11-12T13:34:30.194Z",
+      "elapsedSeconds": 57,
+      "stage": "正在采样 24/40"
+    },
+    {
+      "at": "2026-11-12T13:34:33.212Z",
+      "elapsedSeconds": 60,
+      "stage": "正在采样 26/40"
+    },
+    {
+      "at": "2026-11-12T13:34:36.218Z",
+      "elapsedSeconds": 63,
+      "stage": "正在采样 28/40"
+    },
+    {
+      "at": "2026-11-12T13:34:37.727Z",
+      "elapsedSeconds": 65,
+      "stage": "正在采样 29/40"
+    },
+    {
+      "at": "2026-11-12T13:34:39.234Z",
+      "elapsedSeconds": 66,
+      "stage": "正在采样 30/40"
+    },
+    {
+      "at": "2026-11-12T13:34:40.747Z",
+      "elapsedSeconds": 68,
+      "stage": "正在采样 31/40"
+    },
+    {
+      "at": "2026-11-12T13:34:42.255Z",
+      "elapsedSeconds": 69,
+      "stage": "正在采样 32/40"
+    },
+    {
+      "at": "2026-11-12T13:34:43.760Z",
+      "elapsedSeconds": 71,
+      "stage": "正在采样 33/40"
+    },
+    {
+      "at": "2026-11-12T13:34:45.269Z",
+      "elapsedSeconds": 72,
+      "stage": "正在采样 34/40"
+    },
+    {
+      "at": "2026-11-12T13:34:46.779Z",
+      "elapsedSeconds": 74,
+      "stage": "正在采样 35/40"
+    },
+    {
+      "at": "2026-11-12T13:34:48.288Z",
+      "elapsedSeconds": 75,
+      "stage": "正在采样 37/40"
+    },
+    {
+      "at": "2026-11-12T13:34:51.300Z",
+      "elapsedSeconds": 78,
+      "stage": "正在采样 39/40"
+    },
+    {
+      "at": "2026-11-12T13:34:54.322Z",
+      "elapsedSeconds": 81,
+      "stage": "采样 40/40 · 正在处理"
+    },
+    {
+      "at": "2026-11-12T13:34:55.830Z",
+      "elapsedSeconds": 83,
+      "stage": "正在解码图片"
+    },
+    {
+      "at": "2026-11-12T13:34:58.837Z",
+      "elapsedSeconds": 86,
+      "stage": "正在验证并保存"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT"
+  ],
+  "selectedModel": "Qwen-Image 2.1",
+  "turnsBefore": {
+    "turns": 4,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T13:33:32.843Z",
+  "turnId": "turn-46d11918000a4125ad509ebdcacde26a",
+  "turnText": "涓€鐩嗙矇鑹叉ū鑺辨斁鍦ㄦ湪璐ㄧ獥鍙颁笂锛屾櫒鍏夛紝娴呮櫙娣?[G03]\n\n你\nImage Studio\nQwen-Image 2.1 · 1:1 · 种子 1056653535\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+  "elapsedSeconds": 88,
+  "endedAt": "2026-11-12T13:35:00.516Z"
+}

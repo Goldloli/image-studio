@@ -1,0 +1,708 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-real-generation-results",
+  "change": "validate-windows-12gb-real-generation",
+  "beads_issue": "image-studio-pze",
+  "generated_at": "2026-11-12T20:50:35.5140561+08:00",
+  "build": {
+    "commit": "159a0e89d80ca896140d3854fcf2a3c6acecb17e",
+    "version": "0.1.1",
+    "installer_sha256": "d23c18c0a107850cd8fc14d305e0bd23064f3632decd219567015ddc4e0cd3b4",
+    "installed_exe_sha256": "aec5d0672a8b56ded736de19afa93486b0d4593fc85c2067aecdf3d921cab539"
+  },
+  "machine": {
+    "os": "Microsoft Windows 10 专业版 10.0.19045 build 19045 64 位",
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13700K (16C/24T)",
+    "ram_gib": 31.7,
+    "gpu_line": "NVIDIA GeForce RTX 3080 Ti, 12288 MiB, 596.49, 8.6",
+    "display": "2560x1440",
+    "dpi": 96,
+    "webview2": "157.0.4341.46",
+    "disk_c_free_gib": 925.8,
+    "pagefile_mib": 4864,
+    "commit_limit_gib": 36.5,
+    "available_commit_gib": 21.9,
+    "available_physical_gib": 19.7,
+    "proxy": "127.0.0.1:7897",
+    "python": "3.11/3.13/3.14",
+    "node": "v24.19.0",
+    "npm": "11.17.0",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)"
+  },
+  "data_roots": {
+    "fresh_root": "C:\\ist-rg\\r-fresh",
+    "upgrade_root": "C:\\ist-rg\\r-v5",
+    "network_root": "C:\\ist-rg\\r-net",
+    "source_roots_untouched": [
+      "C:\\ist-accept",
+      "C:\\ist-a"
+    ],
+    "seed_cache_source": [
+      "C:\\ist-accept\\cache\\downloads (152 entries / 135.5 GiB)",
+      "target/parity-gate0 (143.37 GiB)",
+      "target/parity-runtime (111.89 GiB)",
+      "target/windows-gate0 (68 GiB)"
+    ],
+    "v5_source_assets": 20,
+    "v5_source_jobs": 23,
+    "v5_source_conversations": 1
+  },
+  "execution_surface_review": {
+    "baseline": "b861ae5 (2026-11-08 full-generation baseline)",
+    "classification": "execution-surface change",
+    "changed_files": [
+      "tools/diffusers-worker-windows/studio_diffusers_worker/backends/low_memory.py",
+      "tools/diffusers-worker-windows/studio_diffusers_worker/backends/prepare.py",
+      "tools/diffusers-worker-windows/studio_diffusers_worker/backends/qwen.py",
+      "apps/desktop/src/adapters/installation.rs",
+      "apps/desktop/src/adapters/windows_process.rs",
+      "resources/windows-parity/workers/studio_diffusers_worker-0.1.0-py3-none-any.whl",
+      "resources/windows-parity/runtime-v2/product-runtime-manifest.json",
+      "resources/windows-parity/realesrgan-ncnn-vulkan/asset-manifest.json"
+    ],
+    "gate0_reuse": "invalid for this build; worker-internal CUDA reserved not measured in this product-level round"
+  },
+  "labels": {
+    "current_build_real_generation": "pass (machine evidence; 9/9 cases succeeded in the canonical run, resources within product-level budgets)",
+    "functional_and_management": "pass (install, workspace, works/conversations, v5 upgrade, startup diagnostics, cancellation, forced kill)",
+    "reused_evidence": "none (execution-surface change); 2026-11-08 and 8 GB supplementary evidence referenced only as context",
+    "waived": [
+      "whole-tree network denial",
+      "real Microsoft IME",
+      "display scaling switch",
+      "visual acceptance"
+    ],
+    "not_run": [
+      "watchdog injection",
+      "migration failure protection",
+      "disk-shortage/read-only startup",
+      "worker-internal CUDA reserved"
+    ]
+  },
+  "summary": {
+    "counts": {
+      "pass": 65,
+      "not_run": 3,
+      "waived": 4,
+      "pending_user": 1
+    },
+    "real_generation_cases": 9,
+    "real_generation_succeeded": 9,
+    "resource_budget_ok": true,
+    "works_before_cleanup": 27,
+    "works_after_cleanup": 25,
+    "upgrade_root_assets": 21
+  },
+  "rows": [
+    {
+      "id": "P01",
+      "category": "prerequisite",
+      "status": "pass",
+      "note": "frozen commit 159a0e89d80ca896140d3854fcf2a3c6acecb17e (local docs commit, not pushed); last pushed main 95dd117 carries [skip ci]; local quality gates recorded in build.log"
+    },
+    {
+      "id": "P02",
+      "category": "prerequisite",
+      "status": "pass",
+      "note": "environment.json"
+    },
+    {
+      "id": "P03",
+      "category": "prerequisite",
+      "status": "pass",
+      "note": "execution-surface diff since b861ae5 is an execution-surface change (low_memory.py, prepare.py, qwen.py, windows_process.rs, installation.rs, worker wheel); historical Gate 0 CUDA reserved reuse is NOT valid for this build"
+    },
+    {
+      "id": "P04",
+      "category": "prerequisite",
+      "status": "pass",
+      "note": "r-v5 copied from real v5 root; source roots untouched; data-safety.json"
+    },
+    {
+      "id": "P05",
+      "category": "prerequisite",
+      "status": "pass",
+      "note": "seed parity 132 artifacts / 123 unique / 0 missing / 0 mismatch; Z-Image seed 25 links / 34 cache hits; zero downloads in r-fresh"
+    },
+    {
+      "id": "P06",
+      "category": "prerequisite",
+      "status": "pass",
+      "note": "CDP 9222, helper scripts, UTF-8 JSON case files"
+    },
+    {
+      "id": "P07",
+      "category": "prerequisite",
+      "status": "pass",
+      "note": "pagefile 4864 MiB; commit limit 36.5 GiB; available physical 19.7 GiB at start; low-memory prepare gate satisfied"
+    },
+    {
+      "id": "I01",
+      "category": "install",
+      "status": "pass",
+      "note": "frontend 81 tests + build, cargo fmt/clippy/test workspace, NSIS build; build.log"
+    },
+    {
+      "id": "I02",
+      "category": "install",
+      "status": "pass",
+      "note": "installer d23c18c0a107850c...; installed exe aec5d0672a8b56de...; registry 0.1.1; first silent attempt exited 2 (retry exited 0)"
+    },
+    {
+      "id": "I03",
+      "category": "install",
+      "status": "pass",
+      "note": "fresh root 7 models / 0 installed / device met 7; no download, no runtime preparation"
+    },
+    {
+      "id": "I04",
+      "category": "install",
+      "status": "pass",
+      "note": "second instance same root exited 0 in 1.1 s, first instance alive, no startup-failure log; busy-during-generation variant not run"
+    },
+    {
+      "id": "I05",
+      "category": "install",
+      "status": "pass",
+      "note": "long path and WebView2 profile-file failure: startup-failure.log + native dialog + exit code 3; bad WEBVIEW2_BROWSER_EXECUTABLE_FOLDER did not reproduce failure (not_run, recorded)"
+    },
+    {
+      "id": "I06",
+      "category": "install",
+      "status": "pass",
+      "note": "structured app.log lines; zero console windows and zero worker window handles across 59 one-second samples during a real generation"
+    },
+    {
+      "id": "M01-BiRefNet",
+      "category": "model-install",
+      "status": "pass",
+      "note": "seed cache install 61 s; install-birefnet.json"
+    },
+    {
+      "id": "M01-Klein",
+      "category": "model-install",
+      "status": "pass",
+      "note": "seed cache install 89 s; install-klein.json"
+    },
+    {
+      "id": "M01-MOSS",
+      "category": "model-install",
+      "status": "pass",
+      "note": "seed cache install 361 s; install-moss.json"
+    },
+    {
+      "id": "M01-Qwen-Image 2.1",
+      "category": "model-install",
+      "status": "pass",
+      "note": "seed cache install 399 s; install-qwen-base.json"
+    },
+    {
+      "id": "M01-Qwen-Image 2.1 Turbo",
+      "category": "model-install",
+      "status": "pass",
+      "note": "seed cache install 403 s; install-qwen-turbo.json"
+    },
+    {
+      "id": "M01-Real-ESRGAN",
+      "category": "model-install",
+      "status": "pass",
+      "note": "seed cache install 11 s; install-realesrgan.json"
+    },
+    {
+      "id": "M01-Z-Image",
+      "category": "model-install",
+      "status": "pass",
+      "note": "seed cache install 164 s; install-zimage.json"
+    },
+    {
+      "id": "M02",
+      "category": "model-install",
+      "status": "pass",
+      "note": "real network Z-Image install: attempt 1 downloaded 33.17/35.56 GB then stalled; restarted with 继续安装; attempt 2 completed download+verify in 1012 s; ready; cache 33.12 GiB"
+    },
+    {
+      "id": "M03",
+      "category": "model-install",
+      "status": "pass",
+      "note": "low-memory prepare logs for Qwen/MOSS; prepare-preflight recorded; no prepared-cache leftovers from failed attempts"
+    },
+    {
+      "id": "M04",
+      "category": "model-install",
+      "status": "pass",
+      "note": "after restart all seven models report 当前可执行"
+    },
+    {
+      "id": "M05",
+      "category": "model-install",
+      "status": "pass",
+      "note": "Klein detail shows 当前执行：标准档 1024×1024 · bfloat16; device identity RTX 3080 Ti 12 GiB / Windows 10 22H2"
+    },
+    {
+      "id": "G01a",
+      "category": "real-generation",
+      "status": "pass",
+      "model": "Klein",
+      "capability": "text",
+      "elapsed_seconds": 27,
+      "output": {
+        "width": 1024,
+        "height": 1024,
+        "bytes": 2150170,
+        "sha256": "09c54104c1d2dcc5d8a094295404a9ea72c3f2d0f9ed0583334a9632753fa3c6",
+        "output_role": "primary"
+      },
+      "resources": {
+        "gpu_peak_mib": 7590.0,
+        "gpu_peak_minus_baseline_mib": 6190.0,
+        "private_commit_peak_gib": 16.68,
+        "available_physical_min_gib": 17.1,
+        "gpu_limit_mib": 10752,
+        "commit_limit_gib": 24,
+        "available_physical_limit_gib": 2
+      },
+      "evidence": "generations/G01a-evidence.json"
+    },
+    {
+      "id": "G01b",
+      "category": "real-generation",
+      "status": "pass",
+      "model": "Klein",
+      "capability": "text",
+      "elapsed_seconds": 26,
+      "output": {
+        "width": 1024,
+        "height": 1024,
+        "bytes": 1684363,
+        "sha256": "683bd991e993aa2013bf5e59263548571620cd3e3f6462005b700c88ac506b54",
+        "output_role": "primary"
+      },
+      "resources": {
+        "gpu_peak_mib": 7607.0,
+        "gpu_peak_minus_baseline_mib": 6207.0,
+        "private_commit_peak_gib": 16.6,
+        "available_physical_min_gib": 15.7,
+        "gpu_limit_mib": 10752,
+        "commit_limit_gib": 24,
+        "available_physical_limit_gib": 2
+      },
+      "evidence": "generations/G01b-evidence.json"
+    },
+    {
+      "id": "G02",
+      "category": "real-generation",
+      "status": "pass",
+      "model": "Z-Image",
+      "capability": "text",
+      "elapsed_seconds": 54,
+      "output": {
+        "width": 1024,
+        "height": 1024,
+        "bytes": 1394376,
+        "sha256": "db2fc65aee60dba8d37a4fe1d4e14b6d2af0d0838623b257eeccd02c7399b61b",
+        "output_role": "primary"
+      },
+      "resources": {
+        "gpu_peak_mib": 10852.0,
+        "gpu_peak_minus_baseline_mib": 9452.0,
+        "private_commit_peak_gib": 18.75,
+        "available_physical_min_gib": 13.1,
+        "gpu_limit_mib": 10752,
+        "commit_limit_gib": 24,
+        "available_physical_limit_gib": 2
+      },
+      "evidence": "generations/G02-evidence.json"
+    },
+    {
+      "id": "G03",
+      "category": "real-generation",
+      "status": "pass",
+      "model": "Qwen-Image 2.1",
+      "capability": "text",
+      "elapsed_seconds": 86,
+      "output": {
+        "width": 1024,
+        "height": 1024,
+        "bytes": 1354564,
+        "sha256": "d8342834f9de2df078f7061b8cb03b99104833aa02a4a3dfd3d7257b1cf07cf8",
+        "output_role": "primary"
+      },
+      "resources": {
+        "gpu_peak_mib": 6452.0,
+        "gpu_peak_minus_baseline_mib": 5052.0,
+        "private_commit_peak_gib": 13.1,
+        "available_physical_min_gib": 16.5,
+        "gpu_limit_mib": 10752,
+        "commit_limit_gib": 24,
+        "available_physical_limit_gib": 2
+      },
+      "evidence": "generations/G03-evidence.json"
+    },
+    {
+      "id": "G04",
+      "category": "real-generation",
+      "status": "pass",
+      "model": "Qwen-Image 2.1 Turbo",
+      "capability": "text",
+      "elapsed_seconds": 41,
+      "output": {
+        "width": 1024,
+        "height": 1024,
+        "bytes": 1504693,
+        "sha256": "3b779a7383388567df40d12146bdf87934da5b7991f252f3d73e55bbd640b3ed",
+        "output_role": "primary"
+      },
+      "resources": {
+        "gpu_peak_mib": 7907.0,
+        "gpu_peak_minus_baseline_mib": 6507.0,
+        "private_commit_peak_gib": 12.99,
+        "available_physical_min_gib": 15.1,
+        "gpu_limit_mib": 10752,
+        "commit_limit_gib": 24,
+        "available_physical_limit_gib": 2
+      },
+      "evidence": "generations/G04-evidence.json"
+    },
+    {
+      "id": "G05",
+      "category": "real-generation",
+      "status": "pass",
+      "model": "MOSS",
+      "capability": "text",
+      "elapsed_seconds": 146,
+      "output": {
+        "width": 1024,
+        "height": 1024,
+        "bytes": 2013223,
+        "sha256": "59954dfaa6744053ade42751c362d2d808c8d94f12081ba2ab4c059e54b8e50c",
+        "output_role": "primary"
+      },
+      "resources": {
+        "gpu_peak_mib": 6190.0,
+        "gpu_peak_minus_baseline_mib": 4790.0,
+        "private_commit_peak_gib": 12.66,
+        "available_physical_min_gib": 16.0,
+        "gpu_limit_mib": 10752,
+        "commit_limit_gib": 24,
+        "available_physical_limit_gib": 2
+      },
+      "evidence": "generations/G05-evidence.json"
+    },
+    {
+      "id": "G06",
+      "category": "real-generation",
+      "status": "pass",
+      "model": "Klein",
+      "capability": "edit",
+      "elapsed_seconds": 39,
+      "output": {
+        "width": 1024,
+        "height": 1024,
+        "bytes": 2148717,
+        "sha256": "ce17ae2c2c3dfd92d0faae75eeb89fee2302236c847cfeb2893ef78e2b0da85e",
+        "output_role": "primary"
+      },
+      "resources": {
+        "gpu_peak_mib": 7827.0,
+        "gpu_peak_minus_baseline_mib": 6427.0,
+        "private_commit_peak_gib": 16.66,
+        "available_physical_min_gib": 13.6,
+        "gpu_limit_mib": 10752,
+        "commit_limit_gib": 24,
+        "available_physical_limit_gib": 2
+      },
+      "evidence": "generations/G06-evidence.json"
+    },
+    {
+      "id": "G07",
+      "category": "real-generation",
+      "status": "pass",
+      "model": "BiRefNet",
+      "capability": "remove-background",
+      "elapsed_seconds": 23,
+      "output": {
+        "width": 1024,
+        "height": 1024,
+        "bytes": 1565690,
+        "sha256": "b29ce455af763b91b6973411c66be454c20d08b417b3c406a9ed5899c6632fb3",
+        "output_role": "primary"
+      },
+      "resources": {
+        "gpu_peak_mib": 1515.0,
+        "gpu_peak_minus_baseline_mib": 115.0,
+        "private_commit_peak_gib": 10.9,
+        "available_physical_min_gib": 14.3,
+        "gpu_limit_mib": 10752,
+        "commit_limit_gib": 24,
+        "available_physical_limit_gib": 2
+      },
+      "evidence": "generations/G07-evidence.json"
+    },
+    {
+      "id": "G08",
+      "category": "real-generation",
+      "status": "pass",
+      "model": "Real-ESRGAN",
+      "capability": "upscale",
+      "elapsed_seconds": 8,
+      "output": {
+        "width": 4096,
+        "height": 4096,
+        "bytes": 16839218,
+        "sha256": "2e04d2729964c5ddbbbb7bf190677bb5de58cb40f48e4f2eb97b9c10d2067cce",
+        "output_role": "primary"
+      },
+      "resources": {
+        "gpu_peak_mib": 2274.0,
+        "gpu_peak_minus_baseline_mib": 874.0,
+        "private_commit_peak_gib": 2.77,
+        "available_physical_min_gib": 20.6,
+        "gpu_limit_mib": 10752,
+        "commit_limit_gib": 24,
+        "available_physical_limit_gib": 2
+      },
+      "evidence": "generations/G08-evidence.json"
+    },
+    {
+      "id": "G09",
+      "category": "real-generation",
+      "status": "pass",
+      "note": "exported G03 PNG (1,354,564 B) and old v5 Klein PNG (2,097,618 B) byte-identical to managed assets"
+    },
+    {
+      "id": "G10",
+      "category": "real-generation",
+      "status": "pass",
+      "note": "machine checks: 8x 1024 RGB, 1x BiRefNet RGBA, 1x 8-bit grayscale mask, 1x 4096 RGB, all decodable with non-zero variance; visual acceptance waived by owner"
+    },
+    {
+      "id": "G11",
+      "category": "real-generation",
+      "status": "pass",
+      "note": "host GPU peak minus baseline <= 10.5 GiB, process-tree private commit peak <= 24 GiB, available physical RAM >= 2 GiB for every case; worker-internal CUDA reserved not persisted by the product and not reused from Gate 0 because the diff is an execution-surface change (not_run at worker level)"
+    },
+    {
+      "id": "G12",
+      "category": "real-generation",
+      "status": "pass",
+      "note": "after restart works open/export, favorite retained, tombstone retained"
+    },
+    {
+      "id": "W01",
+      "category": "works",
+      "status": "pass",
+      "note": "27 real works listed; filters applied/cleared; empty favorites state; pagination label"
+    },
+    {
+      "id": "W02",
+      "category": "works",
+      "status": "pass",
+      "note": "favorite toggled, 仅收藏 returned exactly 1, persisted across restart"
+    },
+    {
+      "id": "W03",
+      "category": "works",
+      "status": "pass",
+      "note": "preview shows real prompt/model/size/seed/AssetRef/production record"
+    },
+    {
+      "id": "W04",
+      "category": "works",
+      "status": "pass",
+      "note": "delete confirm, file removed, count 27->26, deletion_state=deleted, restart no resurrection"
+    },
+    {
+      "id": "W05",
+      "category": "works",
+      "status": "pass",
+      "note": "BiRefNet primary+mask deleted as one unit; both files gone, count 26->25"
+    },
+    {
+      "id": "W06",
+      "category": "works",
+      "status": "pass",
+      "note": "delete blocked with conversation and per-capability resolution guidance; after clearing current and stale capability source slots delete succeeded"
+    },
+    {
+      "id": "W07",
+      "category": "works",
+      "status": "pass",
+      "note": "conversation delete retained 24 works with 会话已删除 tombstone; successor default conversation created; persisted across restart"
+    },
+    {
+      "id": "C01",
+      "category": "conversations",
+      "status": "pass",
+      "note": "new conversation, switch, rename"
+    },
+    {
+      "id": "C02",
+      "category": "conversations",
+      "status": "pass",
+      "note": "idle non-current conversation deleted; current input untouched"
+    },
+    {
+      "id": "C03",
+      "category": "conversations",
+      "status": "pass",
+      "note": "current/last conversation deleted and successor default conversation created"
+    },
+    {
+      "id": "D01",
+      "category": "upgrade",
+      "status": "pass",
+      "note": "v5->v6 on real copied root: user_version 6, quick_check ok, 20 old assets / 23 jobs / 1 conversation / 1 draft preserved and readable"
+    },
+    {
+      "id": "D02",
+      "category": "upgrade",
+      "status": "pass",
+      "note": "old v5 work exported byte-identical (2,097,618 B, 326a97c6...)"
+    },
+    {
+      "id": "D03",
+      "category": "upgrade",
+      "status": "pass",
+      "note": "Klein re-installed from seeded cache (114 s) and one real generation succeeded (42 s) in the upgraded root"
+    },
+    {
+      "id": "D04",
+      "category": "upgrade",
+      "status": "pass",
+      "note": "restart idempotent: 21 assets / 25 turns / 1 conversation before and after, no duplicate migration"
+    },
+    {
+      "id": "D05",
+      "category": "upgrade",
+      "status": "not_run",
+      "note": "migration failure protection not constructed safely"
+    },
+    {
+      "id": "D06",
+      "category": "upgrade",
+      "status": "pass",
+      "note": "old BiRefNet outputs present and decodable: 1024x1024 8-bit grayscale mask and RGBA primary"
+    },
+    {
+      "id": "O01-C-cancel-klein",
+      "category": "robustness",
+      "status": "pass",
+      "note": "cancelled: Klein"
+    },
+    {
+      "id": "O01-C-cancel-qwen-turbo",
+      "category": "robustness",
+      "status": "pass",
+      "note": "cancelled: Qwen-Image 2.1 Turbo"
+    },
+    {
+      "id": "O01-C-cancel-birefnet",
+      "category": "robustness",
+      "status": "pass",
+      "note": "cancelled: BiRefNet"
+    },
+    {
+      "id": "O01-C-cancel-realesrgan",
+      "category": "robustness",
+      "status": "pass",
+      "note": "cancelled: Real-ESRGAN"
+    },
+    {
+      "id": "O01",
+      "category": "robustness",
+      "status": "pass",
+      "note": "settle times after stop: Klein 6.0 s, Qwen-Turbo 4.5 s, BiRefNet 4.5 s, Real-ESRGAN 1.5 s; no leftover worker processes"
+    },
+    {
+      "id": "O02",
+      "category": "robustness",
+      "status": "pass",
+      "note": "host killed during Z-Image generation; restart marked the attempt interrupted with no asset (30 assets unchanged); explicit 重试 created a new attempt; retry cancelled cleanly"
+    },
+    {
+      "id": "O03",
+      "category": "robustness",
+      "status": "not_run",
+      "note": "watchdog injection not executed this round"
+    },
+    {
+      "id": "O04",
+      "category": "robustness",
+      "status": "pass",
+      "note": "no console windows or console-windowed worker processes during a real generation (59 samples)"
+    },
+    {
+      "id": "O05",
+      "category": "robustness",
+      "status": "waived",
+      "note": "whole-tree network denial waived by owner 2026-11-12"
+    },
+    {
+      "id": "O06",
+      "category": "robustness",
+      "status": "not_run",
+      "note": "disk-shortage / read-only startup not re-run this round"
+    },
+    {
+      "id": "O07",
+      "category": "robustness",
+      "status": "pass",
+      "note": "covered by I05"
+    },
+    {
+      "id": "O08",
+      "category": "robustness",
+      "status": "pass",
+      "note": "covered by I06/O04"
+    },
+    {
+      "id": "H01",
+      "category": "manual",
+      "status": "waived",
+      "note": "real Microsoft IME waived by owner 2026-11-12"
+    },
+    {
+      "id": "H02",
+      "category": "manual",
+      "status": "waived",
+      "note": "display scaling switch waived by owner 2026-11-12"
+    },
+    {
+      "id": "H03",
+      "category": "manual",
+      "status": "pass",
+      "note": "1280x800 and 960x640 client sizes exact; composer controls visible at 960x640; theme toggle applied; Tab/Escape no stray dialogs"
+    },
+    {
+      "id": "H04",
+      "category": "manual",
+      "status": "waived",
+      "note": "visual acceptance waived by owner 2026-11-12"
+    },
+    {
+      "id": "E01",
+      "category": "evidence",
+      "status": "pass",
+      "note": "evidence directory populated: environment, db snapshots, per-case JSON, samples CSV, screenshots, exports, logs"
+    },
+    {
+      "id": "E02",
+      "category": "evidence",
+      "status": "pass",
+      "note": "this results.json"
+    },
+    {
+      "id": "E03",
+      "category": "evidence",
+      "status": "pass",
+      "note": "labels below"
+    },
+    {
+      "id": "E04",
+      "category": "evidence",
+      "status": "pending_user",
+      "note": "change archive awaits owner confirmation"
+    }
+  ]
+}

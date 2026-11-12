@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "kind": "windows-12gb-real-generation-environment",
+  "generated_at": "2026-11-12T20:50:35.5140561+08:00",
+  "change": "validate-windows-12gb-real-generation",
+  "beads_issue": "image-studio-pze",
+  "machine": {
+    "os": "Microsoft Windows 10 专业版 10.0.19045 build 19045 64 位",
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13700K (16C/24T)",
+    "ram_gib": 31.7,
+    "gpu_line": "NVIDIA GeForce RTX 3080 Ti, 12288 MiB, 596.49, 8.6",
+    "display": "2560x1440",
+    "dpi": 96,
+    "webview2": "157.0.4341.46",
+    "disk_c_free_gib": 925.8,
+    "pagefile_mib": 4864,
+    "commit_limit_gib": 36.5,
+    "available_commit_gib": 21.9,
+    "available_physical_gib": 19.7,
+    "proxy": "127.0.0.1:7897",
+    "python": "3.11/3.13/3.14",
+    "node": "v24.19.0",
+    "npm": "11.17.0",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)"
+  },
+  "build": {
+    "commit": "159a0e89d80ca896140d3854fcf2a3c6acecb17e",
+    "commit_subject": "docs(openspec): record the owner-confirmed windows real-generation scope",
+    "worktree_status": "?? .beads/interactions.jsonl",
+    "version": {
+      "cargo": "version = \"0.1.1\"",
+      "frontend": "\"version\":\"0.1.1\"",
+      "tauri": "\"version\": \"0.1.1\""
+    },
+    "installer": "target/release/bundle/nsis/Image Studio_0.1.1_x64-setup.exe",
+    "installer_sha256": "d23c18c0a107850cd8fc14d305e0bd23064f3632decd219567015ddc4e0cd3b4",
+    "exe": "target/release/image-studio-desktop.exe",
+    "exe_sha256": "c185003d01c03a2f576f17b6b76ade1e5b4dbb759ff3dd9b86cd0b3c10a0ebf1",
+    "ci_status": {
+      "frozen_commit_pushed": false,
+      "frozen_commit_note": "local commits 159a0e8/e629960 are 2 ahead of origin/main 95dd117; no CI run applies to the frozen commit",
+      "remote_head": "95dd117b69e06baaa157740eb7a6c1f6cead5202",
+      "remote_head_note": "commit subject carries [skip ci] so no quality run was created for it",
+      "last_quality_run": {
+        "id": 43152709678,
+        "head_sha": "51d56f1c365aed174fd8554e81965ef1f50eb8e1",
+        "conclusion": "failure",
+        "created_at": "2026-11-12T04:07:31Z",
+        "url": "https://github.com/Goldloli/image-studio/actions/runs/43152709678"
+      },
+      "local_quality_gates": "recorded in build.log (frontend 81 tests, cargo workspace 223+ passed)"
+    },
+    "installer_bytes": 245118946,
+    "exe_bytes": 42549760,
+    "built_at": "2026-11-12T21:02:00+08:00",
+    "quality_gates": {
+      "frontend_tests": 81,
+      "frontend_build": "pass",
+      "cargo_fmt": "pass",
+      "cargo_clippy": "pass",
+      "cargo_test_workspace": "223 passed / 0 failed / 7 ignored (desktop) plus other workspace suites",
+      "log": "build.log"
+    },
+    "installed_exe": "C:\\Users\\XIAOKA-PC\\AppData\\Local\\Image Studio\\image-studio-desktop.exe",
+    "installed_exe_bytes": 42549760,
+    "installed_exe_sha256": "aec5d0672a8b56ded736de19afa93486b0d4593fc85c2067aecdf3d921cab539",
+    "install": {
+      "attempts": 2,
+      "attempt1": "exit code 2, no files changed (reason unresolved; retried immediately)",
+      "attempt2": "exit code 0, files replaced",
+      "registry_version": "0.1.1",
+      "install_dir": "C:\\Users\\XIAOKA-PC\\AppData\\Local\\Image Studio",
+      "stub_supervisor_in_bundle": true,
+      "signed": false,
+      "silent_args": "/S"
+    }
+  },
+  "data": {
+    "fresh_root": "C:\\ist-rg\\r-fresh",
+    "upgrade_root": "C:\\ist-rg\\r-v5",
+    "network_root": "C:\\ist-rg\\r-net",
+    "source_roots_untouched": [
+      "C:\\ist-accept",
+      "C:\\ist-a"
+    ],
+    "seed_cache_source": [
+      "C:\\ist-accept\\cache\\downloads (152 entries / 135.5 GiB)",
+      "target/parity-gate0 (143.37 GiB)",
+      "target/parity-runtime (111.89 GiB)",
+      "target/windows-gate0 (68 GiB)"
+    ],
+    "v5_source_assets": 20,
+    "v5_source_jobs": 23,
+    "v5_source_conversations": 1
+  },
+  "owner_decisions": [
+    "执行本轮真实验收（2026-11-12）",
+    "真实下载并安装大型模型",
+    "不执行整树禁网验收",
+    "真实 IME、显示缩放切换、视觉质量接受/拒绝不测（waived）"
+  ],
+  "execution_surface_review": {
+    "baseline": "b861ae5 (2026-11-08 full-generation baseline)",
+    "classification": "execution-surface change",
+    "changed_files": [
+      "tools/diffusers-worker-windows/studio_diffusers_worker/backends/low_memory.py (new, 683 lines)",
+      "tools/diffusers-worker-windows/studio_diffusers_worker/backends/prepare.py",
+      "tools/diffusers-worker-windows/studio_diffusers_worker/backends/qwen.py",
+      "apps/desktop/src/adapters/installation.rs",
+      "apps/desktop/src/adapters/windows_process.rs",
+      "resources/windows-parity/workers/studio_diffusers_worker-0.1.0-py3-none-any.whl",
+      "resources/windows-parity/runtime-v2/product-runtime-manifest.json",
+      "resources/windows-parity/realesrgan-ncnn-vulkan/asset-manifest.json"
+    ],
+    "gate0_reuse": "invalid for this build because the diff changes the worker/prepare execution surface",
+    "note": "the acceptance round was still executed because the owner requested real generation on this build"
+  },
+  "final_state": {
+    "disk_c_free_gib": null,
+    "data_roots": {
+      "r-fresh": "C:/ist-rg/r-fresh",
+      "r-v5": "C:/ist-rg/r-v5",
+      "r-net": "C:/ist-rg/r-net"
+    },
+    "works_after_cleanup": 25,
+    "upgrade_root_assets": 21,
+    "network_install_cache_gib": 33.12,
+    "observations": [
+      "F5: model page auto-poll can stall after an install completes; manual refresh recovers (seen for Z-Image, Qwen Turbo, Qwen base, MOSS, and the r-v5 Klein install)",
+      "F6 (tooling): Windows PowerShell 5.1 reads UTF-8 no-BOM scripts as ANSI, corrupting Chinese string literals; prompts were moved to UTF-8 JSON case files and the corrupted-input run was archived as invalid-input",
+      "F7: the first Klein standard-tier generation failed with process commit peak 24.18 GiB > 24 GiB while three app instances and the r-net download were active; after closing the upgrade instance the retry passed with 16.68 GiB",
+      "F8: installer first silent attempt exited 2 without changing files; immediate retry exited 0 and installed",
+      "F9: bad WEBVIEW2_BROWSER_EXECUTABLE_FOLDER did not reproduce a startup failure in this build (startup-failure diagnostics verified through the long-path and profile-file paths instead)",
+      "F10: stub-supervisor.exe remains in the installed bundle (already tracked as wfy in earlier rounds)"
+    ]
+  }
+}

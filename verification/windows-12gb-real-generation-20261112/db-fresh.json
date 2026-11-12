@@ -1,0 +1,392 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-db-snapshot",
+  "generated_at": "2026-11-12T21:41:08.354301+08:00",
+  "data_root": "C:\\ist-rg\\r-fresh",
+  "user_version": 6,
+  "quick_check": "ok",
+  "conversations": [
+    {
+      "id": "conv-default",
+      "title": "闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛",
+      "title_source": "auto",
+      "created_at": 1794488166885,
+      "activity_seq": 11,
+      "deleted_at": null
+    }
+  ],
+  "drafts": [
+    {
+      "id": 1,
+      "name": "闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛",
+      "prompt": "",
+      "params_json": {
+        "aspect": "1:1",
+        "capabilityDrafts": {
+          "image.edit.flux2-klein-4b.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": "asset-bb2b303773fd4d71ad4abf7782b92f51"
+          },
+          "image.remove-background.birefnet-general-epoch-244.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": "asset-e2a7080923b140afa66efe498f7fe211"
+          },
+          "image.text-to-image.flux2-klein-4b.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": null
+          },
+          "image.text-to-image.moss-image-sft.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": null
+          },
+          "image.text-to-image.qwen-image-2.1-turbo.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": null
+          },
+          "image.text-to-image.qwen-image-2.1.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": null
+          },
+          "image.text-to-image.z-image-turbo-diffusers-cuda-nf4.v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": null
+          }
+        },
+        "capabilityId": "image.upscale.realesrgan-x4plus.windows-v1",
+        "count": 1,
+        "modelId": "realesrgan-x4plus-windows-v1",
+        "seed": "",
+        "sourceAssetId": "asset-930eca363a0a4131b371c2b7945a220b"
+      },
+      "collapsed": 0,
+      "version": 38
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset-bb2b303773fd4d71ad4abf7782b92f51",
+      "job_id": "job-fa5a5858f6ab4f6fb1e9fa99f15d721b",
+      "attempt_id": "attempt-d9eeda51ae6a4e42907a4a5c5f9dddcb",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1358046,
+      "content_hash": "400b024ab28a45afdc7e8d528becd16cea257831708ed3def2b5f75ead269936",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-f4aa7e6f44e042118d40c6c0a19bb5d7.png",
+      "created_at": 1794490300235,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-f4aa7e6f44e042118d40c6c0a19bb5d7.png",
+        "bytes": 1358046,
+        "sha256": "400b024ab28a45afdc7e8d528becd16cea257831708ed3def2b5f75ead269936"
+      }
+    },
+    {
+      "id": "asset-930eca363a0a4131b371c2b7945a220b",
+      "job_id": "job-0cd0a0c923df4922badb104a861816fc",
+      "attempt_id": "attempt-01bb337fad034d6ba56791d25a1f81f1",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1711837,
+      "content_hash": "cf7afdc26550d6d2def9160406f575274aa3193aaddec9a1ae93676dbd659135",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-8e45e4da63d042b4b9b027bf5d292f83.png",
+      "created_at": 1794490331554,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8e45e4da63d042b4b9b027bf5d292f83.png",
+        "bytes": 1711837,
+        "sha256": "cf7afdc26550d6d2def9160406f575274aa3193aaddec9a1ae93676dbd659135"
+      }
+    },
+    {
+      "id": "asset-e2a7080923b140afa66efe498f7fe211",
+      "job_id": "job-a1d784876a8542d79d6d598598a156a4",
+      "attempt_id": "attempt-9f36bb5a8d224a80a634033b9ae0a169",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1862347,
+      "content_hash": "13db61088ebf76594a7f98baac666ff7fac08ba718e0766d65bc20979bdd99b3",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-23381c337ac54c11bb8400c2cf34d360.png",
+      "created_at": 1794490407139,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-23381c337ac54c11bb8400c2cf34d360.png",
+        "bytes": 1862347,
+        "sha256": "13db61088ebf76594a7f98baac666ff7fac08ba718e0766d65bc20979bdd99b3"
+      }
+    },
+    {
+      "id": "asset-4f10fade18b54cc786c9f972bcec041a",
+      "job_id": "job-8e7022c5ec0d40cab7805ee6d80a506d",
+      "attempt_id": "attempt-28448a01753147c29245684ad8a20670",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1389499,
+      "content_hash": "87200ec33b738cba010ba18c0dcf54b215e0d6ab42f0c7d4bcd31e4f4274245d",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-8f074d6ee9004bfdb49ced2c2b2e1fe5.png",
+      "created_at": 1794490498746,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8f074d6ee9004bfdb49ced2c2b2e1fe5.png",
+        "bytes": 1389499,
+        "sha256": "87200ec33b738cba010ba18c0dcf54b215e0d6ab42f0c7d4bcd31e4f4274245d"
+      }
+    },
+    {
+      "id": "asset-1739222018a74a87804cf00d28b3feb9",
+      "job_id": "job-1de40bf77766440b8ecf5c83ce373196",
+      "attempt_id": "attempt-b4e080083f9a47d997f9dd5de08704f4",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1566448,
+      "content_hash": "5b5a4a5ec5d8b84f19cf998b49118f57e851edb842cf8ead0753201a35738989",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-b9f7936b05c5462e9e7904fdaa98ec0c.png",
+      "created_at": 1794490542005,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-b9f7936b05c5462e9e7904fdaa98ec0c.png",
+        "bytes": 1566448,
+        "sha256": "5b5a4a5ec5d8b84f19cf998b49118f57e851edb842cf8ead0753201a35738989"
+      }
+    },
+    {
+      "id": "asset-64a3630321824b8dbe1f95cf93d9ba8b",
+      "job_id": "job-2b2b88fbd3dd4735b46d856068579087",
+      "attempt_id": "attempt-414e367803a74c66ad6636583ec61a92",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1268770,
+      "content_hash": "ad7c7ae9f1c507e6b07e98f47043f6a8a2d3aa8b2c0efefc52cff402079ae37e",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-e74029d406d64c4db3d1359930fd1f5a.png",
+      "created_at": 1794490689209,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-e74029d406d64c4db3d1359930fd1f5a.png",
+        "bytes": 1268770,
+        "sha256": "ad7c7ae9f1c507e6b07e98f47043f6a8a2d3aa8b2c0efefc52cff402079ae37e"
+      }
+    },
+    {
+      "id": "asset-47a622cd1b524479bf403dcc4e64e915",
+      "job_id": "job-bb700125256c47e9a6449ec60f4a4c29",
+      "attempt_id": "attempt-d02b70f7ad1f4f1fa21d0125bcfee7fc",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1390189,
+      "content_hash": "29174d3d2e4f68fa4a6b14b694a3d310451a54b3f19bfe6a5b0663ba886fb575",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-4e35212d92a94ec593d24f78e8e27cff.png",
+      "created_at": 1794490732142,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-4e35212d92a94ec593d24f78e8e27cff.png",
+        "bytes": 1390189,
+        "sha256": "29174d3d2e4f68fa4a6b14b694a3d310451a54b3f19bfe6a5b0663ba886fb575"
+      }
+    },
+    {
+      "id": "asset-52f4453a32584f3b845269cf71d00bc5",
+      "job_id": "job-34105008af3149288a60d6f36d1eea90",
+      "attempt_id": "attempt-58cf64b7cbf642f9b78c31a5663c14bd",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 2133430,
+      "content_hash": "730fdfeae784fe80ba8d0d07710265511653f8467bea2330a70ed75c6fb87dce",
+      "data_type": "image_rgba",
+      "relative_path": "assets/asset-bd9adfba8dc8441eaf7266fa40a56d64.png",
+      "created_at": 1794490759342,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-bd9adfba8dc8441eaf7266fa40a56d64.png",
+        "bytes": 2133430,
+        "sha256": "730fdfeae784fe80ba8d0d07710265511653f8467bea2330a70ed75c6fb87dce"
+      }
+    },
+    {
+      "id": "asset-ad1dc5e32cb247aea8ad0a992ebe28cf",
+      "job_id": "job-34105008af3149288a60d6f36d1eea90",
+      "attempt_id": "attempt-58cf64b7cbf642f9b78c31a5663c14bd",
+      "output_role": "mask",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 30282,
+      "content_hash": "edd0b79f9bd01f8747ebc3d7eb9b57bd25831a875e33405c3e800aaf9441d7a0",
+      "data_type": "mask",
+      "relative_path": "assets/asset-48ccd73bd7d3402b8ab337b351816c0e.png",
+      "created_at": 1794490759342,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-48ccd73bd7d3402b8ab337b351816c0e.png",
+        "bytes": 30282,
+        "sha256": "edd0b79f9bd01f8747ebc3d7eb9b57bd25831a875e33405c3e800aaf9441d7a0"
+      }
+    },
+    {
+      "id": "asset-03a0e87f39364f44a91f282edff4819e",
+      "job_id": "job-d2e07ebe38aa43d59f6246928dc588ea",
+      "attempt_id": "attempt-5d2d2673a3e14beaa09dfd1da57aa00a",
+      "output_role": "primary",
+      "width": 4096,
+      "height": 4096,
+      "byte_count": 17141050,
+      "content_hash": "7efca84607fdd1481557a377c860301b97d477fe795f23b36db558329624a5b1",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-8b1684008bf2485aa653b7f5b64153e6.png",
+      "created_at": 1794490771924,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8b1684008bf2485aa653b7f5b64153e6.png",
+        "bytes": 17141050,
+        "sha256": "7efca84607fdd1481557a377c860301b97d477fe795f23b36db558329624a5b1"
+      }
+    }
+  ],
+  "turns": [
+    {
+      "id": "turn-90361de9ebdd446f8cc32cc6039b05e6",
+      "conversation_id": "conv-default",
+      "sequence": 1,
+      "prompt": "闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛岄湏铏瑰€掑奖锛屽啓瀹炴憚褰?[G01A]",
+      "model_id": "flux2-klein-4b-distilled-windows-v1",
+      "capability_id": "image.text-to-image.flux2-klein-4b.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794489759345,
+      "jobs": [
+        {
+          "id": "job-6c7e7da7785546b5bb8296ea975473ef",
+          "created_at": 1794489761195,
+          "attempts": [
+            {
+              "id": "attempt-5b1e757bd73c4cacbb24587e4374f160",
+              "state": "failed",
+              "created_at": 1794489761195,
+              "completed_at": 1794489796348,
+              "error": "生成超出资源预算：进程提交内存峰值 24.18 GiB，超过 24 GiB 上限。请关闭占用内存或显存的其他程序后重试。",
+              "plan_summary": {
+                "plan_id": "plan-a856d47b-733f-4992-9e61-3fb7d4b46943",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": []
+            }
+          ],
+          "assets": []
+        }
+      ]
+    }
+  ],
+  "ready_records": [
+    {
+      "file": "birefnet-general-epoch-244-windows-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "birefnet-general-epoch-244-onnx-windows-v1",
+      "model_manifest_sha256": "4cb05b6337798025a1147d2bde899bb27b71628d0aef22005a3a558ee1f44f05",
+      "runtime_manifest_sha256": "0a6d2251889afc9d47fef67732d01c93230b975b83085719ef1727187a638647",
+      "runtime_files": 20927
+    },
+    {
+      "file": "flux2-klein-4b-distilled-windows-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "model_manifest_sha256": "d426cba53c83449c4add89be949d588cdfbd8f80360c5b73abe482853360c140",
+      "runtime_manifest_sha256": "0a6d2251889afc9d47fef67732d01c93230b975b83085719ef1727187a638647",
+      "runtime_files": 20927
+    },
+    {
+      "file": "moss-image-sft-windows-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "moss-image-sft-windows-staged-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+      "model_manifest_sha256": "c65b6d691f8ee2d1df610542de6219b10d4d51beeb3e2e967d4c4355f466bd42",
+      "runtime_manifest_sha256": "0a6d2251889afc9d47fef67732d01c93230b975b83085719ef1727187a638647",
+      "runtime_files": 20927
+    },
+    {
+      "file": "qwen-image-2.1-turbo-windows-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+      "model_manifest_sha256": "ba3419934d8a8c724a51b1a68d6edaeda6c58717dc2d0d5ea34c143e31fca216",
+      "runtime_manifest_sha256": "0a6d2251889afc9d47fef67732d01c93230b975b83085719ef1727187a638647",
+      "runtime_files": 20927
+    },
+    {
+      "file": "qwen-image-2.1-windows-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "qwen-image-2.1-windows-staged-d26bb61231c349cf6b7896fa83353113880e1ba3",
+      "model_manifest_sha256": "a69ebdeb0a669e5e97c667685a2b3d52862ba06280daec2d386f5558c4d3b029",
+      "runtime_manifest_sha256": "0a6d2251889afc9d47fef67732d01c93230b975b83085719ef1727187a638647",
+      "runtime_files": 20927
+    },
+    {
+      "file": "realesrgan-x4plus-windows-v1.json",
+      "runtime_lock_id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+      "model_snapshot_id": "realesrgan-x4plus-ncnn-windows-v1",
+      "model_manifest_sha256": "d160ea4b528b24e962070df5a218363f600769988cf6a8dbf0df022f443605a0",
+      "runtime_manifest_sha256": "819d50423e0d58273e4f588875892ba091e6b1c94850a4cdc5a9e7c7ab65f151",
+      "runtime_files": 3
+    },
+    {
+      "file": "z-image-turbo-diffusers-cuda-nf4-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-bnb0482-v1",
+      "model_snapshot_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+      "model_manifest_sha256": "e1c22e08ac97ede3f67275d07b3f3a2377141a3233738129f8f417ba68b393e3",
+      "runtime_manifest_sha256": "171341067c41523e2853a89c04c0225532439f1199caaabdd55950f1a3a8ffcf",
+      "runtime_files": 19486
+    }
+  ],
+  "summary": {
+    "assets": 10,
+    "turns": 1,
+    "conversations": 1,
+    "by_model": {
+      "flux2-klein-4b-distilled-windows-v1": {
+        "turns": 1,
+        "succeeded": 0
+      }
+    }
+  }
+}

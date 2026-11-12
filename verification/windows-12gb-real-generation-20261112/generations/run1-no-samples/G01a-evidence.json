@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-case",
+  "case_id": "G01a",
+  "model": "Klein",
+  "capability_kind": "text",
+  "prompt": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]",
+  "source_tag": null,
+  "data_root": "C:/ist-rg/r-fresh",
+  "sequence": 11,
+  "model_id": "flux2-klein-4b-distilled-windows-v1",
+  "capability_id": "image.text-to-image.flux2-klein-4b.windows-v1",
+  "attempt_id": "attempt-f7937e9dfd094b09bfd208caeffb95c7",
+  "attempt_state": "succeeded",
+  "attempt_error": null,
+  "prompt_matches_expected": true,
+  "plan": {
+    "plan_id": "plan-27eb8146-59e1-4090-8169-6250900d4b06",
+    "recipe_id": null,
+    "capability_id": null,
+    "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+    "parameters": null,
+    "environment_device": null
+  },
+  "elapsed_ms_from_db_attempt": 35383,
+  "driver": {
+    "status": "succeeded",
+    "elapsed_seconds": 38,
+    "stages": [
+      {
+        "at": "2026-11-12T13:42:03.346Z",
+        "elapsedSeconds": 2,
+        "stage": "正在准备生成"
+      },
+      {
+        "at": "2026-11-12T13:42:09.384Z",
+        "elapsedSeconds": 8,
+        "stage": "正在加载模型"
+      },
+      {
+        "at": "2026-11-12T13:42:30.499Z",
+        "elapsedSeconds": 29,
+        "stage": "正在采样 0/4"
+      },
+      {
+        "at": "2026-11-12T13:42:32.004Z",
+        "elapsedSeconds": 30,
+        "stage": "正在采样 2/4"
+      },
+      {
+        "at": "2026-11-12T13:42:33.511Z",
+        "elapsedSeconds": 32,
+        "stage": "采样 4/4 · 正在处理"
+      },
+      {
+        "at": "2026-11-12T13:42:38.036Z",
+        "elapsedSeconds": 36,
+        "stage": "正在验证并保存"
+      }
+    ],
+    "turn_text": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]\n\n你\nImage Studio\nFLUX.2 Klein 4B · 1:1 · 种子 1477811991\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+    "error": null
+  },
+  "outputs": [
+    {
+      "asset_id": "asset-0eeed317751146e88c8ed98c66d3bb7c",
+      "content_hash": "9f769e2ac28d684cf27a153b05bec361abd8510bffb8948abc916e1cf046a997",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-369874e231274625a368f5a3798c3911.png",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 2178638,
+      "file_bytes": 2178638,
+      "file_sha256": "9f769e2ac28d684cf27a153b05bec361abd8510bffb8948abc916e1cf046a997",
+      "output_role": "primary",
+      "file_exists": true
+    }
+  ],
+  "resources": {
+    "rows": 12,
+    "interval_seconds": 1,
+    "gpu_used_mib": {
+      "min": 1519.0,
+      "max": 9242.0,
+      "mean": 4562.58
+    },
+    "gpu_total_mib": {
+      "min": 12288.0,
+      "max": 12288.0,
+      "mean": 12288.0
+    },
+    "private_commit_mib": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "available_physical_mib": {
+      "min": 13111.1,
+      "max": 21910.5,
+      "mean": 18273.23
+    }
+  },
+  "budget": {
+    "gpu_baseline_mib": 1400,
+    "gpu_peak_minus_baseline_mib": 7842.0,
+    "gpu_used_limit_mib": 10752,
+    "private_commit_limit_mib": 24576,
+    "available_physical_min_mib": 2048
+  }
+}

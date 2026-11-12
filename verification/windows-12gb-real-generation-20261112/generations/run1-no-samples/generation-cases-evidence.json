@@ -1,0 +1,1390 @@
+[
+  {
+    "schema_version": 1,
+    "kind": "windows-real-generation-case",
+    "case_id": "G01a",
+    "model": "Klein",
+    "capability_kind": "text",
+    "prompt": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]",
+    "source_tag": null,
+    "data_root": "C:/ist-rg/r-fresh",
+    "sequence": 11,
+    "model_id": "flux2-klein-4b-distilled-windows-v1",
+    "capability_id": "image.text-to-image.flux2-klein-4b.windows-v1",
+    "attempt_id": "attempt-f7937e9dfd094b09bfd208caeffb95c7",
+    "attempt_state": "succeeded",
+    "attempt_error": null,
+    "prompt_matches_expected": true,
+    "plan": {
+      "plan_id": "plan-27eb8146-59e1-4090-8169-6250900d4b06",
+      "recipe_id": null,
+      "capability_id": null,
+      "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+      "parameters": null,
+      "environment_device": null
+    },
+    "elapsed_ms_from_db_attempt": 35383,
+    "driver": {
+      "status": "succeeded",
+      "elapsed_seconds": 38,
+      "stages": [
+        {
+          "at": "2026-11-12T13:42:03.346Z",
+          "elapsedSeconds": 2,
+          "stage": "正在准备生成"
+        },
+        {
+          "at": "2026-11-12T13:42:09.384Z",
+          "elapsedSeconds": 8,
+          "stage": "正在加载模型"
+        },
+        {
+          "at": "2026-11-12T13:42:30.499Z",
+          "elapsedSeconds": 29,
+          "stage": "正在采样 0/4"
+        },
+        {
+          "at": "2026-11-12T13:42:32.004Z",
+          "elapsedSeconds": 30,
+          "stage": "正在采样 2/4"
+        },
+        {
+          "at": "2026-11-12T13:42:33.511Z",
+          "elapsedSeconds": 32,
+          "stage": "采样 4/4 · 正在处理"
+        },
+        {
+          "at": "2026-11-12T13:42:38.036Z",
+          "elapsedSeconds": 36,
+          "stage": "正在验证并保存"
+        }
+      ],
+      "turn_text": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]\n\n你\nImage Studio\nFLUX.2 Klein 4B · 1:1 · 种子 1477811991\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+      "error": null
+    },
+    "outputs": [
+      {
+        "asset_id": "asset-0eeed317751146e88c8ed98c66d3bb7c",
+        "content_hash": "9f769e2ac28d684cf27a153b05bec361abd8510bffb8948abc916e1cf046a997",
+        "data_type": "image_rgb",
+        "relative_path": "assets/asset-369874e231274625a368f5a3798c3911.png",
+        "width": 1024,
+        "height": 1024,
+        "byte_count": 2178638,
+        "file_bytes": 2178638,
+        "file_sha256": "9f769e2ac28d684cf27a153b05bec361abd8510bffb8948abc916e1cf046a997",
+        "output_role": "primary",
+        "file_exists": true
+      }
+    ],
+    "resources": {
+      "rows": 12,
+      "interval_seconds": 1,
+      "gpu_used_mib": {
+        "min": 1519.0,
+        "max": 9242.0,
+        "mean": 4562.58
+      },
+      "gpu_total_mib": {
+        "min": 12288.0,
+        "max": 12288.0,
+        "mean": 12288.0
+      },
+      "private_commit_mib": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "available_physical_mib": {
+        "min": 13111.1,
+        "max": 21910.5,
+        "mean": 18273.23
+      }
+    },
+    "budget": {
+      "gpu_baseline_mib": 1400,
+      "gpu_peak_minus_baseline_mib": 7842.0,
+      "gpu_used_limit_mib": 10752,
+      "private_commit_limit_mib": 24576,
+      "available_physical_min_mib": 2048
+    }
+  },
+  {
+    "schema_version": 1,
+    "kind": "windows-real-generation-case",
+    "case_id": "G01b",
+    "model": "Klein",
+    "capability_kind": "text",
+    "prompt": "a red fox sitting in a snowy forest at dusk, cinematic lighting, photorealistic [G01B]",
+    "source_tag": null,
+    "data_root": "C:/ist-rg/r-fresh",
+    "sequence": 12,
+    "model_id": "flux2-klein-4b-distilled-windows-v1",
+    "capability_id": "image.text-to-image.flux2-klein-4b.windows-v1",
+    "attempt_id": "attempt-fbcea227be4d46e78469f34e42f022db",
+    "attempt_state": "succeeded",
+    "attempt_error": null,
+    "prompt_matches_expected": true,
+    "plan": {
+      "plan_id": "plan-3c941abd-babe-4d7d-8b73-d916bcfc57b1",
+      "recipe_id": null,
+      "capability_id": null,
+      "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+      "parameters": null,
+      "environment_device": null
+    },
+    "elapsed_ms_from_db_attempt": 23925,
+    "driver": {
+      "status": "succeeded",
+      "elapsed_seconds": 26,
+      "stages": [
+        {
+          "at": "2026-11-12T13:42:45.167Z",
+          "elapsedSeconds": 2,
+          "stage": "正在准备生成"
+        },
+        {
+          "at": "2026-11-12T13:42:49.699Z",
+          "elapsedSeconds": 6,
+          "stage": "正在加载模型"
+        },
+        {
+          "at": "2026-11-12T13:43:00.278Z",
+          "elapsedSeconds": 17,
+          "stage": "正在采样 0/4"
+        },
+        {
+          "at": "2026-11-12T13:43:03.282Z",
+          "elapsedSeconds": 20,
+          "stage": "正在采样 3/4"
+        },
+        {
+          "at": "2026-11-12T13:43:04.787Z",
+          "elapsedSeconds": 21,
+          "stage": "采样 4/4 · 正在处理"
+        },
+        {
+          "at": "2026-11-12T13:43:07.799Z",
+          "elapsedSeconds": 24,
+          "stage": "正在验证并保存"
+        }
+      ],
+      "turn_text": "a red fox sitting in a snowy forest at dusk, cinematic lighting, photorealistic [G01B]\n\n你\nImage Studio\nFLUX.2 Klein 4B · 1:1 · 种子 1000834085\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+      "error": null
+    },
+    "outputs": [
+      {
+        "asset_id": "asset-8c715ff54f2b430d828e349f45fe25fb",
+        "content_hash": "c829982b504a7eb91c0a4e5a84b97b558ff906044efb10c587c515e2400fda3c",
+        "data_type": "image_rgb",
+        "relative_path": "assets/asset-89a0ff93a3bc4640a302f102c884be52.png",
+        "width": 1024,
+        "height": 1024,
+        "byte_count": 1703099,
+        "file_bytes": 1703099,
+        "file_sha256": "c829982b504a7eb91c0a4e5a84b97b558ff906044efb10c587c515e2400fda3c",
+        "output_role": "primary",
+        "file_exists": true
+      }
+    ],
+    "resources": {
+      "rows": 9,
+      "interval_seconds": 1,
+      "gpu_used_mib": {
+        "min": 1496.0,
+        "max": 11178.0,
+        "mean": 4109.67
+      },
+      "gpu_total_mib": {
+        "min": 12288.0,
+        "max": 12288.0,
+        "mean": 12288.0
+      },
+      "private_commit_mib": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "available_physical_mib": {
+        "min": 16414.3,
+        "max": 21864.5,
+        "mean": 19843.2
+      }
+    },
+    "budget": {
+      "gpu_baseline_mib": 1400,
+      "gpu_peak_minus_baseline_mib": 9778.0,
+      "gpu_used_limit_mib": 10752,
+      "private_commit_limit_mib": 24576,
+      "available_physical_min_mib": 2048
+    }
+  },
+  {
+    "schema_version": 1,
+    "kind": "windows-real-generation-case",
+    "case_id": "G02",
+    "model": "Z-Image",
+    "capability_kind": "text",
+    "prompt": "雪山下的湖泊与晨雾，远景，超广角风景摄影 [G02]",
+    "source_tag": null,
+    "data_root": "C:/ist-rg/r-fresh",
+    "sequence": 13,
+    "model_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+    "capability_id": "image.text-to-image.z-image-turbo-diffusers-cuda-nf4.v1",
+    "attempt_id": "attempt-16293893812b40d4b62e12f5fc1baf85",
+    "attempt_state": "succeeded",
+    "attempt_error": null,
+    "prompt_matches_expected": true,
+    "plan": {
+      "plan_id": "plan-ce82ac0e-d34c-4cd2-8258-4f10beba3621",
+      "recipe_id": null,
+      "capability_id": null,
+      "model_variant_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+      "parameters": null,
+      "environment_device": null
+    },
+    "elapsed_ms_from_db_attempt": 55000,
+    "driver": {
+      "status": "succeeded",
+      "elapsed_seconds": 57,
+      "stages": [
+        {
+          "at": "2026-11-12T13:43:15.074Z",
+          "elapsedSeconds": 2,
+          "stage": "正在准备生成"
+        },
+        {
+          "at": "2026-11-12T13:43:25.633Z",
+          "elapsedSeconds": 12,
+          "stage": "正在加载模型"
+        },
+        {
+          "at": "2026-11-12T13:43:52.794Z",
+          "elapsedSeconds": 39,
+          "stage": "正在采样 0/9"
+        },
+        {
+          "at": "2026-11-12T13:43:55.807Z",
+          "elapsedSeconds": 42,
+          "stage": "正在采样 2/9"
+        },
+        {
+          "at": "2026-11-12T13:43:57.318Z",
+          "elapsedSeconds": 44,
+          "stage": "正在采样 3/9"
+        },
+        {
+          "at": "2026-11-12T13:44:00.332Z",
+          "elapsedSeconds": 47,
+          "stage": "正在采样 5/9"
+        },
+        {
+          "at": "2026-11-12T13:44:01.843Z",
+          "elapsedSeconds": 48,
+          "stage": "正在采样 6/9"
+        },
+        {
+          "at": "2026-11-12T13:44:03.350Z",
+          "elapsedSeconds": 50,
+          "stage": "正在采样 8/9"
+        },
+        {
+          "at": "2026-11-12T13:44:06.368Z",
+          "elapsedSeconds": 53,
+          "stage": "正在解码图片"
+        },
+        {
+          "at": "2026-11-12T13:44:09.386Z",
+          "elapsedSeconds": 56,
+          "stage": "正在验证并保存"
+        }
+      ],
+      "turn_text": "雪山下的湖泊与晨雾，远景，超广角风景摄影 [G02]\n\n你\nImage Studio\nZ-Image Turbo · 1:1 · 种子 1116200847\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+      "error": null
+    },
+    "outputs": [
+      {
+        "asset_id": "asset-9a3ad31d1bc440b4bc157e9771030b72",
+        "content_hash": "3dee901de225339dc04749b71015232265ba07b1770c399a1ab410c7e04dec1d",
+        "data_type": "image_rgb",
+        "relative_path": "assets/asset-85c569681c814120b15bacb2013b3151.png",
+        "width": 1024,
+        "height": 1024,
+        "byte_count": 1448169,
+        "file_bytes": 1448169,
+        "file_sha256": "3dee901de225339dc04749b71015232265ba07b1770c399a1ab410c7e04dec1d",
+        "output_role": "primary",
+        "file_exists": true
+      }
+    ],
+    "resources": {
+      "rows": 18,
+      "interval_seconds": 1,
+      "gpu_used_mib": {
+        "min": 1477.0,
+        "max": 10851.0,
+        "mean": 5569.61
+      },
+      "gpu_total_mib": {
+        "min": 12288.0,
+        "max": 12288.0,
+        "mean": 12288.0
+      },
+      "private_commit_mib": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "available_physical_mib": {
+        "min": 14452.2,
+        "max": 22114.9,
+        "mean": 18175.91
+      }
+    },
+    "budget": {
+      "gpu_baseline_mib": 1400,
+      "gpu_peak_minus_baseline_mib": 9451.0,
+      "gpu_used_limit_mib": 10752,
+      "private_commit_limit_mib": 24576,
+      "available_physical_min_mib": 2048
+    }
+  },
+  {
+    "schema_version": 1,
+    "kind": "windows-real-generation-case",
+    "case_id": "G03",
+    "model": "Qwen-Image 2.1",
+    "capability_kind": "text",
+    "prompt": "一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]",
+    "source_tag": null,
+    "data_root": "C:/ist-rg/r-fresh",
+    "sequence": 14,
+    "model_id": "qwen-image-2.1-windows-v1",
+    "capability_id": "image.text-to-image.qwen-image-2.1.windows-v1",
+    "attempt_id": "attempt-654d9a85e32f4bfa8faa45c05d42cad5",
+    "attempt_state": "succeeded",
+    "attempt_error": null,
+    "prompt_matches_expected": true,
+    "plan": {
+      "plan_id": "plan-20c43e26-7e04-406d-80f8-f1a0ddd6a9c3",
+      "recipe_id": null,
+      "capability_id": null,
+      "model_variant_id": "qwen-image-2.1-windows-v1",
+      "parameters": null,
+      "environment_device": null
+    },
+    "elapsed_ms_from_db_attempt": 84285,
+    "driver": {
+      "status": "succeeded",
+      "elapsed_seconds": 86,
+      "stages": [
+        {
+          "at": "2026-11-12T13:44:15.590Z",
+          "elapsedSeconds": 2,
+          "stage": "正在准备生成"
+        },
+        {
+          "at": "2026-11-12T13:44:23.142Z",
+          "elapsedSeconds": 9,
+          "stage": "正在加载模型"
+        },
+        {
+          "at": "2026-11-12T13:44:39.737Z",
+          "elapsedSeconds": 26,
+          "stage": "正在采样 2/40"
+        },
+        {
+          "at": "2026-11-12T13:44:41.243Z",
+          "elapsedSeconds": 27,
+          "stage": "正在采样 3/40"
+        },
+        {
+          "at": "2026-11-12T13:44:42.754Z",
+          "elapsedSeconds": 29,
+          "stage": "正在采样 4/40"
+        },
+        {
+          "at": "2026-11-12T13:44:44.270Z",
+          "elapsedSeconds": 30,
+          "stage": "正在采样 5/40"
+        },
+        {
+          "at": "2026-11-12T13:44:45.777Z",
+          "elapsedSeconds": 32,
+          "stage": "正在采样 7/40"
+        },
+        {
+          "at": "2026-11-12T13:44:48.790Z",
+          "elapsedSeconds": 35,
+          "stage": "正在采样 9/40"
+        },
+        {
+          "at": "2026-11-12T13:44:50.296Z",
+          "elapsedSeconds": 36,
+          "stage": "正在采样 10/40"
+        },
+        {
+          "at": "2026-11-12T13:44:53.307Z",
+          "elapsedSeconds": 39,
+          "stage": "正在采样 12/40"
+        },
+        {
+          "at": "2026-11-12T13:44:54.823Z",
+          "elapsedSeconds": 41,
+          "stage": "正在采样 13/40"
+        },
+        {
+          "at": "2026-11-12T13:44:56.332Z",
+          "elapsedSeconds": 42,
+          "stage": "正在采样 14/40"
+        },
+        {
+          "at": "2026-11-12T13:44:57.838Z",
+          "elapsedSeconds": 44,
+          "stage": "正在采样 15/40"
+        },
+        {
+          "at": "2026-11-12T13:44:59.348Z",
+          "elapsedSeconds": 45,
+          "stage": "正在采样 16/40"
+        },
+        {
+          "at": "2026-11-12T13:45:00.855Z",
+          "elapsedSeconds": 47,
+          "stage": "正在采样 17/40"
+        },
+        {
+          "at": "2026-11-12T13:45:02.361Z",
+          "elapsedSeconds": 48,
+          "stage": "正在采样 18/40"
+        },
+        {
+          "at": "2026-11-12T13:45:03.877Z",
+          "elapsedSeconds": 50,
+          "stage": "正在采样 20/40"
+        },
+        {
+          "at": "2026-11-12T13:45:06.896Z",
+          "elapsedSeconds": 53,
+          "stage": "正在采样 21/40"
+        },
+        {
+          "at": "2026-11-12T13:45:08.409Z",
+          "elapsedSeconds": 54,
+          "stage": "正在采样 23/40"
+        },
+        {
+          "at": "2026-11-12T13:45:11.421Z",
+          "elapsedSeconds": 57,
+          "stage": "正在采样 25/40"
+        },
+        {
+          "at": "2026-11-12T13:45:12.927Z",
+          "elapsedSeconds": 59,
+          "stage": "正在采样 26/40"
+        },
+        {
+          "at": "2026-11-12T13:45:15.943Z",
+          "elapsedSeconds": 62,
+          "stage": "正在采样 28/40"
+        },
+        {
+          "at": "2026-11-12T13:45:17.452Z",
+          "elapsedSeconds": 63,
+          "stage": "正在采样 29/40"
+        },
+        {
+          "at": "2026-11-12T13:45:18.958Z",
+          "elapsedSeconds": 65,
+          "stage": "正在采样 30/40"
+        },
+        {
+          "at": "2026-11-12T13:45:20.474Z",
+          "elapsedSeconds": 66,
+          "stage": "正在采样 31/40"
+        },
+        {
+          "at": "2026-11-12T13:45:21.978Z",
+          "elapsedSeconds": 68,
+          "stage": "正在采样 32/40"
+        },
+        {
+          "at": "2026-11-12T13:45:23.488Z",
+          "elapsedSeconds": 69,
+          "stage": "正在采样 33/40"
+        },
+        {
+          "at": "2026-11-12T13:45:24.993Z",
+          "elapsedSeconds": 71,
+          "stage": "正在采样 34/40"
+        },
+        {
+          "at": "2026-11-12T13:45:26.506Z",
+          "elapsedSeconds": 72,
+          "stage": "正在采样 35/40"
+        },
+        {
+          "at": "2026-11-12T13:45:28.012Z",
+          "elapsedSeconds": 74,
+          "stage": "正在采样 36/40"
+        },
+        {
+          "at": "2026-11-12T13:45:29.524Z",
+          "elapsedSeconds": 75,
+          "stage": "正在采样 37/40"
+        },
+        {
+          "at": "2026-11-12T13:45:31.037Z",
+          "elapsedSeconds": 77,
+          "stage": "正在采样 38/40"
+        },
+        {
+          "at": "2026-11-12T13:45:32.551Z",
+          "elapsedSeconds": 78,
+          "stage": "正在采样 39/40"
+        },
+        {
+          "at": "2026-11-12T13:45:34.064Z",
+          "elapsedSeconds": 80,
+          "stage": "采样 40/40 · 正在处理"
+        },
+        {
+          "at": "2026-11-12T13:45:37.082Z",
+          "elapsedSeconds": 83,
+          "stage": "正在解码图片"
+        },
+        {
+          "at": "2026-11-12T13:45:38.593Z",
+          "elapsedSeconds": 85,
+          "stage": "正在验证并保存"
+        }
+      ],
+      "turn_text": "一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]\n\n你\nImage Studio\nQwen-Image 2.1 · 1:1 · 种子 1671495605\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+      "error": null
+    },
+    "outputs": [
+      {
+        "asset_id": "asset-558ae0b17fa340d3817630b9dc8a6508",
+        "content_hash": "704d6cdbf713b4fc936c13c335860e7c1510f8fcb39ebc6c13cafd44ecab0ad5",
+        "data_type": "image_rgb",
+        "relative_path": "assets/asset-90a82a0ffc964c7da3e1e98698edd262.png",
+        "width": 1024,
+        "height": 1024,
+        "byte_count": 1469497,
+        "file_bytes": 1469497,
+        "file_sha256": "704d6cdbf713b4fc936c13c335860e7c1510f8fcb39ebc6c13cafd44ecab0ad5",
+        "output_role": "primary",
+        "file_exists": true
+      }
+    ],
+    "resources": {
+      "rows": 30,
+      "interval_seconds": 1,
+      "gpu_used_mib": {
+        "min": 1483.0,
+        "max": 7796.0,
+        "mean": 5263.47
+      },
+      "gpu_total_mib": {
+        "min": 12288.0,
+        "max": 12288.0,
+        "mean": 12288.0
+      },
+      "private_commit_mib": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "available_physical_mib": {
+        "min": 17694.5,
+        "max": 22130.2,
+        "mean": 20514.23
+      }
+    },
+    "budget": {
+      "gpu_baseline_mib": 1400,
+      "gpu_peak_minus_baseline_mib": 6396.0,
+      "gpu_used_limit_mib": 10752,
+      "private_commit_limit_mib": 24576,
+      "available_physical_min_mib": 2048
+    }
+  },
+  {
+    "schema_version": 1,
+    "kind": "windows-real-generation-case",
+    "case_id": "G04",
+    "model": "Qwen-Image 2.1 Turbo",
+    "capability_kind": "text",
+    "prompt": "a cozy bookstore cafe with warm lights, rain outside the window [G04]",
+    "source_tag": null,
+    "data_root": "C:/ist-rg/r-fresh",
+    "sequence": 15,
+    "model_id": "qwen-image-2.1-turbo-windows-v1",
+    "capability_id": "image.text-to-image.qwen-image-2.1-turbo.windows-v1",
+    "attempt_id": "attempt-4b0df5a2bb0446c5bc83ca928dd523bd",
+    "attempt_state": "succeeded",
+    "attempt_error": null,
+    "prompt_matches_expected": true,
+    "plan": {
+      "plan_id": "plan-fb61a189-c7dc-45ef-84e7-bc57f0063740",
+      "recipe_id": null,
+      "capability_id": null,
+      "model_variant_id": "qwen-image-2.1-turbo-windows-v1",
+      "parameters": null,
+      "environment_device": null
+    },
+    "elapsed_ms_from_db_attempt": 34793,
+    "driver": {
+      "status": "succeeded",
+      "elapsed_seconds": 36,
+      "stages": [
+        {
+          "at": "2026-11-12T13:45:44.959Z",
+          "elapsedSeconds": 2,
+          "stage": "正在准备生成"
+        },
+        {
+          "at": "2026-11-12T13:45:49.475Z",
+          "elapsedSeconds": 6,
+          "stage": "正在加载模型"
+        },
+        {
+          "at": "2026-11-12T13:46:04.571Z",
+          "elapsedSeconds": 21,
+          "stage": "正在采样 2/8"
+        },
+        {
+          "at": "2026-11-12T13:46:06.080Z",
+          "elapsedSeconds": 23,
+          "stage": "正在采样 3/8"
+        },
+        {
+          "at": "2026-11-12T13:46:07.595Z",
+          "elapsedSeconds": 24,
+          "stage": "正在采样 4/8"
+        },
+        {
+          "at": "2026-11-12T13:46:09.101Z",
+          "elapsedSeconds": 26,
+          "stage": "正在采样 5/8"
+        },
+        {
+          "at": "2026-11-12T13:46:10.614Z",
+          "elapsedSeconds": 27,
+          "stage": "正在采样 6/8"
+        },
+        {
+          "at": "2026-11-12T13:46:12.125Z",
+          "elapsedSeconds": 29,
+          "stage": "正在采样 7/8"
+        },
+        {
+          "at": "2026-11-12T13:46:13.629Z",
+          "elapsedSeconds": 30,
+          "stage": "采样 8/8 · 正在处理"
+        },
+        {
+          "at": "2026-11-12T13:46:16.649Z",
+          "elapsedSeconds": 33,
+          "stage": "正在解码图片"
+        }
+      ],
+      "turn_text": "a cozy bookstore cafe with warm lights, rain outside the window [G04]\n\n你\nImage Studio\nQwen 2.1 Turbo · 1:1 · 种子 3034015060\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+      "error": null
+    },
+    "outputs": [
+      {
+        "asset_id": "asset-90c7bdbeb23b44ab9b6efd957ccbec4f",
+        "content_hash": "bdebc10ad01d110c591cdec09f2f31c9a9413b6dfc13859c22262b583a7292ea",
+        "data_type": "image_rgb",
+        "relative_path": "assets/asset-8b125894165445829be03f9faac07f9e.png",
+        "width": 1024,
+        "height": 1024,
+        "byte_count": 1359650,
+        "file_bytes": 1359650,
+        "file_sha256": "bdebc10ad01d110c591cdec09f2f31c9a9413b6dfc13859c22262b583a7292ea",
+        "output_role": "primary",
+        "file_exists": true
+      }
+    ],
+    "resources": {
+      "rows": 13,
+      "interval_seconds": 1,
+      "gpu_used_mib": {
+        "min": 1481.0,
+        "max": 7792.0,
+        "mean": 4076.69
+      },
+      "gpu_total_mib": {
+        "min": 12288.0,
+        "max": 12288.0,
+        "mean": 12288.0
+      },
+      "private_commit_mib": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "available_physical_mib": {
+        "min": 18245.7,
+        "max": 22163.8,
+        "mean": 20630.43
+      }
+    },
+    "budget": {
+      "gpu_baseline_mib": 1400,
+      "gpu_peak_minus_baseline_mib": 6392.0,
+      "gpu_used_limit_mib": 10752,
+      "private_commit_limit_mib": 24576,
+      "available_physical_min_mib": 2048
+    }
+  },
+  {
+    "schema_version": 1,
+    "kind": "windows-real-generation-case",
+    "case_id": "G05",
+    "model": "MOSS",
+    "capability_kind": "text",
+    "prompt": "赛博朋克风格的雨夜街道，霓虹灯牌，电影感 [G05]",
+    "source_tag": null,
+    "data_root": "C:/ist-rg/r-fresh",
+    "sequence": 16,
+    "model_id": "moss-image-sft-windows-v1",
+    "capability_id": "image.text-to-image.moss-image-sft.windows-v1",
+    "attempt_id": "attempt-404225f52f064deaa117b2cb44d07c92",
+    "attempt_state": "succeeded",
+    "attempt_error": null,
+    "prompt_matches_expected": true,
+    "plan": {
+      "plan_id": "plan-d465cb22-147b-42a2-a4c3-fb81362f102c",
+      "recipe_id": null,
+      "capability_id": null,
+      "model_variant_id": "moss-image-sft-windows-v1",
+      "parameters": null,
+      "environment_device": null
+    },
+    "elapsed_ms_from_db_attempt": 142673,
+    "driver": {
+      "status": "succeeded",
+      "elapsed_seconds": 143,
+      "stages": [
+        {
+          "at": "2026-11-12T13:46:25.834Z",
+          "elapsedSeconds": 2,
+          "stage": "正在准备生成"
+        },
+        {
+          "at": "2026-11-12T13:46:31.861Z",
+          "elapsedSeconds": 8,
+          "stage": "正在加载模型"
+        },
+        {
+          "at": "2026-11-12T13:46:43.941Z",
+          "elapsedSeconds": 20,
+          "stage": "正在采样 0/50"
+        },
+        {
+          "at": "2026-11-12T13:46:46.967Z",
+          "elapsedSeconds": 23,
+          "stage": "正在采样 1/50"
+        },
+        {
+          "at": "2026-11-12T13:46:48.469Z",
+          "elapsedSeconds": 24,
+          "stage": "正在采样 2/50"
+        },
+        {
+          "at": "2026-11-12T13:46:51.481Z",
+          "elapsedSeconds": 27,
+          "stage": "正在采样 3/50"
+        },
+        {
+          "at": "2026-11-12T13:46:52.990Z",
+          "elapsedSeconds": 29,
+          "stage": "正在采样 4/50"
+        },
+        {
+          "at": "2026-11-12T13:46:56.007Z",
+          "elapsedSeconds": 32,
+          "stage": "正在采样 5/50"
+        },
+        {
+          "at": "2026-11-12T13:46:59.021Z",
+          "elapsedSeconds": 35,
+          "stage": "正在采样 6/50"
+        },
+        {
+          "at": "2026-11-12T13:47:00.535Z",
+          "elapsedSeconds": 36,
+          "stage": "正在采样 7/50"
+        },
+        {
+          "at": "2026-11-12T13:47:03.551Z",
+          "elapsedSeconds": 39,
+          "stage": "正在采样 8/50"
+        },
+        {
+          "at": "2026-11-12T13:47:05.054Z",
+          "elapsedSeconds": 41,
+          "stage": "正在采样 9/50"
+        },
+        {
+          "at": "2026-11-12T13:47:08.071Z",
+          "elapsedSeconds": 44,
+          "stage": "正在采样 10/50"
+        },
+        {
+          "at": "2026-11-12T13:47:11.092Z",
+          "elapsedSeconds": 47,
+          "stage": "正在采样 11/50"
+        },
+        {
+          "at": "2026-11-12T13:47:12.605Z",
+          "elapsedSeconds": 48,
+          "stage": "正在采样 12/50"
+        },
+        {
+          "at": "2026-11-12T13:47:15.617Z",
+          "elapsedSeconds": 51,
+          "stage": "正在采样 13/50"
+        },
+        {
+          "at": "2026-11-12T13:47:18.632Z",
+          "elapsedSeconds": 54,
+          "stage": "正在采样 14/50"
+        },
+        {
+          "at": "2026-11-12T13:47:20.134Z",
+          "elapsedSeconds": 56,
+          "stage": "正在采样 15/50"
+        },
+        {
+          "at": "2026-11-12T13:47:23.146Z",
+          "elapsedSeconds": 59,
+          "stage": "正在采样 16/50"
+        },
+        {
+          "at": "2026-11-12T13:47:24.648Z",
+          "elapsedSeconds": 60,
+          "stage": "正在采样 17/50"
+        },
+        {
+          "at": "2026-11-12T13:47:27.656Z",
+          "elapsedSeconds": 63,
+          "stage": "正在采样 18/50"
+        },
+        {
+          "at": "2026-11-12T13:47:30.670Z",
+          "elapsedSeconds": 66,
+          "stage": "正在采样 19/50"
+        },
+        {
+          "at": "2026-11-12T13:47:32.179Z",
+          "elapsedSeconds": 68,
+          "stage": "正在采样 20/50"
+        },
+        {
+          "at": "2026-11-12T13:47:35.188Z",
+          "elapsedSeconds": 71,
+          "stage": "正在采样 21/50"
+        },
+        {
+          "at": "2026-11-12T13:47:36.697Z",
+          "elapsedSeconds": 72,
+          "stage": "正在采样 22/50"
+        },
+        {
+          "at": "2026-11-12T13:47:39.714Z",
+          "elapsedSeconds": 75,
+          "stage": "正在采样 23/50"
+        },
+        {
+          "at": "2026-11-12T13:47:42.724Z",
+          "elapsedSeconds": 78,
+          "stage": "正在采样 24/50"
+        },
+        {
+          "at": "2026-11-12T13:47:44.235Z",
+          "elapsedSeconds": 80,
+          "stage": "正在采样 25/50"
+        },
+        {
+          "at": "2026-11-12T13:47:45.737Z",
+          "elapsedSeconds": 81,
+          "stage": "正在采样 26/50"
+        },
+        {
+          "at": "2026-11-12T13:47:50.263Z",
+          "elapsedSeconds": 86,
+          "stage": "正在采样 27/50"
+        },
+        {
+          "at": "2026-11-12T13:47:51.777Z",
+          "elapsedSeconds": 87,
+          "stage": "正在采样 28/50"
+        },
+        {
+          "at": "2026-11-12T13:47:53.286Z",
+          "elapsedSeconds": 89,
+          "stage": "正在采样 29/50"
+        },
+        {
+          "at": "2026-11-12T13:47:56.295Z",
+          "elapsedSeconds": 92,
+          "stage": "正在采样 30/50"
+        },
+        {
+          "at": "2026-11-12T13:47:59.311Z",
+          "elapsedSeconds": 95,
+          "stage": "正在采样 31/50"
+        },
+        {
+          "at": "2026-11-12T13:48:02.333Z",
+          "elapsedSeconds": 98,
+          "stage": "正在采样 32/50"
+        },
+        {
+          "at": "2026-11-12T13:48:03.839Z",
+          "elapsedSeconds": 100,
+          "stage": "正在采样 33/50"
+        },
+        {
+          "at": "2026-11-12T13:48:05.350Z",
+          "elapsedSeconds": 101,
+          "stage": "正在采样 34/50"
+        },
+        {
+          "at": "2026-11-12T13:48:09.881Z",
+          "elapsedSeconds": 106,
+          "stage": "正在采样 35/50"
+        },
+        {
+          "at": "2026-11-12T13:48:11.396Z",
+          "elapsedSeconds": 107,
+          "stage": "正在采样 36/50"
+        },
+        {
+          "at": "2026-11-12T13:48:12.902Z",
+          "elapsedSeconds": 109,
+          "stage": "正在采样 37/50"
+        },
+        {
+          "at": "2026-11-12T13:48:17.439Z",
+          "elapsedSeconds": 113,
+          "stage": "正在采样 38/50"
+        },
+        {
+          "at": "2026-11-12T13:48:18.948Z",
+          "elapsedSeconds": 115,
+          "stage": "正在采样 39/50"
+        },
+        {
+          "at": "2026-11-12T13:48:20.457Z",
+          "elapsedSeconds": 116,
+          "stage": "正在采样 40/50"
+        },
+        {
+          "at": "2026-11-12T13:48:23.478Z",
+          "elapsedSeconds": 119,
+          "stage": "正在采样 41/50"
+        },
+        {
+          "at": "2026-11-12T13:48:26.492Z",
+          "elapsedSeconds": 122,
+          "stage": "正在采样 42/50"
+        },
+        {
+          "at": "2026-11-12T13:48:27.998Z",
+          "elapsedSeconds": 124,
+          "stage": "正在采样 43/50"
+        },
+        {
+          "at": "2026-11-12T13:48:31.016Z",
+          "elapsedSeconds": 127,
+          "stage": "正在采样 44/50"
+        },
+        {
+          "at": "2026-11-12T13:48:32.526Z",
+          "elapsedSeconds": 128,
+          "stage": "正在采样 45/50"
+        },
+        {
+          "at": "2026-11-12T13:48:35.547Z",
+          "elapsedSeconds": 131,
+          "stage": "正在采样 46/50"
+        },
+        {
+          "at": "2026-11-12T13:48:38.563Z",
+          "elapsedSeconds": 134,
+          "stage": "正在采样 47/50"
+        },
+        {
+          "at": "2026-11-12T13:48:40.066Z",
+          "elapsedSeconds": 136,
+          "stage": "正在采样 48/50"
+        },
+        {
+          "at": "2026-11-12T13:48:43.072Z",
+          "elapsedSeconds": 139,
+          "stage": "正在采样 49/50"
+        },
+        {
+          "at": "2026-11-12T13:48:46.100Z",
+          "elapsedSeconds": 142,
+          "stage": "正在解码图片"
+        }
+      ],
+      "turn_text": "赛博朋克风格的雨夜街道，霓虹灯牌，电影感 [G05]\n\n你\nImage Studio\nMOSS-Image-SFT · 1:1 · 种子 2364485002\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+      "error": null
+    },
+    "outputs": [
+      {
+        "asset_id": "asset-a5200801ea4e43d9bc13eb674ad21c44",
+        "content_hash": "22b6da5a93f7f514e4695897fbbdf045a2048aedc8d41fdbbbc40e830081e394",
+        "data_type": "image_rgb",
+        "relative_path": "assets/asset-389b5495190a4a3db68b9d7a4c1f44c7.png",
+        "width": 1024,
+        "height": 1024,
+        "byte_count": 1934950,
+        "file_bytes": 1934950,
+        "file_sha256": "22b6da5a93f7f514e4695897fbbdf045a2048aedc8d41fdbbbc40e830081e394",
+        "output_role": "primary",
+        "file_exists": true
+      }
+    ],
+    "resources": {
+      "rows": 49,
+      "interval_seconds": 1,
+      "gpu_used_mib": {
+        "min": 1482.0,
+        "max": 6963.0,
+        "mean": 4653.41
+      },
+      "gpu_total_mib": {
+        "min": 12288.0,
+        "max": 12288.0,
+        "mean": 12288.0
+      },
+      "private_commit_mib": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "available_physical_mib": {
+        "min": 16123.7,
+        "max": 22133.8,
+        "mean": 20492.39
+      }
+    },
+    "budget": {
+      "gpu_baseline_mib": 1400,
+      "gpu_peak_minus_baseline_mib": 5563.0,
+      "gpu_used_limit_mib": 10752,
+      "private_commit_limit_mib": 24576,
+      "available_physical_min_mib": 2048
+    }
+  },
+  {
+    "schema_version": 1,
+    "kind": "windows-real-generation-case",
+    "case_id": "G06",
+    "model": "Klein",
+    "capability_kind": "edit",
+    "prompt": "把背景换成夜晚的东京街道，保留人物与伞 [G06]",
+    "source_tag": "[G01A]",
+    "data_root": "C:/ist-rg/r-fresh",
+    "sequence": 17,
+    "model_id": "flux2-klein-4b-distilled-windows-v1",
+    "capability_id": "image.edit.flux2-klein-4b.windows-v1",
+    "attempt_id": "attempt-210d98f9ec444d37bd14f925ab63cbed",
+    "attempt_state": "succeeded",
+    "attempt_error": null,
+    "prompt_matches_expected": true,
+    "plan": {
+      "plan_id": "plan-04c12fc4-7738-4b26-a669-11244bd4333f",
+      "recipe_id": null,
+      "capability_id": null,
+      "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+      "parameters": null,
+      "environment_device": null
+    },
+    "elapsed_ms_from_db_attempt": 37378,
+    "driver": {
+      "status": "succeeded",
+      "elapsed_seconds": 39,
+      "stages": [
+        {
+          "at": "2026-11-12T13:48:53.627Z",
+          "elapsedSeconds": 2,
+          "stage": "正在准备生成"
+        },
+        {
+          "at": "2026-11-12T13:48:58.161Z",
+          "elapsedSeconds": 6,
+          "stage": "正在加载模型"
+        },
+        {
+          "at": "2026-11-12T13:49:17.781Z",
+          "elapsedSeconds": 26,
+          "stage": "正在采样 0/4"
+        },
+        {
+          "at": "2026-11-12T13:49:20.804Z",
+          "elapsedSeconds": 29,
+          "stage": "正在采样 2/4"
+        },
+        {
+          "at": "2026-11-12T13:49:23.822Z",
+          "elapsedSeconds": 32,
+          "stage": "采样 4/4 · 正在处理"
+        },
+        {
+          "at": "2026-11-12T13:49:29.857Z",
+          "elapsedSeconds": 38,
+          "stage": "正在验证并保存"
+        }
+      ],
+      "turn_text": "把背景换成夜晚的东京街道，保留人物与伞 [G06]\n\n你\nImage Studio\nFLUX.2 Klein 4B · 单图编辑\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+      "error": null
+    },
+    "outputs": [
+      {
+        "asset_id": "asset-80e913b72d184f2a83b3b5eda2f2316e",
+        "content_hash": "3de524b1a94fb6baabd1fa1c03e5d8cab096788747fb4c234c9101b4c6b97f42",
+        "data_type": "image_rgb",
+        "relative_path": "assets/asset-d9bb0feaf49d470ebef6822ec01b0df4.png",
+        "width": 1024,
+        "height": 1024,
+        "byte_count": 2218441,
+        "file_bytes": 2218441,
+        "file_sha256": "3de524b1a94fb6baabd1fa1c03e5d8cab096788747fb4c234c9101b4c6b97f42",
+        "output_role": "primary",
+        "file_exists": true
+      }
+    ],
+    "resources": {
+      "rows": 13,
+      "interval_seconds": 1,
+      "gpu_used_mib": {
+        "min": 1485.0,
+        "max": 11165.0,
+        "mean": 4748.23
+      },
+      "gpu_total_mib": {
+        "min": 12288.0,
+        "max": 12288.0,
+        "mean": 12288.0
+      },
+      "private_commit_mib": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "available_physical_mib": {
+        "min": 14666.6,
+        "max": 22204.9,
+        "mean": 18850.76
+      }
+    },
+    "budget": {
+      "gpu_baseline_mib": 1400,
+      "gpu_peak_minus_baseline_mib": 9765.0,
+      "gpu_used_limit_mib": 10752,
+      "private_commit_limit_mib": 24576,
+      "available_physical_min_mib": 2048
+    }
+  },
+  {
+    "schema_version": 1,
+    "kind": "windows-real-generation-case",
+    "case_id": "G07",
+    "model": "BiRefNet",
+    "capability_kind": "remove-background",
+    "prompt": "",
+    "source_tag": "[G02]",
+    "data_root": "C:/ist-rg/r-fresh",
+    "sequence": 18,
+    "model_id": "birefnet-general-epoch-244-windows-v1",
+    "capability_id": "image.remove-background.birefnet-general-epoch-244.windows-v1",
+    "attempt_id": "attempt-309e99d27f414206b71bdb1b288338b3",
+    "attempt_state": "succeeded",
+    "attempt_error": null,
+    "prompt_matches_expected": true,
+    "plan": {
+      "plan_id": "plan-96ca01a5-14a8-405f-b809-e6f36b66943d",
+      "recipe_id": null,
+      "capability_id": null,
+      "model_variant_id": "birefnet-general-epoch-244-windows-v1",
+      "parameters": null,
+      "environment_device": null
+    },
+    "elapsed_ms_from_db_attempt": 20455,
+    "driver": {
+      "status": "succeeded",
+      "elapsed_seconds": 21,
+      "stages": [
+        {
+          "at": "2026-11-12T13:49:36.252Z",
+          "elapsedSeconds": 2,
+          "stage": "正在加载模型"
+        },
+        {
+          "at": "2026-11-12T13:49:43.797Z",
+          "elapsedSeconds": 9,
+          "stage": "正在执行本地推理"
+        }
+      ],
+      "turn_text": "去除背景，保留主体\n\n你\nImage Studio\nBiRefNet epoch_244 · 透明背景\n查看大图\n图片已生成\n100%\n查看蒙版\n查看\n导出 PNG\n制作记录",
+      "error": null
+    },
+    "outputs": [
+      {
+        "asset_id": "asset-0fd449c9ba38416aabb4839986d13160",
+        "content_hash": "25a853a8d4e2dc605ce8017213aa0839679ca8d98bd8262c4458bccc8b95b3ee",
+        "data_type": "image_rgba",
+        "relative_path": "assets/asset-a6e43a7b2d6e429d805f8d5ea749191c.png",
+        "width": 1024,
+        "height": 1024,
+        "byte_count": 1642866,
+        "file_bytes": 1642866,
+        "file_sha256": "25a853a8d4e2dc605ce8017213aa0839679ca8d98bd8262c4458bccc8b95b3ee",
+        "output_role": "primary",
+        "file_exists": true
+      },
+      {
+        "asset_id": "asset-141976d313384bb5b195bf692b9913f8",
+        "content_hash": "cacd9a9a1a81f12346dc0349f158d7dbfca2ca7a91df1e53dde17e0b1f9e714e",
+        "data_type": "mask",
+        "relative_path": "assets/asset-41c3de70380d4b2d9fd7190819298e38.png",
+        "width": 1024,
+        "height": 1024,
+        "byte_count": 37403,
+        "file_bytes": 37403,
+        "file_sha256": "cacd9a9a1a81f12346dc0349f158d7dbfca2ca7a91df1e53dde17e0b1f9e714e",
+        "output_role": "mask",
+        "file_exists": true
+      }
+    ],
+    "resources": {
+      "rows": 6,
+      "interval_seconds": 1,
+      "gpu_used_mib": {
+        "min": 1471.0,
+        "max": 1503.0,
+        "mean": 1487.33
+      },
+      "gpu_total_mib": {
+        "min": 12288.0,
+        "max": 12288.0,
+        "mean": 12288.0
+      },
+      "private_commit_mib": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "available_physical_mib": {
+        "min": 14667.4,
+        "max": 22161.7,
+        "mean": 19799.22
+      }
+    },
+    "budget": {
+      "gpu_baseline_mib": 1400,
+      "gpu_peak_minus_baseline_mib": 103.0,
+      "gpu_used_limit_mib": 10752,
+      "private_commit_limit_mib": 24576,
+      "available_physical_min_mib": 2048
+    }
+  },
+  {
+    "schema_version": 1,
+    "kind": "windows-real-generation-case",
+    "case_id": "G08",
+    "model": "Real-ESRGAN",
+    "capability_kind": "upscale",
+    "prompt": "",
+    "source_tag": "[G01B]",
+    "data_root": "C:/ist-rg/r-fresh",
+    "sequence": 19,
+    "model_id": "realesrgan-x4plus-windows-v1",
+    "capability_id": "image.upscale.realesrgan-x4plus.windows-v1",
+    "attempt_id": "attempt-c63ea5e444b240e996e1d89bc4c6ca83",
+    "attempt_state": "succeeded",
+    "attempt_error": null,
+    "prompt_matches_expected": true,
+    "plan": {
+      "plan_id": "plan-d2f86862-ef83-4381-82b1-04f8f53e1912",
+      "recipe_id": null,
+      "capability_id": null,
+      "model_variant_id": "realesrgan-x4plus-windows-v1",
+      "parameters": null,
+      "environment_device": null
+    },
+    "elapsed_ms_from_db_attempt": 5759,
+    "driver": {
+      "status": "succeeded",
+      "elapsed_seconds": 8,
+      "stages": [
+        {
+          "at": "2026-11-12T13:50:00.483Z",
+          "elapsedSeconds": 2,
+          "stage": "正在加载模型"
+        },
+        {
+          "at": "2026-11-12T13:50:01.992Z",
+          "elapsedSeconds": 3,
+          "stage": "正在执行本地推理"
+        }
+      ],
+      "turn_text": "使用固定 4× 模型放大图片\n\n你\nImage Studio\nReal-ESRGAN x4plus · 精确 4× · 4096×4096\n查看大图\n图片已生成\n100%\n查看\n导出 PNG\n制作记录",
+      "error": null
+    },
+    "outputs": [
+      {
+        "asset_id": "asset-d61a76775704423a86181cdf712f76fd",
+        "content_hash": "d52b8ba7ab50124cb1a847b665d0c6d093193c84969067d993c220566ef7dbcb",
+        "data_type": "image_rgb",
+        "relative_path": "assets/asset-1e12ac7556a543049b1312a88d86264a.png",
+        "width": 4096,
+        "height": 4096,
+        "byte_count": 17192768,
+        "file_bytes": 17192768,
+        "file_sha256": "d52b8ba7ab50124cb1a847b665d0c6d093193c84969067d993c220566ef7dbcb",
+        "output_role": "primary",
+        "file_exists": true
+      }
+    ],
+    "resources": {
+      "rows": 3,
+      "interval_seconds": 1,
+      "gpu_used_mib": {
+        "min": 1505.0,
+        "max": 2253.0,
+        "mean": 1787.0
+      },
+      "gpu_total_mib": {
+        "min": 12288.0,
+        "max": 12288.0,
+        "mean": 12288.0
+      },
+      "private_commit_mib": {
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "available_physical_mib": {
+        "min": 20926.5,
+        "max": 22138.7,
+        "mean": 21497.97
+      }
+    },
+    "budget": {
+      "gpu_baseline_mib": 1400,
+      "gpu_peak_minus_baseline_mib": 853.0,
+      "gpu_used_limit_mib": 10752,
+      "private_commit_limit_mib": 24576,
+      "available_physical_min_mib": 2048
+    }
+  }
+]

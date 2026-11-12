@@ -1,31 +1,31 @@
 {
-  "schema_version": 1,
-  "kind": "windows-internal-nsis-package",
-  "status": "built",
-  "installer": "target/release/bundle/nsis/Image Studio_0.1.0_x64-setup.exe",
-  "installer_sha256": "b843acd782c73d3166baf5d86d1d14df30253d3f561dd2eafeaec219250c1f2c",
-  "installer_bytes": 245061956,
-  "target": "x86_64-pc-windows-msvc",
-  "install_mode": "currentUser",
-  "webview2_install_mode": "offlineInstaller",
-  "signed": false,
-  "model_weights_bundled": false,
-  "private_python_bundled": false,
-  "sidecars": [
-    {
-      "name": "diagnostic-worker-x86_64-pc-windows-msvc.exe",
-      "sha256": "c3b3ac9b380433b298d9c2682644695613deddb883482f728666935112702a6b",
-      "bytes": 462848
-    },
-    {
-      "name": "inference-supervisor-x86_64-pc-windows-msvc.exe",
-      "sha256": "e8f95ae65ceb52b148503b473ad4ab125513b3a0a706baffdf18e9226da15e2e",
-      "bytes": 1059840
-    },
-    {
-      "name": "realesrgan-worker-x86_64-pc-windows-msvc.exe",
-      "sha256": "491e5a90ba7c17a2c0585762511b07e424833d955ef077647ffdeb1a38d90bb0",
-      "bytes": 1124352
-    }
-  ]
+    "schema_version":  1,
+    "kind":  "windows-internal-nsis-package",
+    "status":  "built",
+    "installer":  "target/release/bundle/nsis/Image Studio_0.1.1_x64-setup.exe",
+    "installer_sha256":  "d23c18c0a107850cd8fc14d305e0bd23064f3632decd219567015ddc4e0cd3b4",
+    "installer_bytes":  245118946,
+    "target":  "x86_64-pc-windows-msvc",
+    "install_mode":  "currentUser",
+    "webview2_install_mode":  "offlineInstaller",
+    "signed":  false,
+    "model_weights_bundled":  false,
+    "private_python_bundled":  false,
+    "sidecars":  [
+                     {
+                         "name":  "diagnostic-worker-x86_64-pc-windows-msvc.exe",
+                         "sha256":  "eacff34f23a3a9d14b28c2f7db82be64e0ea7d58783c0f53e28cb594b12835d2",
+                         "bytes":  462848
+                     },
+                     {
+                         "name":  "inference-supervisor-x86_64-pc-windows-msvc.exe",
+                         "sha256":  "90be060c00b306e15e3405d42af2183bf4ec2b20114c1ae7e6fa3ea98a3a8ea0",
+                         "bytes":  1059840
+                     },
+                     {
+                         "name":  "realesrgan-worker-x86_64-pc-windows-msvc.exe",
+                         "sha256":  "87083c02bda59d4d4a7e886288722c82113f6d6cc312290252e6d99ab04c5009",
+                         "bytes":  1124352
+                     }
+                 ]
 }

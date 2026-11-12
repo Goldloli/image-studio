@@ -1,0 +1,47 @@
+{
+  "model": "Qwen-Image 2.1 Turbo",
+  "kind": "text",
+  "prompt": "取消测试：海边日落，帆船，电影感 [CANCEL-QWEN]",
+  "source": "",
+  "startedAt": "2026-11-12T14:09:10.252Z",
+  "status": "cancelled",
+  "stages": [
+    {
+      "at": "2026-11-12T14:09:12.510Z",
+      "elapsedSeconds": 2,
+      "stage": "正在接收提示词"
+    },
+    {
+      "at": "2026-11-12T14:09:14.012Z",
+      "elapsedSeconds": 3,
+      "stage": "正在准备生成"
+    },
+    {
+      "at": "2026-11-12T14:09:18.531Z",
+      "elapsedSeconds": 8,
+      "stage": "正在取消"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT"
+  ],
+  "selectedModel": "Qwen-Image 2.1 Turbo",
+  "turnsBefore": {
+    "turns": 1,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T14:09:11.006Z",
+  "cancelClickedAt": "2026-11-12T14:09:17.022Z",
+  "turnId": "turn-32fbc5d7231f4648961f7cf512530bca",
+  "terminalState": "Cancelled",
+  "settleSecondsAfterCancel": 4.5,
+  "turnText": "取消测试：海边日落，帆船，电影感 [CANCEL-QWEN]\n\n你\nImage Studio\nQwen 2.1 Turbo · 1:1 · 种子 1560977463\n已取消\n本次生成已取消\n重试\n编辑后重发\n复制提示词\n制作记录",
+  "elapsedSeconds": 11,
+  "endedAt": "2026-11-12T14:09:21.636Z"
+}

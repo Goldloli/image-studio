@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-case",
+  "case_id": "G04",
+  "model": "Qwen-Image 2.1 Turbo",
+  "capability_kind": "text",
+  "prompt": "a cozy bookstore cafe with warm lights, rain outside the window [G04]",
+  "source_tag": null,
+  "data_root": "C:/ist-rg/r-fresh",
+  "sequence": 15,
+  "model_id": "qwen-image-2.1-turbo-windows-v1",
+  "capability_id": "image.text-to-image.qwen-image-2.1-turbo.windows-v1",
+  "attempt_id": "attempt-4b0df5a2bb0446c5bc83ca928dd523bd",
+  "attempt_state": "succeeded",
+  "attempt_error": null,
+  "prompt_matches_expected": true,
+  "plan": {
+    "plan_id": "plan-fb61a189-c7dc-45ef-84e7-bc57f0063740",
+    "recipe_id": null,
+    "capability_id": null,
+    "model_variant_id": "qwen-image-2.1-turbo-windows-v1",
+    "parameters": null,
+    "environment_device": null
+  },
+  "elapsed_ms_from_db_attempt": 34793,
+  "driver": {
+    "status": "succeeded",
+    "elapsed_seconds": 36,
+    "stages": [
+      {
+        "at": "2026-11-12T13:45:44.959Z",
+        "elapsedSeconds": 2,
+        "stage": "正在准备生成"
+      },
+      {
+        "at": "2026-11-12T13:45:49.475Z",
+        "elapsedSeconds": 6,
+        "stage": "正在加载模型"
+      },
+      {
+        "at": "2026-11-12T13:46:04.571Z",
+        "elapsedSeconds": 21,
+        "stage": "正在采样 2/8"
+      },
+      {
+        "at": "2026-11-12T13:46:06.080Z",
+        "elapsedSeconds": 23,
+        "stage": "正在采样 3/8"
+      },
+      {
+        "at": "2026-11-12T13:46:07.595Z",
+        "elapsedSeconds": 24,
+        "stage": "正在采样 4/8"
+      },
+      {
+        "at": "2026-11-12T13:46:09.101Z",
+        "elapsedSeconds": 26,
+        "stage": "正在采样 5/8"
+      },
+      {
+        "at": "2026-11-12T13:46:10.614Z",
+        "elapsedSeconds": 27,
+        "stage": "正在采样 6/8"
+      },
+      {
+        "at": "2026-11-12T13:46:12.125Z",
+        "elapsedSeconds": 29,
+        "stage": "正在采样 7/8"
+      },
+      {
+        "at": "2026-11-12T13:46:13.629Z",
+        "elapsedSeconds": 30,
+        "stage": "采样 8/8 · 正在处理"
+      },
+      {
+        "at": "2026-11-12T13:46:16.649Z",
+        "elapsedSeconds": 33,
+        "stage": "正在解码图片"
+      }
+    ],
+    "turn_text": "a cozy bookstore cafe with warm lights, rain outside the window [G04]\n\n你\nImage Studio\nQwen 2.1 Turbo · 1:1 · 种子 3034015060\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+    "error": null
+  },
+  "outputs": [
+    {
+      "asset_id": "asset-90c7bdbeb23b44ab9b6efd957ccbec4f",
+      "content_hash": "bdebc10ad01d110c591cdec09f2f31c9a9413b6dfc13859c22262b583a7292ea",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-8b125894165445829be03f9faac07f9e.png",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1359650,
+      "file_bytes": 1359650,
+      "file_sha256": "bdebc10ad01d110c591cdec09f2f31c9a9413b6dfc13859c22262b583a7292ea",
+      "output_role": "primary",
+      "file_exists": true
+    }
+  ],
+  "resources": {
+    "rows": 13,
+    "interval_seconds": 1,
+    "gpu_used_mib": {
+      "min": 1481.0,
+      "max": 7792.0,
+      "mean": 4076.69
+    },
+    "gpu_total_mib": {
+      "min": 12288.0,
+      "max": 12288.0,
+      "mean": 12288.0
+    },
+    "private_commit_mib": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "available_physical_mib": {
+      "min": 18245.7,
+      "max": 22163.8,
+      "mean": 20630.43
+    }
+  },
+  "budget": {
+    "gpu_baseline_mib": 1400,
+    "gpu_peak_minus_baseline_mib": 6392.0,
+    "gpu_used_limit_mib": 10752,
+    "private_commit_limit_mib": 24576,
+    "available_physical_min_mib": 2048
+  }
+}

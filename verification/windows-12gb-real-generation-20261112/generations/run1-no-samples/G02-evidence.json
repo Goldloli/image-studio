@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-case",
+  "case_id": "G02",
+  "model": "Z-Image",
+  "capability_kind": "text",
+  "prompt": "雪山下的湖泊与晨雾，远景，超广角风景摄影 [G02]",
+  "source_tag": null,
+  "data_root": "C:/ist-rg/r-fresh",
+  "sequence": 13,
+  "model_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+  "capability_id": "image.text-to-image.z-image-turbo-diffusers-cuda-nf4.v1",
+  "attempt_id": "attempt-16293893812b40d4b62e12f5fc1baf85",
+  "attempt_state": "succeeded",
+  "attempt_error": null,
+  "prompt_matches_expected": true,
+  "plan": {
+    "plan_id": "plan-ce82ac0e-d34c-4cd2-8258-4f10beba3621",
+    "recipe_id": null,
+    "capability_id": null,
+    "model_variant_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+    "parameters": null,
+    "environment_device": null
+  },
+  "elapsed_ms_from_db_attempt": 55000,
+  "driver": {
+    "status": "succeeded",
+    "elapsed_seconds": 57,
+    "stages": [
+      {
+        "at": "2026-11-12T13:43:15.074Z",
+        "elapsedSeconds": 2,
+        "stage": "正在准备生成"
+      },
+      {
+        "at": "2026-11-12T13:43:25.633Z",
+        "elapsedSeconds": 12,
+        "stage": "正在加载模型"
+      },
+      {
+        "at": "2026-11-12T13:43:52.794Z",
+        "elapsedSeconds": 39,
+        "stage": "正在采样 0/9"
+      },
+      {
+        "at": "2026-11-12T13:43:55.807Z",
+        "elapsedSeconds": 42,
+        "stage": "正在采样 2/9"
+      },
+      {
+        "at": "2026-11-12T13:43:57.318Z",
+        "elapsedSeconds": 44,
+        "stage": "正在采样 3/9"
+      },
+      {
+        "at": "2026-11-12T13:44:00.332Z",
+        "elapsedSeconds": 47,
+        "stage": "正在采样 5/9"
+      },
+      {
+        "at": "2026-11-12T13:44:01.843Z",
+        "elapsedSeconds": 48,
+        "stage": "正在采样 6/9"
+      },
+      {
+        "at": "2026-11-12T13:44:03.350Z",
+        "elapsedSeconds": 50,
+        "stage": "正在采样 8/9"
+      },
+      {
+        "at": "2026-11-12T13:44:06.368Z",
+        "elapsedSeconds": 53,
+        "stage": "正在解码图片"
+      },
+      {
+        "at": "2026-11-12T13:44:09.386Z",
+        "elapsedSeconds": 56,
+        "stage": "正在验证并保存"
+      }
+    ],
+    "turn_text": "雪山下的湖泊与晨雾，远景，超广角风景摄影 [G02]\n\n你\nImage Studio\nZ-Image Turbo · 1:1 · 种子 1116200847\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+    "error": null
+  },
+  "outputs": [
+    {
+      "asset_id": "asset-9a3ad31d1bc440b4bc157e9771030b72",
+      "content_hash": "3dee901de225339dc04749b71015232265ba07b1770c399a1ab410c7e04dec1d",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-85c569681c814120b15bacb2013b3151.png",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1448169,
+      "file_bytes": 1448169,
+      "file_sha256": "3dee901de225339dc04749b71015232265ba07b1770c399a1ab410c7e04dec1d",
+      "output_role": "primary",
+      "file_exists": true
+    }
+  ],
+  "resources": {
+    "rows": 18,
+    "interval_seconds": 1,
+    "gpu_used_mib": {
+      "min": 1477.0,
+      "max": 10851.0,
+      "mean": 5569.61
+    },
+    "gpu_total_mib": {
+      "min": 12288.0,
+      "max": 12288.0,
+      "mean": 12288.0
+    },
+    "private_commit_mib": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "available_physical_mib": {
+      "min": 14452.2,
+      "max": 22114.9,
+      "mean": 18175.91
+    }
+  },
+  "budget": {
+    "gpu_baseline_mib": 1400,
+    "gpu_peak_minus_baseline_mib": 9451.0,
+    "gpu_used_limit_mib": 10752,
+    "private_commit_limit_mib": 24576,
+    "available_physical_min_mib": 2048
+  }
+}

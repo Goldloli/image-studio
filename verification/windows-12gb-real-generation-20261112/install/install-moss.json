@@ -1,0 +1,63 @@
+{
+  "model": "MOSS",
+  "startedAt": "2026-11-12T13:16:14.235Z",
+  "phases": [
+    {
+      "at": "2026-11-12T13:16:16.654Z",
+      "elapsedSeconds": 2,
+      "status": "正在下载",
+      "progress": "正在下载2.72 GB / 29.94 GB"
+    },
+    {
+      "at": "2026-11-12T13:16:30.823Z",
+      "elapsedSeconds": 17,
+      "status": "正在校验模型",
+      "progress": "正在校验模型29.94 GB / 29.94 GB"
+    },
+    {
+      "at": "2026-11-12T13:17:37.211Z",
+      "elapsedSeconds": 83,
+      "status": "检查运行环境与设备",
+      "progress": "检查运行环境与设备29.94 GB / 29.94 GB"
+    },
+    {
+      "at": "2026-11-12T13:17:53.374Z",
+      "elapsedSeconds": 99,
+      "status": "正在准备模型文件",
+      "progress": "正在准备模型文件29.94 GB / 29.94 GB"
+    },
+    {
+      "at": "2026-11-12T13:22:14.628Z",
+      "elapsedSeconds": 360,
+      "status": "当前可执行",
+      "progress": ""
+    }
+  ],
+  "status": "ready",
+  "clicked": {
+    "clicked": true,
+    "text": "安装模型与运行环境"
+  },
+  "endedAt": "2026-11-12T13:22:14.790Z",
+  "elapsedSeconds": 361,
+  "final": {
+    "found": true,
+    "status": "当前可执行",
+    "alert": "",
+    "buttons": [
+      {
+        "text": "用于当前会话",
+        "disabled": false
+      },
+      {
+        "text": "前往创作",
+        "disabled": false
+      },
+      {
+        "text": "返回创作",
+        "disabled": false
+      }
+    ],
+    "progress": ""
+  }
+}

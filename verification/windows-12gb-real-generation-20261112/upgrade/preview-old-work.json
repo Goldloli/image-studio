@@ -1,0 +1,19 @@
+{
+  "action": "preview",
+  "opened": {
+    "opened": true
+  },
+  "preview": {
+    "text": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自\n2026/11/08 20:36\n制作信息\n雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光\n会话\n雨后的上海街角，一位撑伞的行人，写实摄影，真实自\n型号\nFLUX.2 Klein 4B distilled\n尺寸\n1024×1024\n种子\n3605072557\n完成时间\n2026/11/08 20:36\nAssetRef\nasset-10017c33105b4822a3a2dbe70358a3bd\n导出 PNG\n制作记录\n返回来源会话",
+    "facts": [
+      "会话=雨后的上海街角，一位撑伞的行人，写实摄影，真实自",
+      "型号=FLUX.2 Klein 4B distilled",
+      "尺寸=1024×1024",
+      "种子=3605072557",
+      "完成时间=2026/11/08 20:36",
+      "AssetRef=asset-10017c33105b4822a3a2dbe70358a3bd"
+    ],
+    "imageCount": 1,
+    "exportDisabled": false
+  }
+}

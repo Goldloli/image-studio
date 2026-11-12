@@ -1,0 +1,8 @@
+{
+  "action": "export",
+  "clicked": {
+    "clicked": true
+  },
+  "dialog": "{\r\n    \"dialog_title\":  \"导出 PNG 图片\",\r\n    \"edit_handle\":  460188,\r\n    \"save_handle\":  329832,\r\n    \"path\":  \"C:\\\\Users\\\\XIAOKA-PC\\\\Desktop\\\\image-studio\\\\verification\\\\windows-12gb-real-generation-20261112\\\\exports\\\\g03-export.png\"\r\n}",
+  "message": "PNG 已保存到你选择的位置。"
+}

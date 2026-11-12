@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-case",
+  "case_id": "G08",
+  "model": "Real-ESRGAN",
+  "capability_kind": "upscale",
+  "prompt": "",
+  "source_tag": "[G01B]",
+  "data_root": "C:/ist-rg/r-fresh",
+  "sequence": 28,
+  "model_id": "realesrgan-x4plus-windows-v1",
+  "capability_id": "image.upscale.realesrgan-x4plus.windows-v1",
+  "attempt_id": "attempt-258f61e998404d2dacfc70d06ea211f5",
+  "attempt_state": "succeeded",
+  "attempt_error": null,
+  "prompt_matches_expected": true,
+  "plan": {
+    "plan_id": "plan-46ef3829-5d06-4f56-b97f-a508f57d3842",
+    "recipe_id": null,
+    "capability_id": null,
+    "model_variant_id": "realesrgan-x4plus-windows-v1",
+    "parameters": null,
+    "environment_device": null
+  },
+  "elapsed_ms_from_db_attempt": 5759,
+  "driver": {
+    "status": "succeeded",
+    "elapsed_seconds": 8,
+    "stages": [
+      {
+        "at": "2026-11-12T13:59:36.853Z",
+        "elapsedSeconds": 3,
+        "stage": "正在加载模型"
+      },
+      {
+        "at": "2026-11-12T13:59:38.369Z",
+        "elapsedSeconds": 5,
+        "stage": "正在执行本地推理"
+      }
+    ],
+    "turn_text": "使用固定 4× 模型放大图片\n\n你\nImage Studio\nReal-ESRGAN x4plus · 精确 4× · 4096×4096\n查看大图\n图片已生成\n100%\n查看\n导出 PNG\n制作记录",
+    "error": null
+  },
+  "outputs": [
+    {
+      "asset_id": "asset-7780843e36aa456f833db9f7b2f717f8",
+      "content_hash": "2e04d2729964c5ddbbbb7bf190677bb5de58cb40f48e4f2eb97b9c10d2067cce",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-4803f96ace2c4970899f824544736b3d.png",
+      "width": 4096,
+      "height": 4096,
+      "byte_count": 16839218,
+      "file_bytes": 16839218,
+      "file_sha256": "2e04d2729964c5ddbbbb7bf190677bb5de58cb40f48e4f2eb97b9c10d2067cce",
+      "output_role": "primary",
+      "file_exists": true
+    }
+  ],
+  "resources": {
+    "rows": 4,
+    "interval_seconds": 1,
+    "gpu_used_mib": {
+      "min": 1513.0,
+      "max": 2274.0,
+      "mean": 1705.0
+    },
+    "gpu_total_mib": {
+      "min": 12288.0,
+      "max": 12288.0,
+      "mean": 12288.0
+    },
+    "private_commit_mib": {
+      "min": 880.5,
+      "max": 2833.1,
+      "mean": 1382.08
+    },
+    "available_physical_mib": {
+      "min": 21051.8,
+      "max": 22302.4,
+      "mean": 21987.2
+    }
+  },
+  "budget": {
+    "gpu_baseline_mib": 1400,
+    "gpu_peak_minus_baseline_mib": 874.0,
+    "gpu_used_limit_mib": 10752,
+    "private_commit_limit_mib": 24576,
+    "available_physical_min_mib": 2048
+  }
+}

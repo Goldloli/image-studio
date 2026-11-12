@@ -1,0 +1,14 @@
+{
+    "data_root":  "C:\\ist-rg\\r-badprofile",
+    "extra_env":  "",
+    "pre_created_profile_file":  true,
+    "dialog_found":  true,
+    "dialog_titles":  [
+                          "Image Studio 启动失败"
+                      ],
+    "exit_code":  3,
+    "startup_failure_log":  "C:\\ist-rg\\r-badprofile\\logs\\startup-failure.log",
+    "startup_failure_log_exists":  true,
+    "startup_failure_log_text":  "Image Studio 启动失败\n时间（UTC）：2026-11-12T14:08:39Z\n原因：无法创建 WebView2 用户数据目录：当文件已存在时，无法创建该文件。 (os error 183)\n日志：\\\\?\\C:\\ist-rg\\r-badprofile\\logs\\startup-failure.log\n建议：确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。\n",
+    "elapsed_seconds":  0.6
+}

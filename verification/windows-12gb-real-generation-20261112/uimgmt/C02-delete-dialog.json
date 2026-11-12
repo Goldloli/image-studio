@@ -1,0 +1,8 @@
+{
+  "clicked": true,
+  "dialog": {
+    "title": "删除会话「Acceptance 2026-11-12」？",
+    "description": "会话记录及未发送内容将移除；已生成作品会保留在作品库。此操作不可撤销。",
+    "error": ""
+  }
+}

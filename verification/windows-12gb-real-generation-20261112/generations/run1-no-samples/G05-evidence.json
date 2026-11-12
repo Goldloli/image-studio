@@ -1,0 +1,345 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-case",
+  "case_id": "G05",
+  "model": "MOSS",
+  "capability_kind": "text",
+  "prompt": "赛博朋克风格的雨夜街道，霓虹灯牌，电影感 [G05]",
+  "source_tag": null,
+  "data_root": "C:/ist-rg/r-fresh",
+  "sequence": 16,
+  "model_id": "moss-image-sft-windows-v1",
+  "capability_id": "image.text-to-image.moss-image-sft.windows-v1",
+  "attempt_id": "attempt-404225f52f064deaa117b2cb44d07c92",
+  "attempt_state": "succeeded",
+  "attempt_error": null,
+  "prompt_matches_expected": true,
+  "plan": {
+    "plan_id": "plan-d465cb22-147b-42a2-a4c3-fb81362f102c",
+    "recipe_id": null,
+    "capability_id": null,
+    "model_variant_id": "moss-image-sft-windows-v1",
+    "parameters": null,
+    "environment_device": null
+  },
+  "elapsed_ms_from_db_attempt": 142673,
+  "driver": {
+    "status": "succeeded",
+    "elapsed_seconds": 143,
+    "stages": [
+      {
+        "at": "2026-11-12T13:46:25.834Z",
+        "elapsedSeconds": 2,
+        "stage": "正在准备生成"
+      },
+      {
+        "at": "2026-11-12T13:46:31.861Z",
+        "elapsedSeconds": 8,
+        "stage": "正在加载模型"
+      },
+      {
+        "at": "2026-11-12T13:46:43.941Z",
+        "elapsedSeconds": 20,
+        "stage": "正在采样 0/50"
+      },
+      {
+        "at": "2026-11-12T13:46:46.967Z",
+        "elapsedSeconds": 23,
+        "stage": "正在采样 1/50"
+      },
+      {
+        "at": "2026-11-12T13:46:48.469Z",
+        "elapsedSeconds": 24,
+        "stage": "正在采样 2/50"
+      },
+      {
+        "at": "2026-11-12T13:46:51.481Z",
+        "elapsedSeconds": 27,
+        "stage": "正在采样 3/50"
+      },
+      {
+        "at": "2026-11-12T13:46:52.990Z",
+        "elapsedSeconds": 29,
+        "stage": "正在采样 4/50"
+      },
+      {
+        "at": "2026-11-12T13:46:56.007Z",
+        "elapsedSeconds": 32,
+        "stage": "正在采样 5/50"
+      },
+      {
+        "at": "2026-11-12T13:46:59.021Z",
+        "elapsedSeconds": 35,
+        "stage": "正在采样 6/50"
+      },
+      {
+        "at": "2026-11-12T13:47:00.535Z",
+        "elapsedSeconds": 36,
+        "stage": "正在采样 7/50"
+      },
+      {
+        "at": "2026-11-12T13:47:03.551Z",
+        "elapsedSeconds": 39,
+        "stage": "正在采样 8/50"
+      },
+      {
+        "at": "2026-11-12T13:47:05.054Z",
+        "elapsedSeconds": 41,
+        "stage": "正在采样 9/50"
+      },
+      {
+        "at": "2026-11-12T13:47:08.071Z",
+        "elapsedSeconds": 44,
+        "stage": "正在采样 10/50"
+      },
+      {
+        "at": "2026-11-12T13:47:11.092Z",
+        "elapsedSeconds": 47,
+        "stage": "正在采样 11/50"
+      },
+      {
+        "at": "2026-11-12T13:47:12.605Z",
+        "elapsedSeconds": 48,
+        "stage": "正在采样 12/50"
+      },
+      {
+        "at": "2026-11-12T13:47:15.617Z",
+        "elapsedSeconds": 51,
+        "stage": "正在采样 13/50"
+      },
+      {
+        "at": "2026-11-12T13:47:18.632Z",
+        "elapsedSeconds": 54,
+        "stage": "正在采样 14/50"
+      },
+      {
+        "at": "2026-11-12T13:47:20.134Z",
+        "elapsedSeconds": 56,
+        "stage": "正在采样 15/50"
+      },
+      {
+        "at": "2026-11-12T13:47:23.146Z",
+        "elapsedSeconds": 59,
+        "stage": "正在采样 16/50"
+      },
+      {
+        "at": "2026-11-12T13:47:24.648Z",
+        "elapsedSeconds": 60,
+        "stage": "正在采样 17/50"
+      },
+      {
+        "at": "2026-11-12T13:47:27.656Z",
+        "elapsedSeconds": 63,
+        "stage": "正在采样 18/50"
+      },
+      {
+        "at": "2026-11-12T13:47:30.670Z",
+        "elapsedSeconds": 66,
+        "stage": "正在采样 19/50"
+      },
+      {
+        "at": "2026-11-12T13:47:32.179Z",
+        "elapsedSeconds": 68,
+        "stage": "正在采样 20/50"
+      },
+      {
+        "at": "2026-11-12T13:47:35.188Z",
+        "elapsedSeconds": 71,
+        "stage": "正在采样 21/50"
+      },
+      {
+        "at": "2026-11-12T13:47:36.697Z",
+        "elapsedSeconds": 72,
+        "stage": "正在采样 22/50"
+      },
+      {
+        "at": "2026-11-12T13:47:39.714Z",
+        "elapsedSeconds": 75,
+        "stage": "正在采样 23/50"
+      },
+      {
+        "at": "2026-11-12T13:47:42.724Z",
+        "elapsedSeconds": 78,
+        "stage": "正在采样 24/50"
+      },
+      {
+        "at": "2026-11-12T13:47:44.235Z",
+        "elapsedSeconds": 80,
+        "stage": "正在采样 25/50"
+      },
+      {
+        "at": "2026-11-12T13:47:45.737Z",
+        "elapsedSeconds": 81,
+        "stage": "正在采样 26/50"
+      },
+      {
+        "at": "2026-11-12T13:47:50.263Z",
+        "elapsedSeconds": 86,
+        "stage": "正在采样 27/50"
+      },
+      {
+        "at": "2026-11-12T13:47:51.777Z",
+        "elapsedSeconds": 87,
+        "stage": "正在采样 28/50"
+      },
+      {
+        "at": "2026-11-12T13:47:53.286Z",
+        "elapsedSeconds": 89,
+        "stage": "正在采样 29/50"
+      },
+      {
+        "at": "2026-11-12T13:47:56.295Z",
+        "elapsedSeconds": 92,
+        "stage": "正在采样 30/50"
+      },
+      {
+        "at": "2026-11-12T13:47:59.311Z",
+        "elapsedSeconds": 95,
+        "stage": "正在采样 31/50"
+      },
+      {
+        "at": "2026-11-12T13:48:02.333Z",
+        "elapsedSeconds": 98,
+        "stage": "正在采样 32/50"
+      },
+      {
+        "at": "2026-11-12T13:48:03.839Z",
+        "elapsedSeconds": 100,
+        "stage": "正在采样 33/50"
+      },
+      {
+        "at": "2026-11-12T13:48:05.350Z",
+        "elapsedSeconds": 101,
+        "stage": "正在采样 34/50"
+      },
+      {
+        "at": "2026-11-12T13:48:09.881Z",
+        "elapsedSeconds": 106,
+        "stage": "正在采样 35/50"
+      },
+      {
+        "at": "2026-11-12T13:48:11.396Z",
+        "elapsedSeconds": 107,
+        "stage": "正在采样 36/50"
+      },
+      {
+        "at": "2026-11-12T13:48:12.902Z",
+        "elapsedSeconds": 109,
+        "stage": "正在采样 37/50"
+      },
+      {
+        "at": "2026-11-12T13:48:17.439Z",
+        "elapsedSeconds": 113,
+        "stage": "正在采样 38/50"
+      },
+      {
+        "at": "2026-11-12T13:48:18.948Z",
+        "elapsedSeconds": 115,
+        "stage": "正在采样 39/50"
+      },
+      {
+        "at": "2026-11-12T13:48:20.457Z",
+        "elapsedSeconds": 116,
+        "stage": "正在采样 40/50"
+      },
+      {
+        "at": "2026-11-12T13:48:23.478Z",
+        "elapsedSeconds": 119,
+        "stage": "正在采样 41/50"
+      },
+      {
+        "at": "2026-11-12T13:48:26.492Z",
+        "elapsedSeconds": 122,
+        "stage": "正在采样 42/50"
+      },
+      {
+        "at": "2026-11-12T13:48:27.998Z",
+        "elapsedSeconds": 124,
+        "stage": "正在采样 43/50"
+      },
+      {
+        "at": "2026-11-12T13:48:31.016Z",
+        "elapsedSeconds": 127,
+        "stage": "正在采样 44/50"
+      },
+      {
+        "at": "2026-11-12T13:48:32.526Z",
+        "elapsedSeconds": 128,
+        "stage": "正在采样 45/50"
+      },
+      {
+        "at": "2026-11-12T13:48:35.547Z",
+        "elapsedSeconds": 131,
+        "stage": "正在采样 46/50"
+      },
+      {
+        "at": "2026-11-12T13:48:38.563Z",
+        "elapsedSeconds": 134,
+        "stage": "正在采样 47/50"
+      },
+      {
+        "at": "2026-11-12T13:48:40.066Z",
+        "elapsedSeconds": 136,
+        "stage": "正在采样 48/50"
+      },
+      {
+        "at": "2026-11-12T13:48:43.072Z",
+        "elapsedSeconds": 139,
+        "stage": "正在采样 49/50"
+      },
+      {
+        "at": "2026-11-12T13:48:46.100Z",
+        "elapsedSeconds": 142,
+        "stage": "正在解码图片"
+      }
+    ],
+    "turn_text": "赛博朋克风格的雨夜街道，霓虹灯牌，电影感 [G05]\n\n你\nImage Studio\nMOSS-Image-SFT · 1:1 · 种子 2364485002\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+    "error": null
+  },
+  "outputs": [
+    {
+      "asset_id": "asset-a5200801ea4e43d9bc13eb674ad21c44",
+      "content_hash": "22b6da5a93f7f514e4695897fbbdf045a2048aedc8d41fdbbbc40e830081e394",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-389b5495190a4a3db68b9d7a4c1f44c7.png",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1934950,
+      "file_bytes": 1934950,
+      "file_sha256": "22b6da5a93f7f514e4695897fbbdf045a2048aedc8d41fdbbbc40e830081e394",
+      "output_role": "primary",
+      "file_exists": true
+    }
+  ],
+  "resources": {
+    "rows": 49,
+    "interval_seconds": 1,
+    "gpu_used_mib": {
+      "min": 1482.0,
+      "max": 6963.0,
+      "mean": 4653.41
+    },
+    "gpu_total_mib": {
+      "min": 12288.0,
+      "max": 12288.0,
+      "mean": 12288.0
+    },
+    "private_commit_mib": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "available_physical_mib": {
+      "min": 16123.7,
+      "max": 22133.8,
+      "mean": 20492.39
+    }
+  },
+  "budget": {
+    "gpu_baseline_mib": 1400,
+    "gpu_peak_minus_baseline_mib": 5563.0,
+    "gpu_used_limit_mib": 10752,
+    "private_commit_limit_mib": 24576,
+    "available_physical_min_mib": 2048
+  }
+}

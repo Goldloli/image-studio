@@ -1,0 +1,12 @@
+{
+  "action": "conversation-confirm-delete",
+  "clicked": {
+    "clicked": true
+  },
+  "dialogPresent": false,
+  "dialogError": "",
+  "titles": [
+    "新会话"
+  ],
+  "actionError": ""
+}

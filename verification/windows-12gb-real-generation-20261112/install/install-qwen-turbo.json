@@ -1,0 +1,69 @@
+{
+  "model": "Qwen-Image 2.1 Turbo",
+  "startedAt": "2026-11-12T13:02:52.138Z",
+  "phases": [
+    {
+      "at": "2026-11-12T13:02:54.575Z",
+      "elapsedSeconds": 2,
+      "status": "正在下载",
+      "progress": "正在下载2.72 GB / 35.18 GB"
+    },
+    {
+      "at": "2026-11-12T13:03:10.763Z",
+      "elapsedSeconds": 19,
+      "status": "正在校验模型",
+      "progress": "正在校验模型35.18 GB / 35.18 GB"
+    },
+    {
+      "at": "2026-11-12T13:04:11.142Z",
+      "elapsedSeconds": 79,
+      "status": "准备隔离运行环境",
+      "progress": "准备隔离运行环境35.18 GB / 35.18 GB"
+    },
+    {
+      "at": "2026-11-12T13:04:15.272Z",
+      "elapsedSeconds": 83,
+      "status": "检查运行环境与设备",
+      "progress": "检查运行环境与设备35.18 GB / 35.18 GB"
+    },
+    {
+      "at": "2026-11-12T13:04:39.504Z",
+      "elapsedSeconds": 107,
+      "status": "正在准备模型文件",
+      "progress": "正在准备模型文件35.18 GB / 35.18 GB"
+    },
+    {
+      "at": "2026-11-12T13:09:34.897Z",
+      "elapsedSeconds": 403,
+      "status": "当前可执行",
+      "progress": ""
+    }
+  ],
+  "status": "ready",
+  "clicked": {
+    "clicked": true,
+    "text": "安装模型与运行环境"
+  },
+  "endedAt": "2026-11-12T13:09:35.067Z",
+  "elapsedSeconds": 403,
+  "final": {
+    "found": true,
+    "status": "当前可执行",
+    "alert": "",
+    "buttons": [
+      {
+        "text": "用于当前会话",
+        "disabled": false
+      },
+      {
+        "text": "前往创作",
+        "disabled": false
+      },
+      {
+        "text": "返回创作",
+        "disabled": false
+      }
+    ],
+    "progress": ""
+  }
+}

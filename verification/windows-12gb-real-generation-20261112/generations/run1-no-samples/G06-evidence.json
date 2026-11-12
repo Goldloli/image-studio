@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-case",
+  "case_id": "G06",
+  "model": "Klein",
+  "capability_kind": "edit",
+  "prompt": "把背景换成夜晚的东京街道，保留人物与伞 [G06]",
+  "source_tag": "[G01A]",
+  "data_root": "C:/ist-rg/r-fresh",
+  "sequence": 17,
+  "model_id": "flux2-klein-4b-distilled-windows-v1",
+  "capability_id": "image.edit.flux2-klein-4b.windows-v1",
+  "attempt_id": "attempt-210d98f9ec444d37bd14f925ab63cbed",
+  "attempt_state": "succeeded",
+  "attempt_error": null,
+  "prompt_matches_expected": true,
+  "plan": {
+    "plan_id": "plan-04c12fc4-7738-4b26-a669-11244bd4333f",
+    "recipe_id": null,
+    "capability_id": null,
+    "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+    "parameters": null,
+    "environment_device": null
+  },
+  "elapsed_ms_from_db_attempt": 37378,
+  "driver": {
+    "status": "succeeded",
+    "elapsed_seconds": 39,
+    "stages": [
+      {
+        "at": "2026-11-12T13:48:53.627Z",
+        "elapsedSeconds": 2,
+        "stage": "正在准备生成"
+      },
+      {
+        "at": "2026-11-12T13:48:58.161Z",
+        "elapsedSeconds": 6,
+        "stage": "正在加载模型"
+      },
+      {
+        "at": "2026-11-12T13:49:17.781Z",
+        "elapsedSeconds": 26,
+        "stage": "正在采样 0/4"
+      },
+      {
+        "at": "2026-11-12T13:49:20.804Z",
+        "elapsedSeconds": 29,
+        "stage": "正在采样 2/4"
+      },
+      {
+        "at": "2026-11-12T13:49:23.822Z",
+        "elapsedSeconds": 32,
+        "stage": "采样 4/4 · 正在处理"
+      },
+      {
+        "at": "2026-11-12T13:49:29.857Z",
+        "elapsedSeconds": 38,
+        "stage": "正在验证并保存"
+      }
+    ],
+    "turn_text": "把背景换成夜晚的东京街道，保留人物与伞 [G06]\n\n你\nImage Studio\nFLUX.2 Klein 4B · 单图编辑\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+    "error": null
+  },
+  "outputs": [
+    {
+      "asset_id": "asset-80e913b72d184f2a83b3b5eda2f2316e",
+      "content_hash": "3de524b1a94fb6baabd1fa1c03e5d8cab096788747fb4c234c9101b4c6b97f42",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-d9bb0feaf49d470ebef6822ec01b0df4.png",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 2218441,
+      "file_bytes": 2218441,
+      "file_sha256": "3de524b1a94fb6baabd1fa1c03e5d8cab096788747fb4c234c9101b4c6b97f42",
+      "output_role": "primary",
+      "file_exists": true
+    }
+  ],
+  "resources": {
+    "rows": 13,
+    "interval_seconds": 1,
+    "gpu_used_mib": {
+      "min": 1485.0,
+      "max": 11165.0,
+      "mean": 4748.23
+    },
+    "gpu_total_mib": {
+      "min": 12288.0,
+      "max": 12288.0,
+      "mean": 12288.0
+    },
+    "private_commit_mib": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "available_physical_mib": {
+      "min": 14666.6,
+      "max": 22204.9,
+      "mean": 18850.76
+    }
+  },
+  "budget": {
+    "gpu_baseline_mib": 1400,
+    "gpu_peak_minus_baseline_mib": 9765.0,
+    "gpu_used_limit_mib": 10752,
+    "private_commit_limit_mib": 24576,
+    "available_physical_min_mib": 2048
+  }
+}

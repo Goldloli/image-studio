@@ -1,0 +1,40 @@
+{
+  "model": "BiRefNet",
+  "kind": "remove-background",
+  "prompt": "",
+  "source": "[G02]",
+  "startedAt": "2026-11-12T13:49:33.790Z",
+  "status": "succeeded",
+  "stages": [
+    {
+      "at": "2026-11-12T13:49:36.252Z",
+      "elapsedSeconds": 2,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:49:43.797Z",
+      "elapsedSeconds": 9,
+      "stage": "正在执行本地推理"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT",
+    "Klein 单图编辑"
+  ],
+  "selectedModel": "BiRefNet epoch_244 · 去背景",
+  "turnsBefore": {
+    "turns": 17,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T13:49:34.746Z",
+  "turnId": "turn-ffd6732677ea46bc8a8330e48244f960",
+  "turnText": "去除背景，保留主体\n\n你\nImage Studio\nBiRefNet epoch_244 · 透明背景\n查看大图\n图片已生成\n100%\n查看蒙版\n查看\n导出 PNG\n制作记录",
+  "elapsedSeconds": 21,
+  "endedAt": "2026-11-12T13:49:56.045Z"
+}

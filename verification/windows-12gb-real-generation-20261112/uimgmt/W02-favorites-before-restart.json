@@ -1,0 +1,27 @@
+{
+  "clicked": true,
+  "active": [
+    {
+      "text": "全部作品",
+      "active": false
+    },
+    {
+      "text": "仅收藏",
+      "active": true
+    }
+  ],
+  "state": {
+    "count": "1 件正式作品网格列表"
+  },
+  "items": [
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]",
+      "conv": "闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛 · 会话已删除",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/12 21:52",
+      "favorite": true,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    }
+  ]
+}

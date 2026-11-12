@@ -1,0 +1,4 @@
+label,iso_time,epoch_ms,gpu_used_mib,gpu_total_mib,available_physical_mib,commit_limit_mib,commit_available_mib,proc_tree_count,private_commit_mib,working_set_mib,pids
+G08,2026-11-12T13:39:23.9313445Z,1794490763931,1511,12288,21125.5,37352.4,20638.8,0,0,0,
+G08,2026-11-12T13:39:27.5559061Z,1794490767555,1677,12288,20742.2,37352.4,19560.2,0,0,0,
+G08,2026-11-12T13:39:31.0009084Z,1794490771000,2261,12288,22000.5,37352.4,21624.3,0,0,0,

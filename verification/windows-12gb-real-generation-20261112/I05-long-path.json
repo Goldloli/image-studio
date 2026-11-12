@@ -1,0 +1,14 @@
+{
+    "data_root":  "C:\\ist-rg\\r-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "extra_env":  "",
+    "pre_created_profile_file":  false,
+    "dialog_found":  true,
+    "dialog_titles":  [
+                          "Image Studio 启动失败"
+                      ],
+    "exit_code":  3,
+    "startup_failure_log":  "C:\\ist-rg\\r-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\\logs\\startup-failure.log",
+    "startup_failure_log_exists":  true,
+    "startup_failure_log_text":  "Image Studio 启动失败\n时间（UTC）：2026-11-12T14:08:38Z\n原因：数据目录 C:\\ist-rg\\r-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\\data 路径过长（117 个字符，Windows 运行时限 94）。请把数据目录移到更短的位置，例如 C:\\ImageStudioData，或用 --data-dir 指定短目录。\n日志：C:\\ist-rg\\r-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\\logs\\startup-failure.log\n建议：确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。\n",
+    "elapsed_seconds":  0.6
+}

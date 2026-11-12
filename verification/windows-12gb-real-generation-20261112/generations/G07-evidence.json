@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-case",
+  "case_id": "G07",
+  "model": "BiRefNet",
+  "capability_kind": "remove-background",
+  "prompt": "",
+  "source_tag": "[G02]",
+  "data_root": "C:/ist-rg/r-fresh",
+  "sequence": 27,
+  "model_id": "birefnet-general-epoch-244-windows-v1",
+  "capability_id": "image.remove-background.birefnet-general-epoch-244.windows-v1",
+  "attempt_id": "attempt-9ed2149246a242b89f46798614154e69",
+  "attempt_state": "succeeded",
+  "attempt_error": null,
+  "prompt_matches_expected": true,
+  "plan": {
+    "plan_id": "plan-589eabb8-8abf-4cf2-a16c-6356d6b51766",
+    "recipe_id": null,
+    "capability_id": null,
+    "model_variant_id": "birefnet-general-epoch-244-windows-v1",
+    "parameters": null,
+    "environment_device": null
+  },
+  "elapsed_ms_from_db_attempt": 20078,
+  "driver": {
+    "status": "succeeded",
+    "elapsed_seconds": 23,
+    "stages": [
+      {
+        "at": "2026-11-12T13:59:07.893Z",
+        "elapsedSeconds": 2,
+        "stage": "正在接收提示词"
+      },
+      {
+        "at": "2026-11-12T13:59:09.404Z",
+        "elapsedSeconds": 3,
+        "stage": "正在加载模型"
+      },
+      {
+        "at": "2026-11-12T13:59:16.949Z",
+        "elapsedSeconds": 11,
+        "stage": "正在执行本地推理"
+      },
+      {
+        "at": "2026-11-12T13:59:27.517Z",
+        "elapsedSeconds": 21,
+        "stage": "正在验证并保存"
+      }
+    ],
+    "turn_text": "去除背景，保留主体\n\n你\nImage Studio\nBiRefNet epoch_244 · 透明背景\n查看大图\n图片已生成\n100%\n查看蒙版\n查看\n导出 PNG\n制作记录",
+    "error": null
+  },
+  "outputs": [
+    {
+      "asset_id": "asset-0bfb8c45b612476c81a282f6c093cda4",
+      "content_hash": "b29ce455af763b91b6973411c66be454c20d08b417b3c406a9ed5899c6632fb3",
+      "data_type": "image_rgba",
+      "relative_path": "assets/asset-bc530006bdee45e4b16c59a4d10baf60.png",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1565690,
+      "file_bytes": 1565690,
+      "file_sha256": "b29ce455af763b91b6973411c66be454c20d08b417b3c406a9ed5899c6632fb3",
+      "output_role": "primary",
+      "file_exists": true
+    },
+    {
+      "asset_id": "asset-1257c65bec254ccc929a3c32a0816664",
+      "content_hash": "3003936415a5c3a7f6ae6d56f632de266e237c12cd348d20214cd9f0b221f6be",
+      "data_type": "mask",
+      "relative_path": "assets/asset-d63db0c350464403a12cdebe503dcfdc.png",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 20455,
+      "file_bytes": 20455,
+      "file_sha256": "3003936415a5c3a7f6ae6d56f632de266e237c12cd348d20214cd9f0b221f6be",
+      "output_role": "mask",
+      "file_exists": true
+    }
+  ],
+  "resources": {
+    "rows": 7,
+    "interval_seconds": 1,
+    "gpu_used_mib": {
+      "min": 1484.0,
+      "max": 1515.0,
+      "mean": 1501.0
+    },
+    "gpu_total_mib": {
+      "min": 12288.0,
+      "max": 12288.0,
+      "mean": 12288.0
+    },
+    "private_commit_mib": {
+      "min": 868.4,
+      "max": 11160.7,
+      "mean": 3700.24
+    },
+    "available_physical_mib": {
+      "min": 14669.9,
+      "max": 22323.2,
+      "mean": 20388.86
+    }
+  },
+  "budget": {
+    "gpu_baseline_mib": 1400,
+    "gpu_peak_minus_baseline_mib": 115.0,
+    "gpu_used_limit_mib": 10752,
+    "private_commit_limit_mib": 24576,
+    "available_physical_min_mib": 2048
+  }
+}

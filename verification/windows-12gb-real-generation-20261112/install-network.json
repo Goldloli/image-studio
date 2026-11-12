@@ -1,0 +1,63 @@
+{
+  "model": "Z-Image",
+  "startedAt": "2026-11-12T13:41:08.358Z",
+  "phases": [
+    {
+      "at": "2026-11-12T13:41:11.327Z",
+      "elapsedSeconds": 3,
+      "status": "正在下载",
+      "progress": "正在下载223.1 MB / 35.56 GB"
+    },
+    {
+      "at": "2026-11-12T13:55:10.738Z",
+      "elapsedSeconds": 842,
+      "status": "正在校验模型",
+      "progress": "正在校验模型35.56 GB / 35.56 GB"
+    },
+    {
+      "at": "2026-11-12T13:56:31.165Z",
+      "elapsedSeconds": 923,
+      "status": "准备隔离运行环境",
+      "progress": "准备隔离运行环境35.56 GB / 35.56 GB"
+    },
+    {
+      "at": "2026-11-12T13:57:01.394Z",
+      "elapsedSeconds": 953,
+      "status": "检查运行环境与设备",
+      "progress": "检查运行环境与设备35.56 GB / 35.56 GB"
+    },
+    {
+      "at": "2026-11-12T13:57:59.739Z",
+      "elapsedSeconds": 1011,
+      "status": "当前可执行",
+      "progress": ""
+    }
+  ],
+  "status": "ready",
+  "clicked": {
+    "clicked": true,
+    "text": "继续安装"
+  },
+  "endedAt": "2026-11-12T13:57:59.903Z",
+  "elapsedSeconds": 1012,
+  "final": {
+    "found": true,
+    "status": "当前可执行",
+    "alert": "",
+    "buttons": [
+      {
+        "text": "用于当前会话",
+        "disabled": false
+      },
+      {
+        "text": "前往创作",
+        "disabled": false
+      },
+      {
+        "text": "返回创作",
+        "disabled": false
+      }
+    ],
+    "progress": ""
+  }
+}

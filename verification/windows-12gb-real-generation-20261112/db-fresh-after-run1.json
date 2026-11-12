@@ -1,0 +1,1923 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-db-snapshot",
+  "generated_at": "2026-11-12T21:50:21.547989+08:00",
+  "data_root": "C:\\ist-rg\\r-fresh",
+  "user_version": 6,
+  "quick_check": "ok",
+  "conversations": [
+    {
+      "id": "conv-default",
+      "title": "闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛",
+      "title_source": "auto",
+      "created_at": 1794488166885,
+      "activity_seq": 20,
+      "deleted_at": null
+    }
+  ],
+  "drafts": [
+    {
+      "id": 1,
+      "name": "闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛",
+      "prompt": "",
+      "params_json": {
+        "aspect": "1:1",
+        "capabilityDrafts": {
+          "image.edit.flux2-klein-4b.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": "asset-0eeed317751146e88c8ed98c66d3bb7c"
+          },
+          "image.remove-background.birefnet-general-epoch-244.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": "asset-9a3ad31d1bc440b4bc157e9771030b72"
+          },
+          "image.text-to-image.flux2-klein-4b.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": null
+          },
+          "image.text-to-image.moss-image-sft.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": null
+          },
+          "image.text-to-image.qwen-image-2.1-turbo.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": null
+          },
+          "image.text-to-image.qwen-image-2.1.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": null
+          },
+          "image.text-to-image.z-image-turbo-diffusers-cuda-nf4.v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": null
+          },
+          "image.upscale.realesrgan-x4plus.windows-v1": {
+            "aspect": "1:1",
+            "prompt": "",
+            "promptSourceId": null,
+            "seed": "",
+            "sourceAssetId": "asset-930eca363a0a4131b371c2b7945a220b"
+          }
+        },
+        "capabilityId": "image.upscale.realesrgan-x4plus.windows-v1",
+        "count": 1,
+        "modelId": "realesrgan-x4plus-windows-v1",
+        "seed": "",
+        "sourceAssetId": "asset-8c715ff54f2b430d828e349f45fe25fb"
+      },
+      "collapsed": 0,
+      "version": 73
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset-bb2b303773fd4d71ad4abf7782b92f51",
+      "job_id": "job-fa5a5858f6ab4f6fb1e9fa99f15d721b",
+      "attempt_id": "attempt-d9eeda51ae6a4e42907a4a5c5f9dddcb",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1358046,
+      "content_hash": "400b024ab28a45afdc7e8d528becd16cea257831708ed3def2b5f75ead269936",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-f4aa7e6f44e042118d40c6c0a19bb5d7.png",
+      "created_at": 1794490300235,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-f4aa7e6f44e042118d40c6c0a19bb5d7.png",
+        "bytes": 1358046,
+        "sha256": "400b024ab28a45afdc7e8d528becd16cea257831708ed3def2b5f75ead269936"
+      }
+    },
+    {
+      "id": "asset-930eca363a0a4131b371c2b7945a220b",
+      "job_id": "job-0cd0a0c923df4922badb104a861816fc",
+      "attempt_id": "attempt-01bb337fad034d6ba56791d25a1f81f1",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1711837,
+      "content_hash": "cf7afdc26550d6d2def9160406f575274aa3193aaddec9a1ae93676dbd659135",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-8e45e4da63d042b4b9b027bf5d292f83.png",
+      "created_at": 1794490331554,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8e45e4da63d042b4b9b027bf5d292f83.png",
+        "bytes": 1711837,
+        "sha256": "cf7afdc26550d6d2def9160406f575274aa3193aaddec9a1ae93676dbd659135"
+      }
+    },
+    {
+      "id": "asset-e2a7080923b140afa66efe498f7fe211",
+      "job_id": "job-a1d784876a8542d79d6d598598a156a4",
+      "attempt_id": "attempt-9f36bb5a8d224a80a634033b9ae0a169",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1862347,
+      "content_hash": "13db61088ebf76594a7f98baac666ff7fac08ba718e0766d65bc20979bdd99b3",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-23381c337ac54c11bb8400c2cf34d360.png",
+      "created_at": 1794490407139,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-23381c337ac54c11bb8400c2cf34d360.png",
+        "bytes": 1862347,
+        "sha256": "13db61088ebf76594a7f98baac666ff7fac08ba718e0766d65bc20979bdd99b3"
+      }
+    },
+    {
+      "id": "asset-4f10fade18b54cc786c9f972bcec041a",
+      "job_id": "job-8e7022c5ec0d40cab7805ee6d80a506d",
+      "attempt_id": "attempt-28448a01753147c29245684ad8a20670",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1389499,
+      "content_hash": "87200ec33b738cba010ba18c0dcf54b215e0d6ab42f0c7d4bcd31e4f4274245d",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-8f074d6ee9004bfdb49ced2c2b2e1fe5.png",
+      "created_at": 1794490498746,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8f074d6ee9004bfdb49ced2c2b2e1fe5.png",
+        "bytes": 1389499,
+        "sha256": "87200ec33b738cba010ba18c0dcf54b215e0d6ab42f0c7d4bcd31e4f4274245d"
+      }
+    },
+    {
+      "id": "asset-1739222018a74a87804cf00d28b3feb9",
+      "job_id": "job-1de40bf77766440b8ecf5c83ce373196",
+      "attempt_id": "attempt-b4e080083f9a47d997f9dd5de08704f4",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1566448,
+      "content_hash": "5b5a4a5ec5d8b84f19cf998b49118f57e851edb842cf8ead0753201a35738989",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-b9f7936b05c5462e9e7904fdaa98ec0c.png",
+      "created_at": 1794490542005,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-b9f7936b05c5462e9e7904fdaa98ec0c.png",
+        "bytes": 1566448,
+        "sha256": "5b5a4a5ec5d8b84f19cf998b49118f57e851edb842cf8ead0753201a35738989"
+      }
+    },
+    {
+      "id": "asset-64a3630321824b8dbe1f95cf93d9ba8b",
+      "job_id": "job-2b2b88fbd3dd4735b46d856068579087",
+      "attempt_id": "attempt-414e367803a74c66ad6636583ec61a92",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1268770,
+      "content_hash": "ad7c7ae9f1c507e6b07e98f47043f6a8a2d3aa8b2c0efefc52cff402079ae37e",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-e74029d406d64c4db3d1359930fd1f5a.png",
+      "created_at": 1794490689209,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-e74029d406d64c4db3d1359930fd1f5a.png",
+        "bytes": 1268770,
+        "sha256": "ad7c7ae9f1c507e6b07e98f47043f6a8a2d3aa8b2c0efefc52cff402079ae37e"
+      }
+    },
+    {
+      "id": "asset-47a622cd1b524479bf403dcc4e64e915",
+      "job_id": "job-bb700125256c47e9a6449ec60f4a4c29",
+      "attempt_id": "attempt-d02b70f7ad1f4f1fa21d0125bcfee7fc",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1390189,
+      "content_hash": "29174d3d2e4f68fa4a6b14b694a3d310451a54b3f19bfe6a5b0663ba886fb575",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-4e35212d92a94ec593d24f78e8e27cff.png",
+      "created_at": 1794490732142,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-4e35212d92a94ec593d24f78e8e27cff.png",
+        "bytes": 1390189,
+        "sha256": "29174d3d2e4f68fa4a6b14b694a3d310451a54b3f19bfe6a5b0663ba886fb575"
+      }
+    },
+    {
+      "id": "asset-52f4453a32584f3b845269cf71d00bc5",
+      "job_id": "job-34105008af3149288a60d6f36d1eea90",
+      "attempt_id": "attempt-58cf64b7cbf642f9b78c31a5663c14bd",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 2133430,
+      "content_hash": "730fdfeae784fe80ba8d0d07710265511653f8467bea2330a70ed75c6fb87dce",
+      "data_type": "image_rgba",
+      "relative_path": "assets/asset-bd9adfba8dc8441eaf7266fa40a56d64.png",
+      "created_at": 1794490759342,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-bd9adfba8dc8441eaf7266fa40a56d64.png",
+        "bytes": 2133430,
+        "sha256": "730fdfeae784fe80ba8d0d07710265511653f8467bea2330a70ed75c6fb87dce"
+      }
+    },
+    {
+      "id": "asset-ad1dc5e32cb247aea8ad0a992ebe28cf",
+      "job_id": "job-34105008af3149288a60d6f36d1eea90",
+      "attempt_id": "attempt-58cf64b7cbf642f9b78c31a5663c14bd",
+      "output_role": "mask",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 30282,
+      "content_hash": "edd0b79f9bd01f8747ebc3d7eb9b57bd25831a875e33405c3e800aaf9441d7a0",
+      "data_type": "mask",
+      "relative_path": "assets/asset-48ccd73bd7d3402b8ab337b351816c0e.png",
+      "created_at": 1794490759342,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-48ccd73bd7d3402b8ab337b351816c0e.png",
+        "bytes": 30282,
+        "sha256": "edd0b79f9bd01f8747ebc3d7eb9b57bd25831a875e33405c3e800aaf9441d7a0"
+      }
+    },
+    {
+      "id": "asset-03a0e87f39364f44a91f282edff4819e",
+      "job_id": "job-d2e07ebe38aa43d59f6246928dc588ea",
+      "attempt_id": "attempt-5d2d2673a3e14beaa09dfd1da57aa00a",
+      "output_role": "primary",
+      "width": 4096,
+      "height": 4096,
+      "byte_count": 17141050,
+      "content_hash": "7efca84607fdd1481557a377c860301b97d477fe795f23b36db558329624a5b1",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-8b1684008bf2485aa653b7f5b64153e6.png",
+      "created_at": 1794490771924,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8b1684008bf2485aa653b7f5b64153e6.png",
+        "bytes": 17141050,
+        "sha256": "7efca84607fdd1481557a377c860301b97d477fe795f23b36db558329624a5b1"
+      }
+    },
+    {
+      "id": "asset-0eeed317751146e88c8ed98c66d3bb7c",
+      "job_id": "job-83be3c00e2a9482fb9e185df738e482d",
+      "attempt_id": "attempt-f7937e9dfd094b09bfd208caeffb95c7",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 2178638,
+      "content_hash": "9f769e2ac28d684cf27a153b05bec361abd8510bffb8948abc916e1cf046a997",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-369874e231274625a368f5a3798c3911.png",
+      "created_at": 1794490957288,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-369874e231274625a368f5a3798c3911.png",
+        "bytes": 2178638,
+        "sha256": "9f769e2ac28d684cf27a153b05bec361abd8510bffb8948abc916e1cf046a997"
+      }
+    },
+    {
+      "id": "asset-8c715ff54f2b430d828e349f45fe25fb",
+      "job_id": "job-bc9bb88fd4ab45eeb492a3f2e059dadc",
+      "attempt_id": "attempt-fbcea227be4d46e78469f34e42f022db",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1703099,
+      "content_hash": "c829982b504a7eb91c0a4e5a84b97b558ff906044efb10c587c515e2400fda3c",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-89a0ff93a3bc4640a302f102c884be52.png",
+      "created_at": 1794490987654,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-89a0ff93a3bc4640a302f102c884be52.png",
+        "bytes": 1703099,
+        "sha256": "c829982b504a7eb91c0a4e5a84b97b558ff906044efb10c587c515e2400fda3c"
+      }
+    },
+    {
+      "id": "asset-9a3ad31d1bc440b4bc157e9771030b72",
+      "job_id": "job-e4c00610d95e4d4284771c747565191d",
+      "attempt_id": "attempt-16293893812b40d4b62e12f5fc1baf85",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1448169,
+      "content_hash": "3dee901de225339dc04749b71015232265ba07b1770c399a1ab410c7e04dec1d",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-85c569681c814120b15bacb2013b3151.png",
+      "created_at": 1794491048647,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-85c569681c814120b15bacb2013b3151.png",
+        "bytes": 1448169,
+        "sha256": "3dee901de225339dc04749b71015232265ba07b1770c399a1ab410c7e04dec1d"
+      }
+    },
+    {
+      "id": "asset-558ae0b17fa340d3817630b9dc8a6508",
+      "job_id": "job-dfd78b109f2d41d4a32e04884f466e1a",
+      "attempt_id": "attempt-654d9a85e32f4bfa8faa45c05d42cad5",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1469497,
+      "content_hash": "704d6cdbf713b4fc936c13c335860e7c1510f8fcb39ebc6c13cafd44ecab0ad5",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-90a82a0ffc964c7da3e1e98698edd262.png",
+      "created_at": 1794491138446,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-90a82a0ffc964c7da3e1e98698edd262.png",
+        "bytes": 1469497,
+        "sha256": "704d6cdbf713b4fc936c13c335860e7c1510f8fcb39ebc6c13cafd44ecab0ad5"
+      }
+    },
+    {
+      "id": "asset-90c7bdbeb23b44ab9b6efd957ccbec4f",
+      "job_id": "job-a5cf27bbc8234a5083211a613c06d39a",
+      "attempt_id": "attempt-4b0df5a2bb0446c5bc83ca928dd523bd",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1359650,
+      "content_hash": "bdebc10ad01d110c591cdec09f2f31c9a9413b6dfc13859c22262b583a7292ea",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-8b125894165445829be03f9faac07f9e.png",
+      "created_at": 1794491178328,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8b125894165445829be03f9faac07f9e.png",
+        "bytes": 1359650,
+        "sha256": "bdebc10ad01d110c591cdec09f2f31c9a9413b6dfc13859c22262b583a7292ea"
+      }
+    },
+    {
+      "id": "asset-a5200801ea4e43d9bc13eb674ad21c44",
+      "job_id": "job-7d9c2aa4d3fc416e84cf29e183273024",
+      "attempt_id": "attempt-404225f52f064deaa117b2cb44d07c92",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1934950,
+      "content_hash": "22b6da5a93f7f514e4695897fbbdf045a2048aedc8d41fdbbbc40e830081e394",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-389b5495190a4a3db68b9d7a4c1f44c7.png",
+      "created_at": 1794491327088,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-389b5495190a4a3db68b9d7a4c1f44c7.png",
+        "bytes": 1934950,
+        "sha256": "22b6da5a93f7f514e4695897fbbdf045a2048aedc8d41fdbbbc40e830081e394"
+      }
+    },
+    {
+      "id": "asset-80e913b72d184f2a83b3b5eda2f2316e",
+      "job_id": "job-3ca7c6fa3b8d472485765c621883a7b1",
+      "attempt_id": "attempt-210d98f9ec444d37bd14f925ab63cbed",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 2218441,
+      "content_hash": "3de524b1a94fb6baabd1fa1c03e5d8cab096788747fb4c234c9101b4c6b97f42",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-d9bb0feaf49d470ebef6822ec01b0df4.png",
+      "created_at": 1794491369673,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-d9bb0feaf49d470ebef6822ec01b0df4.png",
+        "bytes": 2218441,
+        "sha256": "3de524b1a94fb6baabd1fa1c03e5d8cab096788747fb4c234c9101b4c6b97f42"
+      }
+    },
+    {
+      "id": "asset-0fd449c9ba38416aabb4839986d13160",
+      "job_id": "job-4ad113ac01664b88bc679945a74b7e86",
+      "attempt_id": "attempt-309e99d27f414206b71bdb1b288338b3",
+      "output_role": "primary",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1642866,
+      "content_hash": "25a853a8d4e2dc605ce8017213aa0839679ca8d98bd8262c4458bccc8b95b3ee",
+      "data_type": "image_rgba",
+      "relative_path": "assets/asset-a6e43a7b2d6e429d805f8d5ea749191c.png",
+      "created_at": 1794491395350,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-a6e43a7b2d6e429d805f8d5ea749191c.png",
+        "bytes": 1642866,
+        "sha256": "25a853a8d4e2dc605ce8017213aa0839679ca8d98bd8262c4458bccc8b95b3ee"
+      }
+    },
+    {
+      "id": "asset-141976d313384bb5b195bf692b9913f8",
+      "job_id": "job-4ad113ac01664b88bc679945a74b7e86",
+      "attempt_id": "attempt-309e99d27f414206b71bdb1b288338b3",
+      "output_role": "mask",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 37403,
+      "content_hash": "cacd9a9a1a81f12346dc0349f158d7dbfca2ca7a91df1e53dde17e0b1f9e714e",
+      "data_type": "mask",
+      "relative_path": "assets/asset-41c3de70380d4b2d9fd7190819298e38.png",
+      "created_at": 1794491395350,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-41c3de70380d4b2d9fd7190819298e38.png",
+        "bytes": 37403,
+        "sha256": "cacd9a9a1a81f12346dc0349f158d7dbfca2ca7a91df1e53dde17e0b1f9e714e"
+      }
+    },
+    {
+      "id": "asset-d61a76775704423a86181cdf712f76fd",
+      "job_id": "job-eb1f819e52e24b6c9978e07e150239b2",
+      "attempt_id": "attempt-c63ea5e444b240e996e1d89bc4c6ca83",
+      "output_role": "primary",
+      "width": 4096,
+      "height": 4096,
+      "byte_count": 17192768,
+      "content_hash": "d52b8ba7ab50124cb1a847b665d0c6d093193c84969067d993c220566ef7dbcb",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-1e12ac7556a543049b1312a88d86264a.png",
+      "created_at": 1794491404884,
+      "file": {
+        "exists": true,
+        "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-1e12ac7556a543049b1312a88d86264a.png",
+        "bytes": 17192768,
+        "sha256": "d52b8ba7ab50124cb1a847b665d0c6d093193c84969067d993c220566ef7dbcb"
+      }
+    }
+  ],
+  "turns": [
+    {
+      "id": "turn-90361de9ebdd446f8cc32cc6039b05e6",
+      "conversation_id": "conv-default",
+      "sequence": 1,
+      "prompt": "闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛岄湏铏瑰€掑奖锛屽啓瀹炴憚褰?[G01A]",
+      "model_id": "flux2-klein-4b-distilled-windows-v1",
+      "capability_id": "image.text-to-image.flux2-klein-4b.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794489759345,
+      "jobs": [
+        {
+          "id": "job-6c7e7da7785546b5bb8296ea975473ef",
+          "created_at": 1794489761195,
+          "attempts": [
+            {
+              "id": "attempt-5b1e757bd73c4cacbb24587e4374f160",
+              "state": "failed",
+              "created_at": 1794489761195,
+              "completed_at": 1794489796348,
+              "error": "生成超出资源预算：进程提交内存峰值 24.18 GiB，超过 24 GiB 上限。请关闭占用内存或显存的其他程序后重试。",
+              "plan_summary": {
+                "plan_id": "plan-a856d47b-733f-4992-9e61-3fb7d4b46943",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": []
+            }
+          ],
+          "assets": []
+        }
+      ]
+    },
+    {
+      "id": "turn-90a75d870bba4015be17f3bec07e7406",
+      "conversation_id": "conv-default",
+      "sequence": 2,
+      "prompt": "闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛岄湏铏瑰€掑奖锛屽啓瀹炴憚褰?[G01A]",
+      "model_id": "flux2-klein-4b-distilled-windows-v1",
+      "capability_id": "image.text-to-image.flux2-klein-4b.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490266458,
+      "jobs": [
+        {
+          "id": "job-fa5a5858f6ab4f6fb1e9fa99f15d721b",
+          "created_at": 1794490266473,
+          "attempts": [
+            {
+              "id": "attempt-d9eeda51ae6a4e42907a4a5c5f9dddcb",
+              "state": "succeeded",
+              "created_at": 1794490266473,
+              "completed_at": 1794490300235,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-ab7c3861-136c-4756-a421-047ee543fbd8",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-bb2b303773fd4d71ad4abf7782b92f51",
+                  "content_hash": "400b024ab28a45afdc7e8d528becd16cea257831708ed3def2b5f75ead269936",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-f4aa7e6f44e042118d40c6c0a19bb5d7.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-bb2b303773fd4d71ad4abf7782b92f51",
+              "job_id": "job-fa5a5858f6ab4f6fb1e9fa99f15d721b",
+              "attempt_id": "attempt-d9eeda51ae6a4e42907a4a5c5f9dddcb",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1358046,
+              "content_hash": "400b024ab28a45afdc7e8d528becd16cea257831708ed3def2b5f75ead269936",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-f4aa7e6f44e042118d40c6c0a19bb5d7.png",
+              "created_at": 1794490300235,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-f4aa7e6f44e042118d40c6c0a19bb5d7.png",
+                "bytes": 1358046,
+                "sha256": "400b024ab28a45afdc7e8d528becd16cea257831708ed3def2b5f75ead269936"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-cabb9ee5070543bea72f81afeb0a2aed",
+      "conversation_id": "conv-default",
+      "sequence": 3,
+      "prompt": "a red fox sitting in a snowy forest at dusk, cinematic lighting, photorealistic [G01B]",
+      "model_id": "flux2-klein-4b-distilled-windows-v1",
+      "capability_id": "image.text-to-image.flux2-klein-4b.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490305661,
+      "jobs": [
+        {
+          "id": "job-0cd0a0c923df4922badb104a861816fc",
+          "created_at": 1794490305677,
+          "attempts": [
+            {
+              "id": "attempt-01bb337fad034d6ba56791d25a1f81f1",
+              "state": "succeeded",
+              "created_at": 1794490305677,
+              "completed_at": 1794490331554,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-33092af6-08f8-4b68-b562-50878901566a",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-930eca363a0a4131b371c2b7945a220b",
+                  "content_hash": "cf7afdc26550d6d2def9160406f575274aa3193aaddec9a1ae93676dbd659135",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-8e45e4da63d042b4b9b027bf5d292f83.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-930eca363a0a4131b371c2b7945a220b",
+              "job_id": "job-0cd0a0c923df4922badb104a861816fc",
+              "attempt_id": "attempt-01bb337fad034d6ba56791d25a1f81f1",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1711837,
+              "content_hash": "cf7afdc26550d6d2def9160406f575274aa3193aaddec9a1ae93676dbd659135",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-8e45e4da63d042b4b9b027bf5d292f83.png",
+              "created_at": 1794490331554,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8e45e4da63d042b4b9b027bf5d292f83.png",
+                "bytes": 1711837,
+                "sha256": "cf7afdc26550d6d2def9160406f575274aa3193aaddec9a1ae93676dbd659135"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-269a3e68a2784797a1c74905f4514d59",
+      "conversation_id": "conv-default",
+      "sequence": 4,
+      "prompt": "闆北涓嬬殑婀栨硦涓庢櫒闆撅紝杩滄櫙锛岃秴骞胯椋庢櫙鎽勫奖 [G02]",
+      "model_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+      "capability_id": "image.text-to-image.z-image-turbo-diffusers-cuda-nf4.v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490337315,
+      "jobs": [
+        {
+          "id": "job-a1d784876a8542d79d6d598598a156a4",
+          "created_at": 1794490339907,
+          "attempts": [
+            {
+              "id": "attempt-9f36bb5a8d224a80a634033b9ae0a169",
+              "state": "succeeded",
+              "created_at": 1794490339907,
+              "completed_at": 1794490407139,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-cf9b3660-864d-481f-9fff-eb08c569464c",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-e2a7080923b140afa66efe498f7fe211",
+                  "content_hash": "13db61088ebf76594a7f98baac666ff7fac08ba718e0766d65bc20979bdd99b3",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-23381c337ac54c11bb8400c2cf34d360.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-e2a7080923b140afa66efe498f7fe211",
+              "job_id": "job-a1d784876a8542d79d6d598598a156a4",
+              "attempt_id": "attempt-9f36bb5a8d224a80a634033b9ae0a169",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1862347,
+              "content_hash": "13db61088ebf76594a7f98baac666ff7fac08ba718e0766d65bc20979bdd99b3",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-23381c337ac54c11bb8400c2cf34d360.png",
+              "created_at": 1794490407139,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-23381c337ac54c11bb8400c2cf34d360.png",
+                "bytes": 1862347,
+                "sha256": "13db61088ebf76594a7f98baac666ff7fac08ba718e0766d65bc20979bdd99b3"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-46d11918000a4125ad509ebdcacde26a",
+      "conversation_id": "conv-default",
+      "sequence": 5,
+      "prompt": "涓€鐩嗙矇鑹叉ū鑺辨斁鍦ㄦ湪璐ㄧ獥鍙颁笂锛屾櫒鍏夛紝娴呮櫙娣?[G03]",
+      "model_id": "qwen-image-2.1-windows-v1",
+      "capability_id": "image.text-to-image.qwen-image-2.1.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490412851,
+      "jobs": [
+        {
+          "id": "job-8e7022c5ec0d40cab7805ee6d80a506d",
+          "created_at": 1794490415321,
+          "attempts": [
+            {
+              "id": "attempt-28448a01753147c29245684ad8a20670",
+              "state": "succeeded",
+              "created_at": 1794490415321,
+              "completed_at": 1794490498746,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-e72cdb63-97c9-489d-9690-948440acc5cc",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "qwen-image-2.1-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-4f10fade18b54cc786c9f972bcec041a",
+                  "content_hash": "87200ec33b738cba010ba18c0dcf54b215e0d6ab42f0c7d4bcd31e4f4274245d",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-8f074d6ee9004bfdb49ced2c2b2e1fe5.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-4f10fade18b54cc786c9f972bcec041a",
+              "job_id": "job-8e7022c5ec0d40cab7805ee6d80a506d",
+              "attempt_id": "attempt-28448a01753147c29245684ad8a20670",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1389499,
+              "content_hash": "87200ec33b738cba010ba18c0dcf54b215e0d6ab42f0c7d4bcd31e4f4274245d",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-8f074d6ee9004bfdb49ced2c2b2e1fe5.png",
+              "created_at": 1794490498746,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8f074d6ee9004bfdb49ced2c2b2e1fe5.png",
+                "bytes": 1389499,
+                "sha256": "87200ec33b738cba010ba18c0dcf54b215e0d6ab42f0c7d4bcd31e4f4274245d"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-e7dbfaef59f141d2b17c7af7e84362aa",
+      "conversation_id": "conv-default",
+      "sequence": 6,
+      "prompt": "a cozy bookstore cafe with warm lights, rain outside the window [G04]",
+      "model_id": "qwen-image-2.1-turbo-windows-v1",
+      "capability_id": "image.text-to-image.qwen-image-2.1-turbo.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490505923,
+      "jobs": [
+        {
+          "id": "job-1de40bf77766440b8ecf5c83ce373196",
+          "created_at": 1794490507930,
+          "attempts": [
+            {
+              "id": "attempt-b4e080083f9a47d997f9dd5de08704f4",
+              "state": "succeeded",
+              "created_at": 1794490507930,
+              "completed_at": 1794490542005,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-67883aff-416d-4758-8e8d-55e205bbfc2c",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "qwen-image-2.1-turbo-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-1739222018a74a87804cf00d28b3feb9",
+                  "content_hash": "5b5a4a5ec5d8b84f19cf998b49118f57e851edb842cf8ead0753201a35738989",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-b9f7936b05c5462e9e7904fdaa98ec0c.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-1739222018a74a87804cf00d28b3feb9",
+              "job_id": "job-1de40bf77766440b8ecf5c83ce373196",
+              "attempt_id": "attempt-b4e080083f9a47d997f9dd5de08704f4",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1566448,
+              "content_hash": "5b5a4a5ec5d8b84f19cf998b49118f57e851edb842cf8ead0753201a35738989",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-b9f7936b05c5462e9e7904fdaa98ec0c.png",
+              "created_at": 1794490542005,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-b9f7936b05c5462e9e7904fdaa98ec0c.png",
+                "bytes": 1566448,
+                "sha256": "5b5a4a5ec5d8b84f19cf998b49118f57e851edb842cf8ead0753201a35738989"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-9106afa807e54b8e87edebf2ba8f07f4",
+      "conversation_id": "conv-default",
+      "sequence": 7,
+      "prompt": "璧涘崥鏈嬪厠椋庢牸鐨勯洦澶滆閬擄紝闇撹櫣鐏墝锛岀數褰辨劅 [G05]",
+      "model_id": "moss-image-sft-windows-v1",
+      "capability_id": "image.text-to-image.moss-image-sft.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490546656,
+      "jobs": [
+        {
+          "id": "job-2b2b88fbd3dd4735b46d856068579087",
+          "created_at": 1794490548639,
+          "attempts": [
+            {
+              "id": "attempt-414e367803a74c66ad6636583ec61a92",
+              "state": "succeeded",
+              "created_at": 1794490548639,
+              "completed_at": 1794490689209,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-da264575-b4fa-4918-a4b8-2e68f70239bb",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "moss-image-sft-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-64a3630321824b8dbe1f95cf93d9ba8b",
+                  "content_hash": "ad7c7ae9f1c507e6b07e98f47043f6a8a2d3aa8b2c0efefc52cff402079ae37e",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-e74029d406d64c4db3d1359930fd1f5a.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-64a3630321824b8dbe1f95cf93d9ba8b",
+              "job_id": "job-2b2b88fbd3dd4735b46d856068579087",
+              "attempt_id": "attempt-414e367803a74c66ad6636583ec61a92",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1268770,
+              "content_hash": "ad7c7ae9f1c507e6b07e98f47043f6a8a2d3aa8b2c0efefc52cff402079ae37e",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-e74029d406d64c4db3d1359930fd1f5a.png",
+              "created_at": 1794490689209,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-e74029d406d64c4db3d1359930fd1f5a.png",
+                "bytes": 1268770,
+                "sha256": "ad7c7ae9f1c507e6b07e98f47043f6a8a2d3aa8b2c0efefc52cff402079ae37e"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-9a44d3bbe6594c938efbc79ef5b847f4",
+      "conversation_id": "conv-default",
+      "sequence": 8,
+      "prompt": "鎶婅儗鏅崲鎴愬鏅氱殑涓滀含琛楅亾锛屼繚鐣欎汉鐗╀笌浼?[G06]",
+      "model_id": "flux2-klein-4b-distilled-windows-v1",
+      "capability_id": "image.edit.flux2-klein-4b.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": "asset-bb2b303773fd4d71ad4abf7782b92f51",
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490694419,
+      "jobs": [
+        {
+          "id": "job-bb700125256c47e9a6449ec60f4a4c29",
+          "created_at": 1794490694474,
+          "attempts": [
+            {
+              "id": "attempt-d02b70f7ad1f4f1fa21d0125bcfee7fc",
+              "state": "succeeded",
+              "created_at": 1794490694474,
+              "completed_at": 1794490732142,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-b9b78711-1117-485e-94b9-a85881d85610",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-47a622cd1b524479bf403dcc4e64e915",
+                  "content_hash": "29174d3d2e4f68fa4a6b14b694a3d310451a54b3f19bfe6a5b0663ba886fb575",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-4e35212d92a94ec593d24f78e8e27cff.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-47a622cd1b524479bf403dcc4e64e915",
+              "job_id": "job-bb700125256c47e9a6449ec60f4a4c29",
+              "attempt_id": "attempt-d02b70f7ad1f4f1fa21d0125bcfee7fc",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1390189,
+              "content_hash": "29174d3d2e4f68fa4a6b14b694a3d310451a54b3f19bfe6a5b0663ba886fb575",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-4e35212d92a94ec593d24f78e8e27cff.png",
+              "created_at": 1794490732142,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-4e35212d92a94ec593d24f78e8e27cff.png",
+                "bytes": 1390189,
+                "sha256": "29174d3d2e4f68fa4a6b14b694a3d310451a54b3f19bfe6a5b0663ba886fb575"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-5f63aa15f85f499da51b3965732aee98",
+      "conversation_id": "conv-default",
+      "sequence": 9,
+      "prompt": "",
+      "model_id": "birefnet-general-epoch-244-windows-v1",
+      "capability_id": "image.remove-background.birefnet-general-epoch-244.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": "asset-e2a7080923b140afa66efe498f7fe211",
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490736325,
+      "jobs": [
+        {
+          "id": "job-34105008af3149288a60d6f36d1eea90",
+          "created_at": 1794490738636,
+          "attempts": [
+            {
+              "id": "attempt-58cf64b7cbf642f9b78c31a5663c14bd",
+              "state": "succeeded",
+              "created_at": 1794490738636,
+              "completed_at": 1794490759342,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-201a2c3a-e4af-4262-abf1-f58294aff5a2",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "birefnet-general-epoch-244-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-52f4453a32584f3b845269cf71d00bc5",
+                  "content_hash": "730fdfeae784fe80ba8d0d07710265511653f8467bea2330a70ed75c6fb87dce",
+                  "data_type": "image_rgba",
+                  "relative_path": "assets/asset-bd9adfba8dc8441eaf7266fa40a56d64.png"
+                },
+                {
+                  "asset_id": "asset-ad1dc5e32cb247aea8ad0a992ebe28cf",
+                  "content_hash": "edd0b79f9bd01f8747ebc3d7eb9b57bd25831a875e33405c3e800aaf9441d7a0",
+                  "data_type": "mask",
+                  "relative_path": "assets/asset-48ccd73bd7d3402b8ab337b351816c0e.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-52f4453a32584f3b845269cf71d00bc5",
+              "job_id": "job-34105008af3149288a60d6f36d1eea90",
+              "attempt_id": "attempt-58cf64b7cbf642f9b78c31a5663c14bd",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 2133430,
+              "content_hash": "730fdfeae784fe80ba8d0d07710265511653f8467bea2330a70ed75c6fb87dce",
+              "data_type": "image_rgba",
+              "relative_path": "assets/asset-bd9adfba8dc8441eaf7266fa40a56d64.png",
+              "created_at": 1794490759342,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-bd9adfba8dc8441eaf7266fa40a56d64.png",
+                "bytes": 2133430,
+                "sha256": "730fdfeae784fe80ba8d0d07710265511653f8467bea2330a70ed75c6fb87dce"
+              }
+            },
+            {
+              "id": "asset-ad1dc5e32cb247aea8ad0a992ebe28cf",
+              "job_id": "job-34105008af3149288a60d6f36d1eea90",
+              "attempt_id": "attempt-58cf64b7cbf642f9b78c31a5663c14bd",
+              "output_role": "mask",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 30282,
+              "content_hash": "edd0b79f9bd01f8747ebc3d7eb9b57bd25831a875e33405c3e800aaf9441d7a0",
+              "data_type": "mask",
+              "relative_path": "assets/asset-48ccd73bd7d3402b8ab337b351816c0e.png",
+              "created_at": 1794490759342,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-48ccd73bd7d3402b8ab337b351816c0e.png",
+                "bytes": 30282,
+                "sha256": "edd0b79f9bd01f8747ebc3d7eb9b57bd25831a875e33405c3e800aaf9441d7a0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-ea0d4f048dae487c98bd2962ca85ad70",
+      "conversation_id": "conv-default",
+      "sequence": 10,
+      "prompt": "",
+      "model_id": "realesrgan-x4plus-windows-v1",
+      "capability_id": "image.upscale.realesrgan-x4plus.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": "asset-930eca363a0a4131b371c2b7945a220b",
+      "status": "job",
+      "error": null,
+      "progress_stage": "inference",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490766060,
+      "jobs": [
+        {
+          "id": "job-d2e07ebe38aa43d59f6246928dc588ea",
+          "created_at": 1794490766117,
+          "attempts": [
+            {
+              "id": "attempt-5d2d2673a3e14beaa09dfd1da57aa00a",
+              "state": "succeeded",
+              "created_at": 1794490766117,
+              "completed_at": 1794490771924,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-8389d383-0a43-41a2-857a-9514bbbe2681",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "realesrgan-x4plus-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-03a0e87f39364f44a91f282edff4819e",
+                  "content_hash": "7efca84607fdd1481557a377c860301b97d477fe795f23b36db558329624a5b1",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-8b1684008bf2485aa653b7f5b64153e6.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-03a0e87f39364f44a91f282edff4819e",
+              "job_id": "job-d2e07ebe38aa43d59f6246928dc588ea",
+              "attempt_id": "attempt-5d2d2673a3e14beaa09dfd1da57aa00a",
+              "output_role": "primary",
+              "width": 4096,
+              "height": 4096,
+              "byte_count": 17141050,
+              "content_hash": "7efca84607fdd1481557a377c860301b97d477fe795f23b36db558329624a5b1",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-8b1684008bf2485aa653b7f5b64153e6.png",
+              "created_at": 1794490771924,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8b1684008bf2485aa653b7f5b64153e6.png",
+                "bytes": 17141050,
+                "sha256": "7efca84607fdd1481557a377c860301b97d477fe795f23b36db558329624a5b1"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-80e25ce150cf4a4ca160742588d61060",
+      "conversation_id": "conv-default",
+      "sequence": 11,
+      "prompt": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]",
+      "model_id": "flux2-klein-4b-distilled-windows-v1",
+      "capability_id": "image.text-to-image.flux2-klein-4b.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490921845,
+      "jobs": [
+        {
+          "id": "job-83be3c00e2a9482fb9e185df738e482d",
+          "created_at": 1794490921906,
+          "attempts": [
+            {
+              "id": "attempt-f7937e9dfd094b09bfd208caeffb95c7",
+              "state": "succeeded",
+              "created_at": 1794490921906,
+              "completed_at": 1794490957289,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-27eb8146-59e1-4090-8169-6250900d4b06",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-0eeed317751146e88c8ed98c66d3bb7c",
+                  "content_hash": "9f769e2ac28d684cf27a153b05bec361abd8510bffb8948abc916e1cf046a997",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-369874e231274625a368f5a3798c3911.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-0eeed317751146e88c8ed98c66d3bb7c",
+              "job_id": "job-83be3c00e2a9482fb9e185df738e482d",
+              "attempt_id": "attempt-f7937e9dfd094b09bfd208caeffb95c7",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 2178638,
+              "content_hash": "9f769e2ac28d684cf27a153b05bec361abd8510bffb8948abc916e1cf046a997",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-369874e231274625a368f5a3798c3911.png",
+              "created_at": 1794490957288,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-369874e231274625a368f5a3798c3911.png",
+                "bytes": 2178638,
+                "sha256": "9f769e2ac28d684cf27a153b05bec361abd8510bffb8948abc916e1cf046a997"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-ef7d8c589dff4d95bdfb3e0a03608bd9",
+      "conversation_id": "conv-default",
+      "sequence": 12,
+      "prompt": "a red fox sitting in a snowy forest at dusk, cinematic lighting, photorealistic [G01B]",
+      "model_id": "flux2-klein-4b-distilled-windows-v1",
+      "capability_id": "image.text-to-image.flux2-klein-4b.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490963664,
+      "jobs": [
+        {
+          "id": "job-bc9bb88fd4ab45eeb492a3f2e059dadc",
+          "created_at": 1794490963729,
+          "attempts": [
+            {
+              "id": "attempt-fbcea227be4d46e78469f34e42f022db",
+              "state": "succeeded",
+              "created_at": 1794490963729,
+              "completed_at": 1794490987654,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-3c941abd-babe-4d7d-8b73-d916bcfc57b1",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-8c715ff54f2b430d828e349f45fe25fb",
+                  "content_hash": "c829982b504a7eb91c0a4e5a84b97b558ff906044efb10c587c515e2400fda3c",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-89a0ff93a3bc4640a302f102c884be52.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-8c715ff54f2b430d828e349f45fe25fb",
+              "job_id": "job-bc9bb88fd4ab45eeb492a3f2e059dadc",
+              "attempt_id": "attempt-fbcea227be4d46e78469f34e42f022db",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1703099,
+              "content_hash": "c829982b504a7eb91c0a4e5a84b97b558ff906044efb10c587c515e2400fda3c",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-89a0ff93a3bc4640a302f102c884be52.png",
+              "created_at": 1794490987654,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-89a0ff93a3bc4640a302f102c884be52.png",
+                "bytes": 1703099,
+                "sha256": "c829982b504a7eb91c0a4e5a84b97b558ff906044efb10c587c515e2400fda3c"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-3dd764cb60eb4018a0674a762894a164",
+      "conversation_id": "conv-default",
+      "sequence": 13,
+      "prompt": "雪山下的湖泊与晨雾，远景，超广角风景摄影 [G02]",
+      "model_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+      "capability_id": "image.text-to-image.z-image-turbo-diffusers-cuda-nf4.v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794490993578,
+      "jobs": [
+        {
+          "id": "job-e4c00610d95e4d4284771c747565191d",
+          "created_at": 1794490993647,
+          "attempts": [
+            {
+              "id": "attempt-16293893812b40d4b62e12f5fc1baf85",
+              "state": "succeeded",
+              "created_at": 1794490993647,
+              "completed_at": 1794491048647,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-ce82ac0e-d34c-4cd2-8258-4f10beba3621",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-9a3ad31d1bc440b4bc157e9771030b72",
+                  "content_hash": "3dee901de225339dc04749b71015232265ba07b1770c399a1ab410c7e04dec1d",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-85c569681c814120b15bacb2013b3151.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-9a3ad31d1bc440b4bc157e9771030b72",
+              "job_id": "job-e4c00610d95e4d4284771c747565191d",
+              "attempt_id": "attempt-16293893812b40d4b62e12f5fc1baf85",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1448169,
+              "content_hash": "3dee901de225339dc04749b71015232265ba07b1770c399a1ab410c7e04dec1d",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-85c569681c814120b15bacb2013b3151.png",
+              "created_at": 1794491048647,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-85c569681c814120b15bacb2013b3151.png",
+                "bytes": 1448169,
+                "sha256": "3dee901de225339dc04749b71015232265ba07b1770c399a1ab410c7e04dec1d"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-3896ff32e0254d41b3a7610d609859d1",
+      "conversation_id": "conv-default",
+      "sequence": 14,
+      "prompt": "一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]",
+      "model_id": "qwen-image-2.1-windows-v1",
+      "capability_id": "image.text-to-image.qwen-image-2.1.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794491054091,
+      "jobs": [
+        {
+          "id": "job-dfd78b109f2d41d4a32e04884f466e1a",
+          "created_at": 1794491054161,
+          "attempts": [
+            {
+              "id": "attempt-654d9a85e32f4bfa8faa45c05d42cad5",
+              "state": "succeeded",
+              "created_at": 1794491054161,
+              "completed_at": 1794491138446,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-20c43e26-7e04-406d-80f8-f1a0ddd6a9c3",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "qwen-image-2.1-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-558ae0b17fa340d3817630b9dc8a6508",
+                  "content_hash": "704d6cdbf713b4fc936c13c335860e7c1510f8fcb39ebc6c13cafd44ecab0ad5",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-90a82a0ffc964c7da3e1e98698edd262.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-558ae0b17fa340d3817630b9dc8a6508",
+              "job_id": "job-dfd78b109f2d41d4a32e04884f466e1a",
+              "attempt_id": "attempt-654d9a85e32f4bfa8faa45c05d42cad5",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1469497,
+              "content_hash": "704d6cdbf713b4fc936c13c335860e7c1510f8fcb39ebc6c13cafd44ecab0ad5",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-90a82a0ffc964c7da3e1e98698edd262.png",
+              "created_at": 1794491138446,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-90a82a0ffc964c7da3e1e98698edd262.png",
+                "bytes": 1469497,
+                "sha256": "704d6cdbf713b4fc936c13c335860e7c1510f8fcb39ebc6c13cafd44ecab0ad5"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-436e6ac7575144d8ae1bec8a30e0382f",
+      "conversation_id": "conv-default",
+      "sequence": 15,
+      "prompt": "a cozy bookstore cafe with warm lights, rain outside the window [G04]",
+      "model_id": "qwen-image-2.1-turbo-windows-v1",
+      "capability_id": "image.text-to-image.qwen-image-2.1-turbo.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794491143461,
+      "jobs": [
+        {
+          "id": "job-a5cf27bbc8234a5083211a613c06d39a",
+          "created_at": 1794491143535,
+          "attempts": [
+            {
+              "id": "attempt-4b0df5a2bb0446c5bc83ca928dd523bd",
+              "state": "succeeded",
+              "created_at": 1794491143535,
+              "completed_at": 1794491178328,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-fb61a189-c7dc-45ef-84e7-bc57f0063740",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "qwen-image-2.1-turbo-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-90c7bdbeb23b44ab9b6efd957ccbec4f",
+                  "content_hash": "bdebc10ad01d110c591cdec09f2f31c9a9413b6dfc13859c22262b583a7292ea",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-8b125894165445829be03f9faac07f9e.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-90c7bdbeb23b44ab9b6efd957ccbec4f",
+              "job_id": "job-a5cf27bbc8234a5083211a613c06d39a",
+              "attempt_id": "attempt-4b0df5a2bb0446c5bc83ca928dd523bd",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1359650,
+              "content_hash": "bdebc10ad01d110c591cdec09f2f31c9a9413b6dfc13859c22262b583a7292ea",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-8b125894165445829be03f9faac07f9e.png",
+              "created_at": 1794491178328,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-8b125894165445829be03f9faac07f9e.png",
+                "bytes": 1359650,
+                "sha256": "bdebc10ad01d110c591cdec09f2f31c9a9413b6dfc13859c22262b583a7292ea"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-e9dbaa35183041f993c15ea647a12813",
+      "conversation_id": "conv-default",
+      "sequence": 16,
+      "prompt": "赛博朋克风格的雨夜街道，霓虹灯牌，电影感 [G05]",
+      "model_id": "moss-image-sft-windows-v1",
+      "capability_id": "image.text-to-image.moss-image-sft.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": null,
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794491184339,
+      "jobs": [
+        {
+          "id": "job-7d9c2aa4d3fc416e84cf29e183273024",
+          "created_at": 1794491184415,
+          "attempts": [
+            {
+              "id": "attempt-404225f52f064deaa117b2cb44d07c92",
+              "state": "succeeded",
+              "created_at": 1794491184415,
+              "completed_at": 1794491327088,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-d465cb22-147b-42a2-a4c3-fb81362f102c",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "moss-image-sft-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-a5200801ea4e43d9bc13eb674ad21c44",
+                  "content_hash": "22b6da5a93f7f514e4695897fbbdf045a2048aedc8d41fdbbbc40e830081e394",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-389b5495190a4a3db68b9d7a4c1f44c7.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-a5200801ea4e43d9bc13eb674ad21c44",
+              "job_id": "job-7d9c2aa4d3fc416e84cf29e183273024",
+              "attempt_id": "attempt-404225f52f064deaa117b2cb44d07c92",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1934950,
+              "content_hash": "22b6da5a93f7f514e4695897fbbdf045a2048aedc8d41fdbbbc40e830081e394",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-389b5495190a4a3db68b9d7a4c1f44c7.png",
+              "created_at": 1794491327088,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-389b5495190a4a3db68b9d7a4c1f44c7.png",
+                "bytes": 1934950,
+                "sha256": "22b6da5a93f7f514e4695897fbbdf045a2048aedc8d41fdbbbc40e830081e394"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-291ea0aac52348a09801020af20a53a3",
+      "conversation_id": "conv-default",
+      "sequence": 17,
+      "prompt": "把背景换成夜晚的东京街道，保留人物与伞 [G06]",
+      "model_id": "flux2-klein-4b-distilled-windows-v1",
+      "capability_id": "image.edit.flux2-klein-4b.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": "asset-0eeed317751146e88c8ed98c66d3bb7c",
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794491332182,
+      "jobs": [
+        {
+          "id": "job-3ca7c6fa3b8d472485765c621883a7b1",
+          "created_at": 1794491332295,
+          "attempts": [
+            {
+              "id": "attempt-210d98f9ec444d37bd14f925ab63cbed",
+              "state": "succeeded",
+              "created_at": 1794491332295,
+              "completed_at": 1794491369673,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-04c12fc4-7738-4b26-a669-11244bd4333f",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "flux2-klein-4b-distilled-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-80e913b72d184f2a83b3b5eda2f2316e",
+                  "content_hash": "3de524b1a94fb6baabd1fa1c03e5d8cab096788747fb4c234c9101b4c6b97f42",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-d9bb0feaf49d470ebef6822ec01b0df4.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-80e913b72d184f2a83b3b5eda2f2316e",
+              "job_id": "job-3ca7c6fa3b8d472485765c621883a7b1",
+              "attempt_id": "attempt-210d98f9ec444d37bd14f925ab63cbed",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 2218441,
+              "content_hash": "3de524b1a94fb6baabd1fa1c03e5d8cab096788747fb4c234c9101b4c6b97f42",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-d9bb0feaf49d470ebef6822ec01b0df4.png",
+              "created_at": 1794491369673,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-d9bb0feaf49d470ebef6822ec01b0df4.png",
+                "bytes": 2218441,
+                "sha256": "3de524b1a94fb6baabd1fa1c03e5d8cab096788747fb4c234c9101b4c6b97f42"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-ffd6732677ea46bc8a8330e48244f960",
+      "conversation_id": "conv-default",
+      "sequence": 18,
+      "prompt": "",
+      "model_id": "birefnet-general-epoch-244-windows-v1",
+      "capability_id": "image.remove-background.birefnet-general-epoch-244.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": "asset-9a3ad31d1bc440b4bc157e9771030b72",
+      "status": "job",
+      "error": null,
+      "progress_stage": "writing",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794491374788,
+      "jobs": [
+        {
+          "id": "job-4ad113ac01664b88bc679945a74b7e86",
+          "created_at": 1794491374895,
+          "attempts": [
+            {
+              "id": "attempt-309e99d27f414206b71bdb1b288338b3",
+              "state": "succeeded",
+              "created_at": 1794491374895,
+              "completed_at": 1794491395350,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-96ca01a5-14a8-405f-b809-e6f36b66943d",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "birefnet-general-epoch-244-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-0fd449c9ba38416aabb4839986d13160",
+                  "content_hash": "25a853a8d4e2dc605ce8017213aa0839679ca8d98bd8262c4458bccc8b95b3ee",
+                  "data_type": "image_rgba",
+                  "relative_path": "assets/asset-a6e43a7b2d6e429d805f8d5ea749191c.png"
+                },
+                {
+                  "asset_id": "asset-141976d313384bb5b195bf692b9913f8",
+                  "content_hash": "cacd9a9a1a81f12346dc0349f158d7dbfca2ca7a91df1e53dde17e0b1f9e714e",
+                  "data_type": "mask",
+                  "relative_path": "assets/asset-41c3de70380d4b2d9fd7190819298e38.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-0fd449c9ba38416aabb4839986d13160",
+              "job_id": "job-4ad113ac01664b88bc679945a74b7e86",
+              "attempt_id": "attempt-309e99d27f414206b71bdb1b288338b3",
+              "output_role": "primary",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 1642866,
+              "content_hash": "25a853a8d4e2dc605ce8017213aa0839679ca8d98bd8262c4458bccc8b95b3ee",
+              "data_type": "image_rgba",
+              "relative_path": "assets/asset-a6e43a7b2d6e429d805f8d5ea749191c.png",
+              "created_at": 1794491395350,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-a6e43a7b2d6e429d805f8d5ea749191c.png",
+                "bytes": 1642866,
+                "sha256": "25a853a8d4e2dc605ce8017213aa0839679ca8d98bd8262c4458bccc8b95b3ee"
+              }
+            },
+            {
+              "id": "asset-141976d313384bb5b195bf692b9913f8",
+              "job_id": "job-4ad113ac01664b88bc679945a74b7e86",
+              "attempt_id": "attempt-309e99d27f414206b71bdb1b288338b3",
+              "output_role": "mask",
+              "width": 1024,
+              "height": 1024,
+              "byte_count": 37403,
+              "content_hash": "cacd9a9a1a81f12346dc0349f158d7dbfca2ca7a91df1e53dde17e0b1f9e714e",
+              "data_type": "mask",
+              "relative_path": "assets/asset-41c3de70380d4b2d9fd7190819298e38.png",
+              "created_at": 1794491395350,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-41c3de70380d4b2d9fd7190819298e38.png",
+                "bytes": 37403,
+                "sha256": "cacd9a9a1a81f12346dc0349f158d7dbfca2ca7a91df1e53dde17e0b1f9e714e"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "turn-112e15c5761347268041cb826a85e0aa",
+      "conversation_id": "conv-default",
+      "sequence": 19,
+      "prompt": "",
+      "model_id": "realesrgan-x4plus-windows-v1",
+      "capability_id": "image.upscale.realesrgan-x4plus.windows-v1",
+      "aspect": "1:1",
+      "count": 1,
+      "seed": "",
+      "source_asset_id": "asset-8c715ff54f2b430d828e349f45fe25fb",
+      "status": "job",
+      "error": null,
+      "progress_stage": "inference",
+      "progress_step": null,
+      "progress_total": null,
+      "received_at": 1794491399014,
+      "jobs": [
+        {
+          "id": "job-eb1f819e52e24b6c9978e07e150239b2",
+          "created_at": 1794491399125,
+          "attempts": [
+            {
+              "id": "attempt-c63ea5e444b240e996e1d89bc4c6ca83",
+              "state": "succeeded",
+              "created_at": 1794491399125,
+              "completed_at": 1794491404884,
+              "error": null,
+              "plan_summary": {
+                "plan_id": "plan-d2f86862-ef83-4381-82b1-04f8f53e1912",
+                "recipe_id": null,
+                "capability_id": null,
+                "model_variant_id": "realesrgan-x4plus-windows-v1",
+                "parameters": null,
+                "environment_device": null
+              },
+              "manifest_outputs": [
+                {
+                  "asset_id": "asset-d61a76775704423a86181cdf712f76fd",
+                  "content_hash": "d52b8ba7ab50124cb1a847b665d0c6d093193c84969067d993c220566ef7dbcb",
+                  "data_type": "image_rgb",
+                  "relative_path": "assets/asset-1e12ac7556a543049b1312a88d86264a.png"
+                }
+              ]
+            }
+          ],
+          "assets": [
+            {
+              "id": "asset-d61a76775704423a86181cdf712f76fd",
+              "job_id": "job-eb1f819e52e24b6c9978e07e150239b2",
+              "attempt_id": "attempt-c63ea5e444b240e996e1d89bc4c6ca83",
+              "output_role": "primary",
+              "width": 4096,
+              "height": 4096,
+              "byte_count": 17192768,
+              "content_hash": "d52b8ba7ab50124cb1a847b665d0c6d093193c84969067d993c220566ef7dbcb",
+              "data_type": "image_rgb",
+              "relative_path": "assets/asset-1e12ac7556a543049b1312a88d86264a.png",
+              "created_at": 1794491404884,
+              "file": {
+                "exists": true,
+                "file": "C:\\ist-rg\\r-fresh\\data\\assets/asset-1e12ac7556a543049b1312a88d86264a.png",
+                "bytes": 17192768,
+                "sha256": "d52b8ba7ab50124cb1a847b665d0c6d093193c84969067d993c220566ef7dbcb"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ready_records": [
+    {
+      "file": "birefnet-general-epoch-244-windows-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "birefnet-general-epoch-244-onnx-windows-v1",
+      "model_manifest_sha256": "4cb05b6337798025a1147d2bde899bb27b71628d0aef22005a3a558ee1f44f05",
+      "runtime_manifest_sha256": "0a6d2251889afc9d47fef67732d01c93230b975b83085719ef1727187a638647",
+      "runtime_files": 20927
+    },
+    {
+      "file": "flux2-klein-4b-distilled-windows-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "flux2-klein-4b-windows-e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "model_manifest_sha256": "d426cba53c83449c4add89be949d588cdfbd8f80360c5b73abe482853360c140",
+      "runtime_manifest_sha256": "0a6d2251889afc9d47fef67732d01c93230b975b83085719ef1727187a638647",
+      "runtime_files": 20927
+    },
+    {
+      "file": "moss-image-sft-windows-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "moss-image-sft-windows-staged-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9",
+      "model_manifest_sha256": "c65b6d691f8ee2d1df610542de6219b10d4d51beeb3e2e967d4c4355f466bd42",
+      "runtime_manifest_sha256": "0a6d2251889afc9d47fef67732d01c93230b975b83085719ef1727187a638647",
+      "runtime_files": 20927
+    },
+    {
+      "file": "qwen-image-2.1-turbo-windows-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "qwen-image-2.1-turbo-windows-staged-fc13ba1986fcb905854dc8de2f52eee395f49b5b",
+      "model_manifest_sha256": "ba3419934d8a8c724a51b1a68d6edaeda6c58717dc2d0d5ea34c143e31fca216",
+      "runtime_manifest_sha256": "0a6d2251889afc9d47fef67732d01c93230b975b83085719ef1727187a638647",
+      "runtime_files": 20927
+    },
+    {
+      "file": "qwen-image-2.1-windows-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-diff041-transformers53-v2",
+      "model_snapshot_id": "qwen-image-2.1-windows-staged-d26bb61231c349cf6b7896fa83353113880e1ba3",
+      "model_manifest_sha256": "a69ebdeb0a669e5e97c667685a2b3d52862ba06280daec2d386f5558c4d3b029",
+      "runtime_manifest_sha256": "0a6d2251889afc9d47fef67732d01c93230b975b83085719ef1727187a638647",
+      "runtime_files": 20927
+    },
+    {
+      "file": "realesrgan-x4plus-windows-v1.json",
+      "runtime_lock_id": "realesrgan-x4plus-ncnn-windows-vulkan-v0.2.0-v1",
+      "model_snapshot_id": "realesrgan-x4plus-ncnn-windows-v1",
+      "model_manifest_sha256": "d160ea4b528b24e962070df5a218363f600769988cf6a8dbf0df022f443605a0",
+      "runtime_manifest_sha256": "819d50423e0d58273e4f588875892ba091e6b1c94850a4cdc5a9e7c7ab65f151",
+      "runtime_files": 3
+    },
+    {
+      "file": "z-image-turbo-diffusers-cuda-nf4-v1.json",
+      "runtime_lock_id": "windows-python31210-torch2100-cu126-bnb0482-v1",
+      "model_snapshot_id": "z-image-turbo-diffusers-cuda-nf4-v1",
+      "model_manifest_sha256": "e1c22e08ac97ede3f67275d07b3f3a2377141a3233738129f8f417ba68b393e3",
+      "runtime_manifest_sha256": "171341067c41523e2853a89c04c0225532439f1199caaabdd55950f1a3a8ffcf",
+      "runtime_files": 19486
+    }
+  ],
+  "summary": {
+    "assets": 20,
+    "turns": 19,
+    "conversations": 1,
+    "by_model": {
+      "flux2-klein-4b-distilled-windows-v1": {
+        "turns": 7,
+        "succeeded": 0
+      },
+      "z-image-turbo-diffusers-cuda-nf4-v1": {
+        "turns": 2,
+        "succeeded": 0
+      },
+      "qwen-image-2.1-windows-v1": {
+        "turns": 2,
+        "succeeded": 0
+      },
+      "qwen-image-2.1-turbo-windows-v1": {
+        "turns": 2,
+        "succeeded": 0
+      },
+      "moss-image-sft-windows-v1": {
+        "turns": 2,
+        "succeeded": 0
+      },
+      "birefnet-general-epoch-244-windows-v1": {
+        "turns": 2,
+        "succeeded": 0
+      },
+      "realesrgan-x4plus-windows-v1": {
+        "turns": 2,
+        "succeeded": 0
+      }
+    }
+  }
+}

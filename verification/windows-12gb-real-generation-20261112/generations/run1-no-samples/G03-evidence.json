@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-case",
+  "case_id": "G03",
+  "model": "Qwen-Image 2.1",
+  "capability_kind": "text",
+  "prompt": "一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]",
+  "source_tag": null,
+  "data_root": "C:/ist-rg/r-fresh",
+  "sequence": 14,
+  "model_id": "qwen-image-2.1-windows-v1",
+  "capability_id": "image.text-to-image.qwen-image-2.1.windows-v1",
+  "attempt_id": "attempt-654d9a85e32f4bfa8faa45c05d42cad5",
+  "attempt_state": "succeeded",
+  "attempt_error": null,
+  "prompt_matches_expected": true,
+  "plan": {
+    "plan_id": "plan-20c43e26-7e04-406d-80f8-f1a0ddd6a9c3",
+    "recipe_id": null,
+    "capability_id": null,
+    "model_variant_id": "qwen-image-2.1-windows-v1",
+    "parameters": null,
+    "environment_device": null
+  },
+  "elapsed_ms_from_db_attempt": 84285,
+  "driver": {
+    "status": "succeeded",
+    "elapsed_seconds": 86,
+    "stages": [
+      {
+        "at": "2026-11-12T13:44:15.590Z",
+        "elapsedSeconds": 2,
+        "stage": "正在准备生成"
+      },
+      {
+        "at": "2026-11-12T13:44:23.142Z",
+        "elapsedSeconds": 9,
+        "stage": "正在加载模型"
+      },
+      {
+        "at": "2026-11-12T13:44:39.737Z",
+        "elapsedSeconds": 26,
+        "stage": "正在采样 2/40"
+      },
+      {
+        "at": "2026-11-12T13:44:41.243Z",
+        "elapsedSeconds": 27,
+        "stage": "正在采样 3/40"
+      },
+      {
+        "at": "2026-11-12T13:44:42.754Z",
+        "elapsedSeconds": 29,
+        "stage": "正在采样 4/40"
+      },
+      {
+        "at": "2026-11-12T13:44:44.270Z",
+        "elapsedSeconds": 30,
+        "stage": "正在采样 5/40"
+      },
+      {
+        "at": "2026-11-12T13:44:45.777Z",
+        "elapsedSeconds": 32,
+        "stage": "正在采样 7/40"
+      },
+      {
+        "at": "2026-11-12T13:44:48.790Z",
+        "elapsedSeconds": 35,
+        "stage": "正在采样 9/40"
+      },
+      {
+        "at": "2026-11-12T13:44:50.296Z",
+        "elapsedSeconds": 36,
+        "stage": "正在采样 10/40"
+      },
+      {
+        "at": "2026-11-12T13:44:53.307Z",
+        "elapsedSeconds": 39,
+        "stage": "正在采样 12/40"
+      },
+      {
+        "at": "2026-11-12T13:44:54.823Z",
+        "elapsedSeconds": 41,
+        "stage": "正在采样 13/40"
+      },
+      {
+        "at": "2026-11-12T13:44:56.332Z",
+        "elapsedSeconds": 42,
+        "stage": "正在采样 14/40"
+      },
+      {
+        "at": "2026-11-12T13:44:57.838Z",
+        "elapsedSeconds": 44,
+        "stage": "正在采样 15/40"
+      },
+      {
+        "at": "2026-11-12T13:44:59.348Z",
+        "elapsedSeconds": 45,
+        "stage": "正在采样 16/40"
+      },
+      {
+        "at": "2026-11-12T13:45:00.855Z",
+        "elapsedSeconds": 47,
+        "stage": "正在采样 17/40"
+      },
+      {
+        "at": "2026-11-12T13:45:02.361Z",
+        "elapsedSeconds": 48,
+        "stage": "正在采样 18/40"
+      },
+      {
+        "at": "2026-11-12T13:45:03.877Z",
+        "elapsedSeconds": 50,
+        "stage": "正在采样 20/40"
+      },
+      {
+        "at": "2026-11-12T13:45:06.896Z",
+        "elapsedSeconds": 53,
+        "stage": "正在采样 21/40"
+      },
+      {
+        "at": "2026-11-12T13:45:08.409Z",
+        "elapsedSeconds": 54,
+        "stage": "正在采样 23/40"
+      },
+      {
+        "at": "2026-11-12T13:45:11.421Z",
+        "elapsedSeconds": 57,
+        "stage": "正在采样 25/40"
+      },
+      {
+        "at": "2026-11-12T13:45:12.927Z",
+        "elapsedSeconds": 59,
+        "stage": "正在采样 26/40"
+      },
+      {
+        "at": "2026-11-12T13:45:15.943Z",
+        "elapsedSeconds": 62,
+        "stage": "正在采样 28/40"
+      },
+      {
+        "at": "2026-11-12T13:45:17.452Z",
+        "elapsedSeconds": 63,
+        "stage": "正在采样 29/40"
+      },
+      {
+        "at": "2026-11-12T13:45:18.958Z",
+        "elapsedSeconds": 65,
+        "stage": "正在采样 30/40"
+      },
+      {
+        "at": "2026-11-12T13:45:20.474Z",
+        "elapsedSeconds": 66,
+        "stage": "正在采样 31/40"
+      },
+      {
+        "at": "2026-11-12T13:45:21.978Z",
+        "elapsedSeconds": 68,
+        "stage": "正在采样 32/40"
+      },
+      {
+        "at": "2026-11-12T13:45:23.488Z",
+        "elapsedSeconds": 69,
+        "stage": "正在采样 33/40"
+      },
+      {
+        "at": "2026-11-12T13:45:24.993Z",
+        "elapsedSeconds": 71,
+        "stage": "正在采样 34/40"
+      },
+      {
+        "at": "2026-11-12T13:45:26.506Z",
+        "elapsedSeconds": 72,
+        "stage": "正在采样 35/40"
+      },
+      {
+        "at": "2026-11-12T13:45:28.012Z",
+        "elapsedSeconds": 74,
+        "stage": "正在采样 36/40"
+      },
+      {
+        "at": "2026-11-12T13:45:29.524Z",
+        "elapsedSeconds": 75,
+        "stage": "正在采样 37/40"
+      },
+      {
+        "at": "2026-11-12T13:45:31.037Z",
+        "elapsedSeconds": 77,
+        "stage": "正在采样 38/40"
+      },
+      {
+        "at": "2026-11-12T13:45:32.551Z",
+        "elapsedSeconds": 78,
+        "stage": "正在采样 39/40"
+      },
+      {
+        "at": "2026-11-12T13:45:34.064Z",
+        "elapsedSeconds": 80,
+        "stage": "采样 40/40 · 正在处理"
+      },
+      {
+        "at": "2026-11-12T13:45:37.082Z",
+        "elapsedSeconds": 83,
+        "stage": "正在解码图片"
+      },
+      {
+        "at": "2026-11-12T13:45:38.593Z",
+        "elapsedSeconds": 85,
+        "stage": "正在验证并保存"
+      }
+    ],
+    "turn_text": "一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]\n\n你\nImage Studio\nQwen-Image 2.1 · 1:1 · 种子 1671495605\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+    "error": null
+  },
+  "outputs": [
+    {
+      "asset_id": "asset-558ae0b17fa340d3817630b9dc8a6508",
+      "content_hash": "704d6cdbf713b4fc936c13c335860e7c1510f8fcb39ebc6c13cafd44ecab0ad5",
+      "data_type": "image_rgb",
+      "relative_path": "assets/asset-90a82a0ffc964c7da3e1e98698edd262.png",
+      "width": 1024,
+      "height": 1024,
+      "byte_count": 1469497,
+      "file_bytes": 1469497,
+      "file_sha256": "704d6cdbf713b4fc936c13c335860e7c1510f8fcb39ebc6c13cafd44ecab0ad5",
+      "output_role": "primary",
+      "file_exists": true
+    }
+  ],
+  "resources": {
+    "rows": 30,
+    "interval_seconds": 1,
+    "gpu_used_mib": {
+      "min": 1483.0,
+      "max": 7796.0,
+      "mean": 5263.47
+    },
+    "gpu_total_mib": {
+      "min": 12288.0,
+      "max": 12288.0,
+      "mean": 12288.0
+    },
+    "private_commit_mib": {
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "available_physical_mib": {
+      "min": 17694.5,
+      "max": 22130.2,
+      "mean": 20514.23
+    }
+  },
+  "budget": {
+    "gpu_baseline_mib": 1400,
+    "gpu_peak_minus_baseline_mib": 6396.0,
+    "gpu_used_limit_mib": 10752,
+    "private_commit_limit_mib": 24576,
+    "available_physical_min_mib": 2048
+  }
+}

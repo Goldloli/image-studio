@@ -1,0 +1,71 @@
+{
+  "model": "Klein",
+  "kind": "text",
+  "prompt": "升级后真实生成：清晨的山谷，薄雾与松林 [UPGRADE-D03]",
+  "source": "",
+  "startedAt": "2026-11-12T14:11:29.870Z",
+  "status": "succeeded",
+  "stages": [
+    {
+      "at": "2026-11-12T14:11:32.159Z",
+      "elapsedSeconds": 2,
+      "stage": "正在接收提示词"
+    },
+    {
+      "at": "2026-11-12T14:11:33.668Z",
+      "elapsedSeconds": 3,
+      "stage": "正在准备生成"
+    },
+    {
+      "at": "2026-11-12T14:11:51.779Z",
+      "elapsedSeconds": 21,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T14:12:05.370Z",
+      "elapsedSeconds": 35,
+      "stage": "正在采样 0/4"
+    },
+    {
+      "at": "2026-11-12T14:12:06.879Z",
+      "elapsedSeconds": 36,
+      "stage": "正在采样 2/4"
+    },
+    {
+      "at": "2026-11-12T14:12:08.392Z",
+      "elapsedSeconds": 38,
+      "stage": "正在采样 3/4"
+    },
+    {
+      "at": "2026-11-12T14:12:09.904Z",
+      "elapsedSeconds": 39,
+      "stage": "采样 4/4 · 正在处理"
+    },
+    {
+      "at": "2026-11-12T14:12:11.410Z",
+      "elapsedSeconds": 41,
+      "stage": "正在验证并保存"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT"
+  ],
+  "selectedModel": "FLUX.2 Klein 4B distilled",
+  "turnsBefore": {
+    "turns": 24,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T14:11:30.652Z",
+  "turnId": "turn-b7f69c19e78a41adb2e3b7cfec45e954",
+  "terminalState": "Succeeded",
+  "settleSecondsAfterCancel": null,
+  "turnText": "升级后真实生成：清晨的山谷，薄雾与松林 [UPGRADE-D03]\n\n你\nImage Studio\nFLUX.2 Klein 4B · 1:1 · 种子 3621818651\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+  "elapsedSeconds": 42,
+  "endedAt": "2026-11-12T14:12:13.106Z"
+}

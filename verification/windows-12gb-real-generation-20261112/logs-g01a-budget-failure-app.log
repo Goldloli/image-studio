@@ -1,0 +1,45 @@
+1794488298786 DEBUG install.verify.begin deep=true
+1794488298794 DEBUG install.verify.prepared
+1794488299263 DEBUG install.verify.model
+1794488304734 DEBUG install.verify.runtime
+1794488316666 DEBUG install.verify.begin deep=true
+1794488316666 DEBUG install.verify.prepared
+1794488316683 DEBUG install.verify.model
+1794488316687 DEBUG install.verify.runtime
+1794488391221 DEBUG install.verify.begin deep=true
+1794488391227 DEBUG install.verify.prepared
+1794488399007 DEBUG install.verify.model
+1794488406021 DEBUG install.verify.runtime
+1794488547180 DEBUG install.verify.begin deep=true
+1794488547186 DEBUG install.verify.prepared
+1794488563241 DEBUG install.verify.model
+1794488570489 DEBUG install.verify.runtime
+1794488941959 DEBUG install.verify.begin deep=true
+1794488950261 DEBUG install.verify.prepared
+1794488966139 DEBUG install.verify.model
+1794488973797 DEBUG install.verify.runtime
+1794489332567 DEBUG install.verify.begin deep=true
+1794489341078 DEBUG install.verify.prepared
+1794489361202 DEBUG install.verify.model
+1794489371119 DEBUG install.verify.runtime
+1794489703713 DEBUG install.verify.begin deep=true
+1794489710815 DEBUG install.verify.prepared
+1794489724368 DEBUG install.verify.model
+1794489732712 DEBUG install.verify.runtime
+1794489759350 DEBUG turn.preflight.start turn=turn-90361de9ebdd446f8cc32cc6039b05e6
+1794489759350 DEBUG turn.preflight.gate turn=turn-90361de9ebdd446f8cc32cc6039b05e6
+1794489759350 DEBUG turn.preflight.geometry turn=turn-90361de9ebdd446f8cc32cc6039b05e6 size=1024x1024
+1794489759350 DEBUG turn.preflight.ready.begin turn=turn-90361de9ebdd446f8cc32cc6039b05e6
+1794489759350 DEBUG install.verify.begin deep=false
+1794489759361 DEBUG install.verify.prepared
+1794489759362 DEBUG install.verify.model
+1794489761184 DEBUG install.verify.runtime
+1794489761184 DEBUG turn.preflight.ready.end turn=turn-90361de9ebdd446f8cc32cc6039b05e6
+1794489761184 DEBUG turn.preflight.environment.begin turn=turn-90361de9ebdd446f8cc32cc6039b05e6
+1794489761194 DEBUG turn.preflight.environment.end turn=turn-90361de9ebdd446f8cc32cc6039b05e6
+1794489761194 DEBUG turn.preflight.freeze.begin turn=turn-90361de9ebdd446f8cc32cc6039b05e6
+1794489761195 DEBUG turn.preflight.frozen turn=turn-90361de9ebdd446f8cc32cc6039b05e6
+1794489761195 DEBUG turn.preflight.lock turn=turn-90361de9ebdd446f8cc32cc6039b05e6
+1794489761202 INFO turn.preflight.bound turn=turn-90361de9ebdd446f8cc32cc6039b05e6
+1794489761203 INFO turn.preflight.done turn=turn-90361de9ebdd446f8cc32cc6039b05e6 ms=1853
+1794489761203 INFO generation.start job=job-6c7e7da7785546b5bb8296ea975473ef available_gib=19.46

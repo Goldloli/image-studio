@@ -1,0 +1,101 @@
+﻿[
+    {
+        "id":  "G01a",
+        "model":  "Klein",
+        "kind":  "text",
+        "status":  "succeeded",
+        "exit":  0,
+        "elapsed_seconds":  32.2,
+        "result":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\generations\\G01a.json",
+        "samples":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\samples\\G01a.csv",
+        "shot":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\screenshots\\generations\\G01a.png"
+    },
+    {
+        "id":  "G01b",
+        "model":  "Klein",
+        "kind":  "text",
+        "status":  "succeeded",
+        "exit":  0,
+        "elapsed_seconds":  28,
+        "result":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\generations\\G01b.json",
+        "samples":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\samples\\G01b.csv",
+        "shot":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\screenshots\\generations\\G01b.png"
+    },
+    {
+        "id":  "G02",
+        "model":  "Z-Image",
+        "kind":  "text",
+        "status":  "succeeded",
+        "exit":  0,
+        "elapsed_seconds":  59.6,
+        "result":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\generations\\G02.json",
+        "samples":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\samples\\G02.csv",
+        "shot":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\screenshots\\generations\\G02.png"
+    },
+    {
+        "id":  "G03",
+        "model":  "Qwen-Image 2.1",
+        "kind":  "text",
+        "status":  "succeeded",
+        "exit":  0,
+        "elapsed_seconds":  91.2,
+        "result":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\generations\\G03.json",
+        "samples":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\samples\\G03.csv",
+        "shot":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\screenshots\\generations\\G03.png"
+    },
+    {
+        "id":  "G04",
+        "model":  "Qwen-Image 2.1 Turbo",
+        "kind":  "text",
+        "status":  "succeeded",
+        "exit":  0,
+        "elapsed_seconds":  45.5,
+        "result":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\generations\\G04.json",
+        "samples":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\samples\\G04.csv",
+        "shot":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\screenshots\\generations\\G04.png"
+    },
+    {
+        "id":  "G05",
+        "model":  "MOSS",
+        "kind":  "text",
+        "status":  "succeeded",
+        "exit":  0,
+        "elapsed_seconds":  150.4,
+        "result":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\generations\\G05.json",
+        "samples":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\samples\\G05.csv",
+        "shot":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\screenshots\\generations\\G05.png"
+    },
+    {
+        "id":  "G06",
+        "model":  "Klein",
+        "kind":  "edit",
+        "status":  "succeeded",
+        "exit":  0,
+        "elapsed_seconds":  42.7,
+        "result":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\generations\\G06.json",
+        "samples":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\samples\\G06.csv",
+        "shot":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\screenshots\\generations\\G06.png"
+    },
+    {
+        "id":  "G07",
+        "model":  "BiRefNet",
+        "kind":  "remove-background",
+        "status":  "succeeded",
+        "exit":  0,
+        "elapsed_seconds":  27.5,
+        "result":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\generations\\G07.json",
+        "samples":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\samples\\G07.csv",
+        "shot":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\screenshots\\generations\\G07.png"
+    },
+    {
+        "id":  "G08",
+        "model":  "Real-ESRGAN",
+        "kind":  "upscale",
+        "status":  "succeeded",
+        "exit":  0,
+        "elapsed_seconds":  12.9,
+        "result":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\generations\\G08.json",
+        "samples":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\samples\\G08.csv",
+        "shot":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\screenshots\\generations\\G08.png"
+    }
+]

@@ -1,0 +1,17 @@
+{
+  "clicked": true,
+  "active": [
+    {
+      "text": "全部作品",
+      "active": false
+    },
+    {
+      "text": "仅收藏",
+      "active": true
+    }
+  ],
+  "state": {
+    "count": "0 件正式作品网格列表"
+  },
+  "items": []
+}

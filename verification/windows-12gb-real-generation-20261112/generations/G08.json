@@ -1,0 +1,39 @@
+{
+  "model": "Real-ESRGAN",
+  "kind": "upscale",
+  "prompt": "",
+  "source": "[G01B]",
+  "startedAt": "2026-11-12T13:59:32.877Z",
+  "status": "succeeded",
+  "stages": [
+    {
+      "at": "2026-11-12T13:59:36.853Z",
+      "elapsedSeconds": 3,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:59:38.369Z",
+      "elapsedSeconds": 5,
+      "stage": "正在执行本地推理"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT"
+  ],
+  "selectedModel": "Real-ESRGAN x4plus · 4× 放大",
+  "turnsBefore": {
+    "turns": 27,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T13:59:33.841Z",
+  "turnId": "turn-51b7a446dec7447b8076f09407a9a8be",
+  "turnText": "使用固定 4× 模型放大图片\n\n你\nImage Studio\nReal-ESRGAN x4plus · 精确 4× · 4096×4096\n查看大图\n图片已生成\n100%\n查看\n导出 PNG\n制作记录",
+  "elapsedSeconds": 8,
+  "endedAt": "2026-11-12T13:59:41.559Z"
+}

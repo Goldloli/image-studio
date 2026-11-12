@@ -1,0 +1,91 @@
+[
+  {
+    "file": "install-birefnet.json",
+    "model": "BiRefNet",
+    "status": "ready",
+    "elapsedSeconds": 61,
+    "phases": [
+      "正在校验模型",
+      "准备隔离运行环境",
+      "检查运行环境与设备",
+      "当前可执行"
+    ]
+  },
+  {
+    "file": "install-klein.json",
+    "model": "Klein",
+    "status": "ready",
+    "elapsedSeconds": 89,
+    "phases": [
+      "正在下载",
+      "正在校验模型",
+      "准备隔离运行环境",
+      "检查运行环境与设备",
+      "当前可执行"
+    ]
+  },
+  {
+    "file": "install-moss.json",
+    "model": "MOSS",
+    "status": "ready",
+    "elapsedSeconds": 361,
+    "phases": [
+      "正在下载",
+      "正在校验模型",
+      "检查运行环境与设备",
+      "正在准备模型文件",
+      "当前可执行"
+    ]
+  },
+  {
+    "file": "install-qwen-base.json",
+    "model": "Qwen-Image 2.1",
+    "status": "ready",
+    "elapsedSeconds": 399,
+    "phases": [
+      "正在下载",
+      "正在校验模型",
+      "准备隔离运行环境",
+      "检查运行环境与设备",
+      "正在准备模型文件",
+      "当前可执行"
+    ]
+  },
+  {
+    "file": "install-qwen-turbo.json",
+    "model": "Qwen-Image 2.1 Turbo",
+    "status": "ready",
+    "elapsedSeconds": 403,
+    "phases": [
+      "正在下载",
+      "正在校验模型",
+      "准备隔离运行环境",
+      "检查运行环境与设备",
+      "正在准备模型文件",
+      "当前可执行"
+    ]
+  },
+  {
+    "file": "install-realesrgan.json",
+    "model": "Real-ESRGAN",
+    "status": "ready",
+    "elapsedSeconds": 11,
+    "phases": [
+      "检查运行环境与设备",
+      "当前可执行"
+    ]
+  },
+  {
+    "file": "install-zimage.json",
+    "model": "Z-Image",
+    "status": "ready",
+    "elapsedSeconds": 164,
+    "phases": [
+      "正在下载",
+      "正在校验模型",
+      "准备隔离运行环境",
+      "检查运行环境与设备",
+      "当前可执行"
+    ]
+  }
+]

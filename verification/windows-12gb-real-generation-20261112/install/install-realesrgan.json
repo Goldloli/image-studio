@@ -1,0 +1,45 @@
+{
+  "model": "Real-ESRGAN",
+  "startedAt": "2026-11-12T12:58:27.379Z",
+  "phases": [
+    {
+      "at": "2026-11-12T12:58:29.814Z",
+      "elapsedSeconds": 2,
+      "status": "检查运行环境与设备",
+      "progress": "检查运行环境与设备90.9 MB / 90.9 MB"
+    },
+    {
+      "at": "2026-11-12T12:58:37.965Z",
+      "elapsedSeconds": 11,
+      "status": "当前可执行",
+      "progress": ""
+    }
+  ],
+  "status": "ready",
+  "clicked": {
+    "clicked": true,
+    "text": "安装模型与运行环境"
+  },
+  "endedAt": "2026-11-12T12:58:38.593Z",
+  "elapsedSeconds": 11,
+  "final": {
+    "found": true,
+    "status": "当前可执行",
+    "alert": "",
+    "buttons": [
+      {
+        "text": "用于当前会话",
+        "disabled": false
+      },
+      {
+        "text": "前往创作",
+        "disabled": false
+      },
+      {
+        "text": "返回创作",
+        "disabled": false
+      }
+    ],
+    "progress": ""
+  }
+}

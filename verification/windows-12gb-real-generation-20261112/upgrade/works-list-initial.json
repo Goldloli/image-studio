@@ -1,0 +1,155 @@
+{
+  "action": "list",
+  "state": {
+    "countLabel": "18 件正式作品",
+    "countRow": "18 件正式作品网格列表",
+    "empty": "",
+    "error": ""
+  },
+  "items": [
+    {
+      "prompt": "无控制台复验：黄昏的海边，孤独的灯塔，写实摄影",
+      "meta": "Z-Image Turbo · 1024×1024 · 2026/11/08 20:57",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "窗口句柄验证：窗边的猫，晨光，写实摄影",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/08 20:52",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "无控制台验证：清晨的咖啡馆，窗边光影，写实摄影",
+      "meta": "Z-Image Turbo · 1024×1024 · 2026/11/08 20:50",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "看门狗测试：雨夜城市街道，霓虹灯光，写实摄影",
+      "meta": "Z-Image Turbo · 1024×1024 · 2026/11/08 20:46",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "窗边的猫，柔和晨光，胶片质感，写实摄影",
+      "meta": "Z-Image Turbo · 1024×1024 · 2026/11/08 20:40",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "",
+      "meta": "Real-ESRGAN x4plus · 4× 放大 · 4096×4096 · 2026/11/08 20:38",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "",
+      "meta": "BiRefNet epoch_244 · 去背景 · 1024×1024 · 2026/11/08 20:38",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "把画面改成黄昏时分，保留撑伞行人与湿润街道，暖色灯光，写实摄影",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/08 20:37",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/08 20:36",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+      "meta": "Z-Image Turbo · 1024×1024 · 2026/11/08 20:35",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+      "meta": "Qwen-Image 2.1 · 1024×1024 · 2026/11/08 20:26",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+      "meta": "MOSS-Image-SFT · 1024×1024 · 2026/11/08 20:17",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+      "meta": "Qwen-Image 2.1 Turbo · 1024×1024 · 2026/11/08 19:54",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "把画面改成黄昏时分，保留撑伞行人与湿润街道，暖色灯光，写实摄影",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/08 17:47",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "",
+      "meta": "Real-ESRGAN x4plus · 4× 放大 · 4096×4096 · 2026/11/08 17:46",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "",
+      "meta": "BiRefNet epoch_244 · 去背景 · 1024×1024 · 2026/11/08 17:46",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+      "meta": "Z-Image Turbo · 1024×1024 · 2026/11/08 17:44",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，写实摄影，真实自然光",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/08 17:43",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    }
+  ]
+}

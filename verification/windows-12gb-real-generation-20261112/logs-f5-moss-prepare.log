@@ -1,0 +1,35 @@
+The fast path is not available because one of the required library is not installed. Falling back to torch implementation. To install follow https://github.com/fla-org/flash-linear-attention#installation and https://github.com/Dao-AILab/causal-conv1d
+[prepare-lowmem] moss_text_encoder start tensors=759 quantized=358 groups=15 group_bytes=1073741824
+[prepare-lowmem] moss_text_encoder group 1/15 tensors=115 source_mib=989 elapsed=14.18s
+[prepare-lowmem] moss_text_encoder group 2/15 tensors=17 source_mib=929 elapsed=7.18s
+[prepare-lowmem] moss_text_encoder group 3/15 tensors=17 source_mib=1008 elapsed=7.46s
+[prepare-lowmem] moss_text_encoder group 4/15 tensors=20 source_mib=945 elapsed=7.53s
+[prepare-lowmem] moss_text_encoder group 5/15 tensors=17 source_mib=929 elapsed=7.37s
+[prepare-lowmem] moss_text_encoder group 6/15 tensors=17 source_mib=1008 elapsed=7.42s
+[prepare-lowmem] moss_text_encoder group 7/15 tensors=21 source_mib=961 elapsed=7.72s
+[prepare-lowmem] moss_text_encoder group 8/15 tensors=17 source_mib=1008 elapsed=7.37s
+[prepare-lowmem] moss_text_encoder group 9/15 tensors=20 source_mib=1009 elapsed=7.78s
+[prepare-lowmem] moss_text_encoder group 10/15 tensors=18 source_mib=961 elapsed=7.34s
+[prepare-lowmem] moss_text_encoder group 11/15 tensors=17 source_mib=1008 elapsed=7.4s
+[prepare-lowmem] moss_text_encoder group 12/15 tensors=21 source_mib=961 elapsed=7.53s
+[prepare-lowmem] moss_text_encoder group 13/15 tensors=17 source_mib=1008 elapsed=7.36s
+[prepare-lowmem] moss_text_encoder group 14/15 tensors=20 source_mib=1009 elapsed=7.73s
+[prepare-lowmem] moss_text_encoder group 15/15 tensors=4 source_mib=320 elapsed=4.96s
+[prepare-lowmem] moss_text_encoder done elapsed=127.83s bytes=5848584800 sha256=de9b3f5f02e69270
+[prepare] moss text_encoder low_memory groups=15 elapsed=127.83s
+[prepare] moss text_encoder resources={"process_private_commit_peak_gib": 1.861, "system_available_ram_min_gib": 16.465, "system_physical_total_gib": 31.727, "sample_interval_seconds": 0.2, "sample_count": 629}
+[prepare-lowmem] moss_transformer start tensors=463 quantized=269 groups=10 group_bytes=1073741824
+[prepare-lowmem] moss_transformer group 1/10 tensors=27 source_mib=1016 elapsed=7.79s
+[prepare-lowmem] moss_transformer group 2/10 tensors=28 source_mib=936 elapsed=8.04s
+[prepare-lowmem] moss_transformer group 3/10 tensors=26 source_mib=1008 elapsed=7.8s
+[prepare-lowmem] moss_transformer group 4/10 tensors=28 source_mib=936 elapsed=7.95s
+[prepare-lowmem] moss_transformer group 5/10 tensors=26 source_mib=1008 elapsed=7.95s
+[prepare-lowmem] moss_transformer group 6/10 tensors=28 source_mib=936 elapsed=7.91s
+[prepare-lowmem] moss_transformer group 7/10 tensors=26 source_mib=1008 elapsed=7.93s
+[prepare-lowmem] moss_transformer group 8/10 tensors=28 source_mib=936 elapsed=8.02s
+[prepare-lowmem] moss_transformer group 9/10 tensors=26 source_mib=1008 elapsed=7.95s
+[prepare-lowmem] moss_transformer group 10/10 tensors=26 source_mib=900 elapsed=7.67s
+[prepare-lowmem] moss_transformer done elapsed=83.86s bytes=2622908171 sha256=fe8c7bcbf4c63366
+[prepare] moss transformer low_memory groups=10 elapsed=83.86s
+[prepare] moss transformer resources={"process_private_commit_peak_gib": 1.955, "system_available_ram_min_gib": 16.836, "system_physical_total_gib": 31.727, "sample_interval_seconds": 0.2, "sample_count": 412}
+[prepare-preflight] available_physical_bytes=21013045248 available_commit_bytes=22100254720 minimum_available_physical_bytes=8589934592 minimum_commit_headroom_bytes=6442450944

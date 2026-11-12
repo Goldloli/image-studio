@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "kind": "windows-real-generation-force-kill-recovery",
+  "case": "O02",
+  "data_root": "C:/ist-rg/r-fresh",
+  "generation": {
+    "model": "Z-Image Turbo",
+    "capability": "text-to-image",
+    "prompt": "强制杀进程恢复测试：雪山日出，金色云海 [FORCEKILL]",
+    "seed": 1035935936,
+    "attempt_id": "attempt-89469c37938a46bcb994edde24042207",
+    "state_before_kill": "preparing",
+    "ui_state_before_kill": "state-Preparing, 正在加载模型 10%",
+    "host_pid_killed": 29432,
+    "kill_observed_at": "2026-11-12T22:13:30+08:00"
+  },
+  "after_restart": {
+    "turn_state": "state-Interrupted",
+    "ui_text": "已中断 / 宿主中断；请确认旧执行已清理后显式重试",
+    "attempt_state": "interrupted",
+    "attempt_error_note": "宿主中断；请确认旧执行已清理后显式重试",
+    "assets_before": 30,
+    "assets_after": 30,
+    "auto_retry": false
+  },
+  "explicit_retry": {
+    "trigger": "重试 button on the interrupted turn",
+    "new_attempt_id": "attempt-f0a7ce15b8fa464ab1f03dad41f59f08",
+    "new_attempt_state": "preparing",
+    "old_attempt_kept": "interrupted",
+    "cleanup": "the retry attempt was cancelled from the UI; attempts ended as 5 cancelled / 1 failed / 1 interrupted / 27 succeeded"
+  },
+  "evidence": [
+    "forcekill/generate.json",
+    "screenshots/forcekill-before-kill.png",
+    "db-fresh-final.json"
+  ]
+}

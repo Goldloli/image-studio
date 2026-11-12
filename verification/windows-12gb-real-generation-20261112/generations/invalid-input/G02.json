@@ -1,0 +1,89 @@
+{
+  "model": "Z-Image",
+  "kind": "text",
+  "prompt": "闆北涓嬬殑婀栨硦涓庢櫒闆撅紝杩滄櫙锛岃秴骞胯椋庢櫙鎽勫奖 [G02]",
+  "source": "",
+  "startedAt": "2026-11-12T13:32:16.549Z",
+  "status": "succeeded",
+  "stages": [
+    {
+      "at": "2026-11-12T13:32:18.817Z",
+      "elapsedSeconds": 2,
+      "stage": "正在接收提示词"
+    },
+    {
+      "at": "2026-11-12T13:32:21.837Z",
+      "elapsedSeconds": 5,
+      "stage": "正在准备生成"
+    },
+    {
+      "at": "2026-11-12T13:32:44.457Z",
+      "elapsedSeconds": 27,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:33:10.122Z",
+      "elapsedSeconds": 53,
+      "stage": "正在采样 0/9"
+    },
+    {
+      "at": "2026-11-12T13:33:14.649Z",
+      "elapsedSeconds": 57,
+      "stage": "正在采样 2/9"
+    },
+    {
+      "at": "2026-11-12T13:33:16.157Z",
+      "elapsedSeconds": 59,
+      "stage": "正在采样 3/9"
+    },
+    {
+      "at": "2026-11-12T13:33:17.659Z",
+      "elapsedSeconds": 60,
+      "stage": "正在采样 4/9"
+    },
+    {
+      "at": "2026-11-12T13:33:19.174Z",
+      "elapsedSeconds": 62,
+      "stage": "正在采样 5/9"
+    },
+    {
+      "at": "2026-11-12T13:33:20.682Z",
+      "elapsedSeconds": 63,
+      "stage": "正在采样 7/9"
+    },
+    {
+      "at": "2026-11-12T13:33:22.187Z",
+      "elapsedSeconds": 65,
+      "stage": "正在采样 8/9"
+    },
+    {
+      "at": "2026-11-12T13:33:23.692Z",
+      "elapsedSeconds": 66,
+      "stage": "正在解码图片"
+    },
+    {
+      "at": "2026-11-12T13:33:26.712Z",
+      "elapsedSeconds": 69,
+      "stage": "正在验证并保存"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT"
+  ],
+  "selectedModel": "Z-Image Turbo",
+  "turnsBefore": {
+    "turns": 3,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T13:32:17.307Z",
+  "turnId": "turn-269a3e68a2784797a1c74905f4514d59",
+  "turnText": "闆北涓嬬殑婀栨硦涓庢櫒闆撅紝杩滄櫙锛岃秴骞胯椋庢櫙鎽勫奖 [G02]\n\n你\nImage Studio\nZ-Image Turbo · 1:1 · 种子 1876044390\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+  "elapsedSeconds": 71,
+  "endedAt": "2026-11-12T13:33:28.401Z"
+}

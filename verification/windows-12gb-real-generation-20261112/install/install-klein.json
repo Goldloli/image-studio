@@ -1,0 +1,63 @@
+{
+  "model": "Klein",
+  "startedAt": "2026-11-12T12:58:38.697Z",
+  "phases": [
+    {
+      "at": "2026-11-12T12:58:41.121Z",
+      "elapsedSeconds": 2,
+      "status": "正在下载",
+      "progress": "正在下载2.72 GB / 18.70 GB"
+    },
+    {
+      "at": "2026-11-12T12:58:49.289Z",
+      "elapsedSeconds": 11,
+      "status": "正在校验模型",
+      "progress": "正在校验模型18.70 GB / 18.70 GB"
+    },
+    {
+      "at": "2026-11-12T12:59:15.542Z",
+      "elapsedSeconds": 37,
+      "status": "准备隔离运行环境",
+      "progress": "准备隔离运行环境18.70 GB / 18.70 GB"
+    },
+    {
+      "at": "2026-11-12T12:59:17.675Z",
+      "elapsedSeconds": 39,
+      "status": "检查运行环境与设备",
+      "progress": "检查运行环境与设备18.70 GB / 18.70 GB"
+    },
+    {
+      "at": "2026-11-12T13:00:07.977Z",
+      "elapsedSeconds": 89,
+      "status": "当前可执行",
+      "progress": ""
+    }
+  ],
+  "status": "ready",
+  "clicked": {
+    "clicked": true,
+    "text": "安装模型与运行环境"
+  },
+  "endedAt": "2026-11-12T13:00:08.144Z",
+  "elapsedSeconds": 89,
+  "final": {
+    "found": true,
+    "status": "当前可执行",
+    "alert": "",
+    "buttons": [
+      {
+        "text": "用于当前会话",
+        "disabled": false
+      },
+      {
+        "text": "前往创作",
+        "disabled": false
+      },
+      {
+        "text": "返回创作",
+        "disabled": false
+      }
+    ],
+    "progress": ""
+  }
+}

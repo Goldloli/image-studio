@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "G01a",
+      "model": "Klein",
+      "kind": "text",
+      "prompt": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]",
+      "source": null,
+      "timeout": 900
+    },
+    {
+      "id": "G01b",
+      "model": "Klein",
+      "kind": "text",
+      "prompt": "a red fox sitting in a snowy forest at dusk, cinematic lighting, photorealistic [G01B]",
+      "source": null,
+      "timeout": 900
+    },
+    {
+      "id": "G02",
+      "model": "Z-Image",
+      "kind": "text",
+      "prompt": "雪山下的湖泊与晨雾，远景，超广角风景摄影 [G02]",
+      "source": null,
+      "timeout": 900
+    },
+    {
+      "id": "G03",
+      "model": "Qwen-Image 2.1",
+      "kind": "text",
+      "prompt": "一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]",
+      "source": null,
+      "timeout": 1200
+    },
+    {
+      "id": "G04",
+      "model": "Qwen-Image 2.1 Turbo",
+      "kind": "text",
+      "prompt": "a cozy bookstore cafe with warm lights, rain outside the window [G04]",
+      "source": null,
+      "timeout": 900
+    },
+    {
+      "id": "G05",
+      "model": "MOSS",
+      "kind": "text",
+      "prompt": "赛博朋克风格的雨夜街道，霓虹灯牌，电影感 [G05]",
+      "source": null,
+      "timeout": 1200
+    },
+    {
+      "id": "G06",
+      "model": "Klein",
+      "kind": "edit",
+      "prompt": "把背景换成夜晚的东京街道，保留人物与伞 [G06]",
+      "source": "[G01A]",
+      "timeout": 900
+    },
+    {
+      "id": "G07",
+      "model": "BiRefNet",
+      "kind": "remove-background",
+      "prompt": "",
+      "source": "[G02]",
+      "timeout": 900
+    },
+    {
+      "id": "G08",
+      "model": "Real-ESRGAN",
+      "kind": "upscale",
+      "prompt": "",
+      "source": "[G01B]",
+      "timeout": 900
+    }
+  ]
+}

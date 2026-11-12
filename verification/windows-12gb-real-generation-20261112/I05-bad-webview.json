@@ -1,0 +1,11 @@
+{
+    "data_root":  "C:\\ist-rg\\r-badwebview",
+    "extra_env":  "WEBVIEW2_BROWSER_EXECUTABLE_FOLDER=C:\\ist-rg\\no-such-webview",
+    "pre_created_profile_file":  false,
+    "dialog_found":  false,
+    "exit_code":  "killed",
+    "startup_failure_log":  "C:\\ist-rg\\r-badwebview\\logs\\startup-failure.log",
+    "startup_failure_log_exists":  false,
+    "startup_failure_log_text":  "",
+    "elapsed_seconds":  32.5
+}

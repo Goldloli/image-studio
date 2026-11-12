@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "C-cancel-klein",
+      "model": "Klein",
+      "kind": "text",
+      "prompt": "取消测试：雨后的山间小路，雾气，写实摄影 [CANCEL-KLEIN]",
+      "source": null,
+      "cancelAfter": 6
+    },
+    {
+      "id": "C-cancel-qwen-turbo",
+      "model": "Qwen-Image 2.1 Turbo",
+      "kind": "text",
+      "prompt": "取消测试：海边日落，帆船，电影感 [CANCEL-QWEN]",
+      "source": null,
+      "cancelAfter": 6
+    },
+    {
+      "id": "C-cancel-birefnet",
+      "model": "BiRefNet",
+      "kind": "remove-background",
+      "prompt": "",
+      "source": "[G02]",
+      "cancelAfter": 4
+    },
+    {
+      "id": "C-cancel-realesrgan",
+      "model": "Real-ESRGAN",
+      "kind": "upscale",
+      "prompt": "",
+      "source": "[G01A]",
+      "cancelAfter": 3
+    }
+  ]
+}

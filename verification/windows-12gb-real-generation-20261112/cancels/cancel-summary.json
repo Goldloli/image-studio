@@ -1,0 +1,26 @@
+﻿[
+    {
+        "id":  "C-cancel-klein",
+        "model":  "Klein",
+        "status":  "cancelled",
+        "evidence":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\cancels\\C-cancel-klein.json"
+    },
+    {
+        "id":  "C-cancel-qwen-turbo",
+        "model":  "Qwen-Image 2.1 Turbo",
+        "status":  "cancelled",
+        "evidence":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\cancels\\C-cancel-qwen-turbo.json"
+    },
+    {
+        "id":  "C-cancel-birefnet",
+        "model":  "BiRefNet",
+        "status":  "cancelled",
+        "evidence":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\cancels\\C-cancel-birefnet.json"
+    },
+    {
+        "id":  "C-cancel-realesrgan",
+        "model":  "Real-ESRGAN",
+        "status":  "cancelled",
+        "evidence":  "C:\\Users\\XIAOKA-PC\\Desktop\\image-studio\\verification\\windows-12gb-real-generation-20261112\\cancels\\C-cancel-realesrgan.json"
+    }
+]

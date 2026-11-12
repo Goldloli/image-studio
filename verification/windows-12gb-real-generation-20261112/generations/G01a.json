@@ -1,0 +1,59 @@
+{
+  "model": "Klein",
+  "kind": "text",
+  "prompt": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]",
+  "source": "",
+  "startedAt": "2026-11-12T13:51:35.739Z",
+  "status": "succeeded",
+  "stages": [
+    {
+      "at": "2026-11-12T13:51:38.011Z",
+      "elapsedSeconds": 2,
+      "stage": "正在准备生成"
+    },
+    {
+      "at": "2026-11-12T13:51:44.053Z",
+      "elapsedSeconds": 8,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:51:56.130Z",
+      "elapsedSeconds": 20,
+      "stage": "正在采样 0/4"
+    },
+    {
+      "at": "2026-11-12T13:51:59.150Z",
+      "elapsedSeconds": 23,
+      "stage": "正在采样 2/4"
+    },
+    {
+      "at": "2026-11-12T13:52:00.655Z",
+      "elapsedSeconds": 24,
+      "stage": "采样 4/4 · 正在处理"
+    },
+    {
+      "at": "2026-11-12T13:52:03.677Z",
+      "elapsedSeconds": 27,
+      "stage": "正在显示图片"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT"
+  ],
+  "selectedModel": "FLUX.2 Klein 4B distilled",
+  "turnsBefore": {
+    "turns": 19,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T13:51:36.499Z",
+  "turnId": "turn-d05ba8c99bff4215a3a9d86068ce8a53",
+  "turnText": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]\n\n你\nImage Studio\nFLUX.2 Klein 4B · 1:1 · 种子 644955404\n正在显示图片\n正在解码并校验 PNG\n正在显示图片\n99%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+  "elapsedSeconds": 27,
+  "endedAt": "2026-11-12T13:52:03.976Z"
+}

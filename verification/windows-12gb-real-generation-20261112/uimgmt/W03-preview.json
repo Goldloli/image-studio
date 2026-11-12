@@ -1,0 +1,19 @@
+{
+  "action": "preview",
+  "opened": {
+    "opened": true
+  },
+  "preview": {
+    "text": "闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛\n2026/11/12 21:55\n制作信息\n一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]\n会话\n闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛\n型号\nQwen-Image 2.1\n尺寸\n1024×1024\n种子\n2892712778\n完成时间\n2026/11/12 21:55\nAssetRef\nasset-c7c4337b71174cdd921c6dcd415b1c0d\n导出 PNG\n制作记录\n返回来源会话",
+    "facts": [
+      "会话=闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛",
+      "型号=Qwen-Image 2.1",
+      "尺寸=1024×1024",
+      "种子=2892712778",
+      "完成时间=2026/11/12 21:55",
+      "AssetRef=asset-c7c4337b71174cdd921c6dcd415b1c0d"
+    ],
+    "imageCount": 1,
+    "exportDisabled": false
+  }
+}

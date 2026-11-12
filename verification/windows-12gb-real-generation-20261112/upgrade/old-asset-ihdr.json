@@ -1,0 +1,23 @@
+{
+  "mask1": {
+    "width": 1024,
+    "height": 1024,
+    "bit_depth": 8,
+    "color_type": 0,
+    "interlace": 0
+  },
+  "mask2": {
+    "width": 1024,
+    "height": 1024,
+    "bit_depth": 8,
+    "color_type": 0,
+    "interlace": 0
+  },
+  "old-klein": {
+    "width": 1024,
+    "height": 1024,
+    "bit_depth": 8,
+    "color_type": 2,
+    "interlace": 0
+  }
+}

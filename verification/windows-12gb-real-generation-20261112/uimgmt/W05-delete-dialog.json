@@ -1,0 +1,205 @@
+{
+  "action": "delete",
+  "clicked": {
+    "clicked": true
+  },
+  "dialog": {
+    "title": "删除作品「闆ㄥ悗鐨勪笂娴疯瑙掞紝涓€浣嶆拺浼炵殑琛屼汉锛」？",
+    "description": "应用内原图、同次生成的配套蒙版及专用预览缓存会删除；已导出的外部副本保留。此操作不可撤销。",
+    "error": ""
+  },
+  "items": [
+    {
+      "prompt": "",
+      "meta": "Real-ESRGAN x4plus · 4× 放大 · 4096×4096 · 2026/11/12 21:59",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "",
+      "meta": "BiRefNet epoch_244 · 去背景 · 1024×1024 · 2026/11/12 21:59",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "把背景换成夜晚的东京街道，保留人物与伞 [G06]",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/12 21:59",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "赛博朋克风格的雨夜街道，霓虹灯牌，电影感 [G05]",
+      "meta": "MOSS-Image-SFT · 1024×1024 · 2026/11/12 21:58",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "a cozy bookstore cafe with warm lights, rain outside the window [G04]",
+      "meta": "Qwen-Image 2.1 Turbo · 1024×1024 · 2026/11/12 21:55",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]",
+      "meta": "Qwen-Image 2.1 · 1024×1024 · 2026/11/12 21:55",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雪山下的湖泊与晨雾，远景，超广角风景摄影 [G02]",
+      "meta": "Z-Image Turbo · 1024×1024 · 2026/11/12 21:53",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "a red fox sitting in a snowy forest at dusk, cinematic lighting, photorealistic [G01B]",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/12 21:52",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/12 21:52",
+      "favorite": true,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "",
+      "meta": "Real-ESRGAN x4plus · 4× 放大 · 4096×4096 · 2026/11/12 21:50",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "",
+      "meta": "BiRefNet epoch_244 · 去背景 · 1024×1024 · 2026/11/12 21:49",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "把背景换成夜晚的东京街道，保留人物与伞 [G06]",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/12 21:49",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "赛博朋克风格的雨夜街道，霓虹灯牌，电影感 [G05]",
+      "meta": "MOSS-Image-SFT · 1024×1024 · 2026/11/12 21:48",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "a cozy bookstore cafe with warm lights, rain outside the window [G04]",
+      "meta": "Qwen-Image 2.1 Turbo · 1024×1024 · 2026/11/12 21:46",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "一盆粉色樱花放在木质窗台上，晨光，浅景深 [G03]",
+      "meta": "Qwen-Image 2.1 · 1024×1024 · 2026/11/12 21:45",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雪山下的湖泊与晨雾，远景，超广角风景摄影 [G02]",
+      "meta": "Z-Image Turbo · 1024×1024 · 2026/11/12 21:44",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "a red fox sitting in a snowy forest at dusk, cinematic lighting, photorealistic [G01B]",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/12 21:43",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "雨后的上海街角，一位撑伞的行人，霓虹倒影，写实摄影 [G01A]",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/12 21:42",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "",
+      "meta": "Real-ESRGAN x4plus · 4× 放大 · 4096×4096 · 2026/11/12 21:39",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "",
+      "meta": "BiRefNet epoch_244 · 去背景 · 1024×1024 · 2026/11/12 21:39",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "鎶婅儗鏅崲鎴愬鏅氱殑涓滀含琛楅亾锛屼繚鐣欎汉鐗╀笌浼?[G06]",
+      "meta": "FLUX.2 Klein 4B distilled · 1024×1024 · 2026/11/12 21:38",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "a cozy bookstore cafe with warm lights, rain outside the window [G04]",
+      "meta": "Qwen-Image 2.1 Turbo · 1024×1024 · 2026/11/12 21:35",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "涓€鐩嗙矇鑹叉ū鑺辨斁鍦ㄦ湪璐ㄧ獥鍙颁笂锛屾櫒鍏夛紝娴呮櫙娣?[G03]",
+      "meta": "Qwen-Image 2.1 · 1024×1024 · 2026/11/12 21:34",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    },
+    {
+      "prompt": "闆北涓嬬殑婀栨硦涓庢櫒闆撅紝杩滄櫙锛岃秴骞胯椋庢櫙鎽勫奖 [G02]",
+      "meta": "Z-Image Turbo · 1024×1024 · 2026/11/12 21:33",
+      "favorite": false,
+      "managing": false,
+      "status": "可用",
+      "deletionState": ""
+    }
+  ]
+}

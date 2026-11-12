@@ -1,0 +1,59 @@
+{
+  "model": "Klein",
+  "kind": "edit",
+  "prompt": "鎶婅儗鏅崲鎴愬鏅氱殑涓滀含琛楅亾锛屼繚鐣欎汉鐗╀笌浼?[G06]",
+  "source": "[G01A]",
+  "startedAt": "2026-11-12T13:38:13.105Z",
+  "status": "succeeded",
+  "stages": [
+    {
+      "at": "2026-11-12T13:38:15.882Z",
+      "elapsedSeconds": 2,
+      "stage": "正在准备生成"
+    },
+    {
+      "at": "2026-11-12T13:38:20.418Z",
+      "elapsedSeconds": 6,
+      "stage": "正在加载模型"
+    },
+    {
+      "at": "2026-11-12T13:38:40.030Z",
+      "elapsedSeconds": 26,
+      "stage": "正在采样 0/4"
+    },
+    {
+      "at": "2026-11-12T13:38:44.567Z",
+      "elapsedSeconds": 30,
+      "stage": "正在采样 3/4"
+    },
+    {
+      "at": "2026-11-12T13:38:47.592Z",
+      "elapsedSeconds": 33,
+      "stage": "采样 4/4 · 正在处理"
+    },
+    {
+      "at": "2026-11-12T13:38:52.134Z",
+      "elapsedSeconds": 38,
+      "stage": "正在验证并保存"
+    }
+  ],
+  "availableModels": [
+    "Z-Image Turbo",
+    "FLUX.2 Klein 4B distilled",
+    "BiRefNet epoch_244 · 去背景",
+    "Real-ESRGAN x4plus · 4× 放大",
+    "Qwen-Image 2.1",
+    "Qwen-Image 2.1 Turbo",
+    "MOSS-Image-SFT"
+  ],
+  "selectedModel": "FLUX.2 Klein 4B distilled",
+  "turnsBefore": {
+    "turns": 7,
+    "sent": 1
+  },
+  "sendAt": "2026-11-12T13:38:14.372Z",
+  "turnId": "turn-9a44d3bbe6594c938efbc79ef5b847f4",
+  "turnText": "鎶婅儗鏅崲鎴愬鏅氱殑涓滀含琛楅亾锛屼繚鐣欎汉鐗╀笌浼?[G06]\n\n你\nImage Studio\nFLUX.2 Klein 4B · 单图编辑\n查看大图\n图片已生成\n100%\n编辑后重发\n查看\n导出 PNG\n复制提示词\n制作记录",
+  "elapsedSeconds": 39,
+  "endedAt": "2026-11-12T13:38:53.806Z"
+}
