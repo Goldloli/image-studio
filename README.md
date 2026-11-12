@@ -6,43 +6,45 @@
 [![Latest release](https://img.shields.io/github/v/release/Goldloli/image-studio)](https://github.com/Goldloli/image-studio/releases/latest)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-Image Studio is a local-first desktop image creation studio for macOS arm64 and
-Windows x64, built with Rust, Tauri 2, and React. It provides text-to-image,
-instruction-based image editing, background removal with RGBA/mask output, and
-exact 4× upscaling while keeping model execution and project data on the local
-machine.
+Image Studio is a local-first desktop image creation studio for Apple Silicon
+macOS and Windows x64, built with Rust, Tauri 2, and React. Generate, edit,
+remove backgrounds, and upscale images with seven pinned local models while
+keeping model execution, conversations, and works on your machine.
 
-![Image Studio generation workspace](verification/windows-installed-app/screenshots/generation-conversation.png)
+![Image Studio conversation workspace on macOS](verification/simplify-workspace-20261111/native-01-initial-1280.png)
 
-## Latest Release: v0.1.1
+## Latest Release: v0.2.0
 
-The current release adds an 8 GB VRAM execution tier, a low-memory install path,
-and a round of Windows desktop reliability fixes on top of the first public
-build:
+Version `0.2.0` brings the workspace closer to a daily-use image studio:
 
-- **8 GB compact tier** — Qwen-Image 2.1 / Turbo, MOSS-Image-SFT, and FLUX.2
-  Klein 4B (text-to-image and edit) run at 768×768 with `float16` on an RTX 2060
-  SUPER 8 GB (Turing sm75); measured CUDA reserved peaks are 5.44–5.96 GiB.
-  Z-Image Turbo stays gated at 12 GB.
-- **Low-memory install-time quantization** — NF4 preparation now streams ~1 GiB
-  tensor shards through short-lived child processes (worker commit peak
-  1.95–3.6 GiB), so the install gate drops to available RAM ≥ 8 GiB and commit
-  headroom ≥ 6 GiB. 16 GiB machines can install Qwen and MOSS.
-- **Windows desktop fixes** — send preflight no longer re-hashes the install
-  (60 s+ → ~46 ms), a 60 s turn watchdog bounds stranded sends, cancellation
-  settles in 3–7 s, downloads retry per file and repair corrupted parts, no
-  console windows appear, and `<data>/logs/app.log` keeps a bounded structured
-  log.
-- **Verified on real machines** — Windows 11 / RTX 2060 SUPER 8 GB for the
-  compact tier and Windows 10 22H2 / RTX 3080 Ti 12 GB for the standard tier,
-  with GitHub Actions quality green on Windows x64 and macOS arm64.
+- **One clear workspace** — a single navigation rail replaces duplicated page
+  tabs, standalone feature/task pages, and the development diagnostics drawer.
+  Production records now expand in the conversation or work where they belong.
+- **Conversation and work management** — rename or delete conversations without
+  losing generated works; favourite works, filter to favourites, and delete a
+  work together with its mask and dedicated preview cache. Referenced works are
+  protected with actionable release guidance.
+- **Safer local state** — the SQLite schema upgrades from v5 to v6 with
+  transactional deletion metadata, recovery state, and preserved historical
+  execution records.
+- **Better second-launch behaviour on Windows** — launching the same data root
+  again restores and focuses the running window, or explains within five seconds
+  that it is unresponsive, instead of creating a conflicting second host.
+- **Reliable startup diagnostics** — startup and WebView2 failures now retain
+  both the structured application log and the native failure dialog instead of
+  silently exiting.
+- **Validated across the intended hardware tiers** — current builds are covered
+  on macOS arm64, Windows 12 GB standard-tier hardware, and the Windows 8 GB
+  compact-tier baseline.
 
 See the [latest release notes](https://github.com/Goldloli/image-studio/releases/latest)
 for the complete change list and known limitations.
 
-| Model page with the compact tier | Works library |
+| Conversation-based creation | Local model library |
 |---|---|
-| ![Compact tier on the model page](verification/windows-8gb-tier/model-compact-tier.png) | ![Works library](verification/windows-installed-app/screenshots/works-library.png) |
+| ![Image Studio creation workspace](verification/windows-12gb-real-generation-20261112/screenshots/01-initial-create.png) | ![Local model library](verification/windows-12gb-real-generation-20261112/screenshots/M05-klein-standard-tier.png) |
+| **Works library** | **Background removal** |
+| ![Works library with favourites and deletion](verification/windows-functional-regression-20261112/17-works-three-items.png) | ![Background removal with transparent output](verification/simplify-workspace-20261111/native-E2-birefnet-done-1280.png) |
 
 ## Highlights
 
@@ -63,6 +65,8 @@ for the complete change list and known limitations.
   history, and provenance.
 - **Strict process supervision**: bounded worker output, cancellation,
   descendant cleanup, execution leases, and crash recovery.
+- **Single-instance data ownership**: a second launch using the same data root
+  focuses the active window; isolated `--data-dir` roots remain independent.
 - **Cross-platform releases**: Windows NSIS and macOS arm64 `.app` artifacts
   are built and verified by GitHub Actions.
 
@@ -109,12 +113,13 @@ fresh worker, so the total includes component loading.
 | FLUX.2 Klein 4B text-to-image | 4 | 145.6 s | 9.8 s |
 | FLUX.2 Klein 4B edit | 4 | 166.1 s | 10.3 s |
 
-On the Windows 10 / RTX 3080 Ti 12 GB target machine the standard tier measured
-Klein 50.1 s, Z-Image Turbo 55.1 s, BiRefNet 25.6 s, Real-ESRGAN 8.6 s, Klein
-edit 46.6 s, and single Qwen-Image 2.1 / MOSS-Image-SFT generations of 84 s /
-143 s. Install-time quantization on that machine runs at a worker commit peak of
-~2–3 GiB. Evidence:
+On the current Windows 10 / RTX 3080 Ti 12 GB validation build, all eight
+capabilities completed a real generation: Klein text-to-image in 26–27 s,
+Z-Image Turbo in 54 s, Qwen-Image 2.1 in 86 s, Qwen-Image 2.1 Turbo in 41 s,
+MOSS-Image-SFT in 146 s, Klein edit in 39 s, BiRefNet in 23 s, and Real-ESRGAN
+in 8 s. Evidence:
 [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md),
+[`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md),
 [`verification/windows-12gb-standard-tier/`](verification/windows-12gb-standard-tier/README.md),
 [`doc/15-windows-8gb-tier.md`](doc/15-windows-8gb-tier.md), and
 [`doc/16-zimage-quantization-investigation.md`](doc/16-zimage-quantization-investigation.md).
@@ -123,6 +128,22 @@ The authoritative model catalog is
 [`resources/model-catalog/catalog.json`](resources/model-catalog/catalog.json).
 Windows uses separately frozen NF4/ONNX/ncnn profiles; macOS uses the verified
 MFLUX/MLX and ONNX runtimes.
+
+## Validation and Evidence Boundaries
+
+The project keeps compile, UI, and real inference evidence separate:
+
+| Platform | Version 0.2.0 validation scope | Evidence |
+|---|---|---|
+| macOS arm64 | Native workspace, seven ready models, real text-to-image, BiRefNet, Klein reference editing, cancellation, export, v5→v6 upgrade, conversation/work deletion and favourites | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
+| Windows 12 GB standard tier | Current-build 9/9 real generation cases across seven models and eight capabilities; install, network resume, management, upgrade, cancellation, forced-kill recovery, single-instance activation | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
+| Windows 8 GB compact tier | RTX 2060 SUPER / Turing sm75 compact recipes plus a current-build functional regression with no execution-surface change | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md), [`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
+
+GitHub Actions validates builds, tests, packaging, architecture, checksums, and
+version provenance. It does not download model weights or run GPU inference.
+Hardware support is not extrapolated beyond the recorded machines and
+architectures; `waived` and `not_run` acceptance items are never presented as
+passes.
 
 ## System Requirements
 
@@ -147,20 +168,30 @@ and verify the downloaded file against its `SHA256SUMS-*.txt`:
 - **macOS arm64**: `Image-Studio-<version>-macos-arm64.zip`
 
 ```bash
-sha256sum -c SHA256SUMS-windows.txt
-sha256sum -c SHA256SUMS-macos.txt
+shasum -a 256 -c SHA256SUMS-macos.txt
+```
+
+```powershell
+Get-FileHash .\Image.Studio_<version>_x64-setup.exe -Algorithm SHA256
 ```
 
 The release is unsigned and not notarized:
 
 - Windows may show SmartScreen. Verify the checksum, then use
   **More info → Run anyway** only if the digest matches.
-- macOS may block first launch in Gatekeeper. Verify the checksum, then
-  Control-click the app and choose **Open**, or run:
+- macOS may show **“Image Studio.app is damaged and can’t be opened”** because
+  Gatekeeper applies quarantine to this unsigned build. First confirm the
+  downloaded zip matches `SHA256SUMS-macos.txt`, move the app to Applications,
+  then open Terminal and run:
 
 ```bash
-xattr -dr com.apple.quarantine "Image Studio.app"
+sudo xattr -rd com.apple.quarantine "/Applications/Image Studio.app"
+open "/Applications/Image Studio.app"
 ```
+
+This removes quarantine only from the verified application bundle. Do not run
+the command when the checksum is missing or does not match. On a copy installed
+elsewhere, replace the quoted path with that app's path.
 
 macOS builds require Apple Silicon and macOS 11 or newer.
 
@@ -300,10 +331,14 @@ actionlint -no-color
 Real model acceptance evidence is stored in [`verification/`](verification/):
 
 - Windows compact tier: [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)
-- Windows standard tier and Windows 10 target machine: [`verification/windows-12gb-standard-tier/`](verification/windows-12gb-standard-tier/README.md)
+- Windows 12 GB current-build real generation: [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md)
+- Windows standard tier and Windows 10 target machine baseline: [`verification/windows-12gb-standard-tier/`](verification/windows-12gb-standard-tier/README.md)
+- Windows 0.2.0 functional regression: [`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md)
+- Same-root launch activation: [`verification/single-instance-20261112/`](verification/single-instance-20261112/README.md)
 - Windows desktop coverage and defects: [`verification/windows-desktop-coverage/`](verification/windows-desktop-coverage/2026-11-06-coverage-results.md), [`verification/windows-desktop-defects/`](verification/windows-desktop-defects/2026-11-06-preflight-and-cancel.md)
 - Installed Windows all-model acceptance: [`verification/windows-parity-app/`](verification/windows-parity-app/README.md)
-- macOS seven-model evidence: [`verification/qwen-moss-20261101/moss-stage-report.md`](verification/qwen-moss-20261101/moss-stage-report.md)
+- macOS 0.2.0 native acceptance: [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md)
+- macOS seven-model baseline: [`verification/qwen-moss-20261101/moss-stage-report.md`](verification/qwen-moss-20261101/moss-stage-report.md)
 
 ## CI and Releases
 
@@ -318,9 +353,9 @@ The public repository uses three pinned GitHub Actions workflows:
 
 Pushing a `v*` tag whose commit is on `main`, with the tag, workspace Cargo,
 Tauri, and frontend versions all equal, builds both platforms and stages a
-draft release that the maintainer reviews before publishing. The published
-`v0.1.1` release contains the Windows x64 NSIS installer and the macOS arm64
-`.app` zip. See [CI and release documentation](doc/14-ci-release.md) and
+draft release for artifact review before publication. The `v0.2.0` release
+contains the Windows x64 NSIS installer and the macOS arm64 `.app` zip. See
+[CI and release documentation](doc/14-ci-release.md) and
 [`verification/ci-release/`](verification/ci-release/) for run IDs and artifact
 digests.
 

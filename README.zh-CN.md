@@ -6,36 +6,37 @@
 [![最新发布](https://img.shields.io/github/v/release/Goldloli/image-studio)](https://github.com/Goldloli/image-studio/releases/latest)
 [![许可证：Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-Image Studio 是面向 **macOS arm64** 与 **Windows x64** 的本地优先桌面图片创作
-工作台，使用 Rust、Tauri 2 与 React 构建。它支持文生图、基于指令的单图编辑、
-带 RGBA/mask 输出的去背景，以及精确 4× 放大；模型推理和项目数据都留在本机。
+Image Studio 是面向 **Apple Silicon macOS** 与 **Windows x64** 的本地优先桌面
+图片创作工作台，使用 Rust、Tauri 2 与 React 构建。你可以用七个固定版本的本地
+模型完成文生图、编辑、去背景与放大；模型推理、会话和作品都留在本机。
 
-![Image Studio 生成工作区](verification/windows-installed-app/screenshots/generation-conversation.png)
+![macOS 上的 Image Studio 会话工作区](verification/simplify-workspace-20261111/native-01-initial-1280.png)
 
-## 最新版本：v0.1.1
+## 最新版本：v0.2.0
 
-本次发布在首个公开版本的基础上新增 8 GB 显存执行档位、安装期低内存量化路径，
-并完成一轮 Windows 桌面可靠性修复：
+`0.2.0` 让工作区更接近面向日常创作的图片工作室：
 
-- **8 GB 紧凑档** —— Qwen-Image 2.1 / Turbo、MOSS-Image-SFT 与 FLUX.2 Klein 4B
-  （文生图与编辑）可在 RTX 2060 SUPER 8 GB（Turing sm75）上以 768×768、
-  `float16` 运行，实测 CUDA reserved 峰值 5.44–5.96 GiB。Z-Image Turbo 仍要求
-  12 GB 显存。
-- **安装期低内存量化** —— NF4 量化改为通过短生命周期子进程分片流式处理（约
-  1 GiB 一组，worker commit 峰值 1.95–3.6 GiB），安装门槛降到可用物理内存
-  ≥ 8 GiB 且 commit 余量 ≥ 6 GiB。16 GiB 内存机器现在可以安装 Qwen 与 MOSS。
-- **Windows 桌面修复** —— 发送预检不再重复哈希整个安装（60 s+ → 约 46 ms），
-  60 s 回合看门狗兜底滞留发送，取消在 3–7 s 内落定，下载按文件重试并自动修复
-  坏分片，生成/安装不再弹控制台窗口，`<data>/logs/app.log` 保存有界结构化日志。
-- **真机验证** —— Windows 11 / RTX 2060 SUPER 8 GB 覆盖紧凑档，Windows 10 22H2 /
-  RTX 3080 Ti 12 GB 覆盖标准档；GitHub Actions 在 Windows x64 与 macOS arm64 上
-  质量门均为绿色。
+- **更清晰的工作区** —— 用单层左侧导航替代重复的页面页签、独立功能页/任务页和
+  开发诊断抽屉；制作记录改为在当前会话或作品中展开。
+- **会话与作品管理** —— 可重命名或删除会话且保留已生成作品；可收藏作品、只看
+  收藏，并将原图、蒙版与专用预览缓存作为一组删除。仍被引用的作品会受到保护，
+  并给出可执行的解除指引。
+- **更安全的本地状态** —— SQLite 通过事务从 v5 升级到 v6，保存删除标记、恢复
+  状态与历史执行事实。
+- **Windows 二次启动更自然** —— 使用同一数据根再次启动时，会还原并聚焦已有窗口；
+  若已有实例在 5 秒内未响应，则直接说明原因，不再创建冲突的第二套宿主。
+- **可靠的启动诊断** —— 启动或 WebView2 初始化失败时，结构化应用日志和原生失败
+  对话框都会保留，不再静默退出。
+- **覆盖目标硬件档位** —— 当前构建已在 macOS arm64、Windows 12 GB 标准档机器
+  与 Windows 8 GB 紧凑档基线完成对应验证。
 
 完整变更与已知限制见[最新发布说明](https://github.com/Goldloli/image-studio/releases/latest)。
 
-| 模型页显示紧凑档 | 作品库 |
+| 会话式创作 | 本地模型库 |
 |---|---|
-| ![模型页紧凑档](verification/windows-8gb-tier/model-compact-tier.png) | ![作品库](verification/windows-installed-app/screenshots/works-library.png) |
+| ![Image Studio 创作工作区](verification/windows-12gb-real-generation-20261112/screenshots/01-initial-create.png) | ![本地模型库](verification/windows-12gb-real-generation-20261112/screenshots/M05-klein-standard-tier.png) |
+| **作品库** | **去背景** |
+| ![支持收藏和删除的作品库](verification/windows-functional-regression-20261112/17-works-three-items.png) | ![带透明输出的去背景](verification/simplify-workspace-20261111/native-E2-birefnet-done-1280.png) |
 
 ## 核心特性
 
@@ -52,6 +53,8 @@ Image Studio 是面向 **macOS arm64** 与 **Windows x64** 的本地优先桌面
 - **持久本地作品库**：SQLite 保存草稿、任务、Attempt、正式资产、任务历史与
   制作记录。
 - **严格的进程监督**：有界 worker 输出、取消、后代回收、执行租约和崩溃恢复。
+- **单实例数据所有权**：使用同一数据根再次启动时会聚焦已有窗口；通过
+  `--data-dir` 使用不同数据根的实例仍可独立运行。
 - **双平台发布**：GitHub Actions 构建并验证 Windows NSIS 安装包与 macOS arm64
   `.app`。
 
@@ -94,11 +97,12 @@ Turing 架构上存在 fp16 溢出，仍要求 12 GB 显存。
 | FLUX.2 Klein 4B 文生图 | 4 | 145.6 s | 9.8 s |
 | FLUX.2 Klein 4B 编辑 | 4 | 166.1 s | 10.3 s |
 
-在 Windows 10 / RTX 3080 Ti 12 GB 目标机上，标准档实测 Klein 50.1 s、Z-Image
-Turbo 55.1 s、BiRefNet 25.6 s、Real-ESRGAN 8.6 s、Klein 编辑 46.6 s，单次
-Qwen-Image 2.1 / MOSS-Image-SFT 生成分别为 84 s / 143 s；该机安装期量化的
-worker commit 峰值约 2–3 GiB。证据见
+在当前 Windows 10 / RTX 3080 Ti 12 GB 验证构建上，八项能力全部完成真实生成：
+Klein 文生图 26–27 s、Z-Image Turbo 54 s、Qwen-Image 2.1 86 s、
+Qwen-Image 2.1 Turbo 41 s、MOSS-Image-SFT 146 s、Klein 编辑 39 s、
+BiRefNet 23 s、Real-ESRGAN 8 s。证据见
 [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)、
+[`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md)、
 [`verification/windows-12gb-standard-tier/`](verification/windows-12gb-standard-tier/README.md)、
 [`doc/15-windows-8gb-tier.md`](doc/15-windows-8gb-tier.md) 与
 [`doc/16-zimage-quantization-investigation.md`](doc/16-zimage-quantization-investigation.md)。
@@ -107,6 +111,20 @@ worker commit 峰值约 2–3 GiB。证据见
 [`resources/model-catalog/catalog.json`](resources/model-catalog/catalog.json)。
 Windows 使用独立冻结的 NF4、ONNX 与 ncnn 配置；macOS 使用已验证的 MFLUX/MLX
 和 ONNX 运行时。
+
+## 验证范围与证据边界
+
+项目把编译、界面与真实推理证据分开记录：
+
+| 平台 | 0.2.0 验证范围 | 证据 |
+|---|---|---|
+| macOS arm64 | 原生工作区、七个模型就绪、真实文生图、BiRefNet、Klein 参考图编辑、取消、导出、v5→v6 升级、会话/作品删除与收藏 | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
+| Windows 12 GB 标准档 | 当前构建的七个模型、八项能力共 9/9 个真实生成用例；安装、网络续传、作品管理、升级、取消、强杀恢复与单实例激活 | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
+| Windows 8 GB 紧凑档 | RTX 2060 SUPER / Turing sm75 紧凑档配方，以及执行面无变化的当前构建功能回归 | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)、[`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
+
+GitHub Actions 负责构建、测试、打包、架构、checksum 与版本来源检查；它不下载
+模型权重，也不执行 GPU 推理。硬件支持不外推到已记录机器和架构之外；
+`waived` 与 `not_run` 项目永远不会写成通过。
 
 ## 系统要求
 
@@ -129,20 +147,28 @@ Windows 使用独立冻结的 NF4、ONNX 与 ncnn 配置；macOS 使用已验证
 - **macOS arm64**：`Image-Studio-<version>-macos-arm64.zip`
 
 ```bash
-sha256sum -c SHA256SUMS-windows.txt
-sha256sum -c SHA256SUMS-macos.txt
+shasum -a 256 -c SHA256SUMS-macos.txt
+```
+
+```powershell
+Get-FileHash .\Image.Studio_<version>_x64-setup.exe -Algorithm SHA256
 ```
 
 当前产物未签名、未公证：
 
 - Windows 可能显示 SmartScreen。确认 SHA-256 一致后，才使用
   **更多信息 → 仍要运行**。
-- macOS 可能被 Gatekeeper 拦截。确认 SHA-256 一致后，Control-click 应用并选择
-  **打开**，或运行：
+- macOS 首次打开时可能显示 **“Image Studio.app 已损坏，无法打开”**。这是未签名
+  构建被 Gatekeeper 加上 quarantine 属性后的表现。请先确认下载的 zip 与
+  `SHA256SUMS-macos.txt` 一致，把应用放入“应用程序”，然后在终端运行：
 
 ```bash
-xattr -dr com.apple.quarantine "Image Studio.app"
+sudo xattr -rd com.apple.quarantine "/Applications/Image Studio.app"
+open "/Applications/Image Studio.app"
 ```
+
+这条命令只会移除已校验应用包的 quarantine 属性。checksum 缺失或与下载文件不一致
+时不要执行；如果应用安装在其他位置，请替换引号中的路径。
 
 macOS 产物需要 Apple Silicon 与 macOS 11 或更高版本。
 
@@ -270,10 +296,14 @@ actionlint -no-color
 真实模型验收证据保存在 [`verification/`](verification/)：
 
 - Windows 紧凑档：[`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)
-- Windows 标准档与 Windows 10 目标机：[`verification/windows-12gb-standard-tier/`](verification/windows-12gb-standard-tier/README.md)
+- Windows 12 GB 当前构建真实生成：[`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md)
+- Windows 标准档与 Windows 10 目标机基线：[`verification/windows-12gb-standard-tier/`](verification/windows-12gb-standard-tier/README.md)
+- Windows 0.2.0 功能回归：[`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md)
+- 同数据根启动激活：[`verification/single-instance-20261112/`](verification/single-instance-20261112/README.md)
 - Windows 桌面覆盖与缺陷：[`verification/windows-desktop-coverage/`](verification/windows-desktop-coverage/2026-11-06-coverage-results.md)、[`verification/windows-desktop-defects/`](verification/windows-desktop-defects/2026-11-06-preflight-and-cancel.md)
 - Windows 安装版全模型验收：[`verification/windows-parity-app/`](verification/windows-parity-app/README.md)
-- macOS 七模型证据：[`verification/qwen-moss-20261101/moss-stage-report.md`](verification/qwen-moss-20261101/moss-stage-report.md)
+- macOS 0.2.0 原生验收：[`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md)
+- macOS 七模型基线：[`verification/qwen-moss-20261101/moss-stage-report.md`](verification/qwen-moss-20261101/moss-stage-report.md)
 
 ## CI 与发布
 
@@ -287,8 +317,8 @@ actionlint -no-color
   GitHub Release。
 
 推送一个 `v*` tag（提交必须在 `main` 上，且 tag、workspace Cargo、Tauri 与前端
-版本完全一致）会构建双平台产物并生成 draft Release，由维护者审阅后发布。
-已发布的 `v0.1.1` 包含 Windows x64 NSIS 安装包与 macOS arm64 `.app` zip。
+版本完全一致）会构建双平台产物并生成可供产物审阅的 draft Release，审阅后发布。
+`v0.2.0` 包含 Windows x64 NSIS 安装包与 macOS arm64 `.app` zip。
 运行 ID 与产物摘要见 [CI 与发布文档](doc/14-ci-release.md) 与
 [`verification/ci-release/`](verification/ci-release/)。
 
