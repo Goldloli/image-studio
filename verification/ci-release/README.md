@@ -1,8 +1,8 @@
 # Cross-platform CI/release evidence
 
-Status: **local and real GitHub Actions acceptance passed; `v0.1.1` is
-publicly published** (2026-11-10). `v0.1.0` remains the previous public
-release (2026-11-05).
+Status: **local and real GitHub Actions acceptance passed; `v0.2.0` is
+publicly published** (2026-11-12). `v0.1.1` and `v0.1.0` remain previous
+public releases.
 
 Change: `openspec/changes/archive/2026-11-05-introduce-ci-release-pipeline`.
 Workflows:
@@ -30,6 +30,9 @@ Workflows:
 | `v0.1.1` quality on the release commit | PASS on Windows + macOS arm64 (run 37) | [v0.1.1/acceptance.json](v0.1.1/acceptance.json) |
 | `v0.1.1` release workflow | PASS; version provenance, both platform builds, draft release | same `v0.1.1` record |
 | `v0.1.1` public Release | PASS; 10 assets, both platform packages, checksums re-verified after download | [v0.1.1/README.md](v0.1.1/README.md) |
+| `v0.2.0` quality on the release commit | PASS on Windows + macOS arm64 (run 43242113193) | [v0.2.0/acceptance.json](v0.2.0/acceptance.json) |
+| `v0.2.0` release workflow | PASS; one macOS runner-capacity retry, then both packages and draft release | same `v0.2.0` record |
+| `v0.2.0` public Release | PASS; 10 assets, checksums and package identities re-verified after download | [v0.2.0/README.md](v0.2.0/README.md) |
 
 The local Node runtime is `24.12.0`, while CI pins `24.19.0`; tests/build were
 run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
@@ -58,6 +61,18 @@ run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
 8. `v0.1.1` acceptance archive: [v0.1.1/](v0.1.1/) with the machine-readable
    record, the CI-built Windows package evidence and both published
    checksum files.
+9. `v0.2.0` tag: version/main provenance passed on `bc50fd3`; quality
+   `43242113193` passed on both platforms. Release `43243134087` initially
+   waited 15m02s for a macOS runner without executing a step, then a failed-job
+   rerun completed macOS in 6m50s and created the draft.
+10. Public `v0.2.0` Release: PASS with 10 assets. The Windows installer
+    (`245,195,809 B`) and macOS arm64 zip (`32,566,832 B`) were downloaded again,
+    both checksums passed, the Windows internal package hash/bytes matched, and
+    the macOS bundle reported identifier, version `0.2.0`, macOS 11 minimum and
+    four arm64 executables:
+    <https://github.com/Goldloli/image-studio/releases/tag/v0.2.0>.
+11. `v0.2.0` acceptance archive: [v0.2.0/](v0.2.0/) with the machine-readable
+    record, CI-built Windows package evidence and both published checksum files.
 
 Unsigned/notarization limitations are documented in
 [doc/14-ci-release.md](../../doc/14-ci-release.md).

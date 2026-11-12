@@ -54,6 +54,19 @@ draft 发布）全部成功。公开页包含 Windows x64 NSIS 安装包
 identifier、版本、最低系统版本与 arm64 架构均正确。验收记录见
 [`verification/ci-release/v0.1.1/`](../verification/ci-release/v0.1.1/README.md)。
 
+`v0.2.0` 已于 2026-11-12 人工审阅并公开：
+<https://github.com/Goldloli/image-studio/releases/tag/v0.2.0>。annotated tag
+指向 `main` 提交 `bc50fd3`；同一提交上的 quality run 43242113193 双平台通过。
+release run 43243134087 的版本来源检查、Windows installer 和最终 draft Release
+通过；首次 macOS job 在 15m02s 内未取得 runner 且没有执行任何步骤，使用
+`gh run rerun <id> --failed` 后保留 Windows artifact，macOS app 于 6m50s 完成。
+公开页包含 10 个附件，Windows x64 installer
+`Image.Studio_0.2.0_x64-setup.exe`（245,195,809 B）、macOS arm64 zip
+`Image-Studio-0.2.0-macos-arm64.zip`（32,566,832 B）、checksums、双语 Release
+Notes 与许可文件。发布后重新下载两个包，checksum、Windows 内部包 SHA-256/字节数、
+macOS identifier/版本/最低系统版本与四个 arm64 可执行文件均复验通过。验收记录见
+[`verification/ci-release/v0.2.0/`](../verification/ci-release/v0.2.0/README.md)。
+
 下载后应在对应页签执行：
 
 ```bash
@@ -66,8 +79,10 @@ sha256sum -c SHA256SUMS-macos.txt
 当前 release 不包含代码签名与公证：
 
 - Windows SmartScreen 可能提示“Windows 已保护你的电脑”；核对 checksum 后使用“更多信息 → 仍要运行”。
-- macOS Gatekeeper 可能阻止首次启动；核对 checksum 后右键打开，或运行
-  `xattr -dr com.apple.quarantine "Image Studio.app"`。
+- macOS Gatekeeper 可能提示应用“已损坏，无法打开”；核对 checksum、把应用放入
+  “应用程序”后运行
+  `sudo xattr -rd com.apple.quarantine "/Applications/Image Studio.app"`，
+  再执行 `open "/Applications/Image Studio.app"`。checksum 不一致时不得绕过系统保护。
 
 签名/公证需要证书与 secrets，应另立 change。
 
@@ -99,7 +114,7 @@ Zizmor 的固定版本提示应保持 0 high/medium；当前仅允许已有固�
 
 | 现象 | 处理 |
 |---|---|
-| macOS job 未调度 | 确认使用 `macos-15`；检查 GitHub runner 标签是否仍受支持 |
+| macOS job 未调度 | 确认使用 `macos-15`；若 job 在未执行步骤时被取消，先用 `gh run rerun <id> --failed` 重试，不因容量排队移动 tag |
 | Clippy 只在 macOS 失败 | 重新跑两平台 `--all-targets`，检查 Windows-only cfg/dead code |
 | 版本校验失败 | 同步 tag、Cargo、Tauri 与前端 package version |
 | tag 不属于 main | 将 tag 移到已合入 main 的发布提交 |
