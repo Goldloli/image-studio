@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "release": "v0.2.0",
+  "status": "passed",
+  "tag_commit": "bc50fd3017891f7c59947017848ee9fb49c85959",
+  "published_at": "2026-11-12T15:25:42Z",
+  "published_url": "https://github.com/Goldloli/image-studio/releases/tag/v0.2.0",
+  "quality_run": {
+    "id": 43242113193,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/43242113193",
+    "conclusion": "success",
+    "macos_arm64_seconds": 169,
+    "windows_x64_seconds": 325
+  },
+  "release_run": {
+    "id": 43243134087,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/43243134087",
+    "conclusion": "success",
+    "verify_version_seconds": 32,
+    "windows_installer_seconds": 778,
+    "macos_app_seconds_after_retry": 410,
+    "draft_release_seconds": 36,
+    "initial_macos_attempt": "cancelled after 902 seconds without acquiring a runner"
+  },
+  "assets": {
+    "windows": {
+      "name": "Image.Studio_0.2.0_x64-setup.exe",
+      "bytes": 245195809,
+      "sha256": "2796da216555e74c9a1a89a32a54557a25fe26144b36a24d5d0795ae3d98833f",
+      "target": "x86_64-pc-windows-msvc",
+      "install_mode": "currentUser",
+      "webview2_install_mode": "offlineInstaller"
+    },
+    "macos": {
+      "name": "Image-Studio-0.2.0-macos-arm64.zip",
+      "bytes": 32566832,
+      "sha256": "e09e5336c051fe25209a10dfd1f3039ddc9b66b056cefaff656310ad35c0ca70",
+      "identifier": "io.github.goldloli.image-studio",
+      "version": "0.2.0",
+      "minimum_macos": "11.0",
+      "architectures": {
+        "image-studio-desktop": "arm64",
+        "diagnostic-worker": "arm64",
+        "inference-supervisor": "arm64",
+        "realesrgan-worker": "arm64"
+      }
+    }
+  },
+  "post_publish_checks": {
+    "downloaded_assets": 10,
+    "checksums_pass": true,
+    "windows_internal_package_matches": true,
+    "macos_plist_and_architecture_pass": true,
+    "release_is_latest": true,
+    "release_draft": false,
+    "release_prerelease": false,
+    "release_placeholders_remaining": false
+  },
+  "local_validation": {
+    "frontend_tests": 81,
+    "frontend_typecheck": "pass",
+    "frontend_build": "pass",
+    "rust_fmt": "pass",
+    "rust_clippy": "pass",
+    "rust_workspace_tests": "pass",
+    "rust_release_build": "pass",
+    "macos_release_bundle": "pass",
+    "openspec_version": "1.12.0",
+    "openspec_strict": "24/24 passed",
+    "workflow_structure": "pass",
+    "actionlint": "pass"
+  }
+}

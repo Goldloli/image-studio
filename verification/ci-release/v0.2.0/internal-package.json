@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "windows-internal-nsis-package",
+  "status": "built",
+  "installer": "target/release/bundle/nsis/Image Studio_0.2.0_x64-setup.exe",
+  "installer_sha256": "2796da216555e74c9a1a89a32a54557a25fe26144b36a24d5d0795ae3d98833f",
+  "installer_bytes": 245195809,
+  "target": "x86_64-pc-windows-msvc",
+  "install_mode": "currentUser",
+  "webview2_install_mode": "offlineInstaller",
+  "signed": false,
+  "model_weights_bundled": false,
+  "private_python_bundled": false,
+  "sidecars": [
+    {
+      "name": "diagnostic-worker-x86_64-pc-windows-msvc.exe",
+      "sha256": "b7f333502d3a9d29599d7f24d1af938064804a1c5fc6bd0b45bcb7e0794abf1b",
+      "bytes": 462336
+    },
+    {
+      "name": "inference-supervisor-x86_64-pc-windows-msvc.exe",
+      "sha256": "71b1ea5bd2850bbbaad8691fb9befef50e42412f64cb87f15b24ff657b0cd593",
+      "bytes": 1059840
+    },
+    {
+      "name": "realesrgan-worker-x86_64-pc-windows-msvc.exe",
+      "sha256": "274507bfaacb90fd1a275b314cef2215174f343ef91e0c697d9f944ee93d5353",
+      "bytes": 1124352
+    }
+  ]
+}

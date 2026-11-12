@@ -1,0 +1,1 @@
+e09e5336c051fe25209a10dfd1f3039ddc9b66b056cefaff656310ad35c0ca70  Image-Studio-0.2.0-macos-arm64.zip
