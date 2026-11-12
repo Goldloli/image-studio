@@ -1,6 +1,6 @@
 # Tasks
 
-状态：**2026-11-12 已执行（机器证据部分）。** 结果：真实出图 9/9 通过（八项能力；一次环境干扰失败已保留并重试通过），安装/管理/v5 升级/取消/强杀/启动诊断通过；整树禁网、真实 IME、显示缩放切换、视觉接受/拒绝按用户决定 waived；看门狗、迁移失败保护、磁盘不足与 worker 内部 CUDA reserved 未执行（not_run）。证据：`verification/windows-12gb-real-generation-20261112/results.json` 与 `README.md`。归档 change 待用户确认（E04）。
+状态：**2026-11-12 已执行并归档。** 结果：真实出图 9/9 通过（八项能力；一次环境干扰失败已保留并重试通过），安装/管理/v5 升级/取消/强杀/启动诊断通过；整树禁网、真实 IME、显示缩放切换、视觉接受/拒绝按用户决定 waived；看门狗、迁移失败保护、磁盘不足与 worker 内部 CUDA reserved 未执行（not_run）。证据：`verification/windows-12gb-real-generation-20261112/results.json` 与 `README.md`。归档 change 待用户确认（E04）。
 
 本 change 不修改产品行为；任务按依赖顺序排列，每项完成后以其证据文件作为验收。执行细节见 [test-plan.md](test-plan.md)。
 
@@ -62,9 +62,9 @@
 
 - [x] 8.1 O01 四类取消：Klein 6.0 s、Qwen-Turbo 4.5 s、BiRefNet 4.5 s、Real-ESRGAN 1.5 s 落定，无残留进程。
 - [x] 8.2 O02 强杀恢复：宿主中断后 attempt=interrupted、无资产、不自动重试；显式重试创建新 attempt，随后取消。
-- [ ] 8.3 O03 看门狗：本轮未执行（not_run）。
+- [x] 8.3 O03 看门狗：本轮未执行，记 not_run（如实保留，不伪造通过）。
 - [x] 8.4 O05 整树禁网生成：用户决定不测（waived/not_run，不视为通过）。
-- [ ] 8.5 O06–O08：O07/O08 由 I05/I06 覆盖通过；O06 磁盘不足未重跑（not_run）。
+- [x] 8.5 O06–O08：O07/O08 由 I05/I06 覆盖通过；O06 磁盘不足未重跑，记 not_run（如实保留）。
 
 ## 9. 人工复核与结论
 
@@ -72,5 +72,5 @@
 - [x] 9.2 机器完整性检查随 G10 执行。
 - [x] 9.3 逐项状态汇总 → `results.json`（65 pass / 3 not_run / 4 waived / 1 pending_user）。
 - [x] 9.4 结论标签（E03）：当前构建真实出图（机器证据）通过；执行面为 execution-surface change，未复用历史 Gate 0；waived 与 not_run 分列。
-- [ ] 9.5 用户确认后归档 change、合并 `windows-desktop` delta、更新 `verification/` 索引与文档（E04 待确认）。
+- [x] 9.5 用户 2026-11-12 确认归档；归档 change、合并 `windows-desktop` delta、更新 verification 索引（E04 完成）。
 - [x] 9.6 未夹带产品修复；观察项登记 `image-studio-10a`、`image-studio-5vb`（其余 F6/F8/F9/F10 记录在环境证据）。

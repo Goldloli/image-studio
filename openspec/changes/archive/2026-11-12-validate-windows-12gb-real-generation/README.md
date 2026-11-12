@@ -2,7 +2,7 @@
 
 在 Windows 10 / RTX 3080 Ti 12 GB 目标机上对**当前构建**执行一轮包含真实出图的完整验收：种子缓存安装七型号、八项能力真实生成、用本轮真实作品验证 v6 作品/会话管理、真实 v5 库升级，以及取消/强杀/单实例/启动诊断。
 
-**状态：2026-11-12 已执行（机器证据部分），待用户确认归档。** 结果：真实出图 9/9 通过；安装/管理/v5 升级/取消/强杀/启动诊断通过；整树禁网、真实 IME、显示缩放切换、视觉接受/拒绝按用户决定 waived；看门狗、迁移失败保护、磁盘不足与 worker 内部 CUDA reserved 为 not_run。证据：[verification/windows-12gb-real-generation-20261112/](../../../verification/windows-12gb-real-generation-20261112/README.md)；逐项状态见其 [results.json](../../../verification/windows-12gb-real-generation-20261112/results.json)。
+**状态：2026-11-12 已执行并归档。** 结果：真实出图 9/9 通过；安装/管理/v5 升级/取消/强杀/启动诊断通过；整树禁网、真实 IME、显示缩放切换、视觉接受/拒绝按用户决定 waived；看门狗、迁移失败保护、磁盘不足与 worker 内部 CUDA reserved 为 not_run。证据：[verification/windows-12gb-real-generation-20261112/](../../../../verification/windows-12gb-real-generation-20261112/README.md)；逐项状态见其 [results.json](../../../../verification/windows-12gb-real-generation-20261112/results.json)。
 
 | 文档 | 内容 |
 | --- | --- |
