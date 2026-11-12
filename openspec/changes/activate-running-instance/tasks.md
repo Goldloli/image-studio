@@ -6,7 +6,7 @@
 
 - [ ] 1.1 新增 `apps/desktop/src/single_instance.rs`：`root_identity(root) -> String`（规范化 + 小写 + SHA-256 前 16 hex）与命名对象名常量。
 - [ ] 1.2 实现 `claim(root)`：Windows 上用 `CreateMutexW` 判定 primary/secondary；primary 创建 activate/ack 事件并返回持有 mutex 句柄的守卫；非 Windows 一律返回 primary（no-op）。
-- [ ] 1.3 实现 `request_activation()`：`SetEvent(activate)` + `WaitForSingleObject(ack, 1500 ms)`，返回是否确认。
+- [ ] 1.3 实现 `request_activation()`：`SetEvent(activate)` + `WaitForSingleObject(ack, 5000 ms)`，返回是否确认。
 - [ ] 1.4 `host::run` 在 `HostState::new` 之前调用 `claim`；secondary 分支不发写日志、直接以 0 退出；`--diagnostics` 模式同样适用。
 
 ## 2. 窗口激活
@@ -35,3 +35,4 @@
 - [ ] 5.2 把结果写入 `verification/` 新目录（机器身份、构建哈希、逐项 pass/fail、截图与日志）。
 - [ ] 5.3 更新 `verification/windows-functional-regression-20261112` 的 I03 说明，标注单实例激活已实现。
 - [ ] 5.4 关闭 Beads `image-studio-an2`；用户确认后归档本 change 并合并 `windows-desktop` delta。
+

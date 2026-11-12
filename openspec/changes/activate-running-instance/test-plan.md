@@ -12,7 +12,7 @@
 
 - [ ] 以 `--data-dir C:\ist-verify\r-single-a` 启动实例 A，等待主窗口出现并记录 `pid`。
 - [ ] 用同一 `--data-dir` 启动实例 B；记录起止时间与退出码。
-- [ ] 期望：B 在 ~1.5 s 内以 0 退出；A 的窗口位于前台；A 的 `pid` 不变；不生成 `logs/startup-failure.log`；`data/library.sqlite3-wal` 大小在 B 前后不增长。
+- [ ] 期望：B 在 ~5 s 内以 0 退出；A 的窗口位于前台；A 的 `pid` 不变；不生成 `logs/startup-failure.log`；`data/library.sqlite3-wal` 大小在 B 前后不增长。
 - [ ] 期望：任务管理器中 `image-studio-desktop.exe` 与 `msedgewebview2.exe` 数量不因 B 增加。
 
 ## 2. 最小化后激活
@@ -25,7 +25,7 @@
 
 - [ ] 人为让 A 无响应（例如在调试器中断 A，或用 PowerShell `Suspend-Process`）。
 - [ ] 启动 B（同根）。
-- [ ] 期望：B 在 1.5 s 后显示“Image Studio 已在运行但未响应”的原生提示，关闭后以 0 退出；A 未被结束。
+- [ ] 期望：B 在 5 s 后显示“Image Studio 已在运行但未响应”的原生提示，关闭后以 0 退出；A 未被结束。
 - [ ] 恢复 A（`Resume-Process`），再次启动 B：期望回到第 1 节的激活路径。
 
 ## 4. 不同数据根并行（不得回归）
@@ -60,3 +60,4 @@
 
 - 托盘、开机自启、跨会话窗口激活。
 - macOS 双开行为。
+

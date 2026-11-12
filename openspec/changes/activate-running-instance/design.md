@@ -31,9 +31,9 @@ WebView2 的 profile 目录固定在 `<root>/cache/webview2`（`startup::webview
 
 | 对象 | 类型 | 用途 |
 |---|---|---|
-| `Local\image-studio-root-<id>` | Mutex | 所有权：先创建成功者为 primary |
-| `Local\image-studio-root-<id>-activate` | Event（auto-reset） | secondary → primary 的激活请求 |
-| `Local\image-studio-root-<id>-ack` | Event（auto-reset） | primary 完成激活的回执 |
+| `Local\image-studio-<id>` | Mutex | 所有权：先创建成功者为 primary |
+| `Local\image-studio-<id>-activate` | Event（auto-reset） | secondary → primary 的激活请求 |
+| `Local\image-studio-<id>-ack` | Event（auto-reset） | primary 完成激活的回执 |
 
 - 选择 `Local\` 而不是 `Global\`：不同 Windows 会话的用户不该被另一个会话的窗口打断；跨会话场景
   由第 4 节的回退路径负责解释。
@@ -48,9 +48,11 @@ WebView2 的 profile 目录固定在 `<root>/cache/webview2`（`startup::webview
 2. `GetLastError() != ERROR_ALREADY_EXISTS` → **primary**：创建 activate/ack 事件，把 mutex 句柄
    保存在本进程生命周期内（随 `run` 栈帧存活），继续正常启动。
 3. `ERROR_ALREADY_EXISTS` → **secondary**：`OpenEventW` 两个事件，`SetEvent(activate)`，
-   `WaitForSingleObject(ack, 1500 ms)`：
+   `WaitForSingleObject(ack, 5000 ms)`：
    - 等到 → 直接 `std::process::exit(0)`，不构造宿主、不打开数据库、不创建 WebView2。
-   - 超时或事件打不开 → 原生提示“Image Studio 已在运行但未响应”后 `exit(0)`；提示里给出
+   - 5 s 的上界覆盖“窗口还没建好”的冷启动：请求排在 auto-reset 事件上，监听线程一启动就会消费，
+  因此正常热启动通常几十毫秒回执，只有真正无响应的实例才会走到超时提示。
+- 超时或事件打不开 → 原生提示“Image Studio 已在运行但未响应”后 `exit(0)`；提示里给出
      “结束该进程后重试”的动作，不写 `startup-failure.log`（这不是启动失败）。
 
 `CreateMutexW` 的“已存在”判定是原子的，因此两个同时启动的进程只会有一个成为 primary，
@@ -94,7 +96,7 @@ secondary 路径覆盖不到的情况（另一个 Windows 会话、命名对象�
 - **只靠 `host.lock` 抢占并改进提示**：能消除 101，但用户仍然只能看到“另一个实例在使用”，窗口不会
   被交还；不满足本次目标。
 - **激活后不等待回执**：实现更短，但无法区分“已激活”和“对方无响应”，也无法给用户确定的提示；
-  采用 1.5 s 回执。
+  采用 5 s 回执。
 
 ## Risks / Trade-offs
 
@@ -108,3 +110,6 @@ secondary 路径覆盖不到的情况（另一个 Windows 会话、命名对象�
   另加单元测试覆盖“守卫存活期间第二次 claim 为 secondary”。
 - **测试可及性**：窗口焦点在自动化里只能断言“前台窗口标题/进程”，闪烁兜底无法自动断言，
   在验收记录里写明人工步骤。
+
+
+
