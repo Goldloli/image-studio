@@ -1,0 +1,3 @@
+schema: spec-driven
+created: 2026-11-12
+goal: 恢复被日志 panic 钩子覆盖的启动失败诊断：第二实例或 WebView2 初始化失败时重新写出 startup-failure.log、弹出原生对话框并以退出码 3 结束。
