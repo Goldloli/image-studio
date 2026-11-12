@@ -817,6 +817,11 @@ fn remove_registered_file(path: &Path) -> Result<()> {
             {
                 if error.kind() == std::io::ErrorKind::PermissionDenied {
                     let mut permissions = fs::metadata(path)?.permissions();
+                    // On Windows the read-only bit is a file attribute, so clearing it is
+                    // exactly what lets the registered test asset be removed. The lint warns
+                    // about the Unix meaning (world-writable), which this cfg(windows) branch
+                    // never reaches.
+                    #[allow(clippy::permissions_set_readonly_false)]
                     permissions.set_readonly(false);
                     fs::set_permissions(path, permissions)?;
                     return fs::remove_file(path).map_err(Into::into);
