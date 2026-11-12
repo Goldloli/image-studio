@@ -168,3 +168,12 @@
 4. 按 [test-plan.md](test-plan.md) 执行种子安装、八项真实出图、作品/会话管理、v5 升级与故障分支，逐项记录证据。
 5. 汇总机器证据与 waived 项，用户确认结论标签（人工项本轮不测）。
 6. 归档 change、合并 `windows-desktop` delta、关闭/更新 Beads，并在 `verification/` 与 `doc/15-windows-8gb-tier.md`（如适用）更新索引。
+
+## 执行结果与观测（2026-11-12）
+
+- 真实出图：canonical 运行 9/9 成功（Klein 文生图×2、Klein 编辑、Z-Image、Qwen-Image 2.1、Qwen-Image 2.1-Turbo、MOSS、BiRefNet、Real-ESRGAN），逐项输出与资源证据在 erification/windows-12gb-real-generation-20261112/generations/。
+- 资源口径按决策 6 执行：host GPU 峰值、进程树 private commit、可用物理内存与墙钟；worker CUDA reserved 因执行面变化不可复用 Gate 0，记为 not_run。
+- 真实网络安装：Z-Image 35.56 GB 从 ModelScope 下载；第一次在 33.17 GB 停滞，重启应用以“继续安装”续传，第二轮 1012 s 完成。
+- 偏差与观察：G01a 首次生成在 3 个应用实例并行时 commit 峰值 24.18 GiB 超过 24 GiB 预算（关闭升级实例后重试 16.68 GiB 通过，F7）；模型页安装完成后自动刷新可能停住，手动刷新恢复（F5）；PowerShell 5.1 ANSI 读取无 BOM 脚本导致中文 prompt 损坏，已改用 UTF-8 JSON case 文件并将该轮证据归档为 invalid-input（F6）；第一次静默安装退出 2、重试成功（F8）；坏 WEBVIEW2_BROWSER_EXECUTABLE_FOLDER 未复现启动失败，改用超长路径与 profile 文件占用路径验证诊断（F9）。
+- 人工项（真实 IME、显示缩放切换、视觉接受/拒绝）按用户决定 waived；整树禁网不测。
+- 归档与主规格合并待用户确认。
