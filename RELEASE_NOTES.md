@@ -1,220 +1,224 @@
 # Image Studio {{TAG}}
 
-Image Studio is a local-first image creation desktop app built with Rust,
-Tauri, and React. This release contains unsigned builds for Windows x64 and
-Apple Silicon macOS. `{{VERSION}}` is the first update after the public
-`v0.1.0`: it turns 8 GB VRAM support, the low-memory install path, and the
-Windows desktop reliability work into downloadable builds for both platforms.
+<!-- GitHub Release notes are bilingual; English appears first. -->
 
-Image Studio 是使用 Rust、Tauri 与 React 构建的本地优先桌面图片创作工作台。
-本次发布包含 Windows x64 与 Apple Silicon macOS 构建，当前产物均未签名。
-`{{VERSION}}` 是 `v0.1.0` 公开后的第一个更新：把 8 GB 显存支持、安装期低内存
-量化路径与 Windows 桌面可靠性修复变成两平台可直接下载的构建。
+Image Studio `{{VERSION}}` is a local-first image studio release for Apple
+Silicon macOS and Windows x64. It focuses the workspace around conversations
+and works, adds real conversation/work management, and closes the remaining
+desktop reliability gaps found by macOS and Windows acceptance.
 
-## What's New in {{VERSION}} / {{VERSION}} 更新内容
+Image Studio `{{VERSION}}` 是面向 Apple Silicon macOS 与 Windows x64 的本地优先
+图片工作台版本。本次更新把界面重新聚焦到会话与作品，补齐真正的会话/作品管理，
+并修复了 macOS 与 Windows 验收中剩余的桌面可靠性问题。
 
-### 8 GB VRAM compact tier / 8 GB 显存紧凑档
+## Highlights / 更新内容
 
-- **Five more ways to generate on an 8 GB card.** Qwen-Image 2.1,
+### A focused workspace / 更专注的创作界面
+
+- **One navigation rail.** Remove duplicated page tabs, standalone feature and
+  task pages, and the development diagnostics drawer. Create, inspiration,
+  models, works, theme, about, and settings now form one clear hierarchy.
+- **Production records in context.** Expand model, seed, dimensions, attempt,
+  stage, and execution details directly from a conversation result or a work.
+  There is no detour through a separate task page.
+- **Licensing stays discoverable.** Prompt inspiration keeps source attribution
+  while licence details are consolidated in Settings → About.
+- **单层导航。** 删除重复的页面页签、独立功能页/任务页与开发诊断抽屉；创作、
+  灵感、模型、作品、主题、关于与设置形成单一层级。
+- **制作记录留在上下文。** 可在会话结果或作品中直接展开型号、种子、尺寸、
+  Attempt、阶段与执行信息，不再跳到独立任务页。
+- **许可信息可追溯。** 灵感库保留来源归属，通用许可说明集中到设置 → 关于。
+
+### Conversation and work management / 会话与作品管理
+
+- **Conversation rows have both actions.** Rename or delete a conversation from
+  its row. A destructive action requires confirmation and is blocked while that
+  conversation is still receiving, generating, cancelling, or cleaning up.
+- **Deleting a conversation keeps its works.** Generated works remain available
+  for preview, export, favourites, and deletion, with provenance marked as
+  “conversation deleted”.
+- **Favourite works across pages.** Work favourites are persisted separately
+  from prompt inspiration, survive restart, and can drive a favourites-only
+  filter with stable totals and pagination.
+- **Reference-aware deletion.** A work used by an active draft, a retained
+  capability slot, or an in-flight request is not deleted. The app names the
+  conversation, reference type, and action required to release it.
+- **Controlled cleanup.** Confirmed deletion removes application-managed
+  originals, the companion mask, and dedicated preview caches as one recoverable
+  operation. External exports and immutable execution history remain.
+- **Reliable migration.** The local SQLite library upgrades transactionally from
+  schema v5 to v6 without changing existing asset identities or model readiness.
+- **会话行同时提供重命名与删除。** 删除需确认；会话仍在接收、生成、取消或清理
+  时禁止删除。删除会话后，作品继续用于预览、导出、收藏与删除，并注明
+  “会话已删除”。
+- **作品收藏独立持久。** 作品收藏与灵感收藏隔离，支持跨重启保存和“仅收藏”
+  筛选，并保持完整总数与稳定分页。
+- **删除前检查引用。** 被当前草稿、未激活能力槽位或活动请求引用的作品不会被
+  删除；应用会指出会话、引用类型和解除方式。
+- **受控清理。** 确认删除后，应用内原图、同次蒙版与专用预览缓存作为一组可恢复
+  操作处理；外部导出副本和不可变执行历史保留。
+- **可靠升级。** 本地 SQLite 通过事务从 v5 升级到 v6，不改变既有资产身份和
+  模型就绪状态。
+
+### Desktop reliability / 桌面可靠性
+
+- **Same-root second launch activates the running window.** On Windows, a second
+  launch using the same data root restores and focuses the existing window in
+  about 186 ms and exits successfully. Different `--data-dir` roots remain
+  independent.
+- **Unresponsive instances are explained.** If the existing window cannot be
+  confirmed within five seconds, the second launch reports that condition
+  instead of opening a conflicting WebView2 profile or touching the database.
+- **Startup failures stay visible.** Panic logging now forwards to the startup
+  failure hook, preserving both the native error dialog and
+  `logs/startup-failure.log`.
+- **Follow-up interaction fixes.** Draft capability slots remain valid across
+  model switches, explicit source removal clears the outgoing slot, empty-prompt
+  deletions have usable titles, and blocked work deletion explains the exact
+  action needed.
+- **同数据根二次启动会激活已有窗口。** Windows 上再次启动同一数据根时，已有窗口
+  会在约 186 ms 内还原并聚焦，第二个进程成功退出；不同 `--data-dir` 数据根仍可
+  独立运行。
+- **无响应实例有明确说明。** 已有窗口在 5 秒内无法确认时，第二次启动会直接说明
+  原因，不会创建冲突的 WebView2 profile，也不会改写数据库。
+- **启动失败不再静默。** panic 日志钩子会继续调用启动失败钩子，原生错误对话框与
+  `logs/startup-failure.log` 同时保留。
+- **补齐交互问题。** 切换模型后能力槽位保持有效；显式移除源图会清空旧槽位；
+  空提示词作品有可读的删除标题；受引用阻止的删除会给出具体解除动作。
+
+## Validation / 验证
+
+The release keeps build, UI, and real inference evidence separate:
+
+- **macOS arm64:** the current native validation covers the simplified workspace,
+  seven ready models, real text-to-image, BiRefNet, Klein reference editing,
+  cancellation, export, v5→v6 upgrade, conversation/work deletion, and
+  favourites.
+- **Windows 10 / RTX 3080 Ti 12 GB:** the current-build acceptance completed
+  9/9 real generation cases across seven models and eight capabilities. It also
+  covered seeded and real-network installation with resume, work/conversation
+  management, v5→v6 upgrade, cancellation, forced-kill recovery, startup
+  diagnostics, and second-launch activation.
+- **Windows 11 / RTX 2060 SUPER 8 GB:** the compact tier supports Qwen-Image 2.1,
   Qwen-Image 2.1 Turbo, MOSS-Image-SFT, and FLUX.2 Klein 4B (text-to-image and
-  edit) now run on 8 GB Turing cards through a frozen compact recipe:
-  768×768, `float16`, measured CUDA reserved peaks **5.44–5.96 GiB** on an
-  RTX 2060 SUPER 8 GB (sm75, Windows 11). BiRefNet and Real-ESRGAN were never
-  VRAM-bound.
-- **Automatic tier selection.** The host reads the device compute capability;
-  the model page and composer state the compact tier, and a device below both
-  tiers keeps the model disabled with the unmet requirement as its reason.
-- **Z-Image Turbo stays at 12 GB.** The model overflows in fp16 on BF16-less
-  Turing architectures; the measurement trail is in
-  [`doc/16-zimage-quantization-investigation.md`](doc/16-zimage-quantization-investigation.md).
-- **8 GB 显卡可用的生成能力增至五个。** Qwen-Image 2.1、Qwen-Image 2.1 Turbo、
-  MOSS-Image-SFT 与 FLUX.2 Klein 4B（文生图与编辑）通过冻结的紧凑档配方
-  768×768、`float16` 在 8 GB Turing 卡上运行；RTX 2060 SUPER 8 GB（sm75，
-  Windows 11）实测 CUDA reserved 峰值 **5.44–5.96 GiB**。BiRefNet 与
-  Real-ESRGAN 本来就不受显存限制。
-- **自动选择档位。** 宿主读取设备计算能力，模型页与输入区标注紧凑档；低于
-  两档门槛的设备保持禁用，并显示未满足的最底要求。
-- **Z-Image Turbo 仍要求 12 GB。** 该模型在无 BF16 的 Turing 架构上存在 fp16
-  溢出，完整测量过程见
-  [`doc/16-zimage-quantization-investigation.md`](doc/16-zimage-quantization-investigation.md)。
+  edit) at 768² with `float16`. The 0.2.0 functional regression found no
+  execution-surface change and passed the current UI, storage, and lifecycle
+  checks.
+- **GitHub Actions:** the release workflow checks Rust formatting, Clippy,
+  workspace tests, frontend tests/typecheck/build, OpenSpec, package identity,
+  architecture, checksums, and tag/version provenance. CI does not download
+  model weights or execute GPU inference.
 
-### Low-memory install-time quantization / 安装期低内存量化
+本次发布继续把构建、界面与真实推理证据分开记录：
 
-- **Install-time NF4 preparation now runs in a shard-streaming child process.**
-  Each ~1 GiB tensor group is prepared by a short-lived child, so the worker
-  commit peak is **1.95–3.6 GiB** instead of 16.4–23.1 GiB. The installer gate
-  drops from *available physical RAM ≥ 28 GiB or commit headroom ≥ 26 GiB* to
-  **available physical RAM ≥ 8 GiB and commit headroom ≥ 6 GiB**: a 16 GiB
-  Windows machine can install Qwen-Image 2.1 and MOSS-Image-SFT, and the
-  prepared caches stay byte-identical.
-- **Standard-tier generation fixed after the new install path.** The Qwen text
-  encoder is now loaded with `device_map="cpu", low_cpu_mem_usage=True` in the
-  standard tier as well, so the staged CUDA cleanup actually releases reserved
-  memory.
-- **安装期 NF4 量化改为分片流式。** 每个约 1 GiB 的 tensor 组由短生命周期子进程
-  量化，worker commit 峰值从 16.4–23.1 GiB 降到 **1.95–3.6 GiB**。安装门槛从
-  *可用物理内存 ≥ 28 GiB 或 commit 余量 ≥ 26 GiB* 降到
-  **可用物理内存 ≥ 8 GiB 且 commit 余量 ≥ 6 GiB**：16 GiB Windows 机器也能安装
-  Qwen-Image 2.1 与 MOSS-Image-SFT，且准备好的缓存逐字节一致。
-- **新安装路径下的标准档生成已修复。** 标准档 Qwen 文本编码器同样改为
-  `device_map="cpu", low_cpu_mem_usage=True` 装载，分段 CUDA 清理能够真正
-  释放 reserved 显存。
+- **macOS arm64：** 当前原生验收覆盖精简工作区、七个模型就绪、真实文生图、
+  BiRefNet、Klein 参考图编辑、取消、导出、v5→v6 升级、会话/作品删除与收藏。
+- **Windows 10 / RTX 3080 Ti 12 GB：** 当前构建完成七个模型、八项能力共 9/9 个
+  真实生成用例，并覆盖种子缓存与真实网络安装/续传、作品与会话管理、v5→v6
+  升级、取消、强杀恢复、启动诊断与二次启动激活。
+- **Windows 11 / RTX 2060 SUPER 8 GB：** 紧凑档支持 Qwen-Image 2.1 / Turbo、
+  MOSS-Image-SFT 与 FLUX.2 Klein 4B（文生图与编辑），使用 768²、`float16`；
+  0.2.0 功能回归确认执行面无变化，并通过当前界面、存储与生命周期检查。
+- **GitHub Actions：** 发布流程检查 Rust 格式、Clippy、workspace 测试、前端
+  测试/类型检查/构建、OpenSpec、包身份、架构、checksum 和 tag/版本来源。
+  CI 不下载模型权重，也不执行 GPU 推理。
 
-### Windows desktop reliability / Windows 桌面可靠性
+## Supported Models / 支持模型
 
-- **No more re-hashing the install on every send.** The 25–35 GB install is
-  verified once; send preflight dropped from 60 s+ stalls to ~46 ms.
-- **Stranded turns are bounded.** A 60 s turn watchdog fails a wedged send with
-  a retry entry instead of leaving the composer spinning.
-- **Cancellation is fast.** The process group is force-reaped, so cancel settles
-  in 3–7 s instead of ~120 s, with no orphan processes.
-- **Honest install state.** Model rows project the real installer phase
-  (including `preparing_model`) and no longer claim "not installed".
-- **Downloads recover.** Every artifact retries up to five times with backoff,
-  and a part that fails checksum validation is deleted and re-downloaded instead
-  of blocking the install forever.
-- **No console windows.** Supervisor, worker and installer children are created
-  with `CREATE_NO_WINDOW`, and the flag now survives suspended job spawns.
-- **A real log file.** `<data>/logs/app.log` (8 MiB rotation) records panics,
-  generation-time memory, and structured install/generation events.
-- **Clearer failures.** Failure copy was clarified and localized, the
-  hardware-blocked message is scoped to the model it applies to, the ncnn probe
-  log decodes non-ASCII paths lossily, and native save dialogs are populated
-  with the current file name.
-- **不再重复哈希整个安装。** 25–35 GB 安装内容只在安装时校验一次；发送预检从
-  60 s+ 卡顿降到约 46 ms。
-- **滞留回合有界。** 60 s 回合看门狗会把卡死的发送判为失败并提供重试入口，
-  输入区不再无限转圈。
-- **取消更快。** 超期时强制回收整棵进程组，取消从约 120 s 降到 3–7 s，
-  且没有残留进程。
-- **安装状态可信。** 模型行投影真实安装阶段（含 `preparing_model`），
-  不再错误显示"尚未安装"。
-- **下载可恢复。** 每个文件最多 5 次退避重试；校验失败的分片会被删除并重新
-  下载，而不是让安装永远失败。
-- **不再弹终端窗口。** supervisor、worker 与安装器子进程统一使用
-  `CREATE_NO_WINDOW`，并且该标志在挂起作业 spawn 后仍然生效。
-- **有真正的日志。** `<data>/logs/app.log`（8 MiB 轮转）记录 panic、生成期
-  内存，以及结构化的安装/生成事件。
-- **错误文案更清楚。** 失败提示已清理并中文化，硬件门槛提示只针对对应型号，
-  ncnn 探测日志对非 ASCII 路径做有损解码，原生保存对话框会填入当前文件名。
+| Model / 型号 | Capability / 能力 | Fixed recipe / 固定配方 |
+|---|---|---|
+| Z-Image Turbo | Text to image / 文生图 | 4-bit, 9 steps, 1:1 / 4:3 / 3:4 |
+| FLUX.2 Klein 4B distilled | Text to image, single-image edit / 文生图、单图编辑 | 4-bit, 4 steps, guidance 1.0 |
+| BiRefNet general epoch_244 | Background removal, RGBA + mask / 去背景、RGBA + mask | ONNX Runtime CPU, float32 |
+| Real-ESRGAN x4plus | Exact 4× upscale / 精确 4× 放大 | ncnn Vulkan, tile 128 |
+| Qwen-Image 2.1 | Text to image / 文生图 | NF4, 40 steps, guidance 1.0 |
+| Qwen-Image 2.1 Turbo | Text to image / 文生图 | NF4, 8 steps, official Turbo sampling |
+| MOSS-Image-SFT | Text to image / 文生图 | NF4, 50 steps, guidance 3.0 |
 
-### Verification / 验证
+The standard tier targets at least 12 GB VRAM at 1024² with `bfloat16`; the
+compact tier targets at least 8 GB VRAM at 768² with `float16`. Z-Image Turbo
+requires 12 GB because it overflows in `float16` on BF16-less Turing cards.
 
-- **CI quality gate passed on both platforms.** Rust formatting, Clippy with
-  warnings denied, workspace tests (199 desktop + integration, 46 protocol),
-  60 frontend tests, frontend typecheck/build, and `openspec validate --all
-  --strict` ran on Windows x64 and macOS arm64.
-- **Real-machine acceptance.** Windows 11 / RTX 2060 SUPER 8 GB covers the
-  compact tier, installs, generation, cancellation, watchdog and console
-  behavior; Windows 10 22H2 / RTX 3080 Ti 12 GB covers the standard tier
-  (Klein 50 s, Z-Image 55 s, BiRefNet 26 s, Real-ESRGAN 9 s, Klein edit 47 s,
-  MOSS install 364 s / generation 143 s, Qwen install 415 s / generation 84 s),
-  native export, restart persistence, non-ASCII data root, download retry and
-  bad-checksum recovery.
-- **双平台 CI 质量门通过。** Rust 格式、Clippy `-D warnings`、workspace 测试
-  （桌面 199 + 集成、协议 46）、前端 60 测试与类型检查/构建、
-  `openspec validate --all --strict` 均在 Windows x64 与 macOS arm64 上运行。
-- **真机验收。** Windows 11 / RTX 2060 SUPER 8 GB 覆盖紧凑档、安装、生成、
-  取消、看门狗与控制台窗口；Windows 10 22H2 / RTX 3080 Ti 12 GB 覆盖标准档
-  （Klein 50 s、Z-Image 55 s、BiRefNet 26 s、Real-ESRGAN 9 s、Klein 编辑 47 s、
-  MOSS 安装 364 s / 生成 143 s、Qwen 安装 415 s / 生成 84 s）、原生导出、
-  重启持久化、非 ASCII 数据根、下载重试与坏校验恢复。
-
-## Known Limitations / 已知限制
-
-- **Z-Image Turbo requires a 12 GB card.** The compact recipe identity exists in
-  the protocol, but the catalog deliberately does not offer it on 8 GB.
-- **The 8 GB compact tier is certified on Turing sm75** (RTX 2060 SUPER). Other
-  8 GB architectures are expected to work through the same recipes but are not
-  certified in this release.
-- **Windows virtual memory still matters.** The new install gate is RAM/commit
-  based; a machine whose auto-managed pagefile leaves very little commit
-  headroom still needs a larger virtual-memory setting before installing
-  Qwen-Image 2.1 or MOSS-Image-SFT.
-- **Unsigned builds.** Windows SmartScreen and macOS Gatekeeper can block the
-  first launch; verify the SHA-256 first (see Installation).
-- **模型与运行时单独下载。** 每个生成模型首次安装需要下载约 25–33 GB，并准备
-  NF4 缓存；这些内容不随安装包分发。
-- **Z-Image Turbo 要求 12 GB 显卡；** 紧凑档配方身份保留在协议中，但目录在
-  8 GB 设备上刻意不提供该型号。
-- **8 GB 紧凑档仅在 Turing sm75（RTX 2060 SUPER）上认证；** 其他 8 GB 架构
-  预期可通过同一配方运行，但本版本未认证。
-- **16 GiB 级机器的 Windows 虚拟内存设置会影响安装。** 新的安装门槛基于
-  可用内存/commit；自动管理页面文件导致 commit 余量过小的机器仍需调大
-  虚拟内存。
-- **产物未签名。** Windows SmartScreen 与 macOS Gatekeeper 可能拦截首次
-  启动；请先核对 SHA-256（见安装说明）。
+标准档面向 ≥12 GB 显存、1024² 与 `bfloat16`；紧凑档面向 ≥8 GB 显存、768² 与
+`float16`。Z-Image Turbo 在无 BF16 的 Turing 架构上存在 fp16 溢出，因此仍要求
+12 GB 显存。
 
 ## Downloads / 下载
 
-- **Windows x64**
-  `Image.Studio_{{VERSION}}_x64-setup.exe`
-- **macOS 11+ Apple Silicon**
-  `Image-Studio-{{VERSION}}-macos-arm64.zip`
+- **Windows x64:** `Image.Studio_{{VERSION}}_x64-setup.exe`
+- **macOS 11+ Apple Silicon:** `Image-Studio-{{VERSION}}-macos-arm64.zip`
 - Verify with `SHA256SUMS-windows.txt` or `SHA256SUMS-macos.txt`.
-  请使用对应平台的 `SHA256SUMS-*.txt` 校验文件。
-
-```bash
-sha256sum -c SHA256SUMS-windows.txt
-sha256sum -c SHA256SUMS-macos.txt
-```
+- 请使用对应的 `SHA256SUMS-*.txt` 校验下载文件。
 
 ## Installation / 安装
 
 ### Windows
 
-The installer uses a current-user NSIS package. SmartScreen may show
-“Windows protected your PC” because the build is unsigned. Verify the SHA-256
-first, then use **More info → Run anyway**.
+The installer uses a current-user NSIS package and embeds the WebView2 offline
+installer. The build is unsigned, so SmartScreen may show “Windows protected
+your PC”. Verify the SHA-256 first, then use **More info → Run anyway** only if
+the digest matches.
 
-安装包采用 current-user NSIS。由于未签名，SmartScreen 可能提示
-“Windows 已保护你的电脑”；请先核对 SHA-256，再选择“更多信息 → 仍要运行”。
+安装包使用 current-user NSIS，并内置 WebView2 离线安装器。由于产物未签名，
+SmartScreen 可能显示“Windows 已保护你的电脑”。请先核对 SHA-256，只有完全一致时
+才选择“更多信息 → 仍要运行”。
 
 ### macOS
 
-The app is unsigned and not notarized. Gatekeeper may block the first launch.
-Verify the SHA-256, then Control-click the app and choose **Open**, or run:
-
-应用未签名、未公证，Gatekeeper 可能阻止首次启动。请先核对 SHA-256，然后
-Control-click 应用并选择“打开”，或运行：
+The macOS build is unsigned and not notarized. If opening a checksum-verified
+app shows **“Image Studio.app is damaged and can’t be opened”**, move it to
+Applications and remove only the quarantine attribute:
 
 ```bash
-xattr -dr com.apple.quarantine "Image Studio.app"
+sudo xattr -rd com.apple.quarantine "/Applications/Image Studio.app"
+open "/Applications/Image Studio.app"
 ```
 
-## What Is Included / 包含内容
+Do not run this command when the checksum is missing or does not match. If the
+app is installed elsewhere, replace the quoted path.
 
-- Seven local image models covering text-to-image, single-image editing,
-  background removal with RGBA/mask output, and exact 4× upscaling, with the
-  compact 8 GB tier on top of the standard 12 GB tier.
-- A conversation-based creation workspace, works library, task center, model
-  manager, and persistent settings.
-- Verified Rust/Tauri desktop hosts for Windows x64 and macOS arm64.
-- 七个本地图片模型，覆盖文生图、单图编辑、去背景 RGBA/mask 与精确 4× 放大；
-  在标准 12 GB 档之外新增 8 GB 紧凑档。
-- 包含会话式创作、作品库、任务中心、模型管理与持久设置。
+macOS 构建未签名、未公证。如果已核对 checksum 的应用显示
+**“Image Studio.app 已损坏，无法打开”**，请把应用放入“应用程序”，然后只移除
+该应用包的 quarantine 属性：
 
-Model weights and private Python runtimes are downloaded separately from fixed
-upstream sources and are **not bundled** in these archives.
+```bash
+sudo xattr -rd com.apple.quarantine "/Applications/Image Studio.app"
+open "/Applications/Image Studio.app"
+```
 
-模型权重和私有 Python 运行时不随安装包分发，需要在应用内从固定上游源安装。
+checksum 缺失或与下载文件不一致时不要执行；应用安装在其他位置时请替换引号中的
+路径。
 
-## Validation / 验证
+## Known Limitations / 已知限制
 
-The release was built and checked by GitHub Actions on Windows x64 and macOS
-arm64. Workflow checks cover Rust formatting, Clippy with warnings denied,
-workspace tests, frontend tests/build, OpenSpec strict validation, package
-architecture, checksums, version consistency, and tag provenance.
-
-本版本由 GitHub Actions 在 Windows x64 与 macOS arm64 runner 上构建和检查；
-覆盖 Rust 格式、Clippy、workspace 测试、前端测试/构建、OpenSpec strict、
-包架构、checksums、版本一致性及 tag 来源。CI 不下载模型权重，也不执行 GPU
-推理；真实模型验收证据保存在仓库 `verification/`。
+- The builds are unsigned and not notarized. Windows SmartScreen and macOS
+  Gatekeeper can block first launch; verify the checksum before proceeding.
+- Z-Image Turbo requires a 12 GB card.
+- The 8 GB compact tier is certified on Turing sm75
+  (RTX 2060 SUPER). Other 8 GB architectures are not certified by this release.
+- Windows install-time NF4 preparation is RAM/commit based. Machines with very
+  little commit headroom may need a larger virtual-memory setting before
+  installing Qwen-Image 2.1 or MOSS-Image-SFT.
+- Model weights and private Python runtimes are not bundled. Generative models
+  download 25–33 GB each and retain prepared caches.
+- Hardware results are scoped to the recorded machines and architectures. CI
+  does not replace real GPU generation acceptance.
+- 产物未签名、未公证；Windows SmartScreen 与 macOS Gatekeeper 可能拦截首次启动，
+  请先核对 checksum。
+- Z-Image Turbo 仍要求 12 GB 显卡。
+- 8 GB 紧凑档仅在 Turing sm75（RTX 2060 SUPER）上完成认证，不外推到其他
+  8 GB 架构。
+- Windows 安装期 NF4 准备取决于可用内存与 commit 余量；余量很小的机器可能需要在
+  安装 Qwen-Image 2.1 或 MOSS-Image-SFT 前调大虚拟内存。
+- 模型权重与私有 Python 运行时不随安装包分发；每个生成模型约需下载 25–33 GB
+  并保留准备好的缓存。
+- 硬件结果仅限已记录机器与架构；CI 不能替代真实 GPU 生成验收。
 
 ## License / 许可证
 
-Image Studio is licensed under Apache-2.0. See `LICENSE`, `NOTICE`, and
-`THIRD_PARTY_NOTICES.md`. Model and runtime materials remain subject to their
-upstream licenses.
+Image Studio is licensed under Apache-2.0. Third-party libraries, fonts,
+example prompts/images, model weights, and runtimes retain their upstream
+licenses. See `LICENSE`, `NOTICE`, and `THIRD_PARTY_NOTICES.md`.
 
-Image Studio 采用 Apache-2.0；模型与运行时材料继续遵循各自上游许可证。
+Image Studio 采用 Apache-2.0；第三方库、字体、示例提示词/图片、模型权重与运行时
+继续遵循各自上游许可证，见 `LICENSE`、`NOTICE` 与 `THIRD_PARTY_NOTICES.md`。
