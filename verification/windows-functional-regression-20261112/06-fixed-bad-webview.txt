@@ -1,0 +1,8 @@
+修复后复验：强制 WebView2 不可用（WEBVIEW2_BROWSER_EXECUTABLE_FOLDER=C:\ist-verify\no-such-webview）
+修复前（安装版 51d56f1）：
+  - WebView2 自己先弹英文 "Error" 对话框；关闭后应用 panic，退出码 101
+  - 只有 <root>\logs\app.log 的 WARN app.panic；没有 startup-failure.log；没有中文启动失败对话框
+修复后（release 构建）：
+  - 关闭 WebView2 的 "Error" 后，应用写出 <root>\logs\startup-failure.log（原因 "Could not find the webview runtime"）
+  - 弹出 "Image Studio 启动失败" 中文对话框，关闭后退出码 3
+  - app.log 同时保留 WARN app.panic（日志钩子先记录，再转发给启动失败钩子）

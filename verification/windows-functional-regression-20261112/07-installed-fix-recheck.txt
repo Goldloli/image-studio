@@ -1,0 +1,20 @@
+修复后复验：安装包实测（commit f54a434，含 9600557 的钩子链修复）
+安装包：Image Studio_0.1.1_x64-setup.exe，245,102,349 B，SHA-256 56dc6bcfbe635f920763ae956c26a1fb2db61af654c64d652794138e83211933
+安装：current-user 静默安装 exit 0
+安装后可执行文件：%LOCALAPPDATA%\Image Studio\image-studio-desktop.exe，42,404,864 B，SHA-256 a43ac80b8fde90380dcc0cca73d6de9fbb2fa7ad8d3ca8b0b5404b4b21639b10
+
+1) 同一数据根第二实例（C:\ist-verify\r-installed，实例 A 已持有）
+   - 第二个进程在关闭对话框后退出码 3
+   - <root>\logs\startup-failure.log 已写出（含 UTC 时间、原因、日志路径、建议）
+   - 原生对话框：
+     Image Studio 启动失败
+     原因：Failed to setup app: runtime error: failed to create webview: WebView2 error: WindowsError(Error { code: HRESULT(0x8007139F), message: "组或资源的状态不是执行请求操作的正确状态。" })
+     日志：...\logs\startup-failure.log
+     建议：确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。
+   - 实例 A 全程存活；其数据根仍为 user_version=6、quick_check=ok、1 会话 / 1 草稿 / 0 作品，未被第二个进程修改
+
+2) 不同数据根共存
+   - 同时运行 2 个实例（C:\ist-verify\r-installed 与 C:\ist-verify\r-installed-2）
+   - 两个根各自存在 cache\webview2
+
+对照（修复前 51d56f1 安装版）：同一场景退出码 101，无 startup-failure.log，无对话框，只有 app.log 的 WARN app.panic。

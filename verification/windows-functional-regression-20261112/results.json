@@ -11,11 +11,11 @@
     "not_run"
   ],
   "summary": {
-    "pass": 22,
-    "fail": 1,
+    "pass": 23,
+    "fail": 0,
     "partial": 7,
     "not_run": 5,
-    "verdict": "Windows 功能回归失败（1 项 I03 同一数据根第二实例静默退出）；其余检查项通过或按限制未运行，生图认证未运行"
+    "verdict": "Windows 功能回归通过（I03 在 51d56f1 上失败，已由 9600557 修复并在 f54a434 安装包上复验）；生图认证未运行，复用 2026-11-05/06 的 8 GB 基线"
   },
   "items": [
     {
@@ -67,20 +67,23 @@
       "evidence": [
         "environment.json",
         "01-create-fresh.png",
-        "15-settings-about.png"
+        "15-settings-about.png",
+        "07-installed-fix-recheck.txt"
       ],
       "note": "版本 0.1.1 与哈希一致；关于页列出各模型许可；<data>/logs/app.log 存在。图标资源未逐项核对"
     },
     {
       "id": "I03",
       "title": "数据根所有权",
-      "status": "fail",
+      "status": "pass",
       "evidence": [
         "02-second-instance-same-root.txt",
         "03-second-instance-app-log.txt",
-        "17-works-three-items.png"
+        "04-two-roots.txt",
+        "05-fixed-second-instance.txt",
+        "07-installed-fix-recheck.txt"
       ],
-      "note": "同一数据根第二实例以退出码 101 静默结束，无 startup-failure.log、无原生对话框；不同数据根可同时启动且各自拥有 cache/webview2（该半项 pass）"
+      "note": "51d56f1 上失败：同一数据根第二实例退出码 101、无 startup-failure.log、无对话框。9600557 让日志钩子转发给启动失败钩子后，f54a434 安装包复验：第二个实例写 startup-failure.log、弹“Image Studio 启动失败”、关闭后退出码 3，第一个实例存活且数据未改；不同数据根仍可共存。"
     },
     {
       "id": "D01",
@@ -340,7 +343,10 @@
         "03-second-instance-app-log.txt"
       ],
       "introduced_by": "0a274e8 feat(desktop): log panics and generation-time memory",
-      "beads": "image-studio-z1v"
+      "beads": "image-studio-z1v",
+      "status": "fixed",
+      "fix_commit": "9600557",
+      "verified_by": "07-installed-fix-recheck.txt (f54a434 installer)"
     },
     {
       "id": "F2",
@@ -380,5 +386,19 @@
     "dpi_150_200": "显示器固定 1920×1080 @100%，未切换缩放",
     "v5_works": "本机没有 v5 作品/任务/双输出库，仅有会话与草稿",
     "reference_conflict": "未通过草稿或能力槽位建立源图引用"
+  },
+  "fix_verification": {
+    "commit": "f54a434a7088f63bffd4d588eba165807b87dde3",
+    "fix_commit": "9600557",
+    "installer_sha256": "56dc6bcfbe635f920763ae956c26a1fb2db61af654c64d652794138e83211933",
+    "installer_bytes": 245102349,
+    "installed_exe_sha256": "a43ac80b8fde90380dcc0cca73d6de9fbb2fa7ad8d3ca8b0b5404b4b21639b10",
+    "installed_exe_bytes": 42404864,
+    "same_root_second_instance_exit_code": 3,
+    "startup_failure_log": true,
+    "native_dialog": "Image Studio 启动失败",
+    "first_instance_alive": true,
+    "first_instance_data_intact": true,
+    "different_roots_coexist": true
   }
 }

@@ -1,0 +1,11 @@
+修复后复验：同一数据根的第二个实例（release 构建，commit 待提交）
+命令：target\release\image-studio-desktop.exe --data-dir C:\ist-verify\r-own3（第一个实例已持有该根）
+对话框：Image Studio 启动失败
+  原因：Failed to setup app: runtime error: failed to create webview: WebView2 error: WindowsError(Error { code: HRESULT(0x8007139F), message: "组或资源的状态不是执行请求操作的正确状态。" })
+  日志：C:\ist-verify\r-own3\logs\startup-failure.log
+  建议：确认 Microsoft Edge WebView2 Runtime 已安装且可启动；确认数据根可写；仍失败时保留本文件供排查。
+退出码：3（关闭对话框后）
+startup-failure.log：已写出（含 UTC 时间、原因、日志路径、建议）
+数据库：library.sqlite3 与 -wal 的 SHA-256 在第二个实例尝试前后一致
+第一个实例：全程存活
+对照（修复前，安装版 0a274e8 之后的 51d56f1）：同一场景退出码 101，无 startup-failure.log，无对话框

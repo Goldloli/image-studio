@@ -3,10 +3,12 @@
 Change：`validate-windows-functional-regression`（本机执行记录；该 change 的测试计划要求不下载模型、不运行推理）。
 Beads：`image-studio-bcn`。
 
-**结论：Windows 功能回归失败。** 35 项检查中 22 项通过、7 项按限制部分通过、1 项失败、5 项未运行。
-失败项是 **I03 数据根所有权**：同一数据根启动第二个实例时进程以退出码 101 静默结束，
-既不写 `logs/startup-failure.log`，也不弹原生错误对话框，与 `startup.rs` 文档化的
-“日志 + 对话框 + 退出码 3”不一致（缺陷 F1）。
+**结论：Windows 功能回归通过（修复后复验）。** 首轮在 `51d56f1` 上 35 项检查中 22 项通过、7 项按限制
+部分通过、1 项失败、5 项未运行；失败项是 **I03 数据根所有权**：同一数据根启动第二个实例时进程以退出码
+101 静默结束（缺陷 F1）。修复提交 `9600557` 让日志 panic 钩子转发给启动失败钩子后，`f54a434` 的安装包
+复验 I03 通过：写出 `logs/startup-failure.log`、弹出“Image Studio 启动失败”、关闭后退出码 3，第一个实例
+存活且数据未被修改。最终 23 项通过、7 项部分通过、0 项失败、5 项未运行。复验证据见
+[07-installed-fix-recheck.txt](07-installed-fix-recheck.txt)。
 
 本机是 **Windows 11 / RTX 2060 SUPER 8 GB 补充机**，不是 Windows 10 / RTX 3080 Ti 目标机。
 本轮**没有**执行模型下载、推理或新图片生成；生图结论只引用本机 2026-11-05/06 的 8 GB 基线
@@ -26,6 +28,15 @@ Beads：`image-studio-bcn`。
 | 安装后 exe | `%LOCALAPPDATA%\Image Studio\image-studio-desktop.exe`，42,512,384 B，SHA-256 `40afe5c8f393f806a1dbaaf69adef704183106821ab8394ac08c58358ed1904c` |
 | 安装结果 | 静默安装退出码 0，注册表登记 `Image Studio 0.1.1` |
 | 数据根 | `C:\ist-verify\r-fresh`、`r-v5`、`r-works`（均为可丢弃隔离根） |
+
+修复后复验使用同一台机器上的新构建：
+
+| 项 | 值 |
+|---|---|
+| 复验提交 | `f54a434a7088f63bffd4d588eba165807b87dde3`（含修复 `9600557`） |
+| 复验安装包 | `Image Studio_0.1.1_x64-setup.exe`，245,102,349 B，SHA-256 `56dc6bcfbe635f920763ae956c26a1fb2db61af654c64d652794138e83211933` |
+| 复验安装后 exe | 42,404,864 B，SHA-256 `a43ac80b8fde90380dcc0cca73d6de9fbb2fa7ad8d3ca8b0b5404b4b21639b10` |
+| 复验数据根 | `C:\ist-verify\r-installed`、`r-installed-2` |
 
 质量门（本机）：前端 `npm test` 81 项通过、`npm run build` 通过；`cargo test --workspace --locked`
 350 passed / 0 failed / 7 ignored（19 个套件，输出见 [tests-workspace.txt](tests-workspace.txt)）。
@@ -51,7 +62,7 @@ Beads：`image-studio-bcn`。
 |---|---|---|
 | I01 当前用户安装 | pass | 安装器退出码 0；从安装目录启动；启动不下载模型、不准备运行时 |
 | I02 安装身份与日志 | partial | 版本/哈希一致，关于页含许可；图标资源未逐项核对 |
-| I03 数据根所有权 | **fail** | 同一数据根第二实例退出码 101，无 `startup-failure.log`、无对话框：[02-second-instance-same-root.txt](02-second-instance-same-root.txt)、[03-second-instance-app-log.txt](03-second-instance-app-log.txt) |
+| I03 数据根所有权 | **pass（修复后）** | `51d56f1` 上曾**失败**：第二实例退出码 101、无 `startup-failure.log`、无对话框（[02-second-instance-same-root.txt](02-second-instance-same-root.txt)、[03-second-instance-app-log.txt](03-second-instance-app-log.txt)）。`9600557` 修复后，`f54a434` 安装包复验：写日志、弹“Image Studio 启动失败”、退出码 3，第一个实例存活且数据未改（[05](05-fixed-second-instance.txt)、[07](07-installed-fix-recheck.txt)） |
 | I03 不同数据根共存 | pass | 两实例同时存活，各自 `cache/webview2`，旧共享 profile 未被触碰：[04-two-roots.txt](04-two-roots.txt) |
 
 F1 的根因：`HostState::new`（`apps/desktop/src/host.rs:53`）安装的日志 panic hook 覆盖了
@@ -59,6 +70,13 @@ F1 的根因：`HostState::new`（`apps/desktop/src/host.rs:53`）安装的日�
 该行为由 `0a274e8 feat(desktop): log panics and generation-time memory` 引入。
 它使 2026-11-03 验收过的 W07 启动失败诊断（日志 + 对话框 + 退出码 3）在 WebView2/profile 失败路径上失效；
 超长数据目录路径仍走显式分支，诊断正常（见 S03）。
+
+修复（change `restore-startup-failure-diagnostics`，提交 `9600557`）：日志钩子改为
+`take_hook` 后转发，不再是覆盖；`HostState::new` 调用
+`logging::install_panic_hook()`。复验覆盖两条路径：同一数据根第二实例，以及
+`WEBVIEW2_BROWSER_EXECUTABLE_FOLDER` 指向不存在目录强制 WebView2 失败——两者都写出
+`startup-failure.log`、弹出中文对话框、关闭后退出码 3，并保留 `app.log` 的 `app.panic` 行
+（[06](06-fixed-bad-webview.txt)）。
 
 ## 3. 升级与数据库（D01–D03）
 
@@ -117,14 +135,16 @@ C04 未运行：本机没有归属这些会话的真实作品（墓碑 `deleted_
 
 | 编号 | 严重度 | 摘要 | 位置 / Beads |
 |---|---|---|---|
-| F1 | high | 第二实例/profile 初始化失败时静默 101，启动失败诊断被日志 hook 覆盖 | `apps/desktop/src/host.rs:53`（由 `0a274e8` 引入）· `image-studio-z1v` |
+| F1 | high（已修复 `9600557`） | 第二实例/profile 初始化失败时静默 101，启动失败诊断被日志 hook 覆盖 | `apps/desktop/src/host.rs:53`（由 `0a274e8` 引入）· `image-studio-z1v` |
 | F2 | low | 测试专用 `stub-supervisor.exe` 随安装包发布 | `apps/desktop/Cargo.toml` `[[bin]]` · `image-studio-wfy` |
 | F3 | low | 功能操作不写 `app.log`，功能回归无法从日志复核操作序列 | `apps/desktop/src/studio.rs` 日志调用点 · `image-studio-t7u` |
 | F4 | low | `scripts/windows-ui/answer-dialog.ps1` 无法点击 MB_OK 消息框的“确定”（暴露为 Pane） | `scripts/windows-ui/answer-dialog.ps1` · `image-studio-384` |
 
 ## 8. 结论标签
 
-- **Windows 功能回归：失败（I03）**；其余适用项通过或按限制部分通过。
+- **Windows 功能回归：通过（I03 修复后复验）**；7 项按限制部分通过，5 项未运行。
+- **首轮失败已闭环**：`51d56f1` 的 I03 静默 101 由 `9600557` 修复，`f54a434` 安装包复验通过；
+  change `restore-startup-failure-diagnostics` 记录方案与验证。
 - **8 GB 生图基线复用**：`verification/windows-8gb-tier/`（2026-11-05/06，本机 RTX 2060 SUPER 8 GB）。
 - **生图认证未运行**：本轮没有下载模型、没有推理、没有新图片；不得写成七模型八能力、GPU 资源、
   图片质量、取消/强杀恢复或性能重新认证。
@@ -148,6 +168,11 @@ python verification/windows-functional-regression-20261112/make-works-fixture.py
 
 # 4. 数据库快照（只读副本）
 python verification/windows-functional-regression-20261112/inspect-db.py C:\ist-verify\r-works out.json
+
+# 5. 启动失败诊断复验（修复后）
+$env:WEBVIEW2_BROWSER_EXECUTABLE_FOLDER = 'C:\ist-verify\no-such-webview'
+& "$env:LOCALAPPDATA\Image Studio\image-studio-desktop.exe" --data-dir C:\ist-verify\r-badwebview
+# 预期：logs\startup-failure.log + “Image Studio 启动失败”对话框，关闭后退出码 3
 ```
 
 

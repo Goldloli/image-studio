@@ -16,7 +16,12 @@
     "gpu_driver": "560.94",
     "cuda_version": "12.6",
     "webview2": "157.0.4341.46",
-    "display": { "width": 1920, "height": 1080, "scale_percent": 100, "device_pixel_ratio": 1 },
+    "display": {
+      "width": 1920,
+      "height": 1080,
+      "scale_percent": 100,
+      "device_pixel_ratio": 1
+    },
     "system_drive_free_gib": 28.0,
     "role": "supplementary Windows 11 / 8 GB development machine (not the Windows 10 RTX 3080 Ti target machine)"
   },
@@ -47,10 +52,23 @@
       "note": "pre-bundle binary; the bundler patches the copy that the installer ships"
     },
     "sidecars": [
-      { "name": "inference-supervisor.exe", "bytes": 1059840 },
-      { "name": "diagnostic-worker.exe", "bytes": 462848 },
-      { "name": "realesrgan-worker.exe", "bytes": 1124864 },
-      { "name": "stub-supervisor.exe", "bytes": 263168, "note": "test-only [[bin]] that the bundler also installs; see finding F2" }
+      {
+        "name": "inference-supervisor.exe",
+        "bytes": 1059840
+      },
+      {
+        "name": "diagnostic-worker.exe",
+        "bytes": 462848
+      },
+      {
+        "name": "realesrgan-worker.exe",
+        "bytes": 1124864
+      },
+      {
+        "name": "stub-supervisor.exe",
+        "bytes": 263168,
+        "note": "test-only [[bin]] that the bundler also installs; see finding F2"
+      }
     ]
   },
   "execution_surface_review": {
@@ -80,5 +98,28 @@
     "v5_upgrade": "C:\\ist-verify\\r-v5 (copy of %LOCALAPPDATA%\\ImageStudio with three added v5 sessions)",
     "works_fixture": "C:\\ist-verify\\r-works (v6 copy plus three constructed works; file bytes are verification/windows-8gb-tier/ui-qwen-turbo-768.png)",
     "isolation": "every root is disposable and outside the user's default data root"
+  },
+  "fix_verification": {
+    "change": "restore-startup-failure-diagnostics",
+    "fix_commit": "9600557",
+    "commit": "f54a434a7088f63bffd4d588eba165807b87dde3",
+    "installer": {
+      "path": "target/release/bundle/nsis/Image Studio_0.1.1_x64-setup.exe",
+      "bytes": 245102349,
+      "sha256": "56dc6bcfbe635f920763ae956c26a1fb2db61af654c64d652794138e83211933"
+    },
+    "installed_executable": {
+      "bytes": 42404864,
+      "sha256": "a43ac80b8fde90380dcc0cca73d6de9fbb2fa7ad8d3ca8b0b5404b4b21639b10"
+    },
+    "data_roots": [
+      "C:\\ist-verify\\r-installed",
+      "C:\\ist-verify\\r-installed-2"
+    ],
+    "checks": [
+      "same-data-root second instance: startup-failure.log, native dialog, exit 3, first instance alive, its library unchanged",
+      "different data roots: two instances coexist with separate cache/webview2",
+      "forced WebView2 failure (WEBVIEW2_BROWSER_EXECUTABLE_FOLDER): startup-failure.log, native dialog, exit 3, app.panic retained"
+    ]
   }
 }
