@@ -35,7 +35,7 @@ reqwest.workspace = true
 flate2.workspace = true
 tar.workspace = true
 zip.workspace = true
-rfd = "=0.17.2"
+rfd = "=0.18.0"
 inference-supervisor = { path = "../../tools/inference-supervisor" }
 
 [build-dependencies]
