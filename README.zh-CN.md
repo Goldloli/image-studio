@@ -12,7 +12,21 @@ Image Studio 是面向 **Apple Silicon macOS** 与 **Windows x64** 的本地优�
 
 ![macOS 上的 Image Studio 会话工作区](verification/simplify-workspace-20261111/native-01-initial-1280.png)
 
-## 最新版本：v0.2.0
+## 最新版本：v0.2.1
+
+`0.2.1` 是维护版本，把最新依赖更新纳入可下载安装包，不改变模型范围或用户
+工作流：
+
+- **原生桌面与压缩包依赖** —— 更新到 `rfd` 0.18.0、`zip` 9.5.0、
+  `uuid` 1.29.2 与 `flate2` 1.1.11。
+- **前端工具链更新** —— 使用 Vite 8.3.7、React 插件 6.3.0、Vitest 5.1.0
+  与 Lucide 1.70.0 构建内嵌界面。
+- **无需迁移模型或配方** —— 模型权重、运行时、worker 身份、配方与本地数据继续
+  与 `0.2.0` 兼容。
+- **保持已验证的产品行为** —— 以 `0.2.0` 的真实模型证据作为行为基线；`0.2.1`
+  重新执行当前依赖构建、测试、打包、checksum 与产物检查。
+
+### 延续自 v0.2.0
 
 `0.2.0` 让工作区更接近面向日常创作的图片工作室：
 
@@ -116,11 +130,11 @@ Windows 使用独立冻结的 NF4、ONNX 与 ncnn 配置；macOS 使用已验证
 
 项目把编译、界面与真实推理证据分开记录：
 
-| 平台 | 0.2.0 验证范围 | 证据 |
+| 平台 | 0.2.1 证据范围 | 证据 |
 |---|---|---|
-| macOS arm64 | 原生工作区、七个模型就绪、真实文生图、BiRefNet、Klein 参考图编辑、取消、导出、v5→v6 升级、会话/作品删除与收藏 | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
-| Windows 12 GB 标准档 | 当前构建的七个模型、八项能力共 9/9 个真实生成用例；安装、网络续传、作品管理、升级、取消、强杀恢复与单实例激活 | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
-| Windows 8 GB 紧凑档 | RTX 2060 SUPER / Turing sm75 紧凑档配方，以及执行面无变化的当前构建功能回归 | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)、[`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
+| macOS arm64 | 因推理代码、运行时与配方未变，复用 0.2.0 原生与真实模型基线；0.2.1 重新构建并检查应用包 | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
+| Windows 12 GB 标准档 | 复用 0.2.0 的 9/9 真实生成矩阵；0.2.1 重新执行依赖、构建、安装包与产物验证 | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
+| Windows 8 GB 紧凑档 | 复用已验证的紧凑档配方与执行面无变化的功能基线；模型/运行时身份保持不变 | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)、[`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
 
 GitHub Actions 负责构建、测试、打包、架构、checksum 与版本来源检查；它不下载
 模型权重，也不执行 GPU 推理。硬件支持不外推到已记录机器和架构之外；
@@ -318,7 +332,7 @@ actionlint -no-color
 
 推送一个 `v*` tag（提交必须在 `main` 上，且 tag、workspace Cargo、Tauri 与前端
 版本完全一致）会构建双平台产物并生成可供产物审阅的 draft Release，审阅后发布。
-`v0.2.0` 包含 Windows x64 NSIS 安装包与 macOS arm64 `.app` zip。
+`v0.2.1` 包含 Windows x64 NSIS 安装包与 macOS arm64 `.app` zip。
 运行 ID 与产物摘要见 [CI 与发布文档](doc/14-ci-release.md) 与
 [`verification/ci-release/`](verification/ci-release/)。
 

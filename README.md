@@ -13,9 +13,25 @@ keeping model execution, conversations, and works on your machine.
 
 ![Image Studio conversation workspace on macOS](verification/simplify-workspace-20261111/native-01-initial-1280.png)
 
-## Latest Release: v0.2.0
+## Latest Release: v0.2.1
 
-Version `0.2.0` brings the workspace closer to a daily-use image studio:
+Version `0.2.1` is a maintenance release that rolls the latest dependency
+updates into downloadable builds without changing the model surface or user
+workflow:
+
+- **Native desktop and archive dependencies** — `rfd` 0.18.0, `zip` 9.5.0,
+  `uuid` 1.29.2, and `flate2` 1.1.11 are now shipped.
+- **Frontend toolchain refresh** — Vite 8.3.7, React plugin 6.3.0,
+  Vitest 5.1.0, and Lucide 1.70.0 are now used for the bundled UI.
+- **No model or recipe migration** — model weights, runtimes, worker identities,
+  recipes, and local data remain compatible with `0.2.0`.
+- **Same validated product behaviour** — the `0.2.0` real-model evidence remains
+  the behavioral baseline, while `0.2.1` reruns the current dependency build,
+  test, packaging, checksum, and artifact checks.
+
+### Included from v0.2.0
+
+Version `0.2.0` brought the workspace closer to a daily-use image studio:
 
 - **One clear workspace** — a single navigation rail replaces duplicated page
   tabs, standalone feature/task pages, and the development diagnostics drawer.
@@ -133,11 +149,11 @@ MFLUX/MLX and ONNX runtimes.
 
 The project keeps compile, UI, and real inference evidence separate:
 
-| Platform | Version 0.2.0 validation scope | Evidence |
+| Platform | 0.2.1 evidence scope | Evidence |
 |---|---|---|
-| macOS arm64 | Native workspace, seven ready models, real text-to-image, BiRefNet, Klein reference editing, cancellation, export, v5→v6 upgrade, conversation/work deletion and favourites | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
-| Windows 12 GB standard tier | Current-build 9/9 real generation cases across seven models and eight capabilities; install, network resume, management, upgrade, cancellation, forced-kill recovery, single-instance activation | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
-| Windows 8 GB compact tier | RTX 2060 SUPER / Turing sm75 compact recipes plus a current-build functional regression with no execution-surface change | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md), [`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
+| macOS arm64 | Reuses the 0.2.0 native and real-model baseline because inference code, runtimes, and recipes are unchanged; 0.2.1 rebuilds and checks the app package | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
+| Windows 12 GB standard tier | Reuses the 0.2.0 9/9 real-generation matrix; 0.2.1 reruns dependency, build, installer, and artifact validation | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
+| Windows 8 GB compact tier | Reuses the verified compact recipes and no-execution-surface functional baseline; model/runtime identities are unchanged | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md), [`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
 
 GitHub Actions validates builds, tests, packaging, architecture, checksums, and
 version provenance. It does not download model weights or run GPU inference.
@@ -353,7 +369,7 @@ The public repository uses three pinned GitHub Actions workflows:
 
 Pushing a `v*` tag whose commit is on `main`, with the tag, workspace Cargo,
 Tauri, and frontend versions all equal, builds both platforms and stages a
-draft release for artifact review before publication. The `v0.2.0` release
+draft release for artifact review before publication. The `v0.2.1` release
 contains the Windows x64 NSIS installer and the macOS arm64 `.app` zip. See
 [CI and release documentation](doc/14-ci-release.md) and
 [`verification/ci-release/`](verification/ci-release/) for run IDs and artifact
