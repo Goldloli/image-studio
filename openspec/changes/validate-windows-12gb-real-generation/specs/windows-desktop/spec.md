@@ -43,16 +43,16 @@ Windows 目标机真实出图验收 SHALL 在当前构建上、在目标 Windows
 
 #### Scenario: 至少一条真实网络安装路径
 
-- **WHEN** 本轮需要验证下载链路
-- **THEN** 在空缓存根真实下载并安装至少一个小构件，记录 URL、耗时、校验和与代理环境
-- **AND** 其余安装使用已验证种子缓存并标注 provenance
-- **AND** 网络不可用或校验失败时记 `blocked`，不冒充安装或出图通过
+- **WHEN** 本轮需要验证真实下载链路
+- **THEN** 在空缓存根真实下载并安装至少一个大型模型（例如 Z-Image Turbo），记录每个 artifact 的 URL、声明/实际字节、SHA-256、耗时、吞吐与代理环境
+- **AND** 其余安装 MAY 使用已验证种子缓存并标注 provenance，下载耗时不得混入缓存安装耗时
+- **AND** 网络不可用或校验失败时记 `blocked` 或 `fail`，不冒充安装或出图通过
 
 #### Scenario: 人工复核与未执行项
 
 - **WHEN** 视觉质量、真实 IME 或显示缩放依赖人工操作
-- **THEN** 记录 `pending_user` 与操作者，机器检查单独记录
-- **AND** 未执行项保持 `not_run`，不写成通过
+- **THEN** 机器检查与人工复核分开记录；所有者可明确放弃人工项，报告 SHALL 以 `waived`/`not_run` 记录决定来源
+- **AND** 未执行或放弃项不得写成通过，也不得据此声明视觉质量或输入法已验收
 
 ## MODIFIED Requirements
 

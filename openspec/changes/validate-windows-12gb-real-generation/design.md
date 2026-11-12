@@ -78,7 +78,8 @@
   2. 将 `scripts/windows-ui/seed-cache.ps1` 复制到 `target/seed-windows-cache.ps1` 后运行（Z-Image 模型 + v1 运行时），`-DataRoot C:\ist-rg\r-fresh`。
   - 通过条件：两份结果均 `missing=0`、`hash_mismatch=0`，缓存项按 SHA-256 唯一；记录 artifacts/unique/bytes/硬链接数。若 parity 源不完整，回退为从 `C:\ist-accept\cache\downloads` 硬链接既有已验证缓存，并在证据中说明 provenance 差异。
 - **r-v5（升级证据）**：`C:\ist-rg\r-v5`。只复制 `C:\ist-accept\data` 的 `library.sqlite3`（含 `-wal`/`-shm`）、`assets/`、`inputs/`、`licenses/`、`application-preferences.json`；不复制 `models/`、`runtimes/`、`installations/`（约 168 GiB）。源根保持只读，不修改。
-- **r-net（网络安装证据）**：`C:\ist-rg\r-net`，空缓存启动，只真实下载安装 Real-ESRGAN（模型 43 MiB + native runtime 43 MiB，同一 archive 去重）。
+- **r-net（网络安装证据）**：`C:\ist-rg\r-net`，空缓存启动，**真实下载并安装 Z-Image Turbo**（模型 30.59 GiB + 私有运行时 2.53 GiB），可选加装 Real-ESRGAN（模型 43 MiB + native runtime 43 MiB，同一 archive 去重）验证小构件。记录下载 URL、字节、耗时、吞吐、重试、SHA-256 与安装阶段，并与种子缓存路径分账。若网络不可用或校验失败，主证据仍用种子缓存，网络项记 `blocked`，不冒充。
+- **r-fresh 主证据**：七型号中除网络验证型号外全部由种子缓存安装；Z-Image 的网络下载在 `r-net` 完成，`r-fresh` 的 Z-Image 从种子缓存安装，二者分开记录，避免把下载耗时混入缓存安装耗时。
 - 其他故障分支使用 `C:\ist-rg\` 下的短根（如 `r-bad-webview`、`r-pathfail`），不触碰用户默认根。
 - 新根的模型安装会占用约 168 GiB；当前空闲 925.9 GiB，可容纳旧根 + 新根 + 缓存硬链接。
 
@@ -134,14 +135,13 @@
 - 取消：Klein（CUDA）、Qwen-Turbo（Python 分阶段）、BiRefNet（CPU/ONNX）、Real-ESRGAN（Vulkan）各一次，15 s 内落定、无半成品、无残留进程。
 - 强杀恢复：Z-Image 生成中强杀宿主，重启后 Attempt 为 interrupted、无资产，只有显式重试才新建 Attempt。
 - 看门狗、磁盘不足等分支沿用历史注入方法，安全可复现时执行，否则 `not_run`。
-- 整树禁网生成需要管理员，按 `scripts/windows-admin/` 流程执行；无管理员则 `blocked`。
-- 人工项：真实微软拼音 IME、显示缩放 150%（当前 100%，需要用户切换）、视觉质量接受/拒绝；记录操作者与时间。
+- **所有者决定不执行（2026-11-12 确认）**：整树禁网生成（不测，不视为通过）、真实微软拼音 IME、显示缩放切换、八张图视觉接受/拒绝。全部记 `waived`/`not_run` 并记录决定来源；机器侧质量检查（PNG 解码、尺寸/通道、非全黑、mask 位深、4× 尺寸）照常执行，报告不得把 waived 项写成通过，结论只能声明"机器证据通过 + 人工项未测"。
 
 ### 10. 证据结构与完成标准
 
 - 证据目录：`verification/windows-12gb-real-generation-<YYYYMMDD>/`，至少包含 `README.md`、`environment.json`、`results.json`（逐项状态）、`seed-cache-*.json`、每项生成 JSON、资源采样 CSV、截图、数据库快照、构建/质量门日志、`user-review.json`。
 - 状态集合：`pass | fail | blocked | not_run`；任何未执行项不得记为通过。
-- 完成标准：八项能力均有当前构建真实输出证据；作品/会话/V5 升级/故障分支按计划执行或如实记录未执行；用户完成人工复核；结论标签明确；失败项有复现步骤与 Beads。
+- 完成标准：八项能力均有当前构建真实输出证据；作品/会话/v5 升级/故障分支按计划执行或如实记录未执行；人工复核项按用户决定记 `waived`；结论标签明确；失败项有复现步骤与 Beads。
 - 若八项能力中任一项因当前构建缺陷失败，本轮不宣布"真实出图验收通过"，按失败项另立修复 change 后重跑受影响项。
 
 ### 11. 与 CI、其他机器的分工
@@ -157,7 +157,7 @@
 - **真实作品依赖生成顺序**：删除/引用测试会消耗作品；按"先生成后管理"的顺序执行，并保留至少一件作品直到结论复核。
 - **v6 升级与模型身份变化**：旧安装记录不复制，升级后模型显示未安装是预期；需从缓存重装一个型号验证闭环保留，避免误判为升级失败。
 - **强杀/取消可能留下 GPU 资源**：执行后检查进程树与 nvidia-smi 回落，异常时记录并清理，不把残留当通过。
-- **人工项可能拖期**：IME/DPI/视觉复核需要用户在场，可先完成机器部分并以 `pending_user` 归档，等用户确认后再收口。
+- **人工项已 waived**：真实 IME、显示缩放切换与视觉接受/拒绝本轮不测；结论只能声明机器证据通过并列出 waived 项，不能声明视觉质量已接受。
 - **页面文件/内存波动**：当前满足低内存 prepare 门槛，但长时间执行可能波动；若被预检拒绝，记 `blocked` 并给出实测值，不调整系统配置（除非用户明确授权）。
 
 ## Migration Plan
@@ -166,5 +166,5 @@
 2. 完成环境/执行面/diff/数据安全前置证据，创建 `C:\ist-rg\` 与种子缓存。
 3. 构建并安装当前构建，完成安装、启动、单实例与启动诊断检查。
 4. 按 [test-plan.md](test-plan.md) 执行种子安装、八项真实出图、作品/会话管理、v5 升级与故障分支，逐项记录证据。
-5. 用户完成人工复核（IME/缩放/视觉质量），确认结论标签。
+5. 汇总机器证据与 waived 项，用户确认结论标签（人工项本轮不测）。
 6. 归档 change、合并 `windows-desktop` delta、关闭/更新 Beads，并在 `verification/` 与 `doc/15-windows-8gb-tier.md`（如适用）更新索引。
