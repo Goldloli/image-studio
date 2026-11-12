@@ -67,6 +67,20 @@ Notes 与许可文件。发布后重新下载两个包，checksum、Windows 内�
 macOS identifier/版本/最低系统版本与四个 arm64 可执行文件均复验通过。验收记录见
 [`verification/ci-release/v0.2.0/`](../verification/ci-release/v0.2.0/README.md)。
 
+`v0.2.1` 已于 2026-11-13 人工审阅并公开：
+<https://github.com/Goldloli/image-studio/releases/tag/v0.2.1>。annotated tag
+指向 `main` 提交 `2b805e6`，是包含八个依赖更新的维护版本。quality run
+43260424768 的 Windows 与 macOS arm64 最终通过；release run 43264815859 的版本
+来源检查、Windows installer、macOS app 和 draft Release 最终通过。两个首次
+macOS job 都因 15 分钟排队未取得 runner 而被取消，使用失败 job 重跑恢复，
+Windows artifact 保留。公开页包含 10 个附件，Windows installer
+`Image.Studio_0.2.1_x64-setup.exe`（245,189,562 B）、macOS arm64 zip
+`Image-Studio-0.2.1-macos-arm64.zip`（32,570,985 B）、checksums、双语 Release
+Notes 与许可文件。发布后重新下载两包，checksum、Windows 内部包身份、macOS
+identifier/版本/最低系统版本/arm64 sidecar，以及隔离数据根启动 smoke 均通过。
+验收记录见
+[`verification/ci-release/v0.2.1/`](../verification/ci-release/v0.2.1/README.md)。
+
 下载后应在对应页签执行：
 
 ```bash

@@ -1,8 +1,8 @@
 # Cross-platform CI/release evidence
 
-Status: **local and real GitHub Actions acceptance passed; `v0.2.0` is
-publicly published** (2026-11-12). `v0.1.1` and `v0.1.0` remain previous
-public releases.
+Status: **local and real GitHub Actions acceptance passed; `v0.2.1` is
+publicly published** (2026-11-13). `v0.2.0`, `v0.1.1` and `v0.1.0` remain
+previous public releases.
 
 Change: `openspec/changes/archive/2026-11-05-introduce-ci-release-pipeline`.
 Workflows:
@@ -33,6 +33,9 @@ Workflows:
 | `v0.2.0` quality on the release commit | PASS on Windows + macOS arm64 (run 43242113193) | [v0.2.0/acceptance.json](v0.2.0/acceptance.json) |
 | `v0.2.0` release workflow | PASS; one macOS runner-capacity retry, then both packages and draft release | same `v0.2.0` record |
 | `v0.2.0` public Release | PASS; 10 assets, checksums and package identities re-verified after download | [v0.2.0/README.md](v0.2.0/README.md) |
+| `v0.2.1` quality on the release commit | PASS on Windows + macOS arm64 after one runner-capacity retry (run 43260424768) | [v0.2.1/acceptance.json](v0.2.1/acceptance.json) |
+| `v0.2.1` release workflow | PASS; dependency maintenance build, one macOS runner-capacity retry, then draft release | same `v0.2.1` record |
+| `v0.2.1` public Release | PASS; 10 assets, checksums, package identities and startup smoke re-verified after download | [v0.2.1/README.md](v0.2.1/README.md) |
 
 The local Node runtime is `24.12.0`, while CI pins `24.19.0`; tests/build were
 run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
@@ -73,6 +76,18 @@ run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
     <https://github.com/Goldloli/image-studio/releases/tag/v0.2.0>.
 11. `v0.2.0` acceptance archive: [v0.2.0/](v0.2.0/) with the machine-readable
     record, CI-built Windows package evidence and both published checksum files.
+12. `v0.2.1` maintenance tag: quality `43260424768` and release
+    `43264815859` ultimately passed on both platforms after macOS jobs that
+    never acquired runners were rerun. The Windows installer and macOS zip were
+    rebuilt from the updated dependency set.
+13. Public `v0.2.1` Release: PASS with 10 assets. The Windows installer
+    (`245,189,562 B`) and macOS arm64 zip (`32,570,985 B`) passed published
+    checksums; package identity, arm64 sidecars, release notes and a downloaded
+    app startup smoke were rechecked:
+    <https://github.com/Goldloli/image-studio/releases/tag/v0.2.1>.
+14. `v0.2.1` acceptance archive: [v0.2.1/](v0.2.1/) with the maintenance
+    dependency record, both published checksum files and Windows package
+    evidence.
 
 Unsigned/notarization limitations are documented in
 [doc/14-ci-release.md](../../doc/14-ci-release.md).
