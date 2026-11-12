@@ -1,0 +1,3 @@
+schema: spec-driven
+created: 2026-11-12
+goal: 确认当前 Windows 功能面可安装、可升级、可操作且数据安全，同时复用既有 Windows 生图认证作为外部基线。
