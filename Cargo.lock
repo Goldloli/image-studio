@@ -617,7 +617,7 @@ dependencies = [
 
 [[package]]
 name = "diagnostic-worker"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "image-studio-desktop",
  "serde_json",
@@ -1582,7 +1582,7 @@ dependencies = [
 
 [[package]]
 name = "image-studio-desktop"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "flate2",
  "fs2",
@@ -1643,7 +1643,7 @@ dependencies = [
 
 [[package]]
 name = "inference-supervisor"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "fs2",
  "libc",
@@ -2741,7 +2741,7 @@ checksum = "20675572f6f24e9e76ef639bc5552774ed45f1c30e2951e1e99c59888861c539"
 
 [[package]]
 name = "realesrgan-worker"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "libc",
  "png",
@@ -3493,7 +3493,7 @@ checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
 
 [[package]]
 name = "studio-core"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -4956,7 +4956,7 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 
 [[package]]
 name = "worker-protocol"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
