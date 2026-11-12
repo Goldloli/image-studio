@@ -2,7 +2,7 @@
 
 在 Windows 实机安装当前构建，验证界面删改、v6 升级、会话与作品管理、文件删除及安装包行为；不执行模型推理或生成新图片。
 
-**状态：文档草案（2026-11-12），等待用户确认。确认前不执行 Windows 验收任务，也不修改产品代码。**
+**状态：2026-11-12 已执行并归档。** 验收在 Windows 11 / RTX 2060 SUPER 8 GB 补充机完成（`verification/windows-functional-regression-20261112/`）；目标机复验见 Beads `image-studio-b65`。
 
 | 文档 | 内容 |
 | --- | --- |
@@ -13,3 +13,4 @@
 | [tasks.md](tasks.md) | 用户确认后的执行、证据与归档顺序。 |
 
 本 change 只调整验收策略与证据解释，不改变应用运行行为、接口、数据库或模型配方。Beads 跟踪：`image-studio-7ed`。
+

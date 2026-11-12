@@ -25,4 +25,5 @@
 
 - [x] 4.1 已更新 `verification/windows-functional-regression-20261112` 的 I03、F1、结论与 `results.json`/`environment.json`。
 - [x] 4.2 关闭 Beads `image-studio-z1v`，并在 `image-studio-bcn` 记录结论。
-- [ ] 4.3 用户确认结果后归档本 change，并把 `windows-desktop` delta 合并进主 spec。
+- [x] 4.3 用户确认结果后归档本 change，并把 `windows-desktop` delta 合并进主 spec（2026-11-12 归档）。
+
