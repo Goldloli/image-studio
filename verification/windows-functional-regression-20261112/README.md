@@ -71,6 +71,9 @@ F1 的根因：`HostState::new`（`apps/desktop/src/host.rs:53`）安装的日�
 它使 2026-11-03 验收过的 W07 启动失败诊断（日志 + 对话框 + 退出码 3）在 WebView2/profile 失败路径上失效；
 超长数据目录路径仍走显式分支，诊断正常（见 S03）。
 
+启动体验的后续修复：change `activate-running-instance`（提交 `5345d4c`）把同一数据根的第二次启动改为
+激活已有窗口并以 0 退出；实测见 [single-instance-20261112](../single-instance-20261112/README.md)。
+
 修复（change `restore-startup-failure-diagnostics`，提交 `9600557`）：日志钩子改为
 `take_hook` 后转发，不再是覆盖；`HostState::new` 调用
 `logging::install_panic_hook()`。复验覆盖两条路径：同一数据根第二实例，以及
@@ -174,5 +177,6 @@ $env:WEBVIEW2_BROWSER_EXECUTABLE_FOLDER = 'C:\ist-verify\no-such-webview'
 & "$env:LOCALAPPDATA\Image Studio\image-studio-desktop.exe" --data-dir C:\ist-verify\r-badwebview
 # 预期：logs\startup-failure.log + “Image Studio 启动失败”对话框，关闭后退出码 3
 ```
+
 
 
