@@ -112,3 +112,24 @@ pub fn debug(event: &str, fields: &[(&str, String)]) {
 pub fn warn(event: &str, fields: &[(&str, String)]) {
     emit("WARN", event, fields);
 }
+
+/// Installs the panic logger without discarding the hook that is already
+/// installed.
+///
+/// `std::panic::set_hook` replaces the single global hook, so a plain
+/// `set_hook` here silently removed the startup-failure reporter that
+/// `startup::install_panic_hook` installs earlier in `host::run`. A Tauri setup
+/// panic (missing WebView2, a locked profile, a second instance on the same data
+/// root) then exited with the bare 101 and no `startup-failure.log`. This
+/// wrapper logs the panic and forwards it, so the reporter stays in the chain
+/// and still writes the record, shows the native dialog and exits with code 3.
+pub fn install_panic_hook() {
+    let previous = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        warn(
+            "app.panic",
+            &[("detail", info.to_string().replace('\n', " "))],
+        );
+        previous(info);
+    }));
+}

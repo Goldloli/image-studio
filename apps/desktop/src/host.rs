@@ -49,13 +49,9 @@ impl HostState {
                 "inference-supervisor"
             });
         crate::adapters::logging::init(&paths.logs);
-        // A GUI process otherwise dies silently: capture panics in the same log as the rest.
-        std::panic::set_hook(Box::new(|info| {
-            crate::adapters::logging::warn(
-                "app.panic",
-                &[("detail", info.to_string().replace('\n', " "))],
-            );
-        }));
+        // A GUI process otherwise dies silently: log panics into the same file while
+        // keeping the startup-failure reporter that was installed earlier in the chain.
+        crate::adapters::logging::install_panic_hook();
         let studio = Arc::new(StudioService::new(paths.clone(), supervisor));
         // A send may strand a turn as `pending` while its submitting thread is blocked; the
         // watchdog bounds that wait so the composer can never sit on "receiving prompt" forever.
