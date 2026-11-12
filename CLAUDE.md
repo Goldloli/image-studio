@@ -2,6 +2,44 @@
 
 This file provides instructions and context for AI coding agents working on this project.
 
+## 产品事实与证据边界（OpenSpec 沉淀）
+
+- `openspec/specs/` 是已实现行为的权威规格；`doc/` 是研究、路线和背景资料，不能替代正式规格或真机证据。当前产品是本地优先的 Tauri 2 图片工作台，正式平台为 macOS arm64 与 Windows x64。
+- 当前能力基线是七个本地模型、八项能力：文生图、单图编辑、去背景（RGBA + mask）和精确 4× 放大。标准档面向 ≥12 GB 显存，8 GB 紧凑档使用 768² / `float16`；Z-Image Turbo 仍要求 12 GB。
+- 模型、快照、运行时、配方和 worker 协议身份必须固定。不得在既有安装 ID 下替换为另一上游快照，也不得用相似模型或手工复制的文件冒充原来源；来源或身份变化必须先更新 OpenSpec 并重新验证。
+- 验收证据必须区分：CI 编译/单测、安装与原生 UI 回归、GPU 探针、单模型真实生成、完整能力矩阵。`waived` 与 `not_run` 永远不能写成通过；CI 不下载模型、不运行 GPU 推理，不能代替真机生图认证。
+- 当前真机边界只覆盖已记录设备：macOS arm64；Windows 10 目标机 RTX 3080 Ti 12 GB；Windows 11 补充机 RTX 2060 SUPER 8 GB。不要把某台机器、某个 Windows 版本或某个 GPU 架构的结果外推为全部硬件支持。
+- 面向用户的发布声明必须能对应到 `verification/`、OpenSpec 或当前源码。性能数字、显存口径和资源预算必须写明测量方法；worker 内部数值与宿主观测口径不得混用。
+- 正式 macOS 产物未签名、未公证。文档必须保留“可能显示应用已损坏”的说明、SHA-256 校验要求和解除 quarantine 的终端命令；不得建议用户在校验失败后绕过系统保护。
+
+## 构建与质量门
+
+Tauri 的 `generate_context!` 会在 Rust 编译时嵌入前端产物，因此在干净检出中必须先构建前端，再执行 Cargo 命令。
+
+```bash
+npm --prefix apps/frontend ci
+npm --prefix apps/frontend run build
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo test --workspace --locked
+npm --prefix apps/frontend test
+npm --prefix apps/frontend run check
+npm --prefix apps/frontend run build
+openspec validate --all --strict
+python3 scripts/ci/validate-workflows.py
+actionlint -no-color
+```
+
+修改具体功能时先跑最接近的单元/组件测试；交付前再跑适用的完整质量门。Windows 的 Clippy、测试和 Tauri 构建要求 `apps/desktop/binaries/` 中已有 CI/构建脚本生成的 sidecar。
+
+## 版本与发布
+
+- 发布版本必须同时更新根 `Cargo.toml` 的 `[workspace.package].version`、`apps/desktop/tauri.conf.json`、`apps/frontend/package.json` 及锁文件。tag、Cargo、Tauri 和前端版本必须完全一致。
+- 版本 tag 使用 `vX.Y.Z`，只能指向已进入 `main` 的发布提交。推送分支先触发双平台 quality；推送 tag 触发双平台构建和 Release。
+- `README.md` 是默认英文入口，`README.zh-CN.md` 必须同步更新功能和限制；README 与 Release Notes 应使用真实产品截图并写明证据边界。
+- 发布前检查 macOS quarantine 解除说明、Windows SmartScreen 说明、checksums、未签名状态和已知限制。Release 生成后还要核对 Windows NSIS、macOS arm64 zip、包身份、checksum 和版本。
+- 发布完成后，GitHub About 使用英文说明在前、中文说明在后，并维护准确 homepage 与 topics；远程 push、tag push 和 Dolt 同步仍以当前用户授权为准。
+
 ## Git 提交策略（强制）
 
 用户已明确授权本项目进行本地提交，并要求“尽量多 commit”。当用户已授权实施某项工作、且没有明确禁止提交时，代理应默认持续做小步本地提交，不需要为每次 commit 单独询问；该授权不包含 push、pull 或远程同步。
