@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "release": "v0.2.1",
+  "status": "passed",
+  "tag_commit": "2b805e675d97a9d9f438c560fdd47be25a6d32ed",
+  "published_at": "2026-11-12T17:25:33Z",
+  "published_url": "https://github.com/Goldloli/image-studio/releases/tag/v0.2.1",
+  "quality_run": {
+    "id": 43260424768,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/43260424768",
+    "conclusion": "success",
+    "windows_x64_seconds": 475,
+    "macos_arm64_seconds_after_retry": 218,
+    "initial_macos_attempt": "cancelled after 901 seconds without executing a step"
+  },
+  "release_run": {
+    "id": 43264815859,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/43264815859",
+    "conclusion": "success",
+    "verify_version_seconds": 21,
+    "windows_installer_seconds": 788,
+    "macos_app_seconds_after_retry": 477,
+    "draft_release_seconds": 32,
+    "initial_macos_attempt": "cancelled after 902 seconds without executing a step"
+  },
+  "release_kind": "dependency_maintenance",
+  "dependency_updates": {
+    "rfd": "0.18.0",
+    "zip": "9.5.0",
+    "uuid": "1.29.2",
+    "flate2": "1.1.11",
+    "vite": "8.3.7",
+    "plugin_react": "6.3.0",
+    "vitest": "5.1.0",
+    "lucide_react": "1.70.0"
+  },
+  "behavior_baseline": {
+    "model_runtime_worker_recipe_changed": false,
+    "local_schema_changed": false,
+    "real_model_evidence_reused_from": "v0.2.0"
+  },
+  "assets": {
+    "windows": {
+      "name": "Image.Studio_0.2.1_x64-setup.exe",
+      "bytes": 245189562,
+      "sha256": "88ff36ab7e900b058e74f2ae9c6e2f9010aa4599dc42833dadd142d5b5e46767",
+      "target": "x86_64-pc-windows-msvc"
+    },
+    "macos": {
+      "name": "Image-Studio-0.2.1-macos-arm64.zip",
+      "bytes": 32570985,
+      "sha256": "712f70c7eca2b85f30c9caa71ab03af5dc94acff6103b4b0bea04c83a1d99213",
+      "identifier": "io.github.goldloli.image-studio",
+      "version": "0.2.1",
+      "minimum_macos": "11.0",
+      "architectures": {
+        "image-studio-desktop": "arm64",
+        "diagnostic-worker": "arm64",
+        "inference-supervisor": "arm64",
+        "realesrgan-worker": "arm64"
+      }
+    }
+  },
+  "post_publish_checks": {
+    "downloaded_assets": 10,
+    "checksums_pass": true,
+    "windows_internal_package_matches": true,
+    "macos_plist_and_architecture_pass": true,
+    "release_is_latest": true,
+    "release_draft": false,
+    "release_prerelease": false,
+    "release_placeholders_remaining": false,
+    "downloaded_macos_app_launch_smoke": "pass"
+  },
+  "local_validation": {
+    "frontend_tests": 81,
+    "frontend_typecheck": "pass",
+    "frontend_build": "pass",
+    "rust_fmt": "pass",
+    "rust_clippy": "pass",
+    "rust_workspace_tests": "pass",
+    "rust_release_build": "pass",
+    "macos_release_bundle": "pass",
+    "openspec_strict": "24/24 passed",
+    "workflow_structure": "pass",
+    "actionlint": "pass"
+  }
+}
