@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "kind": "windows-functional-regression-environment",
+  "generated_at": "2026-11-12T04:42:00Z",
+  "round": "windows-functional-regression-20261112",
+  "machine": {
+    "os": "Microsoft Windows 11 企业版",
+    "version": "10.0.22631",
+    "build": "22631",
+    "architecture": "AMD64",
+    "cpu": "Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz",
+    "ram_gib": 31.9,
+    "gpu": "NVIDIA GeForce RTX 2060 SUPER",
+    "gpu_memory_mib": 8192,
+    "gpu_compute_capability": "7.5 (sm75 Turing)",
+    "gpu_driver": "560.94",
+    "cuda_version": "12.6",
+    "webview2": "157.0.4341.46",
+    "display": { "width": 1920, "height": 1080, "scale_percent": 100, "device_pixel_ratio": 1 },
+    "system_drive_free_gib": 28.0,
+    "role": "supplementary Windows 11 / 8 GB development machine (not the Windows 10 RTX 3080 Ti target machine)"
+  },
+  "build": {
+    "commit": "51d56f1c365aed174fd8554e81965ef1f50eb8e1",
+    "commit_subject": "docs(openspec): propose Windows functional-only acceptance",
+    "branch": "main",
+    "working_tree_clean": true,
+    "app_version": "0.1.1",
+    "installer": {
+      "path": "target/release/bundle/nsis/Image Studio_0.1.1_x64-setup.exe",
+      "bytes": 245110777,
+      "sha256": "43a7b081e08fb8966493c6ccb6fd584d1aea2299c49f5d36e22f6340b9fe99e2",
+      "built_by": "scripts/build-windows-internal.ps1 -SkipQualityGates",
+      "install_mode": "currentUser",
+      "webview2_install_mode": "offlineInstaller",
+      "signed": false
+    },
+    "installed_executable": {
+      "path": "%LOCALAPPDATA%\\Image Studio\\image-studio-desktop.exe",
+      "bytes": 42512384,
+      "sha256": "40afe5c8f393f806a1dbaaf69adef704183106821ab8394ac08c58358ed1904c"
+    },
+    "release_binary": {
+      "path": "target/release/image-studio-desktop.exe",
+      "bytes": 42512384,
+      "sha256": "10cff47f64458a8812c4f1d56b708496f960062807449d3fe76903b28678d5a1",
+      "note": "pre-bundle binary; the bundler patches the copy that the installer ships"
+    },
+    "sidecars": [
+      { "name": "inference-supervisor.exe", "bytes": 1059840 },
+      { "name": "diagnostic-worker.exe", "bytes": 462848 },
+      { "name": "realesrgan-worker.exe", "bytes": 1124864 },
+      { "name": "stub-supervisor.exe", "bytes": 263168, "note": "test-only [[bin]] that the bundler also installs; see finding F2" }
+    ]
+  },
+  "execution_surface_review": {
+    "baseline_commit": "af9e40b",
+    "baseline_date": "2026-11-08",
+    "baseline_evidence": "verification/windows-8gb-tier (2026-11-05/06 measurements on this machine)",
+    "diff_command": "git diff --stat af9e40b..HEAD -- tools resources/windows-parity crates/studio-core crates/worker-protocol apps/desktop/src apps/desktop/Cargo.toml apps/desktop/tauri.conf.json apps/desktop/capabilities",
+    "touched_areas": [
+      "apps/desktop/src/adapters/library/* (v5->v6 schema, session delete, favourites, controlled asset deletion)",
+      "apps/desktop/src/host.rs (new commands conversation_delete, asset_set_favorite, asset_delete)",
+      "apps/desktop/src/studio.rs (deletion/favourite projections; generation submit path untouched)",
+      "apps/desktop/capabilities/main.json (permissions for the new commands)",
+      "apps/desktop/tauri.conf.json (version 0.1.1)",
+      "crates/studio-core/Cargo.toml (version only)"
+    ],
+    "untouched_areas": [
+      "tools/* (worker, supervisor, diagnostic worker)",
+      "resources/windows-parity/* (model, runtime, worker manifests, quantisation)",
+      "crates/studio-core source (request/plan/recipe/device thresholds)",
+      "crates/worker-protocol"
+    ],
+    "classification": "no execution-surface change",
+    "consequence": "this round may reference the 2026-11-05/06 8 GB generation baseline instead of running inference; the functional result never claims a new generation certification"
+  },
+  "data_roots": {
+    "fresh": "C:\\ist-verify\\r-fresh",
+    "v5_upgrade": "C:\\ist-verify\\r-v5 (copy of %LOCALAPPDATA%\\ImageStudio with three added v5 sessions)",
+    "works_fixture": "C:\\ist-verify\\r-works (v6 copy plus three constructed works; file bytes are verification/windows-8gb-tier/ui-qwen-turbo-768.png)",
+    "isolation": "every root is disposable and outside the user's default data root"
+  }
+}

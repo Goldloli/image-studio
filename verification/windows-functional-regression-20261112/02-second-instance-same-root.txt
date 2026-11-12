@@ -1,0 +1,9 @@
+same-data-root second instance (while the first instance holds C:\ist-verify\r-works)
+command: image-studio-desktop.exe --data-dir C:\ist-verify\r-works
+exited: True
+exit_code: 101
+elapsed_ms: 849
+stdout: 
+stderr: 
+startup-failure.log exists: False
+native dialog observed: no (process exited before any #32770 window appeared)

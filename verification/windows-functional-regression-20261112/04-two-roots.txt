@@ -1,0 +1,7 @@
+two instances with different --data-dir roots
+started second instance pid=31824 on C:\ist-verify\r-v5 while C:\ist-verify\r-works stays open
+instances alive: 2
+pids: 31020, 31824
+r-works cache/webview2: True
+r-v5    cache/webview2: True
+legacy shared profile untouched: True

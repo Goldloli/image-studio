@@ -1,0 +1,118 @@
+{
+  "data_root": "C:\\ist-verify\\r-fresh",
+  "user_version": 6,
+  "quick_check": "ok",
+  "tables": [
+    "assets",
+    "attempts",
+    "conversations",
+    "drafts",
+    "generation_turns",
+    "imported_sources",
+    "installations",
+    "jobs",
+    "projects"
+  ],
+  "conversations": [
+    {
+      "id": "conv-46c651a3dfd5443184e7cf3fdc1c2da4",
+      "title": "新会话",
+      "title_source": "auto",
+      "deleted_at": null,
+      "activity_seq": 7
+    },
+    {
+      "id": "conv-690ef567068944e3a8af93c509a820f0",
+      "title": "验收-草稿C",
+      "title_source": "manual",
+      "deleted_at": 1794457666230,
+      "activity_seq": 6
+    },
+    {
+      "id": "conv-437a616a03be413dabbb22736857bcc0",
+      "title": "验收-草稿B",
+      "title_source": "manual",
+      "deleted_at": 1794457672790,
+      "activity_seq": 4
+    },
+    {
+      "id": "conv-default",
+      "title": "验收-草稿A",
+      "title_source": "manual",
+      "deleted_at": 1794457619503,
+      "activity_seq": 3
+    }
+  ],
+  "drafts": [
+    {
+      "id": 1,
+      "project_id": "default",
+      "name": "验收-草稿A",
+      "prompt": "",
+      "version": 12,
+      "collapsed": 0
+    },
+    {
+      "id": 2,
+      "project_id": "default",
+      "name": "验收-草稿B",
+      "prompt": "",
+      "version": 4,
+      "collapsed": 0
+    },
+    {
+      "id": 3,
+      "project_id": "default",
+      "name": "验收-草稿C",
+      "prompt": "",
+      "version": 3,
+      "collapsed": 0
+    },
+    {
+      "id": 4,
+      "project_id": "default",
+      "name": "新会话",
+      "prompt": "",
+      "version": 1,
+      "collapsed": 0
+    }
+  ],
+  "assets": [],
+  "jobs": 0,
+  "attempts": 0,
+  "generation_turns": 0,
+  "projects": [
+    {
+      "id": "default",
+      "active_draft_id": 4,
+      "active_conversation_id": "conv-46c651a3dfd5443184e7cf3fdc1c2da4"
+    }
+  ],
+  "conversations_columns": [
+    "id",
+    "project_id",
+    "draft_id",
+    "title",
+    "title_source",
+    "created_at",
+    "activity_seq",
+    "deleted_at"
+  ],
+  "assets_columns": [
+    "id",
+    "job_id",
+    "attempt_id",
+    "output_role",
+    "asset_json",
+    "relative_path",
+    "width",
+    "height",
+    "byte_count",
+    "created_at",
+    "is_favorite",
+    "deletion_state",
+    "delete_requested_at",
+    "deleted_at",
+    "deletion_error"
+  ]
+}

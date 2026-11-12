@@ -1,0 +1,152 @@
+{
+  "data_root": "C:\\ist-verify\\r-works",
+  "user_version": 6,
+  "quick_check": "ok",
+  "tables": [
+    "assets",
+    "attempts",
+    "conversations",
+    "drafts",
+    "generation_turns",
+    "imported_sources",
+    "installations",
+    "jobs",
+    "projects"
+  ],
+  "conversations": [
+    {
+      "id": "conv-v5-accept-3",
+      "title": "验收-v5-会话3",
+      "title_source": "manual",
+      "deleted_at": null,
+      "activity_seq": 13
+    },
+    {
+      "id": "conv-v5-accept-2",
+      "title": "验收-v5-会话2",
+      "title_source": "manual",
+      "deleted_at": null,
+      "activity_seq": 12
+    },
+    {
+      "id": "conv-v5-accept-1",
+      "title": "验收-v5-会话1",
+      "title_source": "manual",
+      "deleted_at": null,
+      "activity_seq": 11
+    },
+    {
+      "id": "conv-default",
+      "title": "新会话",
+      "title_source": "auto",
+      "deleted_at": null,
+      "activity_seq": 1
+    }
+  ],
+  "drafts": [
+    {
+      "id": 1,
+      "project_id": "default",
+      "name": "新会话",
+      "prompt": "",
+      "version": 1,
+      "collapsed": 0
+    },
+    {
+      "id": 2,
+      "project_id": "default",
+      "name": "验收-v5-会话1",
+      "prompt": "v5 升级前草稿 1",
+      "version": 1,
+      "collapsed": 0
+    },
+    {
+      "id": 3,
+      "project_id": "default",
+      "name": "验收-v5-会话2",
+      "prompt": "v5 升级前草稿 2",
+      "version": 1,
+      "collapsed": 0
+    },
+    {
+      "id": 4,
+      "project_id": "default",
+      "name": "验收-v5-会话3",
+      "prompt": "v5 升级前草稿 3",
+      "version": 1,
+      "collapsed": 0
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset-accept-3",
+      "relative_path": "assets/asset-accept-3.png",
+      "width": 768,
+      "height": 768,
+      "byte_count": 1176635,
+      "is_favorite": 0,
+      "deletion_state": "deleted",
+      "deleted_at": 1794458143291,
+      "deletion_error": null
+    },
+    {
+      "id": "asset-accept-2",
+      "relative_path": "assets/asset-accept-2.png",
+      "width": 768,
+      "height": 768,
+      "byte_count": 1176635,
+      "is_favorite": 0,
+      "deletion_state": "deleted",
+      "deleted_at": 1794458118527,
+      "deletion_error": null
+    },
+    {
+      "id": "asset-accept-1",
+      "relative_path": "assets/asset-accept-1.png",
+      "width": 768,
+      "height": 768,
+      "byte_count": 1176635,
+      "is_favorite": 0,
+      "deletion_state": "deleted",
+      "deleted_at": 1794458110027,
+      "deletion_error": null
+    }
+  ],
+  "jobs": 3,
+  "attempts": 3,
+  "generation_turns": 3,
+  "projects": [
+    {
+      "id": "default",
+      "active_draft_id": 1,
+      "active_conversation_id": "conv-default"
+    }
+  ],
+  "conversations_columns": [
+    "id",
+    "project_id",
+    "draft_id",
+    "title",
+    "title_source",
+    "created_at",
+    "activity_seq",
+    "deleted_at"
+  ],
+  "assets_columns": [
+    "id",
+    "job_id",
+    "attempt_id",
+    "output_role",
+    "asset_json",
+    "relative_path",
+    "width",
+    "height",
+    "byte_count",
+    "created_at",
+    "is_favorite",
+    "deletion_state",
+    "delete_requested_at",
+    "deleted_at",
+    "deletion_error"
+  ]
+}

@@ -1,0 +1,3 @@
+app.log tail after the refused second instance:
+
+1794458578148 WARN app.panic detail=panicked at C:\Users\Administrator\.cargo\registry\src\rsproxy.cn-e3de039b2554c837\tauri-2.12.5\src\app.rs:1444:11: Failed to setup app: runtime error: failed to create webview: WebView2 error: WindowsError(Error { code: HRESULT(0x8007139F), message: "组或资源的状态不是执行请求操作的正确状态。" })
