@@ -12,18 +12,34 @@ Image Studio 是面向 **Apple Silicon macOS** 与 **Windows x64** 的本地优�
 
 ![macOS 上的 Image Studio 会话工作区](verification/simplify-workspace-20261111/native-01-initial-1280.png)
 
-## 最新版本：v0.2.2
+## 最新版本：v0.2.3
+
+`0.2.3` 聚焦更清晰的偏好中心与经过校验的稳定版更新流程：
+
+- **六类设置中心**：通用与外观、创作默认值、存储、运行环境、更新、关于采用
+  双面板和行式控件，不再为每个字段重复外框。
+- **持久强调色**：提供六个非绿色预设与合法的自定义 `#RRGGBB` 颜色；成功、警告
+  与错误等语义色保持固定。
+- **稳定版更新**：启动约 10 秒后检查 `Goldloli/image-studio` 的公开稳定版
+  GitHub Release，每 24 小时最多一次，且不会自动下载或安装。
+- **受控安装包**：显示真实下载进度、速度与 ETA，支持取消，并通过 SHA-256 校验
+  后才允许安装。Windows 在无活动任务时可安装并重启；macOS 只打开已校验 DMG，
+  由用户手动拖入“应用程序”。
+- **无需迁移模型或数据**：偏好 v1 在下一次保存时升级为 v2；七个模型身份、执行
+  配方、SQLite schema v6 与现有本地作品继续兼容。
+
+| 设置中心 | 关于与 GitHub |
+|---|---|
+| ![六类设置中心](verification/release-v0.2.3/settings-1280-light.jpg) | ![关于页中的 GitHub 项目入口](verification/release-v0.2.3/about-1280-light.jpg) |
+
+### 延续自 v0.2.2
 
 `0.2.2` 将 macOS 下载产物改为原生磁盘映像：
 
-- **仅提供 DMG**：发布
-  `Image-Studio-<version>-macos-arm64.dmg`，不再提供应用 zip。
-- **拖拽安装**：打开的磁盘映像包含 `Image Studio.app` 与应用程序目录快捷方式。
-- **CI 验证映像**：发布前检查 DMG 结构、应用身份、版本、arm64 可执行文件、
-  最低系统版本与许可资源。
-- **无需迁移应用或模型**：七个模型、执行配方、worker 身份、本地数据结构与
-  Windows 安装包继续兼容。
-- **历史版本保持不变**：更早版本仍保留原有的 zip 附件。
+- 发布 `Image-Studio-<version>-macos-arm64.dmg`，不再提供应用 zip；
+- 打开的磁盘映像包含 `Image Studio.app` 与应用程序目录快捷方式；
+- 发布前检查 DMG 结构、应用身份、版本、arm64 可执行文件、最低系统版本与许可
+  资源。
 
 ### 延续自 v0.2.1
 
@@ -78,6 +94,8 @@ Image Studio 是面向 **Apple Silicon macOS** 与 **Windows x64** 的本地优�
   `--data-dir` 使用不同数据根的实例仍可独立运行。
 - **双平台发布**：GitHub Actions 构建并验证 Windows NSIS 安装包与 macOS arm64
   DMG。
+- **设置与更新**：六类偏好中心、持久强调色、稳定版检查、受校验下载与平台特定
+  安装边界。
 
 ## 支持的模型
 
@@ -137,11 +155,11 @@ Windows 使用独立冻结的 NF4、ONNX 与 ncnn 配置；macOS 使用已验证
 
 项目把编译、界面与真实推理证据分开记录：
 
-| 平台 | 0.2.2 证据范围 | 证据 |
+| 平台 | 0.2.3 证据范围 | 证据 |
 |---|---|---|
-| macOS arm64 | 因推理代码、运行时与配方未变，复用 0.2.0 原生与真实模型基线；0.2.2 重新构建并挂载 DMG，检查映像内应用身份与 arm64 内容 | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
-| Windows 12 GB 标准档 | 复用 0.2.0 的 9/9 真实生成矩阵；0.2.2 重新执行构建、安装包与产物验证 | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
-| Windows 8 GB 紧凑档 | 复用已验证的紧凑档配方与执行面无变化的功能基线；模型/运行时身份保持不变 | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)、[`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
+| macOS arm64 | 新增 1280×800 与 960×640 亮暗设置证据，并完成真实公开 GitHub Release 检查；因推理代码、运行时与配方未变，复用既有真实模型基线 | [`verification/operations/redesign-settings-center/`](verification/operations/redesign-settings-center/README.md) |
+| Windows 12 GB 标准档 | 复用已记录的 9/9 真实生成矩阵；0.2.3 在 CI 重新执行构建、安装包与产物验证。Windows 设置与更新安装仍为 `not_run` | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
+| Windows 8 GB 紧凑档 | 复用已验证的紧凑档配方与功能基线；模型/运行时身份保持不变 | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)、[`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
 
 GitHub Actions 负责构建、测试、打包、架构、checksum 与版本来源检查；它不下载
 模型权重，也不执行 GPU 推理。硬件支持不外推到已记录机器和架构之外；
@@ -196,6 +214,14 @@ open "/Applications/Image Studio.app"
 
 macOS 产物需要 Apple Silicon 与 macOS 11 或更高版本。
 
+### 应用内更新
+
+设置 → 更新只检查 `Goldloli/image-studio` 的公开稳定版 Release。自动检查在启动
+后执行，每 24 小时最多一次，且没有明确操作时不会下载或安装。安装包只有在 Release
+资产大小与 SHA-256 checksum 一致后才进入可安装状态。Windows 在没有生成、模型
+安装或清理任务时可安装并重启；macOS 只打开已校验 DMG，由用户手动拖入
+“应用程序”。Image Studio 不绕过 Gatekeeper 或 SmartScreen。
+
 ## 主要页面
 
 - **创作**：多会话文生图、源图工作流、即时占位、真实步骤进度、取消与重试；
@@ -204,8 +230,8 @@ macOS 产物需要 Apple Silicon 与 macOS 11 或更高版本。
 - **模型**：显示安装、运行时、设备门槛、硬件适配、执行档位与许可信息。
 - **作品**：跨会话浏览不可变正式资产，支持收藏、收藏筛选、预览、原位制作记录，
   以及原生 PNG/RGBA/mask 导出；删除会清理应用内原图、同次蒙版与专用缓存。
-- **设置**：持久外观、显式新会话默认值、存储位置、运行环境事实、运行时清单与
-  有界日志。
+- **设置**：六类偏好中心、持久强调色、显式新会话默认值、存储与运行环境事实、
+  受校验的稳定版更新检查，以及 GitHub 项目入口。
 
 ## 从源码构建
 
@@ -342,7 +368,7 @@ actionlint -no-color
 
 推送一个 `v*` tag（提交必须在 `main` 上，且 tag、workspace Cargo、Tauri 与前端
 版本完全一致）会构建双平台产物并生成可供产物审阅的 draft Release，审阅后发布。
-`v0.2.2` 包含 Windows x64 NSIS 安装包与 macOS arm64 DMG。
+`v0.2.3` 包含 Windows x64 NSIS 安装包与 macOS arm64 DMG。
 运行 ID 与产物摘要见 [CI 与发布文档](doc/14-ci-release.md) 与
 [`verification/ci-release/`](verification/ci-release/)。
 

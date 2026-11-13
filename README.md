@@ -13,21 +13,41 @@ keeping model execution, conversations, and works on your machine.
 
 ![Image Studio conversation workspace on macOS](verification/simplify-workspace-20261111/native-01-initial-1280.png)
 
-## Latest Release: v0.2.2
+## Latest Release: v0.2.3
 
-Version `0.2.2` changes macOS delivery to a native disk image:
+Version `0.2.3` focuses on a clearer preferences center and a verified stable-update
+flow:
 
-- **DMG-only macOS downloads**: the release publishes
-  `Image-Studio-<version>-macos-arm64.dmg` instead of an application zip.
-- **Drag-to-install layout**: the mounted volume contains `Image Studio.app`
-  and an Applications shortcut.
-- **Verified images in CI**: every DMG is checked for structure, bundle identity,
-  version, arm64 executables, minimum macOS version, and legal resources before
-  release.
-- **No application or model migration**: the seven models, execution recipes,
-  worker identities, local schema, and Windows installer remain compatible.
-- **Historical releases stay unchanged**: earlier versions remain available as
-  their original zip artifacts.
+- **Six-group settings center**: General & Appearance, Creation Defaults,
+  Storage, Runtime, Updates, and About share a two-panel layout with row-based
+  controls instead of repeated form cards.
+- **Persistent accent color**: choose from six non-green presets or a validated
+  custom `#RRGGBB` value; semantic success, warning, and danger colors remain
+  fixed.
+- **Verified stable updates**: the app checks the official
+  `Goldloli/image-studio` stable GitHub Releases about 10 seconds after startup,
+  at most once every 24 hours. It never downloads or installs automatically.
+- **Controlled package handling**: downloads show real progress, speed and ETA,
+  support cancellation, and require the matching SHA-256 before installation.
+  Windows can install and restart when no task is active; macOS opens the verified
+  DMG for manual installation.
+- **No model or data migration**: preferences v1 migrate to v2 on the next save;
+  the seven model identities, execution recipes, SQLite schema v6, and existing
+  local works remain compatible.
+
+| Settings center | About and GitHub |
+|---|---|
+| ![Six-group settings center](verification/release-v0.2.3/settings-1280-light.jpg) | ![About page with GitHub project links](verification/release-v0.2.3/about-1280-light.jpg) |
+
+### Included from v0.2.2
+
+Version `0.2.2` changed macOS delivery to a native disk image:
+
+- the release publishes `Image-Studio-<version>-macos-arm64.dmg` instead of an
+  application zip;
+- the mounted volume contains `Image Studio.app` and an Applications shortcut;
+- CI verifies the image structure, bundle identity, version, arm64 executables,
+  minimum macOS version, and legal resources before release.
 
 ### Included from v0.2.1
 
@@ -95,6 +115,9 @@ for the complete change list and known limitations.
   focuses the active window; isolated `--data-dir` roots remain independent.
 - **Cross-platform releases**: Windows NSIS and macOS arm64 DMG artifacts
   are built and verified by GitHub Actions.
+- **Settings and updates**: a six-group preference center, persisted accent color,
+  stable-release checks, verified downloads, and platform-specific installation
+  boundaries.
 
 ## Supported Models
 
@@ -159,11 +182,11 @@ MFLUX/MLX and ONNX runtimes.
 
 The project keeps compile, UI, and real inference evidence separate:
 
-| Platform | 0.2.2 evidence scope | Evidence |
+| Platform | 0.2.3 evidence scope | Evidence |
 |---|---|---|
-| macOS arm64 | Reuses the 0.2.0 native and real-model baseline because inference code, runtimes, and recipes are unchanged; 0.2.2 rebuilds and mounts the DMG, then checks its app identity and arm64 payload | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
-| Windows 12 GB standard tier | Reuses the 0.2.0 9/9 real-generation matrix; 0.2.2 reruns build, installer, and artifact validation | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
-| Windows 8 GB compact tier | Reuses the verified compact recipes and no-execution-surface functional baseline; model/runtime identities are unchanged | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md), [`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
+| macOS arm64 | Adds native 1280×800 and 960×640 light/dark settings evidence and a live public GitHub Release check; reuses the prior real-model baseline because inference code, runtimes, and recipes are unchanged | [`verification/operations/redesign-settings-center/`](verification/operations/redesign-settings-center/README.md) |
+| Windows 12 GB standard tier | Reuses the recorded 9/9 real-generation matrix; 0.2.3 reruns build, installer, and artifact validation in CI. Windows settings/update installation remains `not_run` | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
+| Windows 8 GB compact tier | Reuses the verified compact recipes and functional baseline; model/runtime identities are unchanged | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md), [`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
 
 GitHub Actions validates builds, tests, packaging, architecture, checksums, and
 version provenance. It does not download model weights or run GPU inference.
@@ -223,6 +246,17 @@ elsewhere, replace the quoted path with that app's path.
 
 macOS builds require Apple Silicon and macOS 11 or newer.
 
+### In-app updates
+
+Settings → Updates checks only public stable Releases from
+`Goldloli/image-studio`. Automatic checks run after startup, at most once every
+24 hours, and never download or install without an explicit action. A package
+enters the installable state only after the Release asset size and SHA-256
+checksum match. Windows may install and restart when no generation, model
+installation, or cleanup task is active. macOS opens the verified DMG and
+requires the user to drag the application into Applications; Image Studio never
+bypasses Gatekeeper or SmartScreen.
+
 ## Product Areas
 
 - **Create**: multi-conversation image generation, source-image workflows,
@@ -236,8 +270,9 @@ macOS builds require Apple Silicon and macOS 11 or newer.
   favourites-only filter, preview, inline provenance, and native PNG/RGBA/mask
   export. Deleting a work removes its originals, companion mask and dedicated
   caches only.
-- **Settings**: persistent appearance, explicit new-conversation defaults,
-  storage inspection, runtime facts, runtime inventory, and a bounded log.
+- **Settings**: six preference groups, persisted accent color, explicit
+  new-conversation defaults, storage and runtime facts, verified stable-update
+  checks, and GitHub project links.
 
 ## Build From Source
 
@@ -381,7 +416,7 @@ The public repository uses three pinned GitHub Actions workflows:
 
 Pushing a `v*` tag whose commit is on `main`, with the tag, workspace Cargo,
 Tauri, and frontend versions all equal, builds both platforms and stages a
-draft release for artifact review before publication. The `v0.2.2` release
+draft release for artifact review before publication. The `v0.2.3` release
 contains the Windows x64 NSIS installer and the macOS arm64 DMG. See
 [CI and release documentation](doc/14-ci-release.md) and
 [`verification/ci-release/`](verification/ci-release/) for run IDs and artifact
