@@ -72,7 +72,6 @@ type AboutLinkId =
   | 'releases'
   | 'issues'
   | 'author'
-  | 'bilibili'
   | 'license'
   | 'thirdPartyNotices';
 
@@ -644,7 +643,6 @@ export function SettingsPage({
                 </div>
                 <div className="settings-author-actions">
                   <button className="secondary" onClick={() => void openAboutLink('author')}><GithubMark/>GitHub</button>
-                  <button className="secondary" onClick={() => void openAboutLink('bilibili')}>Bilibili</button>
                 </div>
               </SettingsSection>
               <SettingsSection title="能力与证据">

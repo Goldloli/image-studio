@@ -29,7 +29,6 @@ const ABOUT_REPOSITORY: &str = "https://github.com/Goldloli/image-studio";
 const ABOUT_RELEASES: &str = "https://github.com/Goldloli/image-studio/releases/latest";
 const ABOUT_ISSUES: &str = "https://github.com/Goldloli/image-studio/issues";
 const ABOUT_AUTHOR: &str = "https://github.com/Goldloli";
-const ABOUT_BILIBILI: &str = "https://space.bilibili.com/1599822";
 const ABOUT_LICENSE: &str = "https://github.com/Goldloli/image-studio/blob/main/LICENSE";
 const ABOUT_THIRD_PARTY: &str =
     "https://github.com/Goldloli/image-studio/blob/main/THIRD_PARTY_NOTICES.md";
@@ -665,7 +664,6 @@ fn about_url(link_id: &str) -> Option<&'static str> {
         "releases" => Some(ABOUT_RELEASES),
         "issues" => Some(ABOUT_ISSUES),
         "author" => Some(ABOUT_AUTHOR),
-        "bilibili" => Some(ABOUT_BILIBILI),
         "license" => Some(ABOUT_LICENSE),
         "thirdPartyNotices" => Some(ABOUT_THIRD_PARTY),
         _ => None,
@@ -1147,7 +1145,6 @@ mod tests {
             "releases",
             "issues",
             "author",
-            "bilibili",
             "license",
             "thirdPartyNotices",
         ] {

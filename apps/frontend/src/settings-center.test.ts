@@ -37,9 +37,10 @@ describe('settings center layout contract', () => {
   });
 
   it('keeps GitHub project and author information in About', () => {
-    for (const label of ['最新发布', 'Issues 与反馈', '开源许可证', '第三方声明', 'Goldloli 小卡塔克', 'Bilibili']) {
+    for (const label of ['最新发布', 'Issues 与反馈', '开源许可证', '第三方声明', 'Goldloli 小卡塔克']) {
       expect(settingsSource).toContain(label);
     }
+    expect(settingsSource).not.toContain('Bilibili');
     expect(settingsSource).not.toContain("{ id: 'repository', label: 'GitHub 仓库' }");
     expect(settingsSource).not.toContain('title="项目与支持"');
     expect(settingsSource).toContain('className="settings-brand-links"');
