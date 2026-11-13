@@ -84,7 +84,7 @@
 - **THEN** 版本、来源、许可和第三方声明仍可核对，设置视觉重排不丢失这些证据
 
 #### Scenario: 访问项目与作者
-- **WHEN** 用户在关于分类点击 GitHub 仓库、Releases、Issues、许可证、第三方声明、作者 GitHub 或 Bilibili
+- **WHEN** 用户在关于分类点击 GitHub 仓库、Releases、Issues、许可证、第三方声明或作者 GitHub
 - **THEN** 宿主只打开与该固定标识对应的官方链接，前端不能提交任意 URL
 
 ### Requirement: 更新偏好持久化且不触发隐式安装
