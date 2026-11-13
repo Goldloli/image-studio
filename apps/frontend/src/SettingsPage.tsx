@@ -6,7 +6,6 @@ import {
   ChevronLeft,
   CircleHelp,
   Cpu,
-  Database,
   Download,
   ExternalLink,
   FolderOpen,
@@ -43,6 +42,7 @@ import {
 } from './app-update';
 import {
   builtInCreationDefaults,
+  commonAvailableBytes,
   defaultAppearance,
   defaultsEqual,
   type AppearancePreferences,
@@ -87,7 +87,6 @@ const groups: { id: Group; label: string; icon: LucideIcon }[] = [
 
 const validSeed = (value: string) => value === '' || (/^\d+$/.test(value) && Number(value) <= 4294967295);
 const projectLinks: { id: AboutLinkId; label: string }[] = [
-  { id: 'repository', label: 'GitHub 仓库' },
   { id: 'releases', label: '最新发布' },
   { id: 'issues', label: 'Issues 与反馈' },
   { id: 'license', label: '开源许可证' },
@@ -528,7 +527,7 @@ export function SettingsPage({
               <SettingsSection title="新会话默认">
                 <SettingsRow label="模型" alignTop>
                   <div className="settings-control-stack">
-                    <select value={defaults.modelId} onChange={event => setDefaults({ ...defaults, modelId: event.target.value })}>
+                    <select value={defaults.modelId} aria-label="默认模型" onChange={event => setDefaults({ ...defaults, modelId: event.target.value })}>
                       {(snapshot?.catalog.entries ?? []).filter(model => model.productStatus === 'implemented' && model.capabilities.some(capability => capability.id === 'text_to_image')).map(model => <option key={model.id} value={model.id} disabled={!model.hardwareEligible}>
                         {model.displayName}
                       </option>)}
@@ -626,21 +625,21 @@ export function SettingsPage({
             />}
 
             {group === 'about' && <div className="settings-page-stack">
-              <BrandSummary snapshot={snapshot} onOpen={() => void openAboutLink('repository')}/>
+              <BrandSummary
+                onOpenRepository={() => void openAboutLink('repository')}
+                onOpenLink={id => void openAboutLink(id)}
+              />
               <SettingsSection title="版本与构建">
                 <FactRow label="版本" value={snapshot?.about.version ?? updateInfo?.version ?? '—'}/>
                 <FactRow label="构建" value={`Tauri 2 · ${snapshot?.environment.platform ?? '—'} · ${snapshot?.environment.architecture ?? '—'}`}/>
                 <FactRow label="许可" value="Apache-2.0"/>
-              </SettingsSection>
-              <SettingsSection title="项目与支持">
-                {projectLinks.map(link => <AboutLinkRow key={link.id} label={link.label} onClick={() => void openAboutLink(link.id)}/>)}
               </SettingsSection>
               <SettingsSection title="作者">
                 <div className="settings-author-row">
                   <span className="settings-author-mark"><UserRound size={17}/></span>
                   <div>
                     <strong>Goldloli 小卡塔克</strong>
-                    <span>© 2026 Goldloli 小卡塔克</span>
+                    <span>© 2026</span>
                   </div>
                 </div>
                 <div className="settings-author-actions">
@@ -743,7 +742,7 @@ function AppearanceSettings({
         </div>
       </SettingsRow>
       <SettingsRow label="字号">
-        <select value={appearance.fontScale} onChange={event => onChange({ fontScale: event.target.value as AppearancePreferences['fontScale'] })}>
+        <select value={appearance.fontScale} aria-label="字号" onChange={event => onChange({ fontScale: event.target.value as AppearancePreferences['fontScale'] })}>
           <option value="small">紧凑</option>
           <option value="default">标准</option>
           <option value="large">较大</option>
@@ -859,7 +858,7 @@ function UpdateSettings({
           {checking || pending === 'checking' ? <LoaderCircle className="spin" size={14}/> : <RefreshCw size={14}/>}
           检查更新
         </button>
-        <a className="settings-text-link" href={updateCheck?.releasesUrl ?? 'https://github.com/Goldloli/image-studio/releases'} target="_blank" rel="noreferrer">发布页<ExternalLink size={11}/></a>
+        {!release && <a className="settings-text-link" href={updateCheck?.releasesUrl ?? 'https://github.com/Goldloli/image-studio/releases'} target="_blank" rel="noreferrer">发布页<ExternalLink size={11}/></a>}
       </div>
       {saveStatus === 'error' && <div className="settings-inline-error" role="alert">{saveError}</div>}
       {(checkError || (checkError === '' && actionError && !release)) && <div className="settings-inline-error" role="alert">{checkError || actionError}</div>}
@@ -948,7 +947,6 @@ function StorageLocation({
         ? { tone: 'warning' as const, label: '部分可读' }
         : { tone: 'danger' as const, label: '读取失败' };
   return <div className="storage-location">
-    <span className="storage-location-icon"><Database size={16}/></span>
     <div className="storage-location-copy">
       <div><strong>{entry.label}</strong><StatusBadge {...status}/></div>
       <code>{entry.path}</code>
@@ -998,27 +996,28 @@ function runtimePhaseLabel(phase: string): string {
   }[phase] ?? phase;
 }
 
-function BrandSummary({ snapshot, onOpen }: { snapshot: SettingsSnapshot | null; onOpen: () => void }) {
+function BrandSummary({
+  onOpenRepository,
+  onOpenLink,
+}: {
+  onOpenRepository: () => void;
+  onOpenLink: (id: AboutLinkId) => void;
+}) {
   return <div className="settings-brand-summary">
     <div className="settings-brand-main">
       <img src="/brand/app-icon-ui.png" alt="Image Studio 应用图标"/>
       <div>
-        <div className="settings-brand-name">Image Studio <span>{snapshot?.about.version ?? '—'}</span></div>
+        <div className="settings-brand-name">Image Studio</div>
         <div className="settings-brand-badges">
           <StatusBadge tone="positive" label="本地处理"/>
-          <StatusBadge tone="muted" label={snapshot?.environment.platform ?? '—'}/>
         </div>
       </div>
     </div>
-    <button className="settings-github-button" onClick={onOpen}><GithubMark/>GitHub<ExternalLink size={11}/></button>
+    <button className="settings-github-button" onClick={onOpenRepository}><GithubMark/>GitHub<ExternalLink size={11}/></button>
+    <div className="settings-brand-links" role="group" aria-label="项目链接">
+      {projectLinks.map(link => <button key={link.id} onClick={() => onOpenLink(link.id)}>{link.label}</button>)}
+    </div>
   </div>;
-}
-
-function AboutLinkRow({ label, onClick }: { label: string; onClick: () => void }) {
-  return <button className="settings-link-row settings-about-link-row" onClick={onClick}>
-    <span>{label}</span>
-    <ExternalLink size={12}/>
-  </button>;
 }
 
 function GithubMark() {
@@ -1085,12 +1084,6 @@ function SaveIndicator({ status, error }: { status: SaveStatus; error: string })
   if (status === 'saving') return <span className="settings-save-indicator"><LoaderCircle className="spin" size={11}/>保存中</span>;
   if (status === 'error') return <span className="settings-save-indicator is-error" title={error}><AlertTriangle size={11}/>保存失败</span>;
   return <span className="settings-save-indicator"><Check size={11}/>已保存</span>;
-}
-
-function commonAvailableBytes(entries: SettingsSnapshot['storage']['entries']): number | null {
-  if (entries.length === 0 || entries.some(entry => entry.availableBytes === null)) return null;
-  const values = entries.map(entry => entry.availableBytes!);
-  return values.every(value => value === values[0]) ? values[0] : null;
 }
 
 function normalizeVersion(value: string | null): string {

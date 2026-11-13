@@ -17,6 +17,7 @@ describe('settings center layout contract', () => {
     expect(settingsSource).not.toContain('appearance-grid');
     expect(settingsSource).toContain('settings-row');
     expect(settingsSource).toContain('settings-section-card');
+    expect(settingsSource).not.toContain('storage-location-icon');
   });
 
   it('gates installation on a verified current package', () => {
@@ -31,12 +32,19 @@ describe('settings center layout contract', () => {
     expect(settingsSource).toContain('aria-label="设置分类"');
     expect(settingsSource).toContain('aria-label="自动检查更新"');
     expect(settingsSource).toContain('aria-label="更新通知"');
+    expect(settingsSource).toContain('aria-label="默认模型"');
+    expect(settingsSource).toContain('aria-label="字号"');
   });
 
   it('keeps GitHub project and author information in About', () => {
-    for (const label of ['GitHub 仓库', '最新发布', 'Issues 与反馈', '开源许可证', '第三方声明', 'Goldloli 小卡塔克', 'Bilibili']) {
+    for (const label of ['最新发布', 'Issues 与反馈', '开源许可证', '第三方声明', 'Goldloli 小卡塔克', 'Bilibili']) {
       expect(settingsSource).toContain(label);
     }
+    expect(settingsSource).not.toContain("{ id: 'repository', label: 'GitHub 仓库' }");
+    expect(settingsSource).not.toContain('title="项目与支持"');
+    expect(settingsSource).toContain('className="settings-brand-links"');
+    expect(settingsSource).toContain('!release &&');
+    expect(settingsSource).toContain('<span>© 2026</span>');
     expect(settingsSource).toContain("api('about_open_link'");
   });
 });

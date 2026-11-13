@@ -44,6 +44,13 @@ export type StorageEntry = {
   status: 'ready' | 'missing' | 'partial' | 'error';
   error: string | null;
 };
+export function commonAvailableBytes(entries: { availableBytes: number | null }[]): number | null {
+  const known = entries
+    .map(entry => entry.availableBytes)
+    .filter((value): value is number => value !== null);
+  if (known.length === 0) return null;
+  return known.every(value => value === known[0]) ? known[0] : null;
+}
 export type RuntimeSummary = {
   phase: string;
   summary: string;
