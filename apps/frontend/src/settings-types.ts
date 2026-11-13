@@ -6,10 +6,15 @@ export type FontScale = 'small' | 'default' | 'large';
 export type Density = 'comfortable' | 'compact';
 export type AppearancePreferences = {
   theme: ThemeMode;
+  accentColor: string;
   fontScale: FontScale;
   density: Density;
   reducedMotion: boolean;
   sidebarCollapsed: boolean;
+};
+export type UpdatePreferences = {
+  autoCheck: boolean;
+  notifications: boolean;
 };
 export type CreationDefaults = {
   modelId: string;
@@ -21,6 +26,7 @@ export type PreferencesSnapshot = {
   schemaVersion: number;
   appearance: AppearancePreferences;
   creationDefaults: CreationDefaults;
+  updates: UpdatePreferences;
   loadError: string | null;
   saveError: string | null;
   warnings: string[];
@@ -90,10 +96,16 @@ export type SettingsSnapshot = {
 
 export const defaultAppearance: AppearancePreferences = {
   theme: 'light',
+  accentColor: '#D7641F',
   fontScale: 'default',
   density: 'comfortable',
   reducedMotion: false,
   sidebarCollapsed: false,
+};
+
+export const defaultUpdatePreferences: UpdatePreferences = {
+  autoCheck: true,
+  notifications: true,
 };
 
 export const builtInCreationDefaults: CreationDefaults = {

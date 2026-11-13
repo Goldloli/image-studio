@@ -105,16 +105,16 @@
 .primary-action {
   min-height: 32px;
   padding: 7px 12px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-fill);
   border-radius: 8px;
-  color: white;
-  background: var(--accent);
+  color: var(--accent-on);
+  background: var(--accent-fill);
   font-size: 11px;
 }
 
 .primary-action:hover:not(:disabled) {
-  color: white;
-  background: var(--accent-strong);
+  color: var(--accent-on);
+  background: var(--accent-fill-strong);
 }
 
 .primary-action:disabled {

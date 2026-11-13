@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Palette, Boxes, Settings2, Sun, Moon, X, CircleHelp, Image, Images, Lightbulb } from 'lucide-react';
+import { Palette, Boxes, Settings2, Sun, Moon, X, CircleHelp, Image, Images, Lightbulb, Download } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Workspace from './Workspace';
 import { AssetLibrary } from './AssetLibrary';
@@ -8,12 +8,27 @@ import { ModelLibrary } from './ModelLibrary';
 import { PromptLibrary, type PromptUseRequest } from './PromptLibrary';
 import { SettingsPage } from './SettingsPage';
 import { api, native, type AssetView, type StoredDraft, type StudioSnapshot } from './studio-api';
-import { defaultAppearance, resolveTheme, type AppearancePreferences, type PreferencesEnvelope } from './settings-types';
+import {
+  defaultAppearance,
+  defaultUpdatePreferences,
+  resolveTheme,
+  type AppearancePreferences,
+  type PreferencesEnvelope,
+  type UpdatePreferences,
+} from './settings-types';
+import { applyAccentColor } from './settings-appearance';
+import {
+  AUTO_UPDATE_DELAY_MS,
+  autoCheckDue,
+  markAutoCheckAttempt,
+  readLastAutoCheck,
+  type UpdateCheckResult,
+} from './app-update';
 import './local-generation.css';
 import './library-pages.css';
 
 type Page = 'create' | 'inspiration' | 'models' | 'works' | 'settings';
-type SettingsGroup = 'appearance' | 'defaults' | 'storage' | 'runtime' | 'about';
+type SettingsGroup = 'appearance' | 'defaults' | 'storage' | 'runtime' | 'updates' | 'about';
 type AppearanceSaveStatus = 'saved' | 'saving' | 'error';
 type RequestedModel = { draft: StoredDraft; conversationId: string; nonce: number };
 type RequestedPrompt = PromptUseRequest & { nonce: number };
@@ -49,6 +64,17 @@ export default function App() {
   const appearanceRef = useRef(appearance);
   const appearanceQueue = useRef<Promise<void>>(Promise.resolve());
   const appearanceRevision = useRef(0);
+  const [updatePreferences, setUpdatePreferences] = useState<UpdatePreferences>(defaultUpdatePreferences);
+  const updatePreferencesRef = useRef(updatePreferences);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+  const [updateCheck, setUpdateCheck] = useState<UpdateCheckResult | null>(null);
+  const [updateCheckError, setUpdateCheckError] = useState('');
+  const [updateChecking, setUpdateChecking] = useState(false);
+  const [lastUpdateCheckAt, setLastUpdateCheckAt] = useState<number | null>(null);
+  const [updateNoticeVersion, setUpdateNoticeVersion] = useState('');
+  const [badgeClearedVersion, setBadgeClearedVersion] = useState('');
+  const notifiedVersions = useRef(new Set<string>());
+  const updateCheckInFlight = useRef<Promise<UpdateCheckResult> | null>(null);
   const [host, setHost] = useState<HostStatus | null>(null);
   const [hostError, setHostError] = useState('');
   const [settingsInitialGroup, setSettingsInitialGroup] = useState<SettingsGroup>('appearance');
@@ -60,6 +86,10 @@ export default function App() {
   const refreshStudio = useRef<()=>void>(()=>{});
   const refresh = () => refreshStudio.current();
   const navigate = (next: Page) => setPage(next);
+  const rememberUpdatePreferences = (next: UpdatePreferences) => {
+    updatePreferencesRef.current = next;
+    setUpdatePreferences(next);
+  };
   const commitAppearance = (next: AppearancePreferences) => {
     appearanceRef.current = next;
     setAppearance(next);
@@ -76,6 +106,7 @@ export default function App() {
         if (revision !== appearanceRevision.current) return;
         appearanceRef.current = result.preferences.appearance;
         setAppearance(result.preferences.appearance);
+        rememberUpdatePreferences(result.preferences.updates);
         setAppearanceStatus('saved');
         setAppearanceError('');
       })
@@ -90,14 +121,44 @@ export default function App() {
     const result = await api<PreferencesEnvelope>('preferences_reload');
     appearanceRef.current = result.preferences.appearance;
     setAppearance(result.preferences.appearance);
+    rememberUpdatePreferences(result.preferences.updates);
+    setPreferencesLoaded(true);
     setAppearanceStatus('saved');
     setAppearanceError('');
+  };
+  const performUpdateCheck = useCallback(async () => {
+    if (updateCheckInFlight.current) return updateCheckInFlight.current;
+    const operation = api<UpdateCheckResult>('app_update_check');
+    updateCheckInFlight.current = operation;
+    setUpdateChecking(true);
+    try {
+      const result = await operation;
+      setUpdateCheck(result);
+      setUpdateCheckError('');
+      setLastUpdateCheckAt(result.checkedAtMs);
+      return result;
+    } finally {
+      if (updateCheckInFlight.current === operation) {
+        updateCheckInFlight.current = null;
+        setUpdateChecking(false);
+      }
+    }
+  }, []);
+  const checkForUpdate = async () => {
+    setLastUpdateCheckAt(Date.now());
+    const result = await performUpdateCheck();
+    setUpdateCheckError('');
+    return result;
+  };
+  const markUpdateViewed = () => {
+    if (updateCheck?.release?.version) setBadgeClearedVersion(updateCheck.release.version);
   };
   useEffect(() => {
     const apply = () => {
       const resolved = resolveTheme(appearance.theme);
       document.documentElement.dataset.theme = resolved;
       document.documentElement.style.colorScheme = resolved;
+      applyAccentColor(appearance.accentColor);
       document.documentElement.dataset.fontScale = appearance.fontScale;
       document.documentElement.dataset.density = appearance.density;
       document.documentElement.dataset.reducedMotion = String(appearance.reducedMotion);
@@ -116,6 +177,8 @@ export default function App() {
         if (disposed) return;
         appearanceRef.current = result.preferences.appearance;
         setAppearance(result.preferences.appearance);
+        rememberUpdatePreferences(result.preferences.updates);
+        setPreferencesLoaded(true);
         if (result.preferences.loadError) setHostError(result.preferences.loadError);
       })
       .catch(error => { if (!disposed) setHostError(String(error)); });
@@ -124,6 +187,30 @@ export default function App() {
   useEffect(() => {
     if (native) invoke<HostStatus>('workspace_status').then(status => setHost(status)).catch(error => setHostError(String(error)));
   }, []);
+  useEffect(() => {
+    if (!native || !preferencesLoaded || !updatePreferences.autoCheck) return;
+    const now = Date.now();
+    const lastCheckedAt = readLastAutoCheck(window.localStorage);
+    if (!autoCheckDue(now, lastCheckedAt)) {
+      setLastUpdateCheckAt(lastCheckedAt);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      const attemptAt = Date.now();
+      markAutoCheckAttempt(window.localStorage, attemptAt);
+      setLastUpdateCheckAt(attemptAt);
+      void performUpdateCheck()
+        .then(result => {
+          const version = result.release?.version;
+          if (!result.updateAvailable || !version || !updatePreferencesRef.current.notifications) return;
+          if (notifiedVersions.current.has(version)) return;
+          notifiedVersions.current.add(version);
+          setUpdateNoticeVersion(version);
+        })
+        .catch(error => setUpdateCheckError(String(error)));
+    }, AUTO_UPDATE_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [native, preferencesLoaded, updatePreferences.autoCheck, performUpdateCheck]);
   useEffect(() => {
     if (!native) return;
     let disposed=false,inflight=false;
@@ -144,6 +231,11 @@ export default function App() {
   };
   const platform = host?.platform ?? (navigator.userAgent.includes('Mac') ? 'macos' : 'other');
   const resolvedTheme = resolveTheme(appearance.theme);
+  const updateAvailableVersion = updateCheck?.updateAvailable ? updateCheck.release?.version ?? null : null;
+  const showUpdateBadge = !!updateAvailableVersion
+    && updatePreferences.notifications
+    && badgeClearedVersion !== updateAvailableVersion;
+  const showUpdateNotice = !!updateNoticeVersion && updatePreferences.notifications;
   return <div className="app" data-platform={platform}>
     <header className="titlebar">
       <div className="window-drag" data-tauri-drag-region />
@@ -156,11 +248,17 @@ export default function App() {
         <div className="rail-footer">
           <button className="rail-button" aria-label={resolvedTheme === 'dark' ? '切换为浅色主题' : '切换为深色主题'} title={resolvedTheme === 'dark' ? '浅色主题' : '深色主题'} onClick={() => commitAppearance({ ...appearanceRef.current, theme: resolvedTheme === 'dark' ? 'light' : 'dark' })}>{resolvedTheme === 'dark' ? <Sun size={19}/> : <Moon size={19}/>}</button>
           <button className="rail-button" aria-label="关于 Image Studio" title="关于" onClick={() => { setSettingsInitialGroup('about'); navigate('settings'); }}><CircleHelp size={19}/></button>
-          <button className={`rail-button ${page === 'settings' ? 'selected' : ''}`} aria-label="设置" title="设置" onClick={() => { setSettingsInitialGroup('appearance'); navigate('settings'); }}><Settings2 size={20} strokeWidth={1.6}/></button>
+          <button className={`rail-button ${page === 'settings' ? 'selected' : ''}`} aria-label={showUpdateBadge ? '设置，有可用更新' : '设置'} title={showUpdateBadge ? `设置 · 新版本 ${updateAvailableVersion}` : '设置'} onClick={() => { setSettingsInitialGroup('appearance'); navigate('settings'); }}><Settings2 size={20} strokeWidth={1.6}/>{showUpdateBadge && <span className="rail-update-badge"/>}</button>
         </div>
       </nav>
       <main className="main-surface">
         {hostError && <div className="host-error" role="status">{hostError}<button aria-label="关闭提示" onClick={() => setHostError('')}><X size={12}/></button></div>}
+        {showUpdateNotice && <div className="update-notice" role="status">
+          <Download size={15}/>
+          <span>新版本 <strong>{updateNoticeVersion}</strong></span>
+          <button className="update-notice-action" onClick={() => { setSettingsInitialGroup('updates'); navigate('settings'); setUpdateNoticeVersion(''); }}>查看更新</button>
+          <button className="update-notice-close" aria-label="关闭更新提示" onClick={() => setUpdateNoticeVersion('')}><X size={12}/></button>
+        </div>}
         <div className="workspace-page" hidden={page !== 'create'}><Workspace onModels={() => navigate('models')} studio={studio} requestedAsset={requestedAsset} requestedModel={requestedModel} requestedPrompt={requestedPrompt} sidebarCollapsed={appearance.sidebarCollapsed} onSidebarCollapsedChange={collapsed => commitAppearance({ ...appearanceRef.current, sidebarCollapsed: collapsed })} onRefresh={refresh} onAssetReturn={() => { const returnPage = requestedAsset?.returnPage ?? 'create'; setRequestedAsset(null); navigate(returnPage); }}/></div>
         <div className="workspace-page" hidden={page !== 'inspiration'}><PromptLibrary active={page === 'inspiration'} onBack={() => navigate('create')} onUsePrompt={request => { setRequestedPrompt({ ...request, nonce: ++requestNonce.current }); navigate('create'); }} onError={setHostError}/></div>
         {page === 'models' && <ModelLibrary studio={studio} onRefresh={refresh} onBack={()=>navigate('create')} onError={setHostError} onUseModel={(draft, conversationId) => { setRequestedModel({ draft, conversationId, nonce: Date.now() }); navigate('create'); }}/>}
@@ -173,6 +271,14 @@ export default function App() {
           onBack={() => navigate('create')}
           onAppearanceChange={commitAppearance}
           onPreferencesReload={reloadPreferences}
+          updatePreferences={updatePreferences}
+          updateCheck={updateCheck}
+          updateCheckError={updateCheckError}
+          updateChecking={updateChecking}
+          lastUpdateCheckAt={lastUpdateCheckAt}
+          onUpdatePreferencesChange={rememberUpdatePreferences}
+          onCheckUpdate={checkForUpdate}
+          onUpdateViewed={markUpdateViewed}
           onError={setHostError}
         />}
       </main>

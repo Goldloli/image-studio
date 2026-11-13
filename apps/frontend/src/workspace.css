@@ -110,7 +110,7 @@
 .model-select:hover{background:var(--selected)}
 .model-mark{width:21px;height:21px;border-radius:50%;background:var(--surface);display:grid;place-items:center;color:var(--accent);flex:none}
 .composer-status{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;color:var(--muted);margin-right:4px}
-.composer-send{width:28px;height:28px;padding:0;border-radius:50%;background:var(--accent);color:white;flex:none}
+.composer-send{width:28px;height:28px;padding:0;border-radius:50%;background:var(--accent-fill);color:var(--accent-on);flex:none}
 .composer-send:hover:not(:disabled){background:var(--accent-strong)!important;color:white}
 .composer-send:disabled{background:var(--selected);color:var(--muted);opacity:.75}
 .composer-send.is-stop{background:var(--selected);color:var(--text)}
