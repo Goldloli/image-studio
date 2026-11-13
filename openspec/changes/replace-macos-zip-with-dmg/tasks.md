@@ -1,7 +1,7 @@
 # Tasks
 
-状态：**实现与本地 DMG 验证完成；GitHub 发布验收待执行。** 2026-11-13 用户已确认
-proposal、spec delta、design、tasks 与 test-plan，并授权发布 `v0.2.2`。
+状态：**实现、双平台构建、GitHub Release 与发布后 DMG 验收完成。**
+2026-11-13 用户确认方案并授权直接发布 `v0.2.2`。
 
 ## 1. 文档与确认
 
@@ -34,13 +34,13 @@ proposal、spec delta、design、tasks 与 test-plan，并授权发布 `v0.2.2`�
 
 ## 6. 集成验证与发布
 
-- [ ] 6.1 在 macOS release 构建上执行 D01–D13，在适用环境执行 D14；将未运行的 Gatekeeper 人工项标为 `not_run`，不得写成通过。
+- [x] 6.1 在 macOS release 构建上执行 D01–D13，在适用环境执行 D14；将未运行的 Gatekeeper 人工项标为 `not_run`，不得写成通过。
 - [x] 6.2 运行前端 81 项测试、typecheck、build；Rust fmt、Clippy、workspace tests、release build；OpenSpec strict；workflow 校验与 actionlint。
 - [x] 6.3 更新到下一个未占用 patch 版本（当前预期 `0.2.2`），同步 Cargo、Tauri、前端 package/lock 与双语发布文档；不得修改 `v0.2.1` 或其附件。
-- [ ] 6.4 用户确认发布后，推送 main 与版本 tag，等待双平台 CI/release；确认 draft 只含 DMG，不自动 publish 或覆盖历史 Release。
-- [ ] 6.5 发布后重新下载 DMG，按 R01–R05 复验 checksum、挂载、安装内容、启动 smoke 与无 zip，并记录 GitHub Release URL。
+- [x] 6.4 用户确认发布后，推送 main 与版本 tag，等待双平台 CI/release；确认 draft 只含 DMG，不自动 publish 或覆盖历史 Release。
+- [x] 6.5 发布后重新下载 DMG，按 R01–R05 复验 checksum、挂载、安装内容、启动 smoke 与无 zip，并记录 GitHub Release URL。
 
 ## Workflow follow-up
 
-- 用户确认后归档本 change，并合并 `ci-release` delta。
-- 关闭 Beads `image-studio-gga`；若真实发布尚未执行，保留独立发布跟踪项。
+- 归档本 change，并合并 `ci-release` delta。
+- 关闭 Beads `image-studio-gga`。

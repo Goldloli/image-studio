@@ -1,8 +1,8 @@
 # Cross-platform CI/release evidence
 
-Status: **local and real GitHub Actions acceptance passed; `v0.2.1` is
-publicly published** (2026-11-13). `v0.2.0`, `v0.1.1` and `v0.1.0` remain
-previous public releases.
+Status: **local and real GitHub Actions acceptance passed; `v0.2.2` is
+publicly published** (2026-11-13). `v0.2.1`, `v0.2.0`, `v0.1.1` and `v0.1.0`
+remain previous public releases.
 
 Change: `openspec/changes/archive/2026-11-05-introduce-ci-release-pipeline`.
 Workflows:
@@ -36,6 +36,9 @@ Workflows:
 | `v0.2.1` quality on the release commit | PASS on Windows + macOS arm64 after one runner-capacity retry (run 43260424768) | [v0.2.1/acceptance.json](v0.2.1/acceptance.json) |
 | `v0.2.1` release workflow | PASS; dependency maintenance build, one macOS runner-capacity retry, then draft release | same `v0.2.1` record |
 | `v0.2.1` public Release | PASS; 10 assets, checksums, package identities and startup smoke re-verified after download | [v0.2.1/README.md](v0.2.1/README.md) |
+| `v0.2.2` quality on the release commit | PASS on Windows + macOS arm64 (run 43376989947) | [v0.2.2/acceptance.json](v0.2.2/acceptance.json) |
+| `v0.2.2` release workflow | PASS; macOS build produced and independently mounted a DMG before draft creation | same `v0.2.2` record |
+| `v0.2.2` public Release | PASS; 10 assets, exactly one DMG and zero macOS zip, checksums and startup smoke re-verified | [v0.2.2/README.md](v0.2.2/README.md) |
 
 The local Node runtime is `24.12.0`, while CI pins `24.19.0`; tests/build were
 run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
@@ -88,6 +91,15 @@ run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
 14. `v0.2.1` acceptance archive: [v0.2.1/](v0.2.1/) with the maintenance
     dependency record, both published checksum files and Windows package
     evidence.
+15. `v0.2.2` tag: quality `43376989947` passed on both platforms. Release
+    `43378152775` built Windows NSIS and a macOS DMG, re-downloaded and mounted
+    the DMG in an independent macOS job, then created the draft Release.
+16. Public `v0.2.2` Release: PASS with 10 assets. The DMG-only release
+    downloaded again and passed checksum, `hdiutil verify`, mount, identity,
+    arm64, Applications shortcut, no-zip and startup smoke checks:
+    <https://github.com/Goldloli/image-studio/releases/tag/v0.2.2>.
+17. `v0.2.2` acceptance archive: [v0.2.2/](v0.2.2/) with the release record,
+    published checksum files, Windows package evidence and local DMG validation.
 
 Unsigned/notarization limitations are documented in
 [doc/14-ci-release.md](../../doc/14-ci-release.md).

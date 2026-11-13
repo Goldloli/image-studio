@@ -93,6 +93,19 @@ identifier/版本/最低系统版本/arm64 sidecar，以及隔离数据根启动
 验收记录见
 [`verification/ci-release/v0.2.1/`](../verification/ci-release/v0.2.1/README.md)。
 
+`v0.2.2` 已于 2026-11-13 人工审阅并公开：
+<https://github.com/Goldloli/image-studio/releases/tag/v0.2.2>。annotated tag
+指向 `main` 提交 `5ada451`，是首个 DMG-only macOS 发布。quality run
+43376989947 双平台通过；release run 43378152775 的版本检查、Windows installer、
+macOS DMG、独立 DMG 挂载验证和 draft Release 全部通过。公开页包含 10 个附件，
+Windows installer `Image.Studio_0.2.2_x64-setup.exe`（245,388,429 B）、macOS
+DMG `Image-Studio-0.2.2-macos-arm64.dmg`（34,650,435 B）、checksums、双语
+Release Notes 与许可文件。发布后重新下载两个包，DMG 通过 checksum、
+`hdiutil verify`、只读挂载、应用身份、四个 arm64 可执行文件、Applications
+快捷方式和无 zip 检查；Windows 内部包身份一致。新 Release 只有一个 macOS DMG，
+零个 macOS zip。验收记录见
+[`verification/ci-release/v0.2.2/`](../verification/ci-release/v0.2.2/README.md)。
+
 下载后应在对应页签执行：
 
 ```bash
