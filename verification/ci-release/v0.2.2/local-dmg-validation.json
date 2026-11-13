@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "version": "0.2.2",
-  "status": "local_pass_github_pending",
+  "status": "local_pass_release_pass",
   "artifact": {
     "name": "Image-Studio-0.2.2-macos-arm64.dmg",
     "bytes": 34661923,
