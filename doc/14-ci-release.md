@@ -106,6 +106,18 @@ Release Notes 与许可文件。发布后重新下载两个包，DMG 通过 chec
 零个 macOS zip。验收记录见
 [`verification/ci-release/v0.2.2/`](../verification/ci-release/v0.2.2/README.md)。
 
+`v0.2.3` 已于 2026-11-14 审阅并公开：
+<https://github.com/Goldloli/image-studio/releases/tag/v0.2.3>。annotated tag
+指向 `main` 提交 `9d637f6`，包含重构设置中心、持久强调色、自动更新检查和只保留
+GitHub 的关于页链接。quality run 43496331031 双平台通过；release run
+43497865280 的版本检查、Windows installer、macOS DMG、独立 DMG 挂载验证和 draft
+Release 全部通过。公开页包含 10 个附件，Windows installer
+`Image.Studio_0.2.3_x64-setup.exe`（245,491,502 B，SHA-256
+`f8eb6087…`）、macOS DMG `Image-Studio-0.2.3-macos-arm64.dmg`
+（34,904,410 B，SHA-256 `adc60855…`）、checksums、双语 Release Notes 与许可文件。
+发布后下载两份 checksum，其摘要与 GitHub 资产 digest 完全一致。验收记录见
+[`verification/ci-release/v0.2.3/`](../verification/ci-release/v0.2.3/README.md)。
+
 下载后应在对应页签执行：
 
 ```bash

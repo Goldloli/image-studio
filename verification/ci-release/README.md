@@ -1,8 +1,8 @@
 # Cross-platform CI/release evidence
 
-Status: **local and real GitHub Actions acceptance passed; `v0.2.2` is
-publicly published** (2026-11-13). `v0.2.1`, `v0.2.0`, `v0.1.1` and `v0.1.0`
-remain previous public releases.
+Status: **local and real GitHub Actions acceptance passed; `v0.2.3` is
+publicly published** (2026-11-14). `v0.2.2`, `v0.2.1`, `v0.2.0`, `v0.1.1`, and
+`v0.1.0` remain previous public releases.
 
 Change: `openspec/changes/archive/2026-11-05-introduce-ci-release-pipeline`.
 Workflows:
@@ -39,6 +39,9 @@ Workflows:
 | `v0.2.2` quality on the release commit | PASS on Windows + macOS arm64 (run 43376989947) | [v0.2.2/acceptance.json](v0.2.2/acceptance.json) |
 | `v0.2.2` release workflow | PASS; macOS build produced and independently mounted a DMG before draft creation | same `v0.2.2` record |
 | `v0.2.2` public Release | PASS; 10 assets, exactly one DMG and zero macOS zip, checksums and startup smoke re-verified | [v0.2.2/README.md](v0.2.2/README.md) |
+| `v0.2.3` quality on the release commit | PASS on Windows + macOS arm64 (run 43496331031) | [v0.2.3/acceptance.json](v0.2.3/acceptance.json) |
+| `v0.2.3` release workflow | PASS; Windows NSIS and macOS DMG built; DMG independently mounted before draft creation | same `v0.2.3` record |
+| `v0.2.3` public Release | PASS; 10 assets, one DMG, zero macOS zip, published checksums match GitHub asset digests | [v0.2.3/README.md](v0.2.3/README.md) |
 
 The local Node runtime is `24.12.0`, while CI pins `24.19.0`; tests/build were
 run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
@@ -100,6 +103,19 @@ run through npm `11.17.0`, and the GitHub runner remains the authoritative Node
     <https://github.com/Goldloli/image-studio/releases/tag/v0.2.2>.
 17. `v0.2.2` acceptance archive: [v0.2.2/](v0.2.2/) with the release record,
     published checksum files, Windows package evidence and local DMG validation.
+18. `v0.2.3` settings/update release tag: quality `43496331031` passed on macOS
+    arm64 and Windows x64. Release `43497865280` verified the version and main
+    provenance, built Windows NSIS and macOS DMG, independently mounted the DMG,
+    and created the draft Release.
+19. Public `v0.2.3` Release: PASS with 10 assets, one macOS DMG and zero macOS
+    zip. The published installer SHA-256
+    `f8eb6087879c25607298f678402985a43d43b24ea6e65b17e868fe78a626a2da`
+    and DMG SHA-256
+    `adc60855dac807766dac37bd3c7762fb07f3291860e0f7ee9a024dcc112e9332`
+    match the published checksum files and GitHub asset digests:
+    <https://github.com/Goldloli/image-studio/releases/tag/v0.2.3>.
+20. `v0.2.3` acceptance archive: [v0.2.3/](v0.2.3/) with the machine-readable
+    release record, published checksum files and Windows package evidence.
 
 Unsigned/notarization limitations are documented in
 [doc/14-ci-release.md](../../doc/14-ci-release.md).

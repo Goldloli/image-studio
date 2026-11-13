@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "kind": "cross-platform-release-acceptance",
+  "version": "0.2.3",
+  "status": "published",
+  "published_url": "https://github.com/Goldloli/image-studio/releases/tag/v0.2.3",
+  "published_at_local": "2026-11-14T04:21:21+08:00",
+  "tag": {
+    "name": "v0.2.3",
+    "commit": "9d637f63d287aef57d3992d2295e82cba8f99667",
+    "target": "main",
+    "annotated": true
+  },
+  "quality_run": {
+    "id": 43496331031,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/43496331031",
+    "status": "success",
+    "head_sha": "9d637f63d287aef57d3992d2295e82cba8f99667",
+    "jobs": {
+      "macos_arm64": {
+        "status": "success",
+        "duration": "4m0s"
+      },
+      "windows_x64": {
+        "status": "success",
+        "duration": "8m28s"
+      }
+    }
+  },
+  "release_run": {
+    "id": 43497865280,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/43497865280",
+    "status": "success",
+    "head_sha": "9d637f63d287aef57d3992d2295e82cba8f99667",
+    "jobs": {
+      "version_provenance": {
+        "status": "success",
+        "duration": "19s"
+      },
+      "macos_dmg": {
+        "status": "success",
+        "duration": "5m35s"
+      },
+      "windows_nsis": {
+        "status": "success",
+        "duration": "14m12s"
+      },
+      "independent_dmg_verification": {
+        "status": "success",
+        "duration": "46s"
+      },
+      "draft_release": {
+        "status": "success",
+        "duration": "45s"
+      }
+    }
+  },
+  "github_release": {
+    "draft": false,
+    "prerelease": false,
+    "asset_count": 10,
+    "assets": [
+      {
+        "name": "Image.Studio_0.2.3_x64-setup.exe",
+        "bytes": 245491502,
+        "sha256": "f8eb6087879c25607298f678402985a43d43b24ea6e65b17e868fe78a626a2da",
+        "state": "uploaded"
+      },
+      {
+        "name": "Image-Studio-0.2.3-macos-arm64.dmg",
+        "bytes": 34904410,
+        "sha256": "adc60855dac807766dac37bd3c7762fb07f3291860e0f7ee9a024dcc112e9332",
+        "state": "uploaded"
+      },
+      {
+        "name": "SHA256SUMS-windows.txt",
+        "bytes": 99,
+        "sha256": "9a6e4b3dfdfaffb5898bdcb91695fdaca37014c00b4a09a1a37a731a895be6de",
+        "state": "uploaded"
+      },
+      {
+        "name": "SHA256SUMS-macos.txt",
+        "bytes": 101,
+        "sha256": "3bb164f04f218391e0605dcf44596dc8e8cf24a21a50dcf11ebcb8e1196f6868",
+        "state": "uploaded"
+      }
+    ]
+  },
+  "verified": [
+    "tag, Cargo, Tauri and frontend versions equal 0.2.3",
+    "quality passed on macOS arm64 and Windows x64",
+    "release version provenance and main ancestry passed",
+    "Windows NSIS installer built and uploaded",
+    "macOS arm64 DMG built, uploaded and independently mounted",
+    "checksums in published SHA256SUMS files match GitHub asset digests",
+    "Release Notes and README assets were generated from the repository at the tag"
+  ],
+  "known_not_run": [
+    "Windows NSIS installation and restart on a physical Windows target",
+    "macOS Gatekeeper first-launch UI",
+    "real model inference rerun (model/runtime/recipe code unchanged)",
+    "real update download and platform installation against this release"
+  ]
+}

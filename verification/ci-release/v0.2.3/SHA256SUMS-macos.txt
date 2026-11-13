@@ -1,0 +1,1 @@
+adc60855dac807766dac37bd3c7762fb07f3291860e0f7ee9a024dcc112e9332  Image-Studio-0.2.3-macos-arm64.dmg
