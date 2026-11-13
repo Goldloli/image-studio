@@ -7,8 +7,8 @@
 | 文件 | 触发 | 作用 |
 |---|---|---|
 | `.github/workflows/quality.yml` | push `main`、PR、手动 | Windows x64 + macOS 15 arm64 的 fmt、Clippy `-D warnings`、workspace tests、前端 test/check/build、OpenSpec strict |
-| `.github/workflows/build.yml` | 手动、被 release 调用 | Windows NSIS 与 macOS `.app` zip、架构/包身份检查、SHA256SUMS artifact |
-| `.github/workflows/release.yml` | tag `v*` | 版本/tag/main 来源检查，复用双平台构建，创建 draft GitHub Release |
+| `.github/workflows/build.yml` | 手动、被 release 调用 | Windows NSIS 与 macOS DMG、架构/包身份检查、SHA256SUMS artifact |
+| `.github/workflows/release.yml` | tag `v*` | 版本/tag/main 来源检查，复用双平台构建，重新验证 macOS DMG，创建 draft GitHub Release |
 
 固定工具版本为 Rust **1.99.1**、Node **24.19.0**、npm **11.17.0**、OpenSpec **1.12.0**。CI 不下载模型权重、不运行 GPU 推理；模型和真实生成验收继续以本机证据为准。
 
@@ -16,8 +16,14 @@
 
 - `macos-14` 是 Intel x64，并已于 2026-11-02 退役；workflow 使用官方 arm64 `macos-15`，并在 job 中执行 `uname -m=arm64`。
 - Windows 产物为目标 triple `x86_64-pc-windows-msvc`；macOS 产物为 Apple Silicon arm64，最低系统版本 macOS 11。
-- macOS bundle identifier 为 `io.github.goldloli.image-studio`。`.app` 包含桌面、诊断、监督与 Real-ESRGAN sidecar，以及项目许可证、字体/提示词库/第三方声明。
-- `.app` 先完整验证再 zip；发布 job 再次解包检查 `Info.plist`、四个 Mach-O、许可证资源和版本。
+- macOS bundle identifier 为 `io.github.goldloli.image-studio`。DMG 内的
+  `Image Studio.app` 包含桌面、诊断、监督与 Real-ESRGAN sidecar，以及项目许可、
+  字体/提示词库许可和第三方声明。
+- 构建先生成并验证 `.app`，再生成包含应用与 `/Applications` 快捷方式的只读
+  UDZO DMG。构建 job 使用 `hdiutil verify`、只读挂载、`Info.plist`、四个 Mach-O
+  和许可资源检查。
+- release workflow 在独立 macOS job 重新下载 DMG、校验 checksum 并重复挂载检查，
+  通过后才运行最终 draft Release job。
 
 ## 版本与来源
 
@@ -33,10 +39,16 @@ tag commit 还必须属于 `main`。任一条件不满足时，release 在 Windo
 ## Artifact 与 draft Release
 
 - Windows artifact：NSIS current-user installer、LF `SHA256SUMS-windows.txt`、`internal-package.json`。
-- macOS artifact：`Image-Studio-<version>-macos-arm64.zip`、LF `SHA256SUMS-macos.txt`。
-- 发布 job 先执行两平台 checksum，再解包 macOS 包做身份/架构/资源检查。
+- macOS artifact：`Image-Studio-<version>-macos-arm64.dmg`、LF
+  `SHA256SUMS-macos.txt`。
+- macOS verification job 先校验 checksum，再挂载 DMG 做身份/架构/资源检查；
+  最终 Ubuntu release job 只接受一个 Windows `.exe`、一个 macOS `.dmg` 和零个
+  macOS `.zip`。
 - draft Release 附两平台产物、checksums、README、`LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.md` 与 `RELEASE-NOTES.md`。
 - 不自动 publish。同名 Release 已存在时，重跑会明确失败，避免生成部分 release。
+
+`v0.1.0` 至 `v0.2.1` 使用历史 `.app` zip 格式，发布附件保持不可变。
+`v0.2.2` 起改为 DMG-only；不得为新格式重写旧 Release。
 
 `v0.1.0` 已于 2026-11-05 人工审阅并公开：
 <https://github.com/Goldloli/image-studio/releases/tag/v0.1.0>。公开页包含 Windows x64
@@ -133,6 +145,8 @@ Zizmor 的固定版本提示应保持 0 high/medium；当前仅允许已有固�
 | 版本校验失败 | 同步 tag、Cargo、Tauri 与前端 package version |
 | tag 不属于 main | 将 tag 移到已合入 main 的发布提交 |
 | macOS 产物非 arm64 | 检查 runner host、Cargo target 与四个 sidecar 的 `file` 输出 |
+| DMG 无法验证或挂载 | 先用 `hdiutil verify <dmg>`；检查构建日志、唯一 mountpoint 和 detach 清理，失败时不要继续 draft Release |
+| Release 中出现 macOS zip | 删除旧 workflow artifact 或检查 artifact 名称；`v0.2.2` 起新 Release 必须只有一个 DMG |
 | `gh release create` 提示已存在 | 审阅或删除同名 draft 后重跑；不要覆盖已发布版本 |
 | 下载包被系统拦截 | 校验 SHA-256；未签名限制见上文 |
 

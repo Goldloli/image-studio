@@ -2,77 +2,85 @@
 
 <!-- GitHub Release notes are bilingual; English appears first. -->
 
-Image Studio `{{VERSION}}` is a maintenance release for Apple Silicon macOS
-and Windows x64. It packages the latest dependency updates without changing the
-model catalog, inference runtimes, worker identities, recipes, local schema, or
-user workflow.
+Image Studio `{{VERSION}}` changes macOS delivery to a native disk image. The
+release publishes one arm64 DMG containing the application and an Applications
+shortcut, so installation is a drag instead of a zip extraction followed by a
+manual move.
 
-Image Studio `{{VERSION}}` 是面向 Apple Silicon macOS 与 Windows x64 的维护版本。
-本版把最新依赖更新纳入安装包，不改变模型目录、推理运行时、worker 身份、配方、
-本地数据结构或用户工作流。
+Image Studio `{{VERSION}}` 将 macOS 下载方式改为原生磁盘映像。本版发布一个
+arm64 DMG，包含应用与“应用程序”快捷方式，安装时直接拖拽即可，无需先解压 zip
+再手动复制应用。
 
-## Maintenance Updates / 维护更新
+## What's New / 更新内容
 
-### Desktop and archive dependencies / 桌面与压缩包依赖
+### macOS DMG delivery / macOS DMG 交付
 
-- **Native file dialogs:** `rfd` is updated from 0.17.2 to 0.18.0, including
-  upstream dialog and macOS file-name/directory handling fixes.
-- **Archive handling:** `zip` is updated from 9.2.2 to 9.5.0 and `flate2` from
-  1.1.10 to 1.1.11 for the current compatible archive stack.
-- **Identifiers:** `uuid` is updated from 1.29.0 to 1.29.2.
-- **原生文件对话框：** `rfd` 从 0.17.2 更新到 0.18.0，包含上游对话框与 macOS
-  文件名/目录处理修复。
-- **压缩包处理：** `zip` 从 9.2.2 更新到 9.5.0，`flate2` 从 1.1.10 更新到
-  1.1.11。
-- **标识符：** `uuid` 从 1.29.0 更新到 1.29.2。
+- **One macOS download:** the release artifact is
+  `Image-Studio-{{VERSION}}-macos-arm64.dmg`. Future releases publish no macOS
+  zip.
+- **Drag-to-install:** the mounted volume contains `Image Studio.app` and an
+  `Applications` link.
+- **Verified before release:** CI runs `hdiutil verify`, mounts the image read-only,
+  checks the Applications link, bundle identifier, version, minimum macOS
+  version, arm64 main executable and sidecars, and legal resources.
+- **Historical releases remain unchanged:** `v0.2.1` and earlier keep their
+  original zip attachments.
+- **单一 macOS 下载包：** 发布产物为
+  `Image-Studio-{{VERSION}}-macos-arm64.dmg`；后续版本不再发布 macOS zip。
+- **拖拽安装：** 打开的磁盘映像包含 `Image Studio.app` 与 `Applications`
+  快捷方式。
+- **发布前验证：** CI 执行 `hdiutil verify`，以只读方式挂载映像，并检查
+  应用程序快捷方式、bundle identifier、版本、最低 macOS 版本、arm64 主程序与
+  sidecar，以及许可资源。
+- **历史版本保持不变：** `v0.2.1` 及更早版本继续保留原始 zip 附件。
 
-### Frontend toolchain / 前端工具链
+### Compatibility / 兼容性
 
-- **Runtime and build dependencies:** Vite 8.3.7, `@vitejs/plugin-react` 6.3.0,
-  Lucide React 1.70.0, and Vitest 5.1.0 are now used by the bundled UI and its
-  quality gates.
-- **前端运行时与构建依赖：** 内嵌界面与质量门现在使用 Vite 8.3.7、
-  `@vitejs/plugin-react` 6.3.0、Lucide React 1.70.0 与 Vitest 5.1.0。
-
-## Compatibility / 兼容性
-
-- **No model migration.** All seven model identities, pinned source revisions,
-  prepared caches, worker protocols, and execution recipes are unchanged.
-- **No local-data migration.** The SQLite schema remains v6; existing
-  conversations, works, favourites, deletion state, and installation records
-  remain compatible.
-- **No new product feature.** The single-rail workspace, work management,
-  cancellation, retry, export, single-instance activation, and startup
-  diagnostics behave as in 0.2.0.
-- **无需迁移模型。** 七个模型身份、固定来源 revision、准备好的缓存、worker 协议
-  与执行配方均未改变。
-- **无需迁移本地数据。** SQLite schema 仍为 v6；现有会话、作品、收藏、删除状态
-  与安装记录继续兼容。
-- **没有新增产品功能。** 单层工作区、作品管理、取消、重试、导出、单实例激活与
-  启动诊断行为与 0.2.0 一致。
+- **No model migration:** all seven model identities, source revisions, prepared
+  caches, runtimes, worker protocols, and execution recipes are unchanged.
+- **No local-data migration:** SQLite schema v6 and existing conversations,
+  works, favourites, deletion state, and installation records remain compatible.
+- **Windows unchanged:** the current-user NSIS installer and application behavior
+  are unchanged.
+- **无需迁移模型：** 七个模型身份、来源 revision、准备好的缓存、运行时、worker
+  协议与执行配方均未改变。
+- **无需迁移本地数据：** SQLite schema v6 与现有会话、作品、收藏、删除状态及
+  安装记录继续兼容。
+- **Windows 不变：** current-user NSIS 安装包与应用行为保持原样。
 
 ## Validation / 验证
 
-- The real-model and native UI evidence recorded for 0.2.0 remains the behavior
-  baseline because model and worker execution code did not change.
-- The 0.2.1 release rebuilds both desktop packages on the updated dependency
-  set and reruns Rust formatting, Clippy, workspace tests, frontend tests,
-  typecheck, production build, OpenSpec validation, package identity checks,
-  architecture checks, and checksums.
-- GitHub Actions does not download model weights or run GPU inference.
-- 由于模型与 worker 执行代码未变，0.2.0 已记录的真实模型与原生界面证据继续作为
-  行为基线。
-- 0.2.1 在更新后的依赖组合上重新构建双平台桌面包，并重跑 Rust 格式、Clippy、
-  workspace 测试、前端测试、类型检查、生产构建、OpenSpec、包身份、架构与
-  checksum 检查。
-- GitHub Actions 不下载模型权重，也不执行 GPU 推理。
+- The current macOS application bundle is generated from the existing verified
+  release build path, then packaged as a UDZO DMG.
+- The DMG contains one `Image Studio.app`, one `Applications` link, and no zip.
+- The application identifier is `io.github.goldloli.image-studio`, version
+  `{{VERSION}}`, minimum macOS 11.0, and all four executables are arm64.
+- GitHub Actions reruns Rust formatting, Clippy, workspace tests, frontend
+  tests/typecheck/build, OpenSpec validation, workflow checks, package identity,
+  architecture, DMG mount checks, and checksums. It does not download model
+  weights or run GPU inference.
+- 当前 macOS 应用包继续沿用以真实发布构建生成 `.app` 的流程，再封装为 UDZO DMG。
+- DMG 只包含一个 `Image Studio.app`、一个 `Applications` 快捷方式，不包含 zip。
+- 应用 identifier 为 `io.github.goldloli.image-studio`，版本为 `{{VERSION}}`，
+  最低 macOS 11.0，四个可执行文件均为 arm64。
+- GitHub Actions 重新执行 Rust 格式、Clippy、workspace 测试、前端测试/类型检查/
+  构建、OpenSpec、workflow 检查、包身份、架构、DMG 挂载与 checksum；不下载模型
+  权重，也不执行 GPU 推理。
 
 ## Downloads / 下载
 
 - **Windows x64:** `Image.Studio_{{VERSION}}_x64-setup.exe`
-- **macOS 11+ Apple Silicon:** `Image-Studio-{{VERSION}}-macos-arm64.zip`
+- **macOS 11+ Apple Silicon:** `Image-Studio-{{VERSION}}-macos-arm64.dmg`
 - Verify with `SHA256SUMS-windows.txt` or `SHA256SUMS-macos.txt`.
 - 请使用对应的 `SHA256SUMS-*.txt` 校验下载文件。
+
+```bash
+shasum -a 256 -c SHA256SUMS-macos.txt
+```
+
+```powershell
+Get-FileHash .\Image.Studio_{{VERSION}}_x64-setup.exe -Algorithm SHA256
+```
 
 ## Installation / 安装
 
@@ -89,20 +97,32 @@ SmartScreen 可能显示“Windows 已保护你的电脑”。请先核对 SHA-2
 
 ### macOS
 
-The macOS build is unsigned and not notarized. If opening a checksum-verified
-app shows **“Image Studio.app is damaged and can’t be opened”**, move it to
-Applications and remove only the quarantine attribute:
+1. Verify `Image-Studio-{{VERSION}}-macos-arm64.dmg` against
+   `SHA256SUMS-macos.txt`.
+2. Open the DMG.
+3. Drag `Image Studio` into Applications.
+4. Launch the installed application.
+
+The build is unsigned and not notarized. If macOS reports
+**“Image Studio.app is damaged and can’t be opened”**, remove quarantine only
+after confirming the DMG checksum:
 
 ```bash
 sudo xattr -rd com.apple.quarantine "/Applications/Image Studio.app"
 open "/Applications/Image Studio.app"
 ```
 
-Do not run this command when the checksum is missing or does not match.
+Do not run the command when the checksum is missing or does not match.
 
-macOS 构建未签名、未公证。如果已核对 checksum 的应用显示
-**“Image Studio.app 已损坏，无法打开”**，请把应用放入“应用程序”，然后只移除
-该应用包的 quarantine 属性：
+1. 使用 `SHA256SUMS-macos.txt` 校验
+   `Image-Studio-{{VERSION}}-macos-arm64.dmg`。
+2. 打开 DMG。
+3. 把 `Image Studio` 拖入“应用程序”。
+4. 启动已安装的应用。
+
+构建未签名、未公证。如果 macOS 提示
+**“Image Studio.app 已损坏，无法打开”**，请先确认 DMG checksum 一致，再移除该
+应用包的 quarantine 属性：
 
 ```bash
 sudo xattr -rd com.apple.quarantine "/Applications/Image Studio.app"
@@ -116,14 +136,12 @@ checksum 缺失或与下载文件不一致时不要执行。
 - The builds are unsigned and not notarized.
 - Z-Image Turbo requires a 12 GB card.
 - The 8 GB compact tier is certified on Turing sm75 (RTX 2060 SUPER).
-- Windows install-time NF4 preparation is RAM/commit based and may require a
-  larger virtual-memory setting on low-headroom machines.
+- Windows install-time NF4 preparation is RAM/commit based.
 - Model weights and private Python runtimes remain separate downloads.
 - 产物未签名、未公证。
 - Z-Image Turbo 仍要求 12 GB 显卡。
 - 8 GB 紧凑档仅在 Turing sm75（RTX 2060 SUPER）上完成认证。
-- Windows 安装期 NF4 准备取决于可用内存与 commit 余量，余量很小的机器可能需要
-  调大虚拟内存。
+- Windows 安装期 NF4 准备取决于可用内存与 commit 余量。
 - 模型权重与私有 Python 运行时仍需单独下载。
 
 ## License / 许可证
