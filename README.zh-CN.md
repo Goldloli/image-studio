@@ -12,19 +12,26 @@ Image Studio 是面向 **Apple Silicon macOS** 与 **Windows x64** 的本地优�
 
 ![macOS 上的 Image Studio 会话工作区](verification/simplify-workspace-20261111/native-01-initial-1280.png)
 
-## 最新版本：v0.2.1
+## 最新版本：v0.2.2
 
-`0.2.1` 是维护版本，把最新依赖更新纳入可下载安装包，不改变模型范围或用户
-工作流：
+`0.2.2` 将 macOS 下载产物改为原生磁盘映像：
 
-- **原生桌面与压缩包依赖** —— 更新到 `rfd` 0.18.0、`zip` 9.5.0、
-  `uuid` 1.29.2 与 `flate2` 1.1.11。
-- **前端工具链更新** —— 使用 Vite 8.3.7、React 插件 6.3.0、Vitest 5.1.0
-  与 Lucide 1.70.0 构建内嵌界面。
-- **无需迁移模型或配方** —— 模型权重、运行时、worker 身份、配方与本地数据继续
-  与 `0.2.0` 兼容。
-- **保持已验证的产品行为** —— 以 `0.2.0` 的真实模型证据作为行为基线；`0.2.1`
-  重新执行当前依赖构建、测试、打包、checksum 与产物检查。
+- **仅提供 DMG**：发布
+  `Image-Studio-<version>-macos-arm64.dmg`，不再提供应用 zip。
+- **拖拽安装**：打开的磁盘映像包含 `Image Studio.app` 与应用程序目录快捷方式。
+- **CI 验证映像**：发布前检查 DMG 结构、应用身份、版本、arm64 可执行文件、
+  最低系统版本与许可资源。
+- **无需迁移应用或模型**：七个模型、执行配方、worker 身份、本地数据结构与
+  Windows 安装包继续兼容。
+- **历史版本保持不变**：更早版本仍保留原有的 zip 附件。
+
+### 延续自 v0.2.1
+
+`0.2.1` 把最新依赖更新纳入可下载安装包，不改变模型范围或用户工作流：
+
+- 发布 `rfd` 0.18.0、`zip` 9.5.0、`uuid` 1.29.2 与 `flate2` 1.1.11。
+- 使用 Vite 8.3.7、React 插件 6.3.0、Vitest 5.1.0 与 Lucide 1.70.0 构建界面。
+- 模型权重、运行时、配方与本地数据继续与 `0.2.0` 兼容。
 
 ### 延续自 v0.2.0
 
@@ -70,7 +77,7 @@ Image Studio 是面向 **Apple Silicon macOS** 与 **Windows x64** 的本地优�
 - **单实例数据所有权**：使用同一数据根再次启动时会聚焦已有窗口；通过
   `--data-dir` 使用不同数据根的实例仍可独立运行。
 - **双平台发布**：GitHub Actions 构建并验证 Windows NSIS 安装包与 macOS arm64
-  `.app`。
+  DMG。
 
 ## 支持的模型
 
@@ -130,10 +137,10 @@ Windows 使用独立冻结的 NF4、ONNX 与 ncnn 配置；macOS 使用已验证
 
 项目把编译、界面与真实推理证据分开记录：
 
-| 平台 | 0.2.1 证据范围 | 证据 |
+| 平台 | 0.2.2 证据范围 | 证据 |
 |---|---|---|
-| macOS arm64 | 因推理代码、运行时与配方未变，复用 0.2.0 原生与真实模型基线；0.2.1 重新构建并检查应用包 | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
-| Windows 12 GB 标准档 | 复用 0.2.0 的 9/9 真实生成矩阵；0.2.1 重新执行依赖、构建、安装包与产物验证 | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
+| macOS arm64 | 因推理代码、运行时与配方未变，复用 0.2.0 原生与真实模型基线；0.2.2 重新构建并挂载 DMG，检查映像内应用身份与 arm64 内容 | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
+| Windows 12 GB 标准档 | 复用 0.2.0 的 9/9 真实生成矩阵；0.2.2 重新执行构建、安装包与产物验证 | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
 | Windows 8 GB 紧凑档 | 复用已验证的紧凑档配方与执行面无变化的功能基线；模型/运行时身份保持不变 | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)、[`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
 
 GitHub Actions 负责构建、测试、打包、架构、checksum 与版本来源检查；它不下载
@@ -158,7 +165,7 @@ GitHub Actions 负责构建、测试、打包、架构、checksum 与版本来�
 下载文件，并使用对应的 `SHA256SUMS-*.txt` 校验：
 
 - **Windows x64**：`Image.Studio_<version>_x64-setup.exe`
-- **macOS arm64**：`Image-Studio-<version>-macos-arm64.zip`
+- **macOS arm64**：`Image-Studio-<version>-macos-arm64.dmg`
 
 ```bash
 shasum -a 256 -c SHA256SUMS-macos.txt
@@ -168,13 +175,16 @@ shasum -a 256 -c SHA256SUMS-macos.txt
 Get-FileHash .\Image.Studio_<version>_x64-setup.exe -Algorithm SHA256
 ```
 
+在 macOS 上，打开已校验的 DMG，并把 `Image Studio` 拖入“应用程序”。
+
 当前产物未签名、未公证：
 
 - Windows 可能显示 SmartScreen。确认 SHA-256 一致后，才使用
   **更多信息 → 仍要运行**。
 - macOS 首次打开时可能显示 **“Image Studio.app 已损坏，无法打开”**。这是未签名
-  构建被 Gatekeeper 加上 quarantine 属性后的表现。请先确认下载的 zip 与
-  `SHA256SUMS-macos.txt` 一致，把应用放入“应用程序”，然后在终端运行：
+  构建被 Gatekeeper 加上 quarantine 属性后的表现。请先确认下载的 DMG 与
+  `SHA256SUMS-macos.txt` 一致，打开磁盘映像，把 `Image Studio` 拖入“应用程序”，
+  然后在终端运行：
 
 ```bash
 sudo xattr -rd com.apple.quarantine "/Applications/Image Studio.app"
@@ -325,14 +335,14 @@ actionlint -no-color
 
 - [quality.yml](.github/workflows/quality.yml)：Windows x64 与 macOS arm64 的
   格式、Clippy、workspace 测试、前端测试/构建与 OpenSpec。
-- [build.yml](.github/workflows/build.yml)：Windows NSIS 与 macOS arm64 产物，
+- [build.yml](.github/workflows/build.yml)：Windows NSIS 与 macOS arm64 DMG，
   包含 checksum 与包身份检查。
-- [release.yml](.github/workflows/release.yml)：版本/main 来源检查，并创建 draft
-  GitHub Release。
+- [release.yml](.github/workflows/release.yml)：版本/main 来源检查、独立 macOS
+  DMG 挂载验证，并创建 draft GitHub Release。
 
 推送一个 `v*` tag（提交必须在 `main` 上，且 tag、workspace Cargo、Tauri 与前端
 版本完全一致）会构建双平台产物并生成可供产物审阅的 draft Release，审阅后发布。
-`v0.2.1` 包含 Windows x64 NSIS 安装包与 macOS arm64 `.app` zip。
+`v0.2.2` 包含 Windows x64 NSIS 安装包与 macOS arm64 DMG。
 运行 ID 与产物摘要见 [CI 与发布文档](doc/14-ci-release.md) 与
 [`verification/ci-release/`](verification/ci-release/)。
 

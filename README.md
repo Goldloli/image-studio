@@ -13,21 +13,31 @@ keeping model execution, conversations, and works on your machine.
 
 ![Image Studio conversation workspace on macOS](verification/simplify-workspace-20261111/native-01-initial-1280.png)
 
-## Latest Release: v0.2.1
+## Latest Release: v0.2.2
 
-Version `0.2.1` is a maintenance release that rolls the latest dependency
-updates into downloadable builds without changing the model surface or user
-workflow:
+Version `0.2.2` changes macOS delivery to a native disk image:
 
-- **Native desktop and archive dependencies** — `rfd` 0.18.0, `zip` 9.5.0,
-  `uuid` 1.29.2, and `flate2` 1.1.11 are now shipped.
-- **Frontend toolchain refresh** — Vite 8.3.7, React plugin 6.3.0,
-  Vitest 5.1.0, and Lucide 1.70.0 are now used for the bundled UI.
-- **No model or recipe migration** — model weights, runtimes, worker identities,
-  recipes, and local data remain compatible with `0.2.0`.
-- **Same validated product behaviour** — the `0.2.0` real-model evidence remains
-  the behavioral baseline, while `0.2.1` reruns the current dependency build,
-  test, packaging, checksum, and artifact checks.
+- **DMG-only macOS downloads**: the release publishes
+  `Image-Studio-<version>-macos-arm64.dmg` instead of an application zip.
+- **Drag-to-install layout**: the mounted volume contains `Image Studio.app`
+  and an Applications shortcut.
+- **Verified images in CI**: every DMG is checked for structure, bundle identity,
+  version, arm64 executables, minimum macOS version, and legal resources before
+  release.
+- **No application or model migration**: the seven models, execution recipes,
+  worker identities, local schema, and Windows installer remain compatible.
+- **Historical releases stay unchanged**: earlier versions remain available as
+  their original zip artifacts.
+
+### Included from v0.2.1
+
+Version `0.2.1` rolled the latest dependency updates into downloadable builds
+without changing the model surface or user workflow:
+
+- `rfd` 0.18.0, `zip` 9.5.0, `uuid` 1.29.2, and `flate2` 1.1.11 are shipped.
+- Vite 8.3.7, React plugin 6.3.0, Vitest 5.1.0, and Lucide 1.70.0 build the UI.
+- model weights, runtimes, recipes, and local data remain compatible with
+  `0.2.0`.
 
 ### Included from v0.2.0
 
@@ -83,7 +93,7 @@ for the complete change list and known limitations.
   descendant cleanup, execution leases, and crash recovery.
 - **Single-instance data ownership**: a second launch using the same data root
   focuses the active window; isolated `--data-dir` roots remain independent.
-- **Cross-platform releases**: Windows NSIS and macOS arm64 `.app` artifacts
+- **Cross-platform releases**: Windows NSIS and macOS arm64 DMG artifacts
   are built and verified by GitHub Actions.
 
 ## Supported Models
@@ -149,10 +159,10 @@ MFLUX/MLX and ONNX runtimes.
 
 The project keeps compile, UI, and real inference evidence separate:
 
-| Platform | 0.2.1 evidence scope | Evidence |
+| Platform | 0.2.2 evidence scope | Evidence |
 |---|---|---|
-| macOS arm64 | Reuses the 0.2.0 native and real-model baseline because inference code, runtimes, and recipes are unchanged; 0.2.1 rebuilds and checks the app package | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
-| Windows 12 GB standard tier | Reuses the 0.2.0 9/9 real-generation matrix; 0.2.1 reruns dependency, build, installer, and artifact validation | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
+| macOS arm64 | Reuses the 0.2.0 native and real-model baseline because inference code, runtimes, and recipes are unchanged; 0.2.2 rebuilds and mounts the DMG, then checks its app identity and arm64 payload | [`verification/simplify-workspace-20261111/RESULTS.md`](verification/simplify-workspace-20261111/RESULTS.md) |
+| Windows 12 GB standard tier | Reuses the 0.2.0 9/9 real-generation matrix; 0.2.2 reruns build, installer, and artifact validation | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
 | Windows 8 GB compact tier | Reuses the verified compact recipes and no-execution-surface functional baseline; model/runtime identities are unchanged | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md), [`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
 
 GitHub Actions validates builds, tests, packaging, architecture, checksums, and
@@ -181,7 +191,7 @@ Use the latest published [GitHub Release](https://github.com/Goldloli/image-stud
 and verify the downloaded file against its `SHA256SUMS-*.txt`:
 
 - **Windows x64**: `Image.Studio_<version>_x64-setup.exe`
-- **macOS arm64**: `Image-Studio-<version>-macos-arm64.zip`
+- **macOS arm64**: `Image-Studio-<version>-macos-arm64.dmg`
 
 ```bash
 shasum -a 256 -c SHA256SUMS-macos.txt
@@ -191,14 +201,16 @@ shasum -a 256 -c SHA256SUMS-macos.txt
 Get-FileHash .\Image.Studio_<version>_x64-setup.exe -Algorithm SHA256
 ```
 
+On macOS, open the verified DMG and drag `Image Studio` into Applications.
+
 The release is unsigned and not notarized:
 
 - Windows may show SmartScreen. Verify the checksum, then use
   **More info → Run anyway** only if the digest matches.
 - macOS may show **“Image Studio.app is damaged and can’t be opened”** because
   Gatekeeper applies quarantine to this unsigned build. First confirm the
-  downloaded zip matches `SHA256SUMS-macos.txt`, move the app to Applications,
-  then open Terminal and run:
+  downloaded DMG matches `SHA256SUMS-macos.txt`, open the disk image, drag
+  `Image Studio` into Applications, then open Terminal and run:
 
 ```bash
 sudo xattr -rd com.apple.quarantine "/Applications/Image Studio.app"
@@ -362,15 +374,15 @@ The public repository uses three pinned GitHub Actions workflows:
 
 - [quality.yml](.github/workflows/quality.yml): Windows x64 and macOS arm64
   formatting, Clippy, workspace tests, frontend tests/build, and OpenSpec.
-- [build.yml](.github/workflows/build.yml): Windows NSIS and macOS arm64 app
+- [build.yml](.github/workflows/build.yml): Windows NSIS and macOS arm64 DMG
   artifacts with checksums and package identity checks.
-- [release.yml](.github/workflows/release.yml): version/main provenance checks
-  and a draft GitHub Release.
+- [release.yml](.github/workflows/release.yml): version/main provenance checks,
+  an independent macOS DMG mount check, and a draft GitHub Release.
 
 Pushing a `v*` tag whose commit is on `main`, with the tag, workspace Cargo,
 Tauri, and frontend versions all equal, builds both platforms and stages a
-draft release for artifact review before publication. The `v0.2.1` release
-contains the Windows x64 NSIS installer and the macOS arm64 `.app` zip. See
+draft release for artifact review before publication. The `v0.2.2` release
+contains the Windows x64 NSIS installer and the macOS arm64 DMG. See
 [CI and release documentation](doc/14-ci-release.md) and
 [`verification/ci-release/`](verification/ci-release/) for run IDs and artifact
 digests.
