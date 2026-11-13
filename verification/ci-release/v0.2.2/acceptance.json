@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "release": "v0.2.2",
+  "status": "passed",
+  "tag_commit": "5ada451cef8ad70bc146f6e34d1dd2df044d9a63",
+  "published_at": "2026-11-13T06:35:32Z",
+  "published_url": "https://github.com/Goldloli/image-studio/releases/tag/v0.2.2",
+  "quality_run": {
+    "id": 43376989947,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/43376989947",
+    "conclusion": "success",
+    "windows_x64_seconds": 539,
+    "macos_arm64_seconds": 182
+  },
+  "release_run": {
+    "id": 43378152775,
+    "url": "https://github.com/Goldloli/image-studio/actions/runs/43378152775",
+    "conclusion": "success",
+    "verify_version_seconds": 21,
+    "windows_installer_seconds": 692,
+    "macos_dmg_seconds": 333,
+    "verify_macos_dmg_seconds": 39,
+    "draft_release_seconds": 35
+  },
+  "assets": {
+    "windows": {
+      "name": "Image.Studio_0.2.2_x64-setup.exe",
+      "bytes": 245388429,
+      "sha256": "2feceb8df119e555b7cbaf65001a17a339eb01ef07a8ff96ae569455ec702950",
+      "target": "x86_64-pc-windows-msvc"
+    },
+    "macos": {
+      "name": "Image-Studio-0.2.2-macos-arm64.dmg",
+      "bytes": 34650435,
+      "sha256": "0ec4282780ab03539dff7ce7c8312765756c1f9d2bd4591176283857737025c6",
+      "identifier": "io.github.goldloli.image-studio",
+      "version": "0.2.2",
+      "minimum_macos": "11.0",
+      "applications_link": "/Applications",
+      "architectures": {
+        "image-studio-desktop": "arm64",
+        "diagnostic-worker": "arm64",
+        "inference-supervisor": "arm64",
+        "realesrgan-worker": "arm64"
+      }
+    }
+  },
+  "post_publish_checks": {
+    "downloaded_assets": 10,
+    "macos_checksum": "pass",
+    "windows_checksum": "pass",
+    "windows_internal_package_matches": true,
+    "macos_hdiutil_verify": "pass",
+    "macos_mount_and_detach": "pass",
+    "macos_plist_and_architecture": "pass",
+    "applications_shortcut": "pass",
+    "macos_zip_count": 0,
+    "macos_dmg_count": 1,
+    "downloaded_app_launch_smoke": "pass",
+    "release_is_latest": true,
+    "release_draft": false,
+    "release_prerelease": false,
+    "release_placeholders_remaining": false,
+    "historical_v0_2_1_unchanged": true
+  },
+  "known_not_run": [
+    "Gatekeeper first-launch UI",
+    "Apple notarization",
+    "real-model inference rerun (model/runtime/recipe code unchanged)"
+  ]
+}

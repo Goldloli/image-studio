@@ -1,0 +1,1 @@
+2feceb8df119e555b7cbaf65001a17a339eb01ef07a8ff96ae569455ec702950  Image.Studio_0.2.2_x64-setup.exe

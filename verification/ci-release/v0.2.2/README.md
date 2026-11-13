@@ -1,53 +1,74 @@
-# v0.2.2 macOS DMG acceptance
+# v0.2.2 DMG release acceptance (2026-11-13)
 
-Status: **local DMG acceptance passed; GitHub publication pending.**
+Status: **passed and publicly published**
+<https://github.com/Goldloli/image-studio/releases/tag/v0.2.2>.
 
-Version `0.2.2` replaces the macOS release zip with one arm64 DMG containing
-`Image Studio.app` and an Applications shortcut. Historical releases remain
-unchanged; this acceptance applies only to the new version.
+Tag `v0.2.2` is an annotated tag on `5ada451` in `main`. This is the first
+release that publishes one macOS arm64 DMG instead of an application zip. The
+DMG contains `Image Studio.app` and an Applications shortcut. Historical
+releases remain unchanged.
 
-## Local package
+## Runs
 
-| Field | Value |
-|---|---|
-| Artifact | `Image-Studio-0.2.2-macos-arm64.dmg` |
-| Bytes | 34,661,923 |
-| SHA-256 | `56d2f161a4d92c5ac3eae13402cdabc70ac3692fa706d015c5a80526ff0d78f4` |
-| Identifier | `io.github.goldloli.image-studio` |
-| Version | `0.2.2` |
-| Minimum macOS | `11.0` |
-| Volume contents | `Image Studio.app`, `Applications -> /Applications` |
-| Unexpected zip entries | none |
+| Run | Result | Notes |
+|---|---|---|
+| [quality 43376989947](https://github.com/Goldloli/image-studio/actions/runs/43376989947) | success | macOS `3m02s`, Windows `8m59s` on `5ada451` |
+| [release 43378152775](https://github.com/Goldloli/image-studio/actions/runs/43378152775) | success | version check `21s`, Windows `11m32s`, macOS DMG `5m33s`, independent DMG verification `39s`, draft `35s` |
 
-The four executables `image-studio-desktop`, `diagnostic-worker`,
-`inference-supervisor`, and `realesrgan-worker` are arm64. LICENSE, NOTICE,
-third-party notices, font license, and prompt-library license are present.
+## Published assets
 
-## Checks
+Ten assets were downloaded again after publication:
 
-| Case | Result |
-|---|---|
-| `hdiutil create -format UDZO` | pass |
-| `hdiutil verify` | pass |
-| Read-only mount and detach | pass |
-| Bundle identity, version and minimum macOS | pass |
-| arm64 main executable and three sidecars | pass |
-| Applications shortcut and no zip entry | pass |
-| Missing input and wrong output extension fail closed | pass |
-| Truncated DMG fails `hdiutil verify` | pass |
-| Release fixture rejects zip, missing DMG and bad checksum | pass |
-| Copy app from DMG and launch with isolated data root | pass |
+| Asset | Bytes | SHA-256 |
+|---|---:|---|
+| `Image.Studio_0.2.2_x64-setup.exe` | 245,388,429 | `2feceb8df119e555b7cbaf65001a17a339eb01ef07a8ff96ae569455ec702950` |
+| `Image-Studio-0.2.2-macos-arm64.dmg` | 34,650,435 | `0ec4282780ab03539dff7ce7c8312765756c1f9d2bd4591176283857737025c6` |
+| `internal-package.json` | 1,094 | committed copy |
+| `SHA256SUMS-windows.txt` | 99 | committed copy |
+| `SHA256SUMS-macos.txt` | 101 | committed copy |
+| `README.md`, `LICENSE`, `NOTICE`, `THIRD_PARTY_NOTICES.md`, `RELEASE-NOTES.md` | - | release documents |
 
-The smoke launch remained running for eight seconds and created SQLite, host and
-execution locks, and `logs/app.log`. The visible Gatekeeper first-launch dialog
-was not exercised and remains `not_run`.
+## DMG recheck
 
-Machine-readable record: [local-dmg-validation.json](local-dmg-validation.json).
+- The downloaded DMG passes `SHA256SUMS-macos.txt`, `hdiutil verify`, read-only
+  mount and detach.
+- The volume contains `Image Studio.app` and `Applications -> /Applications`;
+  it contains no zip entry.
+- `Info.plist` reports `io.github.goldloli.image-studio`, version `0.2.2`,
+  build version `0.2.2`, and `LSMinimumSystemVersion 11.0`.
+- The desktop, diagnostic, inference supervisor, and Real-ESRGAN executables
+  are all arm64.
+- LICENSE, NOTICE, third-party notices, font license, and prompt-library
+  license are present.
+- The downloaded app was copied out of the DMG and launched with an isolated
+  data root. It remained running for eight seconds and initialized SQLite,
+  host/execution locks, and `logs/app.log`.
+- The Release has exactly one macOS DMG and zero macOS zip attachments.
 
-## Remaining acceptance
+The local pre-release DMG was 34,661,923 bytes with SHA-256 `56d2f161...`; the
+GitHub rebuild legitimately produced different bytes. Both passed the same
+structure, identity, architecture, mount, checksum, and startup checks.
 
-- Run main quality on the release commit.
-- Build the DMG through GitHub Actions.
-- Verify the downloaded release DMG and publish a draft Release.
-- Recheck the public asset, checksum, mount contents, launch smoke, latest
-  status, and absence of macOS zip attachments.
+## Windows recheck
+
+- The installer checksum and byte count match `SHA256SUMS-windows.txt` and
+  CI-generated `internal-package.json`.
+- Target is `x86_64-pc-windows-msvc`; install mode is current-user and
+  WebView2 is bundled offline.
+
+## Historical release
+
+The `v0.2.1` Release still exposes its original macOS zip, digest
+`712f70c7eca2b85f30c9caa71ab03af5dc94acff6103b4b0bea04c83a1d99213`,
+and Windows installer digest `88ff36ab...`. No historical tag or attachment
+was modified.
+
+Machine-readable records:
+[acceptance.json](acceptance.json) and
+[local-dmg-validation.json](local-dmg-validation.json).
+
+## Remaining limitations
+
+- Builds remain unsigned and not notarized.
+- Gatekeeper first-launch UI was not exercised; `not_run`.
+- CI does not download model weights or execute GPU inference.
