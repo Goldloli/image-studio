@@ -97,9 +97,25 @@ def main() -> int:
         fail(errors, "Windows build must use windows-latest")
     if build["jobs"]["macos"].get("runs-on") != "macos-15":
         fail(errors, "macOS build must use macos-15 arm64")
+    macos_upload_steps = [
+        step
+        for step in build["jobs"]["macos"].get("steps", [])
+        if step.get("name") == "Upload macOS artifact"
+    ]
+    if len(macos_upload_steps) != 1:
+        fail(errors, "macOS build must have exactly one artifact upload step")
+    elif macos_upload_steps[0].get("with", {}).get("name") != "macos-dmg":
+        fail(errors, "macOS build artifact must be named macos-dmg")
     release = yaml.safe_load((WORKFLOWS / "release.yml").read_text(encoding="utf-8"))
     if release.get("permissions", {}).get("contents") != "read":
         fail(errors, "release workflow must default to contents: read")
+    if "verify-macos-dmg" not in release["jobs"]:
+        fail(errors, "release workflow must verify the macOS DMG")
+    elif release["jobs"]["verify-macos-dmg"].get("runs-on") != "macos-15":
+        fail(errors, "macOS DMG verification must run on macos-15 arm64")
+    release_needs = release["jobs"]["release"].get("needs")
+    if release_needs != ["verify-version", "build", "verify-macos-dmg"]:
+        fail(errors, f"release dependencies must include macOS DMG verification: {release_needs}")
     if release["jobs"]["release"].get("permissions", {}).get("contents") != "write":
         fail(errors, "only the final release job may receive contents: write")
     if errors:

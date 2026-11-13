@@ -65,9 +65,41 @@ jobs:
     needs: verify-version
     uses: ./.github/workflows/build.yml
 
+  verify-macos-dmg:
+    name: Verify macOS DMG
+    needs: build
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Verify macOS runner architecture
+        shell: bash
+        run: test "$(uname -m)" = "arm64"
+
+      - name: Download macOS DMG
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: macos-dmg
+          path: target/release-artifact
+
+      - name: Verify downloaded DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd target/release-artifact
+          test "$(find . -maxdepth 1 -name '*.dmg' -type f | wc -l | tr -d ' ')" -eq 1
+          test "$(find . -maxdepth 1 -name '*.zip' -type f | wc -l | tr -d ' ')" -eq 0
+          shasum -a 256 -c SHA256SUMS-macos.txt
+          DMG=$(find . -maxdepth 1 -name '*.dmg' -type f -print -quit)
+          cd ../..
+          python3 scripts/verify-macos-dmg.py --dmg "target/release-artifact/${DMG#./}"
+
   release:
     name: Draft GitHub release
-    needs: [verify-version, build]
+    needs: [verify-version, build, verify-macos-dmg]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -90,47 +122,9 @@ jobs:
           cd artifacts
           sha256sum -c SHA256SUMS-windows.txt
           sha256sum -c SHA256SUMS-macos.txt
-          test "$(find . -maxdepth 1 -name '*.exe' -type f | wc -l)" -eq 1
-          test "$(find . -maxdepth 1 -name '*.zip' -type f | wc -l)" -eq 1
-          MAC_ZIP=$(find . -maxdepth 1 -name '*.zip' -type f -print -quit)
-          unzip -q "$MAC_ZIP" -d ../macos-unpack-check
-          cd ..
-          python3 - <<'PY'
-          import json
-          import pathlib
-          import plistlib
-
-          app = pathlib.Path("macos-unpack-check/Image Studio.app")
-          plist = app / "Contents/Info.plist"
-          with plist.open("rb") as stream:
-              metadata = plistlib.load(stream)
-          expected = json.loads(
-              pathlib.Path("apps/desktop/tauri.conf.json").read_text(encoding="utf-8")
-          )
-          assert metadata["CFBundleIdentifier"] == expected["identifier"]
-          assert metadata["CFBundleShortVersionString"] == expected["version"]
-          assert metadata["CFBundleVersion"] == expected["version"]
-          assert metadata["LSMinimumSystemVersion"] == "11.0"
-          for binary in (
-              "image-studio-desktop",
-              "diagnostic-worker",
-              "inference-supervisor",
-              "realesrgan-worker",
-          ):
-              path = app / "Contents/MacOS" / binary
-              assert path.is_file(), path
-              assert "arm64" in __import__("subprocess").check_output(
-                  ["file", str(path)], text=True
-              )
-          for resource in (
-              "LICENSE",
-              "NOTICE",
-              "THIRD_PARTY_NOTICES.md",
-              "OFL.txt",
-              "PROMPT-LIBRARY-LICENSE.txt",
-          ):
-              assert (app / "Contents/Resources" / resource).is_file(), resource
-          PY
+          test "$(find . -maxdepth 1 -name '*.exe' -type f | wc -l | tr -d ' ')" -eq 1
+          test "$(find . -maxdepth 1 -name '*.dmg' -type f | wc -l | tr -d ' ')" -eq 1
+          test "$(find . -maxdepth 1 -name '*.zip' -type f | wc -l | tr -d ' ')" -eq 0
 
       - name: Prepare release documents
         shell: bash
