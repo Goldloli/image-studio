@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft, ArrowUp, Check, ChevronDown, Copy, ExternalLink, Heart,
   Image as ImageIcon, LoaderCircle, RefreshCw, Search, SlidersHorizontal,
-  Sparkles, Trash2, X,
+  Trash2, X,
 } from 'lucide-react';
 import { api, bytesLabel, native, promptImageUrl } from './studio-api';
 import {
@@ -93,7 +93,6 @@ function PromptImage({
       <span>{state?.status === 'error' ? '图片加载失败' : state?.status === 'loading' ? '正在加载示例图' : '联网后加载示例图'}</span>
       {state?.status === 'error' && (allowRetry ? <button type="button" onClick={onLoad}><RefreshCw size={11}/>重试</button> : <span>打开详情后重试</span>)}
     </div>}
-    <span className="prompt-example-badge">上游示例</span>
   </div>;
 }
 
@@ -291,12 +290,14 @@ export function PromptLibrary({
     <header className="prompt-library-heading">
       <div>
         <button className="prompt-back" type="button" onClick={onBack}><ArrowLeft size={14}/>返回创作</button>
-        <span className="library-kicker"><Sparkles size={12}/> PROMPT INSPIRATION</span>
         <h1>灵感库</h1>
-        <p>看图找灵感，选一句开始创作。示例来自上游社区，不代表本机生成或模型验证结果。</p>
+        <p>示例来自上游社区，不代表本机生成或模型验证结果。</p>
       </div>
       <div className="prompt-heading-actions">
-        <span className="prompt-source-version">目录 {catalog.catalogVersion}<br/>{catalog.importedCount} 条 · 上游 {catalog.upstreamCommit.slice(0, 8)}</span>
+        {catalog.catalogVersion && <details className="prompt-catalog-details">
+          <summary>目录 {catalog.catalogVersion}</summary>
+          <div>{catalog.importedCount} 条 · {catalog.upstreamRepository.replace('https://github.com/', '')}@{catalog.upstreamCommit.slice(0, 8)}</div>
+        </details>}
         <button type="button" className="secondary" onClick={() => void clearCache()} title="清理由灵感库独立管理的图片缓存">
           <Trash2 size={13}/>{cacheArmed ? '再次点击确认' : `缓存 ${bytesLabel(snapshot.cache.bytes)}`}
         </button>
@@ -329,7 +330,7 @@ export function PromptLibrary({
         {catalog.categories.map(category => <button key={category.id} className={query.categoryId === category.id ? 'active' : ''} onClick={() => setQuery(current => ({ ...current, categoryId: query.categoryId === category.id ? '' : category.id }))}><span>{category.label}</span><b>{category.count}</b></button>)}
       </aside>
       <div className="prompt-results">
-        <div className="prompt-result-line"><span>{loading ? '正在读取目录' : `${cases.length} 个案例`}</span>{query.view === 'favorites' && missingFavorites.length > 0 && <small>{missingFavorites.length} 个已移除收藏以占位显示</small>}</div>
+        {!loading && (cases.length !== catalog.cases.length || query.view !== 'all') && <div className="prompt-result-line"><span>{cases.length} 个案例</span></div>}
         {loading ? <div className="prompt-loading"><LoaderCircle size={18} className="spin"/>正在恢复灵感库</div> : cases.length === 0 ? <div className="prompt-empty"><ImageIcon size={26}/><h2>{query.view === 'favorites' ? '还没有匹配的收藏' : '没有匹配的案例'}</h2><p>可以清除关键词或筛选后继续浏览。</p><button className="secondary" onClick={() => setQuery(emptyPromptQuery())}>清除筛选</button></div> : <div className="prompt-grid">
           {cases.map(item => <PromptCard key={item.id} item={item} favorite={favoriteSet.has(item.id)} active={active} image={images[item.id]} onOpen={() => setSelectedId(item.id)} onFavorite={() => void favorite(item)} onLoadImage={() => loadImage(item)} onImageError={() => setImages(previous => ({ ...previous, [item.id]: { status: 'error', error: '图片解码失败' } }))}/>)}
         </div>}
@@ -342,19 +343,18 @@ export function PromptLibrary({
         <button ref={detailClose} className="prompt-detail-close" type="button" aria-label="关闭案例详情" onClick={() => setSelectedId(null)}><X size={16}/></button>
         <div className="prompt-detail-image"><PromptImage item={selected} active={active} state={images[selected.id]} onLoad={() => loadImage(selected)} onImageError={() => setImages(previous => ({ ...previous, [selected.id]: { status: 'error', error: '图片解码失败' } }))} compact/></div>
         <div className="prompt-detail-content">
-          <div className="prompt-detail-meta"><span>{selected.category.label}</span><span>案例 #{selected.sourceCaseId}</span><span>上游示例 · 非本机生成</span></div>
           <h2>{selected.title}</h2>
-          <div className="prompt-detail-tags">{selected.styles.map(style => <span key={style.sourceLabel}>{style.label}</span>)}{selected.scenes.map(scene => <span key={scene.sourceLabel}>{scene.label}</span>)}</div>
-          <div className="prompt-usage"><strong>{promptUsageLabel(selected)}</strong>{selected.usage.notes.length ? selected.usage.notes.map(note => <p key={note}>{note}</p>) : <p>未发现参考图或编辑依赖；仍请按当前模型的实际能力验证效果。</p>}<small>上游未提供可信的精确模型版本、种子或生成参数，本应用不作复现保证。</small></div>
+          <div className="prompt-detail-tags"><span>{selected.category.label}</span>{selected.styles.map(style => <span key={style.sourceLabel}>{style.label}</span>)}{selected.scenes.map(scene => <span key={scene.sourceLabel}>{scene.label}</span>)}</div>
+          <div className="prompt-usage"><strong>{promptUsageLabel(selected)}</strong>{selected.usage.notes.map(note => <p key={note}>{note}</p>)}</div>
           <div className="prompt-copy-heading"><strong>完整提示词</strong><button type="button" onClick={() => void copyPrompt(selected)}>{copied ? <Check size={12}/> : <Copy size={12}/>}{copied ? '已复制' : '复制原文'}</button></div>
           <pre className="prompt-full-text">{selected.prompt}</pre>
           <div className="prompt-sources"><span>来源 {selected.source.label}</span>{selected.source.url ? <a href={selected.source.url} target="_blank" rel="noreferrer">原帖<ExternalLink size={11}/></a> : <span>未提供原帖</span>}<a href={selected.source.githubUrl} target="_blank" rel="noreferrer">上游案例<ExternalLink size={11}/></a></div>
+          <details className="prompt-model-evidence"><summary>模型与参数说明</summary><small>上游未提供可信的精确模型版本、种子或生成参数，本应用不作复现保证。</small></details>
           <div className="prompt-detail-actions">
             <button className="primary-action" type="button" onClick={() => onUsePrompt({ caseId: selected.id, title: selected.title, prompt: selected.prompt, target: 'new' })}><ArrowUp size={13}/>新建会话并填入</button>
             <button className="secondary" type="button" onClick={() => onUsePrompt({ caseId: selected.id, title: selected.title, prompt: selected.prompt, target: 'current' })}>用于当前会话</button>
             <button className={`secondary prompt-detail-favorite ${favoriteSet.has(selected.id) ? 'is-favorite' : ''}`} type="button" aria-pressed={favoriteSet.has(selected.id)} onClick={() => void favorite(selected)}><Heart size={13} fill={favoriteSet.has(selected.id) ? 'currentColor' : 'none'}/>{favoriteSet.has(selected.id) ? '已收藏' : '收藏'}</button>
           </div>
-          <small className="prompt-action-note">填入提示词不会自动发送，也不会切换为上游展示模型。</small>
         </div>
       </article>
     </div>}

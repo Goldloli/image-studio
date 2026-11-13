@@ -14,10 +14,11 @@ const activeStates = ['Pending', 'Submitted', 'Preparing', 'Running', 'Committin
  * its polling. Retry is local to the record; the caller's surrounding context
  * keeps its state.
  */
-export function ProductionRecord({ jobId, fallback, onError }: {
+export function ProductionRecord({ jobId, fallback, onError, showSummary = true }: {
   jobId: string | null;
   fallback?: string;
   onError?: (message: string) => void;
+  showSummary?: boolean;
 }) {
   const [detail, setDetail] = useState<TaskCenterDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -64,16 +65,14 @@ export function ProductionRecord({ jobId, fallback, onError }: {
       {active && <LoaderCircle size={11} className="spin"/>}
       <strong>{detail.nextAction}</strong>
     </p>
-    <dl className="record-summary">
+    {showSummary && <dl className="record-summary">
       <div><dt>会话</dt><dd>{task.conversationTitle}</dd></div>
       <div><dt>型号</dt><dd>{modelLabel(task.modelId)}</dd></div>
       <div><dt>尺寸</dt><dd>{dimensionText(detail.requestedWidth, detail.requestedHeight, task.width, task.height)}</dd></div>
       <div><dt>种子</dt><dd>{task.seed === null ? '随机' : task.seed}</dd></div>
       <div><dt>创建</dt><dd>{formatTime(task.createdAt)}</dd></div>
       <div><dt>完成</dt><dd>{formatTime(task.completedAt)}</dd></div>
-      <div><dt>Job</dt><dd className="mono">{task.id}</dd></div>
-      <div><dt>当前 Attempt</dt><dd className="mono">{task.attemptId}</dd></div>
-    </dl>
+    </dl>}
     {task.error && <div className="record-error-card">
       <strong>{detail.errorCategory ? `错误 · ${errorCategoryLabel(detail.errorCategory)}` : '错误'}</strong>
       <p>{task.error}</p>
@@ -85,7 +84,6 @@ export function ProductionRecord({ jobId, fallback, onError }: {
         <span className={`record-attempt-dot state-${item.state}`}/>
         <div>
           <strong>{stateLabel(item.state)} · {formatTime(item.startedAt)}</strong>
-          <span className="mono">{item.attemptId}</span>
           {item.phase && <small>阶段 {item.phase}</small>}
           {item.error && <small className="error-text">{item.error}</small>}
         </div>
@@ -95,6 +93,8 @@ export function ProductionRecord({ jobId, fallback, onError }: {
       完整制作记录<ChevronDown size={13} className={advancedOpen ? 'rotated' : ''}/>
     </button>
     {advancedOpen && <div className="record-advanced">
+      <div><span>Job</span><code>{task.id}</code></div>
+      {task.attemptId && <div><span>当前 Attempt</span><code>{task.attemptId}</code></div>}
       <div><span>输出哈希</span><code>{detail.advanced.outputHash ?? '尚无正式输出'}</code></div>
       <h4>RunManifest</h4>
       <pre>{manifestText(detail.advanced.manifest)}</pre>

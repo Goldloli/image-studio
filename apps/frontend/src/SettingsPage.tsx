@@ -115,6 +115,17 @@ export function SettingsPage({
     }
     return '';
   }, [defaults, selectedTextRecipe]);
+  const defaultsStatusText = defaultsSaveStatus === 'saving'
+    ? '正在保存默认值…'
+    : defaultsSaveStatus === 'idle' && dirty
+      ? '有尚未保存的创作默认值。'
+      : '';
+  const storageEntries = snapshot?.storage.entries ?? [];
+  const sharedAvailableBytes = storageEntries.length > 0
+    && storageEntries.every(entry => entry.availableBytes !== null)
+    && new Set(storageEntries.map(entry => bytesLabel(entry.availableBytes!))).size === 1
+      ? storageEntries[0].availableBytes
+      : null;
 
   const chooseGroup = (next: Group) => {
     if (next === group) return;
@@ -209,19 +220,17 @@ export function SettingsPage({
     <aside className="section-sidebar settings-sidebar">
       <h2>设置</h2>
       <button className="back-button" onClick={onBack}><ChevronLeft size={16}/>返回创作</button>
-      <span className="section-label">应用配置</span>
       {groups.map(({ id, label, icon: Icon }) => (
         <button key={id} className={group === id ? 'active' : ''} onClick={() => chooseGroup(id)}>
           <Icon size={17}/>{label}
           {id === 'defaults' && dirty && <i className="unsaved-dot" title="有未保存的创作默认值"/>}
         </button>
       ))}
-      <p className="sidebar-note">界面偏好即时保存；创作默认值显式整组保存。<br/>应用偏好与项目作品分开存储。</p>
     </aside>
 
     <section className="detail-page settings-detail settings-detail-v2">
       <div className="settings-topline">
-        <div><h1>{groups.find(item => item.id === group)?.label}</h1><p>真实生效并可跨重启恢复的应用设置</p></div>
+        <div><h1>{groups.find(item => item.id === group)?.label}</h1></div>
         <button className="secondary" disabled={loading} onClick={() => void reloadAll()}><RefreshCw size={13} className={loading ? 'spin' : ''}/>重新读取</button>
       </div>
 
@@ -246,7 +255,7 @@ export function SettingsPage({
           />}
 
           {group === 'defaults' && <div className="settings-section">
-            <SectionHeading title="新会话默认值" text="只影响以后新建的会话；不会复制或改写当前会话的瞬时选择。" />
+            <p className="settings-context">只影响以后新建的会话，不会改写当前会话。</p>
             <div className="defaults-form">
               <label>
                 <span>默认模型</span>
@@ -255,7 +264,7 @@ export function SettingsPage({
                     {model.displayName}{model.productStatus === 'planned' ? '（计划中）' : ''}{model.hardwareEligible ? '' : '（设备不满足）'}
                   </option>)}
                 </select>
-                <small>{modelAvailabilityNote(snapshot, defaults.modelId)}</small>
+                {modelAvailabilityNote(snapshot, defaults.modelId) && <small>{modelAvailabilityNote(snapshot, defaults.modelId)}</small>}
               </label>
               <fieldset>
                 <legend>默认画幅</legend>
@@ -266,12 +275,10 @@ export function SettingsPage({
               <label>
                 <span>每轮图片数量</span>
                 <input type="number" min={1} max={1} value={defaults.count} onChange={event => setDefaults({ ...defaults, count: Number(event.target.value) })}/>
-                <small>当前固定为 1 张。</small>
               </label>
               <label>
                 <span>种子策略</span>
                 <input inputMode="numeric" value={defaults.seed} aria-invalid={!validSeed(defaults.seed)} placeholder="留空随机" onChange={event => setDefaults({ ...defaults, seed: event.target.value })}/>
-                <small>填写 0–4294967295 时固定种子。</small>
               </label>
             </div>
             {(validationError || defaultsError) && <p className="error-text" role="alert">{defaultsError || validationError}</p>}
@@ -283,17 +290,13 @@ export function SettingsPage({
               <button className="secondary" disabled={!dirty || defaultsSaveStatus === 'saving'} onClick={() => { setDefaults(savedDefaults); setDefaultsError(''); setDefaultsSaveStatus('idle'); }}>放弃更改</button>
               <button className="secondary" onClick={() => void persistDefaults(builtInCreationDefaults)}>恢复本组默认</button>
             </div>
-            <p className={`save-status ${defaultsSaveStatus === 'error' ? 'is-error' : ''}`} role="status">
-              {defaultsSaveStatus === 'saving' ? '正在原子保存整组默认值…'
-                : defaultsSaveStatus === 'saved' ? '创作默认值已保存，只影响以后新建的会话。'
-                  : dirty ? '有尚未保存的创作默认值。' : '当前表单与已保存默认值一致。'}
-            </p>
+            {defaultsStatusText && <p className="save-status" role="status">{defaultsStatusText}</p>}
           </div>}
 
           {group === 'storage' && <div className="settings-section">
-            <SectionHeading title="本地存储" text="路径和占用由宿主读取；未知值不会显示成 0 或“不支持”。" />
+            {sharedAvailableBytes !== null && <p className="storage-availability">可用空间 {bytesLabel(sharedAvailableBytes)}</p>}
             <div className="storage-list">
-              {snapshot?.storage.entries.map(entry => <article key={entry.id} className={`storage-row status-${entry.status}`}>
+              {storageEntries.map(entry => <article key={entry.id} className={`storage-row status-${entry.status}`}>
                 <span className="storage-icon"><Database size={17}/></span>
                 <div>
                   <strong>{entry.label}</strong>
@@ -301,17 +304,16 @@ export function SettingsPage({
                   {entry.error && <p className={entry.error ? 'error-text' : ''}>{entry.error || (entry.status === 'missing' ? '目录尚未创建。' : '')}</p>}
                 </div>
                 <span className="storage-size">{entry.status === 'error' ? '读取失败' : bytesLabel(entry.bytes)}</span>
-                <span className="storage-free">{entry.availableBytes === null ? '可用空间未知' : `可用 ${bytesLabel(entry.availableBytes)}`}</span>
+                <span className="storage-free">{sharedAvailableBytes === null ? (entry.availableBytes === null ? '可用空间未知' : `可用 ${bytesLabel(entry.availableBytes)}`) : ''}</span>
                 <button className="secondary" disabled={entry.status === 'missing' || storagePending === entry.id} onClick={() => void openStorage(entry.id)}>
                   {storagePending === entry.id ? <LoaderCircle className="spin" size={12}/> : <FolderOpen size={12}/>}定位
                 </button>
               </article>)}
             </div>
-            <p className="settings-boundary">当前不提供目录迁移、删除或任意路径输入。相关操作需要独立的空间预检、引用检查、忙碌互斥和回滚设计。</p>
+            <p className="settings-boundary">当前仅展示和定位本地目录，不提供迁移、删除或任意路径输入。</p>
           </div>}
 
           {group === 'runtime' && <div className="settings-section">
-            <SectionHeading title="运行环境" text="设备探针、整模型运行与实机验收是不同事实。" />
             <div className="runtime-summary">
               <InfoRow label="平台" value={`${snapshot?.environment.platform ?? '—'} · ${snapshot?.environment.architecture ?? '—'}`}/>
               <InfoRow label="运行时" value={`${snapshot?.environment.runtimeName ?? '—'} ${snapshot?.environment.runtimeVersion ?? ''} · Python ${snapshot?.environment.pythonVersion ?? '—'}`}/>
@@ -324,24 +326,27 @@ export function SettingsPage({
             <div className="runtime-summary">
               {(snapshot?.environment.runtimes ?? []).map(entry => <InfoRow
                 key={entry.installId}
-                label={`${entry.label} · ${entry.runtimeLockId ?? '未登记运行时'}`}
-                value={`${entry.phase} · 模型${entry.modelReady ? '就绪' : '未就绪'} · 环境${entry.runtimeReady ? '就绪' : '未就绪'} · 设备${entry.deviceVerified ? '已验证' : '未验证'} · 硬件门槛${entry.hardwareEligible ? '满足' : `不满足（${entry.hardwareReason ?? '显存或内存不足'}）`}${entry.lastError ? ` · ${entry.lastError}` : ''}`}
+                label={`${entry.label}${entry.runtimeLockId ? ` · ${entry.runtimeLockId}` : ''}`}
+                value={`${entry.phase === 'ready' ? '已就绪' : entry.phase} · 模型${entry.modelReady ? '就绪' : '未就绪'} · 环境${entry.runtimeReady ? '就绪' : '未就绪'} · 设备${entry.deviceVerified ? '已验证' : '未验证'} · 硬件门槛${entry.hardwareEligible ? '满足' : `不满足（${entry.hardwareReason ?? '显存或内存不足'}）`}${entry.lastError ? ` · ${entry.lastError}` : ''}`}
               />)}
             </div>
-            <p className="settings-boundary">打开本页不会启动后台进程，也不会生成性能排名；这里只展示宿主实际报告的运行环境事实。</p>
+            <p className="settings-boundary">本页只展示宿主已报告的环境事实，不启动后台进程或生成性能排名。</p>
           </div>}
 
           {group === 'about' && <div className="settings-section about-v2">
             <div className="about-brand">
-              <div className="about-copy"><span className="neutral-badge">{snapshot?.about.version ?? '0.1.1'} · Preview</span><h2>Image Studio</h2><p>本地图片创作工作台</p></div>
+              <div className="about-copy"><span className="neutral-badge">{snapshot?.about.version ?? '0.1.1'}</span><h2>Image Studio</h2></div>
             </div>
-            <InfoRow label="平台" value={`${snapshot?.about.productName ?? 'Image Studio'} · ${snapshot?.environment.platform ?? '—'}`}/>
+            <InfoRow label="平台" value={snapshot?.environment.platform ?? '—'}/>
             <InfoRow label="处理方式" value={snapshot?.about.localProcessing ? '模型推理在本机受管 worker 中执行' : '状态未知'}/>
             <InfoRow label="当前能力" value={snapshot?.about.capabilityScope ?? '正在读取'}/>
             <InfoRow label="示例来源" value={snapshot?.about.examples ?? '正在读取'}/>
-            <InfoRow label="字体许可" value={snapshot?.about.fontLicense ?? '正在读取'}/>
-            <div className="about-sources"><strong>模型与依赖来源</strong>{snapshot?.about.modelSources.map(source => <code key={source}>{source}</code>)}</div>
-            <PromptLicenseSources/>
+            <details className="about-evidence">
+              <summary>模型、字体与内容许可</summary>
+              <InfoRow label="字体许可" value={snapshot?.about.fontLicense ?? '正在读取'}/>
+              <div className="about-sources"><strong>模型与依赖来源</strong>{snapshot?.about.modelSources.map(source => <code key={source}>{source}</code>)}</div>
+              <PromptLicenseSources/>
+            </details>
             <div className="about-boundaries">
               <span>自动更新：{snapshot?.about.autoUpdateSupported ? '可用' : '未提供'}</span>
               <span>在线模型服务：{snapshot?.about.onlineProviderSupported ? '可用' : '未提供'}</span>
@@ -379,7 +384,7 @@ function AppearanceSettings({
   onReset: () => void;
 }) {
   return <div className="settings-section">
-    <SectionHeading title="界面偏好" text="改动会立即应用到界面，并写入独立的版本化应用偏好。" />
+    <div className="settings-section-heading"><h2>界面偏好</h2></div>
     <div className="theme-options settings-themes">
       {([
         ['light', '浅色', Sun],
@@ -387,27 +392,23 @@ function AppearanceSettings({
         ['system', '跟随系统', Monitor],
       ] as const).map(([value, label, Icon]) => <button key={value} className={`theme-option ${appearance.theme === value ? 'chosen' : ''}`} aria-pressed={appearance.theme === value} onClick={() => onChange({ theme: value })}>
         <div className={`theme-miniature ${value === 'dark' ? 'dark' : ''}`}><i/><div><span/><section/></div></div>
-        <span><Icon size={13}/>{label}{appearance.theme === value && <span className="theme-check">✓</span>}</span>
+        <span><Icon size={13}/>{label}</span>
       </button>)}
     </div>
     <div className="appearance-grid">
       <label><span>字号</span><select value={appearance.fontScale} onChange={event => onChange({ fontScale: event.target.value as AppearancePreferences['fontScale'] })}><option value="small">紧凑</option><option value="default">标准</option><option value="large">较大</option></select></label>
       <label><span>界面密度</span><select value={appearance.density} onChange={event => onChange({ density: event.target.value as AppearancePreferences['density'] })}><option value="comfortable">舒适</option><option value="compact">紧凑</option></select></label>
-      <label className="toggle-row"><span><strong>减弱动效</strong><small>关闭非必要过渡与旋转</small></span><input type="checkbox" checked={appearance.reducedMotion} onChange={event => onChange({ reducedMotion: event.target.checked })}/></label>
-      <label className="toggle-row"><span><strong>折叠会话侧栏</strong><small>跨重启保留侧栏状态</small></span><input type="checkbox" checked={appearance.sidebarCollapsed} onChange={event => onChange({ sidebarCollapsed: event.target.checked })}/></label>
+      <label className="toggle-row"><span><strong>减弱动效</strong></span><input type="checkbox" checked={appearance.reducedMotion} onChange={event => onChange({ reducedMotion: event.target.checked })}/></label>
+      <label className="toggle-row"><span><strong>折叠会话侧栏</strong></span><input type="checkbox" checked={appearance.sidebarCollapsed} onChange={event => onChange({ sidebarCollapsed: event.target.checked })}/></label>
     </div>
     <div className="defaults-actions">
       <button className="secondary" onClick={onReset}><RefreshCw size={13}/>恢复本组默认</button>
       {status === 'error' && <button className="secondary" onClick={() => onChange({})}>重试保存</button>}
-      <span className={`save-status ${status === 'error' ? 'is-error' : ''}`} role="status">
-        {status === 'saving' ? '正在保存外观偏好…' : status === 'error' ? `保存失败：${error}` : '外观偏好已保存到本机'}
-      </span>
+      {status !== 'saved' && <span className={`save-status ${status === 'error' ? 'is-error' : ''}`} role="status">
+        {status === 'saving' ? '正在保存外观偏好…' : `保存失败：${error}`}
+      </span>}
     </div>
   </div>;
-}
-
-function SectionHeading({ title, text }: { title: string; text: string }) {
-  return <div className="settings-section-heading"><h2>{title}</h2><p>{text}</p></div>;
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
@@ -456,5 +457,5 @@ function modelAvailabilityNote(snapshot: SettingsSnapshot | null, modelId: strin
   if (model.productStatus === 'planned') return '该模型已登记但尚未接入；可作为默认选择保存，新会话会保留原因且不会自动替换。';
   if (!model.executable) return '该模型已登记但当前组件或运行环境未就绪；新会话会保留选择。';
   if (isNonCommercialLicense(model)) return '该模型当前可执行；许可见模型页，仅限非商业用途。';
-  return '该模型当前可执行。';
+  return '';
 }

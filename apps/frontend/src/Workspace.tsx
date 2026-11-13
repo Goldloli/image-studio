@@ -245,7 +245,7 @@ function TurnCard({
       <div className="response-source"><span className="assistant-mark"><Palette size={15}/></span><div><strong>Image Studio</strong><span>{modelShortName(turn.modelId)} · {turn.capabilityId.includes('.edit.') ? '单图编辑' : turn.capabilityId.includes('.remove-background.') ? (showMask ? '前景蒙版' : '透明背景') : turn.capabilityId.includes('.upscale.') ? turn.jobId ? `精确 4× · ${turn.width}×${turn.height}` : '固定 4× · 正在校验源图' : `${turn.aspect} · 种子 ${turn.seed ?? '随机'}`}</span></div></div>
       <div className="image-card" style={cardStyle}>
         <div className="image-card-media">
-        {complete && <button className="image-card-open" type="button" onClick={() => onOpen(showMask)} aria-label={showMask ? '放大查看前景蒙版' : '放大查看生成图片'}><img src={assetUrl(displayedAssetId!)} alt={showMask ? '前景蒙版' : turn.prompt} draggable={false} onLoad={() => setImageReady(true)} onError={() => setImageFailed(true)}/>{imageReady && <span className="image-open-hint"><Expand size={14}/>查看大图</span>}</button>}
+        {complete && <button className="image-card-open" type="button" onClick={() => onOpen(showMask)} aria-label={showMask ? '放大查看前景蒙版' : '放大查看生成图片'}><img src={assetUrl(displayedAssetId!)} alt={showMask ? '前景蒙版' : turn.prompt} draggable={false} onLoad={() => setImageReady(true)} onError={() => setImageFailed(true)}/></button>}
         {(!complete || !imageReady) && <div className="image-card-placeholder">
           {workRemoved ? <><ImageIcon size={25}/><strong>{removalLabel}</strong><span>{displayedDeletionState === 'failed' ? (displayedError || '清理未完成，可在作品页重试删除。') : '图片及配套产物已移除；原制作记录仍可查看。'}</span></> : turn.state === 'Succeeded' && (!displayedAvailable || imageFailed) ? <><ImageIcon size={25}/><strong>任务已完成，图片无法显示</strong><span>{displayedError || 'PNG 可能已被移动、改写或无法解码。'}</span></> : active || turn.state === 'Succeeded' ? <><LoaderCircle size={25} className="spin"/><strong>{progress.label}</strong><span>{turn.state === 'Succeeded' ? '正在解码并校验 PNG' : '生成结果会在此处原位出现'}</span></> : <>{turn.state === 'Rejected' ? <X size={24}/> : <ImageIcon size={25}/>}<strong>{stateLabel(turn.state)}</strong><span>{turn.error || (turn.state === 'Cancelled' ? '本次生成已取消' : '本次执行没有可显示结果')}</span></>}
         </div>}
@@ -405,7 +405,8 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
   const systemBusy = Boolean(studio?.execution.busy || localBusy || visibleConversations.some(conversation => conversation.running));
   const runningConversation = visibleConversations.find(conversation => conversation.running)
     ?? visibleConversations.find(conversation => optimistic.some(turn => turn.id.startsWith('local-') && turn.conversationId === conversation.id && activeStates.includes(turn.state)));
-  const overByteBudget = new TextEncoder().encode(active.prompt).length > 16384;
+  const promptByteCount = new TextEncoder().encode(active.prompt).length;
+  const overByteBudget = promptByteCount > 16384;
   const validParams = supportedDraftParams(active.params);
   const isRemoveBackground = active.params.capabilityId === BIREFNET_CAPABILITY;
   const isUpscale = active.params.capabilityId === REALESRGAN_CAPABILITY;
@@ -1241,8 +1242,17 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
               : !validText
                 ? isToolComposer
                   ? '导入源图后开始'
-                  : '输入提示词后发送'
-                : 'Enter 发送 · Shift+Enter 换行';
+                  : ''
+                : '';
+  const saveNote = !native
+    ? '浏览器预览 · 草稿保留于本次页面'
+    : !loaded
+      ? '正在恢复本地会话'
+      : saveStatus === 'error'
+        ? `保存失败：${saveError}`
+        : saveStatus === 'saving'
+          ? '正在保存草稿…'
+          : '';
   const composerAction = composerActionFor({ submittingDraftId, currentActiveTurn, canSend });
   const sendButton = composerAction.kind === 'stop' && currentActiveTurn
     ? <button className="composer-send is-stop" disabled={currentActiveTurn.state === 'CancelRequested'} aria-label="停止生成" title="停止本次生成" onClick={event => { if (isPrimaryActivation(event.detail)) void cancelTurn(currentActiveTurn); }}>{currentActiveTurn.state === 'CancelRequested' ? <LoaderCircle size={17} className="spin"/> : <Square size={15}/>}</button>
@@ -1268,15 +1278,14 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
     <main className="conversation-main">
       <header className="conversation-header">
         <button className="sidebar-toggle" aria-label={sidebarCollapsed ? '展开会话列表' : '收起会话列表'} onClick={() => onSidebarCollapsedChange(!sidebarCollapsed)}>{sidebarCollapsed ? <PanelLeft size={18}/> : <PanelLeftClose size={18}/>}</button>
-        <div className="conversation-heading"><h1>{currentConversation.title}</h1><span>{studio?.execution.busy && currentActiveTurn ? studio.execution.summary : '本地图片创作'}</span></div>
+        <div className="conversation-heading"><h1>{currentConversation.title}</h1>{studio?.execution.busy && currentActiveTurn && <span>{studio.execution.summary}</span>}</div>
         <div className="header-actions">{runningConversation && runningConversation.id !== currentConversation.id && <button className="running-session-link" onClick={() => void switchConversation(runningConversation)}><span className="running-dot"/>查看正在生成的会话</button>}<button className="header-new" disabled={!loaded || switching || submittingDraftId !== null || promptActionBusy} onClick={() => void createConversation()}><Plus size={14}/>新建</button></div>
       </header>
       <div className="conversation-timeline" ref={timeline} onScroll={event => { const element = event.currentTarget; nearBottom.current = element.scrollHeight - element.scrollTop - element.clientHeight < 96; }}>
         {turns.length > 0 && serverPage?.hasMore && <div className="history-loader"><button disabled={loadingOlder} onClick={() => void loadOlder()}>{loadingOlder ? <LoaderCircle size={13} className="spin"/> : <ChevronUp size={13}/>}加载更早记录</button></div>}
         {turns.length === 0 ? <section className="conversation-empty">
-          <span className="ws-kicker"><Palette size={14}/> IMAGE STUDIO</span>
           <h2>从一个画面开始</h2>
-          <p>写下想法并按 Enter。每一轮提示词和生成结果都会留在这个会话里。</p>
+          <p>描述画面，生成结果会留在当前会话。</p>
           <div className="empty-example-grid">{samples.map((sample, index) => <article key={sample.src}>
             <button className="empty-example-image" onClick={() => setViewer({ kind: 'sample', index })}><img src={sample.src} alt={sample.title}/><span>{sample.tag} · 示例</span></button>
             <div><strong>{sample.title}</strong><button onClick={() => applyPrompt(sample.prompt)}>使用提示词 <ArrowUp size={11}/></button></div>
@@ -1297,7 +1306,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
         {replaceLibraryPrompt && <div className="replace-prompt-bar" role="dialog" aria-label="替换为灵感提示词"><span>当前输入已有文字。用「{replaceLibraryPrompt.title}」的完整提示词替换吗？</span><button onClick={confirmLibraryPrompt}>替换</button><button onClick={() => setReplaceLibraryPrompt(null)}>取消</button></div>}
         <button className="collapsed-composer" onClick={() => dispatch({ type: 'collapse' })}><ChevronUp size={15}/><span>{isRemoveBackground ? 'BiRefNet 去背景' : isUpscale ? 'Real-ESRGAN 4× 放大' : active.prompt || '展开提示词，继续创作'}</span></button>
         <div className="conversation-composer">
-          <div className="composer-caption"><span>{currentConversation.title}</span><span>{isRemoveBackground ? '透明 PNG + 蒙版' : isUpscale ? '固定 4× PNG' : `${Array.from(active.prompt).length} 字符`}<IconButton label="收起输入区" onClick={() => { textarea.current?.blur(); dispatch({ type: 'collapse' }); }}><ChevronDown size={14}/></IconButton></span></div>
+          <div className="composer-caption"><span>{promptByteCount >= 13107 && (overByteBudget ? '超出 16 KiB 预算' : '接近 16 KiB 预算')}<IconButton label="收起输入区" onClick={() => { textarea.current?.blur(); dispatch({ type: 'collapse' }); }}><ChevronDown size={14}/></IconButton></span></div>
           {isRemoveBackground ? <div className="tool-composer-summary" role="note"><ListChecks size={17}/><span><strong>提取主体并去除背景</strong><small>使用 BiRefNet epoch_244 · CPU · 输出原图尺寸的透明 PNG 与 8-bit 蒙版</small></span></div> : isUpscale ? <div className="tool-composer-summary" role="note"><ListChecks size={17}/><span><strong>将图片精确放大 4 倍</strong><small>使用 Real-ESRGAN x4plus · {MODEL_PLATFORM === 'windows' ? 'ncnn Vulkan GPU' : 'Metal GPU'} · tile 128 · 输出各边精确 4 倍的 PNG</small></span></div> : <textarea ref={textarea} value={active.prompt} readOnly={submittingDraftId === active.id} aria-label="图片提示词" placeholder="描述你想创作的画面……" spellCheck={false}
             onChange={event => dispatch({ type: 'edit', value: event.target.value, record: !compositions.current.has(active.id) })}
             onKeyDown={handleEditorKeyDown}
@@ -1326,7 +1335,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
               {!isToolComposer && <IconButton label={copyState === 'composer' ? '已复制提示词' : '复制提示词'} disabled={!active.prompt} onClick={() => void copyText(active.prompt, 'composer')}>{copyState === 'composer' ? <Check size={14}/> : <Copy size={14}/>}</IconButton>}
             </div>
             <div className="composer-right">
-              <span className="composer-status">{currentActiveTurn ? studio?.execution.summary : composerStatus}</span>
+              {(currentActiveTurn || composerStatus) && <span className="composer-status">{currentActiveTurn ? studio?.execution.summary : composerStatus}</span>}
               <div className="composer-popup-anchor" data-composer-popup>
                 <button className="model-select" aria-expanded={popup === 'models'} title={selectedModelBlockedReason ?? (selectedModelExecutable ? '当前模型可执行' : '当前模型不可执行，请在模型菜单中选择已就绪型号')} onClick={() => { if (popup === 'models') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('models'); }}><span className="model-mark"><Palette size={13}/></span><span>{selectedModelLabel}</span><ChevronDown size={12}/></button>
                 {popup === 'models' && <div className="composer-popover model-popover" role="dialog" aria-label="选择模型">
@@ -1356,7 +1365,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
         {overByteBudget && <p className="composer-warning" role="alert">提示词超过 16 KiB，请缩短后生成；内容完整保留。</p>}
         {crossPlatformAdvice && <p className="composer-warning" role="alert">{crossPlatformAdvice}</p>}
         {selectedModelBlockedReason && <p className="composer-warning" role="alert">{selectedModelBlockedReason}</p>}
-        <div className={`composer-save-note ${saveStatus === 'error' ? 'error-text' : ''}`} role="status">{!native ? '浏览器预览 · 草稿保留于本次页面' : !loaded ? '正在恢复本地会话' : saveStatus === 'error' ? `保存失败：${saveError}` : saveStatus === 'saved' ? '草稿已保存到本机' : '正在保存草稿…'}{saveStatus === 'error' && <button onClick={() => void flushAll().catch(() => {})}>重试</button>}</div>
+        {saveNote && <div className={`composer-save-note ${saveStatus === 'error' ? 'error-text' : ''}`} role="status">{saveNote}{saveStatus === 'error' && <button onClick={() => void flushAll().catch(() => {})}>重试</button>}</div>}
       </section>
     </main>
     {deleteTarget && <ConfirmDialog title={`删除会话「${deleteTarget.title}」？`} description="会话记录及未发送内容将移除；已生成作品会保留在作品库。此操作不可撤销。" confirmLabel="删除会话" busy={deletingConversation} error={deleteError} onCancel={cancelConversationDelete} onConfirm={() => void confirmConversationDelete()}/>}

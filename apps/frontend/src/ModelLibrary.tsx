@@ -10,7 +10,6 @@ import {
   FolderOpen,
   Image,
   LoaderCircle,
-  Play,
   RefreshCw,
   Search,
   Square,
@@ -174,9 +173,7 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
 
   return (
     <div className="split-page model-page">
-      <aside className="section-sidebar model-sidebar">
-        <h2>模型</h2>
-        <div className="sidebar-search" aria-hidden="true"><Boxes size={15}/><span>本地模型库</span></div>
+      <aside className="section-sidebar model-sidebar" aria-label="模型筛选">
         {primaryFilters.map(filter => (
           <button
             key={filter.id}
@@ -196,23 +193,17 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
             </span>
           </button>
         ))}
-        <p className="sidebar-note">已接入、文件已安装、运行时就绪、当前可执行、设备满足和设备验证分别显示。<br/>低于显存/内存门槛时安装与生成入口会被禁用并展示原因。</p>
       </aside>
 
       <section className="detail-page model-detail">
         <div className="page-heading model-heading">
-          <div><h1>模型</h1><p>查找、理解并管理本地图片模型</p></div>
-          <button className="secondary" disabled={loading} onClick={() => void load(true)}>
-            <RefreshCw size={13} className={loading ? 'spin' : ''}/>刷新
-          </button>
-        </div>
-
-        <div className="catalog-summary" aria-label="模型目录统计">
-          <span>目录 <strong>{catalog?.counts.total ?? '—'}</strong></span>
-          <span>正式接入 <strong>{catalog?.counts.supported ?? '—'}</strong></span>
-          <span>已安装 <strong>{catalog?.counts.installed ?? '—'}</strong></span>
-          <span>可执行 <strong>{catalog?.counts.executable ?? '—'}</strong></span>
-          <span>设备满足 <strong>{catalog?.counts.hardwareEligible ?? '—'}</strong></span>
+          <h1>模型</h1>
+          <div className="model-heading-actions">
+            <span className="model-supported-count">正式接入 <strong>{catalog?.counts.supported ?? '—'}</strong></span>
+            <button className="secondary" disabled={loading} onClick={() => void load(true)}>
+              <RefreshCw size={13} className={loading ? 'spin' : ''}/>刷新
+            </button>
+          </div>
         </div>
 
         <div className="catalog-controls">
@@ -282,7 +273,6 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                     <div className="model-facts">
                       <span>{entry.family}</span>
                       <span>{entry.recipe}</span>
-                      <span>{entry.license}</span>
                       {entry.quantization && <span>量化 {entry.quantization}</span>}
                       {entry.modelBytes !== null && <span>原始模型 {bytesLabel(entry.modelBytes)}</span>}
                       {entry.runtimeBytes > 0 && <span>运行时 {bytesLabel(entry.runtimeBytes)}</span>}
@@ -300,24 +290,27 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                       <span>{entry.hardwareEligible ? '当前设备满足门槛' : entry.hardwareReason ?? '当前设备不满足门槛'}</span>
                       {entry.tierReason && <span>{entry.tierReason}</span>}
                     </div>
-                    <div className="catalog-state-grid">
-                      <StateFact label="产品接入" value={entry.productStatus === 'implemented' ? '已接入' : '计划中'} positive={entry.productStatus === 'implemented'}/>
-                      <StateFact label="模型组件" value={entry.componentsReady ? '文件齐备' : entry.installerSupported ? '尚未齐备' : '未接入'} positive={entry.componentsReady}/>
-                      <StateFact label="运行时" value={entry.runtimeReady ? '已就绪' : '未就绪'} positive={entry.runtimeReady}/>
-                      <StateFact label="设备满足" value={entry.hardwareEligible ? (entry.tier === 'compact' ? '满足（紧凑档）' : entry.tier === 'standard' ? '满足（标准档）' : '满足') : '不满足'} positive={entry.hardwareEligible}/>
-                      <StateFact label="设备探针" value={entry.deviceVerified ? '已通过' : '未通过'} positive={entry.deviceVerified}/>
-                      <StateFact label="当前可执行" value={entry.executable ? '是' : '否'} positive={entry.executable}/>
-                    </div>
-                    <div className="catalog-detail-columns">
-                      <DetailList title="运行与范围" items={[entry.runtime, ...entry.requirements]}/>
-                      <DetailList title="不包含" items={entry.exclusions}/>
-                    </div>
-                    <div className="catalog-source">
-                      <strong>版本与来源</strong>
-                      <code>{entry.source}</code>
-                      <span>revision / release：{entry.revision}</span>
-                      <span>{entry.verifiedDevices.length ? `实机验证：${entry.verifiedDevices.join('；')}` : '尚未完成目标设备实机验证。'}</span>
-                    </div>
+                    <details className="catalog-evidence">
+                      <summary>完整状态与来源</summary>
+                      <div className="catalog-state-grid">
+                        <StateFact label="产品接入" value={entry.productStatus === 'implemented' ? '已接入' : '计划中'} positive={entry.productStatus === 'implemented'}/>
+                        <StateFact label="模型组件" value={entry.componentsReady ? '文件齐备' : entry.installerSupported ? '尚未齐备' : '未接入'} positive={entry.componentsReady}/>
+                        <StateFact label="运行时" value={entry.runtimeReady ? '已就绪' : '未就绪'} positive={entry.runtimeReady}/>
+                        <StateFact label="设备满足" value={entry.hardwareEligible ? (entry.tier === 'compact' ? '满足（紧凑档）' : entry.tier === 'standard' ? '满足（标准档）' : '满足') : '不满足'} positive={entry.hardwareEligible}/>
+                        <StateFact label="设备探针" value={entry.deviceVerified ? '已通过' : '未通过'} positive={entry.deviceVerified}/>
+                        <StateFact label="当前可执行" value={entry.executable ? '是' : '否'} positive={entry.executable}/>
+                      </div>
+                      <div className="catalog-detail-columns">
+                        <DetailList title="运行与范围" items={[entry.runtime, ...entry.requirements]}/>
+                        <DetailList title="不包含" items={entry.exclusions}/>
+                      </div>
+                      <div className="catalog-source">
+                        <strong>版本与来源</strong>
+                        <code>{entry.source}</code>
+                        <span>revision / release：{entry.revision}</span>
+                        <span>{entry.verifiedDevices.length ? `实机验证：${entry.verifiedDevices.join('；')}` : '尚未完成目标设备实机验证。'}</span>
+                      </div>
+                    </details>
                     {entry.error && <p className="error-text" role="alert">{entry.error}</p>}
                     {hardwareBlocked(entry) && <p className="catalog-hardware-block" role="alert">
                       {entry.hardwareReason ?? '当前设备不满足该型号的显存或内存门槛；安装与生成入口已禁用。'}
@@ -331,7 +324,6 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                         {pending === entry.id ? <LoaderCircle size={14} className="spin"/> : <Download size={14}/>}
                         {entry.canContinue ? '继续安装' : entry.installPhase === 'unavailable' || entry.installPhase === 'failed' ? '修复安装' : '安装模型与运行环境'}
                       </button>}
-                      {entry.executable && <button className="secondary" onClick={onBack}><Play size={13}/>前往创作</button>}
                       {!canStartGeneration(entry) && !canInstallModel(entry) && !entry.canStop && <span className="catalog-boundary">{hardwareBlocked(entry) ? '设备不满足硬件门槛，安装与生成入口已禁用。' : '当前阶段不提供下载、生成或编辑动作。'}</span>}
                       <button className="secondary" onClick={onBack}><ArrowLeft size={13}/>返回创作</button>
                     </div>

@@ -27,16 +27,6 @@
   max-width: 680px;
 }
 
-.library-kicker {
-  display: block;
-  color: var(--muted);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 1.05px;
-  text-transform: uppercase;
-  margin-bottom: 5px;
-}
-
 .library-heading-actions,
 .preview-actions {
   display: flex;
@@ -199,6 +189,13 @@ code {
   font-size: 9px;
 }
 
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+}
+
 .date-separator {
   color: var(--muted);
   font-size: 9px;
@@ -336,19 +333,6 @@ code {
   margin-top: 4px;
 }
 
-.work-card-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 7px;
-}
-
-.work-card-actions button {
-  padding: 3px 0;
-  color: var(--muted);
-  font-size: 9px;
-}
-
 .works-list {
   display: flex;
   flex-direction: column;
@@ -398,20 +382,8 @@ code {
   border-bottom: .5px solid var(--border);
 }
 
-.works-preview > header > div {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
 .works-preview > header span {
   font-size: 11px;
-}
-
-.works-preview > header strong {
-  color: var(--muted);
-  font-size: 8px;
-  font-weight: 400;
 }
 
 .works-preview > header button {
@@ -503,6 +475,31 @@ code {
   margin: 0;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.works-preview-technical {
+  margin: 0 0 15px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.works-preview-technical summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.works-preview-technical div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.works-preview-technical code {
+  color: var(--text);
+  overflow-wrap: anywhere;
+  user-select: text;
 }
 
 .export-message {
@@ -712,8 +709,7 @@ code {
 .record-advanced pre { margin: 0 0 10px; max-height: 190px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 9px; }
 
 .work-card-body{position:relative}
-.work-card-actions{padding-right:52px}
-.work-card-manage{position:absolute;right:8px;bottom:8px;display:flex;gap:2px}
+.work-card-manage{display:flex;justify-content:flex-end;gap:2px;margin-top:5px}
 .work-card-manage button{width:22px;height:22px;padding:0;border-radius:6px;color:var(--muted)}
 .work-card-manage button:not(:disabled):hover{background:var(--hover)}
 .work-card-manage .is-favorite{color:var(--accent)}

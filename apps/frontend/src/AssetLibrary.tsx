@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   CalendarDays,
   Download,
-  Expand,
   FileText,
   Grid2X2,
   Image as ImageIcon,
@@ -247,7 +246,7 @@ export function AssetLibrary({ active, onBack, onOpenAsset, onError }: Props) {
   };
   return <section className="detail-page library-page works-page" aria-labelledby="works-page-title">
     <header className="library-heading">
-      <div><span className="library-kicker">正式 AssetRef · 跨会话</span><h1 id="works-page-title">作品</h1><p>只浏览已提交的正式图片；示例、候选和临时文件不会进入这里。</p></div>
+      <div><h1 id="works-page-title">作品</h1></div>
       <div className="library-heading-actions"><button className="secondary" onClick={() => setRefreshNonce(value => value + 1)}><RefreshCw size={14}/>刷新</button><button className="secondary" onClick={onBack}><ArrowLeft size={14}/>返回创作</button></div>
     </header>
 
@@ -256,9 +255,11 @@ export function AssetLibrary({ active, onBack, onOpenAsset, onError }: Props) {
         <label>型号<select value={filters.modelId} onChange={event => setFilters(current => ({ ...current, modelId: event.target.value }))}><option value="">全部型号</option>{page?.facets.models.map(item => <option key={item.id} value={item.id}>{modelLabel(item.id)} · {item.count}</option>)}</select></label>
         <label>尺寸<select value={filters.size} onChange={event => setFilters(current => ({ ...current, size: event.target.value }))}><option value="">全部尺寸</option>{page?.facets.sizes.map(item => <option key={`${item.width}x${item.height}`} value={`${item.width}x${item.height}`}>{item.width}×{item.height} · {item.count}</option>)}</select></label>
         <label>会话<select value={filters.conversationId} onChange={event => setFilters(current => ({ ...current, conversationId: event.target.value }))}><option value="">全部会话</option>{page?.facets.conversations.map(item => <option key={item.id} value={item.id}>{item.title}{item.deleted ? '（已删除）' : ''} · {item.count}</option>)}</select></label>
-        <label className="date-filter"><CalendarDays size={13}/><input type="date" aria-label="作品开始日期" value={filters.from} onChange={event => setFilters(current => ({ ...current, from: event.target.value }))}/></label>
-        <span className="date-separator">至</span>
-        <label className="date-filter"><input type="date" aria-label="作品结束日期" value={filters.to} onChange={event => setFilters(current => ({ ...current, to: event.target.value }))}/></label>
+        <div className="date-range">
+          <label className="date-filter"><CalendarDays size={13}/><input type="date" aria-label="作品开始日期" value={filters.from} onChange={event => setFilters(current => ({ ...current, from: event.target.value }))}/></label>
+          <span className="date-separator">至</span>
+          <label className="date-filter"><input type="date" aria-label="作品结束日期" value={filters.to} onChange={event => setFilters(current => ({ ...current, to: event.target.value }))}/></label>
+        </div>
         <div className="segmented works-favorite-filter" role="group" aria-label="收藏筛选"><button className={filters.favorite === 'all' ? 'active' : ''} aria-pressed={filters.favorite === 'all'} onClick={() => setFilters(current => ({ ...current, favorite: 'all' }))}>全部作品</button><button className={filters.favorite === 'favorites' ? 'active' : ''} aria-pressed={filters.favorite === 'favorites'} onClick={() => setFilters(current => ({ ...current, favorite: 'favorites' }))}><Star size={12}/>仅收藏</button></div>
         {filtered && <button className="filter-clear" onClick={clearFilters}>清除筛选</button>}
       </div>
@@ -275,13 +276,14 @@ export function AssetLibrary({ active, onBack, onOpenAsset, onError }: Props) {
     {page?.hasMore && <div className="library-pagination"><button className="secondary" disabled={loadingMore} onClick={() => void loadMore()}>{loadingMore ? <LoaderCircle size={13} className="spin"/> : null}加载更多较早作品</button></div>}
 
     {viewing && <div className="works-preview" role="dialog" aria-modal="true" aria-label="作品预览">
-      <header><div><span>{viewing.conversationTitle}{viewing.conversationDeleted ? ' · 会话已删除' : ''}</span><strong>{formatTime(viewing.createdAt)}</strong></div><button aria-label="关闭作品预览" onClick={() => { setViewing(null); setRecordOpen(false); }}><X size={17}/></button></header>
+      <header><span>作品预览</span><button aria-label="关闭作品预览" onClick={() => { setViewing(null); setRecordOpen(false); }}><X size={17}/></button></header>
       <div className="works-preview-body">
         <div className="works-preview-image">{viewing.available ? <img src={assetUrl(viewing.id)} alt={viewing.prompt}/> : <div className="resource-error"><ImageIcon size={28}/><h3>图片资源不可用</h3><p>{viewing.availabilityError || 'PNG 可能已被移动、改写或无法解码。'}</p></div>}</div>
-        <aside><span className="library-kicker">制作信息</span><h2>{viewing.prompt}</h2><dl><div><dt>会话</dt><dd>{viewing.conversationTitle}</dd></div><div><dt>型号</dt><dd>{modelLabel(viewing.modelId)}</dd></div><div><dt>尺寸</dt><dd>{viewing.width}×{viewing.height}</dd></div><div><dt>种子</dt><dd>{viewing.seed ?? '随机'}</dd></div><div><dt>完成时间</dt><dd>{formatTime(viewing.createdAt)}</dd></div><div><dt>AssetRef</dt><dd className="mono">{viewing.id}</dd></div></dl>
+        <aside><h2>{viewing.prompt}</h2><dl><div><dt>会话</dt><dd>{viewing.conversationTitle}{viewing.conversationDeleted ? ' · 已删除' : ''}</dd></div><div><dt>型号</dt><dd>{modelLabel(viewing.modelId)}</dd></div><div><dt>尺寸</dt><dd>{viewing.width}×{viewing.height}</dd></div><div><dt>种子</dt><dd>{viewing.seed ?? '随机'}</dd></div><div><dt>完成时间</dt><dd>{formatTime(viewing.createdAt)}</dd></div></dl>
+          <details className="works-preview-technical"><summary>技术信息</summary><div><span>AssetRef</span><code>{viewing.id}</code></div></details>
           {exportMessage && <p className="export-message" role="status">{exportMessage}</p>}
           <div className="preview-actions"><button className="primary-action" disabled={!viewing.available || exporting} onClick={() => void exportItem(viewing)}>{exporting ? <LoaderCircle size={14} className="spin"/> : <Download size={14}/>}导出 PNG</button><button className="secondary" aria-expanded={recordOpen} onClick={() => setRecordOpen(value => !value)}><FileText size={14}/>{recordOpen ? '收起记录' : '制作记录'}</button>{viewing.conversationDeleted ? <span className="historical-source">来源会话已删除 · 作品保留</span> : viewing.conversationId ? <button className="secondary" onClick={() => onOpenAsset(viewing)}><MessageCircle size={14}/>返回来源会话</button> : <span className="historical-source">历史生成 · 无可靠来源会话</span>}</div>
-          {recordOpen && <ProductionRecord jobId={viewing.jobId} onError={onError}/>}
+          {recordOpen && <ProductionRecord jobId={viewing.jobId} onError={onError} showSummary={false}/>}
         </aside>
       </div>
     </div>}
@@ -313,15 +315,20 @@ function WorkCard({ item, index, failed, onFail, onOpen, viewMode, deleting, fav
   const status = !manageable
     ? item.deletionState === 'pending' ? '正在删除' : '删除未完成'
     : item.available ? '可用' : '资源异常';
+  const promptText = item.prompt.trim();
+  const conversationText = item.conversationTitle.trim();
+  const conversationRepeatsPrompt = promptText.startsWith(conversationText) || conversationText.startsWith(promptText);
+  const conversationLabel = conversationRepeatsPrompt
+    ? ''
+    : `${item.conversationTitle}${item.conversationDeleted ? ' · 会话已删除' : ''}`;
   return <article className={`work-card ${manageable ? '' : 'is-managing'}`} role="listitem">
     <button className="work-card-image" disabled={!manageable} onClick={onOpen} aria-label={manageable ? `预览作品 ${index + 1}：${item.prompt}` : `作品${status}`}>
       {item.available && !failed && manageable ? <img loading="lazy" decoding="async" src={assetUrl(item.id)} alt={item.prompt} onError={onFail}/> : <span className="work-image-error"><ImageIcon size={23}/><strong>{manageable ? (item.available ? '解码失败' : '资源缺失') : status}</strong><small>{item.deletionState === 'failed' ? (item.deletionError || '可在右下角重试删除') : manageable ? (item.availabilityError || '点击查看来源信息') : (item.deletionError || '清理完成后自动更新')}</small></span>}
     </button>
     <div className="work-card-body">
-      <div><strong>{item.prompt}</strong><span>{item.conversationTitle}{item.conversationDeleted ? ' · 会话已删除' : ''}</span></div>
+      <div><strong>{item.prompt}</strong>{conversationLabel && <span>{conversationLabel}</span>}</div>
       <p>{modelLabel(item.modelId)} · {item.width}×{item.height} · {formatTime(item.createdAt)}</p>
       {item.deletionState === 'failed' && <p className="work-deletion-state" role="status">{item.deletionError || '删除未完成，可重试'}</p>}
-      <div className="work-card-actions"><button disabled={!manageable} onClick={onOpen}><Expand size={12}/>预览</button><span>{status}</span></div>
       <div className="work-card-manage">
         <button className={`work-favorite ${item.isFavorite ? 'is-favorite' : ''}`} disabled={!manageable || favoriteBusy} aria-pressed={item.isFavorite} aria-label={item.isFavorite ? '取消收藏' : '收藏作品'} title={item.isFavorite ? '取消收藏' : '收藏作品'} onClick={onFavorite}><Star size={13} fill={item.isFavorite ? 'currentColor' : 'none'}/></button>
         <button className="work-delete" disabled={deleting} aria-label={manageable ? '删除作品' : '重试删除'} title={manageable ? '删除作品' : '重试删除'} onClick={onDelete}><Trash2 size={13}/></button>
