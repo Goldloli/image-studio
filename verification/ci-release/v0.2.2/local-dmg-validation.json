@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "version": "0.2.2",
+  "status": "local_pass_github_pending",
+  "artifact": {
+    "name": "Image-Studio-0.2.2-macos-arm64.dmg",
+    "bytes": 34661923,
+    "sha256": "56d2f161a4d92c5ac3eae13402cdabc70ac3692fa706d015c5a80526ff0d78f4",
+    "volume_contents": [
+      "Image Studio.app",
+      "Applications"
+    ],
+    "applications_link": "/Applications"
+  },
+  "app": {
+    "identifier": "io.github.goldloli.image-studio",
+    "version": "0.2.2",
+    "minimum_macos": "11.0",
+    "architectures": {
+      "image-studio-desktop": "arm64",
+      "diagnostic-worker": "arm64",
+      "inference-supervisor": "arm64",
+      "realesrgan-worker": "arm64"
+    },
+    "resources": [
+      "LICENSE",
+      "NOTICE",
+      "THIRD_PARTY_NOTICES.md",
+      "OFL.txt",
+      "PROMPT-LIBRARY-LICENSE.txt"
+    ]
+  },
+  "checks": {
+    "hdiutil_verify": "pass",
+    "read_only_mount_and_detach": "pass",
+    "applications_link": "pass",
+    "no_zip_entries": "pass",
+    "missing_app_fails": "pass",
+    "wrong_extension_fails": "pass",
+    "truncated_dmg_fails": "pass",
+    "release_fixture_rejects_zip": "pass",
+    "release_fixture_rejects_missing_dmg": "pass",
+    "release_fixture_rejects_bad_checksum": "pass",
+    "copied_app_launch_smoke": "pass",
+    "gatekeeper_ui": "not_run"
+  }
+}

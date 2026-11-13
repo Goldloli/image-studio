@@ -4,9 +4,9 @@ Use a DMG instead of a zip for future macOS release artifacts
 
 ## Status
 
-**Proposal only; waiting for user confirmation.** 用户已于 2026-11-13 明确要求后续
-macOS 发布改为 DMG 且不要 zip。本阶段只更新 OpenSpec 文档，不修改 workflow、
-打包脚本、README、版本号或已发布 Release。
+**Implementation complete; local DMG acceptance passed; GitHub release pending.**
+用户已于 2026-11-13 确认 DMG-only 方案并授权发布 `v0.2.2`。workflow、打包/验证
+脚本、README、Release Notes 与版本号已经更新；已发布 Release 保持不可变。
 
 | 文档 | 内容 |
 | --- | --- |
@@ -16,4 +16,6 @@ macOS 发布改为 DMG 且不要 zip。本阶段只更新 OpenSpec 文档，不�
 | [tasks.md](tasks.md) | 确认后的打包、workflow、文档、验证、下一版本发布与归档步骤。 |
 | [test-plan.md](test-plan.md) | 结构、身份、架构、checksum、损坏、cleanup、release 与历史版本测试。 |
 
-归档前必须完成 [tasks.md](tasks.md)；真实发布前不得声称新格式已经交付。
+本地 DMG 证据见
+[`verification/ci-release/v0.2.2/local-dmg-validation.json`](../../../verification/ci-release/v0.2.2/local-dmg-validation.json)。
+归档前必须完成 [tasks.md](tasks.md) 中的 GitHub release 验收。
