@@ -9,13 +9,15 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-pub const PREFERENCES_SCHEMA_VERSION: u32 = 1;
+pub const PREFERENCES_SCHEMA_VERSION: u32 = 2;
+pub const DEFAULT_ACCENT_COLOR: &str = "#D7641F";
 const PREFERENCES_FILE: &str = "application-preferences.json";
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AppearancePreferences {
     pub theme: String,
+    pub accent_color: String,
     pub font_scale: String,
     pub density: String,
     pub reduced_motion: bool,
@@ -26,10 +28,27 @@ impl Default for AppearancePreferences {
     fn default() -> Self {
         Self {
             theme: "light".into(),
+            accent_color: DEFAULT_ACCENT_COLOR.into(),
             font_scale: "default".into(),
             density: "comfortable".into(),
             reduced_motion: false,
             sidebar_collapsed: false,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct UpdatePreferences {
+    pub auto_check: bool,
+    pub notifications: bool,
+}
+
+impl Default for UpdatePreferences {
+    fn default() -> Self {
+        Self {
+            auto_check: true,
+            notifications: true,
         }
     }
 }
@@ -63,6 +82,7 @@ struct PreferencesDocument {
     schema_version: u32,
     appearance: AppearancePreferences,
     creation_defaults: CreationDefaults,
+    updates: UpdatePreferences,
 }
 
 impl Default for PreferencesDocument {
@@ -71,6 +91,7 @@ impl Default for PreferencesDocument {
             schema_version: PREFERENCES_SCHEMA_VERSION,
             appearance: AppearancePreferences::default(),
             creation_defaults: CreationDefaults::default(),
+            updates: UpdatePreferences::default(),
         }
     }
 }
@@ -81,6 +102,7 @@ pub struct PreferencesSnapshot {
     pub schema_version: u32,
     pub appearance: AppearancePreferences,
     pub creation_defaults: CreationDefaults,
+    pub updates: UpdatePreferences,
     pub load_error: Option<String>,
     pub save_error: Option<String>,
     pub warnings: Vec<String>,
@@ -93,6 +115,7 @@ impl PreferencesSnapshot {
             schema_version: document.schema_version,
             appearance: document.appearance,
             creation_defaults: document.creation_defaults,
+            updates: document.updates,
             load_error: None,
             save_error: None,
             warnings: Vec::new(),
@@ -104,6 +127,7 @@ impl PreferencesSnapshot {
             schema_version: PREFERENCES_SCHEMA_VERSION,
             appearance: self.appearance.clone(),
             creation_defaults: self.creation_defaults.clone(),
+            updates: self.updates.clone(),
         }
     }
 }
@@ -141,8 +165,10 @@ impl PreferencesStore {
 
     pub fn save_appearance(
         &self,
-        appearance: AppearancePreferences,
+        mut appearance: AppearancePreferences,
     ) -> Result<PreferencesSnapshot, String> {
+        appearance.accent_color =
+            normalize_accent_color(&appearance.accent_color).ok_or("强调色须为 #RRGGBB")?;
         validate_appearance(&appearance)?;
         self.save(|current| current.appearance = appearance.clone())
     }
@@ -153,6 +179,13 @@ impl PreferencesStore {
     ) -> Result<PreferencesSnapshot, String> {
         validate_creation_defaults(&creation_defaults)?;
         self.save(|current| current.creation_defaults = creation_defaults.clone())
+    }
+
+    pub fn save_updates(
+        &self,
+        preferences: UpdatePreferences,
+    ) -> Result<PreferencesSnapshot, String> {
+        self.save(|current| current.updates = preferences.clone())
     }
 
     fn save(
@@ -171,6 +204,7 @@ impl PreferencesStore {
         // present them as saved.
         guard.appearance = document.appearance.clone();
         guard.creation_defaults = document.creation_defaults.clone();
+        guard.updates = document.updates.clone();
         let result = write_atomic(&self.path, &document);
         match result {
             Ok(()) => {
@@ -191,6 +225,9 @@ pub fn validate_appearance(value: &AppearancePreferences) -> Result<(), String> 
     let mut errors = Vec::new();
     if !matches!(value.theme.as_str(), "light" | "dark" | "system") {
         errors.push("主题必须是 light、dark 或 system");
+    }
+    if normalize_accent_color(&value.accent_color).is_none() {
+        errors.push("强调色必须是 #RRGGBB");
     }
     if !matches!(value.font_scale.as_str(), "small" | "default" | "large") {
         errors.push("字号必须是 small、default 或 large");
@@ -232,6 +269,12 @@ pub fn valid_seed(seed: &str) -> bool {
         || (seed.bytes().all(|byte| byte.is_ascii_digit()) && seed.parse::<u32>().is_ok())
 }
 
+pub fn normalize_accent_color(value: &str) -> Option<String> {
+    let bare = value.strip_prefix('#')?;
+    (bare.len() == 6 && bare.bytes().all(|byte| byte.is_ascii_hexdigit()))
+        .then(|| format!("#{}", bare.to_ascii_uppercase()))
+}
+
 fn read_preferences(path: &Path) -> PreferencesSnapshot {
     let metadata = match fs::symlink_metadata(path) {
         Ok(metadata) => metadata,
@@ -270,9 +313,8 @@ fn read_preferences(path: &Path) -> PreferencesSnapshot {
         fallback.load_error = Some("应用偏好必须是 JSON 对象。".into());
         return fallback;
     };
-    if object.get("schemaVersion").and_then(Value::as_u64)
-        != Some(u64::from(PREFERENCES_SCHEMA_VERSION))
-    {
+    let source_version = object.get("schemaVersion").and_then(Value::as_u64);
+    if !matches!(source_version, Some(1 | 2)) {
         let mut fallback = PreferencesSnapshot::defaults();
         fallback.load_error = Some(format!(
             "应用偏好版本不受支持或缺失（期望 {PREFERENCES_SCHEMA_VERSION}）。"
@@ -281,8 +323,12 @@ fn read_preferences(path: &Path) -> PreferencesSnapshot {
     }
 
     let mut warnings = Vec::new();
+    if source_version == Some(1) {
+        warnings.push("应用偏好来自 v1，已兼容读取；下次保存将升级为 v2".into());
+    }
     let appearance_value = object.get("appearance").and_then(Value::as_object);
     let defaults_value = object.get("creationDefaults").and_then(Value::as_object);
+    let updates_value = object.get("updates").and_then(Value::as_object);
     let mut defaults = AppearancePreferences::default();
     if let Some(values) = appearance_value {
         defaults.theme = string_field(
@@ -293,6 +339,14 @@ fn read_preferences(path: &Path) -> PreferencesSnapshot {
             "theme",
             &mut warnings,
         );
+        if let Some(value) = values.get("accentColor").and_then(Value::as_str) {
+            match normalize_accent_color(value) {
+                Some(color) => defaults.accent_color = color,
+                None => warnings.push(format!("强调色无效，已回退为 {DEFAULT_ACCENT_COLOR}")),
+            }
+        } else if source_version == Some(2) {
+            warnings.push(format!("强调色缺失，已回退为 {DEFAULT_ACCENT_COLOR}"));
+        }
         defaults.font_scale = string_field(
             values,
             "fontScale",
@@ -350,11 +404,20 @@ fn read_preferences(path: &Path) -> PreferencesSnapshot {
     } else {
         warnings.push("creationDefaults 缺失，已使用内置创作默认值".into());
     }
+    let mut updates = UpdatePreferences::default();
+    if let Some(values) = updates_value {
+        updates.auto_check = bool_field(values, "autoCheck", true, "自动检查更新", &mut warnings);
+        updates.notifications =
+            bool_field(values, "notifications", true, "更新通知", &mut warnings);
+    } else if source_version == Some(2) {
+        warnings.push("updates 缺失，已使用默认更新偏好".into());
+    }
 
     PreferencesSnapshot {
         schema_version: PREFERENCES_SCHEMA_VERSION,
         appearance: defaults,
         creation_defaults: creation,
+        updates,
         load_error: None,
         save_error: None,
         warnings,
@@ -460,6 +523,7 @@ mod tests {
         let snapshot = store.snapshot();
         assert_eq!(snapshot.appearance, AppearancePreferences::default());
         assert_eq!(snapshot.creation_defaults, CreationDefaults::default());
+        assert_eq!(snapshot.updates, UpdatePreferences::default());
         assert!(!root.path().join(PREFERENCES_FILE).exists());
     }
 
@@ -488,13 +552,15 @@ mod tests {
         .unwrap();
         let snapshot = PreferencesStore::load(root.path()).snapshot();
         assert_eq!(snapshot.appearance.theme, "dark");
+        assert_eq!(snapshot.appearance.accent_color, DEFAULT_ACCENT_COLOR);
         assert_eq!(snapshot.appearance.font_scale, "default");
         assert_eq!(snapshot.appearance.density, "compact");
         assert!(snapshot.appearance.reduced_motion);
         assert_eq!(snapshot.creation_defaults.aspect, "1:1");
         assert_eq!(snapshot.creation_defaults.count, 1);
         assert_eq!(snapshot.creation_defaults.seed, "");
-        assert_eq!(snapshot.warnings.len(), 4);
+        assert_eq!(snapshot.warnings.len(), 5);
+        assert!(snapshot.warnings[0].contains("v1"));
         assert!(snapshot.load_error.is_none());
     }
 
@@ -510,10 +576,45 @@ mod tests {
         store.save_appearance(appearance).unwrap();
         let contents = fs::read_to_string(root.path().join(PREFERENCES_FILE)).unwrap();
         let value: Value = serde_json::from_str(&contents).unwrap();
-        assert_eq!(value["schemaVersion"], 1);
+        assert_eq!(value["schemaVersion"], 2);
+        assert_eq!(value["appearance"]["accentColor"], DEFAULT_ACCENT_COLOR);
         let loaded = PreferencesStore::load(root.path()).snapshot();
         assert_eq!(loaded.appearance.theme, "dark");
         assert_eq!(loaded.appearance.density, "compact");
+    }
+
+    #[test]
+    fn saves_normalized_accent_and_update_preferences() {
+        let root = tempfile::tempdir().unwrap();
+        let store = PreferencesStore::load(root.path());
+        store
+            .save_appearance(AppearancePreferences {
+                accent_color: "#3b82f6".into(),
+                ..AppearancePreferences::default()
+            })
+            .unwrap();
+        store
+            .save_updates(UpdatePreferences {
+                auto_check: false,
+                notifications: false,
+            })
+            .unwrap();
+        let loaded = PreferencesStore::load(root.path()).snapshot();
+        assert_eq!(loaded.appearance.accent_color, "#3B82F6");
+        assert!(!loaded.updates.auto_check);
+        assert!(!loaded.updates.notifications);
+    }
+
+    #[test]
+    fn rejects_invalid_accent_without_writing() {
+        let root = tempfile::tempdir().unwrap();
+        let store = PreferencesStore::load(root.path());
+        let result = store.save_appearance(AppearancePreferences {
+            accent_color: "orange".into(),
+            ..AppearancePreferences::default()
+        });
+        assert!(result.is_err());
+        assert!(!root.path().join(PREFERENCES_FILE).exists());
     }
 
     #[test]
