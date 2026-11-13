@@ -4,9 +4,10 @@ use crate::{
     DIAGNOSTIC_MODES,
     adapters::{
         AppPaths,
+        app_update::{AppVersionInfo, UpdateCheckResult, UpdateDownloadState, UpdateManager},
         diagnostics::{DiagnosticConfig, DiagnosticController, DiagnosticSnapshot},
         library::{AssetLibraryQuery, TaskCenterQuery},
-        preferences::{AppearancePreferences, CreationDefaults},
+        preferences::{AppearancePreferences, CreationDefaults, UpdatePreferences},
         prompt_library::PromptLibraryStore,
     },
     options::LaunchOptions,
@@ -24,10 +25,20 @@ use std::{
 };
 use tauri::{Emitter, Manager, State, webview::PageLoadEvent};
 
+const ABOUT_REPOSITORY: &str = "https://github.com/Goldloli/image-studio";
+const ABOUT_RELEASES: &str = "https://github.com/Goldloli/image-studio/releases/latest";
+const ABOUT_ISSUES: &str = "https://github.com/Goldloli/image-studio/issues";
+const ABOUT_AUTHOR: &str = "https://github.com/Goldloli";
+const ABOUT_BILIBILI: &str = "https://space.bilibili.com/1599822";
+const ABOUT_LICENSE: &str = "https://github.com/Goldloli/image-studio/blob/main/LICENSE";
+const ABOUT_THIRD_PARTY: &str =
+    "https://github.com/Goldloli/image-studio/blob/main/THIRD_PARTY_NOTICES.md";
+
 /// Only the host owns executable paths. IPC never accepts program or directory arguments.
 pub struct HostState {
     paths: AppPaths,
     worker: PathBuf,
+    updates: UpdateManager,
     session: Mutex<DiagnosticSession>,
     studio: Arc<StudioService>,
     prompt_library: Result<Arc<PromptLibraryStore>, String>,
@@ -53,6 +64,7 @@ impl HostState {
         // keeping the startup-failure reporter that was installed earlier in the chain.
         crate::adapters::logging::install_panic_hook();
         let studio = Arc::new(StudioService::new(paths.clone(), supervisor));
+        let updates = UpdateManager::new(&paths.cache);
         // A send may strand a turn as `pending` while its submitting thread is blocked; the
         // watchdog bounds that wait so the composer can never sit on "receiving prompt" forever.
         let watchdog = Arc::downgrade(&studio);
@@ -77,6 +89,7 @@ impl HostState {
         Self {
             paths,
             worker,
+            updates,
             session: Mutex::new(DiagnosticSession {
                 enabled: options.diagnostics,
                 mode: options.mode.clone(),
@@ -136,6 +149,9 @@ impl HostState {
     }
     fn prompt_library(&self) -> Result<Arc<PromptLibraryStore>, String> {
         self.prompt_library.clone()
+    }
+    pub fn updates(&self) -> UpdateManager {
+        self.updates.clone()
     }
 }
 
@@ -251,6 +267,14 @@ async fn creation_defaults_save(
 ) -> Result<serde_json::Value, String> {
     let studio = state.studio.clone();
     blocking(move || studio.save_creation_defaults(defaults)).await
+}
+#[tauri::command]
+async fn update_preferences_save(
+    state: State<'_, HostState>,
+    preferences: UpdatePreferences,
+) -> Result<serde_json::Value, String> {
+    let studio = state.studio.clone();
+    blocking(move || studio.save_update_preferences(preferences)).await
 }
 #[tauri::command]
 async fn settings_snapshot(state: State<'_, HostState>) -> Result<serde_json::Value, String> {
@@ -573,11 +597,133 @@ async fn source_list(state: State<'_, HostState>) -> Result<serde_json::Value, S
     let studio = state.studio.clone();
     blocking(move || studio.imported_sources()).await
 }
+
 #[tauri::command]
-fn app_close(app: tauri::AppHandle, state: State<'_, HostState>) {
+fn app_update_info() -> AppVersionInfo {
+    UpdateManager::version_info()
+}
+
+#[tauri::command]
+async fn app_update_check(state: State<'_, HostState>) -> Result<UpdateCheckResult, String> {
+    state.updates().check(env!("CARGO_PKG_VERSION")).await
+}
+
+#[tauri::command]
+fn app_update_state(state: State<'_, HostState>) -> Result<UpdateDownloadState, String> {
+    state.updates().state()
+}
+
+#[tauri::command]
+fn app_update_download_start(
+    app: tauri::AppHandle,
+    state: State<'_, HostState>,
+    version: String,
+) -> Result<UpdateDownloadState, String> {
+    state
+        .updates()
+        .start_download(app, env!("CARGO_PKG_VERSION").into(), version)
+}
+
+#[tauri::command]
+fn app_update_download_cancel(
+    app: tauri::AppHandle,
+    state: State<'_, HostState>,
+) -> Result<UpdateDownloadState, String> {
+    state.updates().cancel(&app)
+}
+
+#[tauri::command]
+fn app_update_open_installer(state: State<'_, HostState>) -> Result<(), String> {
+    state.updates().open_installer()
+}
+
+#[tauri::command]
+fn app_update_open_location(state: State<'_, HostState>) -> Result<(), String> {
+    state.updates().open_location()
+}
+
+#[tauri::command]
+fn app_update_install(app: tauri::AppHandle, state: State<'_, HostState>) -> Result<(), String> {
+    state.studio.ensure_update_installable()?;
+    state.updates().mark_pending_install()?;
+    if let Err(error) = app.emit_to("main", "studio-close-requested", ()) {
+        state.updates().clear_pending_install();
+        return Err(format!("无法请求安装更新：{error}"));
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn about_open_link(link_id: String) -> Result<(), String> {
+    let url = about_url(&link_id).ok_or("未登记的关于链接")?;
+    open_external_url(url)
+}
+
+fn about_url(link_id: &str) -> Option<&'static str> {
+    match link_id {
+        "repository" => Some(ABOUT_REPOSITORY),
+        "releases" => Some(ABOUT_RELEASES),
+        "issues" => Some(ABOUT_ISSUES),
+        "author" => Some(ABOUT_AUTHOR),
+        "bilibili" => Some(ABOUT_BILIBILI),
+        "license" => Some(ABOUT_LICENSE),
+        "thirdPartyNotices" => Some(ABOUT_THIRD_PARTY),
+        _ => None,
+    }
+}
+
+fn open_external_url(url: &str) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        let status = std::process::Command::new("open")
+            .arg(url)
+            .status()
+            .map_err(|error| format!("无法打开外部链接：{error}"))?;
+        if status.success() {
+            Ok(())
+        } else {
+            Err("系统未能打开外部链接".into())
+        }
+    }
+    #[cfg(windows)]
+    {
+        crate::adapters::quiet_command("rundll32.exe")
+            .args(["url.dll,FileProtocolHandler", url])
+            .spawn()
+            .map(|_| ())
+            .map_err(|error| format!("无法打开外部链接：{error}"))
+    }
+    #[cfg(not(any(target_os = "macos", windows)))]
+    {
+        let _ = url;
+        Err("当前平台不支持打开外部链接".into())
+    }
+}
+
+#[tauri::command]
+fn app_close(app: tauri::AppHandle, state: State<'_, HostState>) -> Result<(), String> {
+    if let Some(installer) = state.updates().take_pending_install() {
+        state.studio.ensure_update_installable()?;
+        launch_update_installer(&installer)?;
+    }
     state.studio.allow_close();
     state.stop_for_exit();
     app.exit(0);
+    Ok(())
+}
+
+#[cfg(windows)]
+fn launch_update_installer(path: &std::path::Path) -> Result<(), String> {
+    crate::adapters::quiet_command(path)
+        .args(["/S", "/UPDATE", "/R", "/ARGS=--updated"])
+        .spawn()
+        .map(|_| ())
+        .map_err(|error| format!("无法启动更新安装器：{error}"))
+}
+
+#[cfg(not(windows))]
+fn launch_update_installer(_path: &std::path::Path) -> Result<(), String> {
+    Err("当前平台不执行自动替换安装，请打开已验证的更新包".into())
 }
 
 #[derive(Serialize)]
@@ -911,7 +1057,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 eprintln!("DIAGNOSTIC_DESKTOP_READY tauri=2 requested_scale={requested_scale:?} native_dpr=webview window={initial_size:?}; image inference unavailable");
             }
         })
-        .invoke_handler(tauri::generate_handler![workspace_status, diagnostic_enable, diagnostic_start, diagnostic_stop, diagnostic_snapshot, diagnostic_viewport, studio_snapshot, model_catalog, feature_catalog, prompt_library_snapshot, prompt_library_favorite, prompt_library_image, prompt_library_clear_cache, preferences_snapshot, preferences_reload, preferences_save, creation_defaults_save, settings_snapshot, storage_open, model_install, model_cancel, draft_save, draft_create, conversation_list, conversation_create, conversation_apply_model, conversation_select, conversation_rename, conversation_delete, conversation_history, conversation_turn_detail, conversation_send, conversation_cancel_turn, workspace_select, generation_submit, generation_cancel, generation_retry, task_list, asset_library_query, asset_library_item, asset_set_favorite, asset_delete, task_center_query, task_center_detail, asset_export, source_import, source_list, app_close])
+        .invoke_handler(tauri::generate_handler![workspace_status, app_update_info, app_update_check, app_update_state, app_update_download_start, app_update_download_cancel, app_update_open_installer, app_update_open_location, app_update_install, about_open_link, diagnostic_enable, diagnostic_start, diagnostic_stop, diagnostic_snapshot, diagnostic_viewport, studio_snapshot, model_catalog, feature_catalog, prompt_library_snapshot, prompt_library_favorite, prompt_library_image, prompt_library_clear_cache, preferences_snapshot, preferences_reload, preferences_save, creation_defaults_save, update_preferences_save, settings_snapshot, storage_open, model_install, model_cancel, draft_save, draft_create, conversation_list, conversation_create, conversation_apply_model, conversation_select, conversation_rename, conversation_delete, conversation_history, conversation_turn_detail, conversation_send, conversation_cancel_turn, workspace_select, generation_submit, generation_cancel, generation_retry, task_list, asset_library_query, asset_library_item, asset_set_favorite, asset_delete, task_center_query, task_center_detail, asset_export, source_import, source_list, app_close])
         .build(tauri::generate_context!())?;
     app.run(|app, event| {
         if let tauri::RunEvent::ExitRequested { api, .. } = &event
@@ -992,5 +1138,22 @@ mod tests {
             resolve_export_overwrite(true, MessageDialogResult::Custom("no".into())),
             ExportOverwriteChoice::KeepExisting
         );
+    }
+
+    #[test]
+    fn about_links_are_a_fixed_allowlist() {
+        for link in [
+            "repository",
+            "releases",
+            "issues",
+            "author",
+            "bilibili",
+            "license",
+            "thirdPartyNotices",
+        ] {
+            assert!(about_url(link).is_some(), "missing {link}");
+        }
+        assert!(about_url("https://example.com").is_none());
+        assert!(about_url("").is_none());
     }
 }

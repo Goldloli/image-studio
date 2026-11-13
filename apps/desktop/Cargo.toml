@@ -32,6 +32,7 @@ rusqlite.workspace = true
 png.workspace = true
 image.workspace = true
 reqwest.workspace = true
+semver.workspace = true
 flate2.workspace = true
 tar.workspace = true
 zip.workspace = true

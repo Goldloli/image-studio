@@ -14,7 +14,9 @@ use crate::adapters::{
         AcceptTurnInput, AssetLibraryQuery, DEFAULT_MODEL_ID, DraftRecord, JobRecord, Library,
         LibraryError, TaskCenterQuery, TurnRecord, TurnStatus,
     },
-    preferences::{AppearancePreferences, CreationDefaults, PreferencesStore, valid_seed},
+    preferences::{
+        AppearancePreferences, CreationDefaults, PreferencesStore, UpdatePreferences, valid_seed,
+    },
     storage,
 };
 use serde::{Deserialize, Serialize};
@@ -726,6 +728,10 @@ impl StudioService {
         self.preferences.save_creation_defaults(defaults)?;
         Ok(self.preferences_snapshot())
     }
+    pub fn save_update_preferences(&self, preferences: UpdatePreferences) -> Result<Value, String> {
+        self.preferences.save_updates(preferences)?;
+        Ok(self.preferences_snapshot())
+    }
     pub fn settings_snapshot(&self, diagnostics_enabled: bool) -> Result<Value, String> {
         let preferences = self.preferences.snapshot();
         let catalog = self.model_catalog()?;
@@ -1241,6 +1247,25 @@ impl StudioService {
             .as_ref()
             .is_some_and(Installations::is_busy)
     }
+
+    pub fn ensure_update_installable(&self) -> Result<(), String> {
+        let _schedule = self
+            .scheduling
+            .lock()
+            .map_err(|_| "提交锁异常".to_string())?;
+        self.ensure_open()?;
+        let active_generation = self
+            .generation
+            .as_ref()
+            .is_some_and(GenerationController::is_busy)
+            || (self.library.is_some()
+                && self.with_library(|library| library.has_active_generation())?);
+        if active_generation || self.installation_busy() {
+            return Err("请等待生成、清理或模型安装完成后再安装更新".into());
+        }
+        Ok(())
+    }
+
     pub fn save_draft(
         &self,
         draft: DraftInput,
@@ -2310,6 +2335,15 @@ mod tests {
         };
         (root, service)
     }
+
+    #[test]
+    fn update_install_is_refused_after_application_close_begins() {
+        let (_root, service) = fixture();
+        assert!(service.ensure_update_installable().is_ok());
+        service.allow_close();
+        assert!(service.ensure_update_installable().is_err());
+    }
+
     #[test]
     fn legacy_source_url_notation_does_not_change_frozen_component_identity() {
         use studio_core::contracts::{ComponentSnapshot, SourceRevision};
