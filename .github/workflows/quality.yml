@@ -69,11 +69,11 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          cargo build --locked -p inference-supervisor -p diagnostic-worker -p realesrgan-worker
+          cargo build --locked -p inference-supervisor -p diagnostic-worker -p minimax-h3-worker -p realesrgan-worker
           $target = "x86_64-pc-windows-msvc"
           $destination = "apps/desktop/binaries"
           New-Item -ItemType Directory -Force -Path $destination | Out-Null
-          foreach ($name in @("inference-supervisor", "diagnostic-worker", "realesrgan-worker")) {
+          foreach ($name in @("inference-supervisor", "diagnostic-worker", "minimax-h3-worker", "realesrgan-worker")) {
             Copy-Item -Force -LiteralPath "target/debug/$name.exe" -Destination "$destination/$name-$target.exe"
           }
 

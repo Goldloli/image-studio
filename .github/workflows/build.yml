@@ -124,7 +124,7 @@ jobs:
           VERSION=$(node -p "require('./apps/desktop/tauri.conf.json').version")
           python3 scripts/prepare-macos-dev-app.py --profile release --output "target/release/Image Studio.app"
           APP="target/release/Image Studio.app"
-          for binary in image-studio-desktop diagnostic-worker inference-supervisor realesrgan-worker; do
+          for binary in image-studio-desktop diagnostic-worker inference-supervisor minimax-h3-worker realesrgan-worker; do
             file "$APP/Contents/MacOS/$binary" | grep -q 'arm64'
           done
           plutil -lint "$APP/Contents/Info.plist"

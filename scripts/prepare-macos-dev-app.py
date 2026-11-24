@@ -14,6 +14,7 @@ BINARIES = [
     "image-studio-desktop",
     "diagnostic-worker",
     "inference-supervisor",
+    "minimax-h3-worker",
     "realesrgan-worker",
 ]
 

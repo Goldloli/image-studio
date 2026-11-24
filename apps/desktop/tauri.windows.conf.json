@@ -26,6 +26,7 @@
     "externalBin": [
       "binaries/inference-supervisor",
       "binaries/diagnostic-worker",
+      "binaries/minimax-h3-worker",
       "binaries/realesrgan-worker"
     ],
     "useLocalToolsDir": true,

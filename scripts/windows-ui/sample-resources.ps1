@@ -15,7 +15,7 @@ if ($dir -and -not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory
 $writer = New-Object System.IO.StreamWriter($OutputCsv, $false, $utf8)
 $writer.WriteLine('label,iso_time,epoch_ms,gpu_used_mib,gpu_total_mib,available_physical_mib,commit_limit_mib,commit_available_mib,proc_tree_count,private_commit_mib,working_set_mib,pids')
 $started = Get-Date
-$rootPattern = '^(image-studio-desktop|inference-supervisor|python[0-9.]*|realesrgan-worker|diagnostic-worker|stub-supervisor)(\.exe)?$'
+$rootPattern = '^(image-studio-desktop|inference-supervisor|python[0-9.]*|minimax-h3-worker|realesrgan-worker|diagnostic-worker|stub-supervisor)(\.exe)?$'
 try {
     while ($true) {
         $now = Get-Date
