@@ -1,10 +1,11 @@
 use super::*;
 
-pub(super) const CURRENT_USER_VERSION: u32 = 6;
+pub(super) const CURRENT_USER_VERSION: u32 = 7;
 
 /// The schema version introduced by the first-generation single-output
 /// migration; `migrate_v5_to_v6` builds on exactly this version.
 pub(super) const V5_USER_VERSION: u32 = 5;
+pub(super) const V6_USER_VERSION: u32 = 6;
 
 /// Migrates the first-generation single-output schema without rewriting IDs,
 /// paths, requests, plans, manifests, or image bytes.
@@ -92,7 +93,7 @@ pub(super) fn migrate_v4_to_v5(db: &mut Connection) -> Result<()> {
 /// its original visibility and an unset favourite.
 pub(super) fn migrate_v5_to_v6(db: &mut Connection) -> Result<()> {
     let version: u32 = db.pragma_query_value(None, "user_version", |row| row.get(0))?;
-    if version == CURRENT_USER_VERSION {
+    if matches!(version, V6_USER_VERSION | CURRENT_USER_VERSION) {
         return Ok(());
     }
     if version != V5_USER_VERSION {
@@ -136,6 +137,40 @@ pub(super) fn migrate_v5_to_v6(db: &mut Connection) -> Result<()> {
     Ok(())
 }
 
+/// Adds the explicit output resolution to generation turns. Existing rows keep
+/// their historical 1024-square/default semantics.
+pub(super) fn migrate_v6_to_v7(db: &mut Connection) -> Result<()> {
+    let version: u32 = db.pragma_query_value(None, "user_version", |row| row.get(0))?;
+    if version == CURRENT_USER_VERSION {
+        return Ok(());
+    }
+    if version != V6_USER_VERSION {
+        return Err(LibraryError::Schema(format!(
+            "v6 migration cannot upgrade user_version={version}"
+        )));
+    }
+    let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    tx.execute_batch(
+        "
+        ALTER TABLE generation_turns
+            ADD COLUMN resolution INTEGER NOT NULL DEFAULT 1024
+            CHECK(resolution > 0);
+        PRAGMA user_version=7;
+        ",
+    )?;
+    let violations: u32 =
+        tx.query_row("SELECT count(*) FROM pragma_foreign_key_check", [], |row| {
+            row.get(0)
+        })?;
+    if violations != 0 {
+        return Err(LibraryError::Schema(format!(
+            "v6 to v7 migration found {violations} foreign-key violations"
+        )));
+    }
+    tx.commit()?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -148,6 +183,9 @@ mod tests {
         let mut db = Connection::open_in_memory().unwrap();
         db.pragma_update(None, "user_version", 4).unwrap();
         assert!(migrate_v5_to_v6(&mut db).is_err());
+        let mut db = Connection::open_in_memory().unwrap();
+        db.pragma_update(None, "user_version", 5).unwrap();
+        assert!(migrate_v6_to_v7(&mut db).is_err());
     }
 
     #[test]
@@ -155,11 +193,39 @@ mod tests {
         let mut db = Connection::open_in_memory().unwrap();
         db.pragma_update(None, "user_version", CURRENT_USER_VERSION)
             .unwrap();
-        migrate_v5_to_v6(&mut db).unwrap();
+        migrate_v6_to_v7(&mut db).unwrap();
         assert_eq!(
             db.pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
                 .unwrap(),
             CURRENT_USER_VERSION
         );
+    }
+
+    #[test]
+    fn v6_to_v7_preserves_historical_turns_as_1024_square() {
+        let mut db = Connection::open_in_memory().unwrap();
+        db.execute_batch(
+            "
+            CREATE TABLE generation_turns(
+                id TEXT PRIMARY KEY,
+                aspect TEXT NOT NULL,
+                count INTEGER NOT NULL,
+                seed TEXT NOT NULL
+            );
+            INSERT INTO generation_turns(id,aspect,count,seed)
+                VALUES('turn-legacy','1:1',1,'42');
+            PRAGMA user_version=6;
+            ",
+        )
+        .unwrap();
+        migrate_v6_to_v7(&mut db).unwrap();
+        let resolution: u32 = db
+            .query_row(
+                "SELECT resolution FROM generation_turns WHERE id='turn-legacy'",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(resolution, 1024);
     }
 }

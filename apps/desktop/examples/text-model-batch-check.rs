@@ -203,6 +203,7 @@ fn submit_task(
         capability_id: Some(capability.into()),
         source_asset_id: None,
         aspect: "1:1".into(),
+        resolution: 1024,
         count: 1,
         seed: spec.seed.clone(),
         submission_key: format!("{}-{}", spec.id, uuid::Uuid::new_v4()),

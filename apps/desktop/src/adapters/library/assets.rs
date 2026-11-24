@@ -854,6 +854,7 @@ fn max_output_pixels(recipe: Recipe, role: OutputRole) -> u64 {
         (Recipe::BiRefNet | Recipe::BiRefNetWindows, OutputRole::Primary | OutputRole::Mask) => {
             4 * 1024 * 1024
         }
+        (Recipe::MiniMaxH3Mac, OutputRole::Primary) => 4 * 1024 * 1024,
         _ => 1024 * 1024,
     }
 }
@@ -1038,6 +1039,10 @@ mod bounds_tests {
         );
         assert_eq!(
             max_output_pixels(Recipe::BiRefNetWindows, OutputRole::Mask),
+            4 * 1024 * 1024
+        );
+        assert_eq!(
+            max_output_pixels(Recipe::MiniMaxH3Mac, OutputRole::Primary),
             4 * 1024 * 1024
         );
         assert!(

@@ -271,6 +271,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         capability_id: Some(capability.into()),
         source_asset_id: source_id,
         aspect: "1:1".into(),
+        resolution: 1024,
         count: 1,
         seed,
         submission_key: uuid::Uuid::new_v4().to_string(),

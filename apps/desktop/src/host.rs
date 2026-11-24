@@ -6,6 +6,7 @@ use crate::{
         AppPaths,
         app_update::{AppVersionInfo, UpdateCheckResult, UpdateDownloadState, UpdateManager},
         diagnostics::{DiagnosticConfig, DiagnosticController, DiagnosticSnapshot},
+        installation::LicenseAcceptance,
         library::{AssetLibraryQuery, TaskCenterQuery},
         preferences::{AppearancePreferences, CreationDefaults, UpdatePreferences},
         prompt_library::PromptLibraryStore,
@@ -290,9 +291,10 @@ async fn storage_open(state: State<'_, HostState>, location_id: String) -> Resul
 async fn model_install(
     state: State<'_, HostState>,
     install_id: String,
+    license_acceptance: Option<LicenseAcceptance>,
 ) -> Result<serde_json::Value, String> {
     let studio = state.studio.clone();
-    blocking(move || studio.install(&install_id)).await
+    blocking(move || studio.install_with_acceptance(&install_id, license_acceptance)).await
 }
 #[tauri::command]
 async fn model_cancel(

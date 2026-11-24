@@ -65,6 +65,7 @@ pub struct TurnRecord {
     pub capability_id: String,
     pub source_asset_id: Option<AssetId>,
     pub aspect: String,
+    pub resolution: u32,
     pub count: u32,
     pub seed: String,
     pub status: TurnStatus,
@@ -126,6 +127,7 @@ fn default_conversation_params() -> Value {
     serde_json::json!({
         "modelId": DEFAULT_MODEL_ID,
         "aspect": "1:1",
+        "resolution": 1024,
         "count": 1,
         "seed": ""
     })
@@ -155,6 +157,7 @@ pub struct AcceptTurnInput {
     pub capability_id: String,
     pub source_asset_id: Option<AssetId>,
     pub aspect: String,
+    pub resolution: u32,
     pub count: u32,
     pub seed: String,
 }
@@ -648,7 +651,8 @@ impl Library {
             .to_owned();
         let previous = serde_json::json!({
             "prompt": draft.prompt, "aspect": params.get("aspect"), "seed": params.get("seed"),
-            "sourceAssetId": params.get("sourceAssetId"), "promptSourceId": draft.prompt_source,
+            "resolution": params.get("resolution"), "sourceAssetId": params.get("sourceAssetId"),
+            "promptSourceId": draft.prompt_source,
         });
         params.insert("modelId".into(), Value::String(model_id.to_owned()));
         if model_id == studio_core::recipes::KLEIN_MODEL {
@@ -700,6 +704,14 @@ impl Library {
             } else if model_id == studio_core::generation::KLEIN_WINDOWS_MODEL {
                 params.insert("aspect".into(), Value::String("1:1".into()));
             }
+        } else if model_id == studio_core::generation::MINIMAX_H3_MAC_MODEL {
+            params.insert("aspect".into(), Value::String("1:1".into()));
+            params.insert("resolution".into(), Value::from(1024));
+            params.insert(
+                "capabilityId".into(),
+                Value::String(studio_core::generation::MINIMAX_H3_MAC_CAPABILITY.into()),
+            );
+            params.insert("sourceAssetId".into(), Value::Null);
         } else if model_id == DEFAULT_MODEL_ID {
             params.insert(
                 "capabilityId".into(),
@@ -725,7 +737,7 @@ impl Library {
             if let Some(restored) = restored {
                 draft.prompt = restored["prompt"].as_str().unwrap_or("").into();
                 draft.prompt_source = restored["promptSourceId"].as_str().map(str::to_string);
-                for key in ["aspect", "seed", "sourceAssetId"] {
+                for key in ["aspect", "resolution", "seed", "sourceAssetId"] {
                     if let Some(value) = restored.get(key) {
                         params.insert(key.into(), value.clone());
                     }
@@ -824,7 +836,7 @@ impl Library {
         let row = self
             .db
             .query_row(
-                "SELECT id,conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,count,seed,status,job_id,error,progress_stage,progress_step,progress_total,received_at FROM generation_turns WHERE id=?",
+                "SELECT id,conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,resolution,count,seed,status,job_id,error,progress_stage,progress_step,progress_total,received_at FROM generation_turns WHERE id=?",
                 [id.as_str()],
                 |row| {
                     Ok((
@@ -839,21 +851,22 @@ impl Library {
                         row.get::<_, Option<String>>(8)?,
                         row.get::<_, String>(9)?,
                         row.get::<_, i64>(10)?,
-                        row.get::<_, String>(11)?,
+                        row.get::<_, i64>(11)?,
                         row.get::<_, String>(12)?,
-                        row.get::<_, Option<String>>(13)?,
+                        row.get::<_, String>(13)?,
                         row.get::<_, Option<String>>(14)?,
                         row.get::<_, Option<String>>(15)?,
-                        row.get::<_, Option<i64>>(16)?,
+                        row.get::<_, Option<String>>(16)?,
                         row.get::<_, Option<i64>>(17)?,
-                        row.get::<_, i64>(18)?,
+                        row.get::<_, Option<i64>>(18)?,
+                        row.get::<_, i64>(19)?,
                     ))
                 },
             )
             .optional()?
             .ok_or_else(|| LibraryError::NotFound(format!("turn {id}")))?;
         let job = row
-            .13
+            .14
             .as_deref()
             .map(JobId::new)
             .transpose()?
@@ -873,28 +886,30 @@ impl Library {
             capability_id: row.7,
             source_asset_id: row.8.map(AssetId::new).transpose()?,
             aspect: row.9,
-            count: u32::try_from(unsigned_from_i64(row.10, "turn count")?)
+            resolution: u32::try_from(unsigned_from_i64(row.10, "turn resolution")?)
+                .map_err(|_| LibraryError::Schema("轮次分辨率超出范围".into()))?,
+            count: u32::try_from(unsigned_from_i64(row.11, "turn count")?)
                 .map_err(|_| LibraryError::Schema("轮次数量超出范围".into()))?,
-            seed: row.11,
-            status: TurnStatus::try_from(row.12.as_str())?,
+            seed: row.12,
+            status: TurnStatus::try_from(row.13.as_str())?,
             job,
-            error: row.14,
-            progress_stage: row.15,
+            error: row.15,
+            progress_stage: row.16,
             progress_step: row
-                .16
+                .17
                 .map(|value| {
                     u32::try_from(unsigned_from_i64(value, "progress step").unwrap_or(u64::MAX))
                 })
                 .transpose()
                 .map_err(|_| LibraryError::Schema("进度步骤超出范围".into()))?,
             progress_total: row
-                .17
+                .18
                 .map(|value| {
                     u32::try_from(unsigned_from_i64(value, "progress total").unwrap_or(u64::MAX))
                 })
                 .transpose()
                 .map_err(|_| LibraryError::Schema("进度总数超出范围".into()))?,
-            received_at: unsigned_from_i64(row.18, "received_at")?,
+            received_at: unsigned_from_i64(row.19, "received_at")?,
         })
     }
 
@@ -918,7 +933,7 @@ impl Library {
         }
         if let Some(existing) = tx
             .query_row(
-                "SELECT id,conversation_id,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,count,seed FROM generation_turns WHERE project_id='default' AND submission_key=?",
+                "SELECT id,conversation_id,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,resolution,count,seed FROM generation_turns WHERE project_id='default' AND submission_key=?",
                 [input.submission_key.as_str()],
                 |row| {
                     Ok((
@@ -931,7 +946,8 @@ impl Library {
                         row.get::<_, Option<String>>(6)?,
                         row.get::<_, String>(7)?,
                         row.get::<_, i64>(8)?,
-                        row.get::<_, String>(9)?,
+                        row.get::<_, i64>(9)?,
+                        row.get::<_, String>(10)?,
                     ))
                 },
             )
@@ -944,8 +960,9 @@ impl Library {
                 && existing.5 == input.capability_id
                 && existing.6 == input.source_asset_id.as_ref().map(ToString::to_string)
                 && existing.7 == input.aspect
-                && u32::try_from(existing.8).ok() == Some(input.count)
-                && existing.9 == input.seed;
+                && u32::try_from(existing.8).ok() == Some(input.resolution)
+                && u32::try_from(existing.9).ok() == Some(input.count)
+                && existing.10 == input.seed;
             if !matches {
                 return Err(LibraryError::IdempotencyConflict);
             }
@@ -1003,7 +1020,7 @@ impl Library {
         let turn_id = new_key("turn");
         let received_at = now();
         tx.execute(
-            "INSERT INTO generation_turns(id,project_id,conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,count,seed,status,received_at) VALUES(?,? ,?,?,?,?,?,?,?,?,?,?,?,'pending',?)",
+            "INSERT INTO generation_turns(id,project_id,conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,resolution,count,seed,status,received_at) VALUES(?,? ,?,?,?,?,?,?,?,?,?,?,?,?,'pending',?)",
             params![
                 turn_id,
                 "default",
@@ -1019,6 +1036,7 @@ impl Library {
                     .as_ref()
                     .map(ToString::to_string),
                 input.aspect,
+                input.resolution,
                 input.count,
                 input.seed,
                 received_at,
@@ -1078,10 +1096,10 @@ impl Library {
         let source = self.source_facts_for_request(&request)?;
         studio_core::recipes::validate_recipe_plan(&request, &plan, source)?;
         let turn = self.turn(turn_id)?;
-        // A 1:1 turn may be frozen at the standard 1024 canvas or the compact 768 canvas; the
-        // device tier decides which one, and both are valid for the same aspect.
+        // A 1:1 turn may be frozen at the standard 1024 canvas, the compact 768 canvas, or the
+        // experimental MiniMax 2048 profile; the turn identity is checked separately above.
         let expected_sizes: &[(u32, u32)] = match turn.aspect.as_str() {
-            "1:1" => &[(1024, 1024), (768, 768)],
+            "1:1" => &[(1024, 1024), (768, 768), (2048, 2048)],
             "4:3" => &[(1024, 768)],
             "3:4" => &[(768, 1024)],
             _ => return Err(LibraryError::Invalid("轮次画幅无效".into())),
@@ -1381,7 +1399,7 @@ struct TurnRowReader<'a> {
 impl TurnRowReader<'_> {
     fn read(self) -> Result<TurnRecord> {
         let row = self.db.query_row(
-            "SELECT conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,count,seed,status,error,progress_stage,progress_step,progress_total,received_at FROM generation_turns WHERE id=?",
+            "SELECT conversation_id,sequence,submission_key,source_draft_id,prompt,model_id,capability_id,source_asset_id,aspect,resolution,count,seed,status,error,progress_stage,progress_step,progress_total,received_at FROM generation_turns WHERE id=?",
             [self.id.as_str()],
             |row| {
                 Ok((
@@ -1395,13 +1413,14 @@ impl TurnRowReader<'_> {
                     row.get::<_, Option<String>>(7)?,
                     row.get::<_, String>(8)?,
                     row.get::<_, i64>(9)?,
-                    row.get::<_, String>(10)?,
+                    row.get::<_, i64>(10)?,
                     row.get::<_, String>(11)?,
-                    row.get::<_, Option<String>>(12)?,
+                    row.get::<_, String>(12)?,
                     row.get::<_, Option<String>>(13)?,
-                    row.get::<_, Option<i64>>(14)?,
+                    row.get::<_, Option<String>>(14)?,
                     row.get::<_, Option<i64>>(15)?,
-                    row.get::<_, i64>(16)?,
+                    row.get::<_, Option<i64>>(16)?,
+                    row.get::<_, i64>(17)?,
                 ))
             },
         )?;
@@ -1426,16 +1445,18 @@ impl TurnRowReader<'_> {
             capability_id: row.6,
             source_asset_id: row.7.map(AssetId::new).transpose()?,
             aspect: row.8,
-            count: u32::try_from(unsigned_from_i64(row.9, "turn count")?)
+            resolution: u32::try_from(unsigned_from_i64(row.9, "turn resolution")?)
+                .map_err(|_| LibraryError::Schema("轮次分辨率超出范围".into()))?,
+            count: u32::try_from(unsigned_from_i64(row.10, "turn count")?)
                 .map_err(|_| LibraryError::Schema("轮次数量超出范围".into()))?,
-            seed: row.10,
-            status: TurnStatus::try_from(row.11.as_str())?,
+            seed: row.11,
+            status: TurnStatus::try_from(row.12.as_str())?,
             job,
-            error: row.12,
-            progress_stage: row.13,
-            progress_step: optional_u32(row.14, "progress step")?,
-            progress_total: optional_u32(row.15, "progress total")?,
-            received_at: unsigned_from_i64(row.16, "received_at")?,
+            error: row.13,
+            progress_stage: row.14,
+            progress_step: optional_u32(row.15, "progress step")?,
+            progress_total: optional_u32(row.16, "progress total")?,
+            received_at: unsigned_from_i64(row.17, "received_at")?,
         })
     }
 }
@@ -1561,6 +1582,10 @@ fn validate_turn_input(input: &AcceptTurnInput) -> Result<()> {
     if (!tool_without_prompt && input.prompt.trim().is_empty())
         || input.prompt.len() > studio_core::generation::MAX_PROMPT_BYTES
         || !["1:1", "4:3", "3:4"].contains(&input.aspect.as_str())
+        || (input.model_id == studio_core::generation::MINIMAX_H3_MAC_MODEL
+            && !matches!(input.resolution, 1024 | 2048))
+        || (input.model_id != studio_core::generation::MINIMAX_H3_MAC_MODEL
+            && input.resolution != 1024)
         || input.count != 1
         || !valid_seed_text(&input.seed)
     {
@@ -1616,6 +1641,11 @@ fn supported_turn_recipe(model: &str, capability: &str, has_source: bool, aspect
             studio_core::recipes::MOSS_IMAGE_SFT_CAPABILITY,
             false,
         ) => aspect == "1:1",
+        (
+            studio_core::generation::MINIMAX_H3_MAC_MODEL,
+            studio_core::generation::MINIMAX_H3_MAC_CAPABILITY,
+            false,
+        ) => aspect == "1:1",
         _ => windows_supported_pair(model, capability, has_source, aspect),
     }
 }
@@ -1631,6 +1661,7 @@ fn turn_params_json(input: &AcceptTurnInput) -> Result<String> {
     Ok(serde_json::json!({
         "modelId": input.model_id,
         "aspect": input.aspect,
+        "resolution": input.resolution,
         "count": input.count,
         "seed": input.seed,
         "capabilityId": input.capability_id,
@@ -1682,11 +1713,29 @@ mod tests {
                 studio_core::recipes::MOSS_IMAGE_SFT_MODEL,
                 studio_core::recipes::MOSS_IMAGE_SFT_CAPABILITY,
             ),
+            (
+                studio_core::generation::MINIMAX_H3_MAC_MODEL,
+                studio_core::generation::MINIMAX_H3_MAC_CAPABILITY,
+            ),
         ] {
             assert!(supported_turn_recipe(model, capability, false, "1:1"));
             assert!(!supported_turn_recipe(model, capability, true, "1:1"));
             assert!(!supported_turn_recipe(model, capability, false, "4:3"));
         }
+
+        let mut minimax = turn_input(
+            studio_core::generation::MINIMAX_H3_MAC_MODEL,
+            studio_core::generation::MINIMAX_H3_MAC_CAPABILITY,
+            "a copper espresso machine",
+            "42",
+            None,
+            "1:1",
+        );
+        validate_turn_input(&minimax).unwrap();
+        minimax.resolution = 2048;
+        validate_turn_input(&minimax).unwrap();
+        minimax.resolution = 4096;
+        assert!(validate_turn_input(&minimax).is_err());
     }
 
     /// (model_id, capability_id, takes_one_source, is_instruction_less_tool)
@@ -1762,6 +1811,7 @@ mod tests {
             capability_id: capability_id.into(),
             source_asset_id: source.map(|id| AssetId::new(id).unwrap()),
             aspect: aspect.into(),
+            resolution: 1024,
             count: 1,
             seed: seed.into(),
         }

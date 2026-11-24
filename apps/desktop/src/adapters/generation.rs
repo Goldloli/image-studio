@@ -28,10 +28,10 @@ use studio_core::{
     domain::JobId,
     generation::{
         AttemptState, BIREFNET_WINDOWS_CAPABILITY, KLEIN_WINDOWS_EDIT_CAPABILITY,
-        KLEIN_WINDOWS_TEXT_CAPABILITY, MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
-        QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY, QWEN_IMAGE_21_WINDOWS_CAPABILITY,
-        REALESRGAN_WINDOWS_CAPABILITY, WINDOWS_DIFFUSERS_WORKER, WINDOWS_ONNX_WORKER,
-        WINDOWS_REALESRGAN_WORKER,
+        KLEIN_WINDOWS_TEXT_CAPABILITY, MINIMAX_H3_MAC_CAPABILITY, MINIMAX_H3_MAC_WORKER,
+        MOSS_IMAGE_SFT_WINDOWS_CAPABILITY, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
+        QWEN_IMAGE_21_WINDOWS_CAPABILITY, REALESRGAN_WINDOWS_CAPABILITY, WINDOWS_DIFFUSERS_WORKER,
+        WINDOWS_ONNX_WORKER, WINDOWS_REALESRGAN_WORKER,
     },
     recipes::{
         BIREFNET_CAPABILITY, KLEIN_EDIT_CAPABILITY, KLEIN_TEXT_CAPABILITY,
@@ -394,6 +394,7 @@ impl GenerationController {
             && ready.worker_module != "realesrgan-native-worker"
             && ready.worker_module != "studio_diffusers_worker"
             && ready.worker_module != WINDOWS_ZIMAGE_WORKER_MODULE
+            && ready.worker_module != "minimax-h3-native-worker"
         {
             return Err("计算模块身份不符".into());
         }
@@ -422,12 +423,16 @@ impl GenerationController {
         if let Some(expected_build) = expected_worker_build(recipe)
             && ready.worker_build_id != expected_build
         {
-            return Err("Windows 计算模块构建身份不符".into());
+            return Err("计算模块构建身份不符".into());
         }
         // Qwen base/Turbo and MOSS only start from the install-time prepared NF4
         // cache; the worker derives it from the model path, so refuse early with an
         // actionable message instead of failing inside the worker.
-        let mut worker_args = ready.worker_args.clone();
+        let mut worker_args = if recipe == Recipe::MiniMaxH3Mac {
+            minimax_h3_worker_args(ready)?
+        } else {
+            ready.worker_args.clone()
+        };
         if staged_windows_recipe(recipe) {
             let prepared = prepared_cache_path(ready)?;
             for component in ["text_encoder", "transformer"] {
@@ -471,6 +476,13 @@ impl GenerationController {
                 cancel_grace_ms: 5_000,
                 cleanup_deadline_ms: 30_000,
             },
+            Recipe::MiniMaxH3Mac => Timeouts {
+                handshake_ms: 120_000,
+                loading_ms: 600_000,
+                generation_ms: 900_000,
+                cancel_grace_ms: 5_000,
+                cleanup_deadline_ms: 30_000,
+            },
             _ => Timeouts::default(),
         };
         let worker_program = match recipe {
@@ -486,6 +498,16 @@ impl GenerationController {
                 .parent()
                 .ok_or("监督器目录缺失")?
                 .join("realesrgan-worker.exe"),
+            Recipe::MiniMaxH3Mac => self
+                .inner
+                .supervisor
+                .parent()
+                .ok_or("监督器目录缺失")?
+                .join(if cfg!(windows) {
+                    "minimax-h3-worker.exe"
+                } else {
+                    "minimax-h3-worker"
+                }),
             _ => ready.worker_program.clone(),
         };
         let config = SupervisorConfig {
@@ -527,6 +549,7 @@ impl GenerationController {
                 Recipe::MossImageSftWindows | Recipe::MossImageSftWindowsCompact => {
                     vec![MOSS_IMAGE_SFT_WINDOWS_CAPABILITY.into()]
                 }
+                Recipe::MiniMaxH3Mac => vec![MINIMAX_H3_MAC_CAPABILITY.into()],
                 _ => vec![job.request.capability.capability_id.clone()],
             },
             timeouts,
@@ -701,6 +724,13 @@ impl GenerationController {
                     session_id,
                     config.expected_worker.clone(),
                     vec![MOSS_IMAGE_SFT_WINDOWS_CAPABILITY.into()],
+                )
+                .map_err(error)
+            } else if recipe == Recipe::MiniMaxH3Mac {
+                HostSession::new_v2(
+                    session_id,
+                    config.expected_worker.clone(),
+                    vec![MINIMAX_H3_MAC_CAPABILITY.into()],
                 )
                 .map_err(error)
             } else {
@@ -1058,6 +1088,32 @@ fn staged_windows_recipe(recipe: Recipe) -> bool {
             | Recipe::MossImageSftWindowsCompact
     )
 }
+fn minimax_h3_worker_args(ready: &ReadyPaths) -> Result<Vec<String>, String> {
+    let component = |name: &str| {
+        ready
+            .model_path
+            .join(name)
+            .to_str()
+            .map(str::to_owned)
+            .ok_or_else(|| format!("MiniMax-H3-Image 组件路径不是 UTF-8：{name}"))
+    };
+    Ok(vec![
+        "--sd-cli".into(),
+        ready
+            .worker_program
+            .to_str()
+            .ok_or("MiniMax-H3-Image 运行时可执行路径不是 UTF-8")?
+            .into(),
+        "--diffusion-model".into(),
+        component("minimax_h3_image_pruned-Q3_K_S.gguf")?,
+        "--llm".into(),
+        component("qwen3vl_32b_minimax_h3-Q2_K_M.gguf")?,
+        "--vae".into(),
+        component("minimax_h3_image_vae_fp16.safetensors")?,
+        "--tokenizer".into(),
+        component("tokenizer.json")?,
+    ])
+}
 /// The Windows diffusers worker derives the prepared cache by appending
 /// `.prepared` to the model path, so the host must derive exactly that path from
 /// the installed model directory (not from the worker snapshot identity).
@@ -1079,6 +1135,7 @@ fn expected_worker_build(recipe: Recipe) -> Option<&'static str> {
         | Recipe::MossImageSftWindowsCompact => Some(WINDOWS_DIFFUSERS_WORKER),
         Recipe::BiRefNetWindows => Some(WINDOWS_ONNX_WORKER),
         Recipe::RealEsrganWindows => Some(WINDOWS_REALESRGAN_WORKER),
+        Recipe::MiniMaxH3Mac => Some(MINIMAX_H3_MAC_WORKER),
         _ => None,
     }
 }
@@ -1147,7 +1204,10 @@ fn execute_request_v2(
         .transpose()?
         .into_iter()
         .collect();
-    let max_bytes = if matches!(recipe, Recipe::RealEsrgan | Recipe::RealEsrganWindows) {
+    let max_bytes = if matches!(
+        recipe,
+        Recipe::RealEsrgan | Recipe::RealEsrganWindows | Recipe::MiniMaxH3Mac
+    ) {
         wire::MAX_UPSCALE_OUTPUT_BYTES
     } else {
         32 * 1024 * 1024

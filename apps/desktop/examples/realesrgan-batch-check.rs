@@ -146,6 +146,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             capability_id: Some("image.upscale.realesrgan-x4plus.v1".into()),
             source_asset_id: Some(source_id.clone()),
             aspect: "1:1".into(),
+            resolution: 1024,
             count: 1,
             seed: String::new(),
         };
@@ -210,6 +211,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     capability_id: Some("image.text-to-image.z-image-turbo.v1".into()),
                     source_asset_id: None,
                     aspect: "1:1".into(),
+                    resolution: 1024,
                     count: 1,
                     seed: String::new(),
                 })

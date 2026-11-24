@@ -273,6 +273,7 @@ fn submit_task(
         capability_id: Some(capability.into()),
         source_asset_id: None,
         aspect: "1:1".into(),
+        resolution: 1024,
         count: 1,
         seed: seed.into(),
         submission_key: format!("fault-{}", uuid::Uuid::new_v4()),

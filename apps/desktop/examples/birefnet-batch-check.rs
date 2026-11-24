@@ -114,6 +114,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             capability_id: Some("image.remove-background.birefnet-general-epoch-244.v1".into()),
             source_asset_id: Some(source_id.clone()),
             aspect: "1:1".into(),
+            resolution: 1024,
             count: 1,
             seed: String::new(),
         };
@@ -165,6 +166,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 capability_id: Some("image.remove-background.birefnet-general-epoch-244.v1".into()),
                 source_asset_id: Some(source_id.clone()),
                 aspect: "1:1".into(),
+                resolution: 1024,
                 count: 1,
                 seed: String::new(),
             });

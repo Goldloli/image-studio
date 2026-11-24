@@ -324,6 +324,7 @@ impl Library {
                 [serde_json::json!({
                     "modelId": DEFAULT_MODEL_ID,
                     "aspect": "1:1",
+                    "resolution": 1024,
                     "count": 1,
                     "seed": ""
                 })
@@ -352,6 +353,9 @@ impl Library {
         }
         if version <= schema::V5_USER_VERSION {
             schema::migrate_v5_to_v6(&mut db)?;
+        }
+        if version <= schema::V6_USER_VERSION {
+            schema::migrate_v6_to_v7(&mut db)?;
         }
         let integrity: String = db.query_row("PRAGMA quick_check(1)", [], |r| r.get(0))?;
         if integrity != "ok" {

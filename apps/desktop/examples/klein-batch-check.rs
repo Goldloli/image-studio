@@ -409,6 +409,7 @@ fn conversation_input(
         capability_id: Some(capability.into()),
         source_asset_id: source_id.map(str::to_owned),
         aspect: "1:1".into(),
+        resolution: 1024,
         count: 1,
         seed: seed.into(),
         submission_key: submission_key.into(),

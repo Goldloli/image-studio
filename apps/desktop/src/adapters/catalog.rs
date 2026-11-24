@@ -29,6 +29,8 @@ struct RegisteredModel {
     description: String,
     capabilities: Vec<Capability>,
     product_status: String,
+    #[serde(default = "default_support_level")]
+    support_level: String,
     runtime: String,
     license: String,
     source: String,
@@ -52,12 +54,20 @@ struct RegisteredModel {
     #[serde(default)]
     license_notice: Option<String>,
     #[serde(default)]
+    license_url: Option<String>,
+    #[serde(default)]
+    license_sha256: Option<String>,
+    #[serde(default)]
     windows_status: Option<String>,
     /// Per-tier hardware thresholds. Five Windows generative models register a `standard` (12 GB /
     /// 1024² / bf16) and a `compact` (8 GB / 768² / fp16) tier; entries without tiers keep the
     /// single `min_vram_gb`/`min_ram_gb` behaviour.
     #[serde(default)]
     tiers: Vec<TierThreshold>,
+}
+
+fn default_support_level() -> String {
+    "stable".into()
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -128,6 +138,28 @@ impl ModelCatalog {
             if !matches!(entry.product_status.as_str(), "implemented" | "planned") {
                 return Err(format!("模型 {} 的产品状态无效", entry.id));
             }
+            if !matches!(entry.support_level.as_str(), "stable" | "experimental") {
+                return Err(format!("模型 {} 的支持级别无效", entry.id));
+            }
+            if entry.support_level == "experimental"
+                && (entry.license_notice.is_none()
+                    || entry.license_url.is_none()
+                    || entry.license_sha256.is_none())
+            {
+                return Err(format!("实验型号 {} 缺少许可证文本来源或身份", entry.id));
+            }
+            if let Some(sha256) = entry.license_sha256.as_deref()
+                && (sha256.len() != 64 || !sha256.bytes().all(|byte| byte.is_ascii_hexdigit()))
+            {
+                return Err(format!("模型 {} 的许可证哈希无效", entry.id));
+            }
+            if let Some(url) = entry.license_url.as_deref()
+                && (!url.starts_with("https://")
+                    || url.contains("/resolve/master/")
+                    || !url.contains("/resolve/"))
+            {
+                return Err(format!("模型 {} 的许可证来源必须固定 revision", entry.id));
+            }
             if entry.installer_supported != entry.install_id.is_some() {
                 return Err(format!("模型 {} 的安装能力与安装标识不一致", entry.id));
             }
@@ -159,6 +191,18 @@ impl ModelCatalog {
         self.entries.iter().any(|entry| {
             entry.id == id && entry.product_status == "implemented" && entry.installer_supported
         })
+    }
+
+    pub fn installer_supported(&self, id: &str) -> bool {
+        self.entries
+            .iter()
+            .any(|entry| entry.id == id && entry.installer_supported)
+    }
+
+    pub fn stable(&self, id: &str) -> bool {
+        self.entries
+            .iter()
+            .any(|entry| entry.id == id && entry.support_level == "stable")
     }
 
     pub fn supports(&self, id: &str, capability: &str) -> bool {
@@ -223,6 +267,16 @@ impl ModelCatalog {
             .iter()
             .filter(|entry| entry["productStatus"] == "planned")
             .count();
+        let stable = entries
+            .iter()
+            .filter(|entry| {
+                entry["productStatus"] == "implemented" && entry["supportLevel"] == "stable"
+            })
+            .count();
+        let experimental = entries
+            .iter()
+            .filter(|entry| entry["supportLevel"] == "experimental")
+            .count();
         let runtime_ready = entries
             .iter()
             .filter(|entry| entry["runtimeReady"].as_bool() == Some(true))
@@ -241,6 +295,8 @@ impl ModelCatalog {
                 "installed": installed,
                 "executable": executable,
                 "planned": planned,
+                "stable": stable,
+                "experimental": experimental,
                 "runtimeReady": runtime_ready,
                 "hardwareEligible": hardware_eligible
             }
@@ -456,6 +512,7 @@ fn project_entry(
         "description": entry.description,
         "capabilities": entry.capabilities,
         "productStatus": entry.product_status,
+        "supportLevel": entry.support_level,
         "runtime": entry.runtime,
         "license": entry.license,
         "source": entry.source,
@@ -496,6 +553,8 @@ fn project_entry(
             "minRamGb": metadata.min_ram_gb,
             "quantization": metadata.quantization,
             "licenseNotice": metadata.license_notice,
+            "licenseUrl": entry.license_url,
+            "licenseSha256": entry.license_sha256,
             "windowsStatus": metadata.windows_status,
             "hardwareEligible": hardware_eligible,
             // The gate is per model: say so, otherwise a blocked Z-Image reads like a global limit.
@@ -606,12 +665,20 @@ mod tests {
         let query = catalog
             .query(&[], Some("安装器不可用"), &target_device())
             .unwrap();
-        assert_eq!(query["counts"]["total"], 7);
+        assert_eq!(query["counts"]["total"], 8);
+        assert_eq!(
+            query["counts"]["supported"],
+            if cfg!(windows) { 7 } else { 8 }
+        );
+        assert_eq!(
+            query["counts"]["planned"],
+            if cfg!(windows) { 1 } else { 0 }
+        );
+        assert_eq!(query["counts"]["stable"], 7);
+        assert_eq!(query["counts"]["experimental"], 1);
         #[cfg(windows)]
         {
-            assert_eq!(query["counts"]["supported"], 7);
-            assert_eq!(query["counts"]["planned"], 0);
-            assert_eq!(query["counts"]["hardwareEligible"], 7);
+            assert_eq!(query["counts"]["hardwareEligible"], 8);
             assert_eq!(
                 query["entries"][0]["id"],
                 "z-image-turbo-diffusers-cuda-nf4-v1"
@@ -623,8 +690,7 @@ mod tests {
         }
         #[cfg(not(windows))]
         {
-            assert_eq!(query["counts"]["supported"], 7);
-            assert_eq!(query["counts"]["planned"], 0);
+            assert_eq!(query["counts"]["supported"], 8);
         }
         let ids = query["entries"]
             .as_array()
@@ -743,7 +809,19 @@ mod tests {
             .unwrap();
         let mut capability_pairs = 0;
         for item in query["entries"].as_array().unwrap() {
+            if item["id"] == "minimax-h3-image-q3ks-sdcpp-windows-v1" {
+                assert_eq!(item["productStatus"], "planned");
+                assert_eq!(item["supportLevel"], "experimental");
+                assert_eq!(item["installerSupported"], false);
+                assert_eq!(item["installId"], Value::Null);
+                assert_eq!(item["minVramGb"], 12);
+                assert_eq!(item["minRamGb"], 32);
+                assert_eq!(item["tiers"], json!([]));
+                assert_eq!(item["tier"], Value::Null);
+                continue;
+            }
             assert_eq!(item["productStatus"], "implemented");
+            assert_eq!(item["supportLevel"], "stable");
             assert_eq!(item["installerSupported"], true);
             assert_eq!(item["installId"], item["id"]);
             assert!(item["quantization"].is_string());
@@ -821,9 +899,9 @@ mod tests {
     #[test]
     fn unsatisfied_hardware_disables_entry_points_with_a_chinese_reason() {
         let catalog = ModelCatalog::load().unwrap();
-        // An 8 GB / 16 GB machine cannot satisfy the compact tier's 32 GB RAM requirement, so the
-        // five generative models stay blocked while the CPU route and the small ncnn route are
-        // eligible.
+        // An 8 GB / 16 GB machine cannot satisfy the compact tier or MiniMax's independent
+        // 12 GB / 32 GB profile, so the generative models stay blocked while the CPU route and
+        // the small ncnn route are eligible.
         let device = DeviceFacts {
             vram_gb: Some(8),
             ram_gb: 16,
@@ -836,6 +914,7 @@ mod tests {
             "qwen-image-2.1-windows-v1",
             "qwen-image-2.1-turbo-windows-v1",
             "moss-image-sft-windows-v1",
+            "minimax-h3-image-q3ks-sdcpp-windows-v1",
         ] {
             let item = entry(&query, id);
             assert_eq!(item["hardwareEligible"], false, "{id}");

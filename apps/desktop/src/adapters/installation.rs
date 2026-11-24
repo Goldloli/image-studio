@@ -32,6 +32,17 @@ pub const REALESRGAN_WORKER_MODULE: &str = "realesrgan-native-worker";
 pub const QWEN_IMAGE_21_INSTALL_ID: &str = "qwen-image-2.1-mflux-v1";
 pub const QWEN_IMAGE_21_TURBO_INSTALL_ID: &str = "qwen-image-2.1-turbo-mflux-v1";
 pub const MOSS_IMAGE_SFT_INSTALL_ID: &str = "moss-image-sft-mflux-v1";
+#[cfg(not(windows))]
+pub const MINIMAX_H3_INSTALL_ID: &str = "minimax-h3-image-q3ks-sdcpp-macos-v1";
+#[cfg(windows)]
+pub const MINIMAX_H3_INSTALL_ID: &str = "minimax-h3-image-q3ks-sdcpp-windows-v1";
+#[cfg(not(windows))]
+pub const MINIMAX_H3_WORKER_BUILD_ID: &str = "studio-minimax-h3-worker-macos-0.1.0";
+#[cfg(windows)]
+pub const MINIMAX_H3_WORKER_BUILD_ID: &str = "studio-minimax-h3-worker-windows-0.1.0";
+pub const MINIMAX_H3_WORKER_MODULE: &str = "minimax-h3-native-worker";
+pub const MINIMAX_H3_LICENSE_SHA256: &str =
+    "0ec3bb5e6d9e885fa2aaf15e84689e50fd51f42b53fa24d3a64ed9d8c76d423b";
 pub const WINDOWS_ZIMAGE_INSTALL_ID: &str = "z-image-turbo-diffusers-cuda-nf4-v1";
 pub const WINDOWS_ZIMAGE_WORKER_BUILD_ID: &str = "studio-zimage-cuda-worker-0.1.0";
 pub const WINDOWS_ZIMAGE_WORKER_MODULE: &str = "studio_zimage_cuda_worker";
@@ -78,6 +89,60 @@ const QWEN_IMAGE_21_TURBO_MODEL_MANIFEST: &str =
 #[cfg(not(windows))]
 const MOSS_IMAGE_SFT_MODEL_MANIFEST: &str =
     include_str!("../../../../resources/planned-models/moss-image-sft/model-manifest.json");
+#[cfg(not(windows))]
+const MINIMAX_H3_MODEL_MANIFEST: &str =
+    include_str!("../../../../resources/minimax-h3-image/macos-v1/model-manifest.json");
+#[cfg(not(windows))]
+const MINIMAX_H3_RUNTIME_MANIFEST: &str =
+    include_str!("../../../../resources/minimax-h3-image/macos-v1/runtime-manifest.json");
+#[cfg(windows)]
+const MINIMAX_H3_MODEL_MANIFEST: &str =
+    include_str!("../../../../resources/minimax-h3-image/windows-v1/model-manifest.json");
+#[cfg(windows)]
+const MINIMAX_H3_RUNTIME_MANIFEST: &str =
+    include_str!("../../../../resources/minimax-h3-image/windows-v1/runtime-manifest.json");
+#[cfg(not(windows))]
+const MINIMAX_H3_LICENSES: &[(&str, &[u8])] = &[
+    (
+        "LICENSE",
+        include_bytes!("../../../../resources/minimax-h3-image/macos-v1/LICENSE"),
+    ),
+    (
+        "NOTICE",
+        include_bytes!("../../../../resources/minimax-h3-image/macos-v1/NOTICE"),
+    ),
+    (
+        "LICENSE-stable-diffusion.cpp.txt",
+        include_bytes!(
+            "../../../../resources/minimax-h3-image/macos-v1/LICENSE-stable-diffusion.cpp.txt"
+        ),
+    ),
+    (
+        "LICENSE-ggml.txt",
+        include_bytes!("../../../../resources/minimax-h3-image/macos-v1/LICENSE-ggml.txt"),
+    ),
+];
+#[cfg(windows)]
+const MINIMAX_H3_LICENSES: &[(&str, &[u8])] = &[
+    (
+        "LICENSE",
+        include_bytes!("../../../../resources/minimax-h3-image/macos-v1/LICENSE"),
+    ),
+    (
+        "NOTICE",
+        include_bytes!("../../../../resources/minimax-h3-image/macos-v1/NOTICE"),
+    ),
+    (
+        "LICENSE-stable-diffusion.cpp.txt",
+        include_bytes!(
+            "../../../../resources/minimax-h3-image/macos-v1/LICENSE-stable-diffusion.cpp.txt"
+        ),
+    ),
+    (
+        "LICENSE-ggml.txt",
+        include_bytes!("../../../../resources/minimax-h3-image/macos-v1/LICENSE-ggml.txt"),
+    ),
+];
 #[cfg(windows)]
 const WINDOWS_ZIMAGE_MODEL_MANIFEST: &str = include_str!(
     "../../../../resources/windows-foundation/z-image-diffusers/product-model-manifest.json"
@@ -394,6 +459,52 @@ const MOSS_IMAGE_SFT_PROFILE: InstallProfile = InstallProfile {
     shared_worker_wheels: &[],
 };
 
+#[cfg(not(windows))]
+const MINIMAX_H3_PROFILE: InstallProfile = InstallProfile {
+    install_id: MINIMAX_H3_INSTALL_ID,
+    model_manifest: MINIMAX_H3_MODEL_MANIFEST,
+    runtime_manifest: MINIMAX_H3_RUNTIME_MANIFEST,
+    requirements_lock: "",
+    worker_wheel: &[],
+    worker_module: MINIMAX_H3_WORKER_MODULE,
+    worker_build_id: MINIMAX_H3_WORKER_BUILD_ID,
+    engine: studio_core::generation::MINIMAX_H3_MAC_ENGINE,
+    scheduler: studio_core::generation::MINIMAX_H3_SCHEDULER,
+    probe_device: "gpu",
+    precision: "Q3_K_S transformer;Q2_K_M text encoder;float16 VAE",
+    ready_relative: "installations/models/minimax-h3-image-q3ks-sdcpp-macos-v1.json",
+    installing_relative: "installations/models/minimax-h3-image-q3ks-sdcpp-macos-v1.installing.json",
+    probe_with_model: false,
+    worker_model_argument: false,
+    bundle_licenses: MINIMAX_H3_LICENSES,
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
+};
+
+#[cfg(windows)]
+const MINIMAX_H3_PROFILE: InstallProfile = InstallProfile {
+    install_id: MINIMAX_H3_INSTALL_ID,
+    model_manifest: MINIMAX_H3_MODEL_MANIFEST,
+    runtime_manifest: MINIMAX_H3_RUNTIME_MANIFEST,
+    requirements_lock: "",
+    worker_wheel: &[],
+    worker_module: MINIMAX_H3_WORKER_MODULE,
+    worker_build_id: MINIMAX_H3_WORKER_BUILD_ID,
+    engine: studio_core::generation::MINIMAX_H3_WINDOWS_ENGINE,
+    scheduler: studio_core::generation::MINIMAX_H3_SCHEDULER,
+    probe_device: "gpu",
+    precision: "Q3_K_S transformer;Q2_K_M text encoder;float16 VAE",
+    ready_relative: "installations/models/minimax-h3-image-q3ks-sdcpp-windows-v1.json",
+    installing_relative: "installations/models/minimax-h3-image-q3ks-sdcpp-windows-v1.installing.json",
+    probe_with_model: false,
+    worker_model_argument: false,
+    bundle_licenses: MINIMAX_H3_LICENSES,
+    prepare_with_model: false,
+    prepared_cache_reserve: 0,
+    shared_worker_wheels: &[],
+};
+
 #[cfg(windows)]
 const WINDOWS_ZIMAGE_PROFILE: InstallProfile = InstallProfile {
     install_id: WINDOWS_ZIMAGE_INSTALL_ID,
@@ -640,6 +751,32 @@ pub struct ReadyPaths {
     pub runtime_lock_id: String,
     pub model_snapshot_id: String,
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct LicenseAcceptance {
+    pub accepted: bool,
+    pub license_sha256: String,
+    pub territory: String,
+    pub territory_eligible: bool,
+    pub use_scenario: String,
+    pub hosted_service: bool,
+    pub revenue_over_threshold: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct LicenseAcceptanceRecord {
+    schema_version: u32,
+    install_id: String,
+    license_sha256: String,
+    territory: String,
+    territory_eligible: bool,
+    use_scenario: String,
+    hosted_service: bool,
+    revenue_over_threshold: bool,
+    accepted_at_unix: u64,
+}
 #[derive(Clone)]
 pub struct Installation {
     inner: Arc<Inner>,
@@ -672,6 +809,8 @@ pub struct Installations {
     qwen_image_21_turbo: Installation,
     #[cfg(not(windows))]
     moss_image_sft: Installation,
+    #[cfg(not(windows))]
+    minimax_h3: Installation,
     #[cfg(windows)]
     windows_zimage: Installation,
     #[cfg(windows)]
@@ -686,6 +825,8 @@ pub struct Installations {
     windows_qwen_image_21_turbo: Installation,
     #[cfg(windows)]
     windows_moss_image_sft: Installation,
+    #[cfg(windows)]
+    minimax_h3: Installation,
 }
 
 impl Installations {
@@ -703,6 +844,7 @@ impl Installations {
                     QWEN_IMAGE_21_TURBO_PROFILE,
                 )?,
                 moss_image_sft: Installation::new_for(paths.clone(), MOSS_IMAGE_SFT_PROFILE)?,
+                minimax_h3: Installation::new_for(paths.clone(), MINIMAX_H3_PROFILE)?,
             })
         }
         #[cfg(windows)]
@@ -724,9 +866,10 @@ impl Installations {
                     WINDOWS_QWEN_IMAGE_21_TURBO_PROFILE,
                 )?,
                 windows_moss_image_sft: Installation::new_for(
-                    paths,
+                    paths.clone(),
                     WINDOWS_MOSS_IMAGE_SFT_PROFILE,
                 )?,
+                minimax_h3: Installation::new_for(paths, MINIMAX_H3_PROFILE)?,
             })
         }
     }
@@ -744,6 +887,7 @@ impl Installations {
                 self.windows_qwen_image_21.snapshot(),
                 self.windows_qwen_image_21_turbo.snapshot(),
                 self.windows_moss_image_sft.snapshot(),
+                self.minimax_h3.snapshot(),
             ]
         }
         #[cfg(not(windows))]
@@ -755,6 +899,7 @@ impl Installations {
             self.qwen_image_21.snapshot(),
             self.qwen_image_21_turbo.snapshot(),
             self.moss_image_sft.snapshot(),
+            self.minimax_h3.snapshot(),
         ]
     }
 
@@ -763,12 +908,30 @@ impl Installations {
     }
 
     pub fn start(&self, install_id: &str) -> Result<InstallationSnapshot, String> {
+        self.start_with_acceptance(install_id, None)
+    }
+
+    pub fn start_with_acceptance(
+        &self,
+        install_id: &str,
+        acceptance: Option<&LicenseAcceptance>,
+    ) -> Result<InstallationSnapshot, String> {
         if self.is_busy() {
             return Err("另一个型号正在安装，请等待完成或停止后再试。".into());
         }
-        self.for_id(install_id)
-            .ok_or_else(|| "未登记的安装标识。".to_string())?
-            .start(install_id)
+        let installation = self
+            .for_id(install_id)
+            .ok_or_else(|| "未登记的安装标识。".to_string())?;
+        if install_id == MINIMAX_H3_INSTALL_ID {
+            let acceptance =
+                acceptance.ok_or("安装 MiniMax-H3-Image 前必须确认许可证、适用地域与使用场景。")?;
+            record_license_acceptance(
+                &installation.inner.paths.data,
+                installation.inner.profile,
+                acceptance,
+            )?;
+        }
+        installation.start(install_id)
     }
 
     pub fn cancel(&self, install_id: &str) -> Result<InstallationSnapshot, String> {
@@ -819,6 +982,7 @@ impl Installations {
             self.qwen_image_21.cancel();
             self.qwen_image_21_turbo.cancel();
             self.moss_image_sft.cancel();
+            self.minimax_h3.cancel();
         }
         #[cfg(windows)]
         {
@@ -829,6 +993,7 @@ impl Installations {
             self.windows_qwen_image_21.cancel();
             self.windows_qwen_image_21_turbo.cancel();
             self.windows_moss_image_sft.cancel();
+            self.minimax_h3.cancel();
         }
     }
 
@@ -842,6 +1007,7 @@ impl Installations {
             WINDOWS_QWEN_IMAGE_21_INSTALL_ID => Some(&self.windows_qwen_image_21),
             WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID => Some(&self.windows_qwen_image_21_turbo),
             WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID => Some(&self.windows_moss_image_sft),
+            MINIMAX_H3_INSTALL_ID => Some(&self.minimax_h3),
             _ => None,
         }
         #[cfg(not(windows))]
@@ -853,6 +1019,7 @@ impl Installations {
             QWEN_IMAGE_21_INSTALL_ID => Some(&self.qwen_image_21),
             QWEN_IMAGE_21_TURBO_INSTALL_ID => Some(&self.qwen_image_21_turbo),
             MOSS_IMAGE_SFT_INSTALL_ID => Some(&self.moss_image_sft),
+            MINIMAX_H3_INSTALL_ID => Some(&self.minimax_h3),
             _ => None,
         }
     }
@@ -935,6 +1102,100 @@ impl ReadyRecord {
 fn license_root(data: &Path, profile: InstallProfile) -> PathBuf {
     data.join("licenses").join(profile.install_id)
 }
+
+fn license_acceptance_path(data: &Path, profile: InstallProfile) -> PathBuf {
+    license_root(data, profile).join("acceptance.json")
+}
+
+fn validate_license_acceptance(
+    profile: InstallProfile,
+    acceptance: &LicenseAcceptance,
+) -> Result<(), String> {
+    if profile.install_id != MINIMAX_H3_INSTALL_ID {
+        return Ok(());
+    }
+    let territory = acceptance.territory.trim();
+    let scenario = acceptance.use_scenario.trim();
+    if !acceptance.accepted || !acceptance.territory_eligible {
+        return Err("请确认 MiniMax-H3-Image 许可证及适用地域后再安装。".into());
+    }
+    if acceptance.license_sha256 != MINIMAX_H3_LICENSE_SHA256 {
+        return Err("MiniMax-H3-Image 许可证身份与当前固定版本不符。".into());
+    }
+    if territory.is_empty() || territory.chars().count() > 128 {
+        return Err("请填写实际使用地点或适用地域（1–128 个字符）。".into());
+    }
+    if scenario.is_empty() || scenario.chars().count() > 500 {
+        return Err("请填写实际使用场景（1–500 个字符）。".into());
+    }
+    if acceptance.hosted_service {
+        return Err(
+            "MiniMax Community License 不覆盖面向第三方提供托管服务；请先取得 MiniMax 单独授权。"
+                .into(),
+        );
+    }
+    if acceptance.revenue_over_threshold {
+        return Err(
+            "当前使用主体达到 Community License 的单独授权门槛；请先取得 MiniMax 单独授权。".into(),
+        );
+    }
+    Ok(())
+}
+
+fn record_license_acceptance(
+    data: &Path,
+    profile: InstallProfile,
+    acceptance: &LicenseAcceptance,
+) -> Result<(), String> {
+    validate_license_acceptance(profile, acceptance)?;
+    if profile.install_id != MINIMAX_H3_INSTALL_ID {
+        return Ok(());
+    }
+    let root = license_root(data, profile);
+    ensure_child_dir(data, &root)?;
+    let accepted_at_unix = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|error| error.to_string())?
+        .as_secs();
+    atomic_json(
+        &license_acceptance_path(data, profile),
+        &LicenseAcceptanceRecord {
+            schema_version: 1,
+            install_id: profile.install_id.into(),
+            license_sha256: acceptance.license_sha256.clone(),
+            territory: acceptance.territory.trim().into(),
+            territory_eligible: acceptance.territory_eligible,
+            use_scenario: acceptance.use_scenario.trim().into(),
+            hosted_service: acceptance.hosted_service,
+            revenue_over_threshold: acceptance.revenue_over_threshold,
+            accepted_at_unix,
+        },
+    )
+}
+
+fn license_acceptance_healthy(data: &Path, profile: InstallProfile) -> Result<(), String> {
+    if profile.install_id != MINIMAX_H3_INSTALL_ID {
+        return Ok(());
+    }
+    let record: LicenseAcceptanceRecord = serde_json::from_slice(
+        &fs::read(license_acceptance_path(data, profile))
+            .map_err(|_| "MiniMax-H3-Image 缺少许可证确认记录。".to_string())?,
+    )
+    .map_err(|_| "MiniMax-H3-Image 许可证确认记录损坏。".to_string())?;
+    if record.schema_version != 1
+        || record.install_id != profile.install_id
+        || record.license_sha256 != MINIMAX_H3_LICENSE_SHA256
+        || !record.territory_eligible
+        || record.territory.trim().is_empty()
+        || record.use_scenario.trim().is_empty()
+        || record.hosted_service
+        || record.revenue_over_threshold
+    {
+        return Err("MiniMax-H3-Image 许可证确认记录与当前安装身份不符。".into());
+    }
+    Ok(())
+}
+
 fn license_records(profile: InstallProfile) -> Vec<LicenseFileRecord> {
     profile
         .bundle_licenses
@@ -1348,6 +1609,8 @@ fn execution_snapshot_id(install_id: &str) -> Option<&'static str> {
         WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID => {
             Some(studio_core::generation::MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT)
         }
+        #[cfg(windows)]
+        MINIMAX_H3_INSTALL_ID => Some(studio_core::generation::MINIMAX_H3_WINDOWS_SNAPSHOT),
         _ => None,
     }
 }
@@ -1355,6 +1618,8 @@ fn execution_snapshot_id(install_id: &str) -> Option<&'static str> {
 /// device name reported by their install probe.
 fn plan_device_id(install_id: &str) -> Option<&'static str> {
     match install_id {
+        #[cfg(not(windows))]
+        MINIMAX_H3_INSTALL_ID => Some(studio_core::generation::MINIMAX_H3_MAC_DEVICE),
         WINDOWS_ZIMAGE_INSTALL_ID => Some(studio_core::generation::Z_IMAGE_WINDOWS_DEVICE),
         WINDOWS_KLEIN_INSTALL_ID
         | WINDOWS_QWEN_IMAGE_21_INSTALL_ID
@@ -1362,6 +1627,8 @@ fn plan_device_id(install_id: &str) -> Option<&'static str> {
         | WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID => Some(studio_core::generation::WINDOWS_CUDA_DEVICE),
         WINDOWS_BIREFNET_INSTALL_ID => Some(studio_core::generation::WINDOWS_CPU_DEVICE),
         WINDOWS_REALESRGAN_INSTALL_ID => Some(studio_core::generation::WINDOWS_VULKAN_DEVICE),
+        #[cfg(windows)]
+        MINIMAX_H3_INSTALL_ID => Some(studio_core::generation::MINIMAX_H3_WINDOWS_DEVICE),
         _ => None,
     }
 }
@@ -1460,6 +1727,26 @@ fn native_runtime_platform() -> &'static str {
         "windows-amd64"
     } else {
         "macos-universal2"
+    }
+}
+
+fn expected_native_runtime_platform(worker_module: &str) -> &'static str {
+    #[cfg(not(windows))]
+    if worker_module == MINIMAX_H3_WORKER_MODULE {
+        return "macos-arm64";
+    }
+    let _ = worker_module;
+    native_runtime_platform()
+}
+
+fn is_expected_minimax_runtime_device(device: &str) -> bool {
+    #[cfg(windows)]
+    {
+        return device.to_ascii_uppercase().starts_with("CUDA");
+    }
+    #[cfg(not(windows))]
+    {
+        device == studio_core::generation::MINIMAX_H3_MAC_RUNTIME_DEVICE
     }
 }
 
@@ -1739,10 +2026,11 @@ impl Installation {
             ));
         }
         if runtime.is_native() {
-            if runtime.platform != native_runtime_platform() {
+            let expected_platform = expected_native_runtime_platform(profile.worker_module);
+            if runtime.platform != expected_platform {
                 return Err(format!(
                     "原生运行时平台不符；当前系统只接受 {} 清单。",
-                    native_runtime_platform()
+                    expected_platform
                 ));
             }
             if runtime.executable.is_none()
@@ -1901,6 +2189,7 @@ impl Installation {
         if !cfg!(all(target_os = "macos", target_arch = "aarch64")) {
             return Err("此运行时仅验证 macOS arm64。".into());
         }
+        license_acceptance_healthy(&self.inner.paths.data, self.inner.profile)?;
         if self.snapshot().phase == "ready" {
             return Ok(self.snapshot());
         }
@@ -2182,6 +2471,7 @@ impl Installation {
             }
         }
         super::logging::debug("install.verify.runtime", &[]);
+        license_acceptance_healthy(&self.inner.paths.data, self.inner.profile)?;
         let license_root = license_root(&self.inner.paths.data, self.inner.profile);
         for license in license_records(self.inner.profile) {
             verify(
@@ -2198,13 +2488,21 @@ impl Installation {
                 .as_deref()
                 .ok_or("原生运行时缺少 executable")?;
             let program = self.runtime_dir().join(executable);
-            (
-                program.clone(),
+            let args = if self.inner.profile.worker_module == MINIMAX_H3_WORKER_MODULE {
+                vec![
+                    "--sd-cli".into(),
+                    program
+                        .to_str()
+                        .ok_or("MiniMax-H3-Image 运行时路径不是 UTF-8")?
+                        .into(),
+                ]
+            } else {
                 vec![
                     "--ncnn-binary".into(),
                     program.to_str().ok_or("ncnn 路径不是 UTF-8")?.into(),
-                ],
-            )
+                ]
+            };
+            (program, args)
         } else {
             let mut arguments = vec![
                 "-I".into(),
@@ -2671,8 +2969,11 @@ impl Installation {
         {
             use std::os::unix::fs::PermissionsExt;
             if ncnn.metadata().map_err(err)?.permissions().mode() & 0o111 == 0 {
-                return Err("ncnn 可执行权限缺失。".into());
+                return Err("原生可执行权限缺失。".into());
             }
+        }
+        if self.inner.profile.worker_module == MINIMAX_H3_WORKER_MODULE {
+            return self.probe_minimax_h3_runtime(&ncnn);
         }
         self.check_cancel()?;
         self.update(|state| state.phase = "probing".into());
@@ -2778,6 +3079,56 @@ impl Installation {
                 "probe_input_size": [8, 6],
                 "probe_output_size": [32, 24],
                 "probe_output_sha256": probe_output_sha256,
+            }),
+        })
+    }
+
+    fn probe_minimax_h3_runtime(&self, executable: &Path) -> Result<ReadyRecord, String> {
+        self.check_cancel()?;
+        self.update(|state| state.phase = "probing".into());
+        let probe_output = self.command(quiet_command(executable).arg("--list-devices"))?;
+        let probe_log = fs::read(self.inner.paths.logs.join("installation-process.log"))
+            .map(|bytes| String::from_utf8_lossy(&bytes).into_owned())
+            .unwrap_or_default();
+        let device_name = String::from_utf8_lossy(&probe_output)
+            .lines()
+            .chain(probe_log.lines())
+            .find_map(|line| {
+                line.split_once('\t')
+                    .map(|(device, name)| (device.trim(), name.trim()))
+                    .filter(|(device, name)| {
+                        is_expected_minimax_runtime_device(device) && !name.is_empty()
+                    })
+                    .map(|(_, name)| name.to_owned())
+            })
+            .ok_or("MiniMax-H3-Image 运行时未报告预期计算设备")?;
+        let licenses = self.install_licenses()?;
+        let mut runtime_files = Vec::new();
+        inventory(&self.runtime_dir(), &self.runtime_dir(), &mut runtime_files)?;
+        self.check_cancel()?;
+        Ok(ReadyRecord {
+            runtime_lock_id: self.inner.runtime.id.clone(),
+            model_snapshot_id: self.snapshot_id(),
+            runtime_manifest_sha256: manifest_digest(self.inner.profile.runtime_manifest),
+            model_manifest_sha256: manifest_digest(self.inner.profile.model_manifest),
+            licenses,
+            prepared_dir: None,
+            prepared_files: Vec::new(),
+            prepared_digest: None,
+            worker_wheels: Vec::new(),
+            prepare_preflight: None,
+            runtime_files,
+            probe: serde_json::json!({
+                "identity": {
+                    "build_id": self.inner.profile.worker_build_id,
+                    "runtime_lock_id": self.inner.runtime.id,
+                    "model_snapshot_id": self.snapshot_id(),
+                },
+                "device": self.inner.profile.probe_device,
+                "device_name": device_name,
+                "backend": studio_core::generation::MINIMAX_H3_MAC_ENGINE,
+                "command": "sd-cli --list-devices",
+                "model_execution": false,
             }),
         })
     }
@@ -5300,6 +5651,151 @@ mod tests {
         atomic_json(&repo.join("verification/first-generation-runtime-install.json"),&serde_json::json!({"kind":"production-installer-offline-runtime-acceptance","is_full_model_inference":false,"installation_activated":false,"network_denied":std::env::var("STUDIO_ACCEPTANCE_NETWORK_DENIED").as_deref()==Ok("1"),"elapsed_seconds":started.elapsed().as_secs_f64(),"runtime_lock_id":record.runtime_lock_id,"model_snapshot_id":record.model_snapshot_id,"worker_wheel_sha256":i.inner.runtime.wheels.iter().find(|a|a.url=="bundled:worker-wheel").unwrap().sha256,"inventory_entries":record.runtime_files.len(),"probe":record.probe})).unwrap();
     }
 
+    #[cfg(not(windows))]
+    #[test]
+    #[ignore = "explicit acceptance: installs the 23 GB MiniMax-H3-Image closure from the verified POC cache"]
+    fn actual_minimax_product_install_reuses_verified_poc_bytes() {
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .canonicalize()
+            .unwrap();
+        let model_source = std::env::var_os("STUDIO_MINIMAX_MODEL_SOURCE")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| repo.join("target/minimax-h3-poc/models-segmented"));
+        let runtime_zip = std::env::var_os("STUDIO_MINIMAX_RUNTIME_ZIP")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| {
+                repo.join(
+                    "target/minimax-h3-poc/runtime/sd-master-3b12781-bin-Darwin-macOS-26.7.2-arm64.zip",
+                )
+            });
+        let acceptance_root = std::env::var_os("STUDIO_MINIMAX_ACCEPTANCE_ROOT")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| repo.join("target/minimax-h3-product-acceptance"));
+        if std::env::var_os("STUDIO_MINIMAX_RESET").is_some() {
+            let managed = acceptance_root.join("data");
+            if managed.exists() {
+                fs::remove_dir_all(&managed).unwrap();
+            }
+        }
+        fs::create_dir_all(&acceptance_root).unwrap();
+        let paths = AppPaths::resolve(Some(&acceptance_root)).unwrap();
+        let installer = Installation::new_for(paths, MINIMAX_H3_PROFILE).unwrap();
+        ensure_child_dir(&installer.inner.paths.cache, &installer.cache()).unwrap();
+
+        record_license_acceptance(
+            &installer.inner.paths.data,
+            MINIMAX_H3_PROFILE,
+            &LicenseAcceptance {
+                accepted: true,
+                license_sha256: MINIMAX_H3_LICENSE_SHA256.into(),
+                territory: "Shanghai, China".into(),
+                territory_eligible: true,
+                use_scenario: "local Image Studio acceptance test".into(),
+                hosted_service: false,
+                revenue_over_threshold: false,
+            },
+        )
+        .unwrap();
+
+        let model_files = installer
+            .inner
+            .model
+            .downloads()
+            .into_iter()
+            .map(|artifact| {
+                let source = model_source.join(&artifact.path);
+                verify(&source, artifact.bytes, &artifact.sha256)
+                    .unwrap_or_else(|error| panic!("{}: {error}", source.display()));
+                (source, artifact)
+            })
+            .collect::<Vec<_>>();
+        let runtime_artifact = installer
+            .inner
+            .runtime
+            .downloads()
+            .into_iter()
+            .next()
+            .unwrap();
+        verify(
+            &runtime_zip,
+            runtime_artifact.bytes,
+            &runtime_artifact.sha256,
+        )
+        .unwrap();
+
+        for (source, artifact) in model_files
+            .into_iter()
+            .chain(std::iter::once((runtime_zip, runtime_artifact)))
+        {
+            let cache = installer.cache().join(&artifact.sha256);
+            if cache.is_file() && verify(&cache, artifact.bytes, &artifact.sha256).is_ok() {
+                continue;
+            }
+            if cache.exists() {
+                fs::remove_file(&cache).unwrap();
+            }
+            if fs::hard_link(&source, &cache).is_err() {
+                copy_verified(&source, &cache, &artifact, &installer.cache()).unwrap();
+            }
+        }
+
+        let started = std::time::Instant::now();
+        installer.start(MINIMAX_H3_INSTALL_ID).unwrap();
+        let deadline = started + Duration::from_secs(900);
+        loop {
+            let snapshot = installer.snapshot();
+            if snapshot.phase == "ready" {
+                break;
+            }
+            if matches!(
+                snapshot.phase.as_str(),
+                "failed" | "cancelled" | "unavailable"
+            ) {
+                panic!("install ended as {}: {:?}", snapshot.phase, snapshot.error);
+            }
+            assert!(
+                std::time::Instant::now() < deadline,
+                "install timed out in phase {}",
+                snapshot.phase
+            );
+            std::thread::sleep(Duration::from_millis(500));
+        }
+        let ready = installer.ready_paths().unwrap();
+        let plan = installer.plan_environment().unwrap();
+        assert_eq!(
+            ready.runtime_lock_id,
+            studio_core::generation::MINIMAX_H3_MAC_RUNTIME
+        );
+        assert_eq!(ready.worker_build_id, MINIMAX_H3_WORKER_BUILD_ID);
+        assert_eq!(plan.components.len(), 4);
+        assert_eq!(plan.runtime.package_id, ready.runtime_lock_id);
+        assert_eq!(
+            plan.device.device_id,
+            studio_core::generation::MINIMAX_H3_MAC_DEVICE
+        );
+        let evidence = serde_json::json!({
+            "kind": "minimax-h3-image-product-install-acceptance",
+            "status": "passed",
+            "scope": "isolated product installer and device probe; model generation follows separately",
+            "root": acceptance_root,
+            "elapsed_seconds": started.elapsed().as_secs_f64(),
+            "model_snapshot_id": ready.model_snapshot_id,
+            "runtime_lock_id": ready.runtime_lock_id,
+            "worker_build_id": ready.worker_build_id,
+            "components": plan.components.len(),
+            "model_files": installer.inner.model.downloads().len(),
+            "model_manifest_sha256": manifest_digest(MINIMAX_H3_MODEL_MANIFEST),
+            "runtime_manifest_sha256": manifest_digest(MINIMAX_H3_RUNTIME_MANIFEST),
+            "evidence_boundary": "This proves product installation, fixed bytes, license archive and device probe on this macOS arm64 host only; it does not prove generation, native UI or Windows."
+        });
+        atomic_json(
+            &repo.join("verification/minimax-h3-image-20261124/macos-product-install.json"),
+            &evidence,
+        )
+        .unwrap();
+    }
+
     #[test]
     #[ignore = "explicit acceptance: requires the pinned MFLUX wheel cache"]
     fn klein_private_runtime_installs_offline_without_model_weights() {
@@ -5419,6 +5915,81 @@ mod tests {
         );
         assert!(licenses_match_profile(profile, &records));
     }
+
+    #[test]
+    fn minimax_license_acceptance_requires_the_fixed_text_and_scope() {
+        let profile = MINIMAX_H3_PROFILE;
+        let valid = LicenseAcceptance {
+            accepted: true,
+            license_sha256: MINIMAX_H3_LICENSE_SHA256.into(),
+            territory: "Singapore".into(),
+            territory_eligible: true,
+            use_scenario: "local personal image generation".into(),
+            hosted_service: false,
+            revenue_over_threshold: false,
+        };
+        validate_license_acceptance(profile, &valid).unwrap();
+
+        for invalid in [
+            LicenseAcceptance {
+                accepted: false,
+                ..valid.clone()
+            },
+            LicenseAcceptance {
+                license_sha256: "0".repeat(64),
+                ..valid.clone()
+            },
+            LicenseAcceptance {
+                territory_eligible: false,
+                ..valid.clone()
+            },
+            LicenseAcceptance {
+                hosted_service: true,
+                ..valid.clone()
+            },
+            LicenseAcceptance {
+                revenue_over_threshold: true,
+                ..valid
+            },
+        ] {
+            assert!(validate_license_acceptance(profile, &invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn minimax_license_acceptance_is_persisted_before_install() {
+        let (_temp, install) =
+            fixture_for(|paths| Installation::new_for(paths, MINIMAX_H3_PROFILE));
+        let acceptance = LicenseAcceptance {
+            accepted: true,
+            license_sha256: MINIMAX_H3_LICENSE_SHA256.into(),
+            territory: "Singapore".into(),
+            territory_eligible: true,
+            use_scenario: "local personal image generation".into(),
+            hosted_service: false,
+            revenue_over_threshold: false,
+        };
+        record_license_acceptance(&install.inner.paths.data, MINIMAX_H3_PROFILE, &acceptance)
+            .unwrap();
+        license_acceptance_healthy(&install.inner.paths.data, MINIMAX_H3_PROFILE).unwrap();
+        fs::write(
+            license_acceptance_path(&install.inner.paths.data, MINIMAX_H3_PROFILE),
+            b"broken",
+        )
+        .unwrap();
+        assert!(license_acceptance_healthy(&install.inner.paths.data, MINIMAX_H3_PROFILE).is_err());
+    }
+
+    #[test]
+    fn minimax_install_budget_counts_full_weights_runtime_and_staging() {
+        let (_temp, install) =
+            fixture_for(|paths| Installation::new_for(paths, MINIMAX_H3_PROFILE));
+        let snapshot = install.snapshot();
+        assert_eq!(snapshot.model_bytes, 23_045_953_427);
+        assert_eq!(snapshot.runtime_bytes, 39_644_163);
+        assert!(snapshot.required_bytes > snapshot.model_bytes + snapshot.runtime_bytes);
+    }
+
     #[test]
     fn license_archive_failure_cannot_activate_silently() {
         let profile = license_profile();
@@ -6770,6 +7341,14 @@ mod tests {
                 "macos-universal2"
             }
         );
+        assert_eq!(
+            expected_native_runtime_platform(MINIMAX_H3_WORKER_MODULE),
+            if cfg!(windows) {
+                "windows-amd64"
+            } else {
+                "macos-arm64"
+            }
+        );
     }
 
     #[cfg(windows)]
@@ -6934,7 +7513,7 @@ mod tests {
         let paths = AppPaths::resolve(Some(temp.path())).unwrap();
         let manager = Installations::new(paths).unwrap();
         let snapshots = manager.snapshots();
-        assert_eq!(snapshots.len(), 7);
+        assert_eq!(snapshots.len(), 8);
         assert!(
             snapshots
                 .iter()
@@ -6956,6 +7535,7 @@ mod tests {
             QWEN_IMAGE_21_INSTALL_ID,
             QWEN_IMAGE_21_TURBO_INSTALL_ID,
             MOSS_IMAGE_SFT_INSTALL_ID,
+            MINIMAX_H3_INSTALL_ID,
         ] {
             assert_eq!(manager.snapshot(install_id).unwrap().install_id, install_id);
         }
@@ -6993,6 +7573,28 @@ mod tests {
         assert_eq!(manager.snapshot(INSTALL_ID).unwrap().phase, "not_installed");
     }
 
+    #[cfg(not(windows))]
+    #[test]
+    fn minimax_install_participates_in_the_single_install_lock() {
+        let temp = tempfile::tempdir().unwrap();
+        let manager = Installations::new(AppPaths::resolve(Some(temp.path())).unwrap()).unwrap();
+        manager
+            .minimax_h3
+            .update(|state| state.phase = "downloading".into());
+        assert!(
+            manager
+                .start(BIREFNET_INSTALL_ID)
+                .unwrap_err()
+                .contains("另一个型号")
+        );
+        manager.cancel(MINIMAX_H3_INSTALL_ID).unwrap();
+        assert!(manager.minimax_h3.inner.cancelled.load(Ordering::SeqCst));
+        assert_eq!(
+            manager.snapshot(BIREFNET_INSTALL_ID).unwrap().phase,
+            "not_installed"
+        );
+    }
+
     #[cfg(windows)]
     const WINDOWS_MODEL_BYTES: &[(&str, u64)] = &[
         (WINDOWS_ZIMAGE_INSTALL_ID, 32_848_305_533),
@@ -7002,6 +7604,7 @@ mod tests {
         (WINDOWS_QWEN_IMAGE_21_INSTALL_ID, 33_131_609_424),
         (WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID, 32_451_607_098),
         (WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID, 27_219_783_878),
+        (MINIMAX_H3_INSTALL_ID, 23_045_953_427),
     ];
     #[cfg(windows)]
     fn windows_profile(install_id: &str) -> InstallProfile {
@@ -7013,12 +7616,13 @@ mod tests {
             WINDOWS_QWEN_IMAGE_21_INSTALL_ID => WINDOWS_QWEN_IMAGE_21_PROFILE,
             WINDOWS_QWEN_IMAGE_21_TURBO_INSTALL_ID => WINDOWS_QWEN_IMAGE_21_TURBO_PROFILE,
             WINDOWS_MOSS_IMAGE_SFT_INSTALL_ID => WINDOWS_MOSS_IMAGE_SFT_PROFILE,
+            MINIMAX_H3_INSTALL_ID => MINIMAX_H3_PROFILE,
             _ => panic!("unregistered Windows install id"),
         }
     }
     #[cfg(windows)]
     #[test]
-    fn windows_installation_manager_exposes_all_seven_profiles_in_fixed_order() {
+    fn windows_installation_manager_exposes_all_eight_profiles_in_fixed_order() {
         let temp = tempfile::tempdir().unwrap();
         let manager = Installations::new(AppPaths::resolve(Some(temp.path())).unwrap()).unwrap();
         let snapshots = manager.snapshots();
@@ -7114,13 +7718,33 @@ mod tests {
                 install_device_expectation(install_id),
                 installer.inner.profile.probe_device
             );
-            assert!(installer.inner.profile.probe_with_model);
+            if install_id == MINIMAX_H3_INSTALL_ID {
+                assert!(!installer.inner.profile.probe_with_model);
+            } else {
+                assert!(installer.inner.profile.probe_with_model);
+            }
             assert_eq!(
                 installer.inner.profile.worker_model_argument,
-                install_id != WINDOWS_ZIMAGE_INSTALL_ID
+                install_id != WINDOWS_ZIMAGE_INSTALL_ID && install_id != MINIMAX_H3_INSTALL_ID
             );
             assert!(plan_device_id(install_id).is_some());
-            if install_id == WINDOWS_BIREFNET_INSTALL_ID {
+            if install_id == MINIMAX_H3_INSTALL_ID {
+                assert!(installer.inner.runtime.is_native());
+                assert_eq!(
+                    installer.inner.runtime.id,
+                    studio_core::generation::MINIMAX_H3_WINDOWS_RUNTIME
+                );
+                assert_eq!(
+                    installer.inner.runtime.executable.as_deref(),
+                    Some("bin/sd-cli.exe")
+                );
+                assert_eq!(
+                    installer.inner.profile.engine,
+                    studio_core::generation::MINIMAX_H3_WINDOWS_ENGINE
+                );
+                assert_eq!(installer.inner.profile.bundle_licenses.len(), 4);
+                assert!(installer.inner.profile.shared_worker_wheels.is_empty());
+            } else if install_id == WINDOWS_BIREFNET_INSTALL_ID {
                 assert_eq!(installer.inner.profile.probe_device, "windows-cpu");
                 assert_eq!(
                     installer.inner.profile.engine,

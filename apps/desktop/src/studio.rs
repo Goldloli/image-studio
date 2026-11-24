@@ -7,8 +7,9 @@ use crate::adapters::{
     generation::GenerationController,
     installation::{
         BIREFNET_INSTALL_ID, INSTALL_ID, InstallationSnapshot, Installations, KLEIN_INSTALL_ID,
-        MOSS_IMAGE_SFT_INSTALL_ID, QWEN_IMAGE_21_INSTALL_ID, QWEN_IMAGE_21_TURBO_INSTALL_ID,
-        REALESRGAN_INSTALL_ID, WINDOWS_ZIMAGE_INSTALL_ID,
+        LicenseAcceptance, MINIMAX_H3_INSTALL_ID, MOSS_IMAGE_SFT_INSTALL_ID,
+        QWEN_IMAGE_21_INSTALL_ID, QWEN_IMAGE_21_TURBO_INSTALL_ID, REALESRGAN_INSTALL_ID,
+        WINDOWS_ZIMAGE_INSTALL_ID,
     },
     library::{
         AcceptTurnInput, AssetLibraryQuery, DEFAULT_MODEL_ID, DraftRecord, JobRecord, Library,
@@ -38,9 +39,9 @@ use studio_core::{
         BiRefNetInput, KleinInput, MOSS_IMAGE_SFT_CAPABILITY, MOSS_IMAGE_SFT_MODEL,
         QWEN_IMAGE_21_CAPABILITY, QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY,
         QWEN_IMAGE_21_TURBO_MODEL, RealEsrganInput, Recipe, SourceAsset, SourceFacts,
-        TextModelInput, freeze_birefnet, freeze_klein, freeze_realesrgan, freeze_text_model,
-        freeze_windows_birefnet, freeze_windows_klein, freeze_windows_klein_compact,
-        freeze_windows_realesrgan, freeze_windows_text_model,
+        TextModelInput, freeze_birefnet, freeze_klein, freeze_minimax_h3, freeze_realesrgan,
+        freeze_text_model, freeze_windows_birefnet, freeze_windows_klein,
+        freeze_windows_klein_compact, freeze_windows_realesrgan, freeze_windows_text_model,
     },
 };
 use uuid::Uuid;
@@ -109,9 +110,15 @@ pub struct ConversationSendInput {
     #[serde(default)]
     pub source_asset_id: Option<String>,
     pub aspect: String,
+    #[serde(default = "default_output_resolution")]
+    pub resolution: u32,
     pub count: u32,
     pub seed: String,
     pub submission_key: String,
+}
+
+fn default_output_resolution() -> u32 {
+    1024
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -119,6 +126,8 @@ pub struct ConversationSendInput {
 pub struct DraftParams {
     pub model_id: String,
     pub aspect: String,
+    #[serde(default = "default_output_resolution")]
+    pub resolution: u32,
     pub count: u32,
     pub seed: String,
     #[serde(default = "default_capability_id")]
@@ -134,6 +143,8 @@ pub struct DraftParams {
 pub struct CapabilityDraft {
     pub prompt: String,
     pub aspect: String,
+    #[serde(default = "default_output_resolution")]
+    pub resolution: u32,
     pub seed: String,
     pub source_asset_id: Option<String>,
     pub prompt_source_id: Option<String>,
@@ -157,6 +168,9 @@ fn capability_for_model(model_id: &str) -> &'static str {
             return studio_core::generation::QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY;
         }
         WINDOWS_MOSS_MODEL => return studio_core::generation::MOSS_IMAGE_SFT_WINDOWS_CAPABILITY,
+        studio_core::generation::MINIMAX_H3_WINDOWS_MODEL => {
+            return studio_core::generation::MINIMAX_H3_WINDOWS_CAPABILITY;
+        }
         _ => {}
     }
     match model_id {
@@ -168,6 +182,7 @@ fn capability_for_model(model_id: &str) -> &'static str {
         QWEN_IMAGE_21_INSTALL_ID => QWEN_IMAGE_21_CAPABILITY,
         QWEN_IMAGE_21_TURBO_INSTALL_ID => QWEN_IMAGE_21_TURBO_CAPABILITY,
         MOSS_IMAGE_SFT_INSTALL_ID => MOSS_IMAGE_SFT_CAPABILITY,
+        MINIMAX_H3_INSTALL_ID => studio_core::generation::MINIMAX_H3_MAC_CAPABILITY,
         _ => {
             #[cfg(windows)]
             return Z_IMAGE_WINDOWS_CAPABILITY;
@@ -232,14 +247,16 @@ fn model_accepts_aspect(model_id: &str, aspect: &str) -> bool {
         | REALESRGAN_INSTALL_ID
         | QWEN_IMAGE_21_INSTALL_ID
         | QWEN_IMAGE_21_TURBO_INSTALL_ID
-        | MOSS_IMAGE_SFT_INSTALL_ID => aspect == "1:1",
+        | MOSS_IMAGE_SFT_INSTALL_ID
+        | MINIMAX_H3_INSTALL_ID => aspect == "1:1",
         #[cfg(windows)]
         WINDOWS_KLEIN_MODEL
         | WINDOWS_BIREFNET_MODEL
         | WINDOWS_REALESRGAN_MODEL
         | WINDOWS_QWEN_MODEL
         | WINDOWS_QWEN_TURBO_MODEL
-        | WINDOWS_MOSS_MODEL => aspect == "1:1",
+        | WINDOWS_MOSS_MODEL
+        | studio_core::generation::MINIMAX_H3_WINDOWS_MODEL => aspect == "1:1",
         _ => false,
     }
 }
@@ -253,6 +270,7 @@ fn install_display_name(install_id: &str) -> &'static str {
         WINDOWS_QWEN_MODEL => return "Qwen-Image 2.1",
         WINDOWS_QWEN_TURBO_MODEL => return "Qwen-Image 2.1 Turbo",
         WINDOWS_MOSS_MODEL => return "MOSS-Image-SFT",
+        MINIMAX_H3_INSTALL_ID => return "MiniMax-H3-Image",
         _ => {}
     }
     match install_id {
@@ -262,6 +280,7 @@ fn install_display_name(install_id: &str) -> &'static str {
         QWEN_IMAGE_21_INSTALL_ID => "Qwen-Image 2.1",
         QWEN_IMAGE_21_TURBO_INSTALL_ID => "Qwen-Image 2.1 Turbo",
         MOSS_IMAGE_SFT_INSTALL_ID => "MOSS-Image-SFT",
+        MINIMAX_H3_INSTALL_ID => "MiniMax-H3-Image",
         _ => "Z-Image Turbo",
     }
 }
@@ -275,6 +294,7 @@ fn fallback_model_bytes(install_id: &str) -> u64 {
         WINDOWS_QWEN_MODEL => return 33_131_609_424,
         WINDOWS_QWEN_TURBO_MODEL => return 32_451_607_098,
         WINDOWS_MOSS_MODEL => return 27_219_783_878,
+        MINIMAX_H3_INSTALL_ID => return 23_045_953_427,
         _ => {}
     }
     match install_id {
@@ -285,6 +305,7 @@ fn fallback_model_bytes(install_id: &str) -> u64 {
         QWEN_IMAGE_21_INSTALL_ID => 33_131_609_424,
         QWEN_IMAGE_21_TURBO_INSTALL_ID => 32_451_607_098,
         MOSS_IMAGE_SFT_INSTALL_ID => 27_219_783_878,
+        MINIMAX_H3_INSTALL_ID => 23_045_953_427,
         _ => 32_848_304_893,
     }
 }
@@ -305,7 +326,14 @@ fn runtime_lock_id(install_id: &str) -> Option<&'static str> {
         | WINDOWS_QWEN_MODEL
         | WINDOWS_QWEN_TURBO_MODEL
         | WINDOWS_MOSS_MODEL => return Some(studio_core::generation::WINDOWS_V2_RUNTIME),
+        MINIMAX_H3_INSTALL_ID => {
+            return Some(studio_core::generation::MINIMAX_H3_WINDOWS_RUNTIME);
+        }
         _ => {}
+    }
+    #[cfg(not(windows))]
+    if install_id == MINIMAX_H3_INSTALL_ID {
+        return Some(studio_core::generation::MINIMAX_H3_MAC_RUNTIME);
     }
     #[cfg(not(windows))]
     let _ = install_id;
@@ -361,6 +389,7 @@ impl Default for DraftParams {
         Self {
             model_id: DEFAULT_MODEL_ID.into(),
             aspect: "1:1".into(),
+            resolution: 1024,
             count: 1,
             seed: String::new(),
             capability_id: default_capability_id(),
@@ -506,6 +535,7 @@ impl StudioService {
                 WINDOWS_QWEN_MODEL,
                 WINDOWS_QWEN_TURBO_MODEL,
                 WINDOWS_MOSS_MODEL,
+                MINIMAX_H3_INSTALL_ID,
             ]
             .into_iter()
             .map(|id| self.model_view_for(id))
@@ -521,6 +551,7 @@ impl StudioService {
                 QWEN_IMAGE_21_INSTALL_ID,
                 QWEN_IMAGE_21_TURBO_INSTALL_ID,
                 MOSS_IMAGE_SFT_INSTALL_ID,
+                MINIMAX_H3_INSTALL_ID,
             ]
             .into_iter()
             .map(|id| self.model_view_for(id))
@@ -705,24 +736,13 @@ impl StudioService {
     }
     pub fn save_creation_defaults(&self, defaults: CreationDefaults) -> Result<Value, String> {
         let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
-        if !catalog.supports(&defaults.model_id, "text_to_image") {
-            return Err("默认模型必须支持已接入的文生图能力".into());
+        if !catalog.supports(&defaults.model_id, "text_to_image")
+            || !catalog.stable(&defaults.model_id)
+        {
+            return Err("默认模型必须是已接入的稳定文生图型号".into());
         }
         enforce_hardware_gate(catalog, &defaults.model_id, &self.device_facts)?;
-        #[cfg(windows)]
-        if defaults.aspect != "1:1" {
-            return Err("当前 Windows 型号仅支持 1:1 默认画幅".into());
-        }
-        if matches!(
-            defaults.model_id.as_str(),
-            QWEN_IMAGE_21_MODEL
-                | QWEN_IMAGE_21_TURBO_MODEL
-                | MOSS_IMAGE_SFT_MODEL
-                | studio_core::generation::QWEN_IMAGE_21_WINDOWS_MODEL
-                | studio_core::generation::QWEN_IMAGE_21_TURBO_WINDOWS_MODEL
-                | studio_core::generation::MOSS_IMAGE_SFT_WINDOWS_MODEL
-        ) && defaults.aspect != "1:1"
-        {
+        if !model_accepts_aspect(&defaults.model_id, &defaults.aspect) {
             return Err("所选模型仅支持 1:1；请明确修改默认画幅后再保存".into());
         }
         self.preferences.save_creation_defaults(defaults)?;
@@ -828,6 +848,8 @@ impl StudioService {
             "Qwen-Image 2.1 Turbo · Qwen/Qwen-Image-2.1-Turbo · Qwen Research License（非商用）"
                 .into(),
             "MOSS-Image-SFT · OpenMOSS-Team/MOSS-Image-SFT · Apache-2.0".into(),
+            "MiniMax-H3-Image · MiniMaxAI/MiniMax-H3-Image · MiniMax Community License（实验）"
+                .into(),
         ];
         #[cfg(not(windows))]
         let model_sources: Vec<String> = vec![
@@ -838,11 +860,13 @@ impl StudioService {
             "Qwen-Image 2.1 · Qwen/Qwen-Image-2.1 · qwen-research".into(),
             "Qwen-Image 2.1 Turbo · Qwen/Qwen-Image-2.1-Turbo · qwen-research".into(),
             "MOSS-Image-SFT · OpenMOSS-Team/MOSS-Image-SFT · Apache-2.0".into(),
+            "MiniMax-H3-Image · MiniMaxAI/MiniMax-H3-Image · MiniMax Community License（实验）"
+                .into(),
         ];
         #[cfg(windows)]
-        let capability_scope = "Windows 已接入七个型号与八项能力：Z-Image Turbo（v1 运行时）、FLUX.2 Klein（文生图/单图编辑）、BiRefNet 去背景、Real-ESRGAN 4× 放大、Qwen-Image 2.1 基础版/Turbo（非商用）与 MOSS-Image-SFT；低于硬件门槛时禁用安装与生成入口。";
+        let capability_scope = "Windows 稳定接入七个型号与八项能力：Z-Image Turbo（v1 运行时）、FLUX.2 Klein（文生图/单图编辑）、BiRefNet 去背景、Real-ESRGAN 4× 放大、Qwen-Image 2.1 基础版/Turbo（非商用）与 MOSS-Image-SFT；MiniMax-H3-Image 仅作为实验计划登记，Windows Gate 通过前不可安装或生成。";
         #[cfg(not(windows))]
-        let capability_scope = "Z-Image Turbo、FLUX.2 Klein 4B、BiRefNet epoch_244、Real-ESRGAN x4plus、Qwen-Image 2.1 基础版/Turbo 与 MOSS-Image-SFT 已接入本地安装与执行链路。";
+        let capability_scope = "七个稳定型号已接入本地安装与执行链路；MiniMax-H3-Image 作为独立实验 profile 登记，只有对应平台通过真机证据后才能启用。";
         Ok(json!({
             "preferences": preferences,
             "catalog": catalog,
@@ -922,7 +946,8 @@ impl StudioService {
                 | studio_core::recipes::REALESRGAN_CAPABILITY
                 | QWEN_IMAGE_21_CAPABILITY
                 | QWEN_IMAGE_21_TURBO_CAPABILITY
-                | MOSS_IMAGE_SFT_CAPABILITY => saved.aspect == "1:1",
+                | MOSS_IMAGE_SFT_CAPABILITY
+                | studio_core::generation::MINIMAX_H3_MAC_CAPABILITY => saved.aspect == "1:1",
                 #[cfg(windows)]
                 studio_core::generation::KLEIN_WINDOWS_TEXT_CAPABILITY
                 | studio_core::generation::KLEIN_WINDOWS_EDIT_CAPABILITY
@@ -935,8 +960,15 @@ impl StudioService {
                 }
                 _ => false,
             };
+            let resolution_valid =
+                if capability == studio_core::generation::MINIMAX_H3_MAC_CAPABILITY {
+                    matches!(saved.resolution, 1024 | 2048)
+                } else {
+                    saved.resolution == 1024
+                };
             let tool = is_source_only_tool_capability(capability);
             if !aspect_valid
+                || !resolution_valid
                 || saved.prompt.len() > 1024 * 1024
                 || !valid_seed(&saved.seed)
                 || tool && (!saved.prompt.is_empty() || !saved.seed.is_empty())
@@ -960,6 +992,7 @@ impl StudioService {
                     .bytes()
                     .all(|byte| byte.is_ascii_alphanumeric() || b"-_.:".contains(&byte))
                 || !matches!(params.aspect.as_str(), "1:1" | "4:3" | "3:4")
+                || params.resolution != 1024
                 || params.count != 1
                 || !valid_seed(&params.seed)
             {
@@ -1006,6 +1039,11 @@ impl StudioService {
             (QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_CAPABILITY, false)
             | (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY, false)
             | (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY, false) => params.aspect == "1:1",
+            (
+                studio_core::generation::MINIMAX_H3_MAC_MODEL,
+                studio_core::generation::MINIMAX_H3_MAC_CAPABILITY,
+                false,
+            ) => params.aspect == "1:1",
             #[cfg(windows)]
             (
                 WINDOWS_KLEIN_MODEL,
@@ -1040,6 +1078,13 @@ impl StudioService {
         if !supported_combo {
             return Err("模型、能力、源图与画幅组合不受支持".into());
         }
+        if params.model_id == studio_core::generation::MINIMAX_H3_MAC_MODEL {
+            if !matches!(params.resolution, 1024 | 2048) {
+                return Err("MiniMax-H3-Image 仅支持 1024² 或 2048²".into());
+            }
+        } else if params.resolution != 1024 {
+            return Err("当前型号不支持所选分辨率".into());
+        }
         if is_source_only_tool_model(&params.model_id) && !params.seed.is_empty() {
             return Err("当前工具能力不接受种子".into());
         }
@@ -1068,6 +1113,7 @@ impl StudioService {
         let mut params = DraftParams {
             model_id: snapshot.creation_defaults.model_id,
             aspect: snapshot.creation_defaults.aspect,
+            resolution: 1024,
             count: snapshot.creation_defaults.count,
             seed: snapshot.creation_defaults.seed,
             capability_id: default_capability_id(),
@@ -1206,6 +1252,14 @@ impl StudioService {
         }
     }
     pub fn install(&self, id: &str) -> Result<Value, String> {
+        self.install_with_acceptance(id, None)
+    }
+
+    pub fn install_with_acceptance(
+        &self,
+        id: &str,
+        acceptance: Option<LicenseAcceptance>,
+    ) -> Result<Value, String> {
         let _schedule = self
             .scheduling
             .lock()
@@ -1230,9 +1284,12 @@ impl StudioService {
         // call must not bypass the model-page gate; the rejection text is the catalog reason.
         {
             let catalog = self.catalog.as_ref().map_err(|error| error.clone())?;
+            if !catalog.installer_supported(id) {
+                return Err("该实验型号尚未通过对应平台的安装证据门，当前不能安装。".into());
+            }
             enforce_hardware_gate(catalog, id, &self.device_facts)?;
         }
-        installation.start(id)?;
+        installation.start_with_acceptance(id, acceptance.as_ref())?;
         Ok(self.model_view_for(id))
     }
     pub fn cancel_install(&self, id: &str) -> Result<Value, String> {
@@ -1498,6 +1555,7 @@ impl StudioService {
                 capability_id,
                 source_asset_id,
                 aspect: input.aspect,
+                resolution: input.resolution,
                 count: input.count,
                 seed: input.seed,
             })
@@ -1580,7 +1638,14 @@ impl StudioService {
             .and_then(|facts| facts.tier.id)
             .is_some_and(|id| id == "compact");
         crate::adapters::logging::debug("turn.preflight.gate", &[("turn", turn.id.to_string())]);
-        let (width, height) = compact_aspect_size(&turn.aspect, compact_tier)?;
+        let (width, height) = if turn.model_id == studio_core::generation::MINIMAX_H3_MAC_MODEL {
+            if turn.aspect != "1:1" || !matches!(turn.resolution, 1024 | 2048) {
+                return Err("MiniMax-H3-Image 仅支持 1024² 或 2048² 方图".into());
+            }
+            (turn.resolution, turn.resolution)
+        } else {
+            compact_aspect_size(&turn.aspect, compact_tier)?
+        };
         let seed = if turn.seed.is_empty() {
             None
         } else {
@@ -1824,6 +1889,22 @@ impl StudioService {
                     prompt: turn.prompt.clone(),
                     seed,
                 },
+                random_seed,
+                environment,
+            )
+            .map_err(|error| error.to_string())?;
+            (frozen.request, frozen.plan)
+        } else if turn.model_id == studio_core::generation::MINIMAX_H3_MAC_MODEL {
+            let frozen = freeze_minimax_h3(
+                TextModelInput {
+                    request_id,
+                    project_id,
+                    idempotency_key,
+                    plan_id,
+                    prompt: turn.prompt.clone(),
+                    seed,
+                },
+                turn.resolution,
                 random_seed,
                 environment,
             )
@@ -2226,11 +2307,23 @@ fn turn_view(library: &Library, turn: &TurnRecord) -> crate::adapters::library::
         .as_ref()
         .map_or_else(|| fallback_state.into(), |job| format!("{:?}", job.state));
     let width = turn.job.as_ref().map_or_else(
-        || display_width(&turn.aspect),
+        || {
+            if turn.aspect == "1:1" {
+                turn.resolution
+            } else {
+                display_width(&turn.aspect)
+            }
+        },
         |job| job.plan.effective_output.width,
     );
     let height = turn.job.as_ref().map_or_else(
-        || display_height(&turn.aspect),
+        || {
+            if turn.aspect == "1:1" {
+                turn.resolution
+            } else {
+                display_height(&turn.aspect)
+            }
+        },
         |job| job.plan.effective_output.height,
     );
     let seed = turn
@@ -2285,6 +2378,7 @@ fn turn_view(library: &Library, turn: &TurnRecord) -> crate::adapters::library::
         "capabilityId": turn.capability_id,
         "sourceAssetId": turn.source_asset_id,
         "aspect": turn.aspect,
+        "resolution": turn.resolution,
         "count": turn.count,
         "seed": seed,
         "requestedSeed": turn.seed,
@@ -2438,7 +2532,7 @@ mod tests {
         #[cfg(windows)]
         {
             assert!(error.contains("Windows 不会隐式转换执行身份"), "{error}");
-            assert_eq!(models.len(), 7);
+            assert_eq!(models.len(), 8);
             assert_eq!(models[0]["id"], WINDOWS_ZIMAGE_INSTALL_ID);
             // The profile may be reported as not_installed (registered profile) or failed
             // (installer unavailable in the fixture); both are honest "not ready" states.
@@ -2582,6 +2676,7 @@ mod tests {
                 capability_id: None,
                 source_asset_id: None,
                 aspect: "1:1".into(),
+                resolution: 1024,
                 count: 1,
                 seed: String::new(),
                 submission_key: "conversation-send-fast".into(),
@@ -2911,7 +3006,9 @@ mod tests {
     fn catalog_query_exposes_independent_model_install_actions() {
         let (_root, service) = fixture();
         let catalog = service.model_catalog().unwrap();
-        assert_eq!(catalog["counts"]["total"], 7);
+        assert_eq!(catalog["counts"]["total"], 8);
+        assert_eq!(catalog["counts"]["stable"], 7);
+        assert_eq!(catalog["counts"]["experimental"], 1);
         let klein_id = if cfg!(windows) {
             WINDOWS_KLEIN_MODEL
         } else {
@@ -2929,14 +3026,68 @@ mod tests {
         assert_eq!(klein["canInstall"], klein["hardwareEligible"]);
     }
 
+    #[cfg(not(windows))]
+    #[test]
+    fn minimax_install_requires_license_acceptance_through_ipc() {
+        let (_root, service) = fixture();
+        let error = service.install(MINIMAX_H3_INSTALL_ID).unwrap_err();
+        assert!(error.contains("许可证"), "{error}");
+    }
+
+    #[cfg(not(windows))]
+    #[test]
+    fn minimax_draft_accepts_only_1024_or_2048_square() {
+        let (_root, service) = fixture();
+        for resolution in [1024, 2048] {
+            service
+                .validate_registered_draft_params(&json!({
+                    "modelId": studio_core::generation::MINIMAX_H3_MAC_MODEL,
+                    "capabilityId": studio_core::generation::MINIMAX_H3_MAC_CAPABILITY,
+                    "aspect": "1:1",
+                    "resolution": resolution,
+                    "count": 1,
+                    "seed": "42",
+                    "sourceAssetId": null
+                }))
+                .unwrap();
+        }
+        let error = service
+            .validate_registered_draft_params(&json!({
+                "modelId": studio_core::generation::MINIMAX_H3_MAC_MODEL,
+                "capabilityId": studio_core::generation::MINIMAX_H3_MAC_CAPABILITY,
+                "aspect": "1:1",
+                "resolution": 4096,
+                "count": 1,
+                "seed": "42",
+                "sourceAssetId": null
+            }))
+            .unwrap_err();
+        assert!(error.contains("1024² 或 2048²"), "{error}");
+    }
+
+    #[cfg(not(windows))]
+    #[test]
+    fn experimental_minimax_cannot_become_the_new_conversation_default() {
+        let (_root, service) = fixture();
+        let error = service
+            .save_creation_defaults(CreationDefaults {
+                model_id: studio_core::generation::MINIMAX_H3_MAC_MODEL.into(),
+                aspect: "1:1".into(),
+                count: 1,
+                seed: String::new(),
+            })
+            .unwrap_err();
+        assert!(error.contains("稳定文生图型号"), "{error}");
+    }
+
     #[test]
     fn settings_snapshot_reports_the_current_platform_runtime() {
         let (_root, service) = fixture();
         let snapshot = service.settings_snapshot(false).unwrap();
-        assert_eq!(snapshot["catalog"]["counts"]["total"], 7);
+        assert_eq!(snapshot["catalog"]["counts"]["total"], 8);
         assert_eq!(
             snapshot["about"]["modelSources"].as_array().unwrap().len(),
-            7
+            8
         );
         let runtimes = snapshot["environment"]["runtimes"].as_array().unwrap();
         let snapshots = service.installation.as_ref().unwrap().snapshots();
@@ -2967,6 +3118,15 @@ mod tests {
                 );
                 assert!(klein["hardwareEligible"].is_boolean());
             }
+            if let Some(minimax) = runtimes
+                .iter()
+                .find(|row| row["installId"] == MINIMAX_H3_INSTALL_ID)
+            {
+                assert_eq!(
+                    minimax["runtimeLockId"],
+                    studio_core::generation::MINIMAX_H3_WINDOWS_RUNTIME
+                );
+            }
             assert!(
                 snapshot["about"]["capabilityScope"]
                     .as_str()
@@ -2981,9 +3141,16 @@ mod tests {
                 "MFLUX / MLX + ONNX Runtime CPU + ncnn Vulkan"
             );
             assert_eq!(snapshot["environment"]["pythonVersion"], "3.13.12");
-            assert_eq!(runtimes.len(), 7);
+            assert_eq!(runtimes.len(), 8);
             for row in runtimes {
-                assert_eq!(row["runtimeLockId"], Value::Null);
+                if row["installId"] == MINIMAX_H3_INSTALL_ID {
+                    assert_eq!(
+                        row["runtimeLockId"],
+                        studio_core::generation::MINIMAX_H3_MAC_RUNTIME
+                    );
+                } else {
+                    assert_eq!(row["runtimeLockId"], Value::Null);
+                }
             }
         }
     }
@@ -3060,6 +3227,7 @@ mod tests {
                     capability_id: default_capability_id(),
                     source_asset_id: None,
                     aspect: "1:1".into(),
+                    resolution: 1024,
                     count: 1,
                     seed: "73".into(),
                 })
@@ -3369,6 +3537,10 @@ mod tests {
         assert_eq!(
             runtime_lock_id(WINDOWS_REALESRGAN_MODEL),
             Some(windows::REALESRGAN_WINDOWS_RUNTIME)
+        );
+        assert_eq!(
+            runtime_lock_id(MINIMAX_H3_INSTALL_ID),
+            Some(windows::MINIMAX_H3_WINDOWS_RUNTIME)
         );
         // Shared v2 runtime: Klein, BiRefNet, Qwen base/Turbo and MOSS.
         for model in [

@@ -322,6 +322,7 @@ fn draft_with_prompt(library: &mut Library, id: u64, prompt: &str) -> DraftRecor
     draft.params = serde_json::json!({
         "modelId": DEFAULT_MODEL_ID,
         "aspect": "1:1",
+        "resolution": 1024,
         "count": 1,
         "seed": "",
         "capabilityId": default_capability_id(),
@@ -346,6 +347,7 @@ fn accept_prompt(library: &mut Library, prompt: &str, key: &str) -> AcceptedTurn
             capability_id: default_capability_id().into(),
             source_asset_id: None,
             aspect: "1:1".into(),
+            resolution: 1024,
             count: 1,
             seed: String::new(),
         })
@@ -630,7 +632,7 @@ fn v4_to_v5_preserves_legacy_records_and_adds_output_role() {
             .db
             .pragma_query_value(None, "user_version", |row| row.get::<_, u32>(0))
             .unwrap(),
-        6
+        schema::CURRENT_USER_VERSION
     );
     let asset: (String, String, String) = library
         .db
@@ -1558,6 +1560,7 @@ fn fresh_library_has_one_conversation_and_receive_is_fast_and_idempotent() {
             capability_id: default_capability_id().into(),
             source_asset_id: None,
             aspect: "1:1".into(),
+            resolution: 1024,
             count: 1,
             seed: String::new(),
         })
@@ -1575,6 +1578,7 @@ fn fresh_library_has_one_conversation_and_receive_is_fast_and_idempotent() {
             capability_id: default_capability_id().into(),
             source_asset_id: None,
             aspect: "1:1".into(),
+            resolution: 1024,
             count: 1,
             seed: String::new(),
         }),
@@ -1665,6 +1669,7 @@ fn klein_edit_turn_copies_the_frozen_source_for_retry() {
         "capabilityId": KLEIN_EDIT_CAPABILITY,
         "sourceAssetId": imported.asset_id,
         "aspect": "1:1",
+        "resolution": 1024,
         "count": 1,
         "seed": "42"
     });
@@ -1680,6 +1685,7 @@ fn klein_edit_turn_copies_the_frozen_source_for_retry() {
             capability_id: KLEIN_EDIT_CAPABILITY.into(),
             source_asset_id: Some(imported.asset_id.clone()),
             aspect: "1:1".into(),
+            resolution: 1024,
             count: 1,
             seed: "42".into(),
         })
@@ -1859,6 +1865,7 @@ fn manual_conversation_title_is_stable_and_draft_version_conflicts_do_not_consum
             capability_id: default_capability_id().into(),
             source_asset_id: None,
             aspect: "1:1".into(),
+            resolution: 1024,
             count: 1,
             seed: String::new(),
         }),
@@ -1876,6 +1883,7 @@ fn manual_conversation_title_is_stable_and_draft_version_conflicts_do_not_consum
             capability_id: default_capability_id().into(),
             source_asset_id: None,
             aspect: "1:1".into(),
+            resolution: 1024,
             count: 1,
             seed: String::new(),
         })
@@ -2416,6 +2424,7 @@ fn deleting_the_last_conversation_creates_exactly_one_default_conversation() {
         serde_json::json!({
             "modelId": DEFAULT_MODEL_ID,
             "aspect": "1:1",
+            "resolution": 1024,
             "count": 1,
             "seed": ""
         })
@@ -2832,6 +2841,7 @@ fn works_referenced_by_unsent_or_active_requests_cannot_be_deleted() {
         "capabilityId": KLEIN_EDIT_CAPABILITY,
         "sourceAssetId": primary,
         "aspect": "1:1",
+        "resolution": 1024,
         "count": 1,
         "seed": "42"
     });
@@ -2863,6 +2873,7 @@ fn works_referenced_by_unsent_or_active_requests_cannot_be_deleted() {
             default_capability_id(): {
                 "prompt": "",
                 "aspect": "1:1",
+                "resolution": 1024,
                 "seed": "",
                 "sourceAssetId": primary,
                 "promptSourceId": null
@@ -2891,12 +2902,14 @@ fn works_referenced_by_unsent_or_active_requests_cannot_be_deleted() {
         "capabilityId": KLEIN_EDIT_CAPABILITY,
         "sourceAssetId": primary,
         "aspect": "1:1",
+        "resolution": 1024,
         "count": 1,
         "seed": "42",
         "capabilityDrafts": {
             default_capability_id(): {
                 "prompt": "",
                 "aspect": "1:1",
+                "resolution": 1024,
                 "seed": "",
                 "sourceAssetId": primary,
                 "promptSourceId": null
@@ -2915,6 +2928,7 @@ fn works_referenced_by_unsent_or_active_requests_cannot_be_deleted() {
             capability_id: KLEIN_EDIT_CAPABILITY.into(),
             source_asset_id: Some(primary.clone()),
             aspect: "1:1".into(),
+            resolution: 1024,
             count: 1,
             seed: "42".into(),
         })
@@ -2931,6 +2945,7 @@ fn works_referenced_by_unsent_or_active_requests_cannot_be_deleted() {
     draft.params = serde_json::json!({
         "modelId": DEFAULT_MODEL_ID,
         "aspect": "1:1",
+            "resolution": 1024,
         "count": 1,
         "seed": ""
     });

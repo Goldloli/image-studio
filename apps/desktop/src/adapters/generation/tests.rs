@@ -126,6 +126,39 @@ impl Drop for TestGroupCleanup {
 }
 
 #[test]
+fn minimax_worker_arguments_use_only_installed_components_and_pinned_build() {
+    let ready = ReadyPaths {
+        worker_program: PathBuf::from("/runtime/bin/sd-cli"),
+        worker_args: vec!["--sd-cli".into(), "/runtime/bin/sd-cli".into()],
+        model_path: PathBuf::from("/data/models/minimax-h3-image-q3ks-sdcpp-macos-v1"),
+        worker_module: "minimax-h3-native-worker".into(),
+        worker_build_id: studio_core::generation::MINIMAX_H3_MAC_WORKER.into(),
+        runtime_lock_id: studio_core::generation::MINIMAX_H3_MAC_RUNTIME.into(),
+        model_snapshot_id: studio_core::generation::MINIMAX_H3_MAC_SNAPSHOT.into(),
+    };
+    let args = minimax_h3_worker_args(&ready).unwrap();
+    assert_eq!(
+        args,
+        vec![
+            "--sd-cli",
+            "/runtime/bin/sd-cli",
+            "--diffusion-model",
+            "/data/models/minimax-h3-image-q3ks-sdcpp-macos-v1/minimax_h3_image_pruned-Q3_K_S.gguf",
+            "--llm",
+            "/data/models/minimax-h3-image-q3ks-sdcpp-macos-v1/qwen3vl_32b_minimax_h3-Q2_K_M.gguf",
+            "--vae",
+            "/data/models/minimax-h3-image-q3ks-sdcpp-macos-v1/minimax_h3_image_vae_fp16.safetensors",
+            "--tokenizer",
+            "/data/models/minimax-h3-image-q3ks-sdcpp-macos-v1/tokenizer.json",
+        ]
+    );
+    assert_eq!(
+        expected_worker_build(Recipe::MiniMaxH3Mac),
+        Some(studio_core::generation::MINIMAX_H3_MAC_WORKER)
+    );
+}
+
+#[test]
 fn missing_supervisor_finishes_persisted_attempt_without_leaving_busy() {
     let f = Fixture::new(None);
     f.start();
