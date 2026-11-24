@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "kind": "native",
+  "id": "minimax-h3-sdcpp-3b12781-windows-cuda12-v1",
+  "platform": "windows-amd64",
+  "archives": [
+    {
+      "path": "sd-master-3b12781-bin-win-cuda12-x64.zip",
+      "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-1122-3b12781/sd-master-3b12781-bin-win-cuda12-x64.zip",
+      "bytes": 413082709,
+      "sha256": "34169b12181ae75e520d662bdccefd89095ba02d79c3ccb9568531afea1c3dd1",
+      "members": [
+        {
+          "archive_path": "sd-cli.exe",
+          "path": "bin/sd-cli.exe",
+          "bytes": 584192,
+          "sha256": "6963b0f88aab1868ae6eaf465fbb47f69e840a6d06216ff1a89520dc97e5d8da",
+          "executable": true
+        },
+        {
+          "archive_path": "stable-diffusion.dll",
+          "path": "bin/stable-diffusion.dll",
+          "bytes": 117571584,
+          "sha256": "ee00e3963631c2ac62f2d070dea49d12d2a16d6917f3897fcc88b27d3308934e",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-cuda.dll",
+          "path": "bin/ggml-cuda.dll",
+          "bytes": 382631424,
+          "sha256": "aef778a4f548b8333449a014607ee46561666e98580b496db4f0c3094d70cc70",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-base.dll",
+          "path": "bin/ggml-base.dll",
+          "bytes": 742912,
+          "sha256": "7745912e8db60e663f5efd7f0f4a47f1e2451cbb587a1739301c28ad6898749f",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-cpu-alderlake.dll",
+          "path": "bin/ggml-cpu-alderlake.dll",
+          "bytes": 992768,
+          "sha256": "07b9486d6b6cc041543d2c8818008cc042464cdb37c595efefd47b34ebf936aa",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-cpu-cannonlake.dll",
+          "path": "bin/ggml-cpu-cannonlake.dll",
+          "bytes": 1038336,
+          "sha256": "e6b0b226581e4c0c8716e5c48d10682584d920b37ca20977513aa8c339a40dc0",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-cpu-cascadelake.dll",
+          "path": "bin/ggml-cpu-cascadelake.dll",
+          "bytes": 1039872,
+          "sha256": "4a8c4de81b080efbf1efb4995f6685da6a369e47df17bb4fec5de36e85f94b66",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-cpu-haswell.dll",
+          "path": "bin/ggml-cpu-haswell.dll",
+          "bytes": 994304,
+          "sha256": "c9be1019bb6cdab20dcfaa0d7413da35ea28e09e31c2159c8e9b0e048b8e25bc",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-cpu-icelake.dll",
+          "path": "bin/ggml-cpu-icelake.dll",
+          "bytes": 1039872,
+          "sha256": "973fb76568da766a841d2a010f40255a91e4709c5bf31733afe2cc1629940a30",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-cpu-sandybridge.dll",
+          "path": "bin/ggml-cpu-sandybridge.dll",
+          "bytes": 1014784,
+          "sha256": "b314edaa5b0e2bbf46c0eb9095c4a28fd630547315e5fd973d91639ec07e85b7",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-cpu-skylakex.dll",
+          "path": "bin/ggml-cpu-skylakex.dll",
+          "bytes": 1038336,
+          "sha256": "55b8143b7f02a7c32d5f050bfce821f0fd9792322eafeba4c4703db7750dae1a",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-cpu-sse42.dll",
+          "path": "bin/ggml-cpu-sse42.dll",
+          "bytes": 852992,
+          "sha256": "8fccb4254899b16a928d0a09d314ff65f405ac0612cac9829849230f07005bd5",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml-cpu-x64.dll",
+          "path": "bin/ggml-cpu-x64.dll",
+          "bytes": 854016,
+          "sha256": "fe16b59e7700447532386d399882ad313f33ff9d8d7dc2250d83025c3b60416d",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml.dll",
+          "path": "bin/ggml.dll",
+          "bytes": 58368,
+          "sha256": "af82dc04799c2cb017562aa81e0871561ddbbba2477e73cbee6ba044167a510c",
+          "executable": false
+        },
+        {
+          "archive_path": "libsharpyuv.dll",
+          "path": "bin/libsharpyuv.dll",
+          "bytes": 24576,
+          "sha256": "1b7efd3bcd76754e6f22b0e3576e8bf7f5eb2f5970547c3520c6216ed8804025",
+          "executable": false
+        },
+        {
+          "archive_path": "libwebp.dll",
+          "path": "bin/libwebp.dll",
+          "bytes": 373248,
+          "sha256": "fe11bca62f1bdedafbf16bea426cac0174a71d39a1821832adc6278089b6e8cc",
+          "executable": false
+        },
+        {
+          "archive_path": "libwebpdemux.dll",
+          "path": "bin/libwebpdemux.dll",
+          "bytes": 20480,
+          "sha256": "446f4764562f96a7678189a453d22cd51d0ee71254d65f92b9ba4f037021f0bd",
+          "executable": false
+        },
+        {
+          "archive_path": "libwebpmux.dll",
+          "path": "bin/libwebpmux.dll",
+          "bytes": 41984,
+          "sha256": "ce8baf6ce7a5a180fcbff09ff8d9dfb8105f61a6a475862a1ade0b20283a45b9",
+          "executable": false
+        },
+        {
+          "archive_path": "webm.dll",
+          "path": "bin/webm.dll",
+          "bytes": 328192,
+          "sha256": "8db3139ed146c5705d4a9847f65ae2f9ec51051e3df505fd70f6524fd65f3cc0",
+          "executable": false
+        },
+        {
+          "archive_path": "stable-diffusion.cpp.txt",
+          "path": "licenses/stable-diffusion.cpp.txt",
+          "bytes": 1082,
+          "sha256": "4e76049398df734a97db46f3bd4b5cbc460cb5f6bfaf737cdc3d6fbb8ab3de27",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml.txt",
+          "path": "licenses/ggml.txt",
+          "bytes": 1099,
+          "sha256": "bcd8ec749126d45cb06737d0690295d73df4b6e7e194205bcf91190368f27285",
+          "executable": false
+        },
+        {
+          "archive_path": "libwebm.txt",
+          "path": "licenses/libwebm.txt",
+          "bytes": 1526,
+          "sha256": "17c029a902ad45a199dfe8e3a1c39305ab28d302b0703360c4a27351a4673dcb",
+          "executable": false
+        },
+        {
+          "archive_path": "libwebp.txt",
+          "path": "licenses/libwebp.txt",
+          "bytes": 1526,
+          "sha256": "17c029a902ad45a199dfe8e3a1c39305ab28d302b0703360c4a27351a4673dcb",
+          "executable": false
+        },
+        {
+          "archive_path": "cutlass.txt",
+          "path": "licenses/cutlass.txt",
+          "bytes": 1574,
+          "sha256": "6b9e8b964c2a90f7743107a23bccec9ebc6f5a47d4a8fa3d986aa6f51f86da68",
+          "executable": false
+        }
+      ]
+    }
+  ],
+  "executable": "bin/sd-cli.exe"
+}

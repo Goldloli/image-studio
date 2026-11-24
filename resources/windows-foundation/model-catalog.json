@@ -363,6 +363,50 @@
           "computeDtype": "float16"
         }
       ]
+    },
+    {
+      "id": "minimax-h3-image-q3ks-sdcpp-windows-v1",
+      "displayName": "MiniMax-H3-Image",
+      "variant": "unsloth Q3_K_S + Qwen3-VL-32B Q2_K_M · stable-diffusion.cpp CUDA",
+      "family": "MiniMax",
+      "summary": "等待 Windows 目标机 Gate 的实验性文生图 profile。",
+      "description": "固定 Q3_K_S DiT、Q2_K_M 文本编码器、图像 VAE、tokenizer 与 stable-diffusion.cpp 3b12781。macOS 上游 POC 已通过 1024²/2048²，但 Windows 12 GB/32 GB 尚未运行；当前不提供安装或生成动作。",
+      "capabilities": [
+        {
+          "id": "text_to_image",
+          "label": "文生图"
+        }
+      ],
+      "productStatus": "planned",
+      "supportLevel": "experimental",
+      "runtime": "stable-diffusion.cpp 3b12781 · CUDA 12",
+      "license": "minimax-h3-image-community-license-agreement",
+      "licenseUrl": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/resolve/8ced60068623def5b74b4d10558117cb61d6482d/LICENSE",
+      "licenseSha256": "0ec3bb5e6d9e885fa2aaf15e84689e50fd51f42b53fa24d3a64ed9d8c76d423b",
+      "source": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image",
+      "revision": "Q3_K_S 0d25c734 + Q2_K_M eee1dd2f + VAE a70325ac + tokenizer 8ced6006",
+      "modelBytes": 23045953427,
+      "knownArtifactBytes": 23459036136,
+      "requirements": [
+        "Windows 12 GB / 32 GB Gate 未运行",
+        "完整权重与 tokenizer 约 23.05 GB；常见 6.88 GB 仅是 Q2 DiT 单文件，不是完整下载量",
+        "另有约 413 MB CUDA 运行时、解压文件、暂存与缓存空间",
+        "实验许可证要求用户确认适用地域和商业用途"
+      ],
+      "exclusions": [
+        "8 GB compact 档",
+        "4096²、图像编辑与多参考",
+        "借用 macOS 实机结论"
+      ],
+      "verifiedDevices": [],
+      "recipe": "Q3_K_S + Q2_K_M · 6 步 · 1024/2048（未启用）",
+      "installId": null,
+      "installerSupported": false,
+      "minVramGb": 12,
+      "minRamGb": 32,
+      "quantization": "gguf-q3ks-q2te",
+      "licenseNotice": "MiniMax-H3-Image Community License；排除美国、英国、欧盟和韩国，并含收入与托管服务限制。",
+      "windowsStatus": "计划中 · Windows Gate 尚未运行 · 无 compact 档"
     }
   ]
 }

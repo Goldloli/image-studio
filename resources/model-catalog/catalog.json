@@ -238,6 +238,45 @@
       "recipe": "q8 · 50 步 · CFG 3.0 · 1024 × 1024",
       "installId": "moss-image-sft-mflux-v1",
       "installerSupported": true
+    },
+    {
+      "id": "minimax-h3-image-q3ks-sdcpp-macos-v1",
+      "displayName": "MiniMax-H3-Image",
+      "variant": "unsloth Q3_K_S + Qwen3-VL-32B Q2_K_M · stable-diffusion.cpp",
+      "family": "MiniMax",
+      "summary": "实验性高分辨率文生图模型，使用独立原生 Metal 运行时。",
+      "description": "固定 MiniMax-H3-Image 社区量化组件、Qwen3-VL-32B 文本编码器、24 通道图像 VAE、tokenizer 与 stable-diffusion.cpp 3b12781。首期只开放 1024² 和 2048² 文生图，4096²、编辑、多参考与 Windows 执行尚未认证。",
+      "capabilities": [
+        { "id": "text_to_image", "label": "文生图" }
+      ],
+      "productStatus": "implemented",
+      "supportLevel": "experimental",
+      "runtime": "stable-diffusion.cpp 3b12781 · Metal",
+      "license": "minimax-h3-image-community-license-agreement",
+      "licenseNotice": "仅限 MiniMax 定义适用地域内使用；排除美国、英国、欧盟和韩国，并含收入门槛、可接受使用与托管服务限制。",
+      "licenseUrl": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/resolve/8ced60068623def5b74b4d10558117cb61d6482d/LICENSE",
+      "licenseSha256": "0ec3bb5e6d9e885fa2aaf15e84689e50fd51f42b53fa24d3a64ed9d8c76d423b",
+      "source": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image",
+      "revision": "Q3_K_S 0d25c734 + Q2_K_M eee1dd2f + VAE a70325ac + tokenizer 8ced6006",
+      "modelBytes": 23045953427,
+      "knownArtifactBytes": 23085597590,
+      "requirements": [
+        "完整权重与 tokenizer 闭包为 23.05 GB；常见 6.88 GB 仅是 Q2 DiT 单文件，Q3_K_S DiT 为 8.77 GB",
+        "原生运行时、许可证确认、暂存与缓存空间另行计入",
+        "Apple M3 Max / 128 GiB 已完成隔离产品安装、原生 UI 1024²/2048²、取消/重试、重开与导出",
+        "Windows 目标机、8 GB 设备和 4096² 仍需独立证据"
+      ],
+      "exclusions": [
+        "MiniMax-H3 视频、音频与 Ref2VA",
+        "图像编辑、多参考、透明背景与 Prompt Expander",
+        "4096²、8 GB Windows 与未验证 Windows profile"
+      ],
+      "verifiedDevices": [
+        "macOS arm64 · Apple M3 Max · 128 GiB · isolated product profile"
+      ],
+      "recipe": "Q3_K_S + Q2_K_M · 6 步 · 1024/2048",
+      "installId": "minimax-h3-image-q3ks-sdcpp-macos-v1",
+      "installerSupported": true
     }
   ]
 }

@@ -10,6 +10,13 @@ ROOT = Path(__file__).resolve().parents[1]
 RESOURCE = ROOT / "resources/minimax-h3-image/macos-v1"
 MODEL = json.loads((RESOURCE / "model-manifest.json").read_text(encoding="utf-8"))
 RUNTIME = json.loads((RESOURCE / "runtime-manifest.json").read_text(encoding="utf-8"))
+WINDOWS_RESOURCE = ROOT / "resources/minimax-h3-image/windows-v1"
+WINDOWS_MODEL = json.loads(
+    (WINDOWS_RESOURCE / "model-manifest.json").read_text(encoding="utf-8")
+)
+WINDOWS_RUNTIME = json.loads(
+    (WINDOWS_RESOURCE / "runtime-manifest.json").read_text(encoding="utf-8")
+)
 
 
 def digest(path: Path) -> str:
@@ -60,6 +67,10 @@ for file in MODEL["files"]:
     assert re.search(r"/resolve/[0-9a-f]{40}/", file["url"])
     assert file["source_revision"] in file["url"]
 
+assert WINDOWS_MODEL["id"] == "minimax-h3-image-q3ks-sdcpp-windows-v1"
+assert WINDOWS_MODEL["component_bytes"] == MODEL["component_bytes"]
+assert WINDOWS_MODEL["files"] == MODEL["files"]
+
 assert RUNTIME["kind"] == "native"
 assert RUNTIME["id"] == "minimax-h3-sdcpp-3b12781-macos-arm64-metal-v1"
 assert RUNTIME["platform"] == "macos-arm64"
@@ -76,6 +87,28 @@ members = {member["archive_path"]: member for member in archive["members"]}
 assert members["sd-cli"]["path"] == "bin/sd-cli"
 assert members["sd-cli"]["executable"] is True
 assert members["libstable-diffusion.dylib"]["path"] == "bin/libstable-diffusion.dylib"
+
+assert WINDOWS_RUNTIME["kind"] == "native"
+assert WINDOWS_RUNTIME["id"] == "minimax-h3-sdcpp-3b12781-windows-cuda12-v1"
+assert WINDOWS_RUNTIME["platform"] == "windows-amd64"
+assert WINDOWS_RUNTIME["executable"] == "bin/sd-cli.exe"
+assert len(WINDOWS_RUNTIME["archives"]) == 1
+windows_archive = WINDOWS_RUNTIME["archives"][0]
+assert windows_archive["bytes"] == 413_082_709
+assert (
+    windows_archive["sha256"]
+    == "34169b12181ae75e520d662bdccefd89095ba02d79c3ccb9568531afea1c3dd1"
+)
+assert windows_archive["url"].endswith(
+    "/master-1122-3b12781/" + windows_archive["path"]
+)
+windows_members = {
+    member["archive_path"]: member for member in windows_archive["members"]
+}
+assert windows_members["sd-cli.exe"]["path"] == "bin/sd-cli.exe"
+assert windows_members["sd-cli.exe"]["executable"] is True
+assert windows_members["stable-diffusion.dll"]["path"] == "bin/stable-diffusion.dll"
+assert windows_members["ggml-cuda.dll"]["bytes"] == 382_631_424
 
 license_files = {
     "LICENSE": (
@@ -107,6 +140,8 @@ print(
             "component_bytes": MODEL["component_bytes"],
             "runtime_members": len(archive["members"]),
             "runtime_id": RUNTIME["id"],
+            "windows_runtime_members": len(windows_archive["members"]),
+            "windows_runtime_id": WINDOWS_RUNTIME["id"],
             "licenses": sorted(license_files),
             "network_accessed": False,
         },
