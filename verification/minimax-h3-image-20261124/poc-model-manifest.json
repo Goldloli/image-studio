@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "id": "minimax-h3-image-poc-q2-v1",
+  "repository": "mixed-pinned-modelscope-transport",
+  "revision": "fixed-per-file-revisions",
+  "component_bytes": 21147299040,
+  "files": [
+    {
+      "path": "MiniMax-H3-Image-Pruned-Q2_K.gguf",
+      "bytes": 6876632704,
+      "sha256": "b5ee127c91b7349302d3eab6e9398b30ccbe576805b1885e6d292066fcc99ff7",
+      "url": "https://www.modelscope.cn/models/Abiray/MiniMax-H3-Image-GGUF/resolve/0a9488dd07ac6eeed782701c51d6faea4736617e/MiniMax-H3-Image-Pruned-Q2_K.gguf",
+      "upstream_url": "https://huggingface.co/Abiray/MiniMax-H3-Image-GGUF/resolve/fec7ec774db49d0c785bdc2174a488576b7396dd/MiniMax-H3-Image-Pruned-Q2_K.gguf",
+      "source_revision": "0a9488dd07ac6eeed782701c51d6faea4736617e"
+    },
+    {
+      "path": "qwen3vl_32b_minimax_h3-Q2_K_M.gguf",
+      "bytes": 13102161024,
+      "sha256": "a8ccadccd57ef34c838ffb8a7da8368bb554721b2760274a1d3b0df63960b997",
+      "url": "https://www.modelscope.cn/models/leejet/MiniMax-H3-GGUF/resolve/a2b5b9603d8834720ca5cc128b55eecc6eb47d05/qwen3vl_32b_minimax_h3-Q2_K_M.gguf",
+      "upstream_url": "https://huggingface.co/leejet/MiniMax-H3-GGUF/resolve/eee1dd2f05b755b28bd1b785925cbfeebfcba9d9/qwen3vl_32b_minimax_h3-Q2_K_M.gguf",
+      "source_revision": "a2b5b9603d8834720ca5cc128b55eecc6eb47d05"
+    },
+    {
+      "path": "minimax_h3_image_vae_fp16.safetensors",
+      "bytes": 1168505312,
+      "sha256": "d80e9c2e5cfc9844869961ff5a58c9a9e52182df6bfb30b26018dd7f348721af",
+      "url": "https://www.modelscope.cn/models/Comfy-Org/MiniMax-H3-Image/resolve/b8ebf14be96f02e5c58960620a101de71b0bd9f3/vae/minimax_h3_image_vae_fp16.safetensors",
+      "upstream_url": "https://huggingface.co/Comfy-Org/MiniMax-H3-Image/resolve/a70325ac34ca5c0c83df578bb5e02237460c1d8d/vae/minimax_h3_image_vae_fp16.safetensors",
+      "source_revision": "b8ebf14be96f02e5c58960620a101de71b0bd9f3"
+    }
+  ]
+}
