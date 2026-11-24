@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "run": "minimax-h3-image-baseline-20261124",
+  "recorded_at": "2026-11-24T17:35:56+08:00",
+  "branch": "codex/minimax-h3-image-openspec",
+  "commit": "02e50ac55c68fb6e7998c2909e64f17044b85904",
+  "evidence_scope": "pre-change repository regression baseline",
+  "results": {
+    "frontend_build": {
+      "status": "passed",
+      "command": "npm --prefix apps/frontend run build"
+    },
+    "frontend_tests": {
+      "status": "passed",
+      "command": "npm --prefix apps/frontend test",
+      "test_files": 13,
+      "tests": 100
+    },
+    "rust_workspace_tests": {
+      "status": "passed",
+      "command": "cargo test --workspace --locked",
+      "desktop_unit_passed": 208,
+      "desktop_unit_ignored": 5,
+      "studio_core_lib_passed": 31,
+      "studio_core_contract_passed": 17,
+      "worker_protocol_passed": 46
+    },
+    "openspec_change_strict": {
+      "status": "passed",
+      "command": "openspec validate introduce-minimax-h3-image-local-gguf --strict"
+    },
+    "openspec_all_strict": {
+      "status": "failed_existing_warnings",
+      "command": "openspec validate --all --strict",
+      "reason": "Existing formal specs have long-requirement warnings in generation-worker-protocol, model-installation, windows-desktop, and windows-local-generation; this change does not modify openspec/specs."
+    }
+  },
+  "limits": [
+    "No MiniMax-H3-Image weights were downloaded.",
+    "No MiniMax-H3-Image inference was executed.",
+    "No Windows target hardware was accessed.",
+    "CI fixtures and this baseline do not establish model or device support."
+  ]
+}
