@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "run": "minimax-h3-image-macos-poc-20261124",
+  "recorded_at": "2026-11-24T20:44:03+08:00",
+  "scope": "upstream stable-diffusion.cpp CLI only; not product installation or native UI evidence",
+  "machine": {
+    "platform": "macos-arm64",
+    "os": "macOS 27.2.1",
+    "cpu": "Apple M3 Max",
+    "memory_bytes": 137438953472,
+    "metal_device": "MTL0",
+    "recommended_max_working_set_mb": 115448.73
+  },
+  "runtime": {
+    "repository": "leejet/stable-diffusion.cpp",
+    "revision": "3b12781fac1a22eda27ad0f08d0884ef816f24d7",
+    "archive_bytes": 39644163,
+    "archive_sha256": "efb501ec271393e43b08d25eed37ab26c154134fa495501923a5c17417b8782a",
+    "sd_cli_bytes": 2160088,
+    "sd_cli_sha256": "df50945cf827233af22260393454efcf585ac787d80c92a5a3d375370f19efdc",
+    "library_bytes": 103210008,
+    "library_sha256": "77f9aeaaac78ae5fd428a14bc9851bbce72cd7318a5f2ee4f70ebf179bbad16f"
+  },
+  "components": {
+    "verified_weight_bytes": 23038921024,
+    "verified_download_report": "verification/minimax-h3-image-20261124/poc-compatible-download-report.json",
+    "files": [
+      {
+        "role": "dit-q3-k-s",
+        "bytes": 8768254688,
+        "sha256": "cbf7e586952da45de3fcc6bdb51a9c5fef1dbb42a9abec943c577664be090ccd"
+      },
+      {
+        "role": "text-encoder-q2-k-m",
+        "bytes": 13102161024,
+        "sha256": "a8ccadccd57ef34c838ffb8a7da8368bb554721b2760274a1d3b0df63960b997"
+      },
+      {
+        "role": "image-vae-fp16",
+        "bytes": 1168505312,
+        "sha256": "d80e9c2e5cfc9844869961ff5a58c9a9e52182df6bfb30b26018dd7f348721af"
+      }
+    ]
+  },
+  "prompt": "An editorial product photograph of a brushed copper espresso machine on a walnut counter, with a white ceramic cup and a small card reading \"IMAGE STUDIO\". Soft morning window light, realistic reflections, precise typography, natural materials, shallow depth of field, high detail.",
+  "fixed_parameters": {
+    "seed": 42,
+    "steps": 6,
+    "cfg_scale": 1.0,
+    "sampling_method": "euler",
+    "sigmas": "minimax-h3-image",
+    "rng": "cpu",
+    "offload_to_cpu": true,
+    "vae_tiling": true,
+    "backend": "MTL0"
+  },
+  "runs": [
+    {
+      "id": "q2u-1024",
+      "quantization": "Q2_K",
+      "width": 1024,
+      "height": 1024,
+      "wall_seconds": 53.98,
+      "maximum_resident_bytes": 41417834496,
+      "peak_memory_footprint_bytes": 41558145024,
+      "output": "verification/minimax-h3-image-20261124/macos-q2u-1024-seed42.png",
+      "sha256": "31b84017d89c65d70922745c8b2598ac99df05a36573a548d093b99811279465",
+      "quality": "rejected: card lettering is malformed/mirrored and machine labels are unusable"
+    },
+    {
+      "id": "q3ks-1024",
+      "quantization": "Q3_K_S",
+      "width": 1024,
+      "height": 1024,
+      "wall_seconds": 56.24,
+      "maximum_resident_bytes": 43238506496,
+      "peak_memory_footprint_bytes": 43599691240,
+      "output": "verification/minimax-h3-image-20261124/macos-q3ks-1024-seed42.png",
+      "sha256": "b6135acf7feee019786d7a69a16d0b29421bca0e11727319ccbd0dfa19d792ad",
+      "quality": "baseline candidate: requested lettering is readable and the scene is coherent"
+    },
+    {
+      "id": "q3ks-1024-rerun",
+      "quantization": "Q3_K_S",
+      "width": 1024,
+      "height": 1024,
+      "wall_seconds": 56.15,
+      "maximum_resident_bytes": 43453054976,
+      "peak_memory_footprint_bytes": 43594497488,
+      "output_sha256": "b6135acf7feee019786d7a69a16d0b29421bca0e11727319ccbd0dfa19d792ad",
+      "deterministic_with_first_run": true
+    },
+    {
+      "id": "q3ks-2048",
+      "quantization": "Q3_K_S",
+      "width": 2048,
+      "height": 2048,
+      "wall_seconds": 218.33,
+      "maximum_resident_bytes": 41585426432,
+      "peak_memory_footprint_bytes": 43698634264,
+      "output": "verification/minimax-h3-image-20261124/macos-q3ks-2048-seed42.png",
+      "sha256": "2d8ec328a4cc99b0b6b40efb4b5b7302c23c1719765fe4fee123c994f7d5f62b",
+      "quality": "passed visual check: readable requested lettering, coherent composition and materials"
+    },
+    {
+      "id": "q4km-1024",
+      "quantization": "Q4_K_M",
+      "width": 1024,
+      "height": 1024,
+      "wall_seconds": 62.75,
+      "maximum_resident_bytes": 49698275328,
+      "peak_memory_footprint_bytes": 51504960448,
+      "output": "verification/minimax-h3-image-20261124/macos-q4km-1024-seed42.png",
+      "sha256": "24254a43eadcef84c8427114a578c083be0febca2a4a7262b2c2867fb6c30ce9",
+      "quality": "quality reference: readable lettering and clean composition; materially more memory than Q3_K_S"
+    },
+    {
+      "id": "q3ks-2048-cancel",
+      "quantization": "Q3_K_S",
+      "width": 2048,
+      "height": 2048,
+      "wall_seconds_until_sigint": 80.14,
+      "maximum_resident_bytes": 41819635712,
+      "peak_memory_footprint_bytes": 42053974280,
+      "output_created": false,
+      "process_remaining": false,
+      "evidence": "verification/minimax-h3-image-20261124/macos-q3ks-2048-cancel.log"
+    }
+  ],
+  "conclusion": {
+    "status": "go_for_product_poc",
+    "baseline_quantization": "Q3_K_S",
+    "rejected_quantizations": [
+      "Abiray Q2_K: incompatible with pinned stable-diffusion.cpp",
+      "unsloth Q2_K: readable image but requested text is not usable"
+    ],
+    "quality_reference": "Q4_K_M",
+    "supported_poc_sizes": [1024, 2048],
+    "notes": [
+      "The complete verified weight closure is 23,038,921,024 bytes, not 6.88 GB.",
+      "Peak process memory is about 41.6-51.5 GB on the tested 128 GiB Mac.",
+      "This does not establish Windows 12 GB / 32 GB support.",
+      "This is upstream CLI evidence only; product worker, installer and native UI still require separate verification."
+    ]
+  }
+}

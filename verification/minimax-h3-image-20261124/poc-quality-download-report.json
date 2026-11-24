@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "manifest": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/minimax-h3-image-20261124/poc-quality-model-manifest.json",
+  "output": "/Users/gejiawei/Desktop/ai_code/image-studio/target/minimax-h3-poc/models-segmented",
+  "status": "passed",
+  "workers": 8,
+  "selected_paths": [
+    "minimax_h3_image_pruned-Q2_K.gguf",
+    "minimax_h3_image_pruned-Q4_K_M.gguf"
+  ],
+  "verified_files": 2,
+  "verified_bytes": 20469999040,
+  "elapsed_seconds": 289.752,
+  "results": [
+    {
+      "path": "minimax_h3_image_pruned-Q2_K.gguf",
+      "bytes": 7748879072,
+      "sha256": "065a0b10a42736584c0c235c50bdb007380fbbb2de9e6a8cf6d5132872d42c4b",
+      "status": "downloaded",
+      "elapsed_seconds": 109.823
+    },
+    {
+      "path": "minimax_h3_image_pruned-Q4_K_M.gguf",
+      "bytes": 12721119968,
+      "sha256": "ef784687ff25a974191d00f941388060ef971286fbd2e98b2769fa78c8d599a8",
+      "status": "downloaded",
+      "elapsed_seconds": 179.928
+    }
+  ]
+}

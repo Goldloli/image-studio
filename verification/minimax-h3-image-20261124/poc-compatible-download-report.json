@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "manifest": "/Users/gejiawei/Desktop/ai_code/image-studio/verification/minimax-h3-image-20261124/poc-compatible-model-manifest.json",
+  "output": "/Users/gejiawei/Desktop/ai_code/image-studio/target/minimax-h3-poc/models-segmented",
+  "status": "passed",
+  "workers": 8,
+  "selected_paths": [],
+  "verified_files": 3,
+  "verified_bytes": 23038921024,
+  "elapsed_seconds": 129.378,
+  "results": [
+    {
+      "path": "minimax_h3_image_pruned-Q3_K_S.gguf",
+      "bytes": 8768254688,
+      "sha256": "cbf7e586952da45de3fcc6bdb51a9c5fef1dbb42a9abec943c577664be090ccd",
+      "status": "downloaded",
+      "elapsed_seconds": 122.133
+    },
+    {
+      "path": "qwen3vl_32b_minimax_h3-Q2_K_M.gguf",
+      "bytes": 13102161024,
+      "sha256": "a8ccadccd57ef34c838ffb8a7da8368bb554721b2760274a1d3b0df63960b997",
+      "status": "reused"
+    },
+    {
+      "path": "minimax_h3_image_vae_fp16.safetensors",
+      "bytes": 1168505312,
+      "sha256": "d80e9c2e5cfc9844869961ff5a58c9a9e52182df6bfb30b26018dd7f348721af",
+      "status": "reused"
+    }
+  ]
+}

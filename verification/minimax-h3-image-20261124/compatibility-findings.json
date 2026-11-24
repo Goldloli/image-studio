@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-24",
+  "runtime": {
+    "engine": "stable-diffusion.cpp",
+    "commit": "3b12781fac1a22eda27ad0f08d0884ef816f24d7",
+    "binary": "sd-cli"
+  },
+  "attempts": [
+    {
+      "candidate": "Abiray/MiniMax-H3-Image-GGUF Q2_K",
+      "sha256": "b5ee127c91b7349302d3eab6e9398b30ccbe576805b1885e6d292066fcc99ff7",
+      "result": "incompatible",
+      "error": "invalid MiniMax-H3 output head shape --- component_builders.cpp:60",
+      "evidence": "verification/minimax-h3-image-20261124/macos-q2-1024.log",
+      "scope": "The file is not proven to be invalid for ComfyUI-GGUF; it is incompatible with this pinned stable-diffusion.cpp runtime."
+    }
+  ],
+  "next_candidate": {
+    "repository": "unsloth/MiniMax-H3-Image-GGUF",
+    "file": "minimax_h3_image_pruned-Q3_K_S.gguf",
+    "reason": "The quantizer publishes stable-diffusion.cpp compatibility and Q3_K_S avoids the much larger quality loss measured for its Q2_K tier."
+  }
+}

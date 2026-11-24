@@ -8,7 +8,7 @@
       "readme_url": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/resolve/8ced60068623def5b74b4d10558117cb61d6482d/README.md",
       "readme_sha256": "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed"
     },
-    "dit_quant": {
+    "compatibility_probe_dit_quant": {
       "repository": "Abiray/MiniMax-H3-Image-GGUF",
       "revision": "fec7ec774db49d0c785bdc2174a488576b7396dd",
       "files": [
@@ -29,6 +29,34 @@
           "bytes": 11573106304,
           "sha256": "e545379320e533f9d60e2d831a9489d94889158e88cd681ea7940da47882015f",
           "url": "https://huggingface.co/Abiray/MiniMax-H3-Image-GGUF/resolve/fec7ec774db49d0c785bdc2174a488576b7396dd/MiniMax-H3-Image-Pruned-Q4_K_M.gguf"
+        }
+      ]
+    },
+    "selected_dit_quant": {
+      "repository": "unsloth/MiniMax-H3-Image-GGUF",
+      "revision": "0d25c7349e007529691bbc0f4426b579fce7de01",
+      "selection": "Q3_K_S is the first accepted quality tier; Q4_K_M is the quality reference; Q2_K is rejected for malformed requested text.",
+      "files": [
+        {
+          "path": "minimax_h3_image_pruned-Q2_K.gguf",
+          "bytes": 7748879072,
+          "sha256": "065a0b10a42736584c0c235c50bdb007380fbbb2de9e6a8cf6d5132872d42c4b",
+          "modelscope_revision": "75f233806fca11491440c8cba3a6c101107e9425",
+          "url": "https://www.modelscope.cn/models/unsloth/MiniMax-H3-Image-GGUF/resolve/75f233806fca11491440c8cba3a6c101107e9425/minimax_h3_image_pruned-Q2_K.gguf"
+        },
+        {
+          "path": "minimax_h3_image_pruned-Q3_K_S.gguf",
+          "bytes": 8768254688,
+          "sha256": "cbf7e586952da45de3fcc6bdb51a9c5fef1dbb42a9abec943c577664be090ccd",
+          "modelscope_revision": "ae64ad2a813ccd1577a6a8706c4852a8c6198b63",
+          "url": "https://www.modelscope.cn/models/unsloth/MiniMax-H3-Image-GGUF/resolve/ae64ad2a813ccd1577a6a8706c4852a8c6198b63/minimax_h3_image_pruned-Q3_K_S.gguf"
+        },
+        {
+          "path": "minimax_h3_image_pruned-Q4_K_M.gguf",
+          "bytes": 12721119968,
+          "sha256": "ef784687ff25a974191d00f941388060ef971286fbd2e98b2769fa78c8d599a8",
+          "modelscope_revision": "ae64ad2a813ccd1577a6a8706c4852a8c6198b63",
+          "url": "https://www.modelscope.cn/models/unsloth/MiniMax-H3-Image-GGUF/resolve/ae64ad2a813ccd1577a6a8706c4852a8c6198b63/minimax_h3_image_pruned-Q4_K_M.gguf"
         }
       ]
     },
