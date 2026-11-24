@@ -16,7 +16,7 @@
 
 ## 3. 来源与资源清单
 
-- [ ] 3.1 新增 MiniMax-H3-Image 模型、文本编码器、VAE、许可证和 NOTICE 固定清单，验证清单校验脚本接受且篡改任一字节或 revision 会失败
+- [x] 3.1 新增 MiniMax-H3-Image 模型、文本编码器、VAE、许可证和 NOTICE 固定清单，验证清单校验脚本接受且篡改任一字节或 revision 会失败
 - [ ] 3.2 新增 Windows/macOS 原生 runtime 清单，固定 source commit、构建工具链、可执行文件和依赖哈希，验证未知平台或二进制身份会被拒绝
 - [ ] 3.3 新增安装空间计算，分别覆盖权重、runtime、缓存、暂存和最终占用，验证 Q2/Q3/Q4 显示值来自清单而非参数量推算
 - [ ] 3.4 更新第三方许可证与来源记录，验证 `stable-diffusion.cpp` MIT、MiniMax Community License、AUP 和 NOTICE 均可从关于页或安装记录追溯

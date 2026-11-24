@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "id": "minimax-h3-image-q3ks-sdcpp-macos-v1",
+  "repository": "mixed-pinned-modelscope-transport",
+  "revision": "Q3_K_S DiT @ 0d25c734 + Q2_K_M TE @ eee1dd2f + VAE @ a70325ac",
+  "source_url": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image",
+  "download_source": {
+    "provider": "modelscope",
+    "revision_policy": "per-file"
+  },
+  "license": "minimax-h3-image-community-license-agreement",
+  "component_bytes": 23038921024,
+  "files": [
+    {
+      "path": "minimax_h3_image_pruned-Q3_K_S.gguf",
+      "url": "https://www.modelscope.cn/models/unsloth/MiniMax-H3-Image-GGUF/resolve/ae64ad2a813ccd1577a6a8706c4852a8c6198b63/minimax_h3_image_pruned-Q3_K_S.gguf",
+      "upstream_url": "https://huggingface.co/unsloth/MiniMax-H3-Image-GGUF/resolve/0d25c7349e007529691bbc0f4426b579fce7de01/minimax_h3_image_pruned-Q3_K_S.gguf",
+      "bytes": 8768254688,
+      "sha256": "cbf7e586952da45de3fcc6bdb51a9c5fef1dbb42a9abec943c577664be090ccd",
+      "license": "minimax-h3-image-community-license-agreement",
+      "role": "transformer",
+      "source_revision": "ae64ad2a813ccd1577a6a8706c4852a8c6198b63"
+    },
+    {
+      "path": "qwen3vl_32b_minimax_h3-Q2_K_M.gguf",
+      "url": "https://www.modelscope.cn/models/leejet/MiniMax-H3-GGUF/resolve/a2b5b9603d8834720ca5cc128b55eecc6eb47d05/qwen3vl_32b_minimax_h3-Q2_K_M.gguf",
+      "upstream_url": "https://huggingface.co/leejet/MiniMax-H3-GGUF/resolve/eee1dd2f05b755b28bd1b785925cbfeebfcba9d9/qwen3vl_32b_minimax_h3-Q2_K_M.gguf",
+      "bytes": 13102161024,
+      "sha256": "a8ccadccd57ef34c838ffb8a7da8368bb554721b2760274a1d3b0df63960b997",
+      "license": "minimax-h3-image-community-license-agreement",
+      "role": "text_encoder",
+      "source_revision": "a2b5b9603d8834720ca5cc128b55eecc6eb47d05"
+    },
+    {
+      "path": "minimax_h3_image_vae_fp16.safetensors",
+      "url": "https://www.modelscope.cn/models/Comfy-Org/MiniMax-H3-Image/resolve/b8ebf14be96f02e5c58960620a101de71b0bd9f3/vae/minimax_h3_image_vae_fp16.safetensors",
+      "upstream_url": "https://huggingface.co/Comfy-Org/MiniMax-H3-Image/resolve/a70325ac34ca5c0c83df578bb5e02237460c1d8d/vae/minimax_h3_image_vae_fp16.safetensors",
+      "bytes": 1168505312,
+      "sha256": "d80e9c2e5cfc9844869961ff5a58c9a9e52182df6bfb30b26018dd7f348721af",
+      "license": "minimax-h3-image-community-license-agreement",
+      "role": "vae",
+      "source_revision": "b8ebf14be96f02e5c58960620a101de71b0bd9f3"
+    }
+  ]
+}

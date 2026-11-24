@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "kind": "native",
+  "id": "minimax-h3-sdcpp-3b12781-macos-arm64-metal-v1",
+  "platform": "macos-arm64",
+  "archives": [
+    {
+      "path": "sd-master-3b12781-bin-Darwin-macOS-26.7.2-arm64.zip",
+      "url": "https://github.com/leejet/stable-diffusion.cpp/releases/download/master-1122-3b12781/sd-master-3b12781-bin-Darwin-macOS-26.7.2-arm64.zip",
+      "bytes": 39644163,
+      "sha256": "efb501ec271393e43b08d25eed37ab26c154134fa495501923a5c17417b8782a",
+      "members": [
+        {
+          "archive_path": "sd-cli",
+          "path": "bin/sd-cli",
+          "bytes": 2160088,
+          "sha256": "df50945cf827233af22260393454efcf585ac787d80c92a5a3d375370f19efdc",
+          "executable": true
+        },
+        {
+          "archive_path": "libstable-diffusion.dylib",
+          "path": "bin/libstable-diffusion.dylib",
+          "bytes": 103210008,
+          "sha256": "77f9aeaaac78ae5fd428a14bc9851bbce72cd7318a5f2ee4f70ebf179bbad16f",
+          "executable": false
+        },
+        {
+          "archive_path": "stable-diffusion.cpp.txt",
+          "path": "licenses/stable-diffusion.cpp.txt",
+          "bytes": 1062,
+          "sha256": "b53fa08f515cb5a6fff7b9fd8fcd0961a4b80df29d74372d25e1f9171aa042ee",
+          "executable": false
+        },
+        {
+          "archive_path": "ggml.txt",
+          "path": "licenses/ggml.txt",
+          "bytes": 1078,
+          "sha256": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d",
+          "executable": false
+        }
+      ]
+    }
+  ],
+  "executable": "bin/sd-cli"
+}
