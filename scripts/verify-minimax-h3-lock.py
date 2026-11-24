@@ -21,13 +21,14 @@ def digest(path: Path) -> str:
 
 
 assert MODEL["id"] == "minimax-h3-image-q3ks-sdcpp-macos-v1"
-assert MODEL["component_bytes"] == 23_038_921_024
+assert MODEL["component_bytes"] == 23_045_953_427
 assert MODEL["license"] == "minimax-h3-image-community-license-agreement"
 assert sum(file["bytes"] for file in MODEL["files"]) == MODEL["component_bytes"]
 assert [file["role"] for file in MODEL["files"]] == [
     "transformer",
     "text_encoder",
     "vae",
+    "tokenizer",
 ]
 assert MODEL["files"][0]["bytes"] == 8_768_254_688
 assert (
@@ -43,6 +44,11 @@ assert MODEL["files"][2]["bytes"] == 1_168_505_312
 assert (
     MODEL["files"][2]["sha256"]
     == "d80e9c2e5cfc9844869961ff5a58c9a9e52182df6bfb30b26018dd7f348721af"
+)
+assert MODEL["files"][3]["bytes"] == 7_032_403
+assert (
+    MODEL["files"][3]["sha256"]
+    == "a5d85b6dcc535e6b93115a9ef287e6132fdbf30270da6218194ba742261173c7"
 )
 
 for file in MODEL["files"]:

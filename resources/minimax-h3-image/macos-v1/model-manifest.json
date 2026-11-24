@@ -9,7 +9,7 @@
     "revision_policy": "per-file"
   },
   "license": "minimax-h3-image-community-license-agreement",
-  "component_bytes": 23038921024,
+  "component_bytes": 23045953427,
   "files": [
     {
       "path": "minimax_h3_image_pruned-Q3_K_S.gguf",
@@ -40,6 +40,16 @@
       "license": "minimax-h3-image-community-license-agreement",
       "role": "vae",
       "source_revision": "b8ebf14be96f02e5c58960620a101de71b0bd9f3"
+    },
+    {
+      "path": "tokenizer.json",
+      "url": "https://www.modelscope.cn/models/MiniMax/MiniMax-H3-Image/resolve/9c8df9ed12b308eb70c32b7cd69a505e03785dff/tokenizer/tokenizer.json",
+      "upstream_url": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/resolve/8ced60068623def5b74b4d10558117cb61d6482d/tokenizer/tokenizer.json",
+      "bytes": 7032403,
+      "sha256": "a5d85b6dcc535e6b93115a9ef287e6132fdbf30270da6218194ba742261173c7",
+      "license": "minimax-h3-image-community-license-agreement",
+      "role": "tokenizer",
+      "source_revision": "9c8df9ed12b308eb70c32b7cd69a505e03785dff"
     }
   ]
 }

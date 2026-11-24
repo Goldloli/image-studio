@@ -8,6 +8,8 @@ use crate::{
         BIREFNET_WINDOWS_CAPABILITY, BIREFNET_WINDOWS_MODEL, BIREFNET_WINDOWS_RECIPE,
         KLEIN_WINDOWS_EDIT_CAPABILITY, KLEIN_WINDOWS_EDIT_RECIPE, KLEIN_WINDOWS_MODEL,
         KLEIN_WINDOWS_TEXT_CAPABILITY, KLEIN_WINDOWS_TEXT_RECIPE, MAX_PROMPT_BYTES,
+        MINIMAX_H3_MAC_CAPABILITY, MINIMAX_H3_MAC_MODEL, MINIMAX_H3_MAC_RECIPE,
+        MINIMAX_H3_SCHEDULER,
         MOSS_IMAGE_SFT_WINDOWS_CAPABILITY, MOSS_IMAGE_SFT_WINDOWS_MODEL,
         MOSS_IMAGE_SFT_WINDOWS_RECIPE, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
         QWEN_IMAGE_21_TURBO_WINDOWS_MODEL, QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE,
@@ -89,6 +91,7 @@ pub enum Recipe {
     QwenImage21TurboWindowsCompact,
     MossImageSftWindowsCompact,
     ZImageTurboCudaNf4Compact,
+    MiniMaxH3Mac,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -207,6 +210,7 @@ impl Recipe {
             (QWEN_IMAGE_21_MODEL, QWEN_IMAGE_21_CAPABILITY) => Self::QwenImage21,
             (QWEN_IMAGE_21_TURBO_MODEL, QWEN_IMAGE_21_TURBO_CAPABILITY) => Self::QwenImage21Turbo,
             (MOSS_IMAGE_SFT_MODEL, MOSS_IMAGE_SFT_CAPABILITY) => Self::MossImageSft,
+            (MINIMAX_H3_MAC_MODEL, MINIMAX_H3_MAC_CAPABILITY) => Self::MiniMaxH3Mac,
             (KLEIN_WINDOWS_MODEL, KLEIN_WINDOWS_TEXT_CAPABILITY)
                 if requests_compact_output(request) =>
             {
@@ -278,6 +282,7 @@ impl Recipe {
             Self::QwenImage21TurboWindowsCompact => QWEN_IMAGE_21_TURBO_WINDOWS_COMPACT_RECIPE,
             Self::MossImageSftWindowsCompact => MOSS_IMAGE_SFT_WINDOWS_COMPACT_RECIPE,
             Self::ZImageTurboCudaNf4Compact => Z_IMAGE_WINDOWS_COMPACT_RECIPE,
+            Self::MiniMaxH3Mac => MINIMAX_H3_MAC_RECIPE,
         }
     }
 
@@ -335,7 +340,8 @@ impl Recipe {
                 | Self::QwenImage21WindowsCompact
                 | Self::QwenImage21TurboWindowsCompact
                 | Self::MossImageSftWindowsCompact
-                | Self::ZImageTurboCudaNf4Compact,
+                | Self::ZImageTurboCudaNf4Compact
+                | Self::MiniMaxH3Mac,
                 OutputRole::Primary,
             ) => matches!(kind, AssetKind::ImageRgb),
             (Self::BiRefNet | Self::BiRefNetWindows, OutputRole::Primary) => {
@@ -353,6 +359,7 @@ impl Recipe {
             (Self::RealEsrgan | Self::RealEsrganWindows, OutputRole::Primary) => {
                 Some(MAX_UPSCALE_OUTPUT_BYTES)
             }
+            (Self::MiniMaxH3Mac, OutputRole::Primary) => Some(MAX_UPSCALE_OUTPUT_BYTES),
             (
                 Self::ZImageTurbo
                 | Self::ZImageTurboCudaNf4
@@ -413,6 +420,7 @@ impl Recipe {
             Self::QwenImage21 => QWEN_IMAGE_21_CAPABILITY,
             Self::QwenImage21Turbo => QWEN_IMAGE_21_TURBO_CAPABILITY,
             Self::MossImageSft => MOSS_IMAGE_SFT_CAPABILITY,
+            Self::MiniMaxH3Mac => MINIMAX_H3_MAC_CAPABILITY,
             Self::KleinTextWindows => KLEIN_WINDOWS_TEXT_CAPABILITY,
             Self::KleinEditWindows => KLEIN_WINDOWS_EDIT_CAPABILITY,
             Self::BiRefNetWindows => BIREFNET_WINDOWS_CAPABILITY,
@@ -513,6 +521,7 @@ impl Recipe {
             | Self::MossImageSftWindowsCompact => {
                 validate_text_model_request(request, source, 768)?;
             }
+            Self::MiniMaxH3Mac => validate_minimax_h3_request(request, source)?,
             Self::ZImageTurbo | Self::ZImageTurboCudaNf4 | Self::ZImageTurboCudaNf4Compact => {
                 unreachable!()
             }
@@ -626,6 +635,13 @@ impl Recipe {
             }
             Self::ZImageTurboCudaNf4Compact => {
                 windows_z_image_compact_parameters(windows_z_image_effective_seed(request, plan)?)
+            }
+            Self::MiniMaxH3Mac => {
+                let effective_seed = text_model_effective_seed(request, plan)?;
+                minimax_h3_parameters(
+                    effective_seed,
+                    request.requested_output.width,
+                )
             }
             Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
         };
@@ -1250,6 +1266,64 @@ pub fn freeze_windows_text_model(
     Ok(FrozenRecipe { request, plan })
 }
 
+/// Freezes the experimental macOS MiniMax-H3-Image text-to-image request.
+pub fn freeze_minimax_h3(
+    input: TextModelInput,
+    resolution: u32,
+    resolved_seed: u32,
+    env: crate::generation::PlanEnvironment,
+) -> Result<FrozenRecipe, ContractError> {
+    require(
+        matches!(resolution, 1024 | 2048),
+        "MiniMax-H3-Image POC supports 1024 or 2048 square output",
+    )?;
+    let request = UserRequest {
+        schema_version: crate::contracts::REQUEST_SCHEMA_VERSION,
+        request_id: input.request_id,
+        project_id: input.project_id,
+        capability: crate::contracts::CapabilityDescriptor {
+            capability_id: MINIMAX_H3_MAC_CAPABILITY.into(),
+            instruction_required: true,
+            input_roles: vec![],
+        },
+        instruction: input.prompt,
+        inputs: vec![],
+        model_variant_id: ModelVariantId::new(MINIMAX_H3_MAC_MODEL)?,
+        requested_output: crate::contracts::ImageOutput {
+            width: resolution,
+            height: resolution,
+            count: 1,
+        },
+        policy: crate::contracts::AdjustmentPolicy {
+            allow_model_substitution: false,
+            allow_resolution_change: false,
+            allow_cpu_fallback: false,
+        },
+        parameters: BTreeMap::from([(
+            "seed".into(),
+            input
+                .seed
+                .map_or(serde_json::Value::Null, |seed| json!(seed)),
+        )]),
+        idempotency_key: input.idempotency_key,
+    };
+    let effective_seed = input.seed.unwrap_or(resolved_seed);
+    let plan = ExecutionPlan {
+        schema_version: crate::contracts::PLAN_SCHEMA_VERSION,
+        plan_id: input.plan_id,
+        request_id: request.request_id.clone(),
+        model_variant_id: request.model_variant_id.clone(),
+        components: env.components,
+        runtime: env.runtime,
+        device: env.device,
+        effective_output: request.requested_output.clone(),
+        effective_parameters: minimax_h3_parameters(effective_seed, resolution),
+        adjustments: vec![],
+    };
+    Recipe::MiniMaxH3Mac.validate_plan(&request, &plan, None)?;
+    Ok(FrozenRecipe { request, plan })
+}
+
 fn validate_text_model_request(
     request: &UserRequest,
     source: Option<SourceFacts>,
@@ -1286,6 +1360,67 @@ fn validate_text_model_request(
         )?;
     }
     Ok(())
+}
+
+fn validate_minimax_h3_request(
+    request: &UserRequest,
+    source: Option<SourceFacts>,
+) -> Result<(), ContractError> {
+    require(
+        request.capability.instruction_required
+            && request.capability.input_roles.is_empty()
+            && request.inputs.is_empty()
+            && source.is_none(),
+        "MiniMax-H3-Image requires text and no source image",
+    )?;
+    require(
+        !request.instruction.trim().is_empty() && request.instruction.len() <= MAX_PROMPT_BYTES,
+        "MiniMax-H3-Image prompt must contain text and be at most 16 KiB UTF-8",
+    )?;
+    require(
+        matches!(
+            (request.requested_output.width, request.requested_output.height),
+            (1024, 1024) | (2048, 2048)
+        ) && request.requested_output.count == 1,
+        "MiniMax-H3-Image requires one 1024 or 2048 square image",
+    )?;
+    require(
+        request.parameters.len() == 1 && request.parameters.contains_key("seed"),
+        "MiniMax-H3-Image requires exactly the seed request parameter",
+    )?;
+    if let Some(seed) = request.parameters.get("seed") {
+        require(
+            seed.is_null()
+                || seed
+                    .as_u64()
+                    .is_some_and(|value| u32::try_from(value).is_ok()),
+            "MiniMax-H3-Image seed must be null or u32",
+        )?;
+    }
+    Ok(())
+}
+
+fn minimax_h3_parameters(seed: u32, resolution: u32) -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        ("seed".into(), json!(seed)),
+        ("steps".into(), json!(6)),
+        ("guidance".into(), json!(1.0)),
+        ("sampling_method".into(), json!("euler")),
+        ("scheduler".into(), json!(MINIMAX_H3_SCHEDULER)),
+        ("recipe".into(), json!(MINIMAX_H3_MAC_RECIPE)),
+        ("recipe_version".into(), json!(1)),
+        ("resolution".into(), json!(resolution)),
+        ("token_budget".into(), json!(4096)),
+        ("truncation".into(), json!(false)),
+        ("quantization".into(), json!("gguf")),
+        ("transformer_precision".into(), json!("Q3_K_S")),
+        ("text_encoder_precision".into(), json!("Q2_K_M")),
+        ("vae_precision".into(), json!("float16")),
+        ("tokenizer".into(), json!("qwen3-vl-32b-minimax-h3-v1")),
+        ("offload".into(), json!("cpu")),
+        ("vae_tiling".into(), json!(true)),
+        ("attention".into(), json!("diffusion")),
+    ])
 }
 
 fn text_model_effective_seed(
@@ -2335,6 +2470,88 @@ mod tests {
             false,
         );
         assert!(validate_recipe_request(&wrong, None).is_err());
+    }
+
+    #[test]
+    fn minimax_h3_freezes_q3_six_step_profile_and_square_sizes() {
+        let environment = PlanEnvironment {
+            components: vec![ComponentSnapshot {
+                role: "transformer".into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+                content_hash: ContentHash::new("c".repeat(64)).unwrap(),
+            }],
+            runtime: RuntimeSnapshot {
+                package_id: crate::generation::MINIMAX_H3_MAC_RUNTIME.into(),
+                engine: crate::generation::MINIMAX_H3_MAC_ENGINE.into(),
+                source: SourceRevision {
+                    source: "fixture".into(),
+                    revision: "pinned".into(),
+                },
+            },
+            device: DeviceSnapshot {
+                device_id: crate::generation::MINIMAX_H3_MAC_DEVICE.into(),
+                precision: "Q3_K_S+Q2_K_M".into(),
+            },
+            scheduler: MINIMAX_H3_SCHEDULER.into(),
+        };
+        for resolution in [1024, 2048] {
+            let frozen = freeze_minimax_h3(
+                TextModelInput {
+                    request_id: RequestId::new(format!("request:minimax:{resolution}")).unwrap(),
+                    project_id: ProjectId::new("default").unwrap(),
+                    idempotency_key: IdempotencyKey::new(format!(
+                        "submit:minimax:{resolution}"
+                    ))
+                    .unwrap(),
+                    plan_id: PlanId::new(format!("plan:minimax:{resolution}")).unwrap(),
+                    prompt: "a copper espresso machine".into(),
+                    seed: Some(42),
+                },
+                resolution,
+                7,
+                environment.clone(),
+            )
+            .unwrap();
+            assert_eq!(
+                Recipe::from_request(&frozen.request).unwrap(),
+                Recipe::MiniMaxH3Mac
+            );
+            assert_eq!(frozen.request.model_variant_id.as_str(), MINIMAX_H3_MAC_MODEL);
+            assert_eq!(
+                frozen.plan.runtime.package_id,
+                crate::generation::MINIMAX_H3_MAC_RUNTIME
+            );
+            assert_eq!(frozen.plan.effective_parameters["seed"], 42);
+            assert_eq!(frozen.plan.effective_parameters["steps"], 6);
+            assert_eq!(frozen.plan.effective_parameters["guidance"], 1.0);
+            assert_eq!(
+                frozen.plan.effective_parameters["sampling_method"],
+                "euler"
+            );
+            assert_eq!(
+                frozen.plan.effective_parameters["transformer_precision"],
+                "Q3_K_S"
+            );
+            assert_eq!(frozen.plan.effective_parameters["resolution"], resolution);
+        }
+
+        let bad_resolution = freeze_minimax_h3(
+            TextModelInput {
+                request_id: RequestId::new("request:minimax:bad").unwrap(),
+                project_id: ProjectId::new("default").unwrap(),
+                idempotency_key: IdempotencyKey::new("submit:minimax:bad").unwrap(),
+                plan_id: PlanId::new("plan:minimax:bad").unwrap(),
+                prompt: "a copper espresso machine".into(),
+                seed: None,
+            },
+            4096,
+            7,
+            environment,
+        );
+        assert!(bad_resolution.is_err());
     }
 
     #[test]

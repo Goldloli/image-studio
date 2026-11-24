@@ -354,6 +354,31 @@ fn text_v2_request(
     }
 }
 
+fn minimax_h3_v2_request(resolution: u32) -> ExecuteRequestV2 {
+    ExecuteRequestV2 {
+        model_id: MINIMAX_H3_MAC_MODEL_ID.into(),
+        capability_id: MINIMAX_H3_MAC_CAPABILITY_ID.into(),
+        recipe_id: MINIMAX_H3_MAC_RECIPE_ID.into(),
+        recipe_version: 1,
+        runtime_lock_id: MINIMAX_H3_MAC_RUNTIME_ID.into(),
+        model_snapshot_id: MINIMAX_H3_MAC_SNAPSHOT_ID.into(),
+        instruction: "a detailed copper espresso machine with readable lettering".into(),
+        seed: Some(42),
+        sampling_steps: Some(6),
+        parameters: minimax_h3_parameters(42, resolution),
+        inputs: vec![],
+        outputs: vec![OutputSpec {
+            role: "primary".into(),
+            data_type: "image_rgb".into(),
+            width: resolution,
+            height: resolution,
+            max_bytes: MAX_UPSCALE_OUTPUT_BYTES,
+        }],
+        model_path: managed_path("models/minimax-h3"),
+        output_dir: managed_path("runs/minimax-h3"),
+    }
+}
+
 fn windows_v2_request() -> ExecuteRequestV2 {
     ExecuteRequestV2 {
         model_id: Z_IMAGE_WINDOWS_MODEL_ID.into(),
@@ -1436,6 +1461,40 @@ fn windows_staged_text_payloads_require_exact_identities_and_parameter_maps() {
             );
         }
     }
+}
+
+#[test]
+fn minimax_h3_payload_is_closed_and_supports_only_1024_or_2048_square() {
+    assert!(minimax_h3_v2_request(1024).validate().is_ok());
+    assert!(minimax_h3_v2_request(2048).validate().is_ok());
+    for mutation in 0..5 {
+        let mut request = minimax_h3_v2_request(1024);
+        match mutation {
+            0 => request.sampling_steps = Some(7),
+            1 => request.inputs.push(InputAssetDescriptor {
+                role: "source".into(),
+                path: managed_path("runs/minimax-h3/input.png"),
+                width: 1024,
+                height: 1024,
+                sha256: "a".repeat(64),
+            }),
+            2 => request.outputs[0].width = 4096,
+            3 => {
+                request
+                    .parameters
+                    .insert("negative_prompt".into(), serde_json::json!("blur"));
+            }
+            _ => request.runtime_lock_id = "minimax-h3-sdcpp-other-v1".into(),
+        }
+        assert!(
+            request.validate().is_err(),
+            "MiniMax-H3-Image mutation {mutation}"
+        );
+    }
+
+    let mut wrong_platform = minimax_h3_v2_request(1024);
+    wrong_platform.runtime_lock_id = MINIMAX_H3_WINDOWS_RUNTIME_ID.into();
+    assert!(wrong_platform.validate().is_err());
 }
 
 #[test]

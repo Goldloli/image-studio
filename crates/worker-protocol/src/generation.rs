@@ -108,6 +108,24 @@ pub const MOSS_IMAGE_SFT_WINDOWS_RECIPE_ID: &str = "moss-image-sft-windows-txt2i
 pub const MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT_ID: &str =
     "moss-image-sft-windows-staged-f972bd4b4b9e3852133cc5da954d87bc32cd8fb9";
 
+pub const MINIMAX_H3_MAC_MODEL_ID: &str = "minimax-h3-image-q3ks-sdcpp-macos-v1";
+pub const MINIMAX_H3_MAC_CAPABILITY_ID: &str =
+    "image.text-to-image.minimax-h3-image.gguf.macos-v1";
+pub const MINIMAX_H3_MAC_RECIPE_ID: &str =
+    "minimax-h3-image-txt2img-q3-q2te-6-macos-v1";
+pub const MINIMAX_H3_MAC_RUNTIME_ID: &str =
+    "minimax-h3-sdcpp-3b12781-macos-arm64-metal-v1";
+pub const MINIMAX_H3_MAC_SNAPSHOT_ID: &str = MINIMAX_H3_MAC_MODEL_ID;
+pub const MINIMAX_H3_WINDOWS_MODEL_ID: &str =
+    "minimax-h3-image-q3ks-sdcpp-windows-v1";
+pub const MINIMAX_H3_WINDOWS_CAPABILITY_ID: &str =
+    "image.text-to-image.minimax-h3-image.gguf.windows-v1";
+pub const MINIMAX_H3_WINDOWS_RECIPE_ID: &str =
+    "minimax-h3-image-txt2img-q3-q2te-6-windows-v1";
+pub const MINIMAX_H3_WINDOWS_RUNTIME_ID: &str =
+    "minimax-h3-sdcpp-3b12781-windows-cuda12-v1";
+pub const MINIMAX_H3_WINDOWS_SNAPSHOT_ID: &str = MINIMAX_H3_WINDOWS_MODEL_ID;
+
 // Compact (8 GB VRAM) tier identities. They share every standard identity except the recipe id
 // and the frozen compact parameter map; the standard maps above stay byte-identical.
 pub const KLEIN_WINDOWS_TEXT_COMPACT_RECIPE_ID: &str = "klein4b-text-windows-compact-v1";
@@ -124,8 +142,52 @@ pub const Z_IMAGE_WINDOWS_COMPACT_RECIPE_ID: &str = "z-image-turbo-nf4-cuda-comp
 pub fn is_windows_runtime_id(value: &str) -> bool {
     matches!(
         value,
-        Z_IMAGE_WINDOWS_RUNTIME_ID | WINDOWS_V2_RUNTIME_ID | REALESRGAN_WINDOWS_RUNTIME_ID
+        Z_IMAGE_WINDOWS_RUNTIME_ID
+            | WINDOWS_V2_RUNTIME_ID
+            | REALESRGAN_WINDOWS_RUNTIME_ID
+            | MINIMAX_H3_WINDOWS_RUNTIME_ID
     )
+}
+
+pub fn minimax_h3_parameters(
+    seed: u32,
+    resolution: u32,
+) -> BTreeMap<String, serde_json::Value> {
+    BTreeMap::from([
+        ("seed".into(), serde_json::json!(seed)),
+        ("steps".into(), serde_json::json!(6)),
+        ("guidance".into(), serde_json::json!(1.0)),
+        ("sampling_method".into(), serde_json::json!("euler")),
+        (
+            "scheduler".into(),
+            serde_json::json!("minimax-h3-image"),
+        ),
+        (
+            "recipe".into(),
+            serde_json::json!(MINIMAX_H3_MAC_RECIPE_ID),
+        ),
+        ("recipe_version".into(), serde_json::json!(1)),
+        ("resolution".into(), serde_json::json!(resolution)),
+        ("token_budget".into(), serde_json::json!(4096)),
+        ("truncation".into(), serde_json::json!(false)),
+        ("quantization".into(), serde_json::json!("gguf")),
+        (
+            "transformer_precision".into(),
+            serde_json::json!("Q3_K_S"),
+        ),
+        (
+            "text_encoder_precision".into(),
+            serde_json::json!("Q2_K_M"),
+        ),
+        ("vae_precision".into(), serde_json::json!("float16")),
+        (
+            "tokenizer".into(),
+            serde_json::json!("qwen3-vl-32b-minimax-h3-v1"),
+        ),
+        ("offload".into(), serde_json::json!("cpu")),
+        ("vae_tiling".into(), serde_json::json!(true)),
+        ("attention".into(), serde_json::json!("diffusion")),
+    ])
 }
 
 /// Klein text-to-image and single-image edit share one frozen NF4 + component-offload map.
@@ -848,6 +910,43 @@ impl ExecuteRequestV2 {
                     768,
                     windows_moss_compact_parameters(self.seed.unwrap_or_default()),
                 )?;
+            }
+            (MINIMAX_H3_MAC_MODEL_ID, MINIMAX_H3_MAC_CAPABILITY_ID)
+                if self.recipe_id == MINIMAX_H3_MAC_RECIPE_ID =>
+            {
+                let Some(seed) = self.seed else {
+                    return Err(Error::Invalid(
+                        "MiniMax-H3-Image requires a resolved seed",
+                    ));
+                };
+                if self.instruction.trim().is_empty()
+                    || self.sampling_steps != Some(6)
+                    || !self.inputs.is_empty()
+                    || self.runtime_lock_id != MINIMAX_H3_MAC_RUNTIME_ID
+                    || self.model_snapshot_id != MINIMAX_H3_MAC_SNAPSHOT_ID
+                {
+                    return Err(Error::Invalid("invalid MiniMax-H3-Image recipe"));
+                }
+                expect_outputs(&self.outputs, &output_roles, &["primary"], "image_rgb")?;
+                let Some(output) = self.output_spec("primary") else {
+                    return Err(Error::Invalid("missing MiniMax-H3-Image output"));
+                };
+                if !matches!(
+                    (output.width, output.height),
+                    (1024, 1024) | (2048, 2048)
+                ) || output.max_bytes > MAX_UPSCALE_OUTPUT_BYTES
+                {
+                    return Err(Error::Invalid(
+                        "MiniMax-H3-Image output must be one bounded 1024 or 2048 square",
+                    ));
+                }
+                if self.parameters
+                    != minimax_h3_parameters(seed, output.width)
+                {
+                    return Err(Error::Invalid(
+                        "invalid MiniMax-H3-Image parameters",
+                    ));
+                }
             }
             _ => return Err(Error::Invalid("unsupported v2 model recipe")),
         }
@@ -1637,6 +1736,7 @@ fn is_macos_model_id(value: &str) -> bool {
             | "qwen-image-2.1-mflux-v1"
             | "qwen-image-2.1-turbo-mflux-v1"
             | "moss-image-sft-mflux-v1"
+            | MINIMAX_H3_MAC_MODEL_ID
     )
 }
 

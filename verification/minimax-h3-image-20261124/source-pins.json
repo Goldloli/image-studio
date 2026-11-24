@@ -86,6 +86,14 @@
       "sha256": "d80e9c2e5cfc9844869961ff5a58c9a9e52182df6bfb30b26018dd7f348721af",
       "url": "https://huggingface.co/Comfy-Org/MiniMax-H3-Image/resolve/a70325ac34ca5c0c83df578bb5e02237460c1d8d/vae/minimax_h3_image_vae_fp16.safetensors"
     },
+    "tokenizer": {
+      "repository": "MiniMaxAI/MiniMax-H3-Image",
+      "revision": "8ced60068623def5b74b4d10558117cb61d6482d",
+      "path": "tokenizer/tokenizer.json",
+      "bytes": 7032403,
+      "sha256": "a5d85b6dcc535e6b93115a9ef287e6132fdbf30270da6218194ba742261173c7",
+      "url": "https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/resolve/8ced60068623def5b74b4d10558117cb61d6482d/tokenizer/tokenizer.json"
+    },
     "licenses": {
       "community_license": {
         "bytes": 18208,
