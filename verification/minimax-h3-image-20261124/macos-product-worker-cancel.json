@@ -1,0 +1,14 @@
+{
+  "candidate_written": false,
+  "elapsed_seconds": 0.133978458,
+  "evidence_boundary": "This proves the worker terminates its direct native child after a valid cancel frame. Supervisor whole-tree enforcement and host restart recovery remain separate gates.",
+  "kind": "minimax-h3-image-product-worker-cancel-acceptance",
+  "log": "verification/minimax-h3-image-20261124/macos-product-worker-cancel.log",
+  "model_snapshot_id": "minimax-h3-image-q3ks-sdcpp-macos-v1",
+  "runtime_lock_id": "minimax-h3-sdcpp-3b12781-macos-arm64-metal-v1",
+  "scope": "real inference-stage cancel through the product worker",
+  "status": "passed",
+  "worker_build_id": "studio-minimax-h3-worker-macos-0.1.0",
+  "worker_exit_success": true,
+  "worker_pid": 97805
+}

@@ -1,0 +1,69 @@
+{
+  "kind": "minimax-h3-image-macos-native-ui-acceptance",
+  "status": "passed",
+  "platform": "macOS arm64",
+  "host": "Apple M3 Max / 128 GiB",
+  "app_bundle": "target/minimax-h3-ui/Image Studio.app",
+  "isolated_data_root": "target/minimax-h3-product-acceptance",
+  "model_snapshot_id": "minimax-h3-image-q3ks-sdcpp-macos-v1",
+  "runtime_lock_id": "minimax-h3-sdcpp-3b12781-macos-arm64-metal-v1",
+  "worker_build_id": "studio-minimax-h3-worker-macos-0.1.0",
+  "runs": [
+    {
+      "resolution": 1024,
+      "seed": 1036322922,
+      "attempt_state": "succeeded",
+      "elapsed_ms": 70797,
+      "asset_sha256": "c8ac8bd6a0e5dc127a3c7629bd3141157fc0d83ae9122110c47e2cde1b721c7c",
+      "export": "verification/minimax-h3-image-20261124/macos-ui-export-1024.png",
+      "export_bytes": 1805189,
+      "export_sha256": "c8ac8bd6a0e5dc127a3c7629bd3141157fc0d83ae9122110c47e2cde1b721c7c"
+    },
+    {
+      "resolution": 2048,
+      "seed": 3225420991,
+      "attempt_state": "succeeded",
+      "elapsed_ms": 260888,
+      "asset_sha256": "5f69e5db601f6c14116b89ed8f1b4699b5f9346b22204b3cce81e9b15f105ba0",
+      "export": "verification/minimax-h3-image-20261124/macos-ui-export-2048.png",
+      "export_bytes": 7921705,
+      "export_sha256": "5f69e5db601f6c14116b89ed8f1b4699b5f9346b22204b3cce81e9b15f105ba0"
+    }
+  ],
+  "cancel_attempts": [
+    {
+      "resolution": 2048,
+      "state": "cancelled",
+      "elapsed_ms": 17069,
+      "candidate_written": false
+    },
+    {
+      "resolution": 2048,
+      "state": "cancelled_after_retry",
+      "elapsed_ms": 7760,
+      "candidate_written": false
+    }
+  ],
+  "retry": {
+    "same_turn_reused": true,
+    "final_attempt_state": "succeeded",
+    "final_elapsed_ms": 260888
+  },
+  "reopen": {
+    "passed": true,
+    "conversation_history_restored": true,
+    "both_exported_assets_available": true
+  },
+  "residual_compute_processes_after_cancel": 0,
+  "development_failures_fixed_before_final_pass": [
+    {
+      "failure": "2048 turn binding rejected because the host square-size allowlist omitted 2048",
+      "fixed": true
+    },
+    {
+      "failure": "2048 candidate PNG rejected by the legacy 1 MP output pixel ceiling",
+      "fixed": true
+    }
+  ],
+  "evidence_boundary": "Passed on this macOS arm64 host only. Windows x64, 8 GB devices, 4096 square and other Apple Silicon configurations are not certified."
+}

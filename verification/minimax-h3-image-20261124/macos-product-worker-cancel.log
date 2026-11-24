@@ -1,0 +1,95 @@
+[V] version: stable-diffusion.cpp version unknown, commit 3b12781 --- main.cpp:602
+ggml_metal_device_init: tensor API disabled for pre-M5 and pre-A19 devices
+ggml_metal_library_init: using embedded metal library
+ggml_metal_library_compile_all: compiled 'fa_aux' library in 0.021 sec
+ggml_metal_library_compile_all: compiled 'fa_f16' library in 0.016 sec
+ggml_metal_library_compile_all: compiled 'fa_f32' library in 0.032 sec
+ggml_metal_library_compile_all: compiled 'fa_q4_0' library in 0.053 sec
+ggml_metal_library_compile_all: compiled 'fa_q4_1' library in 0.008 sec
+ggml_metal_library_compile_all: compiled 'fa_q5_0' library in 0.036 sec
+ggml_metal_library_compile_all: compiled 'fa_q5_1' library in 0.031 sec
+ggml_metal_library_compile_all: compiled 'fa_q8_0' library in 0.035 sec
+ggml_metal_library_compile_all: compiled 'fa_tensor' library in 0.005 sec
+ggml_metal_library_compile_all: compiled 'fa_vec_f16' library in 0.052 sec
+ggml_metal_library_compile_all: compiled 'fa_vec_f32' library in 0.007 sec
+ggml_metal_library_compile_all: compiled 'fa_vec_q4_0' library in 0.026 sec
+ggml_metal_library_compile_all: compiled 'fa_vec_q4_1' library in 0.047 sec
+ggml_metal_library_compile_all: compiled 'fa_vec_q5_0' library in 0.039 sec
+ggml_metal_library_compile_all: compiled 'fa_vec_q5_1' library in 0.030 sec
+ggml_metal_library_compile_all: compiled 'fa_vec_q8_0' library in 0.043 sec
+ggml_metal_library_compile_all: compiled 'mul_mv' library in 0.019 sec
+ggml_metal_library_compile_all: compiled 'mul_mv_mma' library in 0.013 sec
+ggml_metal_library_compile_all: compiled 'mul_mm' library in 0.057 sec
+ggml_metal_library_compile_all: compiled 'quantize' library in 0.033 sec
+ggml_metal_library_compile_all: compiled 'softmax' library in 0.020 sec
+ggml_metal_library_compile_all: compiled 'norm' library in 0.006 sec
+ggml_metal_library_compile_all: compiled 'unary' library in 0.047 sec
+ggml_metal_library_compile_all: compiled 'binbcast' library in 0.039 sec
+ggml_metal_library_compile_all: compiled 'reduce' library in 0.006 sec
+ggml_metal_library_compile_all: compiled 'tri' library in 0.005 sec
+ggml_metal_library_compile_all: compiled 'ssm' library in 0.006 sec
+ggml_metal_library_compile_all: compiled 'wkv' library in 0.025 sec
+ggml_metal_library_compile_all: compiled 'gated_delta_net' library in 0.020 sec
+ggml_metal_library_compile_all: compiled 'solve_tri' library in 0.043 sec
+ggml_metal_library_compile_all: compiled 'rope' library in 0.021 sec
+ggml_metal_library_compile_all: compiled 'conv' library in 0.017 sec
+ggml_metal_library_compile_all: compiled 'upscale' library in 0.047 sec
+ggml_metal_library_compile_all: compiled 'argsort' library in 0.048 sec
+ggml_metal_library_compile_all: compiled 'pool' library in 0.015 sec
+ggml_metal_library_compile_all: compiled 'misc' library in 0.015 sec
+ggml_metal_library_compile_all: loaded 36 libraries from embedded data in 0.057 sec (max single = 0.057 sec)
+ggml_metal_rsets_init: creating a residency set collection (keep_alive = 180 s)
+ggml_metal_device_init: GPU name:   MTL0 (Apple M3 Max)
+ggml_metal_device_init: GPU family: MTLGPUFamilyApple9  (1009)
+ggml_metal_device_init: GPU family: MTLGPUFamilyMetal4  (5002)
+ggml_metal_device_init: simdgroup reduction   = true
+ggml_metal_device_init: simdgroup matrix mul. = true
+ggml_metal_device_init: has unified memory    = true
+ggml_metal_device_init: has bfloat            = true
+ggml_metal_device_init: has tensor            = false
+ggml_metal_device_init: use residency sets    = true
+ggml_metal_device_init: use shared buffers    = true
+ggml_metal_device_init: recommendedMaxWorkingSetSize  = 115448.73 MB
+[V] System Info:
+   NEON = 1 |    ARM_FMA = 1 |    FP16_VA = 1 |    DOTPROD = 1 |    ACCELERATE = 1 |    REPACK = 1 |  --- main.cpp:603
+[V] parse '/Users/gejiawei/Desktop/ai_code/image-studio/target/minimax-h3-poc/models-segmented/minimax_h3_image_pruned-Q3_K_S.gguf' using gguf format, prefix = '' --- model_loader.cpp:224
+[V] GGUF v3, tensor_count=528, metadata_kv_count=3 --- gguf_reader_ext.h:225
+[V] parse '/Users/gejiawei/Desktop/ai_code/image-studio/target/minimax-h3-poc/models-segmented/minimax_h3_image_vae_fp16.safetensors' using safetensors format, prefix = '' --- model_loader.cpp:230
+[I] Detected model family: MiniMax-H3-Image (minimax_h3_image_pruned-Q3_K_S.gguf) --- generation.cpp:124
+[V] parse '/Users/gejiawei/Desktop/ai_code/image-studio/target/minimax-h3-poc/models-segmented/minimax_h3_image_pruned-Q3_K_S.gguf' using gguf format, prefix = '' --- model_loader.cpp:224
+[V] GGUF v3, tensor_count=528, metadata_kv_count=3 --- gguf_reader_ext.h:225
+[V] Initializing backend: MTL0 --- ggml_extend_backend.cpp:421
+[I] ggml: ggml_metal_init: allocating
+[I] ggml: ggml_metal_init: found device: Apple M3 Max
+[I] ggml: ggml_metal_init: picking default device: Apple M3 Max
+[I] ggml: ggml_metal_init: use fusion         = true
+[I] ggml: ggml_metal_init: use concurrency    = true
+[I] ggml: ggml_metal_init: use graph optimize = true
+[V] Initializing backend: CPU --- ggml_extend_backend.cpp:421
+[V] minimax_h3: layers=50, hidden=5376, heads=56, head_dim=128, ffn=14336, adaln_curve=1025, two_time=0, audio_latent_channels=0, pdd_num_inference_steps=6 --- minimax_h3.hpp:185
+[I] MiniMax-H3 attention chunk budget: 2 GiB (0 disables grouping) --- minimax_h3.hpp:1269
+[I] conv2d direct auto: MTL0 -> off (no implicit GEMM path) --- conv_direct.cpp:90
+[I] conv3d direct auto: MTL0 -> off (no implicit GEMM path) --- conv_direct.cpp:90
+[I] Diffusion model weights: 8446.39 MiB --- model_runtime.cpp:483
+[V] parse '/Users/gejiawei/Desktop/ai_code/image-studio/target/minimax-h3-poc/models-segmented/qwen3vl_32b_minimax_h3-Q2_K_M.gguf' using gguf format, prefix = '' --- model_loader.cpp:224
+[V] GGUF v3, tensor_count=902, metadata_kv_count=0 --- gguf_reader_ext.h:225
+[V] llm: num_layers = 50, vocab_size = 151936, hidden_size = 5120, intermediate_size = 25600 --- llm.hpp:464
+[V] enable llm vision --- llm.hpp:2475
+[I] Conditioner model weights: 12497.02 MiB --- model_runtime.cpp:483
+[V] parse '/Users/gejiawei/Desktop/ai_code/image-studio/target/minimax-h3-poc/models-segmented/minimax_h3_image_vae_fp16.safetensors' using safetensors format, prefix = '' --- model_loader.cpp:230
+[I] using VAE for encoding / decoding --- component_builders.cpp:187
+[V] minimax_h3_vae: decoder=original, layers=24, patch_size_t=1, hidden_size=1024 --- minimax_h3_vae.hpp:66
+[I] VAE weights: 1116.71 MiB --- model_runtime.cpp:483
+[V] auto-fit plan: 3 models, 3 phases --- run_plan.cpp:73
+[V]   MTL0: available weight/compute budget 109588.03 MiB --- run_plan.cpp:75
+[V]   load_dit: 8446.39 MiB params -> CPU --- run_plan.cpp:79
+[V]   load_text_encoder: 12497.02 MiB params -> CPU --- run_plan.cpp:79
+[V]   load_vae: 1116.71 MiB params -> CPU --- run_plan.cpp:79
+[V]   phase encode_prompt: load_text_encoder --- run_plan.cpp:91
+[V]   phase sample: load_dit --- run_plan.cpp:91
+[V]   phase vae_decode: load_vae --- run_plan.cpp:91
+[V] parse 'A detailed studio photograph of a ceramic cup and a card reading IMAGE STUDIO' to [['A detailed studio photograph of a ceramic cup and a card reading IMAGE STUDIO', 1], ] --- conditioner.hpp:2264
+[V] split prompt "A detailed studio photograph of a ceramic cup and a card reading IMAGE STUDIO" to 15 tokens ["A", "Ġdetailed", "Ġstudio", "Ġphotograph", "Ġof", "Ġa", "Ġceramic", "Ġcup", "Ġand", "Ġa", "Ġcard", "Ġreading", "ĠIMAGE", "ĠST", "UDIO", ] --- bpe_tokenizer.cpp:245
+[V] qwen3vl build cached graph cut plan done (taking 2 ms) --- ggml_graph_cut.cpp:1034
+[I] loading 551/902 tensors from /Users/gejiawei/Desktop/ai_code/image-studio/target/minimax-h3-poc/models-segmented/qwen3vl_32b_minimax_h3-Q2_K_M.gguf --- model_loader.cpp:1184
+  |###                                               |  33/551 - 302.30MB/s[K  |#####                                             |  47/551 - 638.47MB/s[K  |######                                            |  60/551 - 721.19MB/s[K  |########                                          |  80/551 -   1.03GB/s[K  |#########                                         |  92/551 -   1.02GB/s[K  |##########                                        | 107/551 -   1.05GB/s[K  |############                                      | 124/551 -   1.13GB/s[K  |#############                                     | 140/551 -   1.18GB/s[K

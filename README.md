@@ -8,8 +8,9 @@
 
 Image Studio is a local-first desktop image creation studio for Apple Silicon
 macOS and Windows x64, built with Rust, Tauri 2, and React. Generate, edit,
-remove backgrounds, and upscale images with seven pinned local models while
-keeping model execution, conversations, and works on your machine.
+remove backgrounds, and upscale images with seven stable pinned local models,
+plus one explicitly experimental MiniMax-H3-Image profile, while keeping model
+execution, conversations, and works on your machine.
 
 ![Image Studio conversation workspace on macOS](verification/simplify-workspace-20261111/native-01-initial-1280.png)
 
@@ -94,7 +95,8 @@ for the complete change list and known limitations.
 
 ## Highlights
 
-- **Seven certified models / eight capabilities** on both macOS and Windows.
+- **Seven stable certified models / eight capabilities** on both macOS and
+  Windows, plus one macOS-only experimental MiniMax-H3-Image profile.
 - **Two execution tiers**: a standard tier (≥ 12 GB VRAM, 1024², `bfloat16`) and
   a compact tier (≥ 8 GB VRAM, 768², `float16`) selected automatically from the
   device facts.
@@ -130,6 +132,19 @@ for the complete change list and known limitations.
 | Qwen-Image 2.1 | Text to image | 4-bit NF4, 40 steps, guidance 1.0 |
 | Qwen-Image 2.1 Turbo | Text to image | 4-bit NF4, 8 steps, official Turbo sampling |
 | MOSS-Image-SFT | Text to image | 4-bit NF4, 50 steps, guidance 3.0 |
+| MiniMax-H3-Image (experimental) | Text to image | Q3_K_S + Q2_K_M GGUF, 6 steps, 1024² / 2048² |
+
+### Experimental MiniMax-H3-Image profile
+
+The macOS arm64 profile is verified only on the recorded Apple M3 Max / 128 GiB
+host. It uses the complete 23.05 GB pinned weight/tokenizer closure plus a
+dedicated `stable-diffusion.cpp` Metal runtime; the community's 6.88 GB figure is
+only one Q2 DiT file, not a complete model download. The first profile supports
+1024² and 2048² text-to-image only. Windows, 8 GB devices, and 4096² remain
+unverified and disabled. MiniMax's Community License territory, revenue,
+acceptable-use, and hosted-service boundaries require an explicit local
+acknowledgement before installation. Evidence:
+[`verification/minimax-h3-image-20261124/`](verification/minimax-h3-image-20261124/README.md).
 
 ### Execution tiers
 
@@ -185,6 +200,7 @@ The project keeps compile, UI, and real inference evidence separate:
 | Platform | 0.2.3 evidence scope | Evidence |
 |---|---|---|
 | macOS arm64 | Adds native 1280×800 and 960×640 light/dark settings evidence and a live public GitHub Release check; reuses the prior real-model baseline because inference code, runtimes, and recipes are unchanged | [`verification/operations/redesign-settings-center/`](verification/operations/redesign-settings-center/README.md) |
+| macOS arm64 · MiniMax-H3-Image | Isolated product install, license archive, Metal probe, native UI 1024²/2048² generation, cancel/retry, reopen, and PNG export; Windows remains `not_run` | [`verification/minimax-h3-image-20261124/README.md`](verification/minimax-h3-image-20261124/README.md) |
 | Windows 12 GB standard tier | Reuses the recorded 9/9 real-generation matrix; 0.2.3 reruns build, installer, and artifact validation in CI. Windows settings/update installation remains `not_run` | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
 | Windows 8 GB compact tier | Reuses the verified compact recipes and functional baseline; model/runtime identities are unchanged | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md), [`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
 
@@ -206,7 +222,9 @@ passes.
   eligibility.
 - **Disk**: each generative model downloads 25–33 GB and keeps a prepared NF4
   cache. Reserve at least 40 GB per generative model and roughly 150 GB for the
-  full model set. Model weights and private Python runtimes are not bundled.
+  full model set. MiniMax-H3-Image separately requires about 23.05 GB for weights
+  and tokenizer plus runtime, cache, and staging space. Model weights and private
+  runtimes are not bundled.
 
 ## Download
 

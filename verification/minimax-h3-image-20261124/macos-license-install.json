@@ -1,0 +1,42 @@
+{
+  "kind": "minimax-h3-image-macos-license-install-acceptance",
+  "status": "passed",
+  "scope": "fresh isolated data root with a pre-verified fixed download cache",
+  "data_root": "target/minimax-h3-ui-install",
+  "install_id": "minimax-h3-image-q3ks-sdcpp-macos-v1",
+  "license": {
+    "sha256": "0ec3bb5e6d9e885fa2aaf15e84689e50fd51f42b53fa24d3a64ed9d8c76d423b",
+    "territory": "Shanghai, China",
+    "territory_eligible": true,
+    "use_scenario": "local Image Studio acceptance test",
+    "hosted_service": false,
+    "revenue_over_threshold": false,
+    "accepted_at_unix": 1795530029
+  },
+  "ready_record": {
+    "path": "target/minimax-h3-ui-install/data/installations/models/minimax-h3-image-q3ks-sdcpp-macos-v1.json",
+    "written_at_unix": 1795530085,
+    "sha256": "ecad1c1610f49e6abf24fa38547c78327d6657dc22411746e72b9429f8ebc109",
+    "runtime_lock_id": "minimax-h3-sdcpp-3b12781-macos-arm64-metal-v1",
+    "model_snapshot_id": "minimax-h3-image-q3ks-sdcpp-macos-v1",
+    "worker_build_id": "studio-minimax-h3-worker-macos-0.1.0",
+    "device_name": "Apple M3 Max",
+    "runtime_manifest_sha256": "3c599b068548230ae53af71866fcaa08c54436618c0893495d6299bdda01e1d6",
+    "model_manifest_sha256": "990cb6e047feb474b42359f8aaa3a632f46965b6acbf71e1485fcc8baf9197f0"
+  },
+  "model_component_bytes": 23045953427,
+  "license_files": [
+    {
+      "name": "LICENSE",
+      "bytes": 18208,
+      "sha256": "0ec3bb5e6d9e885fa2aaf15e84689e50fd51f42b53fa24d3a64ed9d8c76d423b"
+    },
+    {
+      "name": "NOTICE",
+      "bytes": 386,
+      "sha256": "f828a0087e386efe5e1c3039bee87bff734c375ad52fb75f35110957f16de9c1"
+    }
+  ],
+  "network_denied": "not_run",
+  "evidence_boundary": "The UI displayed and persisted the license acknowledgement and installed from a pre-verified cache. Network-disabled installation, corrupt-cache recovery and interrupted-download recovery remain separate acceptance cases."
+}

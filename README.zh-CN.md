@@ -7,8 +7,9 @@
 [![许可证：Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 Image Studio 是面向 **Apple Silicon macOS** 与 **Windows x64** 的本地优先桌面
-图片创作工作台，使用 Rust、Tauri 2 与 React 构建。你可以用七个固定版本的本地
-模型完成文生图、编辑、去背景与放大；模型推理、会话和作品都留在本机。
+图片创作工作台，使用 Rust、Tauri 2 与 React 构建。你可以用七个稳定固定版本的
+本地模型完成文生图、编辑、去背景与放大，并可在 macOS 上显式试用实验性的
+MiniMax-H3-Image；模型推理、会话和作品都留在本机。
 
 ![macOS 上的 Image Studio 会话工作区](verification/simplify-workspace-20261111/native-01-initial-1280.png)
 
@@ -77,7 +78,8 @@ Image Studio 是面向 **Apple Silicon macOS** 与 **Windows x64** 的本地优�
 
 ## 核心特性
 
-- **七个认证型号、八项能力**，macOS 与 Windows 均已完成真实执行验收。
+- **七个稳定认证型号、八项能力**，macOS 与 Windows 均已完成真实执行验收；另有
+  一个仅面向已记录 macOS arm64 profile 的实验型号。
 - **两个执行档位**：标准档（≥ 12 GB 显存、1024²、`bfloat16`）与紧凑档
   （≥ 8 GB 显存、768²、`float16`），由宿主根据设备事实自动选择。
 - **本地执行**：不依赖托管图片 API，也不把项目数据上传到云端。
@@ -108,6 +110,17 @@ Image Studio 是面向 **Apple Silicon macOS** 与 **Windows x64** 的本地优�
 | Qwen-Image 2.1 | 文生图 | 4-bit（NF4）、40 步、guidance 1.0 |
 | Qwen-Image 2.1 Turbo | 文生图 | 4-bit（NF4）、8 步、官方 Turbo 采样 |
 | MOSS-Image-SFT | 文生图 | 4-bit（NF4）、50 步、guidance 3.0 |
+| MiniMax-H3-Image（实验） | 文生图 | Q3_K_S + Q2_K_M GGUF、6 步、1024² / 2048² |
+
+### 实验性 MiniMax-H3-Image profile
+
+当前只在已记录的 Apple M3 Max / 128 GiB macOS arm64 主机完成原生 UI 验收。
+完整权重与 tokenizer 闭包为 23.05 GB，另需专用 `stable-diffusion.cpp` Metal
+运行时；社区常见的 6.88 GB 只是 Q2 DiT 单文件，不是完整下载量。首期只开放
+1024² 与 2048² 文生图，Windows、8 GB 显存设备和 4096² 均未验证并保持禁用。
+MiniMax Community License 的适用地域、收入门槛、可接受使用和托管服务边界
+必须在安装前由用户明确确认。证据见
+[`verification/minimax-h3-image-20261124/`](verification/minimax-h3-image-20261124/README.md)。
 
 ### 执行档位
 
@@ -158,6 +171,7 @@ Windows 使用独立冻结的 NF4、ONNX 与 ncnn 配置；macOS 使用已验证
 | 平台 | 0.2.3 证据范围 | 证据 |
 |---|---|---|
 | macOS arm64 | 新增 1280×800 与 960×640 亮暗设置证据，并完成真实公开 GitHub Release 检查；因推理代码、运行时与配方未变，复用既有真实模型基线 | [`verification/operations/redesign-settings-center/`](verification/operations/redesign-settings-center/README.md) |
+| macOS arm64 · MiniMax-H3-Image | 隔离产品安装、许可证归档、Metal 探针、原生 UI 1024²/2048² 生成、取消/重试、重开与 PNG 导出；Windows 保持 `not_run` | [`verification/minimax-h3-image-20261124/README.md`](verification/minimax-h3-image-20261124/README.md) |
 | Windows 12 GB 标准档 | 复用已记录的 9/9 真实生成矩阵；0.2.3 在 CI 重新执行构建、安装包与产物验证。Windows 设置与更新安装仍为 `not_run` | [`verification/windows-12gb-real-generation-20261112/`](verification/windows-12gb-real-generation-20261112/README.md) |
 | Windows 8 GB 紧凑档 | 复用已验证的紧凑档配方与功能基线；模型/运行时身份保持不变 | [`verification/windows-8gb-tier/`](verification/windows-8gb-tier/README.md)、[`verification/windows-functional-regression-20261112/`](verification/windows-functional-regression-20261112/README.md) |
 
@@ -175,7 +189,8 @@ GitHub Actions 负责构建、测试、打包、架构、checksum 与版本来�
   MFLUX/MLX 与 ONNX 运行时；模型页会显示设备可用性。
 - **磁盘**：每个生成模型需下载 25–33 GB 并保留一份准备好的 NF4 缓存。建议每个
   生成模型预留至少 40 GB，完整模型集约 150 GB。模型权重与私有 Python 运行时不
-  随安装包分发。
+  随安装包分发。MiniMax-H3-Image 另需约 23.05 GB 权重与 tokenizer，以及运行时、
+  缓存和暂存空间。
 
 ## 下载与安装
 

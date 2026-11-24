@@ -46,6 +46,21 @@ records are available in `resources/model-catalog/catalog.json`,
 Qwen model materials are marked as non-commercial in the application catalog;
 users must review the upstream Qwen license before use or redistribution.
 
+MiniMax-H3-Image materials are subject to the MiniMax-H3-Image Community
+License Agreement, including its incorporated Acceptable Use Policy, territory,
+revenue, hosted-service, and distribution terms. The fixed license text and
+NOTICE are archived under `resources/minimax-h3-image/macos-v1/` and are copied
+into the application-managed license directory after explicit user
+acknowledgement. The dedicated runtime is built from `leejet/stable-diffusion.cpp`
+under its MIT license; the fixed runtime archive also carries the upstream
+stable-diffusion.cpp, ggml, WebM, WebP, and CUTLASS notices.
+
+The MiniMax-H3-Image model files are installed separately and are not bundled in
+the application installer or macOS archive. See
+`resources/minimax-h3-image/`, `resources/model-catalog/catalog.json`, and
+`verification/minimax-h3-image-20261124/` for pinned sources, hashes, and
+acceptance evidence.
+
 ## Reporting an Attribution Issue
 
 Please open an issue at <https://github.com/Goldloli/image-studio/issues> with

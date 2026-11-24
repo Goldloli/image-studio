@@ -1,0 +1,22 @@
+{
+  "elapsed_seconds": 59.556120667,
+  "evidence_boundary": "This proves the dedicated worker protocol and native generation path at 1024 square on this host; 2048, cancel, reopen, UI send and export are separate gates.",
+  "height": 1024,
+  "kind": "minimax-h3-image-product-worker-protocol-acceptance",
+  "log": "verification/minimax-h3-image-20261124/macos-product-worker-1024.log",
+  "model_snapshot_id": "minimax-h3-image-q3ks-sdcpp-macos-v1",
+  "png": "verification/minimax-h3-image-20261124/macos-product-worker-1024-seed42.png",
+  "process_exit_after_candidate": true,
+  "runtime_lock_id": "minimax-h3-sdcpp-3b12781-macos-arm64-metal-v1",
+  "scope": "real generation through the product minimax-h3-worker and pinned stable-diffusion.cpp sidecar on this macOS arm64 host",
+  "sha256": "733b26d2a4dff11977e701c5655cf2f2b98705e8e0b43e9b0fce9ab2c4e78eb3",
+  "size_bytes": 2001636,
+  "stages": [
+    "loading",
+    "inference",
+    "writing"
+  ],
+  "status": "passed",
+  "width": 1024,
+  "worker_build_id": "studio-minimax-h3-worker-macos-0.1.0"
+}

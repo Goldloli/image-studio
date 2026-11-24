@@ -3,13 +3,29 @@
 <!-- GitHub Release notes are bilingual; English appears first. -->
 
 Image Studio `{{VERSION}}` redesigns the settings experience and adds a verified
-stable-update flow. The release keeps the existing seven local models, execution
-recipes, local data schema, and platform packaging boundaries unchanged.
+stable-update flow. It keeps the seven stable local models unchanged and adds an
+explicitly experimental macOS arm64 MiniMax-H3-Image text-to-image profile.
 
 Image Studio `{{VERSION}}` 重构设置体验，并加入经过校验的稳定版更新流程。本版
-不改变现有的七个本地模型、执行配方、本地数据结构与平台打包边界。
+保留七个稳定本地模型不变，并新增一个显式实验性的 macOS arm64
+MiniMax-H3-Image 文生图 profile。
 
 ## What's New / 更新内容
+
+### Experimental MiniMax-H3-Image / 实验性 MiniMax-H3-Image
+
+- Adds a dedicated `stable-diffusion.cpp` native worker and Metal runtime for the
+  pinned Q3_K_S + Q2_K_M profile, with 1024² and 2048² text-to-image.
+- The complete download is about 23.05 GB; the commonly cited 6.88 GB is only a
+  Q2 DiT file, not a runnable model closure.
+- macOS native UI acceptance covers install, license acknowledgement, generation,
+  cancel, retry, reopen, and PNG export. Windows and 8 GB devices remain
+  unverified and disabled; 4096² is not exposed.
+- 为固定的 Q3_K_S + Q2_K_M profile 新增专用 `stable-diffusion.cpp` 原生 worker 与
+  Metal 运行时，只开放 1024²/2048² 文生图。
+- 完整下载约 23.05 GB；社区常见的 6.88 GB 只是 Q2 DiT 单文件，不是可运行闭包。
+- macOS 原生 UI 验收覆盖安装、许可证确认、生成、取消、重试、重开与 PNG 导出；
+  Windows、8 GB 设备仍未验证并保持禁用，4096² 不开放。
 
 ### Redesigned settings center / 重构设置中心
 
@@ -62,19 +78,20 @@ Image Studio `{{VERSION}}` 重构设置体验，并加入经过校验的稳定�
 
 - **Preferences:** schema v1 is read with field-level fallbacks and upgrades to v2
   on the next valid save.
-- **No model migration:** model identities, pinned source revisions, runtimes,
-  worker protocols, and recipes are unchanged.
-- **No local-data migration:** SQLite schema v6 and existing conversations,
-  works, favourites, deletion state, and installation records remain compatible.
-- **No inference regression expected:** generation paths are untouched, so the
-  existing macOS and Windows real-model acceptance evidence remains applicable.
+- **Stable model identities unchanged:** the seven stable model revisions,
+  runtimes, worker protocols, and recipes are unchanged.
+- **Local-data migration:** SQLite schema v7 adds an explicit per-turn output
+  resolution; historical turns default to 1024 without rewriting stored plans or
+  assets.
+- **No stable inference regression expected:** stable generation paths are
+  unchanged; MiniMax-H3-Image is isolated in a dedicated profile.
 - **偏好：** schema v1 可逐字段回退读取，并在下一次合法保存时升级到 v2。
-- **无需迁移模型：** 模型身份、固定来源 revision、运行时、worker 协议与配方均未
+- **稳定模型身份不变：** 七个稳定模型的 revision、运行时、worker 协议与配方均未
   改变。
-- **无需迁移本地数据：** SQLite schema v6 与现有会话、作品、收藏、删除状态及
-  安装记录继续兼容。
-- **预期无推理回归：** 生成链路未改动，现有 macOS 与 Windows 真实模型验收证据
-  继续适用。
+- **本地数据结构迁移：** SQLite schema v7 为轮次增加显式输出分辨率；历史轮次
+  默认 1024，不重写既有计划或资产。
+- **预期稳定型号无推理回归：** 稳定生成链路未改；MiniMax-H3-Image 使用独立
+  profile。
 
 ## Validation / 验证
 
@@ -86,6 +103,9 @@ Image Studio `{{VERSION}}` 重构设置体验，并加入经过校验的稳定�
 - A real request to the public GitHub Releases API returned the current stable
   release and the UI correctly reported that no newer version was available at
   test time.
+- MiniMax-H3-Image passed isolated macOS installation, Metal probe, native UI
+  1024²/2048² generation, cancel/retry, reopen, and export. Evidence is stored
+  under `verification/minimax-h3-image-20261124/`. Windows remains `not_run`.
 - Actual package download, SHA-256 verification over release bytes, DMG opening,
   Windows NSIS installation/restart, and active-task install refusal are
   `not_run` for this version. They are covered by unit/state tests and will be
@@ -96,6 +116,9 @@ Image Studio `{{VERSION}}` 重构设置体验，并加入经过校验的稳定�
   `verification/operations/redesign-settings-center/`。
 - 真实 GitHub Releases API 请求成功返回当前稳定版；测试时 UI 正确显示没有更高
   版本。
+- MiniMax-H3-Image 已完成隔离 macOS 安装、Metal 探针、原生 UI 1024²/2048²
+  生成、取消/重试、重开与导出，证据位于
+  `verification/minimax-h3-image-20261124/`；Windows 保持 `not_run`。
 - 本版本的发布包真实下载、Release 字节 SHA-256 校验、打开 DMG、Windows NSIS
   安装/重启与活动任务拒绝安装为 `not_run`；状态边界已有单元测试，将在下一稳定版
   的对应设备上执行。
@@ -171,11 +194,16 @@ checksum 缺失或与下载文件不一致时不要执行。
 - Z-Image Turbo requires a 12 GB card.
 - The 8 GB compact tier is certified on Turing sm75 (RTX 2060 SUPER).
 - Model weights and private Python runtimes remain separate downloads.
+- MiniMax-H3-Image is experimental, macOS arm64 only for this profile, and
+  requires explicit license/territory acknowledgement. It does not certify
+  Windows, 8 GB devices, or 4096².
 - 产物未签名、未公证。
 - 更新通道仅提供稳定版，本版本不提供 prerelease 通道。
 - Z-Image Turbo 仍要求 12 GB 显卡。
 - 8 GB 紧凑档仅在 Turing sm75（RTX 2060 SUPER）上完成认证。
 - 模型权重与私有 Python 运行时仍需单独下载。
+- MiniMax-H3-Image 为实验功能，本轮只认证该 macOS arm64 profile，且必须显式
+  确认许可证/适用地域；不认证 Windows、8 GB 显存设备或 4096²。
 
 ## License / 许可证
 
