@@ -81,25 +81,21 @@ pub const MOSS_IMAGE_SFT_WINDOWS_SNAPSHOT: &str =
 
 /// MiniMax-H3-Image: one experimental text-to-image capability on a dedicated native runtime.
 pub const MINIMAX_H3_MAC_MODEL: &str = "minimax-h3-image-q3ks-sdcpp-macos-v1";
-pub const MINIMAX_H3_MAC_CAPABILITY: &str =
-    "image.text-to-image.minimax-h3-image.gguf.macos-v1";
-pub const MINIMAX_H3_MAC_RECIPE: &str =
-    "minimax-h3-image-txt2img-q3-q2te-6-macos-v1";
-pub const MINIMAX_H3_MAC_RUNTIME: &str =
-    "minimax-h3-sdcpp-3b12781-macos-arm64-metal-v1";
+pub const MINIMAX_H3_MAC_CAPABILITY: &str = "image.text-to-image.minimax-h3-image.gguf.macos-v1";
+pub const MINIMAX_H3_MAC_RECIPE: &str = "minimax-h3-image-txt2img-q3-q2te-6-macos-v1";
+pub const MINIMAX_H3_MAC_RUNTIME: &str = "minimax-h3-sdcpp-3b12781-macos-arm64-metal-v1";
 pub const MINIMAX_H3_MAC_SNAPSHOT: &str = MINIMAX_H3_MAC_MODEL;
 pub const MINIMAX_H3_MAC_WORKER: &str = "studio-minimax-h3-worker-macos-0.1.0";
 pub const MINIMAX_H3_MAC_ENGINE: &str = "stable-diffusion.cpp";
 pub const MINIMAX_H3_MAC_DEVICE: &str = "apple-metal";
+pub const MINIMAX_H3_MAC_RUNTIME_DEVICE: &str = "MTL0";
 pub const MINIMAX_H3_SCHEDULER: &str = "minimax-h3-image";
 
 pub const MINIMAX_H3_WINDOWS_MODEL: &str = "minimax-h3-image-q3ks-sdcpp-windows-v1";
 pub const MINIMAX_H3_WINDOWS_CAPABILITY: &str =
     "image.text-to-image.minimax-h3-image.gguf.windows-v1";
-pub const MINIMAX_H3_WINDOWS_RECIPE: &str =
-    "minimax-h3-image-txt2img-q3-q2te-6-windows-v1";
-pub const MINIMAX_H3_WINDOWS_RUNTIME: &str =
-    "minimax-h3-sdcpp-3b12781-windows-cuda12-v1";
+pub const MINIMAX_H3_WINDOWS_RECIPE: &str = "minimax-h3-image-txt2img-q3-q2te-6-windows-v1";
+pub const MINIMAX_H3_WINDOWS_RUNTIME: &str = "minimax-h3-sdcpp-3b12781-windows-cuda12-v1";
 pub const MINIMAX_H3_WINDOWS_SNAPSHOT: &str = MINIMAX_H3_WINDOWS_MODEL;
 pub const MINIMAX_H3_WINDOWS_WORKER: &str = "studio-minimax-h3-worker-windows-0.1.0";
 pub const MINIMAX_H3_WINDOWS_ENGINE: &str = "stable-diffusion.cpp-cuda";

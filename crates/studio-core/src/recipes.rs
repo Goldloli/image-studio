@@ -8,8 +8,8 @@ use crate::{
         BIREFNET_WINDOWS_CAPABILITY, BIREFNET_WINDOWS_MODEL, BIREFNET_WINDOWS_RECIPE,
         KLEIN_WINDOWS_EDIT_CAPABILITY, KLEIN_WINDOWS_EDIT_RECIPE, KLEIN_WINDOWS_MODEL,
         KLEIN_WINDOWS_TEXT_CAPABILITY, KLEIN_WINDOWS_TEXT_RECIPE, MAX_PROMPT_BYTES,
-        MINIMAX_H3_MAC_CAPABILITY, MINIMAX_H3_MAC_MODEL, MINIMAX_H3_MAC_RECIPE,
-        MINIMAX_H3_SCHEDULER,
+        MINIMAX_H3_MAC_CAPABILITY, MINIMAX_H3_MAC_DEVICE, MINIMAX_H3_MAC_ENGINE,
+        MINIMAX_H3_MAC_MODEL, MINIMAX_H3_MAC_RECIPE, MINIMAX_H3_MAC_RUNTIME, MINIMAX_H3_SCHEDULER,
         MOSS_IMAGE_SFT_WINDOWS_CAPABILITY, MOSS_IMAGE_SFT_WINDOWS_MODEL,
         MOSS_IMAGE_SFT_WINDOWS_RECIPE, QWEN_IMAGE_21_TURBO_WINDOWS_CAPABILITY,
         QWEN_IMAGE_21_TURBO_WINDOWS_MODEL, QWEN_IMAGE_21_TURBO_WINDOWS_RECIPE,
@@ -638,10 +638,7 @@ impl Recipe {
             }
             Self::MiniMaxH3Mac => {
                 let effective_seed = text_model_effective_seed(request, plan)?;
-                minimax_h3_parameters(
-                    effective_seed,
-                    request.requested_output.width,
-                )
+                minimax_h3_parameters(effective_seed, request.requested_output.width)
             }
             Self::ZImageTurbo | Self::ZImageTurboCudaNf4 => unreachable!(),
         };
@@ -1379,7 +1376,10 @@ fn validate_minimax_h3_request(
     )?;
     require(
         matches!(
-            (request.requested_output.width, request.requested_output.height),
+            (
+                request.requested_output.width,
+                request.requested_output.height
+            ),
             (1024, 1024) | (2048, 2048)
         ) && request.requested_output.count == 1,
         "MiniMax-H3-Image requires one 1024 or 2048 square image",
@@ -1677,6 +1677,14 @@ fn validate_plan_platform_identity(
     recipe: Recipe,
     plan: &ExecutionPlan,
 ) -> Result<(), ContractError> {
+    if recipe == Recipe::MiniMaxH3Mac {
+        return require(
+            plan.runtime.package_id == MINIMAX_H3_MAC_RUNTIME
+                && plan.runtime.engine == MINIMAX_H3_MAC_ENGINE
+                && plan.device.device_id == MINIMAX_H3_MAC_DEVICE,
+            "MiniMax-H3-Image runtime or device identity does not match the frozen profile",
+        );
+    }
     if recipe.is_windows() {
         let (runtime, engine, device) = windows_plan_identity(recipe);
         require(
@@ -2502,10 +2510,8 @@ mod tests {
                 TextModelInput {
                     request_id: RequestId::new(format!("request:minimax:{resolution}")).unwrap(),
                     project_id: ProjectId::new("default").unwrap(),
-                    idempotency_key: IdempotencyKey::new(format!(
-                        "submit:minimax:{resolution}"
-                    ))
-                    .unwrap(),
+                    idempotency_key: IdempotencyKey::new(format!("submit:minimax:{resolution}"))
+                        .unwrap(),
                     plan_id: PlanId::new(format!("plan:minimax:{resolution}")).unwrap(),
                     prompt: "a copper espresso machine".into(),
                     seed: Some(42),
@@ -2519,7 +2525,10 @@ mod tests {
                 Recipe::from_request(&frozen.request).unwrap(),
                 Recipe::MiniMaxH3Mac
             );
-            assert_eq!(frozen.request.model_variant_id.as_str(), MINIMAX_H3_MAC_MODEL);
+            assert_eq!(
+                frozen.request.model_variant_id.as_str(),
+                MINIMAX_H3_MAC_MODEL
+            );
             assert_eq!(
                 frozen.plan.runtime.package_id,
                 crate::generation::MINIMAX_H3_MAC_RUNTIME
@@ -2527,10 +2536,7 @@ mod tests {
             assert_eq!(frozen.plan.effective_parameters["seed"], 42);
             assert_eq!(frozen.plan.effective_parameters["steps"], 6);
             assert_eq!(frozen.plan.effective_parameters["guidance"], 1.0);
-            assert_eq!(
-                frozen.plan.effective_parameters["sampling_method"],
-                "euler"
-            );
+            assert_eq!(frozen.plan.effective_parameters["sampling_method"], "euler");
             assert_eq!(
                 frozen.plan.effective_parameters["transformer_precision"],
                 "Q3_K_S"
@@ -2549,9 +2555,47 @@ mod tests {
             },
             4096,
             7,
-            environment,
+            environment.clone(),
         );
         assert!(bad_resolution.is_err());
+
+        let mut wrong_runtime = environment.clone();
+        wrong_runtime.runtime.package_id = "recipes-v3".into();
+        assert!(
+            freeze_minimax_h3(
+                TextModelInput {
+                    request_id: RequestId::new("request:minimax:runtime").unwrap(),
+                    project_id: ProjectId::new("default").unwrap(),
+                    idempotency_key: IdempotencyKey::new("submit:minimax:runtime").unwrap(),
+                    plan_id: PlanId::new("plan:minimax:runtime").unwrap(),
+                    prompt: "a copper espresso machine".into(),
+                    seed: Some(42),
+                },
+                1024,
+                7,
+                wrong_runtime,
+            )
+            .is_err()
+        );
+
+        let mut wrong_device = environment;
+        wrong_device.device.device_id = "cuda0".into();
+        assert!(
+            freeze_minimax_h3(
+                TextModelInput {
+                    request_id: RequestId::new("request:minimax:device").unwrap(),
+                    project_id: ProjectId::new("default").unwrap(),
+                    idempotency_key: IdempotencyKey::new("submit:minimax:device").unwrap(),
+                    plan_id: PlanId::new("plan:minimax:device").unwrap(),
+                    prompt: "a copper espresso machine".into(),
+                    seed: Some(42),
+                },
+                1024,
+                7,
+                wrong_device,
+            )
+            .is_err()
+        );
     }
 
     #[test]
