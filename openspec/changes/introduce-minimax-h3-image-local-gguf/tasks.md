@@ -4,7 +4,7 @@
 
 - [x] 1.1 用户明确批准本 proposal/spec/design 后，在 Beads 中建立实现子任务并记录批准范围，验证 `bd show <id>` 显示依赖与验收范围
 - [x] 1.2 记录当前七个稳定型号/八能力的基线测试结果，验证最接近的 Rust、前端和 OpenSpec 测试在改动前通过
-- [ ] 1.3 冻结本次候选来源、文件字节、SHA-256、许可证哈希和 `stable-diffusion.cpp` commit 到实验记录，验证来源 URL 均为登记 revision 且不包含 `master`
+- [x] 1.3 冻结本次候选来源、文件字节、SHA-256、许可证哈希和 `stable-diffusion.cpp` commit 到实验记录，验证来源 URL 均为登记 revision 且不包含 `master`
 
 ## 2. 独立技术 Gate
 
