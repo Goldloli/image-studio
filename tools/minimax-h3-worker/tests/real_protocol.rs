@@ -50,7 +50,10 @@ fn actual_native_protocol_generates_square() {
     let runtime = std::env::var_os("STUDIO_MINIMAX_RUNTIME_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|| repo.join("target/minimax-h3-poc/runtime/sdcpp-3b12781-macos-arm64"));
-    let output_dir = repo.join("target/minimax-h3-worker-real-protocol");
+    let evidence_suffix = std::env::var("STUDIO_MINIMAX_EVIDENCE_SUFFIX").unwrap_or_default();
+    let output_dir = repo.join(format!(
+        "target/minimax-h3-worker-real-protocol{evidence_suffix}"
+    ));
     let resolution = std::env::var("STUDIO_MINIMAX_TEST_RESOLUTION")
         .ok()
         .and_then(|value| value.parse::<u32>().ok())
@@ -60,7 +63,7 @@ fn actual_native_protocol_generates_square() {
         fs::remove_dir_all(&output_dir).unwrap();
     }
     fs::create_dir_all(&output_dir).unwrap();
-    let stem = format!("macos-product-worker-{resolution}");
+    let stem = format!("macos-product-worker-{resolution}{evidence_suffix}");
     let log_path = repo.join(format!("verification/minimax-h3-image-20261124/{stem}.log"));
     let stderr = File::create(&log_path).unwrap();
 
@@ -205,6 +208,9 @@ fn actual_native_protocol_generates_square() {
         "runtime_lock_id": RUNTIME_ID,
         "model_snapshot_id": SNAPSHOT_ID,
         "worker_build_id": BUILD_ID,
+        "execution_environment": std::env::var("STUDIO_MINIMAX_EXECUTION_ENVIRONMENT")
+            .unwrap_or_else(|_| "normal".into()),
+        "network_denied": std::env::var("STUDIO_MINIMAX_NETWORK_DENIED").as_deref() == Ok("1"),
         "log": format!("verification/minimax-h3-image-20261124/{stem}.log"),
         "png": format!("verification/minimax-h3-image-20261124/{stem}-seed42.png"),
         "evidence_boundary": format!("This proves the dedicated worker protocol and native generation path at {resolution} square on this host; other sizes, cancel, reopen, UI send and export are separate gates.")

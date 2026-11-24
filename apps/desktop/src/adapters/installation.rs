@@ -5672,6 +5672,11 @@ mod tests {
         let acceptance_root = std::env::var_os("STUDIO_MINIMAX_ACCEPTANCE_ROOT")
             .map(PathBuf::from)
             .unwrap_or_else(|| repo.join("target/minimax-h3-product-acceptance"));
+        let evidence_path = std::env::var_os("STUDIO_MINIMAX_INSTALL_EVIDENCE")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| {
+                repo.join("verification/minimax-h3-image-20261124/macos-product-install.json")
+            });
         if std::env::var_os("STUDIO_MINIMAX_RESET").is_some() {
             let managed = acceptance_root.join("data");
             if managed.exists() {
@@ -5787,13 +5792,12 @@ mod tests {
             "model_files": installer.inner.model.downloads().len(),
             "model_manifest_sha256": manifest_digest(MINIMAX_H3_MODEL_MANIFEST),
             "runtime_manifest_sha256": manifest_digest(MINIMAX_H3_RUNTIME_MANIFEST),
+            "execution_environment": std::env::var("STUDIO_MINIMAX_EXECUTION_ENVIRONMENT")
+                .unwrap_or_else(|_| "normal".into()),
+            "network_denied": std::env::var("STUDIO_MINIMAX_NETWORK_DENIED").as_deref() == Ok("1"),
             "evidence_boundary": "This proves product installation, fixed bytes, license archive and device probe on this macOS arm64 host only; it does not prove generation, native UI or Windows."
         });
-        atomic_json(
-            &repo.join("verification/minimax-h3-image-20261124/macos-product-install.json"),
-            &evidence,
-        )
-        .unwrap();
+        atomic_json(&evidence_path, &evidence).unwrap();
     }
 
     #[test]
