@@ -32,6 +32,15 @@
 .catalog-model-name{display:flex;flex-direction:column;min-width:0;gap:2px}
 .catalog-model-name strong{font-size:12px;font-weight:600;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .catalog-model-name small{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.model-support-badge{align-self:flex-start;margin-top:2px;padding:1px 5px;border:1px solid color-mix(in srgb,var(--accent) 38%,var(--line));border-radius:999px;color:var(--accent);font-size:8px;font-weight:500;line-height:1.4}
+.catalog-license-gate{display:grid;gap:10px;padding:12px 0 4px;border-top:1px solid var(--border)}
+.catalog-license-gate>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.catalog-license-gate a{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:10px;text-decoration:none}
+.catalog-license-gate code{overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:9px}
+.catalog-license-gate>label:not(.license-check){display:grid;gap:5px;font-size:10px;color:var(--muted)}
+.catalog-license-gate input:not([type=checkbox]),.catalog-license-gate textarea{width:100%;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;padding:7px 8px;resize:vertical}
+.license-check{display:flex;align-items:flex-start;gap:7px;color:var(--muted);font-size:10px;line-height:1.45}
+.license-check input{margin-top:2px;accent-color:var(--accent)}
 .catalog-capabilities{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .catalog-capabilities i{font-style:normal;font-size:9px;padding:3px 6px;border-radius:5px;background:var(--input);color:var(--muted);white-space:nowrap}
 .catalog-status{display:inline-flex;align-items:center;gap:6px;font-size:9px;color:var(--muted);white-space:nowrap}
@@ -55,6 +64,7 @@
 .catalog-state-grid strong.is-positive{color:var(--accent)}
 .catalog-license,.catalog-hardware{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:9px 10px;margin-bottom:8px;border-radius:8px;background:var(--surface);border:1px solid var(--border);font-size:10px;color:var(--muted)}
 .catalog-license strong,.catalog-hardware strong{font-size:10px;color:var(--text);margin-right:4px}
+.catalog-license>a{display:inline-flex;align-items:center;gap:4px;color:var(--accent);text-decoration:none}
 .license-badge{font-style:normal;font-size:9px;padding:2px 7px;border-radius:5px;background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--danger);white-space:nowrap}
 .catalog-hardware-block{margin-top:10px;padding:9px 10px;border-radius:8px;background:color-mix(in srgb,var(--danger) 9%,transparent);border:1px solid color-mix(in srgb,var(--danger) 35%,transparent);color:var(--danger);font-size:10px;line-height:1.6}
 .catalog-detail-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:13px 0}

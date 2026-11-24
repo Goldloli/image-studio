@@ -134,6 +134,7 @@ export function supportedDraftParams(params: DraftParams): boolean {
     const text = (params.capabilityId ?? textRecipe.capabilityId) === textRecipe.capabilityId && !params.sourceAssetId;
     const edit = params.capabilityId === KLEIN_EDIT_CAPABILITY && Boolean(params.sourceAssetId);
     return textRecipe.aspects.includes(params.aspect)
+      && textRecipe.resolutions.includes(params.resolution ?? textRecipe.defaultResolution)
       && params.count === 1
       && (text || (params.modelId === KLEIN_MODEL_ID && edit))
       && seedValid;
@@ -142,6 +143,7 @@ export function supportedDraftParams(params: DraftParams): boolean {
     return params.capabilityId === BIREFNET_CAPABILITY
       && Boolean(params.sourceAssetId)
       && params.aspect === '1:1'
+      && (params.resolution ?? 1024) === 1024
       && params.count === 1
       && params.seed === '';
   }
@@ -149,6 +151,7 @@ export function supportedDraftParams(params: DraftParams): boolean {
     return params.capabilityId === REALESRGAN_CAPABILITY
       && Boolean(params.sourceAssetId)
       && params.aspect === '1:1'
+      && (params.resolution ?? 1024) === 1024
       && params.count === 1
       && params.seed === '';
   }

@@ -7,14 +7,17 @@ import {
   hardwareBlocked,
   hardwareThresholdLabel,
   isNonCommercialLicense,
+  licenseAcceptanceReady,
   licenseLabel,
+  requiresExplicitLicense,
   type ModelEntry,
 } from './model-catalog';
 
 const base: ModelEntry = {
   id: 'z-image-turbo-mflux-v1', displayName: 'Z-Image Turbo', variant: 'Tongyi-MAI/Z-Image-Turbo',
   family: 'Z-Image', summary: '', description: '', capabilities: [{ id: 'text_to_image', label: '文生图' }],
-  productStatus: 'implemented', runtime: 'MFLUX / MLX', license: 'Apache-2.0', licenseNotice: 'Apache-2.0',
+  productStatus: 'implemented', supportLevel: 'stable', runtime: 'MFLUX / MLX', license: 'Apache-2.0', licenseNotice: 'Apache-2.0',
+  licenseUrl: null, licenseSha256: null,
   source: '', revision: 'abc', modelBytes: 1, knownArtifactBytes: 1, requirements: [], exclusions: [],
   verifiedDevices: [], recipe: 'q4', installId: 'z-image-turbo-mflux-v1', installerSupported: true,
   minVramGb: null, minRamGb: null, standardMinVramGb: null, tier: null, resolution: null,
@@ -40,6 +43,22 @@ describe('model catalog filtering', () => {
   it('searches family, variant, id and runtime', () => {
     expect(filterCatalog([base, queueOnly('realesrgan-x4plus', 'upscale')], 'mflux', 'all', 'all')).toHaveLength(1);
     expect(filterCatalog([base, queueOnly('flux2-klein-4b-distilled', 'image_edit')], 'flux', 'all', 'image_edit').map(entry => entry.id)).toEqual(['flux2-klein-4b-distilled']);
+  });
+
+  it('filters experimental support without changing stable filters', () => {
+    const experimental: ModelEntry = {
+      ...base,
+      id: 'minimax-h3-image-q3ks-sdcpp-windows-v1',
+      displayName: 'MiniMax-H3-Image',
+      supportLevel: 'experimental',
+      productStatus: 'planned',
+      executable: false,
+      canUse: false,
+    };
+    expect(filterCatalog([base, experimental], '', 'experimental', 'all').map(entry => entry.id))
+      .toEqual([experimental.id]);
+    expect(filterCatalog([base, experimental], '', 'executable', 'all').map(entry => entry.id))
+      .toEqual([base.id]);
   });
 
   it('filters by device eligibility without hiding the reason', () => {
@@ -112,6 +131,30 @@ describe('hardware gate projection', () => {
 });
 
 describe('license projection', () => {
+  it('requires the pinned MiniMax license acknowledgement and rejects hosted use', () => {
+    const minimax: ModelEntry = {
+      ...base,
+      id: 'minimax-h3-image-q3ks-sdcpp-windows-v1',
+      supportLevel: 'experimental',
+      licenseSha256: '0ec3bb5e6d9e885fa2aaf15e84689e50fd51f42b53fa24d3a64ed9d8c76d423b',
+    };
+    expect(requiresExplicitLicense(minimax)).toBe(true);
+    expect(requiresExplicitLicense(base)).toBe(false);
+    const acceptance = {
+      accepted: true,
+      licenseSha256: minimax.licenseSha256!,
+      territory: 'Singapore',
+      territoryEligible: true,
+      useScenario: 'local image generation',
+      hostedService: false,
+      revenueOverThreshold: false,
+    };
+    expect(licenseAcceptanceReady(acceptance)).toBe(true);
+    expect(licenseAcceptanceReady({ ...acceptance, territoryEligible: false })).toBe(false);
+    expect(licenseAcceptanceReady({ ...acceptance, hostedService: true })).toBe(false);
+    expect(licenseAcceptanceReady({ ...acceptance, revenueOverThreshold: true })).toBe(false);
+  });
+
   it('uses the registered license notice and flags the Qwen non-commercial license', () => {
     const qwen: ModelEntry = {
       ...base, id: 'qwen-image-2.1-windows-v1', license: 'qwen-research',

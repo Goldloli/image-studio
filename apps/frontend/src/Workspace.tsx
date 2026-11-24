@@ -84,6 +84,7 @@ import {
   capabilityForModel,
   crossPlatformModelAdvice,
   modelDisplayName,
+  normalizeResolutionForModel,
   textRecipeForModel,
 } from './model-recipes';
 import './workspace.css';
@@ -151,6 +152,7 @@ function storedDraft(record: StoredDraft): Draft {
 }
 
 function localTurn(conversationId: string, draft: Draft, submissionKey: string): TurnView {
+  const resolution = normalizeResolutionForModel(draft.params.modelId, draft.params.resolution);
   return {
     id: `local-${submissionKey}`,
     conversationId,
@@ -168,8 +170,8 @@ function localTurn(conversationId: string, draft: Draft, submissionKey: string):
     state: 'Pending',
     jobId: null,
     attemptId: null,
-    width: draft.params.aspect === '3:4' ? 768 : 1024,
-    height: draft.params.aspect === '4:3' ? 768 : 1024,
+    width: draft.params.aspect === '3:4' ? 768 : draft.params.aspect === '1:1' ? resolution : 1024,
+    height: draft.params.aspect === '4:3' ? 768 : draft.params.aspect === '1:1' ? resolution : 1024,
     assetId: null,
     assetAvailable: false,
     assetError: null,
@@ -412,6 +414,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
   const isUpscale = active.params.capabilityId === REALESRGAN_CAPABILITY;
   const isToolComposer = isRemoveBackground || isUpscale;
   const activeTextRecipe = textRecipeForModel(active.params.modelId);
+  const activeResolution = normalizeResolutionForModel(active.params.modelId, active.params.resolution);
   const crossPlatformAdvice = crossPlatformModelAdvice(MODEL_PLATFORM, active.params.modelId);
   const newTextOnlyModel = [QWEN_IMAGE_21_MODEL_ID, QWEN_IMAGE_21_TURBO_MODEL_ID, MOSS_IMAGE_SFT_MODEL_ID]
     .includes(active.params.modelId);
@@ -983,6 +986,7 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
           capabilityId: source.params.capabilityId ?? capabilityForModel(source.params.modelId),
           sourceAssetId: source.params.sourceAssetId ?? null,
           aspect: source.params.aspect,
+          resolution: normalizeResolutionForModel(source.params.modelId, source.params.resolution),
           count: source.params.count,
           seed: source.params.seed,
           submissionKey,
@@ -1323,8 +1327,25 @@ export default function Workspace({ onModels, studio, requestedAsset, requestedM
           <div className="composer-toolbar">
             <div className="composer-left">
               {!isToolComposer && <div className="composer-popup-anchor" data-composer-popup>
-                <button className={`composer-chip ${popup === 'params' ? 'is-open' : ''}`} aria-expanded={popup === 'params'} onClick={() => { if (popup === 'params') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('params'); }}><SlidersHorizontal size={15}/><span>{active.params.aspect} · {active.params.count} 张</span></button>
-                {popup === 'params' && <div className="composer-popover params-popover" role="dialog" aria-label="创作参数"><div className="popover-heading"><strong>创作参数</strong><span>当前型号 {activeTextRecipe?.steps ?? 9} 步 · q{activeTextRecipe?.quantization ?? 4} · 单张</span></div><span className="popover-label">画幅</span><div className="aspect-options">{(activeTextRecipe?.aspects ?? ['1:1', '4:3', '3:4']).map(aspect => <button key={aspect} className={active.params.aspect === aspect ? 'is-selected' : ''} aria-pressed={active.params.aspect === aspect} onClick={() => setDraftParams({ aspect })}><i style={{ aspectRatio: aspect.replace(':', '/') }}/><span>{aspect}</span></button>)}</div><label className="seed-field"><span>数量</span><input type="number" min={1} max={1} step={1} value={active.params.count} onChange={event => setDraftParams({ count: Number(event.target.value) })}/></label><label className="seed-field"><span>种子</span><input inputMode="numeric" value={active.params.seed} aria-invalid={!validSeed(active.params.seed)} placeholder="留空随机" onChange={event => setDraftParams({ seed: event.target.value })}/></label>{!validSeed(active.params.seed) && <p className="field-error">请输入 0–4294967295 的整数，或留空。</p>}{activeTextRecipe && !activeTextRecipe.aspects.includes(active.params.aspect) && <p className="field-error">当前型号仅支持 {activeTextRecipe.aspects.join('、')}；请明确选择新画幅，提示词已保留。</p>}<p className="popover-note">只修改当前会话的下一条请求，不会改变已发送记录。</p></div>}
+                <button className={`composer-chip ${popup === 'params' ? 'is-open' : ''}`} aria-expanded={popup === 'params'} onClick={() => { if (popup === 'params') { setPopup(null); requestAnimationFrame(() => textarea.current?.focus()); } else setPopup('params'); }}>
+                  <SlidersHorizontal size={15}/>
+                  <span>{active.params.aspect}{(activeTextRecipe?.resolutions.length ?? 0) > 1 ? ` · ${activeResolution}²` : ''} · {active.params.count} 张</span>
+                </button>
+                {popup === 'params' && <div className="composer-popover params-popover" role="dialog" aria-label="创作参数">
+                  <div className="popover-heading"><strong>创作参数</strong><span>当前型号 {activeTextRecipe?.steps ?? 9} 步 · {activeTextRecipe?.precisionLabel ?? `q${activeTextRecipe?.quantization ?? 4}`} · 单张</span></div>
+                  <span className="popover-label">画幅</span>
+                  <div className="aspect-options">{(activeTextRecipe?.aspects ?? ['1:1', '4:3', '3:4']).map(aspect => <button key={aspect} className={active.params.aspect === aspect ? 'is-selected' : ''} aria-pressed={active.params.aspect === aspect} onClick={() => setDraftParams({ aspect })}><i style={{ aspectRatio: aspect.replace(':', '/') }}/><span>{aspect}</span></button>)}</div>
+                  {activeTextRecipe && activeTextRecipe.resolutions.length > 1 && <>
+                    <span className="popover-label">分辨率</span>
+                    <div className="resolution-options">{activeTextRecipe.resolutions.map(resolution => <button key={resolution} className={activeResolution === resolution ? 'is-selected' : ''} aria-pressed={activeResolution === resolution} onClick={() => setDraftParams({ resolution })}>{resolution}²</button>)}</div>
+                  </>}
+                  <label className="seed-field"><span>数量</span><input type="number" min={1} max={1} step={1} value={active.params.count} onChange={event => setDraftParams({ count: Number(event.target.value) })}/></label>
+                  <label className="seed-field"><span>种子</span><input inputMode="numeric" value={active.params.seed} aria-invalid={!validSeed(active.params.seed)} placeholder="留空随机" onChange={event => setDraftParams({ seed: event.target.value })}/></label>
+                  {!validSeed(active.params.seed) && <p className="field-error">请输入 0–4294967295 的整数，或留空。</p>}
+                  {activeTextRecipe && !activeTextRecipe.aspects.includes(active.params.aspect) && <p className="field-error">当前型号仅支持 {activeTextRecipe.aspects.join('、')}；请明确选择新画幅，提示词已保留。</p>}
+                  {activeTextRecipe && !activeTextRecipe.resolutions.includes(activeResolution) && <p className="field-error">当前型号不支持该分辨率；请明确选择 {activeTextRecipe.resolutions.join('²、')}²。</p>}
+                  <p className="popover-note">只修改当前会话的下一条请求，不会改变已发送记录。</p>
+                </div>}
               </div>}
               {sourceImportSupported && <button className="composer-chip" disabled={sourceImporting || submittingDraftId !== null} onClick={() => void importSource()} title={isRemoveBackground ? '导入一张 PNG 或 JPEG 用于去背景' : isUpscale ? '导入最长边不超过 1024、最大 1 MP、无透明像素的 PNG 或 JPEG' : '导入一张 PNG 或 JPEG 作为编辑源图'}>{sourceImporting ? <LoaderCircle size={14} className="spin"/> : <ImageIcon size={14}/>}<span>{active.params.sourceAssetId ? '更换源图' : '导入源图'}</span></button>}
               {sourceImportSupported && <div className="composer-popup-anchor" data-composer-popup>

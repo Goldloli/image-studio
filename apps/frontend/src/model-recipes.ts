@@ -17,6 +17,7 @@ export type PlatformModelIds = {
   qwen: { model: string; capability: string };
   qwenTurbo: { model: string; capability: string };
   moss: { model: string; capability: string };
+  minimaxH3: { model: string; capability: string };
 };
 
 export const MODEL_IDS: Record<ModelPlatform, PlatformModelIds> = {
@@ -50,6 +51,10 @@ export const MODEL_IDS: Record<ModelPlatform, PlatformModelIds> = {
       model: 'moss-image-sft-mflux-v1',
       capability: 'image.text-to-image.moss-image-sft.v1',
     },
+    minimaxH3: {
+      model: 'minimax-h3-image-q3ks-sdcpp-macos-v1',
+      capability: 'image.text-to-image.minimax-h3-image.gguf.macos-v1',
+    },
   },
   windows: {
     zImage: {
@@ -80,6 +85,10 @@ export const MODEL_IDS: Record<ModelPlatform, PlatformModelIds> = {
     moss: {
       model: 'moss-image-sft-windows-v1',
       capability: 'image.text-to-image.moss-image-sft.windows-v1',
+    },
+    minimaxH3: {
+      model: 'minimax-h3-image-q3ks-sdcpp-windows-v1',
+      capability: 'image.text-to-image.minimax-h3-image.gguf.windows-v1',
     },
   },
 };
@@ -112,6 +121,8 @@ export const QWEN_IMAGE_21_TURBO_MODEL_ID = ids.qwenTurbo.model;
 export const QWEN_IMAGE_21_TURBO_CAPABILITY = ids.qwenTurbo.capability;
 export const MOSS_IMAGE_SFT_MODEL_ID = ids.moss.model;
 export const MOSS_IMAGE_SFT_CAPABILITY = ids.moss.capability;
+export const MINIMAX_H3_MODEL_ID = ids.minimaxH3.model;
+export const MINIMAX_H3_CAPABILITY = ids.minimaxH3.capability;
 
 export type TextRecipe = {
   modelId: string;
@@ -120,7 +131,10 @@ export type TextRecipe = {
   shortName: string;
   steps: number;
   quantization: 4 | 8;
+  precisionLabel: string;
   aspects: readonly string[];
+  resolutions: readonly number[];
+  defaultResolution: number;
 };
 
 const textRecipes: Record<string, TextRecipe> = {
@@ -131,7 +145,10 @@ const textRecipes: Record<string, TextRecipe> = {
     shortName: 'Z-Image Turbo',
     steps: 9,
     quantization: 4,
+    precisionLabel: 'q4',
     aspects: ['1:1', '4:3', '3:4'],
+    resolutions: [1024],
+    defaultResolution: 1024,
   },
   [Z_IMAGE_WINDOWS_MODEL_ID]: {
     modelId: Z_IMAGE_WINDOWS_MODEL_ID,
@@ -140,7 +157,10 @@ const textRecipes: Record<string, TextRecipe> = {
     shortName: 'Z-Image Turbo',
     steps: 9,
     quantization: 4,
+    precisionLabel: 'q4',
     aspects: ['1:1'],
+    resolutions: [1024],
+    defaultResolution: 1024,
   },
   [MODEL_IDS.macos.klein.model]: {
     modelId: MODEL_IDS.macos.klein.model,
@@ -149,7 +169,10 @@ const textRecipes: Record<string, TextRecipe> = {
     shortName: 'FLUX.2 Klein 4B',
     steps: 4,
     quantization: 4,
+    precisionLabel: 'q4',
     aspects: ['1:1'],
+    resolutions: [1024],
+    defaultResolution: 1024,
   },
   [MODEL_IDS.windows.klein.model]: {
     modelId: MODEL_IDS.windows.klein.model,
@@ -158,7 +181,10 @@ const textRecipes: Record<string, TextRecipe> = {
     shortName: 'FLUX.2 Klein 4B',
     steps: 4,
     quantization: 4,
+    precisionLabel: 'q4',
     aspects: ['1:1'],
+    resolutions: [1024],
+    defaultResolution: 1024,
   },
   [MODEL_IDS.macos.qwen.model]: {
     modelId: MODEL_IDS.macos.qwen.model,
@@ -167,7 +193,10 @@ const textRecipes: Record<string, TextRecipe> = {
     shortName: 'Qwen-Image 2.1',
     steps: 40,
     quantization: 8,
+    precisionLabel: 'q8',
     aspects: ['1:1'],
+    resolutions: [1024],
+    defaultResolution: 1024,
   },
   [MODEL_IDS.windows.qwen.model]: {
     modelId: MODEL_IDS.windows.qwen.model,
@@ -176,7 +205,10 @@ const textRecipes: Record<string, TextRecipe> = {
     shortName: 'Qwen-Image 2.1',
     steps: 40,
     quantization: 4,
+    precisionLabel: 'q4',
     aspects: ['1:1'],
+    resolutions: [1024],
+    defaultResolution: 1024,
   },
   [MODEL_IDS.macos.qwenTurbo.model]: {
     modelId: MODEL_IDS.macos.qwenTurbo.model,
@@ -185,7 +217,10 @@ const textRecipes: Record<string, TextRecipe> = {
     shortName: 'Qwen 2.1 Turbo',
     steps: 8,
     quantization: 8,
+    precisionLabel: 'q8',
     aspects: ['1:1'],
+    resolutions: [1024],
+    defaultResolution: 1024,
   },
   [MODEL_IDS.windows.qwenTurbo.model]: {
     modelId: MODEL_IDS.windows.qwenTurbo.model,
@@ -194,7 +229,10 @@ const textRecipes: Record<string, TextRecipe> = {
     shortName: 'Qwen 2.1 Turbo',
     steps: 8,
     quantization: 4,
+    precisionLabel: 'q4',
     aspects: ['1:1'],
+    resolutions: [1024],
+    defaultResolution: 1024,
   },
   [MODEL_IDS.macos.moss.model]: {
     modelId: MODEL_IDS.macos.moss.model,
@@ -203,7 +241,10 @@ const textRecipes: Record<string, TextRecipe> = {
     shortName: 'MOSS-Image-SFT',
     steps: 50,
     quantization: 8,
+    precisionLabel: 'q8',
     aspects: ['1:1'],
+    resolutions: [1024],
+    defaultResolution: 1024,
   },
   [MODEL_IDS.windows.moss.model]: {
     modelId: MODEL_IDS.windows.moss.model,
@@ -212,7 +253,34 @@ const textRecipes: Record<string, TextRecipe> = {
     shortName: 'MOSS-Image-SFT',
     steps: 50,
     quantization: 4,
+    precisionLabel: 'q4',
     aspects: ['1:1'],
+    resolutions: [1024],
+    defaultResolution: 1024,
+  },
+  [MODEL_IDS.macos.minimaxH3.model]: {
+    modelId: MODEL_IDS.macos.minimaxH3.model,
+    capabilityId: MODEL_IDS.macos.minimaxH3.capability,
+    displayName: 'MiniMax-H3-Image',
+    shortName: 'MiniMax-H3-Image',
+    steps: 6,
+    quantization: 4,
+    precisionLabel: 'Q3_K_S / Q2_K_M',
+    aspects: ['1:1'],
+    resolutions: [1024, 2048],
+    defaultResolution: 1024,
+  },
+  [MODEL_IDS.windows.minimaxH3.model]: {
+    modelId: MODEL_IDS.windows.minimaxH3.model,
+    capabilityId: MODEL_IDS.windows.minimaxH3.capability,
+    displayName: 'MiniMax-H3-Image',
+    shortName: 'MiniMax-H3-Image',
+    steps: 6,
+    quantization: 4,
+    precisionLabel: 'Q3_K_S / Q2_K_M',
+    aspects: ['1:1'],
+    resolutions: [1024, 2048],
+    defaultResolution: 1024,
   },
 };
 
@@ -243,6 +311,17 @@ export const normalizeAspectForCapability = (capabilityId: string, aspect: strin
   return supported.includes(aspect) ? aspect : supported[0];
 };
 
+export const resolutionsForModel = (modelId: string): readonly number[] =>
+  textRecipeForModel(modelId)?.resolutions ?? [1024];
+
+export const normalizeResolutionForModel = (modelId: string, resolution?: number): number => {
+  const recipe = textRecipeForModel(modelId);
+  if (!recipe) return 1024;
+  return resolution !== undefined && recipe.resolutions.includes(resolution)
+    ? resolution
+    : recipe.defaultResolution;
+};
+
 /** The capability a text recipe/model selects, falling back to the tool models. */
 export const capabilityForModel = (modelId: string): string =>
   textRecipeForModel(modelId)?.capabilityId
@@ -271,11 +350,13 @@ const displayNames: Record<string, string> = {
   [MODEL_IDS.windows.qwenTurbo.model]: 'Qwen-Image 2.1 Turbo',
   [MODEL_IDS.macos.moss.model]: 'MOSS-Image-SFT',
   [MODEL_IDS.windows.moss.model]: 'MOSS-Image-SFT',
+  [MODEL_IDS.macos.minimaxH3.model]: 'MiniMax-H3-Image',
+  [MODEL_IDS.windows.minimaxH3.model]: 'MiniMax-H3-Image',
 };
 
 export const modelDisplayName = (modelId: string): string => displayNames[modelId] ?? modelId;
 
-/** Every model-variant id that the given platform can execute (seven per platform). */
+/** Every registered model-variant id for the given platform; catalog readiness still applies. */
 const PLATFORM_MODEL_IDS: Record<ModelPlatform, ReadonlySet<string>> = {
   macos: new Set(Object.values(MODEL_IDS.macos).map(entry => entry.model)),
   windows: new Set(Object.values(MODEL_IDS.windows).map(entry => entry.model)),
@@ -289,7 +370,7 @@ export const isModelSupportedOn = (platform: ModelPlatform, modelId: string): bo
 
 const CROSS_PLATFORM_TEXT_ADVICE: Record<ModelPlatform, string> = {
   windows:
-    '此会话保留来自其他平台的模型选择。请从模型菜单明确选择对应的 Windows 型号（Z-Image / Klein / Qwen / MOSS），并核对画幅与参数后再发送。',
+    '此会话保留来自其他平台的模型选择。请从模型菜单明确选择对应的 Windows 型号（Z-Image / Klein / Qwen / MOSS / MiniMax-H3），并核对画幅与参数后再发送。',
   macos: '此会话保留 Windows 端的模型选择。请从模型菜单明确选择对应的 macOS 型号，并核对画幅后再发送。',
 };
 

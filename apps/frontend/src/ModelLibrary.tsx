@@ -7,6 +7,7 @@ import {
   ChevronUp,
   Cpu,
   Download,
+  ExternalLink,
   FolderOpen,
   Image,
   LoaderCircle,
@@ -25,10 +26,13 @@ import {
   hardwareThresholdLabel,
   installProgress,
   isNonCommercialLicense,
+  licenseAcceptanceReady,
   licenseLabel,
+  requiresExplicitLicense,
   primaryFilters,
   type CapabilityFilter,
   type CatalogPayload,
+  type LicenseAcceptance,
   type ModelEntry,
   type PrimaryFilter,
 } from './model-catalog';
@@ -84,6 +88,7 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
   const [capability, setCapability] = useState<CapabilityFilter>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
   const [pending, setPending] = useState('');
+  const [licenseAcceptance, setLicenseAcceptance] = useState<(LicenseAcceptance & { entryId: string }) | null>(null);
   const queryGeneration = useRef(0);
   const disposed = useRef(false);
   const pollTimer = useRef<number | undefined>(undefined);
@@ -131,11 +136,18 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
     conversation => conversation.id === studio.activeConversationId,
   );
 
-  const action = async (entry: ModelEntry, command: 'model_install' | 'model_cancel') => {
+  const action = async (
+    entry: ModelEntry,
+    command: 'model_install' | 'model_cancel',
+    acceptance?: LicenseAcceptance,
+  ) => {
     if (!entry.installId) return;
     setPending(entry.id);
     try {
-      await api(command, { installId: entry.installId });
+      await api(command, {
+        installId: entry.installId,
+        ...(acceptance ? { licenseAcceptance: acceptance } : {}),
+      });
       onRefresh();
       await load();
     } catch (cause) {
@@ -143,6 +155,23 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
     } finally {
       setPending('');
     }
+  };
+
+  const install = (entry: ModelEntry) => {
+    if (requiresExplicitLicense(entry)) {
+      setLicenseAcceptance({
+        entryId: entry.id,
+        accepted: false,
+        licenseSha256: entry.licenseSha256!,
+        territory: '',
+        territoryEligible: false,
+        useScenario: '',
+        hostedService: false,
+        revenueOverThreshold: false,
+      });
+      return;
+    }
+    void action(entry, 'model_install');
   };
 
   const useModel = async (entry: ModelEntry) => {
@@ -189,6 +218,7 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                   : filter.id === 'executable' ? catalog?.counts.executable ?? '—'
                     : filter.id === 'eligible' ? catalog?.counts.hardwareEligible ?? '—'
                       : filter.id === 'planned' ? catalog?.counts.planned ?? '—'
+                        : filter.id === 'experimental' ? catalog?.counts.experimental ?? '—'
                         : catalog?.counts.runtimeReady ?? '—'}
             </span>
           </button>
@@ -199,7 +229,8 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
         <div className="page-heading model-heading">
           <h1>模型</h1>
           <div className="model-heading-actions">
-            <span className="model-supported-count">正式接入 <strong>{catalog?.counts.supported ?? '—'}</strong></span>
+            <span className="model-supported-count">稳定 <strong>{catalog?.counts.stable ?? '—'}</strong></span>
+            <span className="model-supported-count">实验 <strong>{catalog?.counts.experimental ?? '—'}</strong></span>
             <button className="secondary" disabled={loading} onClick={() => void load(true)}>
               <RefreshCw size={13} className={loading ? 'spin' : ''}/>刷新
             </button>
@@ -255,6 +286,7 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                     <span className="catalog-model-name">
                       <strong>{entry.displayName}</strong>
                       <small>{entry.variant}</small>
+                      {entry.supportLevel === 'experimental' && <i className="model-support-badge">实验</i>}
                     </span>
                     <span className="catalog-capabilities">
                       {entry.capabilities.map(item => <i key={item.id}>{item.label}</i>)}
@@ -281,8 +313,83 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                     <div className="catalog-license">
                       <strong>许可</strong>
                       <span>{licenseLabel(entry)}</span>
+                      {entry.licenseUrl && <a href={entry.licenseUrl} target="_blank" rel="noreferrer">
+                        查看固定许可证<ExternalLink size={10}/>
+                      </a>}
                       {isNonCommercialLicense(entry) && <i className="license-badge">仅限非商业用途</i>}
                     </div>
+                    {licenseAcceptance?.entryId === entry.id && <div className="catalog-license-gate">
+                      <div>
+                        <strong>安装前确认</strong>
+                        <a href={entry.licenseUrl ?? undefined} target="_blank" rel="noreferrer">
+                          完整许可证与 AUP<ExternalLink size={10}/>
+                        </a>
+                      </div>
+                      <code>{entry.licenseSha256}</code>
+                      <label>
+                        <span>实际使用地点或适用地域</span>
+                        <input
+                          value={licenseAcceptance.territory}
+                          maxLength={128}
+                          onChange={event => setLicenseAcceptance(previous => previous ? { ...previous, territory: event.target.value } : previous)}
+                        />
+                      </label>
+                      <label>
+                        <span>实际使用场景</span>
+                        <textarea
+                          value={licenseAcceptance.useScenario}
+                          maxLength={500}
+                          rows={2}
+                          onChange={event => setLicenseAcceptance(previous => previous ? { ...previous, useScenario: event.target.value } : previous)}
+                        />
+                      </label>
+                      <label className="license-check">
+                        <input
+                          type="checkbox"
+                          checked={licenseAcceptance.territoryEligible}
+                          onChange={event => setLicenseAcceptance(previous => previous ? { ...previous, territoryEligible: event.target.checked } : previous)}
+                        />
+                        <span>我确认使用地点位于许可证适用地域内</span>
+                      </label>
+                      <label className="license-check">
+                        <input
+                          type="checkbox"
+                          checked={licenseAcceptance.hostedService}
+                          onChange={event => setLicenseAcceptance(previous => previous ? { ...previous, hostedService: event.target.checked } : previous)}
+                        />
+                        <span>我会向第三方提供托管或 API 服务</span>
+                      </label>
+                      <label className="license-check">
+                        <input
+                          type="checkbox"
+                          checked={licenseAcceptance.revenueOverThreshold}
+                          onChange={event => setLicenseAcceptance(previous => previous ? { ...previous, revenueOverThreshold: event.target.checked } : previous)}
+                        />
+                        <span>使用主体达到许可证规定的单独授权收入门槛</span>
+                      </label>
+                      <label className="license-check">
+                        <input
+                          type="checkbox"
+                          checked={licenseAcceptance.accepted}
+                          onChange={event => setLicenseAcceptance(previous => previous ? { ...previous, accepted: event.target.checked } : previous)}
+                        />
+                        <span>我已阅读并同意当前固定版本的 MiniMax-H3-Image 许可证与 AUP</span>
+                      </label>
+                      <div className="catalog-actions">
+                        <button className="secondary" onClick={() => setLicenseAcceptance(null)}>取消</button>
+                        <button
+                          className="primary-action"
+                          disabled={pending === entry.id || !licenseAcceptanceReady(licenseAcceptance)}
+                          onClick={() => {
+                            const { entryId: _entryId, ...acceptance } = licenseAcceptance;
+                            setLicenseAcceptance(null);
+                            void action(entry, 'model_install', acceptance);
+                          }}
+                        >
+                          <Download size={14}/>确认并安装
+                        </button>
+                      </div>
+                    </div>}
                     <div className="catalog-hardware">
                       <strong>设备门槛</strong>
                       <span>{hardwareThresholdLabel(entry)}</span>
@@ -293,7 +400,7 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                     <details className="catalog-evidence">
                       <summary>完整状态与来源</summary>
                       <div className="catalog-state-grid">
-                        <StateFact label="产品接入" value={entry.productStatus === 'implemented' ? '已接入' : '计划中'} positive={entry.productStatus === 'implemented'}/>
+                        <StateFact label="产品接入" value={entry.productStatus === 'implemented' ? entry.supportLevel === 'experimental' ? '实验性接入' : '已接入' : entry.supportLevel === 'experimental' ? '实验计划' : '计划中'} positive={entry.productStatus === 'implemented'}/>
                         <StateFact label="模型组件" value={entry.componentsReady ? '文件齐备' : entry.installerSupported ? '尚未齐备' : '未接入'} positive={entry.componentsReady}/>
                         <StateFact label="运行时" value={entry.runtimeReady ? '已就绪' : '未就绪'} positive={entry.runtimeReady}/>
                         <StateFact label="设备满足" value={entry.hardwareEligible ? (entry.tier === 'compact' ? '满足（紧凑档）' : entry.tier === 'standard' ? '满足（标准档）' : '满足') : '不满足'} positive={entry.hardwareEligible}/>
@@ -320,7 +427,7 @@ export function ModelLibrary({ studio, onRefresh, onBack, onError, onUseModel }:
                         {pending === entry.id ? <LoaderCircle size={14} className="spin"/> : <Check size={14}/>}用于当前会话
                       </button>}
                       {entry.canStop && <button className="secondary" disabled={pending === entry.id} onClick={() => void action(entry, 'model_cancel')}><Square size={12}/>停止安装</button>}
-                      {canInstallModel(entry) && <button className="primary-action" disabled={pending === entry.id} onClick={() => void action(entry, 'model_install')}>
+                      {canInstallModel(entry) && <button className="primary-action" disabled={pending === entry.id} onClick={() => install(entry)}>
                         {pending === entry.id ? <LoaderCircle size={14} className="spin"/> : <Download size={14}/>}
                         {entry.canContinue ? '继续安装' : entry.installPhase === 'unavailable' || entry.installPhase === 'failed' ? '修复安装' : '安装模型与运行环境'}
                       </button>}

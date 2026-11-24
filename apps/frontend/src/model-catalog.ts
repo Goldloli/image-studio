@@ -1,5 +1,6 @@
 export type ModelCapability = { id: string; label: string };
 export type ModelProductStatus = 'implemented' | 'planned';
+export type ModelSupportLevel = 'stable' | 'experimental';
 export type ModelEntry = {
   id: string;
   displayName: string;
@@ -9,9 +10,12 @@ export type ModelEntry = {
   description: string;
   capabilities: ModelCapability[];
   productStatus: ModelProductStatus;
+  supportLevel: ModelSupportLevel;
   runtime: string;
   license: string;
   licenseNotice: string | null;
+  licenseUrl: string | null;
+  licenseSha256: string | null;
   source: string;
   revision: string;
   modelBytes: number | null;
@@ -63,6 +67,8 @@ export type CatalogCounts = {
   installed: number;
   executable: number;
   planned: number;
+  stable: number;
+  experimental: number;
   runtimeReady: number;
   hardwareEligible: number;
 };
@@ -72,8 +78,28 @@ export type CatalogPayload = {
   entries: ModelEntry[];
   counts: CatalogCounts;
 };
-export type PrimaryFilter = 'all' | 'installed' | 'executable' | 'planned' | 'runtime' | 'eligible';
+export type PrimaryFilter = 'all' | 'installed' | 'executable' | 'planned' | 'experimental' | 'runtime' | 'eligible';
 export type CapabilityFilter = 'all' | 'text_to_image' | 'image_edit' | 'background_removal' | 'upscale';
+export type LicenseAcceptance = {
+  accepted: boolean;
+  licenseSha256: string;
+  territory: string;
+  territoryEligible: boolean;
+  useScenario: string;
+  hostedService: boolean;
+  revenueOverThreshold: boolean;
+};
+
+export const requiresExplicitLicense = (entry: ModelEntry): boolean =>
+  entry.supportLevel === 'experimental' && Boolean(entry.licenseSha256);
+
+export const licenseAcceptanceReady = (acceptance: LicenseAcceptance): boolean =>
+  acceptance.accepted
+  && acceptance.territoryEligible
+  && Boolean(acceptance.territory.trim())
+  && Boolean(acceptance.useScenario.trim())
+  && !acceptance.hostedService
+  && !acceptance.revenueOverThreshold;
 
 export const primaryFilters: { id: PrimaryFilter; label: string }[] = [
   { id: 'all', label: '全部' },
@@ -81,6 +107,7 @@ export const primaryFilters: { id: PrimaryFilter; label: string }[] = [
   { id: 'executable', label: '可执行' },
   { id: 'eligible', label: '设备满足' },
   { id: 'planned', label: '计划中' },
+  { id: 'experimental', label: '实验中' },
   { id: 'runtime', label: '运行环境' },
 ];
 
@@ -112,6 +139,7 @@ export function filterCatalog(
       || primary === 'executable' && entry.executable
       || primary === 'eligible' && entry.hardwareEligible
       || primary === 'planned' && entry.productStatus === 'planned'
+      || primary === 'experimental' && entry.supportLevel === 'experimental'
       || primary === 'runtime' && entry.runtimeReady;
     const matchesCapability = capability === 'all'
       || entry.capabilities.some(item => item.id === capability);

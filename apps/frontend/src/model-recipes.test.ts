@@ -83,6 +83,9 @@ describe('platform model identity matrix', () => {
     expect(textRecipeForModel(WINDOWS.moss.model)?.steps).toBe(50);
     expect(textRecipeForModel(WINDOWS.zImage.model)?.steps).toBe(9);
     expect(textRecipeForModel(WINDOWS.zImage.model)?.aspects).toEqual(['1:1']);
+    expect(textRecipeForModel(WINDOWS.minimaxH3.model)?.steps).toBe(6);
+    expect(textRecipeForModel(WINDOWS.minimaxH3.model)?.resolutions).toEqual([1024, 2048]);
+    expect(textRecipeForModel(MACOS.minimaxH3.model)?.aspects).toEqual(['1:1']);
   });
 
   it('maps the source-only tool capabilities on both platforms', () => {
@@ -105,12 +108,12 @@ describe('platform model identity matrix', () => {
 });
 
 describe('cross-platform text model selection', () => {
-  const windowsTextIds = ['zImage', 'klein', 'qwen', 'qwenTurbo', 'moss'] as const;
-  const macosTextIds = ['zImage', 'klein', 'qwen', 'qwenTurbo', 'moss'] as const;
+  const windowsTextIds = ['zImage', 'klein', 'qwen', 'qwenTurbo', 'moss', 'minimaxH3'] as const;
+  const macosTextIds = ['zImage', 'klein', 'qwen', 'qwenTurbo', 'moss', 'minimaxH3'] as const;
 
-  it('registers seven model ids per platform', () => {
-    expect(platformModelIds('windows').size).toBe(7);
-    expect(platformModelIds('macos').size).toBe(7);
+  it('registers eight model ids per platform', () => {
+    expect(platformModelIds('windows').size).toBe(8);
+    expect(platformModelIds('macos').size).toBe(8);
   });
 
   it('keeps every Windows-native text model un-warned on Windows', () => {
@@ -130,7 +133,7 @@ describe('cross-platform text model selection', () => {
       const advice = crossPlatformTextModelAdvice('windows', modelId);
       expect(advice).not.toBeNull();
       expect(advice).toContain('Windows 型号');
-      expect(advice).toContain('Z-Image / Klein / Qwen / MOSS');
+      expect(advice).toContain('Z-Image / Klein / Qwen / MOSS / MiniMax-H3');
       expect(advice).not.toContain('请选择 Windows Z-Image');
     }
   });

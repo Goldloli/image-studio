@@ -527,7 +527,7 @@ export function SettingsPage({
                 <SettingsRow label="模型" alignTop>
                   <div className="settings-control-stack">
                     <select value={defaults.modelId} aria-label="默认模型" onChange={event => setDefaults({ ...defaults, modelId: event.target.value })}>
-                      {(snapshot?.catalog.entries ?? []).filter(model => model.productStatus === 'implemented' && model.capabilities.some(capability => capability.id === 'text_to_image')).map(model => <option key={model.id} value={model.id} disabled={!model.hardwareEligible}>
+                      {(snapshot?.catalog.entries ?? []).filter(model => model.supportLevel === 'stable' && model.productStatus === 'implemented' && model.capabilities.some(capability => capability.id === 'text_to_image')).map(model => <option key={model.id} value={model.id} disabled={!model.hardwareEligible}>
                         {model.displayName}
                       </option>)}
                     </select>
