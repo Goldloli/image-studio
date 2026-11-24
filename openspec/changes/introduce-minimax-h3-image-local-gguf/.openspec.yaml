@@ -1,0 +1,5 @@
+schema: spec-driven
+created: 2026-11-24
+goal: Define a pinned, license-aware, cross-platform GGUF integration using a
+  dedicated native stable-diffusion.cpp worker, with explicit storage/VRAM gates
+  and no unverified 8 GB claim.
