@@ -40,7 +40,7 @@ rfd = "=0.18.0"
 inference-supervisor = { path = "../../tools/inference-supervisor" }
 
 [build-dependencies]
-tauri-build = { version = "=2.7.4", features = [] }
+tauri-build = { version = "=2.7.6", features = [] }
 
 [target.'cfg(unix)'.dependencies]
 libc.workspace = true
